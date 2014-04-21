@@ -1,0 +1,143 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+html {
+  background-color: #537FAD;
+  height: 100%;
+}
+
+body {
+  /*font-size: 85%;*/
+  /*width: 80em;*/
+  width: 99%;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #EFF1F4;
+  padding: 0;
+  min-height: 100%;
+  border-left: 0.2em solid #0F4D83;
+  border-right: 0.2em solid #0F4D83;
+}
+
+div#breadcrumbs {
+  padding: 6px;
+  font-size: 100%;
+  background-color: #D6E1ED;
+}
+
+div.xright, div.xleft {
+  text-shadow: none;
+}
+
+div#breadcrumbs a {
+  padding: 6px;
+  font-weight: bold;
+  color: black;
+  background: transparent;
+}
+
+div#breadcrumbs a:hover {
+  border-bottom: 3px solid #777777;
+  padding-bottom: 3px;
+}
+
+div#leftColumn {
+  background-color: #DCE3EB;
+  border: none;
+  overflow: visible;
+}
+
+div#navcolumn > ul > li.expanded,
+div#navcolumn > ul > li.none {
+  background-image: none;
+  padding: 0.5em 0;
+}
+
+div#navcolumn a,
+div#navcolumn strong {
+  padding: 0.3em 0;
+  display: block;
+  background-image: none;
+  color: black;
+}
+
+div#navcolumn > ul > li.expanded > ul > li.none > a,
+div#navcolumn > ul > li.expanded > ul > li.none > strong {
+  padding-left: 0.3em;
+}
+
+div#navcolumn a:hover {
+  background-color: #C7D8EB;
+}
+
+div#navcolumn li.expanded > a {
+  border-bottom: 1px solid #999999;
+}
+
+div#contentBox > div.section {
+  border-top: 1px solid #999999;
+  margin-top: 1.5em;
+}
+
+h2 {
+  border: none;
+  font-size: 1.5em;
+  font-weight:bold;
+  padding: 0;
+  color: black;
+  background-color: transparent;
+  margin: 0;
+}
+
+div#contentBox > div.section > div.section {
+  padding: 0;
+}
+
+h3 {
+  border: none;
+  font-size: 1.3em;
+  font-weight: bold;
+  padding: 0;
+  color: black;
+  background-color: transparent;
+}
+
+h4 {
+  padding: 4px 4px 4px 6px;
+  border: 1px solid #BBB;
+  color: black;
+  background-color: transparent;
+  font-weight: bold;
+  font-size: medium;
+}
+
+p, li, td {
+  font-size: 100%;
+  color: #333333;
+  line-height: 1.45em;
+}
+
+a.externalLink, a.externalLink:link, a.externalLink:visited, a.externalLink:active, a.externalLink:hover {
+  background: transparent;
+  padding-right: 0
+}
+
+.source {
+ background-color: #fffff0;
+}
+
+dl {
+ background-color: #EBEFF8;
+}

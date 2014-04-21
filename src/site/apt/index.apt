@@ -1,0 +1,37 @@
+             ---------------------------------------------------
+               Siddhi CEP - The Complex Event Processing Engine
+             ---------------------------------------------------
+
+Welcome to Siddhi
+
+  Siddhi CEP is a lightweight, easy-to-use Open Source Complex Event Processing Engine (CEP) under  Apache Software License v2.0. Siddhi CEP processes events which are triggered by various event sources and notifies appropriate complex events according to the user specified queries.
+
+  This project was started as a research project initiated at University of Moratuwa, Sri Lanka,and now being improved by WSO2 Inc.
+
+
+<<{{{http://svn.wso2.org/repos/wso2/people/suho/siddhi/m1/siddhi-2.0.0.zip}Siddhi CEP 1.0.0 - Milestone 1 Released!}}>>
+
+     Please check out the samples located in the $SIDDHI_HOME/samples directory to try out its basic features.
+
+
+Main highlights of this release  (2.0.0-M2)
+
+    * In-memory caching support using Hazelcast
+
+    * Snapshot state persistence support
+
+    * "within" condition support for join, pattern and sequence
+
+    * Query addition and removal support, at runtime
+
+Main highlights of 2.0.0-M1
+
+  * Rewriting Siddhi
+
+    ** To support rich CEP fictionalises
+
+    ** Make the architecture extensible
+
+ *  Defining new Siddhi CEP Language
+
+    ** Improved logical language to support CEP functions

@@ -1,0 +1,12 @@
+             ---------------------------------------------------
+               Siddhi CEP - The Complex Event Processing Engine
+             ---------------------------------------------------
+
+The EMMA code coverage results for Siddhi CEP
+  
+    * Code coverage for {{{./code-coverage/api/emma/index.html}Siddhi API}}
+
+    * Code coverage for {{{./code-coverage/query/emma/index.html}Siddhi Query}}
+
+    * Code coverage for {{{./code-coverage/core/emma/index.html}Siddhi Core}}
+

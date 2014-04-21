@@ -1,0 +1,51 @@
+<!--
+  ~ Licensed under the Apache License, Version 2.0 (the "License"); 
+  ~ you may not use this file except in compliance with the License. 
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<project name="Siddhi">
+    <bannerLeft>
+        <name>Siddhi CEP</name>
+        <src>images/logo.png</src>
+        <href>http://siddhi.sourceforge.net/index.html</href>
+    </bannerLeft>
+    <body>
+        <links>
+            <item name="WSO2" href="http://wso2.com/"/>
+            <!--<item name="WSO2 CEP" href="http://wso2.com/"/>-->
+            <item name="University of Moratuwa" href="http://www.mrt.ac.lk/"/>
+            <item name="CSE" href="http://www.cse.mrt.ac.lk/"/>
+            <item name="Siddhi" href="http://siddhi.sourceforge.net/index.html"/>
+        </links>
+
+        <menu name="Siddhi">
+            <item name="About" href="index.html"/>
+
+            <item name="Downloads" href="https://sourceforge.net/projects/siddhi/files/" >
+                <!--<item name="Releases" href="http://sourceforge.net/projects/siddhi/files/"/>-->
+                <item name="Release" href="http://svn.wso2.org/repos/wso2/people/suho/siddhi/m1/siddhi-2.0.0.zip"/>
+                <item name="Source Code" href="source-repository.html"/>
+            </item>
+            <item name="Documentation" href="">
+                <item name="Features" href="/features.html"/>
+                <item name="Javadocs" href="/apidocs/index.html"/>
+            </item>
+            <item name="Project Information" href=''>
+                <item name="Mailing Lists" href="/mail-lists.html"/>
+                <item name="Issue Tracking" href="https://wso2.org/jira/secure/IssueNavigator.jspa?requestId=10724"/>
+                <item name="Code Coverage" href="code-coverage.html"/>
+                <item name="blog" href="http://siddhi-cep.blogspot.com/"/>
+            </item>
+            <item name="License" href="http://www.apache.org/licenses/LICENSE-2.0"/>
+        </menu>
+    </body>
+</project>
