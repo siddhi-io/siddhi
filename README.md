@@ -59,7 +59,8 @@ System Requirements
 2. Processor      - Pentium 800MHz or equivalent at minimum
 3. Java SE Development Kit 1.6.0_21 or higher
 4. To build Siddi CEP from the Source distribution, it is necessary that you have
-   JDK 1.6 or higher version and Maven 2.1.0 or later
+ * JDK 1.6 or higher version and 
+ * Maven 2.1.0 or later
 
 
 Support
@@ -67,7 +68,7 @@ Support
 
 Support is provided by WSO2 Inc. dev@wso2.org
 
-####We welcome your feedback and can contribution.
+####We welcome your feedback and contribution.
 
 Siddhi Team
 
