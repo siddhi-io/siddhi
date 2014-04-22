@@ -1,5 +1,6 @@
-Siddhi Complex Event Processing Engine 3.0.0-SNAPSHOT
-====================================================================================================
+Siddhi Complex Event Processing Engine 
+======================================
+###  v3.0.0-SNAPSHOT 
 
 Siddhi CEP is a lightweight, easy-to-use Open Source Complex Event Processing
 Engine (CEP) under  Apache Software License v2.0. Siddhi CEP processes
@@ -11,7 +12,7 @@ and now being improved by WSO2 Inc.
 
 
 Features Supported
-==================
+------------------
  - Filter
     - Uses stream handlers to filter events
  - Join
@@ -52,7 +53,7 @@ Features Supported
     - Supports Query, Stream Definition and Query Plan compilation
 
 System Requirements
-===================
+-------------------
 
 1. Minimum memory - 1 GB
 2. Processor      - Pentium 800MHz or equivalent at minimum
@@ -62,12 +63,11 @@ System Requirements
 
 
 Support
-=======
+--------
 
 Support is provided by WSO2 Inc. dev@wso2.org
 
-
-We welcome your feedback and can contribution.
+####We welcome your feedback and can contribution.
 
 Siddhi Team
 
