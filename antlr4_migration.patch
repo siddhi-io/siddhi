@@ -1,0 +1,260 @@
+Index: modules/siddhi-core/src/main/java/org/wso2/siddhi/core/SiddhiObjectPool.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- modules/siddhi-core/src/main/java/org/wso2/siddhi/core/SiddhiObjectPool.java	(revision )
++++ modules/siddhi-core/src/main/java/org/wso2/siddhi/core/SiddhiObjectPool.java	(revision )
+@@ -0,0 +1,60 @@
++package org.wso2.siddhi.core;
++
++import java.util.concurrent.atomic.AtomicInteger;
++
++/**
++ * Created by suho on 4/22/14.
++ */
++public class SiddhiObjectPool {
++
++    static int size = 5;
++    static  ThreadLocal<Object[]> buffer = new ThreadLocal<Object[]>() {
++        @Override
++        protected Object[] initialValue() {
++            return new Object[size];
++        }
++    };
++    static  ThreadLocal<Integer> addIndex = new ThreadLocal<Integer>() {
++        @Override
++        protected Integer initialValue() {
++            return -1;
++        }
++    };
++    static AtomicInteger removeIndex = new AtomicInteger();
++
++   public static  void put(Object obj) {
++
++       int index=  addIndex.get();
++
++        if (index== size-1) {
++            System.out.println("put null");
++            return;
++        }
++       index++;
++        addIndex.set(index);
++        buffer.get()[index] = obj;
++//       removeIndex.getAndIncrement();
++    }
++
++    public static  Object get() {
++      int index=  addIndex.get();
++        if (index== -1) {
++            System.out.println("get null");
++            return null;
++        }
++
++        Object obj = buffer.get()[index];
++        index--;
++        addIndex.set(index);
++
++//        buffer.remove();
++//        removeIndex.getAndIncrement();
++        return obj;
++//        return null;
++
++    }
++
++    synchronized static void main(String[] args) {
++        System.out.println(-75 % 12);
++    }
++}
+Index: modules/siddhi-core/src/test/java/org/wso2/siddhi/test/standard/SiddhiTest1.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- modules/siddhi-core/src/test/java/org/wso2/siddhi/test/standard/SiddhiTest1.java	(revision )
++++ modules/siddhi-core/src/test/java/org/wso2/siddhi/test/standard/SiddhiTest1.java	(revision )
+@@ -0,0 +1,43 @@
++package org.wso2.siddhi.test.standard;
++
++import org.apache.log4j.Logger;
++import org.wso2.siddhi.core.SiddhiManager;
++import org.wso2.siddhi.core.event.Event;
++import org.wso2.siddhi.core.stream.output.StreamCallback;
++import org.wso2.siddhi.core.util.EventPrinter;
++
++/**
++ * Created by suho on 4/22/14.
++ */
++public class SiddhiTest1 {
++
++    static final Logger log = Logger.getLogger(JoinTestCase.class);
++
++    static int interval = 1000000;
++
++    public static void main(String[] args) throws InterruptedException {
++        log.info("Filter test119");
++        SiddhiManager siddhiManager = new SiddhiManager();
++
++        siddhiManager.defineStream("define stream A (a string) ");
++        siddhiManager.defineStream("define stream B (a string) ");
++        System.out.println(siddhiManager.getStreamDefinitions());
++        String q1 = siddhiManager.addQuery("fromParameter A insert into Foo ");
++        String q2 = siddhiManager.addQuery("fromParameter B insert into Foo ");
++        System.out.println(siddhiManager.getStreamDefinitions());
++        siddhiManager.removeQuery(q1);
++//        siddhiManager.removeQuery(q2);
++        System.out.println(siddhiManager.getStreamDefinitions());
++        siddhiManager.getInputHandler("Foo").send(new Object[]{"hi"});
++
++        siddhiManager.addCallback("Foo", new StreamCallback() {
++            @Override
++            public void receive(Event[] events) {
++                EventPrinter.print(events);
++
++            }
++        });
++        Thread.sleep(1000);
++        siddhiManager.shutdown();
++    }
++}
+Index: modules/siddhi-core/src/test/java/org/wso2/siddhi/test/standard/SiddhiTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- modules/siddhi-core/src/test/java/org/wso2/siddhi/test/standard/SiddhiTest.java	(revision )
++++ modules/siddhi-core/src/test/java/org/wso2/siddhi/test/standard/SiddhiTest.java	(revision )
+@@ -0,0 +1,67 @@
++package org.wso2.siddhi.test.standard;
++
++import org.apache.log4j.Logger;
++import org.wso2.siddhi.core.SiddhiManager;
++import org.wso2.siddhi.core.SiddhiObjectPool;
++import org.wso2.siddhi.core.event.Event;
++import org.wso2.siddhi.core.event.in.InEvent;
++import org.wso2.siddhi.core.query.output.callback.QueryCallback;
++import org.wso2.siddhi.core.stream.input.InputHandler;
++
++/**
++ * Created by suho on 4/22/14.
++ */
++public class SiddhiTest {
++
++    static final Logger log = Logger.getLogger(JoinTestCase.class);
++
++    static int interval = 1000000;
++
++    public static void main(String[] args) throws InterruptedException {
++        log.info("Filter test119");
++        SiddhiManager siddhiManager = new SiddhiManager();
++
++        siddhiManager.defineStream("define stream CseEventStream (symbol string, price float, volume long) ");
++
++        String queryReference = siddhiManager.addQuery("fromParameter CseEventStream " +
++                "select symbol, price, volume " +
++                "insert into StockQuote;");
++
++        siddhiManager.addCallback(queryReference, new QueryCallback() {
++            public long count;
++            public long start = System.currentTimeMillis();
++
++            @Override
++            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
++//                EventPrinter.print(timeStamp, inEvents, removeEvents);
++//                Assert.assertTrue("IBM".equals(inEvents[0].getData(0)) || "WSO2".equals(inEvents[0].getData(0)));
++                for(Event event:inEvents){
++                    SiddhiObjectPool.put(event);
++                }
++                count++;
++                if (count % interval == 0) {
++                    long end = System.currentTimeMillis();
++                    System.out.println("TP: " + (interval * 1000.0) / (end - start));
++                    start = end;
++                }
++            }
++        });
++        InputHandler inputHandler = siddhiManager.getInputHandler("CseEventStream");
++
++        for (int i = 0; i < 10000000; i++) {
++            InEvent evnet;
++            evnet = (InEvent) SiddhiObjectPool.get();
++            if (evnet == null) {
++                evnet = new InEvent("CseEventStream", System.currentTimeMillis(), new Object[3]);
++            }
++            evnet.getData()[0] = "IBM";
++            evnet.getData()[1] = 75.6f;
++            evnet.getData()[2] = 100l;
++            inputHandler.send(evnet);
++
++        }
++
++        Thread.sleep(1000);
++        siddhiManager.shutdown();
++    }
++}
+Index: modules/siddhi-api/src/main/java/org/wso2/siddhi/query/api/definition/Attribute.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- modules/siddhi-api/src/main/java/org/wso2/siddhi/query/api/definition/Attribute.java	(date 1399283452000)
++++ modules/siddhi-api/src/main/java/org/wso2/siddhi/query/api/definition/Attribute.java	(revision )
+@@ -22,7 +22,7 @@
+     private Type type;
+ 
+     public enum Type {
+-        STRING, INT, LONG, FLOAT, DOUBLE, BOOL, TYPE
++        STRING, INT, LONG, FLOAT, DOUBLE, BOOL, OBJECT, TYPE
+     }
+ 
+     public Attribute(String name, Type type) {
+Index: pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pom.xml	(date 1399283452000)
++++ pom.xml	(revision )
+@@ -13,7 +13,7 @@
+ 
+     <modules>
+         <module>modules/siddhi-api</module>
+-        <module>modules/siddhi-query</module>
++        <module>modules/siddhi-query2</module>
+         <module>modules/siddhi-core</module>
+         <module>modules/siddhi-extensions</module>
+         <module>modules/siddhi-distribution</module>
+@@ -72,7 +72,7 @@
+             </dependency>
+             <dependency>
+                 <groupId>org.antlr</groupId>
+-                <artifactId>antlr-runtime</artifactId>
++                <artifactId>antlr4-runtime</artifactId>
+                 <version>${antlr.runtime.version}</version>
+                 <scope>compile</scope>
+             </dependency>
+@@ -161,7 +161,7 @@
+         <log4j.version>1.2.14</log4j.version>
+         <mvel2.version>2.0.19</mvel2.version>
+         <hazelcast.version>2.2</hazelcast.version>
+-        <antlr.runtime.version>3.4</antlr.runtime.version>
++        <antlr.runtime.version>4.2.2</antlr.runtime.version>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+     </properties>
+ 
+Index: modules/siddhi-api/src/main/java/org/wso2/siddhi/query/api/definition/TableDefinition.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- modules/siddhi-api/src/main/java/org/wso2/siddhi/query/api/definition/TableDefinition.java	(date 1399283452000)
++++ modules/siddhi-api/src/main/java/org/wso2/siddhi/query/api/definition/TableDefinition.java	(revision )
+@@ -53,7 +53,7 @@
+     }
+ 
+ 
+-    public TableDefinition from(String paramName, String paramValue) {
++    public TableDefinition fromParameter(String paramName, String paramValue) {
+         if (externalTable == null) {
+             externalTable = new ExternalTable();
+         }
