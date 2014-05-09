@@ -17,6 +17,6 @@ public abstract class RegressionCalculator {
 
     public abstract Object[] processData();
 
-    public abstract Object[] linearRegressionCalculation ( InEvent inEvent, Map<Integer, String> paramPositions, int dataCount);
+    public abstract Object[] linearRegressionCalculation ( InEvent inEvent, Map<Integer, String> paramPositions, int paramCount, int batchSize, double ci );
 
 }
