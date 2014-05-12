@@ -19,7 +19,7 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
     private int eventCount = 0;
     private int xParameterCount = 0;
     private int batchSize = 1000000000;
-    private int perfCounter =0;
+    private int incCounter =0;
 
     public MultipleLinearRegressionCalculator() {
 //        init();
@@ -44,7 +44,7 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
         }
 
         //FOR PERFORMANCE TEST PURPOSES
-        if(perfCounter%1000 != 0){
+        if(incCounter %1000000 != 0){
             return null;
         }
         return  processData();
@@ -52,7 +52,7 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
 
     public void addEvent (InEvent inEvent, Map<Integer, String> paramPositions, int paramCount) {
 
-        perfCounter++;
+        incCounter++;
         eventCount++;
         double[] dataX = new double[paramCount];
         double[] dataY = new double[1];
@@ -63,11 +63,10 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
         for (Map.Entry<Integer, String> entry : paramPositions.entrySet()) {
 
            if (itr == 0) {
-                dataY[0] =  Double.parseDouble(inEvent.getData(entry.getKey()).toString());
-
-            }
-            else {
-                dataX[itr] = Double.parseDouble(inEvent.getData(entry.getKey()).toString());
+                dataY[0] =  ((Number) inEvent.getData(entry.getKey())).doubleValue();
+           }
+           else {
+                dataX[itr] = ((Number) inEvent.getData(entry.getKey())).doubleValue();
            }
             itr++;
         }

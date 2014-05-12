@@ -20,7 +20,7 @@ public class SimpleLinearRegressionCalculator extends RegressionCalculator{
     private double sumX = 0.0, sumY = 0.0, sumxsquared = 0.0;
     private double confidenceInterval = 0.0;
     private int batchSize = 1000000000;
-    private int perfCounter =0;
+    private int incCounter =0;
 
     public SimpleLinearRegressionCalculator () {
     }
@@ -46,16 +46,16 @@ public class SimpleLinearRegressionCalculator extends RegressionCalculator{
         }
 
         //FOR PERFORMANCE TEST PURPOSES
-        if(perfCounter%10000000 != 0){
+/*        if(incCounter%1000 != 0){
             return null;
-        }
+        }*/
         return  processData();
     }
 
     public void addEvent (InEvent inEvent, Map<Integer, String> paramPositions, int paramCount) {
 
         eventCount++;
-        perfCounter++;
+        incCounter++;
 
         int itr = 0;
         double xValue = 0.0 , yValue = 0.0;
@@ -63,11 +63,11 @@ public class SimpleLinearRegressionCalculator extends RegressionCalculator{
         for (Map.Entry<Integer, String> entry : paramPositions.entrySet()) {
 
             if (itr == 0) {
-                yValue = Double.parseDouble(inEvent.getData(entry.getKey()).toString());
+                yValue = ((Number) inEvent.getData(entry.getKey())).doubleValue();
                 yValueList.add(yValue);
             }
             else {
-                xValue = Double.parseDouble(inEvent.getData(entry.getKey()).toString());
+                xValue = ((Number) inEvent.getData(entry.getKey())).doubleValue();
                 xValueList.add(xValue);
             }
             itr++;
