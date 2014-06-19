@@ -1,6 +1,3 @@
-                    <excludes>
-                        <exclude>**/standard/table/rdbms/*TestCase.java</exclude>
-                        <exclude>**/standard/table/cassandra/*TestCase.java</exclude>
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -96,11 +93,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>15.0</version>
-        </dependency>
+
     <build>
         <extensions>
             <extension>
@@ -173,26 +166,26 @@
     </properties>
 
     <!--<scm>-->
-        <!--<connection>scm:svn:http://svn.wso2.org/repos/wso2/trunk/commons/siddhi</connection>-->
-        <!--<developerConnection>scm:svn:https://svn.wso2.org/repos/wso2/trunk/commons/siddhi-->
-        <!--</developerConnection>-->
-        <!--<url>http://svn.wso2.org/repos/wso2/trunk/commons/siddhi</url>-->
+    <!--<connection>scm:svn:http://svn.wso2.org/repos/wso2/trunk/commons/siddhi</connection>-->
+    <!--<developerConnection>scm:svn:https://svn.wso2.org/repos/wso2/trunk/commons/siddhi-->
+    <!--</developerConnection>-->
+    <!--<url>http://svn.wso2.org/repos/wso2/trunk/commons/siddhi</url>-->
     <!--</scm>-->
 
     <mailingLists>
         <!--<mailingList>-->
-            <!--<name>Users</name>-->
-            <!--<subscribe>siddhi-user+subscribe@googlegroups.com</subscribe>-->
-            <!--<unsubscribe>siddhi-user+unsubscribe@googlegroups.com</unsubscribe>-->
-            <!--<post>siddhi-user@googlegroups.com</post>-->
-            <!--<archive>http://groups.google.com/group/siddhi-user</archive>-->
+        <!--<name>Users</name>-->
+        <!--<subscribe>siddhi-user+subscribe@googlegroups.com</subscribe>-->
+        <!--<unsubscribe>siddhi-user+unsubscribe@googlegroups.com</unsubscribe>-->
+        <!--<post>siddhi-user@googlegroups.com</post>-->
+        <!--<archive>http://groups.google.com/group/siddhi-user</archive>-->
         <!--</mailingList>-->
         <!--<mailingList>-->
-            <!--<name>Developers</name>-->
-            <!--<subscribe>siddhi-dev+subscribe@googlegroups.com</subscribe>-->
-            <!--<unsubscribe>siddhi-dev+unsubscribe@googlegroups.com</unsubscribe>-->
-            <!--<post>siddhi-dev@googlegroups.com</post>-->
-            <!--<archive>http://groups.google.com/group/siddhi-dev</archive>-->
+        <!--<name>Developers</name>-->
+        <!--<subscribe>siddhi-dev+subscribe@googlegroups.com</subscribe>-->
+        <!--<unsubscribe>siddhi-dev+unsubscribe@googlegroups.com</unsubscribe>-->
+        <!--<post>siddhi-dev@googlegroups.com</post>-->
+        <!--<archive>http://groups.google.com/group/siddhi-dev</archive>-->
         <!--</mailingList>-->
         <mailingList>
             <name>Architecture</name>
