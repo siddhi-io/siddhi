@@ -33,9 +33,10 @@ public class LinearRegressionTransformProcessor extends TransformProcessor
 
     static final Logger log = Logger.getLogger(LinearRegressionTransformProcessor.class);
 
-    private int paramCount = 0;
-    private int batchSize = 1000000000;
-    private double ci = 0.95;
+    private int paramCount = 0;         // Number of x variables +1
+    private int calcInterval = 1;       // The frequency of regression calculation
+    private int batchSize = 1000000000; // Maximum # of events, used for regression calculation
+    private double ci = 0.95;           // Confidence Interval
     private final int SIMPLE_LINREG_INPUT_PARAM_COUNT = 2;
     private Map<Integer, String> paramPositions = new HashMap<Integer, String>();
     private RegressionCalculator regressionCalculator = null;
@@ -44,10 +45,50 @@ public class LinearRegressionTransformProcessor extends TransformProcessor
     }
 
     @Override
+    protected void init(Expression[] parameters, List<ExpressionExecutor> expressionExecutors, StreamDefinition inStreamDefinition, StreamDefinition outStreamDefinition, String elementId, SiddhiContext siddhiContext) {
+
+
+        if (outStreamDefinition == null) { //WHY DO WE HAVE TO CHECK WHETHER ITS NULL?
+            this.outStreamDefinition = new StreamDefinition().name("linregStream");
+            this.outStreamDefinition.attribute("stdError", Attribute.Type.DOUBLE);
+        }
+
+        calcInterval = ((IntConstant) parameters[0]).getValue();
+        batchSize = ((IntConstant) parameters[1]).getValue();
+        ci = ((DoubleConstant) parameters[2]).getValue();
+
+        // processing siddhi query
+        for (Expression parameter : parameters) {
+            if (parameter instanceof Variable) {
+                Variable var = (Variable) parameter;
+                String attributeName = var.getAttributeName();
+                paramPositions.put(inStreamDefinition.getAttributePosition(attributeName), attributeName );
+                paramCount++;
+            }
+        }
+
+        // pick the appropriate regression calculator
+        if(paramCount > SIMPLE_LINREG_INPUT_PARAM_COUNT) {
+            regressionCalculator = new MultipleLinearRegressionCalculator();
+        }
+        else {
+            regressionCalculator = new SimpleLinearRegressionCalculator();
+        }
+
+        // Creating the outstream based on the number of input parameters
+        String betaVal;
+        for (int itr = 0; itr < paramCount ; itr++) {
+            betaVal = "beta" + itr;
+
+            this.outStreamDefinition.attribute(betaVal, Attribute.Type.DOUBLE);
+        }
+    }
+
+    @Override
     protected InStream processEvent(InEvent inEvent) {
         log.debug("processEvent");
 
-        return new InEvent(inEvent.getStreamId(), System.currentTimeMillis(),  regressionCalculator.linearRegressionCalculation( inEvent, paramPositions, paramCount, batchSize, ci ));
+        return new InEvent(inEvent.getStreamId(), System.currentTimeMillis(),  regressionCalculator.linearRegressionCalculation( inEvent, paramPositions, paramCount, calcInterval, batchSize, ci ));
     }
     @Override
     protected InStream processEvent(InListEvent inListEvent) {
@@ -72,46 +113,7 @@ public class LinearRegressionTransformProcessor extends TransformProcessor
         if (objects.length > 0 && objects[0] instanceof Map) {  //WHAT IS THIS IF CONDITION FOR?
         }
     }
-    @Override
-    protected void init(Expression[] parameters, List<ExpressionExecutor> expressionExecutors, StreamDefinition inStreamDefinition, StreamDefinition outStreamDefinition, String elementId, SiddhiContext siddhiContext) {
 
-
-        if (outStreamDefinition == null) { //WHY DO WE HAVE TO CHECK WHETHER ITS NULL?
-            this.outStreamDefinition = new StreamDefinition().name("linregStream");
-            this.outStreamDefinition.attribute("stdError", Attribute.Type.DOUBLE);
-        }
-
-        batchSize = ((IntConstant) parameters[0]).getValue();
-        ci = ((DoubleConstant) parameters[1]).getValue();
-
-        // processing siddhi query
-        for (Expression parameter : parameters) {
-            if (parameter instanceof Variable) {
-                Variable var = (Variable) parameter;
-                String attributeName = var.getAttributeName();
-                paramPositions.put(inStreamDefinition.getAttributePosition(attributeName), attributeName );
-                paramCount++;
-            }
-        }
-
-        // pick the appropriate regression calculator
-        if(paramCount > SIMPLE_LINREG_INPUT_PARAM_COUNT) {
-            regressionCalculator = new MultipleLinearRegressionCalculator();
-        }
-        else {
-            regressionCalculator = new SimpleLinearRegressionCalculator();
-        }
-
-        // Creating the outstream based on the number of input parameters
-        String betaVal, tStat;
-        for (int itr = 0; itr < paramCount - 1; itr++) {
-            betaVal = "beta" + itr;
-            tStat = "tStat" + itr;
-
-            this.outStreamDefinition.attribute(betaVal, Attribute.Type.DOUBLE);
-            this.outStreamDefinition.attribute(tStat, Attribute.Type.DOUBLE);
-        }
-    }
     @Override
     public void destroy() {
         regressionCalculator.close();
