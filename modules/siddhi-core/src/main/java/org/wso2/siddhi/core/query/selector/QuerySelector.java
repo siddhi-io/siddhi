@@ -331,7 +331,6 @@ public class QuerySelector implements QueryPostProcessingElement {
                     Event event = new InEvent(outputStreamId, timeStamp, data);
                     if (havingConditionExecutor.execute(event)) {
                         outputListEvent.addEvent(event);
-
                     }
                 }
             }
