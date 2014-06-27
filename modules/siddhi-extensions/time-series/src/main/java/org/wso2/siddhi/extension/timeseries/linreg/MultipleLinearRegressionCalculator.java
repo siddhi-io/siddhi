@@ -22,7 +22,6 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
     private int incCounter =0;
 
     public MultipleLinearRegressionCalculator() {
-//        init();
     }
 
     public void init() {
@@ -31,20 +30,23 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
     public void close() {
     }
 
-    public Object[] linearRegressionCalculation ( InEvent inEvent, Map<Integer, String> paramPositions, int paramCount, int limit, double ci) {
+    public Object[] calculateLinearRegression(InEvent inEvent, Map<Integer, String> paramPositions, int paramCount, int calcInterval, int limit, double ci) {
 
         confidenceInterval = ci;
         batchSize = limit;
 
+        // TODO: implement this at the super class
+
         addEvent(inEvent, paramPositions, paramCount);
 
+        // removing oldest events in order to maintain batchsize
         if(eventCount > batchSize){
             eventCount--;
             removeEvent();
         }
 
-        //FOR PERFORMANCE TEST PURPOSES
-        if(incCounter %1000000 != 0){
+        // processing at a user specified calculation interval
+        if(incCounter % calcInterval != 0){
             return null;
         }
         return  processData();
@@ -55,24 +57,25 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
         incCounter++;
         eventCount++;
         double[] dataX = new double[paramCount];
-        double[] dataY = new double[1];
+        double[] dataY = new double[1]; // TODO: check whether double can be used instead of array
         int itr = 0;
 
         dataX[0] = 1.0;
 
+        // TODO: iterate from 1st position, take the Y out of the loop
         for (Map.Entry<Integer, String> entry : paramPositions.entrySet()) {
 
            if (itr == 0) {
                 dataY[0] =  ((Number) inEvent.getData(entry.getKey())).doubleValue();
-           }
-           else {
+           } else {
                 dataX[itr] = ((Number) inEvent.getData(entry.getKey())).doubleValue();
            }
-            itr++;
+           itr++;
         }
 
         xValueList.add(dataX);
         yValueList.add(dataY);
+        // TODO: move this to the constructor
         xParameterCount = paramCount - 1;
     }
 
@@ -86,15 +89,13 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
 
         double[][] xArray = xValueList.toArray(new double[eventCount][xParameterCount +1]);
         double[][] yArray = yValueList.toArray(new double[eventCount][1]);
-
         double [] betaErrors = new double[xParameterCount +1];
         double [] tStats = new double[xParameterCount +1];
         double sse = 0.0;                               // sum of square error
         double df = eventCount - xParameterCount - 1;   // Degrees of Freedom for Confidence Interval
         double p = 1- confidenceInterval;               // P value of specified confidence interval
         double pValue;
-        int outputDataCount = 1 + (xParameterCount + 1) * 2;
-        Object[] dataObjArray = new Object[outputDataCount];
+        Object[] regResults = new Object[xParameterCount + 2];
 
         // Calculate Betas
         try{
@@ -114,28 +115,28 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
 
             // Calculating Errors
             double mse = sse/df;
-            double stdErr = Math.sqrt(mse);
-            dataObjArray[0] = stdErr;
+            regResults[0] = Math.sqrt(mse);      // Standard Error of Regression
             TDistribution t = new TDistribution(df);
 
-            //Calculating beta errors and tstats
+            // Calculating beta errors and tstats
             for(int j=0; j <= xParameterCount; j++) {
                 betaErrors[j] = Math.sqrt(matXTXInverse.get(j,j) * mse);
                 tStats[j] = matBetas.get(j,0)/betaErrors[j];
 
-                pValue = 1-(t.cumulativeProbability(Math.abs(tStats[j])) - 1 + t.cumulativeProbability(Math.abs(tStats[j])));
+                // Eliminating statistically weak coefficients
+                pValue = 2 * (1 - t.cumulativeProbability(Math.abs(tStats[j])));
                 if ( pValue > p) {
-                    matBetas.set(j,0,0);
+                    regResults[j+1] = 0;
+                }else {
+                    regResults[j+1] = matBetas.get(j,0);
                 }
-
-                dataObjArray[j+1] = matBetas.get(j,0);
-                dataObjArray[j+2+ xParameterCount] = tStats[j];
             }
         }
         catch(RuntimeException e){
-            dataObjArray[0]="Insufficient Data";
+            return null;
+            // TODO: create dummy obj array and send
         }
 
-        return dataObjArray;
+        return regResults;
     }
 }
