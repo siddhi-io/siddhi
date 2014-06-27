@@ -28,6 +28,8 @@ import java.util.Map;
  */
 @SiddhiExtension(namespace = "timeseries", function = "regress")
 
+// TODO: explain function paramters
+
 public class LinearRegressionTransformProcessor extends TransformProcessor
 {
 
@@ -38,7 +40,7 @@ public class LinearRegressionTransformProcessor extends TransformProcessor
     private int batchSize = 1000000000; // Maximum # of events, used for regression calculation
     private double ci = 0.95;           // Confidence Interval
     private final int SIMPLE_LINREG_INPUT_PARAM_COUNT = 2;
-    private Map<Integer, String> paramPositions = new HashMap<Integer, String>();
+    private Map<Integer, String> paramPositions = new HashMap<Integer, String>();   // Capture Input Parameters
     private RegressionCalculator regressionCalculator = null;
 
     public LinearRegressionTransformProcessor() {
@@ -47,17 +49,19 @@ public class LinearRegressionTransformProcessor extends TransformProcessor
     @Override
     protected void init(Expression[] parameters, List<ExpressionExecutor> expressionExecutors, StreamDefinition inStreamDefinition, StreamDefinition outStreamDefinition, String elementId, SiddhiContext siddhiContext) {
 
-
-        if (outStreamDefinition == null) { //WHY DO WE HAVE TO CHECK WHETHER ITS NULL?
-            this.outStreamDefinition = new StreamDefinition().name("linregStream");
-            this.outStreamDefinition.attribute("stdError", Attribute.Type.DOUBLE);
+        if (log.isDebugEnabled()) {
+            // TODO: print the stream values
+            log.debug("Query Initialized");
         }
-
+        // TODO: Try to get defaults
         calcInterval = ((IntConstant) parameters[0]).getValue();
         batchSize = ((IntConstant) parameters[1]).getValue();
         ci = ((DoubleConstant) parameters[2]).getValue();
 
+        // TODO: exception handling: type for constants, attribute count for variables
+
         // processing siddhi query
+        // TODO: start for loop from 3rd parameter
         for (Expression parameter : parameters) {
             if (parameter instanceof Variable) {
                 Variable var = (Variable) parameter;
@@ -69,29 +73,37 @@ public class LinearRegressionTransformProcessor extends TransformProcessor
 
         // pick the appropriate regression calculator
         if(paramCount > SIMPLE_LINREG_INPUT_PARAM_COUNT) {
+            // TODO: send constants to regression calculators here itself as parameters
             regressionCalculator = new MultipleLinearRegressionCalculator();
-        }
-        else {
+        } else {
             regressionCalculator = new SimpleLinearRegressionCalculator();
         }
 
-        // Creating the outstream based on the number of input parameters
-        String betaVal;
-        for (int itr = 0; itr < paramCount ; itr++) {
-            betaVal = "beta" + itr;
+        if (outStreamDefinition == null) { //WHY DO WE HAVE TO CHECK WHETHER ITS NULL?
+            this.outStreamDefinition = new StreamDefinition().name("linregStream");
+            this.outStreamDefinition.attribute("stdError", Attribute.Type.DOUBLE);
 
-            this.outStreamDefinition.attribute(betaVal, Attribute.Type.DOUBLE);
+            // Creating the outstream attributes based on the number of input parameters
+            String betaVal;
+            for (int itr = 0; itr < paramCount ; itr++) {
+                betaVal = "beta" + itr;
+                this.outStreamDefinition.attribute(betaVal, Attribute.Type.DOUBLE);
+
+            }
+            // TODO: add the input variables to the outstream, by iterating input stream definition
         }
     }
 
     @Override
     protected InStream processEvent(InEvent inEvent) {
-        log.debug("processEvent");
-
-        return new InEvent(inEvent.getStreamId(), System.currentTimeMillis(),  regressionCalculator.linearRegressionCalculation( inEvent, paramPositions, paramCount, calcInterval, batchSize, ci ));
+        if (log.isDebugEnabled()) {
+            log.debug("processEvent");
+        }
+        return new InEvent(inEvent.getStreamId(), System.currentTimeMillis(),  regressionCalculator.calculateLinearRegression(inEvent, paramPositions, paramCount, calcInterval, batchSize, ci));
     }
     @Override
     protected InStream processEvent(InListEvent inListEvent) {
+        // TODO: Use processEvent for all events, get results and put in to list event and send it out
         InEvent lastEvent = null;
 
         for (Event event : inListEvent.getEvents()) {
@@ -102,7 +114,6 @@ public class LinearRegressionTransformProcessor extends TransformProcessor
         }
 
         return new InEvent(lastEvent.getStreamId(), System.currentTimeMillis(), regressionCalculator.processData());
-
     }
     @Override
     protected Object[] currentState() {
@@ -110,8 +121,6 @@ public class LinearRegressionTransformProcessor extends TransformProcessor
     }
     @Override
     protected void restoreState(Object[] objects) {
-        if (objects.length > 0 && objects[0] instanceof Map) {  //WHAT IS THIS IF CONDITION FOR?
-        }
     }
 
     @Override
