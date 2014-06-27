@@ -50,7 +50,6 @@ public class LinearRegressionOutlierTransformProcessor extends TransformProcesso
     @Override
     protected void init(Expression[] parameters, List<ExpressionExecutor> expressionExecutors, StreamDefinition inStreamDefinition, StreamDefinition outStreamDefinition, String elementId, SiddhiContext siddhiContext) {
 
-
         if (outStreamDefinition == null) { //WHY DO WE HAVE TO CHECK WHETHER ITS NULL?
             this.outStreamDefinition = new StreamDefinition().name("linregStream");
             this.outStreamDefinition.attribute("outlier", Attribute.Type.BOOL);
@@ -81,36 +80,36 @@ public class LinearRegressionOutlierTransformProcessor extends TransformProcesso
         else {
             regressionCalculator = new SimpleLinearRegressionCalculator();
         }
-
     }
 
     @Override
     protected InStream processEvent(InEvent inEvent) {
-        log.debug("processEvent");
+        if (log.isDebugEnabled()) {
+            log.debug("processEvent");
+        }
+
         Object[] outStreamData = new Object[paramCount+2];
-        String result = "normal";
+        String result = "normal"; // TODO: convert in to BOOL
         eventCount++;
 
-        if(eventCount < paramCount+2) {
-            regResults = regressionCalculator.linearRegressionCalculation(inEvent, paramPositions, paramCount, calcInterval, batchSize, ci);
+        if(eventCount < 4) { // TODO: explain 4
+            regResults = regressionCalculator.calculateLinearRegression(inEvent, paramPositions, paramCount, calcInterval, batchSize, ci);
             outStreamData[0] = result;
-
         }
         else {
-
             // Calculate the upper limit and the lower limit based on standard error and regression equation
-            double upLimit = (Double) regResults[0] * range + ((Number) regResults[1]).doubleValue() + ((Number) inEvent.getData1()).doubleValue() * (Double) regResults[2];
-            double downLimit = - (Double) regResults[0] * range + (Double) regResults[1] + ((Number) inEvent.getData1()).doubleValue() * (Double) regResults[2];
+            double forecastY = (Double) regResults[1] + ((Number) inEvent.getData1()).doubleValue() * (Double) regResults[2];
+            double upLimit = (Double) regResults[0] * range + forecastY;
+            double downLimit = - (Double) regResults[0] * range + forecastY;
 
             // Check whether next Y value is an outlier based on the next X value and the current regression equation
             double nextY = ((Number)inEvent.getData0()).doubleValue();
             if(nextY < downLimit || nextY > upLimit) {
                 result = "outlier";
             }
-            regResults = regressionCalculator.linearRegressionCalculation(inEvent, paramPositions, paramCount, calcInterval, batchSize, ci);
+            regResults = regressionCalculator.calculateLinearRegression(inEvent, paramPositions, paramCount, calcInterval, batchSize, ci);
             outStreamData[0] = result;
             System.arraycopy(regResults,0,outStreamData, 1, regResults.length);
-
         }
 
         return new InEvent(inEvent.getStreamId(), System.currentTimeMillis(), outStreamData);
@@ -136,8 +135,6 @@ public class LinearRegressionOutlierTransformProcessor extends TransformProcesso
     }
     @Override
     protected void restoreState(Object[] objects) {
-        if (objects.length > 0 && objects[0] instanceof Map) {  //WHAT IS THIS IF CONDITION FOR?
-        }
     }
 
     @Override
