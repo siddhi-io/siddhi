@@ -35,7 +35,7 @@ public class LinearRegressionForecastTransformProcessor extends TransformProcess
 
     private int paramCount = 0;         // Number of x variables +1
     private int calcInterval = 1;       // how frequently regression is calculated
-    private int batchSize = 1000000000; //maximum number of events for a regression calculation
+    private int batchSize = 1000000000; // maximum number of events for a regression calculation
     private double xDash;               // input variable for forecasting
     private double ci = 0.95;           // confidence interval
     private final int SIMPLE_LINREG_INPUT_PARAM_COUNT = 2;
@@ -48,7 +48,6 @@ public class LinearRegressionForecastTransformProcessor extends TransformProcess
     @Override
     protected void init(Expression[] parameters, List<ExpressionExecutor> expressionExecutors, StreamDefinition inStreamDefinition, StreamDefinition outStreamDefinition, String elementId, SiddhiContext siddhiContext) {
 
-
         if (outStreamDefinition == null) { //WHY DO WE HAVE TO CHECK WHETHER ITS NULL?
             this.outStreamDefinition = new StreamDefinition().name("linregStream");
             this.outStreamDefinition.attribute("forecastY", Attribute.Type.DOUBLE);
@@ -57,6 +56,7 @@ public class LinearRegressionForecastTransformProcessor extends TransformProcess
         calcInterval = ((IntConstant) parameters[0]).getValue();
         batchSize = ((IntConstant) parameters[1]).getValue();
         ci = ((DoubleConstant) parameters[2]).getValue();
+        // TODO: Handle scenarios when this is a variable
         xDash = ((DoubleConstant) parameters[3]).getValue();
 
         // processing siddhi query
@@ -68,7 +68,6 @@ public class LinearRegressionForecastTransformProcessor extends TransformProcess
                 paramCount++;
             }
         }
-
 
         // pick the appropriate regression calculator
         if(paramCount > SIMPLE_LINREG_INPUT_PARAM_COUNT) {
@@ -82,13 +81,17 @@ public class LinearRegressionForecastTransformProcessor extends TransformProcess
 
     @Override
     protected InStream processEvent(InEvent inEvent) {
-        log.debug("processEvent");
-        Object[] outStreamData=null;
-        Object[] regResults = regressionCalculator.linearRegressionCalculation(inEvent, paramPositions, paramCount, calcInterval, batchSize, ci);
-        if(regResults!=null) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("processEvent");
+        }
+        Object[] outStreamData=null;
+        Object[] regResults = regressionCalculator.calculateLinearRegression(inEvent, paramPositions, paramCount, calcInterval, batchSize, ci);
+        if(regResults!=null) {
+            // Calculating forecast Y based on regression equation and given X
             double forecastY = ((Number) regResults[1]).doubleValue()+ xDash * ((Number) regResults[2]).doubleValue();
             outStreamData = new Object[]{forecastY};
+            // TODO: same suggestions as first transformer
         }
         return new InEvent(inEvent.getStreamId(), System.currentTimeMillis(), outStreamData);
     }
@@ -104,7 +107,6 @@ public class LinearRegressionForecastTransformProcessor extends TransformProcess
         }
 
         return new InEvent(lastEvent.getStreamId(), System.currentTimeMillis(), regressionCalculator.processData());
-
     }
     @Override
     protected Object[] currentState() {
@@ -112,8 +114,6 @@ public class LinearRegressionForecastTransformProcessor extends TransformProcess
     }
     @Override
     protected void restoreState(Object[] objects) {
-        if (objects.length > 0 && objects[0] instanceof Map) {  //WHAT IS THIS IF CONDITION FOR?
-        }
     }
 
     @Override
