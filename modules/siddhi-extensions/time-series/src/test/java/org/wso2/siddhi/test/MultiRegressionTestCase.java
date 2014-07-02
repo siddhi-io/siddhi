@@ -39,16 +39,16 @@ public class MultiRegressionTestCase
 
         SiddhiManager siddhiManager = new SiddhiManager(siddhiConfiguration);
 
-        InputHandler inputHandler = siddhiManager.defineStream("define stream DataStream ( y double, x1 double, x2 double , x3 double, x4 double )");
+        InputHandler inputHandler = siddhiManager.defineStream("define stream DataStream ( y double, x1 double, x2 double , x3 double, x4 int )");
 
-        String queryReference = siddhiManager.addQuery("from DataStream#transform.timeseries:regress( 30, 0.95, y, x1, x2, x3, x4 ) \n" +
+        String queryReference = siddhiManager.addQuery("from DataStream#transform.timeseries:regress( 3, 100, 0.95, y, x1, x2, x3, x4 ) \n" +
                 "        select *  \n" +
                 "        insert into RegressionResult;\n");
 
         siddhiManager.addCallback(queryReference, new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                EventPrinter.print(inEvents);
                 if(inEvents[0].getData2()!=null){
                     betaOne = (Double) inEvents[0].getData2();
                 }

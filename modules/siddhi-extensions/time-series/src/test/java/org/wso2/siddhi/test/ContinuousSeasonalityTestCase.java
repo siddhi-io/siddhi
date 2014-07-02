@@ -44,7 +44,7 @@ public class ContinuousSeasonalityTestCase
                 " select y, x1, sin(x1) as sinx1 " +
                 " insert into tempStream1;");
 
-        String queryReference = siddhiManager.addQuery("from tempStream1#transform.timeseries:regress(30, 0.95, y, x1, sinx1) \n" +
+        String queryReference = siddhiManager.addQuery("from tempStream1#transform.timeseries:regress( 1, 1000, 0.95, y, x1, sinx1) \n" +
                 "        select *  \n" +
                 "        insert into RegressionResult;\n");
 

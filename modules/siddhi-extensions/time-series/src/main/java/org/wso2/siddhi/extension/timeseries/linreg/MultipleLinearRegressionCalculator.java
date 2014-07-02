@@ -4,6 +4,7 @@ import Jama.Matrix;
 import org.apache.commons.math3.distribution.TDistribution;
 import org.wso2.siddhi.core.event.in.InEvent;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,41 +16,10 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
 
     private List<double[]> yValueList = new LinkedList<double[]>();
     private List<double[]> xValueList = new LinkedList<double[]>();
-    private double confidenceInterval = 0.0;
-    private int eventCount = 0;
-    private int xParameterCount = 0;
-    private int batchSize = 1000000000;
-    private int incCounter =0;
 
-    public MultipleLinearRegressionCalculator() {
-    }
-
-    public void init() {
-    }
-
-    public void close() {
-    }
-
-    public Object[] calculateLinearRegression(InEvent inEvent, Map<Integer, String> paramPositions, int paramCount, int calcInterval, int limit, double ci) {
-
-        confidenceInterval = ci;
-        batchSize = limit;
-
-        // TODO: implement this at the super class
-
-        addEvent(inEvent, paramPositions, paramCount);
-
-        // removing oldest events in order to maintain batchsize
-        if(eventCount > batchSize){
-            eventCount--;
-            removeEvent();
-        }
-
-        // processing at a user specified calculation interval
-        if(incCounter % calcInterval != 0){
-            return null;
-        }
-        return  processData();
+    public MultipleLinearRegressionCalculator(int paramCount, int calcInt, int limit, double ci)
+    {
+        super(paramCount, calcInt, limit, ci);
     }
 
     public void addEvent (InEvent inEvent, Map<Integer, String> paramPositions, int paramCount) {
@@ -57,26 +27,18 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
         incCounter++;
         eventCount++;
         double[] dataX = new double[paramCount];
-        double[] dataY = new double[1]; // TODO: check whether double can be used instead of array
-        int itr = 0;
-
+        double[] dataY = new double[1];
         dataX[0] = 1.0;
 
-        // TODO: iterate from 1st position, take the Y out of the loop
-        for (Map.Entry<Integer, String> entry : paramPositions.entrySet()) {
+        Iterator<Map.Entry<Integer, String>> it = paramPositions.entrySet().iterator();
+        dataY[0] = ((Number) inEvent.getData(it.next().getKey())).doubleValue();
 
-           if (itr == 0) {
-                dataY[0] =  ((Number) inEvent.getData(entry.getKey())).doubleValue();
-           } else {
-                dataX[itr] = ((Number) inEvent.getData(entry.getKey())).doubleValue();
-           }
-           itr++;
+        for(int i=1; i<paramCount; i++) {
+            dataX[i] = ((Number) inEvent.getData(it.next().getKey())).doubleValue();
         }
 
         xValueList.add(dataX);
         yValueList.add(dataY);
-        // TODO: move this to the constructor
-        xParameterCount = paramCount - 1;
     }
 
     public void removeEvent(){
@@ -110,7 +72,7 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
 
             // Calculate Sum of Squares
             for (int i = 0; i < eventCount; i++) {
-                sse += Math.pow((yHat.get(i,0) - yArray[i][0]),2);
+                sse += (yHat.get(i,0) - yArray[i][0]) * (yHat.get(i,0) - yArray[i][0]);
             }
 
             // Calculating Errors
@@ -126,17 +88,19 @@ public class MultipleLinearRegressionCalculator extends RegressionCalculator{
                 // Eliminating statistically weak coefficients
                 pValue = 2 * (1 - t.cumulativeProbability(Math.abs(tStats[j])));
                 if ( pValue > p) {
-                    regResults[j+1] = 0;
+                    regResults[j+1] = 0.0;
                 }else {
                     regResults[j+1] = matBetas.get(j,0);
                 }
             }
         }
         catch(RuntimeException e){
-            return null;
-            // TODO: create dummy obj array and send
+            regResults[0] = 0.0;
+            for(int j=0; j <= xParameterCount; j++) {
+                regResults[j+1]= 0.0;
+            }
+            return regResults;
         }
-
         return regResults;
     }
 }

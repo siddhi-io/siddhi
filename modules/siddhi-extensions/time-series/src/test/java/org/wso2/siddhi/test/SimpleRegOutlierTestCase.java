@@ -44,7 +44,7 @@ public class SimpleRegOutlierTestCase
 
         InputHandler inputHandler = siddhiManager.defineStream("define stream DataStream ( y double, x double )");
 
-        String queryReference = siddhiManager.addQuery("from DataStream#transform.timeseries:outlier( 1, 1000, 0.95, 2, y, x) \n" +
+        String queryReference = siddhiManager.addQuery("from DataStream#transform.timeseries:outlier(  1, y, x) \n" +
                 "        select *  \n" +
                 "        insert into RegressionResult;\n");
 

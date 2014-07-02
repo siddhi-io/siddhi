@@ -58,7 +58,7 @@ public class DiscreteSeasonalityTestCase
                 " select y, t, 0 as dum1" +
                 " insert into tempStream3;");
 
-        String queryReference = siddhiManager.addQuery("from tempStream3#transform.timeseries:regress(30, 0.95, y, dum1) \n" +
+        String queryReference = siddhiManager.addQuery("from tempStream3#transform.timeseries:regress( 1, 1000, 0.95, y, dum1) \n" +
                 "        select *  \n" +
                 "        insert into RegressionResult;\n");
 
