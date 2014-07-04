@@ -1,6 +1,7 @@
 package org.wso2.siddhi.test;
 
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -9,6 +10,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.extension.timeseries.LinearRegressionOutlierTransformProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +18,9 @@ import java.util.List;
 /**
  * Created by seshika on 4/7/14.
  */
-public class SimpleRegressionTestCase
+public class SimpleRegOutlierTestCase
 {
-    static final Logger log = Logger.getLogger(SimpleRegressionTestCase.class);
+    static final Logger log = Logger.getLogger(SimpleRegOutlierTestCase.class);
 
     private int count;
     private double betaZero;
@@ -30,12 +32,12 @@ public class SimpleRegressionTestCase
 
     @Test
     public void testRegression() throws InterruptedException {
-        log.info("Regression Test 1 - Simple Linear");
+        log.info("Regression Test 6 - Simple Linear Outlier");
 
         SiddhiConfiguration siddhiConfiguration = new SiddhiConfiguration();
 
         List<Class> list = new ArrayList<Class>();
-        list.add(org.wso2.siddhi.extension.timeseries.LinearRegressionTransformProcessor.class);
+        list.add(LinearRegressionOutlierTransformProcessor.class);
         list.add(org.wso2.siddhi.extension.timeseries.LinearRegressionForecastTransformProcessor.class);
         list.add(org.wso2.siddhi.extension.timeseries.LinearRegressionOutlierTransformProcessor.class);
 
@@ -45,7 +47,7 @@ public class SimpleRegressionTestCase
 
         InputHandler inputHandler = siddhiManager.defineStream("define stream DataStream ( y double, x double )");
 
-        String queryReference = siddhiManager.addQuery("from DataStream#transform.timeseries:regress( 1, 1000000, 0.95,  y, x) \n" +
+        String queryReference = siddhiManager.addQuery("from DataStream#transform.timeseries:outlier(  1, y, x) \n" +
                 "        select *  \n" +
                 "        insert into RegressionResult;\n");
 
@@ -53,10 +55,11 @@ public class SimpleRegressionTestCase
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                if (inEvents[0].getData1() != null) {
-                    betaZero = (Double) inEvents[0].getData1();
-                }
                 count++;
+                if(inEvents[0].getData1()!=null){
+                    betaZero= (Double) inEvents[0].getData2();
+                }
+
             }
         });
 
@@ -113,11 +116,13 @@ public class SimpleRegressionTestCase
         inputHandler.send(new Object[]{200.00,13.00});
         inputHandler.send(new Object[]{180.00,6.00});
 
+
         Thread.sleep(1000);
         siddhiManager.shutdown();
 
-//        Assert.assertEquals("No of events: ", 50, count);
-//        Assert.assertEquals("Beta0: ", 573.1418421169498, betaZero);
+        double delta=0.0;
+        Assert.assertEquals("No of events: ", 50, count);
+        Assert.assertEquals(573.1418421169493, betaZero, delta);
 
     }
 }
