@@ -12,8 +12,8 @@
     <description>Siddhi, high performing Complex Event Processing Engine</description>
 
     <modules>
-        <!--<module>modules/siddhi-api</module>-->
-        <!--<module>modules/siddhi-query</module>-->
+        <module>modules/siddhi-query-api</module>
+        <module>modules/siddhi-query-compiler</module>
         <!--<module>modules/siddhi-core</module>-->
         <!--<module>modules/siddhi-extensions</module>-->
         <!--<module>modules/siddhi-distribution</module>-->
@@ -51,18 +51,18 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!--<dependency>-->
-                <!--<groupId>org.mvel</groupId>-->
-                <!--<artifactId>mvel2</artifactId>-->
-                <!--<version>${mvel2.version}</version>-->
-                <!--<scope>compile</scope>-->
-            <!--</dependency>-->
-            <!--<dependency>-->
-                <!--<groupId>org.antlr</groupId>-->
-                <!--<artifactId>antlr-runtime</artifactId>-->
-                <!--<version>${antlr.runtime.version}</version>-->
-                <!--<scope>compile</scope>-->
-            <!--</dependency>-->
+            <dependency>
+                <groupId>org.mvel</groupId>
+                <artifactId>mvel2</artifactId>
+                <version>${mvel2.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>${antlr.runtime.version}</version>
+                <scope>compile</scope>
+            </dependency>
             <!--<dependency>-->
                 <!--<groupId>com.hazelcast</groupId>-->
                 <!--<artifactId>hazelcast</artifactId>-->
@@ -148,9 +148,8 @@
     <properties>
         <junit.version>4.10</junit.version>
         <log4j.version>1.2.14</log4j.version>
-        <mvel2.version>2.0.19</mvel2.version>
-        <hazelcast.version>2.2</hazelcast.version>
-        <antlr.runtime.version>3.4</antlr.runtime.version>
+        <mvel2.version>2.2.1.Final</mvel2.version>
+        <antlr.runtime.version>4.3</antlr.runtime.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
