@@ -12,25 +12,12 @@
     <description>Siddhi, high performing Complex Event Processing Engine</description>
 
     <modules>
-        <module>modules/siddhi-api</module>
-        <module>modules/siddhi-query</module>
-        <module>modules/siddhi-core</module>
-        <module>modules/siddhi-extensions</module>
-        <module>modules/siddhi-distribution</module>
+        <!--<module>modules/siddhi-api</module>-->
+        <!--<module>modules/siddhi-query</module>-->
+        <!--<module>modules/siddhi-core</module>-->
+        <!--<module>modules/siddhi-extensions</module>-->
+        <!--<module>modules/siddhi-distribution</module>-->
     </modules>
-
-    <distributionManagement>
-        <repository>
-            <id>wso2-maven2-repository</id>
-            <name>WSO2 Maven2 Repository</name>
-            <url>scp://dist.wso2.org/home/httpd/dist.wso2.org/maven2/</url>
-        </repository>
-        <snapshotRepository>
-            <id>wso2-maven2-snapshot-repository</id>
-            <name>WSO2 Maven2 Snapshot Repository</name>
-            <url>scp://dist.wso2.org/home/httpd/dist.wso2.org/snapshots/maven2/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <dependencyManagement>
         <dependencies>
@@ -64,33 +51,33 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>org.mvel</groupId>
-                <artifactId>mvel2</artifactId>
-                <version>${mvel2.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.antlr</groupId>
-                <artifactId>antlr-runtime</artifactId>
-                <version>${antlr.runtime.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.hazelcast</groupId>
-                <artifactId>hazelcast</artifactId>
-                <version>${hazelcast.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>emma</groupId>
-                <artifactId>emma</artifactId>
-                <version>2.1.5320</version>
-            </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>5.1.6</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>org.mvel</groupId>-->
+                <!--<artifactId>mvel2</artifactId>-->
+                <!--<version>${mvel2.version}</version>-->
+                <!--<scope>compile</scope>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+                <!--<groupId>org.antlr</groupId>-->
+                <!--<artifactId>antlr-runtime</artifactId>-->
+                <!--<version>${antlr.runtime.version}</version>-->
+                <!--<scope>compile</scope>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+                <!--<groupId>com.hazelcast</groupId>-->
+                <!--<artifactId>hazelcast</artifactId>-->
+                <!--<version>${hazelcast.version}</version>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+                <!--<groupId>emma</groupId>-->
+                <!--<artifactId>emma</artifactId>-->
+                <!--<version>2.1.5320</version>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+                <!--<groupId>mysql</groupId>-->
+                <!--<artifactId>mysql-connector-java</artifactId>-->
+                <!--<version>5.1.6</version>-->
+            <!--</dependency>-->
         </dependencies>
     </dependencyManagement>
 
