@@ -68,11 +68,11 @@
                 <!--<artifactId>hazelcast</artifactId>-->
                 <!--<version>${hazelcast.version}</version>-->
             <!--</dependency>-->
-            <dependency>
-                <groupId>emma</groupId>
-                <artifactId>emma</artifactId>
-                <version>2.1.5320</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>emma</groupId>-->
+                <!--<artifactId>emma</artifactId>-->
+                <!--<version>2.1.5320</version>-->
+            <!--</dependency>-->
             <!--<dependency>-->
                 <!--<groupId>mysql</groupId>-->
                 <!--<artifactId>mysql-connector-java</artifactId>-->
