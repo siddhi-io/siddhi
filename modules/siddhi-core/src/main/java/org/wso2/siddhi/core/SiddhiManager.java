@@ -26,7 +26,9 @@ import org.wso2.siddhi.core.util.validate.QueryValidator;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.execution.ExecutionElement;
 import org.wso2.siddhi.query.api.execution.query.Query;
+import org.wso2.siddhi.query.compiler.SiddhiCompiler;
 
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -52,8 +54,12 @@ public class SiddhiManager {
             }//TODO add partition validation
         }
         ExecutionPlanRuntime executionPlanRuntime = ExecutionPlanParser.parse(executionPlan);
-        executionPlanRuntimeMap.put(executionPlan.getName(), executionPlanRuntime);
+        executionPlanRuntimeMap.put((executionPlan.getName()!= null) ? executionPlan.getName(): UUID.randomUUID().toString(), executionPlanRuntime);
         return executionPlanRuntime;
+    }
+
+    public ExecutionPlanRuntime addExecutionPlan(String executionPlan) throws ValidatorException {
+        return addExecutionPlan(SiddhiCompiler.parse(executionPlan));
     }
 
     public ExecutionPlanRuntime getExecutionPlanRuntime(String executionPlanName) {
@@ -61,7 +67,6 @@ public class SiddhiManager {
     }
 
     //Todo remove the execution plan from SiddhiManager
-
     public SiddhiContext getSiddhiContext() {
         return siddhiContext;
     }
