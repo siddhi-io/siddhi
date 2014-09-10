@@ -1,4 +1,4 @@
-/*
+package org.wso2.siddhi.core.event.stream.converter;/*
  * Copyright (c) 2005 - 2014, WSO2 Inc. (http://www.wso2.org)
  * All Rights Reserved.
  *
@@ -16,27 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.core.query.selector.attribute.processor;
 
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.query.api.definition.Attribute;
 
-public interface AttributeProcessor {
+public interface EventConverter {
+    /**
+     * Method to convert Event into StreamEvent
+     *
+     * @param event Event to be converted
+     * @return converted StreamEvent
+     */
+    public StreamEvent convertToStreamEvent(Event event);
 
     /**
-     * Method to get output type of the result produced by the Processor
+     * Method to convert(change format) StreamEvent into new StreamEvent
      *
-     * @return
+     * @param streamEvent StreamEvent to be Converted
+     * @return converted StreamEvent
      */
-    public Attribute.Type getOutputType();
-
-    public int getOutputPosition();
-
-    /**
-     * Method to process attributes of given StreamEvent.
-     *
-     * @param event event to be processed
-     */
-    public void process(StreamEvent event);
-
+    public StreamEvent convertToStreamEvent(StreamEvent streamEvent);
 }
