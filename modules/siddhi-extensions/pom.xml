@@ -37,6 +37,7 @@
 
     <modules>
         <module>time-series</module>
+	<module>siddhi-classifiers</module>
     </modules>
 
 </project>
