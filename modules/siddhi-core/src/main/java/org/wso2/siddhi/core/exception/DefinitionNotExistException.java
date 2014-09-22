@@ -16,19 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.core.query.selector.attribute.handler;
+package org.wso2.siddhi.core.exception;
 
-import org.wso2.siddhi.query.api.definition.Attribute;
+public class DefinitionNotExistException extends RuntimeException {
 
-import java.io.Serializable;
+    public DefinitionNotExistException() {
+        super();
+    }
 
-public interface OutputAttributeAggregator extends Serializable {
+    public DefinitionNotExistException(String message) {
+        super(message);
+    }
 
-    Attribute.Type getReturnType();
+    public DefinitionNotExistException(String message,
+                                       Throwable throwable) {
+        super(message, throwable);
+    }
 
-    Object processAdd(Object obj);
-
-    Object processRemove(Object obj);
-
-    OutputAttributeAggregator newInstance();
+    public DefinitionNotExistException(Throwable throwable) {
+        super(throwable);
+    }
 }

@@ -21,11 +21,11 @@ package org.wso2.siddhi.core.query;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.exception.QueryCreationException;
+import org.wso2.siddhi.core.partition.QueryPartitioner;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.query.output.rateLimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.processor.Processor;
-import org.wso2.siddhi.core.query.selector.QueryPartitioner;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.stream.runtime.SingleStreamRuntime;
@@ -59,7 +59,8 @@ public class QueryRuntime {
     private ConcurrentMap<String, AbstractDefinition> definitionMap;
     private MetaStateEvent metaStateEvent;
 
-    public QueryRuntime(Query query, SiddhiContext siddhiContext, StreamRuntime streamRuntime, QuerySelector selector, OutputRateLimiter outputRateLimiter, MetaStateEvent metaStateEvent) {
+    public QueryRuntime(Query query, SiddhiContext siddhiContext, StreamRuntime streamRuntime, QuerySelector selector,
+                        OutputRateLimiter outputRateLimiter, MetaStateEvent metaStateEvent) {
         this.query = query;
         this.siddhiContext = siddhiContext;
         this.streamRuntime = streamRuntime;
@@ -90,10 +91,6 @@ public class QueryRuntime {
         return queryId;
     }
 
-    public void setQueryId(String queryId) {
-        this.queryId = queryId;
-    }
-
     public void addCallback(QueryCallback callback) {
         outputRateLimiter.addQueryCallback(callback);
     }
@@ -114,6 +111,10 @@ public class QueryRuntime {
         return toLocalStream;
     }
 
+    public void setToLocalStream(boolean toLocalStream) {
+        this.toLocalStream = toLocalStream;
+    }
+
     public boolean isFromLocalStream() {
         if (query.getInputStream() instanceof SingleInputStream) {
             return ((SingleInputStream) query.getInputStream()).isInnerStream();
@@ -129,7 +130,8 @@ public class QueryRuntime {
         QuerySelector clonedSelector = this.selector.clone(key);
         OutputRateLimiter clonedOutputRateLimiter = outputRateLimiter.clone(key);
 
-        QueryRuntime queryRuntime = new QueryRuntime(query, siddhiContext, clonedStreamRuntime, clonedSelector, clonedOutputRateLimiter, this.metaStateEvent);
+        QueryRuntime queryRuntime = new QueryRuntime(query, siddhiContext, clonedStreamRuntime, clonedSelector,
+                clonedOutputRateLimiter, this.metaStateEvent);
         queryRuntime.queryId = this.queryId + key;
         queryRuntime.setToLocalStream(toLocalStream);
         queryRuntime.setDefinitionMap(definitionMap);
@@ -138,7 +140,8 @@ public class QueryRuntime {
             queryRuntime.outputRateLimiter.setOutputCallback(outputCallback);
             queryRuntime.outputCallback = this.outputCallback;
         } else {
-            OutputCallback clonedQueryOutputCallback = OutputParser.constructOutputCallback(query.getOutputStream(), key, localStreamJunctionMap, outputStreamDefinition, siddhiContext);
+            OutputCallback clonedQueryOutputCallback = OutputParser.constructOutputCallback(query.getOutputStream(), key,
+                    localStreamJunctionMap, outputStreamDefinition, siddhiContext);
             queryRuntime.outputRateLimiter.setOutputCallback(clonedQueryOutputCallback);
             queryRuntime.outputCallback = clonedQueryOutputCallback;
         }
@@ -159,21 +162,13 @@ public class QueryRuntime {
         this.definitionMap = definitionMap;
     }
 
-    public void setMetaStateEvent(MetaStateEvent metaStateEvent) {
-        outputStreamDefinition = metaStateEvent.getOutputStreamDefinition();
-        this.metaStateEvent = metaStateEvent;
-    }
-
-    public void setQueryPartitioner(QueryPartitioner queryPartitioner) {
-        this.queryPartitioner = queryPartitioner;
-    }
-
     public MetaStateEvent getMetaStateEvent() {
         return metaStateEvent;
     }
 
-    public void setToLocalStream(boolean toLocalStream) {
-        this.toLocalStream = toLocalStream;
+    public void setMetaStateEvent(MetaStateEvent metaStateEvent) {
+        outputStreamDefinition = metaStateEvent.getOutputStreamDefinition();
+        this.metaStateEvent = metaStateEvent;
     }
 
     public Query getQuery() {
@@ -186,6 +181,10 @@ public class QueryRuntime {
 
     public QueryPartitioner getQueryPartitioner() {
         return queryPartitioner;
+    }
+
+    public void setQueryPartitioner(QueryPartitioner queryPartitioner) {
+        this.queryPartitioner = queryPartitioner;
     }
 
     public void init() {

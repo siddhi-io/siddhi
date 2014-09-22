@@ -30,8 +30,8 @@ public class PassThroughOutputRateLimiter extends OutputRateLimiter {
         this.id = id;
     }
 
-    public PassThroughOutputRateLimiter clone(String key){
-        return new PassThroughOutputRateLimiter(id+key);
+    public PassThroughOutputRateLimiter clone(String key) {
+        return new PassThroughOutputRateLimiter(id + key);
     }
 
 
@@ -45,7 +45,7 @@ public class PassThroughOutputRateLimiter extends OutputRateLimiter {
 
     @Override
     public void process(StreamEvent event) {
-        /* this method will not be used since no processing is done by rateLimiters*/
+        //this method will not be used since no processing is done by rateLimiters
     }
 
     @Override
@@ -55,12 +55,12 @@ public class PassThroughOutputRateLimiter extends OutputRateLimiter {
 
     @Override
     public void setNext(Processor processor) {
-        /*this method will not be used as there is no processors after an outputRateLimiter*/
+        //this method will not be used as there is no processors after an outputRateLimiter
     }
 
     @Override
     public void setToLast(Processor processor) {
-        /*this method will not be used as there is no processors after an outputRateLimiter*/
+        //this method will not be used as there is no processors after an outputRateLimiter
     }
 
     @Override

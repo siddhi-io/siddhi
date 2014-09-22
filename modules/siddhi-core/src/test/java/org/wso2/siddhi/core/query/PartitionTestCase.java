@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.exception.ValidatorException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
@@ -40,6 +39,7 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
+import sun.security.validator.ValidatorException;
 
 
 public class PartitionTestCase {
@@ -56,7 +56,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void PartitionTest() throws InterruptedException, ValidatorException {
+    public void PartitionTest() throws InterruptedException {
         log.info("partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -88,7 +88,7 @@ public class PartitionTestCase {
             public void receive(Event[] events) {
                 EventPrinter.print(events);
                 Assert.assertTrue("IBM".equals(events[0].getData(0)) || "WSO2".equals(events[0].getData(0)));
-                count++;
+                count = count+events.length;
                 eventArrived = true;
             }
         });
@@ -103,7 +103,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery1() throws InterruptedException, ValidatorException {
+    public void testPartitionQuery1() throws InterruptedException {
         log.info("Partition test1");
         SiddhiManager siddhiManager = new SiddhiManager();
         ExecutionPlan executionPlan = new ExecutionPlan("plan1");
@@ -111,7 +111,25 @@ public class PartitionTestCase {
         StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT).
                 annotation(Annotation.annotation("config").element("async", "true"));
         ;
+        StreamDefinition streamDefinition1 = StreamDefinition.id("1cseEventStream").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT).
+                annotation(Annotation.annotation("config").element("async", "true"));
+        ;
         executionPlan.defineStream(streamDefinition);
+        executionPlan.defineStream(streamDefinition1);
+
+        Query query1 = Query.query().annotation(Annotation.annotation("info").element("name", "query1"));
+        query1.from(InputStream.stream("1cseEventStream")
+
+
+        );
+        query1.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price",Expression.variable("price")).
+                        select("volume", Expression.variable("volume"))
+        );
+        query1.insertInto("cseEventStream");
+
 
         Partition partition = Partition.partition().
                 with("cseEventStream", Expression.variable("symbol"));
@@ -128,15 +146,16 @@ public class PartitionTestCase {
         query.select(
                 Selector.selector().
                         select("symbol", Expression.variable("symbol")).
-                        select("price", Expression.variable("price")).
+                        select("price", Expression.function("sum",Expression.variable("price"))).
                         select("volume", Expression.variable("volume"))
         );
         query.insertInto("OutStockStream");
 
         partition.addQuery(query);
 
-
+        executionPlan.addQuery(query1);
         executionPlan.addPartition(partition);
+
 
         ExecutionPlanRuntime executionRuntime = siddhiManager.addExecutionPlan(executionPlan);
 
@@ -144,12 +163,13 @@ public class PartitionTestCase {
         executionRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
-                count++;
+                EventPrinter.print(events);
+                count = count+events.length;
                 eventArrived = true;
             }
         });
 
-        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        InputHandler inputHandler = executionRuntime.getInputHandler("1cseEventStream");
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
         inputHandler.send(new Object[]{"WSO2", 70005.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
@@ -161,7 +181,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery2() throws InterruptedException, ValidatorException {
+    public void testPartitionQuery2() throws InterruptedException {
         log.info("Partition test2");
         SiddhiManager siddhiManager = new SiddhiManager();
         ExecutionPlan executionPlan = new ExecutionPlan("plan1");
@@ -202,7 +222,7 @@ public class PartitionTestCase {
         executionRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
-                count++;
+                count = count+events.length;
                 eventArrived = true;
             }
         });
@@ -217,7 +237,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery3() throws InterruptedException, ValidatorException {
+    public void testPartitionQuery3() throws InterruptedException {
         log.info("Partition test3");
 
 
@@ -266,7 +286,7 @@ public class PartitionTestCase {
         executionRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
-                count++;
+                count = count+events.length;
                 eventArrived = true;
             }
         });
@@ -284,7 +304,7 @@ public class PartitionTestCase {
 
 
     @Test
-    public void testPartitionQuery4() throws InterruptedException, ValidatorException {
+    public void testPartitionQuery4() throws InterruptedException {
         log.info("Partition test4");
         SiddhiManager siddhiManager = new SiddhiManager();
         ExecutionPlan executionPlan = new ExecutionPlan("plan1");
@@ -368,7 +388,7 @@ public class PartitionTestCase {
         executionRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
-                count++;
+                count = count+events.length;
                 eventArrived = true;
             }
         });
@@ -393,7 +413,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery5() throws InterruptedException, ValidatorException {
+    public void testPartitionQuery5() throws InterruptedException {
         log.info("Partition test5");
         SiddhiManager siddhiManager = new SiddhiManager();
         ExecutionPlan executionPlan = new ExecutionPlan("plan1");
@@ -507,7 +527,7 @@ public class PartitionTestCase {
         executionRuntime.addCallback("StockStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
-                stockStreamEventCount++;
+                stockStreamEventCount = stockStreamEventCount+events.length;
 
             }
         });
@@ -516,7 +536,7 @@ public class PartitionTestCase {
         executionRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
-                count++;
+                count = count+events.length;
                 eventArrived = true;
             }
         });
@@ -550,7 +570,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery6() throws InterruptedException, ValidatorException {
+    public void testPartitionQuery6() throws InterruptedException {
         log.info("Partition test6");
         SiddhiManager siddhiManager = new SiddhiManager();
         ExecutionPlan executionPlan = new ExecutionPlan("plan1");
@@ -625,7 +645,7 @@ public class PartitionTestCase {
         executionRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
-                count++;
+                count = count+events.length;
                 eventArrived = true;
             }
         });
@@ -649,4 +669,307 @@ public class PartitionTestCase {
 
     }
 
+    @Test
+    public void testPartitionQuery7() throws InterruptedException, ValidatorException {
+        log.info("Partition test7");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlan executionPlan = new ExecutionPlan("plan1");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT).
+                annotation(Annotation.annotation("config").element("async", "true"));
+
+        executionPlan.defineStream(streamDefinition);
+
+        Partition partition = Partition.partition().
+                with("cseEventStream", Expression.variable("symbol"));
+
+
+        Query query = Query.query().annotation(Annotation.annotation("info").element("name", "query1"));
+        query.from(InputStream.stream("cseEventStream"));
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.function("sum",Expression.variable("price")))
+        );
+        query.insertInto("OutStockStream");
+
+        partition.addQuery(query);
+
+
+        executionPlan.addPartition(partition);
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.addExecutionPlan(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count = count+events.length;
+                if (count == 1) {
+                    Assert.assertEquals(75.0, events[0].getData()[1]);
+                } else if (count == 2) {
+                    Assert.assertEquals(705.0, events[0].getData()[1]);
+                } else if (count == 3) {
+                    Assert.assertEquals(110.0, events[0].getData()[1]);
+                } else if (count == 4) {
+                    Assert.assertEquals(50.0,events[0].getData()[1]);
+                }
+                eventArrived = true;
+            }
+        });
+
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        inputHandler.send(new Object[]{"IBM", 75f, 100});
+        inputHandler.send(new Object[]{"WSO2", 705f, 100});
+        inputHandler.send(new Object[]{"IBM", 35f, 100});
+        inputHandler.send(new Object[]{"ORACLE", 50.0f, 100});
+        Thread.sleep(1000);
+        Assert.assertEquals(4, count);
+
+
+    }
+
+    @Test
+    public void testPartitionQuery8() throws InterruptedException, ValidatorException {
+        log.info("Partition test8");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlan executionPlan = new ExecutionPlan("plan1");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT).
+                annotation(Annotation.annotation("config").element("async", "true"));
+
+        executionPlan.defineStream(streamDefinition);
+
+        Partition partition = Partition.partition().
+                with("cseEventStream", Expression.variable("symbol"));
+
+
+        Query query = Query.query().annotation(Annotation.annotation("info").element("name", "query1"));
+        query.from(InputStream.stream("cseEventStream"));
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.function("max",Expression.variable("price")))
+        );
+        query.insertInto("OutStockStream");
+
+        partition.addQuery(query);
+
+
+        executionPlan.addPartition(partition);
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.addExecutionPlan(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count = count+events.length;
+                if (count == 1) {
+                    Assert.assertEquals(75.0f, events[0].getData()[1]);
+                } else if (count == 2) {
+                    Assert.assertEquals(705.0f, events[0].getData()[1]);
+                } else if (count == 3) {
+                    Assert.assertEquals(75.0f, events[0].getData()[1]);
+                } else if (count == 4) {
+                    Assert.assertEquals(50.0f,events[0].getData()[1]);
+                }
+                eventArrived = true;
+            }
+        });
+
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        inputHandler.send(new Object[]{"IBM", 75f, 100});
+        inputHandler.send(new Object[]{"WSO2", 705f, 100});
+        inputHandler.send(new Object[]{"IBM", 35f, 100});
+        inputHandler.send(new Object[]{"ORACLE", 50.0f, 100});
+        Thread.sleep(1000);
+        Assert.assertEquals(4, count);
+
+
+    }
+
+    @Test
+    public void testPartitionQuery9() throws InterruptedException, ValidatorException {
+        log.info("Partition test9");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlan executionPlan = new ExecutionPlan("plan1");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT).
+                annotation(Annotation.annotation("config").element("async", "true"));
+
+        executionPlan.defineStream(streamDefinition);
+
+        Partition partition = Partition.partition().
+                with("cseEventStream", Expression.variable("symbol"));
+
+
+        Query query = Query.query().annotation(Annotation.annotation("info").element("name", "query1"));
+        query.from(InputStream.stream("cseEventStream"));
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.function("min",Expression.variable("price")))
+        );
+        query.insertInto("OutStockStream");
+
+        partition.addQuery(query);
+
+
+        executionPlan.addPartition(partition);
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.addExecutionPlan(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count = count+events.length;
+                if (count == 1) {
+                    Assert.assertEquals(75.0f, events[0].getData()[1]);
+                } else if (count == 2) {
+                    Assert.assertEquals(705.0f, events[0].getData()[1]);
+                } else if (count == 3) {
+                    Assert.assertEquals(35.0f, events[0].getData()[1]);
+                } else if (count == 4) {
+                    Assert.assertEquals(50.0f,events[0].getData()[1]);
+                }
+                eventArrived = true;
+            }
+        });
+
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        inputHandler.send(new Object[]{"IBM", 75f, 100});
+        inputHandler.send(new Object[]{"WSO2", 705f, 100});
+        inputHandler.send(new Object[]{"IBM", 35f, 100});
+        inputHandler.send(new Object[]{"ORACLE", 50.0f, 100});
+        Thread.sleep(1000);
+        Assert.assertEquals(4, count);
+
+
+    }
+
+    @Test
+    public void testPartitionQuery10() throws InterruptedException, ValidatorException {
+        log.info("Partition test10");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlan executionPlan = new ExecutionPlan("plan1");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT).
+                annotation(Annotation.annotation("config").element("async", "true"));
+
+        executionPlan.defineStream(streamDefinition);
+
+        Partition partition = Partition.partition().
+                with("cseEventStream", Expression.variable("symbol"));
+
+
+        Query query = Query.query().annotation(Annotation.annotation("info").element("name", "query1"));
+        query.from(InputStream.stream("cseEventStream"));
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.function("avg",Expression.variable("price")))
+        );
+        query.insertInto("OutStockStream");
+
+        partition.addQuery(query);
+
+
+        executionPlan.addPartition(partition);
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.addExecutionPlan(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count = count+events.length;
+                if (count == 1) {
+                    Assert.assertEquals(75.0, events[0].getData()[1]);
+                } else if (count == 2) {
+                    Assert.assertEquals(705.0, events[0].getData()[1]);
+                } else if (count == 3) {
+                    Assert.assertEquals(55.0, events[0].getData()[1]);
+                } else if (count == 4) {
+                    Assert.assertEquals(50.0,events[0].getData()[1]);
+                }
+                eventArrived = true;
+            }
+        });
+
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        inputHandler.send(new Object[]{"IBM", 75f, 100});
+        inputHandler.send(new Object[]{"WSO2", 705f, 100});
+        inputHandler.send(new Object[]{"IBM", 35f, 100});
+        inputHandler.send(new Object[]{"ORACLE", 50.0f, 100});
+        Thread.sleep(1000);
+        Assert.assertEquals(4, count);
+
+
+    }
+
+    @Test
+    public void testPartitionQuery11() throws InterruptedException, ValidatorException {
+        log.info("Partition test11");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlan executionPlan = new ExecutionPlan("plan1");
+
+        StreamDefinition streamDefinition = StreamDefinition.id("cseEventStream").attribute("symbol", Attribute.Type.STRING).attribute("price", Attribute.Type.FLOAT).attribute("volume", Attribute.Type.INT).
+                annotation(Annotation.annotation("config").element("async", "true"));
+
+        executionPlan.defineStream(streamDefinition);
+
+        Partition partition = Partition.partition().
+                with("cseEventStream", Expression.variable("symbol"));
+
+
+        Query query = Query.query().annotation(Annotation.annotation("info").element("name", "query1"));
+        query.from(InputStream.stream("cseEventStream"));
+        query.select(
+                Selector.selector().
+                        select("entries", Expression.function("count",Expression.variable("symbol")))
+        );
+        query.insertInto("OutStockStream");
+
+        partition.addQuery(query);
+
+
+        executionPlan.addPartition(partition);
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.addExecutionPlan(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count = count+events.length;
+                if (count == 1) {
+                    Assert.assertEquals(1l, events[0].getData()[0]);
+                } else if (count == 2) {
+                    Assert.assertEquals(1l, events[0].getData()[0]);
+                } else if (count == 3) {
+                    Assert.assertEquals(2l, events[0].getData()[0]);
+                } else if (count == 4) {
+                    Assert.assertEquals(1l,events[0].getData()[0]);
+                }
+                eventArrived = true;
+            }
+        });
+
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        inputHandler.send(new Object[]{"IBM", 75f, 100});
+        inputHandler.send(new Object[]{"WSO2", 705f, 100});
+        inputHandler.send(new Object[]{"IBM", 35f, 100});
+        inputHandler.send(new Object[]{"ORACLE", 50.0f, 100});
+        Thread.sleep(1000);
+        Assert.assertEquals(4, count);
+
+
+    }
 }

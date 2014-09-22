@@ -37,6 +37,10 @@ public abstract class AbstractDefinition {
         this.id = id;
     }
 
+    public static Annotation annotation(String name) {
+        return new Annotation(name);
+    }
+
     public String getId() {
         return id;
     }
@@ -56,7 +60,7 @@ public abstract class AbstractDefinition {
     protected void checkAttribute(String attributeName) {
         for (Attribute attribute : attributeList) {
             if (attribute.getName().equals(attributeName)) {
-                throw new AttributeAlreadyExistException(attributeName + " is already defined for with type " + attribute.getType() + " for " + id);
+                throw new AttributeAlreadyExistException(attributeName + " is already defined for with type " + attribute.getType() + " for " + id + "; " + this.toString());
             }
         }
     }
@@ -67,7 +71,7 @@ public abstract class AbstractDefinition {
                 return attribute.getType();
             }
         }
-        throw new AttributeNotExistException("Cannot find attribute type as " + attributeName + " does not exist in " + id);
+        throw new AttributeNotExistException("Cannot find attribute type as " + attributeName + " does not exist in " + id + "; " + this.toString());
     }
 
     public int getAttributePosition(String attributeName) {
@@ -77,9 +81,8 @@ public abstract class AbstractDefinition {
                 return i;
             }
         }
-        throw new AttributeNotExistException("Cannot get attribute position as " + attributeName + " does not exist in " + id);
+        throw new AttributeNotExistException("Cannot get attribute position as " + attributeName + " does not exist in " + id + "; " + this.toString());
     }
-
 
     public String[] getAttributeNameArray() {
         int attributeListSize = attributeList.size();
@@ -88,10 +91,6 @@ public abstract class AbstractDefinition {
             attributeNameArray[i] = attributeList.get(i).getName();
         }
         return attributeNameArray;
-    }
-
-    public static Annotation annotation(String name) {
-        return new Annotation(name);
     }
 
     @Override
@@ -124,5 +123,19 @@ public abstract class AbstractDefinition {
         result = 31 * result + (attributeList != null ? attributeList.hashCode() : 0);
         result = 31 * result + (annotations != null ? annotations.hashCode() : 0);
         return result;
+    }
+
+
+    public boolean equalsIgnoreAnnotations(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractDefinition)) return false;
+
+        AbstractDefinition that = (AbstractDefinition) o;
+
+        if (attributeList != null ? !attributeList.equals(that.attributeList) : that.attributeList != null)
+            return false;
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+
+        return true;
     }
 }
