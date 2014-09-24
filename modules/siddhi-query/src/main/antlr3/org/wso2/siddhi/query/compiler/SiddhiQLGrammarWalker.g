@@ -67,7 +67,7 @@ executionPlan returns [List<ExecutionPlan> executionPlanList]
     @init{
         $executionPlanList=new ArrayList<ExecutionPlan>();
     }
-	: (^(PARTITION_DEFINITION definitionPartition {$executionPlanList.add($definitionPartition.partitionDefinition);}))*
+	: (^(PARTITION_fDEFINITION definitionPartition {$executionPlanList.add($definitionPartition.partitionDefinition);}))*
 	  (^(STREAM_DEFINITION definitionStream {$executionPlanList.add($definitionStream.streamDefinition);}))*
 	  (^(TABLE_DEFINITION definitionTable {$executionPlanList.add($definitionTable.tableDefinition);}))*
 	  (query {$executionPlanList.add($query.query);})*
@@ -81,7 +81,7 @@ definitionStream returns [StreamDefinition streamDefinition]
 	@init{
         $streamDefinition = QueryFactory.createStreamDefinition();
     }
-	:  ^(streamId {$streamDefinition.name($streamId.value);} (^(IN_ATTRIBUTE attributeName type {$streamDefinition.attribute($attributeName.value, $type.type);}))+)
+	:  ^(streamId {$streamDefinition.name($streamId.value);} (^(IN_ATTRIBUTE attributeName type arguments {$streamDefinition.attribute($attributeName.value, $type.type,$arguments.expressions);}))+)
 	;
 
 
@@ -337,6 +337,19 @@ parameters returns [Expression[\] expressions]
 	:  ^(PARAMETERS (parameter {$parameters::parameterlist.add($parameter.expression);})+)
 	;
 
+arguments returns [Expression[\] expressions]
+	scope{
+		List<Expression> parameterlist;
+	}
+	@init{
+		$arguments::parameterlist=new ArrayList<Expression>();
+	}
+	@after{
+		$expressions=$arguments::parameterlist.toArray(new Expression[$arguments::parameterlist.size()]);
+	}
+	:  ^(ARGUMENTS (parameter {$arguments::parameterlist.add($parameter.expression);})+)
+	;
+
 time returns [Expression expression]
 	: constant {$expression=$constant.expression;}
 	;
@@ -561,13 +574,14 @@ tableName returns [String value]
 stringVal returns [String value]
     : STRING_VAL {$value=$STRING_VAL.text;}
     ;
-    
+
 type returns [Attribute.Type type]
 	:'string' 	{$type=Attribute.Type.STRING;} 
 	|'int'  	{$type=Attribute.Type.INT;} 
 	|'long' 	{$type=Attribute.Type.LONG;} 
 	|'float' 	{$type=Attribute.Type.FLOAT;} 
 	|'double' 	{$type=Attribute.Type.DOUBLE;} 
-	|'bool' 	{$type=Attribute.Type.BOOL;} 
-	; 
+	|'bool' 	{$type=Attribute.Type.BOOL;}
+	|'nominal'  {$type=Attribute.Type.NOMINAL;}
+	;
 

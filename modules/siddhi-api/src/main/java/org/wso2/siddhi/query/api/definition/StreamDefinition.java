@@ -17,6 +17,11 @@
 */
 package org.wso2.siddhi.query.api.definition;
 
+import org.wso2.siddhi.query.api.expression.Expression;
+
+import java.util.Arrays;
+import java.util.List;
+
 public class StreamDefinition extends AbstractDefinition {
 
     public StreamDefinition name(String streamId) {
@@ -27,6 +32,25 @@ public class StreamDefinition extends AbstractDefinition {
     public StreamDefinition attribute(String attributeName, Attribute.Type type) {
         checkAttribute(attributeName);
         this.attributeList.add(new Attribute(attributeName, type));
+        return this;
+    }
+
+    public StreamDefinition attribute(String attributeName,Attribute.Type type, Expression[] attributeValues) {
+        if(attributeValues == null) {
+            return attribute(attributeName, type);
+        }else {
+            checkAttribute(attributeName);
+            this.attributeList.add(new Attribute(attributeName, attributeValues));
+        }
+        return this;
+    }
+    public StreamDefinition attribute(String attributeName,Attribute.Type type, String[] attributeValues) {
+        if(attributeValues == null) {
+            return attribute(attributeName, type);
+        }else {
+            checkAttribute(attributeName);
+            this.attributeList.add(new Attribute(attributeName, Arrays.asList(attributeValues)));
+        }
         return this;
     }
 

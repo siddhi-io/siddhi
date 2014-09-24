@@ -135,8 +135,6 @@ public interface Instance extends Copyable {
      * Returns an enumeration of all the attributes.
      *
      * @return enumeration of all the attributes
-     * @throws UnassignedDatasetException if the instance doesn't have access to a
-     *                                    dataset
      */
     public Enumeration<Attribute> enumerateAttributes();
 
@@ -146,8 +144,6 @@ public interface Instance extends Copyable {
      * @param inst another instance
      * @return true if the header of the given instance is equivalent to this
      * instance's header
-     * @throws UnassignedDatasetException if instance doesn't have access to any
-     *                                    dataset
      */
     public boolean equalHeaders(Instance inst);
 
@@ -155,7 +151,6 @@ public interface Instance extends Copyable {
      * Checks if the headers of two instances are equivalent. If not, then returns
      * a message why they differ.
      *
-     * @param dataset another instance
      * @return null if the header of the given instance is equivalent to this
      * instance's header, otherwise a message with details on why they
      * differ
@@ -167,8 +162,6 @@ public interface Instance extends Copyable {
      * set.
      *
      * @return true if instance has a missing value.
-     * @throws UnassignedDatasetException if instance doesn't have access to any
-     *                                    dataset
      */
     public boolean hasMissingValue();
 
@@ -241,8 +234,6 @@ public interface Instance extends Copyable {
      *
      * @return the number of class labels as an integer if the class attribute is
      * nominal, 1 otherwise.
-     * @throws UnassignedDatasetException if instance doesn't have access to any
-     *                                    dataset
      */
     public int numClasses();
 
@@ -268,9 +259,6 @@ public interface Instance extends Copyable {
      * vector of attribute values is performed before the value is set to be
      * missing.
      *
-     * @throws UnassignedClassException   if the class is not set
-     * @throws UnassignedDatasetException if the instance doesn't have access to a
-     *                                    dataset
      */
     public void setClassMissing();
 
@@ -282,9 +270,6 @@ public interface Instance extends Copyable {
      * @param value the new attribute value (If the corresponding attribute is
      *              nominal (or a string) then this is the new value's index as a
      *              double).
-     * @throws UnassignedClassException   if the class is not set
-     * @throws UnaddignedDatasetException if the instance doesn't have access to a
-     *                                    dataset
      */
     public void setClassValue(double value);
 
@@ -294,8 +279,6 @@ public interface Instance extends Copyable {
      *
      * @param value the new class value (If the class is a string attribute and
      *              the value can't be found, the value is added to the attribute).
-     * @throws UnassignedClassException   if the class is not set
-     * @throws UnassignedDatasetException if the dataset is not set
      * @throws IllegalArgumentException   if the attribute is not nominal or a
      *                                    string, or the value couldn't be found for a nominal attribute
      */
@@ -361,7 +344,6 @@ public interface Instance extends Copyable {
      * @param value    the new attribute value (If the attribute is a string
      *                 attribute and the value can't be found, the value is added to the
      *                 attribute).
-     * @throws UnassignedDatasetException if the dataset is not set
      * @throws IllegalArgumentException   if the selected attribute is not nominal
      *                                    or a string, or the supplied value couldn't be found for a
      *                                    nominal attribute
@@ -412,8 +394,6 @@ public interface Instance extends Copyable {
      * @return the corresponding relation as an Instances object
      * @throws IllegalArgumentException   if the attribute is not a relation-valued
      *                                    attribute
-     * @throws UnassignedDatasetException if the instance doesn't belong to a
-     *                                    dataset.
      */
     public Instances relationalValue(int attIndex);
 
@@ -424,8 +404,6 @@ public interface Instance extends Copyable {
      * @return the corresponding relation as an Instances object
      * @throws IllegalArgumentException   if the attribute is not a relation-valued
      *                                    attribute
-     * @throws UnassignedDatasetException if the instance doesn't belong to a
-     *                                    dataset.
      */
     public Instances relationalValue(Attribute att);
 
@@ -437,8 +415,6 @@ public interface Instance extends Copyable {
      * @return the value as a string
      * @throws IllegalArgumentException   if the attribute is not a nominal, string,
      *                                    date, or relation-valued attribute.
-     * @throws UnassignedDatasetException if the instance doesn't belong to a
-     *                                    dataset.
      */
     public String stringValue(int attIndex);
 
@@ -450,8 +426,6 @@ public interface Instance extends Copyable {
      * @return the value as a string
      * @throws IllegalArgumentException   if the attribute is not a nominal, string,
      *                                    date, or relation-valued attribute.
-     * @throws UnassignedDatasetException if the instance doesn't belong to a
-     *                                    dataset.
      */
     public String stringValue(Attribute att);
 

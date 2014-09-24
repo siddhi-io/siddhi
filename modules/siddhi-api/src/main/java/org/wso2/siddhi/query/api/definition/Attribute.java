@@ -17,6 +17,9 @@
 */
 package org.wso2.siddhi.query.api.definition;
 
+import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.Variable;
+import org.wso2.siddhi.query.api.expression.constant.StringConstant;
 import org.wso2.siddhi.query.api.utils.CommonUtils;
 import org.wso2.siddhi.query.api.utils.SerializedObject;
 
@@ -75,11 +78,37 @@ public class Attribute {
             type = Type.NOMINAL;
         }
     }
+
+    public Attribute(String name, Expression[] expressions) {
+        this.name = name;
+        ArrayList<String> attributeValues = new ArrayList<String>();
+        for(Expression e:expressions){
+            if(e instanceof Variable){
+                attributeValues.add(((Variable)e).getAttributeName());
+            }else {
+                throw new RuntimeException("Bad Arguments !");
+            }
+        }
+        attributeInfo = new NominalAttributeInfo(attributeValues, name);
+        if (attributeValues == null) {
+            this.type = Type.STRING;
+
+            // Make sure there is at least one value so that string attribute
+            // values are always represented when output as part of a sparse instance.
+            addStringValue(DUMMY_STRING_VAL);
+        } else {
+            type = Type.NOMINAL;
+        }
+    }
     public Attribute(String name) {
         this.name = name;
         attributeInfo = new NominalAttributeInfo(null, name);
         this.type = Type.STRING;
         addStringValue(DUMMY_STRING_VAL);
+    }
+
+    public boolean isRelationValued() {
+        return (type==Type.RELATIONAL);
     }
 
     public enum Type {
@@ -310,5 +339,27 @@ public class Attribute {
             }
             return (String) val;
         }
+    }
+    /**
+     * Adds an attribute value.
+     *
+     * @param value the attribute value
+     */
+    // @ requires value != null;
+    // @ ensures m_Values.size() == \old(m_Values.size()) + 1;
+    public final void forceAddValue(String value) {
+
+        Object store = value;
+        if (value.length() > STRING_COMPRESS_THRESHOLD) {
+            try {
+                store = new SerializedObject(value, true);
+            } catch (Exception ex) {
+                System.err.println("Couldn't compress string attribute value -"
+                        + " storing uncompressed.");
+            }
+        }
+        ((NominalAttributeInfo)attributeInfo).m_Values.add(store);
+        ((NominalAttributeInfo)attributeInfo).m_Hashtable.
+                put(store, new Integer(((NominalAttributeInfo)attributeInfo).m_Values.size() - 1));
     }
 }

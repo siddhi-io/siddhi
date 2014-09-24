@@ -21,6 +21,12 @@ import org.junit.Test;
 import org.wso2.siddhi.query.api.exception.AttributeAlreadyExistException;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.Variable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class DefineStreamTestCase {
 
@@ -33,6 +39,17 @@ public class DefineStreamTestCase {
 
     }
 
+    @Test
+    public void testCreatingNominalStreamDefinition() {
+        StreamDefinition streamDefinition = QueryFactory.createStreamDefinition();
+        String[] strings = new String[]{"sunny", "overcast", "rainy"};
+        Variable[] expressions = new Variable[3];
+        for(int i=0;i<3;i++) {
+            expressions[i] = new Variable(strings[i]);
+        }
+        streamDefinition.name("weather").attribute("outlook",Attribute.Type.NOMINAL,expressions);
+
+    }
     @Test(expected = AttributeAlreadyExistException.class)
     public void testCreatingStreamWithDuplicateAttribute() {
         StreamDefinition streamDefinition = QueryFactory.createStreamDefinition();

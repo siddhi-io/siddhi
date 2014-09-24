@@ -32,6 +32,7 @@ tokens {
   QUERY;
   FUNCTION;
   PARAMETERS;
+  ARGUMENTS;
   ATTRIBUTE;
   IN_ATTRIBUTE;
   CONSTANT;
@@ -100,7 +101,8 @@ definitionStreamFinal
     ;
 
 definitionStream 
-	:'define' 'stream' streamId '(' attributeName type (',' attributeName type )* ')'  ->  ^(streamId (^(IN_ATTRIBUTE attributeName type))+)
+	:'define' 'stream' streamId '(' attributeName type arguments ((',' attributeName type)|(',' attributeName type arguments))* ')'  ->  ^(streamId (^(IN_ATTRIBUTE attributeName type arguments))+)
+	|'define' 'stream' streamId '(' attributeName type  ((',' attributeName type)|(',' attributeName type arguments ))* ')'  ->  ^(streamId (^(IN_ATTRIBUTE attributeName type arguments))+)
 	;
 
 definitionPartitionFinal
@@ -307,6 +309,10 @@ parameters
 	: parameter (',' parameter)*  ->  ^(PARAMETERS parameter+)
 	;
 
+arguments
+	: '('parameter (',' parameter)*')'  ->  ^(ARGUMENTS parameter+)
+	;
+
 time
 	: constant
 	;
@@ -437,6 +443,8 @@ attributeName
 	: id  ->  ^( ATTRIBUTE id)
 	;
 
+
+
 join
 	: 'left''outer' 'join' ->  ^('join' ^('outer' 'left'))
 	| 'right' 'outer' 'join' -> ^('join' ^('outer' 'right'))
@@ -519,13 +527,15 @@ tableName: id;
 
 dataSourceName : id;
 
+attributeValue: id;
+
 stringVal: STRING_VAL;
 
 tableParamName : stringVal;
 
 tableParamValue : stringVal;
 
-type: 'string' |'int' |'long' |'float' |'double' |'bool';
+type: 'string' |'int' |'long' |'float' |'double' |'bool '|'nominal';
 
 POSITIVE_INT_VAL:  NUM('I'|'i')?;
 

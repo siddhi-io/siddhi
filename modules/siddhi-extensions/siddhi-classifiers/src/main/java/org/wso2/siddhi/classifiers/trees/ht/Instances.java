@@ -22,6 +22,7 @@ package org.wso2.siddhi.classifiers.trees.ht;
 
 import org.wso2.siddhi.classifiers.trees.ht.exception.UnassignedClassException;
 import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
+import org.wso2.siddhi.core.util.SiddhiEnumeration;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.io.FileReader;
@@ -1793,6 +1794,21 @@ public class Instances extends AbstractList<Instance> implements Serializable {
             merged.add(first.instance(i).mergeInstance(second.instance(i)));
         }
         return merged;
+    }
+
+    public/* @non_null pure@ */Enumeration<Attribute> enumerateAttributes() {
+
+        return new SiddhiEnumeration<Attribute>(m_Attributes, m_ClassIndex);
+    }
+
+    /**
+     * Returns an enumeration of all instances in the dataset.
+     *
+     * @return enumeration of all instances in the dataset
+     */
+    public/* @non_null pure@ */Enumeration<Instance> enumerateInstances() {
+
+        return new SiddhiEnumeration<Instance>(m_Instances);
     }
 }
 

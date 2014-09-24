@@ -33,5 +33,17 @@ public class DefineStreamTestCase {
                             streamDefinition.toString());
     }
 
+    @Test
+    public void Test3() throws RecognitionException, SiddhiParserException {
+        StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("define stream `define` ( `string` nominal(test1,test2), price nominal(high,low,average), volume nominal(high,low) );");
+        String[] priceValues = {"high","low","average"};
+        Assert.assertEquals(new StreamDefinition().
+                        name("define").
+                        attribute("string", Attribute.Type.NOMINAL).
+                        attribute("price", Attribute.Type.NOMINAL,priceValues).
+                        attribute("volume", Attribute.Type.NOMINAL).toString(),
+                streamDefinition.toString());
+    }
+
 
 }

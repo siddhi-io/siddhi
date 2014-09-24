@@ -20,5 +20,27 @@
 */
 package org.wso2.siddhi.classifiers.trees.ht.exception;
 
-public class UnassignedDatasetException {
+public class UnassignedDatasetException extends RuntimeException {
+
+    /** for serialization */
+    private static final long serialVersionUID = -9000116786626328854L;
+
+    /**
+     * Creates a new UnassignedDatasetException with no message.
+     *
+     */
+    public UnassignedDatasetException() {
+
+        super();
+    }
+
+    /**
+     * Creates a new UnassignedDatasetException.
+     *
+     * @param message the reason for raising an exception.
+     */
+    public UnassignedDatasetException(String message) {
+
+        super(message);
+    }
 }
