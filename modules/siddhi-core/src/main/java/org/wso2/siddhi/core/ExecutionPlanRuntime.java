@@ -20,6 +20,7 @@
 package org.wso2.siddhi.core;
 
 import org.wso2.siddhi.core.config.SiddhiContext;
+import org.wso2.siddhi.core.exception.DifferentDefinitionAlreadyExistException;
 import org.wso2.siddhi.core.exception.QueryNotExistException;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
@@ -58,6 +59,7 @@ public class ExecutionPlanRuntime {
     }
 
     public InputHandler defineStream(StreamDefinition streamDefinition) {
+        validateStreamDefinition(streamDefinition);
         InputHandler inputHandler = inputHandlerManager.getInputHandler(streamDefinition.getId());
         if (inputHandler == null) {
             streamDefinitionMap.put(streamDefinition.getId(), streamDefinition);
@@ -71,6 +73,14 @@ public class ExecutionPlanRuntime {
             return inputHandlerManager.setIfAbsentInputHandler(streamDefinition.getId(), inputHandler);
         } else {
             return inputHandler;
+        }
+    }
+
+    private void validateStreamDefinition(StreamDefinition streamDefinition) {
+        if (streamDefinitionMap.containsKey(streamDefinition.getId()) && !(streamDefinitionMap.get(streamDefinition.getId())
+                .equalsIgnoreAnnotations(streamDefinition))) {
+            throw new DifferentDefinitionAlreadyExistException("Different stream definition same as output stream definition is already " +
+                    "exist under stream name " + streamDefinition.getId());
         }
     }
 
@@ -89,7 +99,6 @@ public class ExecutionPlanRuntime {
         OutputCallback outputCallback = OutputParser.constructOutputCallback(queryRuntime.getQuery().getOutputStream(),
                 streamJunctionMap, queryRuntime.getOutputStreamDefinition(), siddhiContext);
         queryRuntime.setOutputCallback(outputCallback);
-        queryRuntime.getOutputRateManager().setOutputCallback(outputCallback);
         if (outputCallback != null && outputCallback instanceof InsertIntoStreamCallback) {
             defineStream(((InsertIntoStreamCallback) outputCallback).getOutputStreamDefinition());
         }
@@ -108,7 +117,9 @@ public class ExecutionPlanRuntime {
     }
 
     public void addCallback(String queryName, QueryCallback callback) {
+        callback.setContext(siddhiContext);
         QueryRuntime queryRuntime = queryProcessorMap.get(queryName);
+        callback.setQuery(queryRuntime.getQuery());
         if (queryRuntime == null) {
             throw new QueryNotExistException("No query fund for " + queryName);
         }

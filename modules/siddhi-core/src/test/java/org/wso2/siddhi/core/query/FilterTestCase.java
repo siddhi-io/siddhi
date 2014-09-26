@@ -39,7 +39,6 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
-import sun.security.validator.ValidatorException;
 
 public class FilterTestCase {
     static final Logger log = Logger.getLogger(FilterTestCase.class);
@@ -62,20 +61,20 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[70 > price] select symbol,price insert into outputStream ;";
         String query2 = "@info(name = 'query2') from outputStream[70 > price] select symbol,price insert into outputStream2 ;";
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query+query2);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query + query2);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 Assert.assertTrue("WSO2".equals(inEvents[0].getData(0)));
-                count= count+inEvents.length;
+                count = count + inEvents.length;
                 eventArrived = true;
             }
 
         });
 
-        executionPlanRuntime.addCallback("query2", new QueryCallback(null, "query2", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -104,14 +103,14 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true')define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[150 > volume] select symbol,price insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 Assert.assertTrue("IBM".equals(inEvents[0].getData(0)));
-                count= count+inEvents.length;
+                count = count + inEvents.length;
                 eventArrived = true;
             }
 
@@ -134,15 +133,15 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream[70 > price] select symbol,price insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 Assert.assertTrue("WSO2".equals(inEvents[0].getData(0)));
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
 
         });
@@ -165,13 +164,13 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 50f] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
@@ -192,13 +191,13 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 50l] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
@@ -220,17 +219,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 50l] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60});
         inputHandler.send(new Object[]{"WSO2", 70f, 40});
         inputHandler.send(new Object[]{"WSO2", 44f, 200});
@@ -248,17 +247,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 50l] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -276,17 +275,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume float);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 50l] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60f});
         inputHandler.send(new Object[]{"WSO2", 70f, 40f});
         inputHandler.send(new Object[]{"WSO2", 44f, 200f});
@@ -304,17 +303,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume float);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 50f] select symbol,price insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60f});
         inputHandler.send(new Object[]{"WSO2", 70f, 40f});
         inputHandler.send(new Object[]{"WSO2", 44f, 200f});
@@ -332,17 +331,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 50d] select symbol,price insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -360,17 +359,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 50f] select symbol,price insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -388,17 +387,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 45] select symbol,price insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -416,17 +415,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume float);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 50d] select symbol,price insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60f});
         inputHandler.send(new Object[]{"WSO2", 70f, 40f});
         inputHandler.send(new Object[]{"WSO2", 44f, 200f});
@@ -444,17 +443,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume float);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 45] select symbol,price insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60f});
         inputHandler.send(new Object[]{"WSO2", 70f, 40f});
         inputHandler.send(new Object[]{"WSO2", 44f, 200f});
@@ -472,17 +471,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume float, quantity int);";
         String query = "@info(name = 'query1') from cseEventStream[quantity > 4d] select symbol,price,quantity insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 5});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 200d, 4});
@@ -500,17 +499,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 50d] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l});
@@ -535,17 +534,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l});
@@ -564,10 +563,10 @@ public class FilterTestCase {
 
         Query query = new Query();
         query.from(InputStream.stream("cseEventStream").
-                filter(Expression.compare(Expression.value(70),
-                        Compare.Operator.GREATER_THAN,
-                        Expression.variable("volume"))
-                )
+                        filter(Expression.compare(Expression.value(70),
+                                        Compare.Operator.GREATER_THAN,
+                                        Expression.variable("volume"))
+                        )
         );
         query.annotation(Annotation.annotation("info").element("name", "query1"));
         query.select(
@@ -580,19 +579,19 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        QueryCallback queryCallback = new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        QueryCallback queryCallback = new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 Assert.assertTrue("WSO2".equals(inEvents[0].getData(0)));
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
 
         };
         executionPlanRuntime.addCallback("query1", queryCallback);
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.6f, 50});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
         inputHandler.send(new Object[]{"WSO2", 57.6f, 30});
@@ -612,10 +611,10 @@ public class FilterTestCase {
 
         Query query = new Query();
         query.from(InputStream.stream("cseEventStream").
-                filter(Expression.compare(Expression.variable("symbol"),
-                        Compare.Operator.CONTAINS,
-                        Expression.value("WS"))
-                )
+                        filter(Expression.compare(Expression.variable("symbol"),
+                                        Compare.Operator.CONTAINS,
+                                        Expression.value("WS"))
+                        )
         );
         query.annotation(Annotation.annotation("info").element("name", "query1"));
         query.select(
@@ -629,16 +628,16 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100l});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100l});
         inputHandler.send(new Object[]{"WSO2", 57.6f, 100l});
@@ -657,10 +656,10 @@ public class FilterTestCase {
 
         Query query = new Query();
         query.from(InputStream.stream("cseEventStream").
-                filter(Expression.compare(Expression.variable("volume"),
-                        Compare.Operator.LESS_THAN,
-                        Expression.value(100))
-                )
+                        filter(Expression.compare(Expression.variable("volume"),
+                                        Compare.Operator.LESS_THAN,
+                                        Expression.value(100))
+                        )
         );
         query.annotation(Annotation.annotation("info").element("name", "query1"));
         query.select(
@@ -674,18 +673,18 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 Assert.assertEquals(10l, ((Long) inEvents[0].getData(2)).longValue());
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.6f, 103l});
         inputHandler.send(new Object[]{"WSO2", 57.6f, 10l});
         Thread.sleep(100);
@@ -702,18 +701,18 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume != 100] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 Assert.assertEquals(10l, ((Long) inEvents[0].getData(2)).longValue());
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100l});
         inputHandler.send(new Object[]{"WSO2", 57.6f, 10l});
         Thread.sleep(100);
@@ -731,19 +730,19 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[volume > 12l and price < 56] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 Assert.assertEquals(100d, inEvents[0].getData(2));
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100d});
         inputHandler.send(new Object[]{"WSO2", 57.6f, 10d});
         Thread.sleep(100);
@@ -760,17 +759,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[symbol != 'WSO2' and volume != 55l and price != 45f ] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 45f, 100l});
         inputHandler.send(new Object[]{"IBM", 35f, 50l});
 
@@ -788,17 +787,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume != 50f] select symbol,price insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 45f, 100l});
         inputHandler.send(new Object[]{"IBM", 35f, 50l});
 
@@ -817,17 +816,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[price != 35l] select symbol,price insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 45f, 100l});
         inputHandler.send(new Object[]{"IBM", 35f, 50l});
 
@@ -846,17 +845,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume != 100 and volume != 70d] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100l});
         inputHandler.send(new Object[]{"IBM", 57.6f, 10l});
         Thread.sleep(100);
@@ -874,17 +873,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[price != 53.6d or price != 87] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100l});
         inputHandler.send(new Object[]{"IBM", 57.6f, 10l});
         Thread.sleep(100);
@@ -901,17 +900,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream[volume != 40f and volume != 400] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50});
         inputHandler.send(new Object[]{"WSO2", 50.5f, 400});
@@ -930,24 +929,24 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream[volume != 40d and volume != 400d] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50});
         inputHandler.send(new Object[]{"WSO2", 50.5f, 400});
 
         Thread.sleep(100);
         Assert.assertEquals(1, count);
-   }
+    }
 
     @Test
     public void testFilterQuery30() throws InterruptedException {
@@ -957,17 +956,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, available bool);";
         String query = "@info(name = 'query1') from cseEventStream[available != true ] select symbol,price,available insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"IBM", 55.6f, true});
         inputHandler.send(new Object[]{"WSO2", 57.6f, false});
         Thread.sleep(100);
@@ -985,10 +984,10 @@ public class FilterTestCase {
 
         Query query = new Query();
         query.from(InputStream.stream("cseEventStream").
-                filter(Expression.compare(Expression.variable("available"),
-                        Compare.Operator.NOT_EQUAL,
-                        Expression.value(true))
-                )
+                        filter(Expression.compare(Expression.variable("available"),
+                                        Compare.Operator.NOT_EQUAL,
+                                        Expression.value(true))
+                        )
         );
         query.annotation(Annotation.annotation("info").element("name", "query1"));
         query.select(
@@ -1002,18 +1001,18 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 Assert.assertEquals("WSO2", inEvents[0].getData(0).toString());
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"IBM", 55.6f, true});
         inputHandler.send(new Object[]{"WSO2", 57.6f, false});
         Thread.sleep(100);
@@ -1030,17 +1029,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream[price != 50 and volume != 50l] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50});
 
@@ -1057,17 +1056,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[volume != 50d] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40d});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50d});
 
@@ -1084,17 +1083,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[volume != 50f  or volume != 50] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40d});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50d});
 
@@ -1111,17 +1110,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[volume != 50l] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40d});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50d});
 
@@ -1139,10 +1138,10 @@ public class FilterTestCase {
 
         Query query = new Query();
         query.from(InputStream.stream("cseEventStream").
-                filter(Expression.compare(Expression.variable("available"),
-                        Compare.Operator.EQUAL,
-                        Expression.value(true))
-                )
+                        filter(Expression.compare(Expression.variable("available"),
+                                        Compare.Operator.EQUAL,
+                                        Expression.value(true))
+                        )
         );
         query.annotation(Annotation.annotation("info").element("name", "query1"));
         query.select(
@@ -1156,18 +1155,18 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 Assert.assertEquals("IBM", inEvents[0].getData(0).toString());
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"IBM", 55.6f, true});
         inputHandler.send(new Object[]{"WSO2", 57.6f, false});
         Thread.sleep(100);
@@ -1184,17 +1183,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[volume == 50d] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40d});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50d});
 
@@ -1211,17 +1210,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[symbol == 'IBM'] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40d});
         inputHandler.send(new Object[]{"IBM", 53.5f, 50d});
 
@@ -1238,17 +1237,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[price <= 53.5f] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40d});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50d});
 
@@ -1265,17 +1264,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume double);";
         String query = "@info(name = 'query1') from cseEventStream[price <= 54] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40d});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50d});
 
@@ -1292,17 +1291,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream[volume <= 40] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50});
 
@@ -1319,17 +1318,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream[price >= 54] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50});
 
@@ -1346,17 +1345,17 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume >= 50] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40l});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50l});
 
@@ -1373,7 +1372,7 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume >= 50 and volume] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -1385,7 +1384,7 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[price and volume >= 50 ] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -1397,7 +1396,7 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume >= 50 or volume] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -1409,7 +1408,7 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[price or volume >= 50 ] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -1434,7 +1433,7 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
     }
 
@@ -1460,7 +1459,7 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
     }
 
@@ -1473,7 +1472,7 @@ public class FilterTestCase {
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume] select symbol,price,volume insert into outputStream ;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
     }
 
     @Test
@@ -1492,17 +1491,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -1528,17 +1527,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -1564,17 +1563,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -1599,17 +1598,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -1634,17 +1633,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -1669,17 +1668,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -1704,17 +1703,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d});
         inputHandler.send(new Object[]{"WSO2", 60f, 200d});
@@ -1739,17 +1738,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 5});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 200d, 4});
@@ -1774,17 +1773,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 5});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 200d, 4});
@@ -1809,17 +1808,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 5});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 200d, 4});
@@ -1844,17 +1843,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 5});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 200d, 4});
@@ -1879,17 +1878,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l, 5});
         inputHandler.send(new Object[]{"WSO2", 70f, 60l, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 200l, 4});
@@ -1914,17 +1913,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l});
@@ -1949,17 +1948,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l});
@@ -1984,17 +1983,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l});
@@ -2021,17 +2020,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l});
@@ -2058,17 +2057,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50d, 60l});
         inputHandler.send(new Object[]{"WSO2", 70d, 40l});
         inputHandler.send(new Object[]{"WSO2", 44d, 200l});
@@ -2093,17 +2092,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50d, 60l});
         inputHandler.send(new Object[]{"WSO2", 70d, 40l});
         inputHandler.send(new Object[]{"WSO2", 44d, 200l});
@@ -2128,17 +2127,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50d, 60l});
         inputHandler.send(new Object[]{"WSO2", 70d, 40l});
         inputHandler.send(new Object[]{"WSO2", 44d, 200l});
@@ -2163,17 +2162,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 5});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 300d, 4});
@@ -2198,17 +2197,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l});
@@ -2234,17 +2233,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 60d, 5});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 300d, 4});
@@ -2269,17 +2268,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 300d, 4});
@@ -2304,17 +2303,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 300d, 4});
@@ -2340,17 +2339,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 300d, 4});
@@ -2375,17 +2374,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l});
@@ -2410,17 +2409,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l});
@@ -2445,17 +2444,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l});
@@ -2480,17 +2479,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 60l, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60l, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 300l, 4});
@@ -2519,17 +2518,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -2554,17 +2553,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -2589,17 +2588,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50d, 60d});
         inputHandler.send(new Object[]{"WSO2", 70d, 40d});
         inputHandler.send(new Object[]{"WSO2", 44d, 200d});
@@ -2625,17 +2624,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 300d, 4});
@@ -2660,17 +2659,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300d, 4});
@@ -2695,17 +2694,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300d, 4});
@@ -2730,17 +2729,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 50l, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 20l, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300l, 4});
@@ -2765,17 +2764,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -2800,17 +2799,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -2835,17 +2834,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
@@ -2870,17 +2869,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
@@ -2905,17 +2904,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
@@ -2940,17 +2939,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l, 56});
@@ -2975,17 +2974,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l, 56});
@@ -3014,17 +3013,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -3049,17 +3048,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -3084,17 +3083,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50d, 60d});
         inputHandler.send(new Object[]{"WSO2", 70d, 40d});
         inputHandler.send(new Object[]{"WSO2", 44d, 200d});
@@ -3120,17 +3119,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 300d, 4});
@@ -3155,17 +3154,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300d, 4});
@@ -3190,17 +3189,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300d, 4});
@@ -3225,17 +3224,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 500f, 50l, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 20l, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300l, 4});
@@ -3260,17 +3259,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -3295,17 +3294,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
@@ -3330,17 +3329,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
@@ -3365,17 +3364,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
@@ -3400,17 +3399,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
@@ -3435,17 +3434,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l, 56});
@@ -3470,17 +3469,17 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60l, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40l, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200l, 56});
@@ -3499,10 +3498,10 @@ public class FilterTestCase {
 
         Query query = new Query();
         query.from(InputStream.stream("cseEventStream").
-                filter(Expression.compare(Expression.variable("price"),
-                        Compare.Operator.CONTAINS,
-                        Expression.value("WS"))
-                )
+                        filter(Expression.compare(Expression.variable("price"),
+                                        Compare.Operator.CONTAINS,
+                                        Expression.value("WS"))
+                        )
         );
         query.annotation(Annotation.annotation("info").element("name", "query1"));
         query.select(
@@ -3516,7 +3515,7 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
     }
 
@@ -3545,9 +3544,9 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 5, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -3559,8 +3558,8 @@ public class FilterTestCase {
 
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
-        inputHandler.send(new Object[]{"WSO2", 55.5f, 100d, 5,10l});
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        inputHandler.send(new Object[]{"WSO2", 55.5f, 100d, 5, 10l});
 
         Thread.sleep(100);
 
@@ -3594,9 +3593,9 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 5, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
 
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -3608,11 +3607,10 @@ public class FilterTestCase {
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
-        inputHandler.send(new Object[]{"WSO2", 55.5f, 100d, 5,50l});
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        inputHandler.send(new Object[]{"WSO2", 55.5f, 100d, 5, 50l});
 
         Thread.sleep(100);
-
 
 
     }
@@ -3646,9 +3644,9 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 5, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
 
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -3661,8 +3659,8 @@ public class FilterTestCase {
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
-        inputHandler.send(new Object[]{"WSO2", 60f, 100d,100,70l});
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        inputHandler.send(new Object[]{"WSO2", 60f, 100d, 100, 70l});
 
         Thread.sleep(100);
 
@@ -3697,9 +3695,9 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 5, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
 
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -3711,11 +3709,10 @@ public class FilterTestCase {
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
-        inputHandler.send(new Object[]{"WSO2", 55.5f, 100d, 5,3l});
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        inputHandler.send(new Object[]{"WSO2", 55.5f, 100d, 5, 3l});
 
         Thread.sleep(100);
-
 
 
     }
@@ -3749,9 +3746,9 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 5, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
 
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -3763,11 +3760,10 @@ public class FilterTestCase {
             }
 
         });
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 55.5f, 101d, 5, 7l});
 
         Thread.sleep(100);
-
 
 
     }
@@ -3791,20 +3787,20 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
                 if (count == 1) {
                     Assert.assertEquals(50.0f, inEvents[0].getData()[1]);
                 }
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60l, 6});
         Thread.sleep(100);
         Assert.assertEquals(1, count);
@@ -3828,19 +3824,19 @@ public class FilterTestCase {
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(cseEventStream);
         executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(executionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(query, "query1", 3, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
                 Assert.fail("No events should occur");
 
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60l, 6});
         Thread.sleep(100);
         Assert.assertEquals(0, count);
@@ -3848,25 +3844,25 @@ public class FilterTestCase {
     }
 
     @Test
-    public void FilterTest116() throws InterruptedException, ValidatorException {
+    public void FilterTest116() throws InterruptedException {
         log.info("filter test116");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream select symbol,price+5 as price insert into outputStream ;";
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
                 eventArrived = true;
             }
 
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"IBM", 700f, 100l});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
         inputHandler.send(new Object[]{"IBM", 700f, 100l});
@@ -3876,25 +3872,25 @@ public class FilterTestCase {
     }
 
     @Test
-    public void FilterTest117() throws InterruptedException, ValidatorException {
+    public void FilterTest117() throws InterruptedException {
         log.info("filter test116");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream select symbol,sum(price)+5 as price insert into outputStream ;";
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
                 eventArrived = true;
             }
 
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"IBM", 700f, 100l});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
         inputHandler.send(new Object[]{"IBM", 700f, 100l});
@@ -3904,25 +3900,25 @@ public class FilterTestCase {
     }
 
     @Test
-    public void FilterTest118() throws InterruptedException, ValidatorException {
+    public void FilterTest118() throws InterruptedException {
         log.info("filter test118");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream select volume, sum(price) as price group by volume insert into outputStream ;";
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
                 eventArrived = true;
             }
 
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"IBM", 700f, 100l});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
         inputHandler.send(new Object[]{"IBM", 700f, 100l});
@@ -3932,25 +3928,25 @@ public class FilterTestCase {
     }
 
     @Test
-    public void FilterTest119() throws InterruptedException, ValidatorException {
+    public void FilterTest119() throws InterruptedException {
         log.info("filter test119");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream select symbol,sum(price)+10 as price group by symbol having price > 880 insert into outputStream ;";
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
                 eventArrived = true;
             }
 
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"IBM", 700f, 100l});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
         inputHandler.send(new Object[]{"IBM", 700f, 100l});
@@ -3960,25 +3956,25 @@ public class FilterTestCase {
     }
 
     @Test
-    public void FilterTest120() throws InterruptedException, ValidatorException {
+    public void FilterTest120() throws InterruptedException {
         log.info("filter test120");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream select symbol,sum(price) as sumprice group by symbol having sumprice > 880 insert into outputStream ;";
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.addExecutionPlan(cseEventStream+query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback(null, "query1", 2, siddhiManager.getSiddhiContext()) {
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count= count+inEvents.length;
+                count = count + inEvents.length;
                 eventArrived = true;
             }
 
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");         
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         inputHandler.send(new Object[]{"IBM", 700f, 100l});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
         inputHandler.send(new Object[]{"IBM", 700f, 100l});

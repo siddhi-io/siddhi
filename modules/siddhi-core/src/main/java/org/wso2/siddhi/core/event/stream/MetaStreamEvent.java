@@ -18,7 +18,6 @@
 package org.wso2.siddhi.core.event.stream;
 
 import org.wso2.siddhi.core.event.ComplexMetaEvent;
-import org.wso2.siddhi.core.query.selector.attribute.ComplexAttribute;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -31,12 +30,12 @@ import java.util.List;
  * and StreamEvent. This will be eventually
  * used to update variable positions on Variable executors
  */
-public class MetaStreamEvent implements ComplexMetaEvent{
+public class MetaStreamEvent implements ComplexMetaEvent {
     private List<Attribute> beforeWindowData = new ArrayList<Attribute>();
     private List<Attribute> afterWindowData = null;
     private List<Attribute> outputData = null;
-    private AbstractDefinition definition;      //check Abstract/Stream Definition
-    private String referenceId;
+    private AbstractDefinition inputDefinition;
+    private String inputReferenceId;
 
     public List<Attribute> getBeforeWindowData() {
         return beforeWindowData;
@@ -100,20 +99,20 @@ public class MetaStreamEvent implements ComplexMetaEvent{
         outputData.add(attribute);
     }
 
-    public AbstractDefinition getDefinition() {
-        return definition;
+    public AbstractDefinition getInputDefinition() {
+        return inputDefinition;
     }
 
-    public void setDefinition(AbstractDefinition definition) {
-        this.definition = definition;
+    public void setInputDefinition(AbstractDefinition inputDefinition) {
+        this.inputDefinition = inputDefinition;
     }
 
-    public String getReferenceId() {
-        return referenceId;
+    public String getInputReferenceId() {
+        return inputReferenceId;
     }
 
-    public void setReferenceId(String referenceId) {
-        this.referenceId = referenceId;
+    public void setInputReferenceId(String inputReferenceId) {
+        this.inputReferenceId = inputReferenceId;
     }
 
 
