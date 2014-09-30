@@ -102,7 +102,7 @@ definitionStreamFinal
 
 definitionStream 
 	:'define' 'stream' streamId '(' attributeName type arguments ((',' attributeName type)|(',' attributeName type arguments))* ')'  ->  ^(streamId (^(IN_ATTRIBUTE attributeName type arguments))+)
-	|'define' 'stream' streamId '(' attributeName type  ((',' attributeName type)|(',' attributeName type arguments ))* ')'  ->  ^(streamId (^(IN_ATTRIBUTE attributeName type arguments))+)
+	|'define' 'stream' streamId '(' attributeName type  ((',' attributeName type)|(',' attributeName type arguments ))* ')'  ->  ^(streamId (^(IN_ATTRIBUTE attributeName type))+)
 	;
 
 definitionPartitionFinal
@@ -535,7 +535,7 @@ tableParamName : stringVal;
 
 tableParamValue : stringVal;
 
-type: 'string' |'int' |'long' |'float' |'double' |'bool '|'nominal';
+type: 'string' |'int' |'long' |'float' |'double' |'bool'|'nominal';
 
 POSITIVE_INT_VAL:  NUM('I'|'i')?;
 

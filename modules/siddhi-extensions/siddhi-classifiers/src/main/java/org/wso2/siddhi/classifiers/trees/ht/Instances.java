@@ -196,8 +196,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @param capacity the capacity of the set
      * @throws IllegalArgumentException if attribute names are not unique
      */
-    public Instances(/* @non_null@ */String name,
-  /* @non_null@ */ArrayList<Attribute> attInfo, int capacity) {
+    public Instances(String name,List<Attribute> attInfo, int capacity) {
 
         // check whether the attribute names are unique
         HashSet<String> names = new HashSet<String>();

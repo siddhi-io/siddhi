@@ -51,7 +51,7 @@ public class FrequentWindowTestCase {
     @Test
     public void testWindowQueryAllAttributes() throws InterruptedException {
         log.info("Frequent Event Count Test Running");
-        siddhiManager.defineStream("define stream purchase (cardNo string, price float) ");
+        siddhiManager.defineStream("define stream purchase (cardNo string, price float)");
         String queryReference = siddhiManager.addQuery("from purchase[price >= 30]#window.frequent(2)" +
                 "select cardNo, price " +
                 "insert into PotentialFraud for  all-events ;");
