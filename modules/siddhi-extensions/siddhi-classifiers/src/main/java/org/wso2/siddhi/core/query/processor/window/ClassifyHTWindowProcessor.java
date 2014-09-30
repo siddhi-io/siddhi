@@ -23,6 +23,7 @@ package org.wso2.siddhi.core.query.processor.window;
 import org.wso2.siddhi.classifiers.trees.ht.DenseInstance;
 import org.wso2.siddhi.classifiers.trees.ht.HoeffdingTree;
 import org.wso2.siddhi.classifiers.trees.ht.Instances;
+import org.wso2.siddhi.classifiers.utils.InstancesUtil;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.StreamEvent;
@@ -41,13 +42,24 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ClassifyHtWindowProcessor extends WindowProcessor {
-    int testModeCount = -1;
-    boolean trainMode = true;
-    HoeffdingTree hoeffdingTree;
-
+    private int testModeCount = -1;
+    private boolean trainMode = true;
+    private HoeffdingTree hoeffdingTree;
+    private int attributeCount = 0;
+    private List<Attribute> attributeList;
+    private Instances instances;
     @Override
     protected void processEvent(InEvent event) {
-
+//        acquireLock();
+        try {
+            DenseInstance instance = InstancesUtil.getInstance(attributeList, event);
+            instances.add(instance);
+            instances.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Error building the Tree");
+        }finally {
+//            releaseLock();
+        }
     }
 
     @Override
@@ -89,7 +101,7 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
     protected void init(Expression[] parameters, QueryPostProcessingElement nextProcessor, AbstractDefinition streamDefinition, String elementId, boolean async, SiddhiContext siddhiContext) {
         // first we check the stream definition, currently we do not support numerica attributes,
         // we first check the stream only have nominal attributes
-        List<Attribute> attributeList = streamDefinition.getAttributeList();
+        attributeList = streamDefinition.getAttributeList();
         for(Attribute attribute: attributeList){
             if(!Attribute.Type.NOMINAL.equals(attribute.getType())) {
                 throw new SiddhiParserException("This Window can only handle nominal attributes");
@@ -107,13 +119,25 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
 
         // todo we need to implement a way to load the training dataset during initialization and start the siddhi with
         // todo a properly trained tree, otherwise we have to do a check to do whether build or update the tree
-        Instances instances = new Instances(streamDefinition.getId(), streamDefinition.getAttributeList(), 10);
-        hoeffdingTree = new HoeffdingTree();
-        try {
-            hoeffdingTree.buildClassifier(instances);
-        } catch (Exception e) {
-            throw new RuntimeException("Error building the Tree");
+        instances = new Instances(streamDefinition.getId(), streamDefinition.getAttributeList(), 10);
+
+        instances.setClassIndex(instances.numAttributes() - 1); // this is by default and stream has to be defined accordingly
+
+        // Test basic methods based on class index.
+        System.out.println("\nClass name: " + instances.classAttribute().getName());
+        System.out.println("\nClass index: " + instances.classIndex());
+        System.out.println("\nClass is nominal: "
+                + instances.classAttribute().isNominal());
+        System.out.println("\nClass is numeric: "
+                + instances.classAttribute().isNumeric());
+        System.out.println("\nClasses:\n");
+        for (int i = 0; i < instances.numClasses(); i++) {
+            System.out.println(instances.classAttribute().value(i));
         }
+
+        System.out.println("\nClass values and labels of instances:\n");
+
+        hoeffdingTree = new HoeffdingTree();
     }
 
     @Override

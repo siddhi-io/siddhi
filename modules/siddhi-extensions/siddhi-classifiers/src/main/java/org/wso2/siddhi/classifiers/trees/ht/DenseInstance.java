@@ -43,7 +43,7 @@ public class DenseInstance extends AbstractInstance {
      *          are to be copied
      */
     // @ ensures m_Dataset == null;
-    public DenseInstance(/* @non_null@ */Instance instance) {
+    public DenseInstance(Instance instance) {
 
         if (instance instanceof DenseInstance) {
             m_AttValues = ((DenseInstance) instance).m_AttValues;
