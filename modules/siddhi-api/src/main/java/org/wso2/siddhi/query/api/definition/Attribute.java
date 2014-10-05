@@ -16,7 +16,6 @@
 * under the License.
 */
 package org.wso2.siddhi.query.api.definition;
-
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.Variable;
 import org.wso2.siddhi.query.api.expression.constant.StringConstant;
@@ -26,7 +25,8 @@ import org.wso2.siddhi.query.api.utils.SerializedObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Attribute {
+import java.io.Serializable;
+public class Attribute implements Serializable {
     private String name;
 
     private Type type;
