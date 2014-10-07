@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.processor.filter;
 
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEventIterator;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
@@ -45,8 +46,15 @@ public class FilterProcessor implements Processor {
 
     @Override
     public void process(StreamEvent event) {
-        if ((Boolean) conditionExecutor.execute(event)) {
-            this.next.process(event);
+        StreamEventIterator iterator = event.getIterator();
+        while (iterator.hasNext()){
+            StreamEvent streamEvent = iterator.next();
+            if (!(Boolean) conditionExecutor.execute(streamEvent)){
+                iterator.remove();
+            }
+        }
+        if(iterator.getFirstElement() != null){
+            this.next.process(iterator.getFirstElement());
         }
     }
 
