@@ -442,9 +442,6 @@ public interface Instance extends Copyable {
      * floating-point values. Quotes string values that contain whitespace
      * characters.
      * <p/>
-     * This method is used by getRandomNumberGenerator() in Instances.java in
-     * order to maintain backwards compatibility with weka 3.4.
-     *
      * @param afterDecimalPoint maximum number of digits after the decimal point
      *                          for numeric values
      * @return the instance's description as a string
@@ -457,9 +454,6 @@ public interface Instance extends Copyable {
      * floating-point values. Quotes string values that contain whitespace
      * characters.
      * <p/>
-     * This method is used by getRandomNumberGenerator() in Instances.java in
-     * order to maintain backwards compatibility with weka 3.4.
-     *
      * @return the instance's description as a string
      */
     public String toStringNoWeight();

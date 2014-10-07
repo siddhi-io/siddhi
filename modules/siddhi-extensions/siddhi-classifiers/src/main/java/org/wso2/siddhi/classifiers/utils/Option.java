@@ -23,16 +23,16 @@ package org.wso2.siddhi.classifiers.utils;
 public class Option {
 
     /** What does this option do? */
-    private String m_Description;
+    private String description;
 
     /** The synopsis. */
-    private String m_Synopsis;
+    private String synopsis;
 
     /** What's the option's name? */
-    private String m_Name;
+    private String name;
 
     /** How many arguments does it take? */
-    private int m_NumArguments;
+    private int numArguments;
 
     /**
      * Creates new option with the given parameters.
@@ -44,10 +44,10 @@ public class Option {
     public Option(String description, String name,
                   int numArguments, String synopsis) {
 
-        m_Description = description;
-        m_Name = name;
-        m_NumArguments = numArguments;
-        m_Synopsis = synopsis;
+        this.description = description;
+        this.name = name;
+        this.numArguments = numArguments;
+        this.synopsis = synopsis;
     }
 
     /**
@@ -57,7 +57,7 @@ public class Option {
      */
     public String description() {
 
-        return m_Description;
+        return description;
     }
 
     /**
@@ -67,7 +67,7 @@ public class Option {
      */
     public String name() {
 
-        return m_Name;
+        return name;
     }
 
     /**
@@ -77,7 +77,7 @@ public class Option {
      */
     public int numArguments() {
 
-        return m_NumArguments;
+        return numArguments;
     }
 
     /**
@@ -87,6 +87,6 @@ public class Option {
      */
     public String synopsis() {
 
-        return m_Synopsis;
+        return synopsis;
     }
 }

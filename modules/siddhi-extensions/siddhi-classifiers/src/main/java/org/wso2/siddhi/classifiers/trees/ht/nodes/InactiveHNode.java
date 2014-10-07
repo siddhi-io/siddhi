@@ -37,7 +37,7 @@ public class InactiveHNode extends LeafNode implements LearningNode {
      * @param classDistrib the class distribution at this node
      */
     public InactiveHNode(Map<String, WeightMass> classDistrib) {
-        m_classDistribution = classDistrib;
+        weightedClassDist = classDistrib;
     }
 
     @Override

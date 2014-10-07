@@ -22,58 +22,44 @@ package org.wso2.siddhi.classifiers.trees.ht;
 
 import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
 
-import java.io.Serializable;
 import java.util.*;
 
 public class GaussianConditionalSufficientStats extends ConditionalSufficientStats {
-
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = -1527915607201784762L;
-
     /**
      * Inner class that implements a Gaussian estimator
      *
      * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
      */
-    protected class GaussianEstimator extends UnivariateNormalEstimator implements
-            Serializable {
-
-        /**
-         * For serialization
-         */
-        private static final long serialVersionUID = 4756032800685001315L;
-
+    protected class GaussianEstimator extends UnivariateNormalEstimator{
         public double getSumOfWeights() {
-            return m_SumOfWeights;
+            return sumOfWeights;
         }
 
         public double probabilityDensity(double value) {
             updateMeanAndVariance();
 
-            if (m_SumOfWeights > 0) {
-                double stdDev = Math.sqrt(m_Variance);
+            if (sumOfWeights > 0) {
+                double stdDev = Math.sqrt(variance);
                 if (stdDev > 0) {
-                    double diff = value - m_Mean;
+                    double diff = value - mean;
                     return (1.0 / (CONST * stdDev))
-                            * Math.exp(-(diff * diff / (2.0 * m_Variance)));
+                            * Math.exp(-(diff * diff / (2.0 * variance)));
                 }
-                return value == m_Mean ? 1.0 : 0.0;
+                return value == mean ? 1.0 : 0.0;
             }
 
             return 0.0;
         }
 
         public double[] weightLessThanEqualAndGreaterThan(double value) {
-            double stdDev = Math.sqrt(m_Variance);
-            double equalW = probabilityDensity(value) * m_SumOfWeights;
+            double stdDev = Math.sqrt(variance);
+            double equalW = probabilityDensity(value) * sumOfWeights;
 
             double lessW = (stdDev > 0) ? Statistics
-                    .normalProbability((value - m_Mean) / stdDev)
-                    * m_SumOfWeights
-                    - equalW : (value < m_Mean) ? m_SumOfWeights - equalW : 0.0;
-            double greaterW = m_SumOfWeights - equalW - lessW;
+                    .normalProbability((value - mean) / stdDev)
+                    * sumOfWeights
+                    - equalW : (value < mean) ? sumOfWeights - equalW : 0.0;
+            double greaterW = sumOfWeights - equalW - lessW;
 
             return new double[] { lessW, equalW, greaterW };
         }
@@ -95,10 +81,10 @@ public class GaussianConditionalSufficientStats extends ConditionalSufficientSta
     @Override
     public void update(double attVal, String classVal, double weight) {
         if (!Utils.isMissingValue(attVal)) {
-            GaussianEstimator norm = (GaussianEstimator) m_classLookup.get(classVal);
+            GaussianEstimator norm = (GaussianEstimator) classLookup.get(classVal);
             if (norm == null) {
                 norm = new GaussianEstimator();
-                m_classLookup.put(classVal, norm);
+                classLookup.put(classVal, norm);
                 m_minValObservedPerClass.put(classVal, attVal);
                 m_maxValObservedPerClass.put(classVal, attVal);
             } else {
@@ -117,7 +103,7 @@ public class GaussianConditionalSufficientStats extends ConditionalSufficientSta
     @Override
     public double probabilityOfAttValConditionedOnClass(double attVal,
                                                         String classVal) {
-        GaussianEstimator norm = (GaussianEstimator) m_classLookup.get(classVal);
+        GaussianEstimator norm = (GaussianEstimator) classLookup.get(classVal);
         if (norm == null) {
             return 0;
         }
@@ -131,7 +117,7 @@ public class GaussianConditionalSufficientStats extends ConditionalSufficientSta
         double min = Double.POSITIVE_INFINITY;
         double max = Double.NEGATIVE_INFINITY;
 
-        for (String classVal : m_classLookup.keySet()) {
+        for (String classVal : classLookup.keySet()) {
             if (m_minValObservedPerClass.containsKey(classVal)) {
                 if (m_minValObservedPerClass.get(classVal) < min) {
                     min = m_minValObservedPerClass.get(classVal);
@@ -161,7 +147,7 @@ public class GaussianConditionalSufficientStats extends ConditionalSufficientSta
         Map<String, WeightMass> lhsDist = new HashMap<String, WeightMass>();
         Map<String, WeightMass> rhsDist = new HashMap<String, WeightMass>();
 
-        for (Map.Entry<String, Object> e : m_classLookup.entrySet()) {
+        for (Map.Entry<String, Object> e : classLookup.entrySet()) {
             String classVal = e.getKey();
             GaussianEstimator attEst = (GaussianEstimator) e.getValue();
 
@@ -172,14 +158,14 @@ public class GaussianConditionalSufficientStats extends ConditionalSufficientSta
                         mass = new WeightMass();
                         rhsDist.put(classVal, mass);
                     }
-                    mass.m_weight += attEst.getSumOfWeights();
+                    mass.weight += attEst.getSumOfWeights();
                 } else if (splitVal > m_maxValObservedPerClass.get(classVal)) {
                     WeightMass mass = lhsDist.get(classVal);
                     if (mass == null) {
                         mass = new WeightMass();
                         lhsDist.put(classVal, mass);
                     }
-                    mass.m_weight += attEst.getSumOfWeights();
+                    mass.weight += attEst.getSumOfWeights();
                 } else {
                     double[] weights = attEst.weightLessThanEqualAndGreaterThan(splitVal);
                     WeightMass mass = lhsDist.get(classVal);
@@ -187,14 +173,14 @@ public class GaussianConditionalSufficientStats extends ConditionalSufficientSta
                         mass = new WeightMass();
                         lhsDist.put(classVal, mass);
                     }
-                    mass.m_weight += weights[0] + weights[1]; // <=
+                    mass.weight += weights[0] + weights[1]; // <=
 
                     mass = rhsDist.get(classVal);
                     if (mass == null) {
                         mass = new WeightMass();
                         rhsDist.put(classVal, mass);
                     }
-                    mass.m_weight += weights[2]; // >
+                    mass.weight += weights[2]; // >
                 }
             }
         }
@@ -219,7 +205,7 @@ public class GaussianConditionalSufficientStats extends ConditionalSufficientSta
             double splitMerit = splitMetric.evaluateSplit(preSplitDist,
                     postSplitDists);
 
-            if (best == null || splitMerit > best.m_splitMerit) {
+            if (best == null || splitMerit > best.splitMerit) {
                 Split split = new UnivariateNumericBinarySplit(attName, s);
                 best = new SplitCandidate(split, postSplitDists, splitMerit);
             }

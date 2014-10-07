@@ -22,5 +22,5 @@ package org.wso2.siddhi.query.api.definition;
 
 import java.io.Serializable;
 
-public interface AttributeInfo extends Serializable {
+public interface AttributeInfo{
 }

@@ -24,13 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Split {
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = 5390368487675958092L;
-
     /** name(s) of attribute(s) involved in the split */
-    protected List<String> m_splitAttNames = new ArrayList<String>();
+    protected List<String> splitNames = new ArrayList<String>();
 
     /**
      * Returns the name of the branch that the supplied instance would go down
@@ -49,6 +44,6 @@ public abstract class Split {
     public abstract String conditionForBranch(String branch);
 
     public List<String> splitAttributes() {
-        return m_splitAttNames;
+        return splitNames;
     }
 }

@@ -59,32 +59,37 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
     protected void processEvent(InEvent event) {
         acquireLock();
         try {
-            DenseInstance instance = InstancesUtil.getInstance(attributeList, event);
-            instances.add(instance);
-            System.out.println(instances.toString());
-            if (instances.size() == testModeCount && trainMode) {
-                hoeffdingTree.buildClassifier(instances);
-                evaluation = new Evaluation(instances);
-                instances = new Instances(instances.relationName(), attributeList, capacity);
-                instances.setClassIndex(instances.numAttributes() - 1);
-                trainMode = false;
-            }else {
-                if (instances.size() == capacity && !trainMode) {
-                    Enumeration<Instance> instanceEnumeration = instances.enumerateInstances();
-                    while (instanceEnumeration.hasMoreElements()) {
-                        Instance instance1 = instanceEnumeration.nextElement();
-                        if(attributeList.get(attributeList.size()-1).indexOfValue(outClassValues.get(0))==evaluation.evaluationForSingleInstance(hoeffdingTree, instance1)){
-                            nextProcessor.process(event);
-                        }
-                    }
-                    instances = new Instances(instances.relationName(), attributeList, capacity);
-                    instances.setClassIndex(instances.numAttributes() - 1);
-                }
-            }
+            runClassification(event);
         } catch (Exception e) {
             throw new RuntimeException("Error building the Tree", e);
         } finally {
             releaseLock();
+        }
+    }
+
+    private void runClassification(Event event) throws Exception {
+        DenseInstance instance = InstancesUtil.getInstance(attributeList, event);
+        instances.add(instance);
+        if (instances.size() == testModeCount && trainMode) {
+            hoeffdingTree.buildClassifier(instances);
+            evaluation = new Evaluation(instances);
+            instances = new Instances(instances.relationName(), attributeList, capacity);
+            instances.setClassIndex(instances.numAttributes() - 1);
+            trainMode = false;
+        }else {
+            if (instances.size() == capacity && !trainMode) {
+                Enumeration<Instance> instanceEnumeration = instances.enumerateInstances();
+                while (instanceEnumeration.hasMoreElements()) {
+                    Instance instance1 = instanceEnumeration.nextElement();
+                    double v = evaluation.evaluationForSingleInstance(hoeffdingTree, instance1);
+                    System.out.println(v);
+                    if(attributeList.get(attributeList.size()-1).indexOfValue(outClassValues.get(0))== v){
+                        nextProcessor.process(event);
+                    }
+                }
+                instances = new Instances(instances.relationName(), attributeList, capacity);
+                instances.setClassIndex(instances.numAttributes() - 1);
+            }
         }
     }
 
@@ -95,8 +100,11 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
             Event[] events = listEvent.getEvents();
             for (int i = 0, events1Length = listEvent.getActiveEvents(); i < events1Length; i++) {
                 // invoke hoeffding tree
-
-
+                try {
+                    runClassification(events[i]);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         } finally {
             releaseLock();

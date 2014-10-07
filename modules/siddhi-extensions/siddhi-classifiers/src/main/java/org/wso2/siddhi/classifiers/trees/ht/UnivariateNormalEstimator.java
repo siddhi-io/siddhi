@@ -22,22 +22,22 @@ package org.wso2.siddhi.classifiers.trees.ht;
 
 public class UnivariateNormalEstimator {
     /** The weighted sum of values */
-    protected double m_WeightedSum = 0;
+    protected double weightedSum = 0;
 
     /** The weighted sum of squared values */
-    protected double m_WeightedSumSquared = 0;
+    protected double weightedSumSquared = 0;
 
     /** The weight of the values collected so far */
-    protected double m_SumOfWeights = 0;
+    protected double sumOfWeights = 0;
 
     /** The mean value (only updated when needed) */
-    protected double m_Mean = 0;
+    protected double mean = 0;
 
     /** The variance (only updated when needed) */
-    protected double m_Variance = Double.MAX_VALUE;
+    protected double variance = Double.MAX_VALUE;
 
     /** The minimum allowed value of the variance (default: 1.0E-6 * 1.0E-6) */
-    protected double m_MinVar = 1.0E-6 * 1.0E-6;
+    protected double minVar = 1.0E-6 * 1.0E-6;
 
     /** Constant for Gaussian density */
     public static final double CONST = Math.log(2 * Math.PI);
@@ -50,34 +50,34 @@ public class UnivariateNormalEstimator {
      */
     public void addValue(double value, double weight) {
 
-        m_WeightedSum += value * weight;
-        m_WeightedSumSquared += value * value * weight;
-        m_SumOfWeights += weight;
+        weightedSum += value * weight;
+        weightedSumSquared += value * value * weight;
+        sumOfWeights += weight;
     }
 
     /**
      * Updates mean and variance based on sufficient statistics.
-     * Variance is set to m_MinVar if it becomes smaller than that
+     * Variance is set to minVar if it becomes smaller than that
      * value. It is set to Double.MAX_VALUE if the sum of weights is
      * zero.
      */
     protected void updateMeanAndVariance() {
 
         // Compute mean
-        m_Mean = 0;
-        if (m_SumOfWeights > 0) {
-            m_Mean = m_WeightedSum / m_SumOfWeights;
+        mean = 0;
+        if (sumOfWeights > 0) {
+            mean = weightedSum / sumOfWeights;
         }
 
         // Compute variance
-        m_Variance = Double.MAX_VALUE;
-        if (m_SumOfWeights > 0) {
-            m_Variance = m_WeightedSumSquared / m_SumOfWeights - m_Mean * m_Mean;
+        variance = Double.MAX_VALUE;
+        if (sumOfWeights > 0) {
+            variance = weightedSumSquared / sumOfWeights - mean * mean;
         }
 
         // Hack for case where variance is 0
-        if (m_Variance <= m_MinVar) {
-            m_Variance = m_MinVar;
+        if (variance <= minVar) {
+            variance = minVar;
         }
     }
 }

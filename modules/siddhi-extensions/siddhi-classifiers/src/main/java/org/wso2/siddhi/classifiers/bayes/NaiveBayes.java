@@ -22,20 +22,25 @@ package org.wso2.siddhi.classifiers.bayes;
 
 import org.wso2.siddhi.classifiers.AbstractClassifier;
 import org.wso2.siddhi.classifiers.OptionHandler;
+import org.wso2.siddhi.classifiers.estimators.DiscreteEstimator;
+import org.wso2.siddhi.classifiers.estimators.Estimator;
 import org.wso2.siddhi.classifiers.trees.ht.Instance;
 import org.wso2.siddhi.classifiers.trees.ht.Instances;
+import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
 import org.wso2.siddhi.classifiers.utils.Option;
+import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.Enumeration;
 
 public class NaiveBayes extends AbstractClassifier implements OptionHandler{
 
-    protected int m_NumClasses;
+    protected int classCount;
 
-    protected Instances m_Instances;
+    protected Instances instances;
 
-    protected Estimator[][] m_Distributions;
+    protected Estimator[][] distributions;
 
+    protected Estimator classDistribution;
 
     @Override
     public void buildClassifier(Instances instances) throws Exception {
@@ -44,32 +49,28 @@ public class NaiveBayes extends AbstractClassifier implements OptionHandler{
         instances = new Instances(instances);
         instances.deleteWithMissingClass();
 
-        m_NumClasses = instances.numClasses();
+        classCount = instances.numClasses();
 
         // Copy the instances
-        m_Instances = new Instances(instances);
+        this.instances = new Instances(instances);
 
         // Reserve space for the distributions
-        m_Distributions = new Estimator[m_Instances.numAttributes() - 1][m_Instances
+        distributions = new Estimator[this.instances.numAttributes() - 1][this.instances
                 .numClasses()];
-        m_ClassDistribution = new DiscreteEstimator(m_Instances.numClasses(), true);
+        classDistribution = new DiscreteEstimator(this.instances.numClasses(), true);
         int attIndex = 0;
-        Enumeration<Attribute> enu = m_Instances.enumerateAttributes();
+        Enumeration<Attribute> enu = this.instances.enumerateAttributes();
         while (enu.hasMoreElements()) {
             Attribute attribute = enu.nextElement();
-
-            // If the attribute is numeric, determine the estimator
-            // numeric precision from differences between adjacent values
-            double numPrecision = DEFAULT_NUM_PRECISION;
-            if (attribute.type() == Attribute.NUMERIC) {
-                m_Instances.sort(attribute);
-                if ((m_Instances.numInstances() > 0)
-                        && !m_Instances.instance(0).isMissing(attribute)) {
-                    double lastVal = m_Instances.instance(0).value(attribute);
+            if (attribute.getType() == Attribute.Type.NUMERIC) {
+                this.instances.sort(attribute);
+                if ((this.instances.numInstances() > 0)
+                        && !this.instances.instance(0).isMissing(attribute)) {
+                    double lastVal = this.instances.instance(0).value(attribute);
                     double currentVal, deltaSum = 0;
                     int distinct = 0;
-                    for (int i = 1; i < m_Instances.numInstances(); i++) {
-                        Instance currentInst = m_Instances.instance(i);
+                    for (int i = 1; i < this.instances.numInstances(); i++) {
+                        Instance currentInst = this.instances.instance(i);
                         if (currentInst.isMissing(attribute)) {
                             break;
                         }
@@ -80,23 +81,13 @@ public class NaiveBayes extends AbstractClassifier implements OptionHandler{
                             distinct++;
                         }
                     }
-                    if (distinct > 0) {
-                        numPrecision = deltaSum / distinct;
-                    }
                 }
             }
 
-            for (int j = 0; j < m_Instances.numClasses(); j++) {
-                switch (attribute.type()) {
-                    case Attribute.NUMERIC:
-                        if (m_UseKernelEstimator) {
-                            m_Distributions[attIndex][j] = new KernelEstimator(numPrecision);
-                        } else {
-                            m_Distributions[attIndex][j] = new NormalEstimator(numPrecision);
-                        }
-                        break;
-                    case Attribute.NOMINAL:
-                        m_Distributions[attIndex][j] = new DiscreteEstimator(
+            for (int j = 0; j < this.instances.numClasses(); j++) {
+                switch (attribute.getType()) {
+                    case NOMINAL:
+                        distributions[attIndex][j] = new DiscreteEstimator(
                                 attribute.numValues(), true);
                         break;
                     default:
@@ -107,16 +98,69 @@ public class NaiveBayes extends AbstractClassifier implements OptionHandler{
         }
 
         // Compute counts
-        Enumeration<Instance> enumInsts = m_Instances.enumerateInstances();
+        Enumeration<Instance> enumInsts = this.instances.enumerateInstances();
         while (enumInsts.hasMoreElements()) {
             Instance instance = enumInsts.nextElement();
             updateClassifier(instance);
         }
 
         // Save space
-        m_Instances = new Instances(m_Instances, 0);
+        this.instances = new Instances(this.instances, 0);
     }
 
+    public void updateClassifier(Instance instance) throws Exception {
+
+        if (!instance.classIsMissing()) {
+            Enumeration<Attribute> enumAtts = instances.enumerateAttributes();
+            int attIndex = 0;
+            while (enumAtts.hasMoreElements()) {
+                Attribute attribute = enumAtts.nextElement();
+                if (!instance.isMissing(attribute)) {
+                    distributions[attIndex][(int) instance.classValue()].addValue(
+                            instance.value(attribute), instance.weight());
+                }
+                attIndex++;
+            }
+            classDistribution.addValue(instance.classValue(), instance.weight());
+        }
+    }
+
+    public double[] distributionForInstance(Instance instance) throws Exception {
+        double[] probs = new double[classCount];
+        for (int j = 0; j < classCount; j++) {
+            probs[j] = classDistribution.getProbability(j);
+        }
+        Enumeration<Attribute> enumAtts = instance.enumerateAttributes();
+        int attIndex = 0;
+        while (enumAtts.hasMoreElements()) {
+            Attribute attribute = enumAtts.nextElement();
+            if (!instance.isMissing(attribute)) {
+                double temp, max = 0;
+                for (int j = 0; j < classCount; j++) {
+                    temp = Math.max(1e-75, Math.pow(distributions[attIndex][j]
+                                    .getProbability(instance.value(attribute)),
+                            instances.attribute(attIndex).getM_Weight()));
+                    probs[j] *= temp;
+                    if (probs[j] > max) {
+                        max = probs[j];
+                    }
+                    if (Double.isNaN(probs[j])) {
+                        throw new Exception("NaN returned from estimator for attribute "
+                                + attribute.getName() + ":\n"
+                                + distributions[attIndex][j].toString());
+                    }
+                }
+                if ((max > 0) && (max < 1e-75)) { // Danger of probability underflow
+                    for (int j = 0; j < classCount; j++) {
+                        probs[j] *= 1e75;
+                    }
+                }
+            }
+            attIndex++;
+        }
+        Utils.normalize(probs);
+        return probs;
+    }
     @Override
     public Enumeration<Option> listOptions() {
         return null;

@@ -22,27 +22,19 @@ package org.wso2.siddhi.classifiers.trees.ht;
 
 import org.wso2.siddhi.query.api.definition.Attribute;
 
-import java.io.Serializable;
-
 public class UnivariateNominalMultiwaySplit extends Split{
-
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = -9094590488097956665L;
-
     /**
      * Constructor
      *
      * @param attName the name of the attribute to split on
      */
     public UnivariateNominalMultiwaySplit(String attName) {
-        m_splitAttNames.add(attName);
+        splitNames.add(attName);
     }
 
     @Override
     public String branchForInstance(Instance inst) {
-        Attribute att = inst.dataset().attribute(m_splitAttNames.get(0));
+        Attribute att = inst.dataset().attribute(splitNames.get(0));
         if (att == null || inst.isMissing(att)) {
             return null;
         }
@@ -51,6 +43,6 @@ public class UnivariateNominalMultiwaySplit extends Split{
 
     @Override
     public String conditionForBranch(String branch) {
-        return m_splitAttNames.get(0) + " = " + branch;
+        return splitNames.get(0) + " = " + branch;
     }
 }

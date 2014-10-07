@@ -25,10 +25,7 @@ import org.wso2.siddhi.classifiers.trees.ht.Instance;
 import org.wso2.siddhi.classifiers.trees.ht.SplitNode;
 import org.wso2.siddhi.classifiers.trees.ht.WeightMass;
 import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
-import org.wso2.siddhi.query.api.definition.NominalAttributeInfo;
-import org.wso2.siddhi.core.util.ByteSerializer;
 import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.definition.AttributeInfo;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
@@ -48,17 +45,17 @@ public abstract class HNode implements Serializable {
     /**
      * Class distribution at this node
      */
-    public Map<String, WeightMass> m_classDistribution = new LinkedHashMap<String, WeightMass>();
+    public Map<String, WeightMass> weightedClassDist = new LinkedHashMap<String, WeightMass>();
 
     /**
      * Holds the leaf number (if this is a leaf)
      */
-    protected int m_leafNum;
+    protected int leafNum;
 
     /**
      * Holds the node number (for graphing purposes)
      */
-    protected int m_nodeNum;
+    protected int nodeNum;
 
     /**
      * Construct a new HNode
@@ -72,7 +69,7 @@ public abstract class HNode implements Serializable {
      * @param classDistrib
      */
     public HNode(Map<String, WeightMass> classDistrib) {
-        m_classDistribution = classDistrib;
+        weightedClassDist = classDistrib;
     }
 
     /**
@@ -90,7 +87,7 @@ public abstract class HNode implements Serializable {
      * @return the number of entries in the class distribution
      */
     public int numEntriesInClassDistribution() {
-        return m_classDistribution.size();
+        return weightedClassDist.size();
     }
 
     /**
@@ -100,8 +97,8 @@ public abstract class HNode implements Serializable {
      */
     public boolean classDistributionIsPure() {
         int count = 0;
-        for (Map.Entry<String, WeightMass> el : m_classDistribution.entrySet()) {
-            if (el.getValue().m_weight > 0) {
+        for (Map.Entry<String, WeightMass> el : weightedClassDist.entrySet()) {
+            if (el.getValue().weight > 0) {
                 count++;
 
                 if (count > 1) {
@@ -124,14 +121,14 @@ public abstract class HNode implements Serializable {
         }
         String classVal = inst.stringValue(inst.classAttribute());
 
-        WeightMass m = m_classDistribution.get(classVal);
+        WeightMass m = weightedClassDist.get(classVal);
         if (m == null) {
             m = new WeightMass();
-            m.m_weight = 1.0;
+            m.weight = 1.0;
 
-            m_classDistribution.put(classVal, m);
+            weightedClassDist.put(classVal, m);
         }
-        m.m_weight += inst.weight();
+        m.weight += inst.weight();
     }
 
     /**
@@ -142,14 +139,14 @@ public abstract class HNode implements Serializable {
      * @return a class probability distribution
      * @throws Exception if a problem occurs
      */
-    public double[] getDistribution(Attribute classAtt)
+    public double[] getDistribution(Instance inst, Attribute classAtt)
             throws Exception {
         double[] dist = new double[classAtt.numValues()];
 
         for (int i = 0; i < classAtt.numValues(); i++) {
-            WeightMass w = m_classDistribution.get(classAtt.value(i));
+            WeightMass w = weightedClassDist.get(classAtt.value(i));
             if (w != null) {
-                dist[i] = w.m_weight;
+                dist[i] = w.weight;
             } else {
                 dist[i] = 1.0;
             }
@@ -161,7 +158,7 @@ public abstract class HNode implements Serializable {
 
     public int installNodeNums(int nodeNum) {
         nodeNum++;
-        m_nodeNum = nodeNum;
+        this.nodeNum = nodeNum;
 
         return nodeNum;
     }
@@ -170,15 +167,15 @@ public abstract class HNode implements Serializable {
 
         double max = -1;
         String classVal = "";
-        for (Map.Entry<String, WeightMass> e : m_classDistribution.entrySet()) {
-            if (e.getValue().m_weight > max) {
-                max = e.getValue().m_weight;
+        for (Map.Entry<String, WeightMass> e : weightedClassDist.entrySet()) {
+            if (e.getValue().weight > max) {
+                max = e.getValue().weight;
                 classVal = e.getKey();
             }
         }
         buff.append(classVal + " (" + String.format("%-9.3f", max).trim() + ")");
         leafCount++;
-        m_leafNum = leafCount;
+        leafNum = leafCount;
 
         return leafCount;
     }
@@ -190,14 +187,14 @@ public abstract class HNode implements Serializable {
 
         double max = -1;
         String classVal = "";
-        for (Map.Entry<String, WeightMass> e : m_classDistribution.entrySet()) {
-            if (e.getValue().m_weight > max) {
-                max = e.getValue().m_weight;
+        for (Map.Entry<String, WeightMass> e : weightedClassDist.entrySet()) {
+            if (e.getValue().weight > max) {
+                max = e.getValue().weight;
                 classVal = e.getKey();
             }
         }
 
-        text.append("N" + m_nodeNum + " [label=\"" + classVal + " ("
+        text.append("N" + nodeNum + " [label=\"" + classVal + " ("
                 + String.format("%-9.3f", max).trim() + ")\" shape=box style=filled]\n");
     }
 
@@ -231,8 +228,8 @@ public abstract class HNode implements Serializable {
     public double totalWeight() {
         double tw = 0;
 
-        for (Map.Entry<String, WeightMass> e : m_classDistribution.entrySet()) {
-            tw += e.getValue().m_weight;
+        for (Map.Entry<String, WeightMass> e : weightedClassDist.entrySet()) {
+            tw += e.getValue().weight;
         }
 
         return tw;
@@ -259,12 +256,12 @@ public abstract class HNode implements Serializable {
      */
     public abstract void updateNode(Instance inst) throws Exception;
 
-    public int getM_leafNum() {
-        return m_leafNum;
+    public int getLeafNum() {
+        return leafNum;
     }
 
-    public int getM_nodeNum() {
-        return m_nodeNum;
+    public int getNodeNum() {
+        return nodeNum;
     }
 }
 

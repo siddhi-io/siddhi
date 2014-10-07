@@ -28,22 +28,18 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import java.util.Enumeration;
 
 public abstract class AbstractInstance implements Instance {
-
-    /** for serialization */
-    static final long serialVersionUID = 1482635194499365155L;
-
     /**
      * The dataset the instance has access to. Null if the instance doesn't have
      * access to any dataset. Only if an instance has access to a dataset, it
      * knows about the actual attribute types.
      */
-    protected Instances m_Dataset;
+    protected Instances dataSet;
 
     /** The instance's attribute values. */
-    protected double[] m_AttValues;
+    protected double[] attributeValues;
 
     /** The instance's weight. */
-    protected double m_Weight;
+    protected double weight;
 
     /** Default max number of digits after the decimal point for numeric values */
     public static int s_numericAfterDecimalPoint = 6;
@@ -56,15 +52,15 @@ public abstract class AbstractInstance implements Instance {
      * @throws UnassignedDatasetException if instance doesn't have access to a
      *           dataset
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
     public Attribute attribute(int index) {
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
-        return m_Dataset.attribute(index);
+        return dataSet.attribute(index);
     }
 
     /**
@@ -75,15 +71,15 @@ public abstract class AbstractInstance implements Instance {
      * @throws UnassignedDatasetException if instance doesn't have access to a
      *           dataset
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
-    public/* @pure@ */Attribute attributeSparse(int indexOfIndex) {
+    public Attribute attributeSparse(int indexOfIndex) {
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
-        return m_Dataset.attribute(index(indexOfIndex));
+        return dataSet.attribute(index(indexOfIndex));
     }
 
     /**
@@ -93,15 +89,15 @@ public abstract class AbstractInstance implements Instance {
      * @throws UnassignedDatasetException if the class is not set or the instance
      *           doesn't have access to a dataset
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
-    public/* @pure@ */Attribute classAttribute() {
+    public Attribute classAttribute() {
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
-        return m_Dataset.classAttribute();
+        return dataSet.classAttribute();
     }
 
     /**
@@ -111,16 +107,16 @@ public abstract class AbstractInstance implements Instance {
      * @throws UnassignedDatasetException if instance doesn't have access to a
      *           dataset
      */
-    // @ requires m_Dataset != null;
-    // @ ensures \result == m_Dataset.classIndex();
+    // @ requires dataSet != null;
+    // @ ensures \result == dataSet.classIndex();
     @Override
-    public/* @pure@ */int classIndex() {
+    public int classIndex() {
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
-        return m_Dataset.classIndex();
+        return dataSet.classIndex();
     }
 
     /**
@@ -132,7 +128,7 @@ public abstract class AbstractInstance implements Instance {
      */
     // @ requires classIndex() >= 0;
     @Override
-    public/* @pure@ */boolean classIsMissing() {
+    public boolean classIsMissing() {
 
         int classIndex = classIndex();
         if (classIndex < 0) {
@@ -153,7 +149,7 @@ public abstract class AbstractInstance implements Instance {
      */
     // @ requires classIndex() >= 0;
     @Override
-    public/* @pure@ */double classValue() {
+    public double classValue() {
 
         int classIndex = classIndex();
         if (classIndex < 0) {
@@ -169,11 +165,11 @@ public abstract class AbstractInstance implements Instance {
      *
      * @return the dataset the instance has accesss to
      */
-    // @ ensures \result == m_Dataset;
+    // @ ensures \result == dataSet;
     @Override
-    public/* @pure@ */Instances dataset() {
+    public Instances dataset() {
 
-        return m_Dataset;
+        return dataSet;
     }
 
     /**
@@ -184,11 +180,11 @@ public abstract class AbstractInstance implements Instance {
      * @param position the attribute's position
      * @throws RuntimeException if the instance has access to a dataset
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
     public void deleteAttributeAt(int position) {
 
-        if (m_Dataset != null) {
+        if (dataSet != null) {
             throw new RuntimeException("Instance has access to a dataset!");
         }
         forceDeleteAttributeAt(position);
@@ -201,15 +197,15 @@ public abstract class AbstractInstance implements Instance {
      * @throws UnassignedDatasetException if the instance doesn't have access to a
      *           dataset
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
     public Enumeration<Attribute> enumerateAttributes() {
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
-        return m_Dataset.enumerateAttributes();
+        return dataSet.enumerateAttributes();
     }
 
     /**
@@ -221,15 +217,15 @@ public abstract class AbstractInstance implements Instance {
      * @throws UnassignedDatasetException if instance doesn't have access to any
      *           dataset
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
-    public/* @pure@ */boolean equalHeaders(Instance inst) {
+    public boolean equalHeaders(Instance inst) {
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
-        return m_Dataset.equalHeaders(inst.dataset());
+        return dataSet.equalHeaders(inst.dataset());
     }
 
     /**
@@ -242,12 +238,12 @@ public abstract class AbstractInstance implements Instance {
      */
     @Override
     public String equalHeadersMsg(Instance inst) {
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
 
-        return m_Dataset.equalHeadersMsg(inst.dataset());
+        return dataSet.equalHeadersMsg(inst.dataset());
     }
 
     /**
@@ -258,11 +254,11 @@ public abstract class AbstractInstance implements Instance {
      * @throws UnassignedDatasetException if instance doesn't have access to any
      *           dataset
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
-    public/* @pure@ */boolean hasMissingValue() {
+    public boolean hasMissingValue() {
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
@@ -286,12 +282,12 @@ public abstract class AbstractInstance implements Instance {
      * @throws RuntimeException if the instance has accesss to a dataset
      * @throws IllegalArgumentException if the position is out of range
      */
-    // @ requires m_Dataset == null;
+    // @ requires dataSet == null;
     // @ requires 0 <= position && position <= numAttributes();
     @Override
     public void insertAttributeAt(int position) {
 
-        if (m_Dataset != null) {
+        if (dataSet != null) {
             throw new RuntimeException("Instance has accesss to a dataset!");
         }
         if ((position < 0) || (position > numAttributes())) {
@@ -308,7 +304,7 @@ public abstract class AbstractInstance implements Instance {
      * @return true if the value is "missing"
      */
     @Override
-    public/* @pure@ */boolean isMissing(int attIndex) {
+    public boolean isMissing(int attIndex) {
 
         if (Utils.isMissingValue(value(attIndex))) {
             return true;
@@ -324,7 +320,7 @@ public abstract class AbstractInstance implements Instance {
      * @return true if the value is "missing"
      */
     @Override
-    public/* @pure@ */boolean isMissingSparse(int indexOfIndex) {
+    public boolean isMissingSparse(int indexOfIndex) {
 
         if (Utils.isMissingValue(valueSparse(indexOfIndex))) {
             return true;
@@ -340,7 +336,7 @@ public abstract class AbstractInstance implements Instance {
      * @return true if the value is "missing"
      */
     @Override
-    public/* @pure@ */boolean isMissing(Attribute att) {
+    public boolean isMissing(Attribute att) {
 
         return isMissing(att.index());
     }
@@ -353,15 +349,15 @@ public abstract class AbstractInstance implements Instance {
      * @throws UnassignedDatasetException if instance doesn't have access to any
      *           dataset
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
-    public/* @pure@ */int numClasses() {
+    public int numClasses() {
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
-        return m_Dataset.numClasses();
+        return dataSet.numClasses();
     }
 
     /**
@@ -438,7 +434,7 @@ public abstract class AbstractInstance implements Instance {
     @Override
     public final void setDataset(Instances instances) {
 
-        m_Dataset = instances;
+        dataSet = instances;
     }
 
     /**
@@ -479,13 +475,13 @@ public abstract class AbstractInstance implements Instance {
      *           or a string, or the supplied value couldn't be found for a
      *           nominal attribute
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
     public final void setValue(int attIndex, String value) {
 
         int valIndex;
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
@@ -566,7 +562,7 @@ public abstract class AbstractInstance implements Instance {
     @Override
     public final void setWeight(double weight) {
 
-        m_Weight = weight;
+        this.weight = weight;
     }
 
     /**
@@ -579,15 +575,15 @@ public abstract class AbstractInstance implements Instance {
      * @throws UnassignedDatasetException if the instance doesn't belong to a
      *           dataset.
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
     public final Instances relationalValue(int attIndex) {
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
-        return relationalValue(m_Dataset.attribute(attIndex));
+        return relationalValue(dataSet.attribute(attIndex));
     }
 
 
@@ -603,15 +599,15 @@ public abstract class AbstractInstance implements Instance {
      * @throws UnassignedDatasetException if the instance doesn't belong to a
      *           dataset.
      */
-    // @ requires m_Dataset != null;
+    // @ requires dataSet != null;
     @Override
-    public final/* @pure@ */String stringValue(int attIndex) {
+    public final String stringValue(int attIndex) {
 
-        if (m_Dataset == null) {
+        if (dataSet == null) {
             throw new UnassignedDatasetException(
                     "Instance doesn't have access to a dataset!");
         }
-        return stringValue(m_Dataset.attribute(attIndex));
+        return stringValue(dataSet.attribute(attIndex));
     }
 
     /**
@@ -626,7 +622,7 @@ public abstract class AbstractInstance implements Instance {
      *           dataset.
      */
     @Override
-    public final/* @pure@ */String stringValue(Attribute att) {
+    public final String stringValue(Attribute att) {
 
         int attIndex = att.index();
         if (isMissing(attIndex)) {
@@ -657,8 +653,8 @@ public abstract class AbstractInstance implements Instance {
     public final String toStringMaxDecimalDigits(int afterDecimalPoint) {
         StringBuffer text = new StringBuffer(toStringNoWeight(afterDecimalPoint));
 
-        if (m_Weight != 1.0) {
-            text.append(",{" + Utils.doubleToString(m_Weight, afterDecimalPoint)
+        if (weight != 1.0) {
+            text.append(",{" + Utils.doubleToString(weight, afterDecimalPoint)
                     + "}");
         }
 
@@ -704,17 +700,17 @@ public abstract class AbstractInstance implements Instance {
      * @return the value's description as a string
      */
     @Override
-    public final/* @pure@ */String toString(int attIndex, int afterDecimalPoint) {
+    public final String toString(int attIndex, int afterDecimalPoint) {
 
         StringBuffer text = new StringBuffer();
 
         if (isMissing(attIndex)) {
             text.append("?");
         } else {
-            if (m_Dataset == null) {
+            if (dataSet == null) {
                 text.append(Utils.doubleToString(value(attIndex), afterDecimalPoint));
             } else {
-                switch (m_Dataset.attribute(attIndex).getType()) {
+                switch (dataSet.attribute(attIndex).getType()) {
                     case NOMINAL:
                     case STRING:
                     case DATE:
@@ -775,7 +771,7 @@ public abstract class AbstractInstance implements Instance {
      *         double).
      */
     @Override
-    public/* @pure@ */double value(Attribute att) {
+    public double value(Attribute att) {
 
         return value(att.index());
     }
@@ -790,9 +786,9 @@ public abstract class AbstractInstance implements Instance {
      *         double).
      */
     @Override
-    public/* @pure@ */double valueSparse(int indexOfIndex) {
+    public double valueSparse(int indexOfIndex) {
 
-        return m_AttValues[indexOfIndex];
+        return attributeValues[indexOfIndex];
     }
 
     /**
@@ -801,9 +797,9 @@ public abstract class AbstractInstance implements Instance {
      * @return the instance's weight as a double
      */
     @Override
-    public final/* @pure@ */double weight() {
+    public final double weight() {
 
-        return m_Weight;
+        return weight;
     }
 
     /**

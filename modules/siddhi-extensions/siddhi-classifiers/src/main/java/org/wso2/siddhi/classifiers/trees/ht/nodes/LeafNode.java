@@ -22,7 +22,6 @@ package org.wso2.siddhi.classifiers.trees.ht.nodes;
 
 import org.wso2.siddhi.classifiers.trees.ht.Instance;
 import org.wso2.siddhi.classifiers.trees.ht.SplitNode;
-import org.wso2.siddhi.classifiers.trees.ht.nodes.HNode;
 
 public class LeafNode extends HNode {
     /**
@@ -31,13 +30,13 @@ public class LeafNode extends HNode {
     private static final long serialVersionUID = -3359429731894384404L;
 
     /** The actual node for this leaf */
-    public HNode m_theNode;
+    public HNode actualNode;
 
     /** Parent split node */
-    public SplitNode m_parentNode;
+    public SplitNode parentNode;
 
     /** Parent branch leading to this node */
-    public String m_parentBranch;
+    public String parentBranch;
 
     /**
      * Construct an empty leaf node
@@ -53,15 +52,15 @@ public class LeafNode extends HNode {
      * @param parentBranch the branch leading to this node
      */
     public LeafNode(HNode node, SplitNode parentNode, String parentBranch) {
-        m_theNode = node;
-        m_parentNode = parentNode;
-        m_parentBranch = parentBranch;
+        actualNode = node;
+        this.parentNode = parentNode;
+        this.parentBranch = parentBranch;
     }
 
     @Override
     public void updateNode(Instance inst) throws Exception {
-        if (m_theNode != null) {
-            m_theNode.updateDistribution(inst);
+        if (actualNode != null) {
+            actualNode.updateDistribution(inst);
         } else {
             super.updateDistribution(inst);
         }

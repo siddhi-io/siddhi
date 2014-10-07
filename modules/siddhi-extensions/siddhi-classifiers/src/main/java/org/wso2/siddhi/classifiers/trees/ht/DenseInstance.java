@@ -27,10 +27,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 public class DenseInstance extends AbstractInstance {
-
-    /** for serialization */
-    static final long serialVersionUID = 1482635194499365122L;
-
     /**
      * Constructor that copies the attribute values and the weight from the given
      * instance. It does NOT perform a deep copy of the attribute values if the
@@ -42,16 +38,16 @@ public class DenseInstance extends AbstractInstance {
      * @param instance the instance from which the attribute values and the weight
      *          are to be copied
      */
-    // @ ensures m_Dataset == null;
+    // @ ensures dataSet == null;
     public DenseInstance(Instance instance) {
 
         if (instance instanceof DenseInstance) {
-            m_AttValues = ((DenseInstance) instance).m_AttValues;
+            attributeValues = ((DenseInstance) instance).attributeValues;
         } else {
-            m_AttValues = instance.toDoubleArray();
+            attributeValues = instance.toDoubleArray();
         }
-        m_Weight = instance.weight();
-        m_Dataset = null;
+        weight = instance.weight();
+        dataSet = null;
     }
 
     /**
@@ -62,12 +58,12 @@ public class DenseInstance extends AbstractInstance {
      * @param weight the instance's weight
      * @param attValues a vector of attribute values
      */
-    // @ ensures m_Dataset == null;
-    public DenseInstance(double weight, /* @non_null@ */double[] attValues) {
+    // @ ensures dataSet == null;
+    public DenseInstance(double weight, double[] attValues) {
 
-        m_AttValues = attValues;
-        m_Weight = weight;
-        m_Dataset = null;
+        attributeValues = attValues;
+        this.weight = weight;
+        dataSet = null;
     }
 
     /**
@@ -78,15 +74,15 @@ public class DenseInstance extends AbstractInstance {
      * @param numAttributes the size of the instance
      */
     // @ requires numAttributes > 0; // Or maybe == 0 is okay too?
-    // @ ensures m_Dataset == null;
+    // @ ensures dataSet == null;
     public DenseInstance(int numAttributes) {
 
-        m_AttValues = new double[numAttributes];
-        for (int i = 0; i < m_AttValues.length; i++) {
-            m_AttValues[i] = Utils.missingValue();
+        attributeValues = new double[numAttributes];
+        for (int i = 0; i < attributeValues.length; i++) {
+            attributeValues[i] = Utils.missingValue();
         }
-        m_Weight = 1;
-        m_Dataset = null;
+        weight = 1;
+        dataSet = null;
     }
 
     /**
@@ -98,12 +94,12 @@ public class DenseInstance extends AbstractInstance {
      */
     // @ also ensures \result != null;
     // @ also ensures \result instanceof DenseInstance;
-    // @ also ensures ((DenseInstance)\result).m_Dataset == m_Dataset;
+    // @ also ensures ((DenseInstance)\result).dataSet == dataSet;
     @Override
-    public/* @pure@ */Object copy() {
+    public Object copy() {
 
         DenseInstance result = new DenseInstance(this);
-        result.m_Dataset = m_Dataset;
+        result.dataSet = dataSet;
         return result;
     }
 
@@ -115,7 +111,7 @@ public class DenseInstance extends AbstractInstance {
      * @return the index of the attribute stored at the given position
      */
     @Override
-    public/* @pure@ */int index(int position) {
+    public int index(int position) {
 
         return position;
     }
@@ -147,11 +143,11 @@ public class DenseInstance extends AbstractInstance {
      *
      * @return the number of attributes as an integer
      */
-    // @ ensures \result == m_AttValues.length;
+    // @ ensures \result == attributeValues.length;
     @Override
-    public/* @pure@ */int numAttributes() {
+    public int numAttributes() {
 
-        return m_AttValues.length;
+        return attributeValues.length;
     }
 
     /**
@@ -159,11 +155,11 @@ public class DenseInstance extends AbstractInstance {
      *
      * @return the number of values
      */
-    // @ ensures \result == m_AttValues.length;
+    // @ ensures \result == attributeValues.length;
     @Override
-    public/* @pure@ */int numValues() {
+    public int numValues() {
 
-        return m_AttValues.length;
+        return attributeValues.length;
     }
 
     /**
@@ -177,13 +173,13 @@ public class DenseInstance extends AbstractInstance {
     @Override
     public void replaceMissingValues(double[] array) {
 
-        if ((array == null) || (array.length != m_AttValues.length)) {
+        if ((array == null) || (array.length != attributeValues.length)) {
             throw new IllegalArgumentException("Unequal number of attributes!");
         }
         freshAttributeVector();
-        for (int i = 0; i < m_AttValues.length; i++) {
+        for (int i = 0; i < attributeValues.length; i++) {
             if (isMissing(i)) {
-                m_AttValues[i] = array[i];
+                attributeValues[i] = array[i];
             }
         }
     }
@@ -202,7 +198,7 @@ public class DenseInstance extends AbstractInstance {
     public void setValue(int attIndex, double value) {
 
         freshAttributeVector();
-        m_AttValues[attIndex] = value;
+        attributeValues[attIndex] = value;
     }
 
     /**
@@ -219,7 +215,7 @@ public class DenseInstance extends AbstractInstance {
     public void setValueSparse(int indexOfIndex, double value) {
 
         freshAttributeVector();
-        m_AttValues[indexOfIndex] = value;
+        attributeValues[indexOfIndex] = value;
     }
 
     /**
@@ -230,8 +226,8 @@ public class DenseInstance extends AbstractInstance {
     @Override
     public double[] toDoubleArray() {
 
-        double[] newValues = new double[m_AttValues.length];
-        System.arraycopy(m_AttValues, 0, newValues, 0, m_AttValues.length);
+        double[] newValues = new double[attributeValues.length];
+        System.arraycopy(attributeValues, 0, newValues, 0, attributeValues.length);
         return newValues;
     }
 
@@ -240,9 +236,6 @@ public class DenseInstance extends AbstractInstance {
      * instance doesn't have access to a dataset, it returns the internal
      * floating-point values. Quotes string values that contain whitespace
      * characters.
-     *
-     * This method is used by getRandomNumberGenerator() in Instances.java in
-     * order to maintain backwards compatibility with weka 3.4.
      *
      * @return the instance's description as a string
      */
@@ -257,8 +250,6 @@ public class DenseInstance extends AbstractInstance {
      * floating-point values. Quotes string values that contain whitespace
      * characters.
      *
-     * This method is used by getRandomNumberGenerator() in Instances.java in
-     * order to maintain backwards compatibility with weka 3.4.
      *
      * @param afterDecimalPoint maximum number of digits after the decimal point
      *          for numeric values
@@ -269,7 +260,7 @@ public class DenseInstance extends AbstractInstance {
     public String toStringNoWeight(int afterDecimalPoint) {
         StringBuffer text = new StringBuffer();
 
-        for (int i = 0; i < m_AttValues.length; i++) {
+        for (int i = 0; i < attributeValues.length; i++) {
             if (i > 0) {
                 text.append(",");
             }
@@ -287,9 +278,9 @@ public class DenseInstance extends AbstractInstance {
      *         nominal (or a string) then it returns the value's index as a
      *         double).
      */
-    public/* @pure@ */double value(int attIndex) {
+    public double value(int attIndex) {
 
-        return m_AttValues[attIndex];
+        return attributeValues[attIndex];
     }
 
     /**
@@ -300,14 +291,14 @@ public class DenseInstance extends AbstractInstance {
     @Override
     protected void forceDeleteAttributeAt(int position) {
 
-        double[] newValues = new double[m_AttValues.length - 1];
+        double[] newValues = new double[attributeValues.length - 1];
 
-        System.arraycopy(m_AttValues, 0, newValues, 0, position);
-        if (position < m_AttValues.length - 1) {
-            System.arraycopy(m_AttValues, position + 1, newValues, position,
-                    m_AttValues.length - (position + 1));
+        System.arraycopy(attributeValues, 0, newValues, 0, position);
+        if (position < attributeValues.length - 1) {
+            System.arraycopy(attributeValues, position + 1, newValues, position,
+                    attributeValues.length - (position + 1));
         }
-        m_AttValues = newValues;
+        attributeValues = newValues;
     }
 
     /**
@@ -319,13 +310,13 @@ public class DenseInstance extends AbstractInstance {
     @Override
     protected void forceInsertAttributeAt(int position) {
 
-        double[] newValues = new double[m_AttValues.length + 1];
+        double[] newValues = new double[attributeValues.length + 1];
 
-        System.arraycopy(m_AttValues, 0, newValues, 0, position);
+        System.arraycopy(attributeValues, 0, newValues, 0, position);
         newValues[position] = Utils.missingValue();
-        System.arraycopy(m_AttValues, position, newValues, position + 1,
-                m_AttValues.length - position);
-        m_AttValues = newValues;
+        System.arraycopy(attributeValues, position, newValues, position + 1,
+                attributeValues.length - position);
+        attributeValues = newValues;
     }
 
     /**
@@ -334,7 +325,7 @@ public class DenseInstance extends AbstractInstance {
      */
     private void freshAttributeVector() {
 
-        m_AttValues = toDoubleArray();
+        attributeValues = toDoubleArray();
     }
 
     /**

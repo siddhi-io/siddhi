@@ -26,15 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 public class InfoGainSplitMetric extends SplitMetric {
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = 2173840581308675428L;
-
-    protected double m_minFracWeightForTwoBranches;
+    protected double minFracWeightForTwoBranches;
 
     public InfoGainSplitMetric(double minFracWeightForTwoBranches) {
-        m_minFracWeightForTwoBranches = minFracWeightForTwoBranches;
+        this.minFracWeightForTwoBranches = minFracWeightForTwoBranches;
     }
 
     @Override
@@ -44,7 +39,7 @@ public class InfoGainSplitMetric extends SplitMetric {
         double[] pre = new double[preDist.size()];
         int count = 0;
         for (Map.Entry<String, WeightMass> e : preDist.entrySet()) {
-            pre[count++] = e.getValue().m_weight;
+            pre[count++] = e.getValue().weight;
         }
 
         double preEntropy = ContingencyTables.entropy(pre);
@@ -58,7 +53,7 @@ public class InfoGainSplitMetric extends SplitMetric {
 
         int fracCount = 0;
         for (double d : distWeights) {
-            if (d / totalWeight > m_minFracWeightForTwoBranches) {
+            if (d / totalWeight > minFracWeightForTwoBranches) {
                 fracCount++;
             }
         }
@@ -73,7 +68,7 @@ public class InfoGainSplitMetric extends SplitMetric {
             double[] post = new double[d.size()];
             count = 0;
             for (Map.Entry<String, WeightMass> e : d.entrySet()) {
-                post[count++] = e.getValue().m_weight;
+                post[count++] = e.getValue().weight;
             }
             postEntropy += distWeights[i] * ContingencyTables.entropy(post);
         }

@@ -22,10 +22,7 @@ package org.wso2.siddhi.classifiers.trees.ht;
 
 import org.wso2.siddhi.classifiers.AbstractClassifier;
 import org.wso2.siddhi.classifiers.UpdateableClassifier;
-import org.wso2.siddhi.classifiers.trees.ht.nodes.HNode;
-import org.wso2.siddhi.classifiers.trees.ht.nodes.InactiveHNode;
-import org.wso2.siddhi.classifiers.trees.ht.nodes.LeafNode;
-import org.wso2.siddhi.classifiers.trees.ht.nodes.LearningNode;
+import org.wso2.siddhi.classifiers.trees.ht.nodes.*;
 import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -34,36 +31,31 @@ import java.util.List;
 
 public class HoeffdingTree extends AbstractClassifier implements
         UpdateableClassifier {
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = 7117521775722396251L;
-
-    protected Instances m_header;
-    protected HNode m_root;
+    protected Instances header;
+    protected HNode rootNode;
 
     /** The number of instances a leaf should observe between split attempts */
-    protected double m_gracePeriod = 200;
+    protected double gracePeriod = 200;
 
     /**
      * The allowable error in a split decision. Values closer to zero will take
      * longer to decide
      */
-    protected double m_splitConfidence = 0.0000001;
+    protected double splitConfidence = 0.0000001;
 
     /** Threshold below which a split will be forced to break ties */
-    protected double m_hoeffdingTieThreshold = 0.05;
+    protected double hoeffdingThreshold = 0.05;
 
     /**
      * The minimum fraction of weight required down at least two branches for info
      * gain splitting
      */
-    protected double m_minFracWeightForTwoBranchesGain = 0.01;
+    protected double minFracWeightForTwoBranchesGain = 0.01;
 
     /** The splitting metric to use */
     protected int m_selectedSplitMetric = INFO_GAIN_SPLIT;
     protected SplitMetric m_splitMetric = new InfoGainSplitMetric(
-            m_minFracWeightForTwoBranchesGain);
+            minFracWeightForTwoBranchesGain);
 
     /** The leaf prediction strategy to use */
     protected int m_leafStrategy = LEAF_NB_ADAPTIVE;
@@ -72,11 +64,11 @@ public class HoeffdingTree extends AbstractClassifier implements
      * The number of instances (total weight) a leaf should observe before
      * allowing naive Bayes to make predictions
      */
-    protected double m_nbThreshold = 0;
+    protected double nbThreshold = 0;
 
-    protected int m_activeLeafCount;
-    protected int m_inactiveLeafCount;
-    protected int m_decisionNodeCount;
+    protected int activeLeafCount;
+    protected int inactiveLeafCount;
+    protected int decisionNodeCount;
 
     public static final int GINI_SPLIT = 0;
     public static final int INFO_GAIN_SPLIT = 1;
@@ -97,11 +89,11 @@ public class HoeffdingTree extends AbstractClassifier implements
 
 
     protected void reset() {
-        m_root = null;
+        rootNode = null;
 
-        m_activeLeafCount = 0;
-        m_inactiveLeafCount = 0;
-        m_decisionNodeCount = 0;
+        activeLeafCount = 0;
+        inactiveLeafCount = 0;
+        decisionNodeCount = 0;
     }
 
 
@@ -114,11 +106,11 @@ public class HoeffdingTree extends AbstractClassifier implements
     public void buildClassifier(Instances data) throws Exception {
         reset();
 
-        m_header = new Instances(data, 0);
+        header = new Instances(data, 0);
         if (m_selectedSplitMetric == GINI_SPLIT) {
             m_splitMetric = new GiniSplitMetric();
         } else {
-            m_splitMetric = new InfoGainSplitMetric(m_minFracWeightForTwoBranchesGain);
+            m_splitMetric = new InfoGainSplitMetric(minFracWeightForTwoBranchesGain);
         }
 
         data = new Instances(data);
@@ -141,15 +133,15 @@ public class HoeffdingTree extends AbstractClassifier implements
             return;
         }
 
-        if (m_root == null) {
-            m_root = newLearningNode();
+        if (rootNode == null) {
+            rootNode = newLearningNode();
         }
 
-        LeafNode l = m_root.leafForInstance(inst, null, null);
-        HNode actualNode = l.m_theNode;
+        LeafNode l = rootNode.leafForInstance(inst, null, null);
+        HNode actualNode = l.actualNode;
         if (actualNode == null) {
             actualNode = new ActiveHNode();
-            l.m_parentNode.setChild(l.m_parentBranch, actualNode);
+            l.parentNode.setChild(l.parentBranch, actualNode);
         }
 
         if (actualNode instanceof LearningNode) {
@@ -158,12 +150,12 @@ public class HoeffdingTree extends AbstractClassifier implements
             if (/* m_growthAllowed && */actualNode instanceof ActiveHNode) {
                 double totalWeight = actualNode.totalWeight();
                 if (totalWeight
-                        - ((ActiveHNode) actualNode).m_weightSeenAtLastSplitEval > m_gracePeriod) {
+                        - ((ActiveHNode) actualNode).weightSeenAtLastSplitEval > gracePeriod) {
 
                     // try a split
-                    trySplit((ActiveHNode) actualNode, l.m_parentNode, l.m_parentBranch);
+                    trySplit((ActiveHNode) actualNode, l.parentNode, l.parentBranch);
 
-                    ((ActiveHNode) actualNode).m_weightSeenAtLastSplitEval = totalWeight;
+                    ((ActiveHNode) actualNode).weightSeenAtLastSplitEval = totalWeight;
                 }
             }
         }
@@ -176,15 +168,7 @@ public class HoeffdingTree extends AbstractClassifier implements
      * @throws Exception if a problem occurs
      */
     protected ActiveHNode newLearningNode() throws Exception {
-        ActiveHNode newChild=null;
-        newChild = new ActiveHNode();
-      /*  else if (m_leafStrategy == LEAF_NB) {
-            newChild = new NBNode(m_header, m_nbThreshold);
-        } else {
-            newChild = new NBNodeAdaptive(m_header, m_nbThreshold);
-        }*/
-
-        return newChild;
+        return new NBNode(header, nbThreshold);
     }
 
     /**
@@ -208,15 +192,15 @@ public class HoeffdingTree extends AbstractClassifier implements
                 doSplit = bestSplits.size() > 0;
             } else {
                 // compute the Hoeffding bound
-                double metricMax = m_splitMetric.getMetricRange(node.m_classDistribution);
+                double metricMax = m_splitMetric.getMetricRange(node.weightedClassDist);
                 double hoeffdingBound = computeHoeffdingBound(metricMax,
-                        m_splitConfidence, node.totalWeight());
+                        splitConfidence, node.totalWeight());
 
                 SplitCandidate best = bestSplits.get(bestSplits.size() - 1);
                 SplitCandidate secondBest = bestSplits.get(bestSplits.size() - 2);
 
-                if (best.m_splitMerit - secondBest.m_splitMerit > hoeffdingBound
-                        || hoeffdingBound < m_hoeffdingTieThreshold) {
+                if (best.splitMerit - secondBest.splitMerit > hoeffdingBound
+                        || hoeffdingBound < hoeffdingThreshold) {
                     doSplit = true;
                 }
 
@@ -226,36 +210,36 @@ public class HoeffdingTree extends AbstractClassifier implements
             if (doSplit) {
                 SplitCandidate best = bestSplits.get(bestSplits.size() - 1);
 
-                if (best.m_splitTest == null) {
+                if (best.splitTest == null) {
                     // preprune
                     deactivateNode(node, parent, parentBranch);
                 } else {
-                    SplitNode newSplit = new SplitNode(node.m_classDistribution,
-                            best.m_splitTest);
+                    SplitNode newSplit = new SplitNode(node.weightedClassDist,
+                            best.splitTest);
 
                     for (int i = 0; i < best.numSplits(); i++) {
                         ActiveHNode newChild = newLearningNode();
-                        newChild.m_classDistribution = best.m_postSplitClassDistributions
+                        newChild.weightedClassDist = best.postSplitClassDistributions
                                 .get(i);
-                        newChild.m_weightSeenAtLastSplitEval = newChild.totalWeight();
+                        newChild.weightSeenAtLastSplitEval = newChild.totalWeight();
                         String branchName = "";
-                        if (m_header.attribute(best.m_splitTest.splitAttributes().get(0))
+                        if (header.attribute(best.splitTest.splitAttributes().get(0))
                                 .isNumeric()) {
                             branchName = i == 0 ? "left" : "right";
                         } else {
-                            Attribute splitAtt = m_header.attribute(best.m_splitTest
+                            Attribute splitAtt = header.attribute(best.splitTest
                                     .splitAttributes().get(0));
                             branchName = splitAtt.value(i);
                         }
                         newSplit.setChild(branchName, newChild);
                     }
 
-                    m_activeLeafCount--;
-                    m_decisionNodeCount++;
-                    m_activeLeafCount += best.numSplits();
+                    activeLeafCount--;
+                    decisionNodeCount++;
+                    activeLeafCount += best.numSplits();
 
                     if (parent == null) {
-                        m_root = newSplit;
+                        rootNode = newSplit;
                     } else {
                         parent.setChild(parentBranch, newSplit);
                     }
@@ -272,7 +256,7 @@ public class HoeffdingTree extends AbstractClassifier implements
      * @return the number/weight of instances
      */
     public double getNaiveBayesPredictionThreshold() {
-        return m_nbThreshold;
+        return nbThreshold;
     }
 
     protected static double computeHoeffdingBound(double max, double confidence,
@@ -290,30 +274,29 @@ public class HoeffdingTree extends AbstractClassifier implements
      */
     protected void deactivateNode(ActiveHNode toDeactivate, SplitNode parent,
                                   String parentBranch) {
-        HNode leaf = new InactiveHNode(toDeactivate.m_classDistribution);
+        HNode leaf = new InactiveHNode(toDeactivate.weightedClassDist);
 
         if (parent == null) {
-            m_root = leaf;
+            rootNode = leaf;
         } else {
             parent.setChild(parentBranch, leaf);
         }
-        m_activeLeafCount--;
-        m_inactiveLeafCount++;
+        activeLeafCount--;
+        inactiveLeafCount++;
     }
     public double[] distributionForInstance(Instance inst) throws Exception {
 
         Attribute classAtt = inst.classAttribute();
         double[] pred = new double[classAtt.numValues()];
 
-        if (m_root != null) {
-            LeafNode l = m_root.leafForInstance(inst, null, null);
-            HNode actualNode = l.m_theNode;
+        if (rootNode != null) {
+            LeafNode l = rootNode.leafForInstance(inst, null, null);
+            HNode actualNode = l.actualNode;
 
             if (actualNode == null) {
-                actualNode = l.m_parentNode;
+                actualNode = l.parentNode;
             }
-
-            pred = actualNode.getDistribution(classAtt);
+            pred = actualNode.getDistribution(inst, classAtt);
 
         } else {
             // all class values equally likely

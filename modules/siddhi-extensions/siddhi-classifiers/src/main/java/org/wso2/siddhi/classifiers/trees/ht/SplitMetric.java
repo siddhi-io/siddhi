@@ -25,11 +25,6 @@ import java.util.Map;
 
 public abstract class SplitMetric {
     /**
-     * For serialization
-     */
-    private static final long serialVersionUID = 2891555018707080818L;
-
-    /**
      * Utility method to return the sum of instance weight in a distribution
      *
      * @param dist the distribution
@@ -39,7 +34,7 @@ public abstract class SplitMetric {
         double sum = 0;
 
         for (Map.Entry<String, WeightMass> e : dist.entrySet()) {
-            sum += e.getValue().m_weight;
+            sum += e.getValue().weight;
         }
 
         return sum;

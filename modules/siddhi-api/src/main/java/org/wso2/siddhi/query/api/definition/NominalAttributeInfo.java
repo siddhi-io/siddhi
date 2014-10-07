@@ -30,8 +30,6 @@ import java.util.List;
  * Stores information for nominal and string attributes.
  */
 public class NominalAttributeInfo implements AttributeInfo {
-
-    private static final long serialVersionUID = 8468028833812774844L;
     private static int STRING_COMPRESS_THRESHOLD = 200;
 
     /** The attribute's values. */

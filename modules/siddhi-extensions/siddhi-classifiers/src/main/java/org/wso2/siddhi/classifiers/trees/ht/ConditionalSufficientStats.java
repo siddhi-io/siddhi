@@ -24,14 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class ConditionalSufficientStats {
-
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = 8724787722646808376L;
-
     /** Lookup by class value */
-    protected Map<String, Object> m_classLookup = new HashMap<String, Object>();
+    protected Map<String, Object> classLookup = new HashMap<String, Object>();
 
     /**
      * Update this stat with the supplied attribute value and class value

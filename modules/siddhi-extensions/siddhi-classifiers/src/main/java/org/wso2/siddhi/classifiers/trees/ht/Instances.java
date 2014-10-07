@@ -25,8 +25,6 @@ import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
 import org.wso2.siddhi.core.util.SiddhiEnumeration;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
-import java.io.FileReader;
-import java.io.Reader;
 import java.io.Serializable;
 import java.util.*;
 
@@ -38,7 +36,6 @@ import java.util.*;
  * <p/>
  * <p/>
  * <pre>
- * import weka.core.converters.ConverterUtils.DataSource;
  * ...
  *
  * // Read all the instances in the file (ARFF, CSV, XRFF, ...)
@@ -62,23 +59,6 @@ import java.util.*;
  * changed.
  */
 public class Instances extends AbstractList<Instance> implements Serializable {
-
-    /**
-     * for serialization
-     */
-    static final long serialVersionUID = -19412345060742748L;
-
-    /**
-     * The filename extension that should be used for arff files
-     */
-    public final static String FILE_EXTENSION = ".arff";
-
-    /**
-     * The filename extension that should be used for bin. serialized instances
-     * files
-     */
-    public final static String SERIALIZED_OBJ_FILE_EXTENSION = ".bsi";
-
     /**
      * The keyword used to denote the start of an arff header
      */
@@ -92,29 +72,27 @@ public class Instances extends AbstractList<Instance> implements Serializable {
     /**
      * The dataset's name.
      */
-    protected/* @spec_public non_null@ */ String m_RelationName;
+    protected  String relationName;
 
     /**
      * The attribute information.
      */
-    protected/* @spec_public non_null@ */ List<Attribute> m_Attributes;
+    protected  List<Attribute> attributes;
   /*
-   * public invariant (\forall int i; 0 <= i && i < m_Attributes.size();
-   * m_Attributes.get(i) != null);
+   * public invariant (\forall int i; 0 <= i && i < attributes.size();
+   * attributes.get(i) != null);
    */
 
     /**
      * The instances.
      */
-    protected/* @spec_public non_null@ */ ArrayList<Instance> m_Instances;
+    protected  ArrayList<Instance> instances;
 
     /**
      * The class attribute's index
      */
-    protected int m_ClassIndex;
-    // @ protected invariant classIndex() == m_ClassIndex;
-
-    protected int m_Lines = 0;
+    protected int classIndex;
+    // @ protected invariant classIndex() == classIndex;
 
 
     /**
@@ -123,7 +101,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @param dataset the set to be copied
      */
-    public Instances(/* @non_null@ */Instances dataset) {
+    public Instances(Instances dataset) {
 
         this(dataset, dataset.numInstances());
 
@@ -139,7 +117,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *                 taken
      * @param capacity the capacity of the new dataset
      */
-    public Instances(/* @non_null@ */Instances dataset, int capacity) {
+    public Instances(Instances dataset, int capacity) {
         initialize(dataset, capacity);
     }
 
@@ -157,10 +135,10 @@ public class Instances extends AbstractList<Instance> implements Serializable {
 
         // Strings only have to be "shallow" copied because
         // they can't be modified.
-        m_ClassIndex = dataset.m_ClassIndex;
-        m_RelationName = dataset.m_RelationName;
-        m_Attributes = dataset.m_Attributes;
-        m_Instances = new ArrayList<Instance>(capacity);
+        classIndex = dataset.classIndex;
+        relationName = dataset.relationName;
+        attributes = dataset.attributes;
+        instances = new ArrayList<Instance>(capacity);
     }
 
     /**
@@ -174,7 +152,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
     // @ requires 0 <= first;
     // @ requires 0 <= toCopy;
     // @ requires first + toCopy <= source.numInstances();
-    public Instances(/* @non_null@ */Instances source, int first, int toCopy) {
+    public Instances(Instances source, int first, int toCopy) {
 
         this(source, toCopy);
 
@@ -213,13 +191,13 @@ public class Instances extends AbstractList<Instance> implements Serializable {
         }
         names.clear();
 
-        m_RelationName = name;
-        m_ClassIndex = -1;
-        m_Attributes = attInfo;
+        relationName = name;
+        classIndex = -1;
+        attributes = attInfo;
         for (int i = 0; i < numAttributes(); i++) {
             attribute(i).setIndex(i);
         }
-        m_Instances = new ArrayList<Instance>(capacity);
+        instances = new ArrayList<Instance>(capacity);
     }
 
 
@@ -232,12 +210,12 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @param instance the instance to be added
      */
     @Override
-    public boolean add(/* @non_null@ */Instance instance) {
+    public boolean add(Instance instance) {
 
         Instance newInstance = (Instance) instance.copy();
 
         newInstance.setDataset(this);
-        m_Instances.add(newInstance);
+        instances.add(newInstance);
 
         return true;
     }
@@ -253,14 +231,14 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @param instance the instance to be added
      */
     // @ requires 0 <= index;
-    // @ requires index < m_Instances.size();
+    // @ requires index < instances.size();
     @Override
-    public void add(int index, /* @non_null@ */Instance instance) {
+    public void add(int index, Instance instance) {
 
         Instance newInstance = (Instance) instance.copy();
 
         newInstance.setDataset(this);
-        m_Instances.add(index, newInstance);
+        instances.add(index, newInstance);
     }
 
     /**
@@ -270,11 +248,11 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @return the attribute at the given position
      */
     // @ requires 0 <= index;
-    // @ requires index < m_Attributes.size();
+    // @ requires index < attributes.size();
     // @ ensures \result != null;
-    public/* @pure@ */Attribute attribute(int index) {
+    public Attribute attribute(int index) {
 
-        return m_Attributes.get(index);
+        return attributes.get(index);
     }
 
     /**
@@ -286,7 +264,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @return the attribute with the given name, null if the attribute can't be
      * found
      */
-    public/* @pure@ */Attribute attribute(String name) {
+    public Attribute attribute(String name) {
 
         for (int i = 0; i < numAttributes(); i++) {
             if (attribute(i).getName().equals(name)) {
@@ -306,7 +284,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
 
         int i = 0;
 
-        while (i < m_Attributes.size()) {
+        while (i < attributes.size()) {
             if (attribute(i++).getType().ordinal() == attType) {
                 return true;
             }
@@ -319,7 +297,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @return true if string attributes are present, false otherwise
      */
-    public/* @pure@ */boolean checkForStringAttributes() {
+    public boolean checkForStringAttributes() {
         return checkForAttributeType(Attribute.Type.STRING.ordinal());
     }
 
@@ -331,7 +309,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @param instance the instance to check
      * @return true if the instance is compatible with the dataset
      */
-    public/* @pure@ */boolean checkInstance(Instance instance) {
+    public boolean checkInstance(Instance instance) {
 
         if (instance.numAttributes() != numAttributes()) {
             return false;
@@ -358,12 +336,12 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @throws UnassignedClassException if the class is not set
      */
     // @ requires classIndex() >= 0;
-    public/* @pure@ */Attribute classAttribute() {
+    public Attribute classAttribute() {
 
-        if (m_ClassIndex < 0) {
+        if (classIndex < 0) {
             throw new UnassignedClassException("Class index is negative (not set)!");
         }
-        return attribute(m_ClassIndex);
+        return attribute(classIndex);
     }
 
     /**
@@ -372,10 +350,10 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @return the class index as an integer
      */
-    // ensures \result == m_ClassIndex;
-    public/* @pure@ */int classIndex() {
+    // ensures \result == classIndex;
+    public int classIndex() {
 
-        return m_ClassIndex;
+        return classIndex;
     }
 
     /**
@@ -384,7 +362,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     public void compactify() {
 
-        m_Instances.trimToSize();
+        instances.trimToSize();
     }
 
     /**
@@ -392,7 +370,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     public void delete() {
 
-        m_Instances = new ArrayList<Instance>();
+        instances = new ArrayList<Instance>();
     }
 
     /**
@@ -403,7 +381,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
     // @ requires 0 <= index && index < numInstances();
     public void delete(int index) {
 
-        m_Instances.remove(index);
+        instances.remove(index);
     }
 
     /**
@@ -420,24 +398,24 @@ public class Instances extends AbstractList<Instance> implements Serializable {
     // @ requires position != classIndex();
     public void deleteAttributeAt(int position) {
 
-        if ((position < 0) || (position >= m_Attributes.size())) {
+        if ((position < 0) || (position >= attributes.size())) {
             throw new IllegalArgumentException("Index out of range");
         }
-        if (position == m_ClassIndex) {
+        if (position == classIndex) {
             throw new IllegalArgumentException("Can't delete class attribute");
         }
 
-        ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size() - 1);
-        newList.addAll(m_Attributes.subList(0, position));
-        for (int i = position + 1; i < m_Attributes.size(); i++) {
-            Attribute newAtt = (Attribute) m_Attributes.get(i).copy();
+        ArrayList<Attribute> newList = new ArrayList<Attribute>(attributes.size() - 1);
+        newList.addAll(attributes.subList(0, position));
+        for (int i = position + 1; i < attributes.size(); i++) {
+            Attribute newAtt = (Attribute) attributes.get(i).copy();
             newAtt.setIndex(i - 1);
             newList.add(newAtt);
         }
-        m_Attributes = newList;
+        attributes = newList;
 
-        if (m_ClassIndex > position) {
-            m_ClassIndex--;
+        if (classIndex > position) {
+            classIndex--;
         }
         for (int i = 0; i < numInstances(); i++) {
             instance(i).setDataset(null);
@@ -456,7 +434,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     public void deleteAttributeType(int attType) {
         int i = 0;
-        while (i < m_Attributes.size()) {
+        while (i < attributes.size()) {
             if (attribute(i).getType().ordinal() == attType) {
                 deleteAttributeAt(i);
             } else {
@@ -494,7 +472,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
                 newInstances.add(instance(i));
             }
         }
-        m_Instances = newInstances;
+        instances = newInstances;
     }
 
     /**
@@ -503,7 +481,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @param att the attribute
      */
-    public void deleteWithMissing(/* @non_null@ */Attribute att) {
+    public void deleteWithMissing(Attribute att) {
 
         deleteWithMissing(att.getIndex());
     }
@@ -513,10 +491,10 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     public void deleteWithMissingClass() {
 
-        if (m_ClassIndex < 0) {
+        if (classIndex < 0) {
             throw new UnassignedClassException("Class index is negative (not set)!");
         }
-        deleteWithMissing(m_ClassIndex);
+        deleteWithMissing(classIndex);
     }
 
 
@@ -530,17 +508,17 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     public String equalHeadersMsg(Instances dataset) {
         // Check class and all attributes
-        if (m_ClassIndex != dataset.m_ClassIndex) {
-            return "Class index differ: " + (m_ClassIndex + 1) + " != "
-                    + (dataset.m_ClassIndex + 1);
+        if (classIndex != dataset.classIndex) {
+            return "Class index differ: " + (classIndex + 1) + " != "
+                    + (dataset.classIndex + 1);
         }
 
-        if (m_Attributes.size() != dataset.m_Attributes.size()) {
-            return "Different number of attributes: " + m_Attributes.size() + " != "
-                    + dataset.m_Attributes.size();
+        if (attributes.size() != dataset.attributes.size()) {
+            return "Different number of attributes: " + attributes.size() + " != "
+                    + dataset.attributes.size();
         }
 
-        for (int i = 0; i < m_Attributes.size(); i++) {
+        for (int i = 0; i < attributes.size(); i++) {
             if (dataset.attribute(i) == null) {
                 return "Attributes differ at position " + (i + 1) + ":\n";
             }
@@ -556,7 +534,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @return true if the header of the given dataset is equivalent to this
      * header
      */
-    public/* @pure@ */boolean equalHeaders(Instances dataset) {
+    public boolean equalHeaders(Instances dataset) {
         return (equalHeadersMsg(dataset) == null);
     }
 
@@ -568,7 +546,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
     // @ requires numInstances() > 0;
     public/* @non_null pure@ */Instance firstInstance() {
 
-        return m_Instances.get(0);
+        return instances.get(0);
     }
 
     /**
@@ -601,9 +579,9 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     // @ requires 0 <= position;
     // @ requires position <= numAttributes();
-    public void insertAttributeAt(/* @non_null@ */Attribute att, int position) {
+    public void insertAttributeAt(Attribute att, int position) {
 
-        if ((position < 0) || (position > m_Attributes.size())) {
+        if ((position < 0) || (position > attributes.size())) {
             throw new IllegalArgumentException("Index out of range");
         }
         if (attribute(att.getName()) != null) {
@@ -613,23 +591,23 @@ public class Instances extends AbstractList<Instance> implements Serializable {
         att = (Attribute) att.copy();
         att.setIndex(position);
 
-        ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size() + 1);
-        newList.addAll(m_Attributes.subList(0, position));
+        ArrayList<Attribute> newList = new ArrayList<Attribute>(attributes.size() + 1);
+        newList.addAll(attributes.subList(0, position));
         newList.add(att);
-        for (int i = position; i < m_Attributes.size(); i++) {
-            Attribute newAtt = (Attribute) m_Attributes.get(i).copy();
+        for (int i = position; i < attributes.size(); i++) {
+            Attribute newAtt = (Attribute) attributes.get(i).copy();
             newAtt.setIndex(i + 1);
             newList.add(newAtt);
         }
-        m_Attributes = newList;
+        attributes = newList;
 
         for (int i = 0; i < numInstances(); i++) {
             instance(i).setDataset(null);
             instance(i).insertAttributeAt(position);
             instance(i).setDataset(this);
         }
-        if (m_ClassIndex >= position) {
-            m_ClassIndex++;
+        if (classIndex >= position) {
+            classIndex++;
         }
     }
 
@@ -643,7 +621,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
     // @ requires index < numInstances();
     public/* @non_null pure@ */Instance instance(int index) {
 
-        return m_Instances.get(index);
+        return instances.get(index);
     }
 
     /**
@@ -657,7 +635,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
     @Override
     public/* @non_null pure@ */Instance get(int index) {
 
-        return m_Instances.get(index);
+        return instances.get(index);
     }
 
     /**
@@ -668,7 +646,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
     // @ requires numInstances() > 0;
     public/* @non_null pure@ */Instance lastInstance() {
 
-        return m_Instances.get(m_Instances.size() - 1);
+        return instances.get(instances.size() - 1);
     }
 
 
@@ -677,10 +655,10 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @return the number of attributes as an integer
      */
-    // @ ensures \result == m_Attributes.size();
-    public/* @pure@ */int numAttributes() {
+    // @ ensures \result == attributes.size();
+    public int numAttributes() {
 
-        return m_Attributes.size();
+        return attributes.size();
     }
 
     /**
@@ -691,9 +669,9 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @throws UnassignedClassException if the class is not set
      */
     // @ requires classIndex() >= 0;
-    public/* @pure@ */int numClasses() {
+    public int numClasses() {
 
-        if (m_ClassIndex < 0) {
+        if (classIndex < 0) {
             throw new UnassignedClassException("Class index is negative (not set)!");
         }
         if (!classAttribute().isNominal()) {
@@ -713,7 +691,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     // @ requires 0 <= attIndex;
     // @ requires attIndex < numAttributes();
-    public/* @pure@ */int numDistinctValues(int attIndex) {
+    public int numDistinctValues(int attIndex) {
 
         if (attribute(attIndex).isNumeric()) {
             double[] attVals = attributeToDoubleArray(attIndex);
@@ -744,7 +722,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @param att the attribute
      * @return the number of distinct values of a given attribute
      */
-    public/* @pure@ */int numDistinctValues(/* @non_null@ */Attribute att) {
+    public int numDistinctValues(Attribute att) {
 
         return numDistinctValues(att.getIndex());
     }
@@ -754,10 +732,10 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @return the number of instances in the dataset as an integer
      */
-    // @ ensures \result == m_Instances.size();
-    public/* @pure@ */int numInstances() {
+    // @ ensures \result == instances.size();
+    public int numInstances() {
 
-        return m_Instances.size();
+        return instances.size();
     }
 
     /**
@@ -765,11 +743,11 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @return the number of instances in the dataset as an integer
      */
-    // @ ensures \result == m_Instances.size();
+    // @ ensures \result == instances.size();
     @Override
-    public/* @pure@ */int size() {
+    public int size() {
 
-        return m_Instances.size();
+        return instances.size();
     }
 
     /**
@@ -798,14 +776,14 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     // @ requires 0 <= position;
     // @ requires position <= numAttributes();
-    public void replaceAttributeAt(/* @non_null@ */Attribute att, int position) {
+    public void replaceAttributeAt(Attribute att, int position) {
 
-        if ((position < 0) || (position > m_Attributes.size())) {
+        if ((position < 0) || (position > attributes.size())) {
             throw new IllegalArgumentException("Index out of range");
         }
 
         // Does the new attribute have a different name?
-        if (!att.getName().equals(m_Attributes.get(position).getName())) {
+        if (!att.getName().equals(attributes.get(position).getName())) {
 
             // Need to check if attribute name already exists
             Attribute candidate = attribute(att.getName());
@@ -818,19 +796,19 @@ public class Instances extends AbstractList<Instance> implements Serializable {
         att = (Attribute) att.copy();
         att.setIndex(position);
 
-        ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size());
-        newList.addAll(m_Attributes.subList(0, position));
+        ArrayList<Attribute> newList = new ArrayList<Attribute>(attributes.size());
+        newList.addAll(attributes.subList(0, position));
         newList.add(att);
-        newList.addAll(m_Attributes.subList(position + 1, m_Attributes.size()));
-        m_Attributes = newList;
+        newList.addAll(attributes.subList(position + 1, attributes.size()));
+        attributes = newList;
 
         for (int i = 0; i < numInstances(); i++) {
             instance(i).setDataset(null);
             instance(i).setMissing(position);
             instance(i).setDataset(this);
         }
-        if (m_ClassIndex >= position) {
-            m_ClassIndex++;
+        if (classIndex >= position) {
+            classIndex++;
         }
     }
 
@@ -839,10 +817,10 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @return the relation's name as a string
      */
-    // @ ensures \result == m_RelationName;
-    public/* @pure@ */String relationName() {
+    // @ ensures \result == relationName;
+    public String relationName() {
 
-        return m_RelationName;
+        return relationName;
     }
 
     /**
@@ -856,7 +834,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
     @Override
     public Instance remove(int index) {
 
-        return m_Instances.remove(index);
+        return instances.remove(index);
     }
 
     /**
@@ -879,14 +857,14 @@ public class Instances extends AbstractList<Instance> implements Serializable {
 
         Attribute newAtt = attribute(att).copy(name);
         ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
-        for (Attribute attr : m_Attributes) {
+        for (Attribute attr : attributes) {
             if (attr.getIndex() == att) {
                 newVec.add(newAtt);
             } else {
                 newVec.add(attr);
             }
         }
-        m_Attributes = newVec;
+        attributes = newVec;
     }
 
     /**
@@ -914,14 +892,14 @@ public class Instances extends AbstractList<Instance> implements Serializable {
         ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
 
         newAtt.setValue(val, name);
-        for (Attribute attr : m_Attributes) {
+        for (Attribute attr : attributes) {
             if (attr.getIndex() == att) {
                 newVec.add(newAtt);
             } else {
                 newVec.add(attr);
             }
         }
-        m_Attributes = newVec;
+        attributes = newVec;
     }
 
     /**
@@ -1183,15 +1161,15 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @return the instance previously at that position
      */
     // @ requires 0 <= index;
-    // @ requires index < m_Instances.size();
+    // @ requires index < instances.size();
     @Override
-    public Instance set(int index, /* @non_null@ */Instance instance) {
+    public Instance set(int index, Instance instance) {
 
         Instance newInstance = (Instance) instance.copy();
-        Instance oldInstance = m_Instances.get(index);
+        Instance oldInstance = instances.get(index);
 
         newInstance.setDataset(this);
-        m_Instances.set(index, newInstance);
+        instances.set(index, newInstance);
 
         return oldInstance;
     }
@@ -1203,7 +1181,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     public void setClass(Attribute att) {
 
-        m_ClassIndex = att.getIndex();
+        classIndex = att.getIndex();
     }
 
     /**
@@ -1218,7 +1196,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
         if (classIndex >= numAttributes()) {
             throw new IllegalArgumentException("Invalid class index: " + classIndex);
         }
-        m_ClassIndex = classIndex;
+        this.classIndex = classIndex;
     }
 
     /**
@@ -1226,9 +1204,9 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @param newName the new relation name.
      */
-    public void setRelationName(/* @non_null@ */String newName) {
+    public void setRelationName(String newName) {
 
-        m_RelationName = newName;
+        relationName = newName;
     }
 
     /**
@@ -1257,7 +1235,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
 
         int[] sortOrder = Utils.sortWithNoMissingValues(vals);
         for (int i = 0; i < vals.length; i++) {
-            m_Instances.set(i, backup[sortOrder[i]]);
+            instances.set(i, backup[sortOrder[i]]);
         }
     }
 
@@ -1289,7 +1267,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
             throw new IllegalArgumentException(
                     "Number of folds must be greater than 1");
         }
-        if (m_ClassIndex < 0) {
+        if (classIndex < 0) {
             throw new UnassignedClassException("Class index is negative (not set)!");
         }
         if (classAttribute().isNominal()) {
@@ -1317,7 +1295,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @return the sum of all the instances' weights as a double
      */
-    public/* @pure@ */double sumOfWeights() {
+    public double sumOfWeights() {
 
         double sum = 0;
 
@@ -1375,7 +1353,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
 
         StringBuffer text = new StringBuffer();
 
-        text.append(ARFF_RELATION).append(" ").append(Utils.quote(m_RelationName))
+        text.append(ARFF_RELATION).append(" ").append(Utils.quote(relationName))
                 .append("\n\n");
         for (int i = 0; i < numAttributes(); i++) {
             text.append(attribute(i)).append("\n");
@@ -1475,7 +1453,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @return the variance if the attribute is numeric
      * @throws IllegalArgumentException if the attribute is not numeric
      */
-    public/* @pure@ */double variance(int attIndex) {
+    public double variance(int attIndex) {
 
         double sum = 0, sumSquared = 0, sumOfWeights = 0;
 
@@ -1512,7 +1490,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * @return the variance if the attribute is numeric
      * @throws IllegalArgumentException if the attribute is not numeric
      */
-    public/* @pure@ */double variance(Attribute att) {
+    public double variance(Attribute att) {
 
         return variance(att.index());
     }
@@ -1573,7 +1551,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      * instance in the dataset.
      */
     // @ requires 0 <= index && index < numAttributes();
-    public/* @pure@ */double[] attributeToDoubleArray(int index) {
+    public double[] attributeToDoubleArray(int index) {
 
         double[] result = new double[numInstances()];
         for (int i = 0; i < result.length; i++) {
@@ -1684,7 +1662,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     // @ requires 0 <= from && from <= numInstances() - num;
     // @ requires 0 <= num;
-    protected void copyInstances(int from, /* @non_null@ */Instances dest, int num) {
+    protected void copyInstances(int from, Instances dest, int num) {
 
         for (int i = 0; i < num; i++) {
             dest.add(instance(from + i));
@@ -1696,11 +1674,11 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     protected void freshAttributeInfo() {
 
-        ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size());
-        for (Attribute att : m_Attributes) {
+        ArrayList<Attribute> newList = new ArrayList<Attribute>(attributes.size());
+        for (Attribute att : attributes) {
             newList.add((Attribute) att.copy());
         }
-        m_Attributes = newList;
+        attributes = newList;
     }
 
     /**
@@ -1709,7 +1687,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      *
      * @return description of instance and its weight as a string
      */
-    protected/* @pure@ */String instancesAndWeights() {
+    protected String instancesAndWeights() {
 
         StringBuffer text = new StringBuffer();
 
@@ -1729,7 +1707,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     protected void stratStep(int numFolds) {
 
-        ArrayList<Instance> newVec = new ArrayList<Instance>(m_Instances.size());
+        ArrayList<Instance> newVec = new ArrayList<Instance>(instances.size());
         int start = 0, j;
 
         // create stratified batch
@@ -1741,7 +1719,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
             }
             start++;
         }
-        m_Instances = newVec;
+        instances = newVec;
     }
 
     /**
@@ -1754,9 +1732,9 @@ public class Instances extends AbstractList<Instance> implements Serializable {
     // @ requires 0 <= j && j < numInstances();
     public void swap(int i, int j) {
 
-        Instance in = m_Instances.get(i);
-        m_Instances.set(i, m_Instances.get(j));
-        m_Instances.set(j, in);
+        Instance in = instances.get(i);
+        instances.set(i, instances.get(j));
+        instances.set(j, in);
     }
 
     /**
@@ -1778,10 +1756,10 @@ public class Instances extends AbstractList<Instance> implements Serializable {
 
         // Create the vector of merged attributes
         ArrayList<Attribute> newAttributes = new ArrayList<Attribute>();
-        for (Attribute att : first.m_Attributes) {
+        for (Attribute att : first.attributes) {
             newAttributes.add(att);
         }
-        for (Attribute att : second.m_Attributes) {
+        for (Attribute att : second.attributes) {
             newAttributes.add((Attribute) att.copy()); // Need to copy because indices will change.
         }
 
@@ -1797,7 +1775,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
 
     public/* @non_null pure@ */Enumeration<Attribute> enumerateAttributes() {
 
-        return new SiddhiEnumeration<Attribute>(m_Attributes, m_ClassIndex);
+        return new SiddhiEnumeration<Attribute>(attributes, classIndex);
     }
 
     /**
@@ -1807,7 +1785,7 @@ public class Instances extends AbstractList<Instance> implements Serializable {
      */
     public/* @non_null pure@ */Enumeration<Instance> enumerateInstances() {
 
-        return new SiddhiEnumeration<Instance>(m_Instances);
+        return new SiddhiEnumeration<Instance>(instances);
     }
 }
 

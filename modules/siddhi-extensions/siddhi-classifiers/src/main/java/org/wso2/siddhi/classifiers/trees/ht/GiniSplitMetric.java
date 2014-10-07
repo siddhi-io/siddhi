@@ -25,11 +25,6 @@ import java.util.Map;
 
 public class GiniSplitMetric extends SplitMetric {
 
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = -2037586582742660298L;
-
     @Override
     public double evaluateSplit(Map<String, WeightMass> preDist,
                                 List<Map<String, WeightMass>> postDist) {
@@ -60,7 +55,7 @@ public class GiniSplitMetric extends SplitMetric {
         double gini = 1.0;
 
         for (Map.Entry<String, WeightMass> e : dist.entrySet()) {
-            double frac = e.getValue().m_weight / sumOfWeights;
+            double frac = e.getValue().weight / sumOfWeights;
             gini -= frac * frac;
         }
 
@@ -70,7 +65,7 @@ public class GiniSplitMetric extends SplitMetric {
     /**
      * Return the gini metric computed from the supplied distribution
      *
-     * @param dist dist the distribution to compute the gini metric from
+     * @param dist distribution the distribution to compute the gini metric from
      * @return
      */
     public static double gini(Map<String, WeightMass> dist) {

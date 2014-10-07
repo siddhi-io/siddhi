@@ -20,20 +20,23 @@
 */
 package org.wso2.siddhi.classifiers.trees.ht.nodes;
 
+import org.wso2.siddhi.classifiers.bayes.NaiveBayes;
 import org.wso2.siddhi.classifiers.bayes.NaiveBayesUpdateable;
 import org.wso2.siddhi.classifiers.trees.ht.ActiveHNode;
+import org.wso2.siddhi.classifiers.trees.ht.Instance;
 import org.wso2.siddhi.classifiers.trees.ht.Instances;
+import org.wso2.siddhi.query.api.definition.Attribute;
 
 public class NBNode extends ActiveHNode implements LearningNode {
-
+/*
     /** The naive Bayes model at the node */
-    protected NaiveBayesUpdateable m_bayes;
+    protected NaiveBayes bayes;
 
     /**
      * The weight of instances that need to be seen by this node before allowing
      * naive Bayes to make predictions
      */
-    protected double m_nbWeightThreshold;
+    protected double naiveBayesThreshold;
 
     /**
      * Construct a new NBNode
@@ -44,9 +47,9 @@ public class NBNode extends ActiveHNode implements LearningNode {
      * @throws Exception if a problem occurs
      */
     public NBNode(Instances header, double nbWeightThreshold) throws Exception {
-        m_nbWeightThreshold = nbWeightThreshold;
-        m_bayes = new NaiveBayesUpdateable();
-        m_bayes.buildClassifier(header);
+        naiveBayesThreshold = nbWeightThreshold;
+        bayes = new NaiveBayesUpdateable();
+        bayes.buildClassifier(header);
     }
 
     @Override
@@ -54,45 +57,26 @@ public class NBNode extends ActiveHNode implements LearningNode {
         super.updateNode(inst);
 
         try {
-            m_bayes.updateClassifier(inst);
+            bayes.updateClassifier(inst);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    protected double[] bypassNB(Instance inst, Attribute classAtt)
-            throws Exception {
-        return super.getDistribution(inst, classAtt);
     }
 
     @Override
     public double[] getDistribution(Instance inst, Attribute classAtt)
             throws Exception {
 
-        // totalWeight - m_weightSeenAtLastSplitEval is the weight mass
+        // totalWeight - weightSeenAtLastSplitEval is the weight mass
         // observed by this node's NB model
 
-        boolean doNB = m_nbWeightThreshold == 0 ? true : (totalWeight()
-                - m_weightSeenAtLastSplitEval > m_nbWeightThreshold);
+        boolean doNB = naiveBayesThreshold == 0 ? true : (totalWeight()
+                - weightSeenAtLastSplitEval > naiveBayesThreshold);
 
         if (doNB) {
-            return m_bayes.distributionForInstance(inst);
+            return bayes.distributionForInstance(inst);
         }
 
-        return super.getDistribution(inst, classAtt);
-    }
-
-    @Override
-    protected int dumpTree(int depth, int leafCount, StringBuffer buff) {
-        leafCount = super.dumpTree(depth, leafCount, buff);
-
-        buff.append(" NB" + m_leafNum);
-
-        return leafCount;
-    }
-
-    @Override
-    protected void printLeafModels(StringBuffer buff) {
-        buff.append("NB" + m_leafNum).append("\n").append(m_bayes.toString());
+        return super.getDistribution(inst,classAtt);
     }
 }

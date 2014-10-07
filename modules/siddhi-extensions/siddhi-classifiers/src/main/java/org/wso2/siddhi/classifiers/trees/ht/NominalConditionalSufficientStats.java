@@ -26,59 +26,47 @@ import java.io.Serializable;
 import java.util.*;
 
 public class NominalConditionalSufficientStats extends ConditionalSufficientStats {
-
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = -669902060601313488L;
-
     /**
      * Inner class that implements a discrete distribution
      *
      * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
      */
     protected class ValueDistribution implements Serializable {
+        protected final Map<Integer, WeightMass> distribution = new LinkedHashMap<Integer, WeightMass>();
 
-        /**
-         * For serialization
-         */
-        private static final long serialVersionUID = -61711544350888154L;
-
-        protected final Map<Integer, WeightMass> m_dist = new LinkedHashMap<Integer, WeightMass>();
-
-        private double m_sum;
+        private double sum;
 
         public void add(int val, double weight) {
-            WeightMass count = m_dist.get(val);
+            WeightMass count = distribution.get(val);
             if (count == null) {
                 count = new WeightMass();
-                count.m_weight = 1.0;
-                m_sum += 1.0;
-                m_dist.put(val, count);
+                count.weight = 1.0;
+                sum += 1.0;
+                distribution.put(val, count);
             }
-            count.m_weight += weight;
-            m_sum += weight;
+            count.weight += weight;
+            sum += weight;
         }
 
         public void delete(int val, double weight) {
-            WeightMass count = m_dist.get(val);
+            WeightMass count = distribution.get(val);
             if (count != null) {
-                count.m_weight -= weight;
-                m_sum -= weight;
+                count.weight -= weight;
+                sum -= weight;
             }
         }
 
         public double getWeight(int val) {
-            WeightMass count = m_dist.get(val);
+            WeightMass count = distribution.get(val);
             if (count != null) {
-                return count.m_weight;
+                return count.weight;
             }
 
             return 0.0;
         }
 
         public double sum() {
-            return m_sum;
+            return sum;
         }
     }
 
@@ -91,12 +79,12 @@ public class NominalConditionalSufficientStats extends ConditionalSufficientStat
             m_missingWeight += weight;
         } else {
             new Integer((int) attVal);
-            ValueDistribution valDist = (ValueDistribution) m_classLookup
+            ValueDistribution valDist = (ValueDistribution) classLookup
                     .get(classVal);
             if (valDist == null) {
                 valDist = new ValueDistribution();
                 valDist.add((int) attVal, weight);
-                m_classLookup.put(classVal, valDist);
+                classLookup.put(classVal, valDist);
             } else {
                 valDist.add((int) attVal, weight);
             }
@@ -108,7 +96,7 @@ public class NominalConditionalSufficientStats extends ConditionalSufficientStat
     @Override
     public double probabilityOfAttValConditionedOnClass(double attVal,
                                                         String classVal) {
-        ValueDistribution valDist = (ValueDistribution) m_classLookup.get(classVal);
+        ValueDistribution valDist = (ValueDistribution) classLookup.get(classVal);
         if (valDist != null) {
             double prob = valDist.getWeight((int) attVal) / valDist.sum();
             return prob;
@@ -122,11 +110,11 @@ public class NominalConditionalSufficientStats extends ConditionalSufficientStat
         // att index keys to class distribution
         Map<Integer, Map<String, WeightMass>> splitDists = new HashMap<Integer, Map<String, WeightMass>>();
 
-        for (Map.Entry<String, Object> cls : m_classLookup.entrySet()) {
+        for (Map.Entry<String, Object> cls : classLookup.entrySet()) {
             String classVal = cls.getKey();
             ValueDistribution attDist = (ValueDistribution) cls.getValue();
 
-            for (Map.Entry<Integer, WeightMass> att : attDist.m_dist.entrySet()) {
+            for (Map.Entry<Integer, WeightMass> att : attDist.distribution.entrySet()) {
                 Integer attVal = att.getKey();
                 WeightMass attCount = att.getValue();
 
@@ -143,7 +131,7 @@ public class NominalConditionalSufficientStats extends ConditionalSufficientStat
                     clsDist.put(classVal, clsCount);
                 }
 
-                clsCount.m_weight += attCount.m_weight;
+                clsCount.weight += attCount.weight;
             }
 
         }

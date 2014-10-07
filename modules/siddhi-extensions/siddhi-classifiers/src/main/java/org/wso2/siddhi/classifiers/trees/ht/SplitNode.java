@@ -27,16 +27,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SplitNode extends HNode {
-
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = 1558033628618451073L;
-
     /**
      * The split itself
      */
-    protected Split m_split;
+    protected Split split;
 
     /**
      * Child nodes
@@ -52,7 +46,7 @@ public class SplitNode extends HNode {
     public SplitNode(Map<String, WeightMass> classDistrib, Split split) {
         super(classDistrib);
 
-        m_split = split;
+        this.split = split;
     }
 
     /**
@@ -62,7 +56,7 @@ public class SplitNode extends HNode {
      * @return the branch that the supplied instance goes down
      */
     public String branchForInstance(Instance inst) {
-        return m_split.branchForInstance(inst);
+        return split.branchForInstance(inst);
     }
 
     @Override
@@ -125,7 +119,7 @@ public class SplitNode extends HNode {
                     buff.append("|   ");
                 }
 
-                buff.append(m_split.conditionForBranch(branch).trim());
+                buff.append(split.conditionForBranch(branch).trim());
                 buff.append(": ");
                 leafCount = child.dumpTree(depth + 1, leafCount, buff);
             }
@@ -158,7 +152,7 @@ public class SplitNode extends HNode {
             String branch = e.getKey();
 
             if (child != null) {
-                String conditionForBranch = m_split.conditionForBranch(branch);
+                String conditionForBranch = split.conditionForBranch(branch);
                 if (first) {
                     String testAttName = null;
 
@@ -170,7 +164,7 @@ public class SplitNode extends HNode {
                                 conditionForBranch.indexOf("<")).trim();
                     }
                     first = false;
-                    buff.append("N" + m_nodeNum + " [label=\"" + testAttName + "\"]\n");
+                    buff.append("N" + nodeNum + " [label=\"" + testAttName + "\"]\n");
                 }
 
                 int startIndex = 0;
@@ -185,7 +179,7 @@ public class SplitNode extends HNode {
                         conditionForBranch.length()).trim();
 
                 buff.append(
-                        "N" + m_nodeNum + "->" + "N" + child.getM_nodeNum() + "[label=\""
+                        "N" + nodeNum + "->" + "N" + child.getNodeNum() + "[label=\""
                                 + conditionForBranch + "\"]\n").append("\n");
 
             }

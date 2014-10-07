@@ -20,5 +20,7 @@
 */
 package org.wso2.siddhi.classifiers.bayes;
 
-public class NaiveBayesUpdateable {
+public class NaiveBayesUpdateable extends NaiveBayes {
+
 }
+

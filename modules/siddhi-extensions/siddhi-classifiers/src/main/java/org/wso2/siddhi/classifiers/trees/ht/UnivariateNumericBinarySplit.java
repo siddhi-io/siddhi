@@ -24,7 +24,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 
 public class UnivariateNumericBinarySplit extends Split {
     /** The split point */
-    protected double m_splitPoint;
+    protected double splitPoint;
 
     /**
      * Constructor
@@ -33,20 +33,20 @@ public class UnivariateNumericBinarySplit extends Split {
      * @param splitPoint the split point
      */
     public UnivariateNumericBinarySplit(String attName, double splitPoint) {
-        m_splitAttNames.add(attName);
-        m_splitPoint = splitPoint;
+        splitNames.add(attName);
+        this.splitPoint = splitPoint;
     }
 
     @Override
     public String branchForInstance(Instance inst) {
 
-        Attribute att = inst.dataset().attribute(m_splitAttNames.get(0));
+        Attribute att = inst.dataset().attribute(splitNames.get(0));
         if (att == null || inst.isMissing(att)) {
             // TODO -------------
             return null;
         }
 
-        if (inst.value(att) <= m_splitPoint) {
+        if (inst.value(att) <= splitPoint) {
             return "left";
         }
 
@@ -55,7 +55,7 @@ public class UnivariateNumericBinarySplit extends Split {
 
     @Override
     public String conditionForBranch(String branch) {
-        String result = m_splitAttNames.get(0);
+        String result = splitNames.get(0);
 
         if (branch.equalsIgnoreCase("left")) {
             result += " <= ";
@@ -63,7 +63,7 @@ public class UnivariateNumericBinarySplit extends Split {
             result += " > ";
         }
 
-        result += String.format("%-9.3f", m_splitPoint);
+        result += String.format("%-9.3f", splitPoint);
 
         return result;
     }

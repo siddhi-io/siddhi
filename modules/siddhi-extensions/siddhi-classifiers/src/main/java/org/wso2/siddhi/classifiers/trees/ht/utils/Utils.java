@@ -61,7 +61,7 @@ public class Utils {
         }
     }
 
-    public static/* @pure@ */boolean eq(double a, double b) {
+    public static boolean eq(double a, double b) {
 
         return (a == b) || ((a - b < SMALL) && (b - a < SMALL));
     }
@@ -72,7 +72,7 @@ public class Utils {
      * @param a a double
      * @param b a double
      */
-    public static/* @pure@ */boolean sm(double a, double b) {
+    public static boolean sm(double a, double b) {
 
         return (b - a > SMALL);
     }
@@ -84,12 +84,12 @@ public class Utils {
      * @param a a double
      * @param b a double
      */
-    public static/* @pure@ */boolean gr(double a, double b) {
+    public static boolean gr(double a, double b) {
 
         return (a - b > SMALL);
     }
 
-    public static/* @pure@ */int[] sort(/* @non_null@ */double[] array) {
+    public static int[] sort(double[] array) {
 
         int[] index = initialIndex(array.length);
         if (array.length > 1) {
@@ -138,7 +138,7 @@ public class Utils {
         return Double.isNaN(val);
     }
 
-    private static void quickSort(/* @non_null@ */int[] array, /* @non_null@ */
+    private static void quickSort(int[] array,
                                   int[] index, int left, int right) {
 
         if (left < right) {
@@ -148,7 +148,7 @@ public class Utils {
         }
     }
 
-    private static void quickSort(/* @non_null@ */double[] array, /* @non_null@ */
+    private static void quickSort(double[] array,
                                   int[] index, int left, int right) {
 
         int diff = right - left;
@@ -297,8 +297,8 @@ public class Utils {
         return (T) x;
     }
 
-    public static/* @pure@ */int[] sortWithNoMissingValues(
-  /* @non_null@ */double[] array) {
+    public static int[] sortWithNoMissingValues(
+  double[] array) {
 
         int[] index = initialIndex(array.length);
         if (array.length > 1) {
@@ -443,7 +443,7 @@ public class Utils {
      *          decimal point
      * @return the double as a formatted string
      */
-    public static/* @pure@ */String doubleToString(double value,
+    public static String doubleToString(double value,
                                                    int afterDecimalPoint) {
 
         StringBuffer stringBuffer;
@@ -501,7 +501,7 @@ public class Utils {
      * @param afterDecimalPoint the number of digits after the decimal point
      * @return the double as a formatted string
      */
-    public static/* @pure@ */String doubleToString(double value, int width,
+    public static String doubleToString(double value, int width,
                                                    int afterDecimalPoint) {
 
         String tempString = doubleToString(value, afterDecimalPoint);
@@ -591,7 +591,7 @@ public class Utils {
      * @param right true if inserted spaces should be added to the right
      * @return the output string
      */
-    private static/* @pure@ */String fixStringLength(String inString, int length,
+    private static String fixStringLength(String inString, int length,
                                                      boolean right) {
 
         if (inString.length() < length) {
@@ -623,12 +623,12 @@ public class Utils {
      * @param a a double
      * @return the logarithm for base 2
      */
-    public static/* @pure@ */double log2(double a) {
+    public static double log2(double a) {
 
         return Math.log(a) / log2;
     }
 
-    public static/* @pure@ */int maxIndex(double[] doubles) {
+    public static int maxIndex(double[] doubles) {
 
         double maximum = 0;
         int maxIndex = 0;
@@ -643,7 +643,7 @@ public class Utils {
         return maxIndex;
     }
 
-    public static/* @pure@ */int[] stableSort(double[] array) {
+    public static int[] stableSort(double[] array) {
 
         int[] index = initialIndex(array.length);
 

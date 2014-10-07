@@ -23,6 +23,7 @@ package org.wso2.siddhi.classifiers.utils;
 import org.wso2.siddhi.classifiers.trees.ht.DenseInstance;
 import org.wso2.siddhi.classifiers.trees.ht.Instance;
 import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.in.InEvent;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -31,7 +32,7 @@ import java.util.List;
 
 public class InstancesUtil {
 
-    public static DenseInstance getInstance(List<Attribute> attributeList, InEvent events) {
+    public static DenseInstance getInstance(List<Attribute> attributeList, Event events) {
         double[] instance = new double[attributeList.size()];
         for (int i = 0; i < attributeList.size(); i++) {
             String data = (String) events.getData(i);

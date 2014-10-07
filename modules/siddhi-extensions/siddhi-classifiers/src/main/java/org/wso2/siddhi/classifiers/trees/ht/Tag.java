@@ -21,18 +21,14 @@
 package org.wso2.siddhi.classifiers.trees.ht;
 
 public class Tag {
-
-    /** for serialization. */
-    private static final long serialVersionUID = 3326379903447135320L;
-
     /** The ID */
-    protected int m_ID;
+    protected int iD;
 
     /** The unique string for this tag, doesn't have to be numeric */
-    protected String m_IDStr;
+    protected String idString;
 
     /** The descriptive text */
-    protected String m_Readable;
+    protected String readable;
 
     /**
      * Creates a new default Tag
@@ -64,16 +60,16 @@ public class Tag {
     }
 
     public Tag(int ident, String identStr, String readable, boolean upperCase) {
-        m_ID = ident;
+        iD = ident;
         if (identStr.length() == 0) {
-            m_IDStr = "" + ident;
+            idString = "" + ident;
         } else {
-            m_IDStr = identStr;
+            idString = identStr;
             if (upperCase) {
-                m_IDStr = identStr.toUpperCase();
+                idString = identStr.toUpperCase();
             }
         }
-        m_Readable = readable;
+        this.readable = readable;
     }
 
     /**
@@ -82,7 +78,7 @@ public class Tag {
      * @return the ID of the Tag.
      */
     public int getID() {
-        return m_ID;
+        return iD;
     }
 
     /**
@@ -91,7 +87,7 @@ public class Tag {
      * @param id the ID of the Tag.
      */
     public void setID(int id) {
-        m_ID = id;
+        iD = id;
     }
 
     /**
@@ -100,7 +96,7 @@ public class Tag {
      * @return the string ID of the Tag.
      */
     public String getIDStr() {
-        return m_IDStr;
+        return idString;
     }
 
     /**
@@ -109,7 +105,7 @@ public class Tag {
      * @param str the string ID of the Tag.
      */
     public void setIDStr(String str) {
-        m_IDStr = str;
+        idString = str;
     }
 
     /**
@@ -118,7 +114,7 @@ public class Tag {
      * @return the description of the Tag.
      */
     public String getReadable() {
-        return m_Readable;
+        return readable;
     }
 
     /**
@@ -127,7 +123,7 @@ public class Tag {
      * @param r the description of the Tag.
      */
     public void setReadable(String r) {
-        m_Readable = r;
+        readable = r;
     }
 
     /**
@@ -136,7 +132,7 @@ public class Tag {
      * @return the IDStr
      */
     public String toString() {
-        return m_IDStr;
+        return idString;
     }
 
     /**

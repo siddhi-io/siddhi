@@ -22,8 +22,6 @@ package org.wso2.siddhi.classifiers.trees.ht;
 
 import java.io.Serializable;
 
-public class WeightMass implements Serializable {
-    private static final long serialVersionUID = -6994189789686798162L;
-
-    public double m_weight;
+public class WeightMass {
+    public double weight;
 }

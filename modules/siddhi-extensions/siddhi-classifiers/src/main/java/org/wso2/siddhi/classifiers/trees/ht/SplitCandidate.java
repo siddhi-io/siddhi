@@ -25,16 +25,16 @@ import java.util.Map;
 
 public class SplitCandidate implements Comparable<SplitCandidate> {
 
-    public Split m_splitTest;
+    public Split splitTest;
 
     /**
      * list of class distributions resulting from a split - 2 entries in the outer
      * list for numeric splits and n for nominal splits
      */
-    public List<Map<String, WeightMass>> m_postSplitClassDistributions;
+    public List<Map<String, WeightMass>> postSplitClassDistributions;
 
     /** The merit of the split */
-    public double m_splitMerit;
+    public double splitMerit;
 
     /**
      * Constructor
@@ -45,9 +45,9 @@ public class SplitCandidate implements Comparable<SplitCandidate> {
      */
     public SplitCandidate(Split splitTest,
                           List<Map<String, WeightMass>> postSplitDists, double merit) {
-        m_splitTest = splitTest;
-        m_postSplitClassDistributions = postSplitDists;
-        m_splitMerit = merit;
+        this.splitTest = splitTest;
+        postSplitClassDistributions = postSplitDists;
+        splitMerit = merit;
     }
 
     /**
@@ -56,10 +56,10 @@ public class SplitCandidate implements Comparable<SplitCandidate> {
      * @return the number of subsets of instances resulting from the split
      */
     public int numSplits() {
-        return m_postSplitClassDistributions.size();
+        return postSplitClassDistributions.size();
     }
 
     public int compareTo(SplitCandidate comp) {
-        return Double.compare(m_splitMerit, comp.m_splitMerit);
+        return Double.compare(splitMerit, comp.splitMerit);
     }
 }

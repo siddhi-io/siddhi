@@ -25,10 +25,7 @@ import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
 import java.io.Serializable;
 
 
-public class AttributeStats implements Serializable{
-    private static final long serialVersionUID = -2431357803158525767L;
-    /** for serialization */
-
+public class AttributeStats{
     /** The number of int-like values */
     public int intCount = 0;
 

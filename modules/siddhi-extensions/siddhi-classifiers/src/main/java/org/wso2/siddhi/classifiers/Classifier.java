@@ -25,12 +25,7 @@ import org.wso2.siddhi.classifiers.trees.ht.Instances;
 
 /**
  * Classifier interface. All schemes for numeric or nominal prediction in
- * Weka implement this interface. Note that a classifier MUST either implement
- * distributionForInstance() or classifyInstance().
- *
- * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * Siddhi will implement this interface
  */
 public interface Classifier {
 

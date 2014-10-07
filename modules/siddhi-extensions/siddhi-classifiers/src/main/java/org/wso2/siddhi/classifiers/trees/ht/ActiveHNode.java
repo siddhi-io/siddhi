@@ -30,14 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ActiveHNode extends LeafNode implements LearningNode {
-
-    /**
-     * For serialization
-     */
-    private static final long serialVersionUID = 3284585939739561683L;
-
     /** The weight of instances seen at the last split evaluation */
-    public double m_weightSeenAtLastSplitEval = 0;
+    public double weightSeenAtLastSplitEval = 0;
 
     /** Statistics for nominal or numeric attributes conditioned on the class */
     protected Map<String, ConditionalSufficientStats> m_nodeStats = new HashMap<String, ConditionalSufficientStats>();
@@ -78,9 +72,9 @@ public class ActiveHNode extends LeafNode implements LearningNode {
 
         // null split
         List<Map<String, WeightMass>> nullDist = new ArrayList<Map<String, WeightMass>>();
-        nullDist.add(m_classDistribution);
+        nullDist.add(weightedClassDist);
         SplitCandidate nullSplit = new SplitCandidate(null, nullDist,
-                splitMetric.evaluateSplit(m_classDistribution, nullDist));
+                splitMetric.evaluateSplit(weightedClassDist, nullDist));
         splits.add(nullSplit);
 
         for (Map.Entry<String, ConditionalSufficientStats> e : m_nodeStats
@@ -88,7 +82,7 @@ public class ActiveHNode extends LeafNode implements LearningNode {
             ConditionalSufficientStats stat = e.getValue();
 
             SplitCandidate splitCandidate = stat.bestSplit(splitMetric,
-                    m_classDistribution, e.getKey());
+                    weightedClassDist, e.getKey());
 
             if (splitCandidate != null) {
                 splits.add(splitCandidate);

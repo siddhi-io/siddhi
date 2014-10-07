@@ -25,49 +25,42 @@ import org.wso2.siddhi.classifiers.trees.ht.Instance;
 import org.wso2.siddhi.classifiers.trees.ht.Instances;
 import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class Evaluation {
     /**
      * The number of classes.
      */
-    protected int m_NumClasses;
-
-    /**
-     * The number of folds for a cross-validation.
-     */
-    protected int m_NumFolds;
+    protected int classCount; // currently only support 1
 
     /**
      * The weight of all incorrectly classified instances.
      */
-    protected double m_Incorrect;
+    protected double inCorrectResults;
 
     /**
      * The weight of all correctly classified instances.
      */
-    protected double m_Correct;
+    protected double correctResults;
 
     /**
      * The weight of all unclassified instances.
      */
-    protected double m_Unclassified;
+    protected double unClassified;
 
     /**
      * The weight of all instances that had no class assigned to them.
      */
-    protected double m_MissingClass;
+    protected double missingClass;
 
     /**
      * The weight of all instances that had a class assigned to them.
      */
-    protected double m_WithClass;
+    protected double withClass;
 
     /**
      * Array for storing the confusion matrix.
      */
-    protected double[][] m_ConfusionMatrix;
+    protected double[][] confusionMatrix;
 
     /**
      * Is the class nominal or numeric?
@@ -77,103 +70,43 @@ public class Evaluation {
     /**
      * The prior probabilities of the classes.
      */
-    protected double[] m_ClassPriors;
+    protected double[] classPriors;
 
     /**
      * The sum of counts for priors.
      */
-    protected double m_ClassPriorsSum;
-
-    /**
-     * The total cost of predictions (includes instance weights).
-     */
-    protected double m_TotalCost;
-
-    /**
-     * Sum of errors.
-     */
-    protected double m_SumErr;
-
-    /**
-     * Sum of absolute errors.
-     */
-    protected double m_SumAbsErr;
-
-    /**
-     * Sum of squared errors.
-     */
-    protected double m_SumSqrErr;
-
-    /**
-     * Sum of class values.
-     */
-    protected double m_SumClass;
-
-    /**
-     * Sum of squared class values.
-     */
-    protected double m_SumSqrClass;
-
-    /**
-     * Sum of predicted values.
-     */
-    protected double m_SumPredicted;
-
-    /**
-     * Sum of squared predicted values.
-     */
-    protected double m_SumSqrPredicted;
-
-    /**
-     * Sum of predicted * class values.
-     */
-    protected double m_SumClassPredicted;
-
-    /**
-     * Sum of absolute errors of the prior.
-     */
-    protected double m_SumPriorAbsErr;
-
-    /**
-     * Sum of absolute errors of the prior.
-     */
-    protected double m_SumPriorSqrErr;
+    protected double classPriorsSum;
 
     /**
      * Total Kononenko & Bratko Information.
      */
-    protected double m_SumKBInfo;
+    protected double sumKBInfo;
 
     /**
      * Resolution of the margin histogram.
      */
-    protected static int k_MarginResolution = 500;
+    protected static int marginResolution = 500;
 
     /**
      * Cumulative margin distribution.
      */
-    protected double m_MarginCounts[];
+    protected double marginCounts[];
 
     /**
      * Number of non-missing class training instances seen.
      */
-    protected int m_NumTrainClassVals;
+    protected int numTrainClassVals;
 
     /**
      * Array containing all numeric training class values seen.
      */
-    protected double[] m_TrainClassVals;
+    protected double[] trainClassVals;
 
     /**
      * Array containing all numeric training class weights.
      */
-    protected double[] m_TrainClassWeights;
+    protected double[] trainClassWeights;
 
-
-    /**
-     * Whether complexity statistics are available.
-     */
-    protected boolean m_ComplexityStatisticsAvailable = true;
 
     /**
      * The minimum probablility accepted from an estimator to avoid taking log(0)
@@ -184,69 +117,44 @@ public class Evaluation {
     /**
      * Total entropy of prior predictions.
      */
-    protected double m_SumPriorEntropy;
+    protected double sumPriorEntropy;
 
     /**
      * Total entropy of scheme predictions.
      */
-    protected double m_SumSchemeEntropy;
-
-    /**
-     * Whether coverage statistics are available.
-     */
-    protected boolean m_CoverageStatisticsAvailable = true;
+    protected double sumSchemeEntropy;
 
     /**
      * The confidence level used for coverage statistics.
      */
-    protected double m_ConfLevel = 0.95;
+    protected double confLevel = 0.95;
 
     /**
      * Total size of predicted regions at the given confidence level.
      */
-    protected double m_TotalSizeOfRegions;
+    protected double totalSizeOfRegions;
 
     /**
      * Total coverage of test cases at the given confidence level.
      */
-    protected double m_TotalCoverage;
+    protected double totalCoverage;
 
     /**
      * Minimum target value.
      */
-    protected double m_MinTarget;
+    protected double minTarget;
 
     /**
      * Maximum target value.
      */
-    protected double m_MaxTarget;
+    protected double maxTarget;
 
 
     /**
      * enables/disables the use of priors, e.g., if no training set is present in
      * case of de-serialized schemes.
      */
-    protected boolean m_NoPriors = false;
-
-
-    /**
-     * whether to discard predictions (and save memory).
-     */
-    protected boolean m_DiscardPredictions;
-
-
-    /**
-     * The list of metrics to display in the output
-     */
-    protected List<String> m_metricsToDisplay = new ArrayList<String>();
-
-
-    public static final String[] BUILT_IN_EVAL_METRICS = {"Correct",
-            "Incorrect", "Kappa", "Total cost", "Average cost", "KB relative",
-            "KB information", "Correlation", "Complexity 0", "Complexity scheme",
-            "Complexity improvement", "MAE", "RMSE", "RAE", "RRSE", "Coverage",
-            "Region size", "TP rate", "FP rate", "Precision", "Recall", "F-measure",
-            "MCC", "ROC area", "PRC area"};
+    protected boolean noPriors = false;
 
     protected Instances m_Header;
 
@@ -255,12 +163,12 @@ public class Evaluation {
 
     public Evaluation(Instances data) {
         m_Header = new Instances(data, 0);
-        m_NumClasses = data.numClasses();
-        m_ConfusionMatrix = new double[m_NumClasses][m_NumClasses];
-        m_ClassNames = new String[m_NumClasses];
-        m_ClassPriors = new double[m_NumClasses];
+        classCount = data.numClasses();
+        confusionMatrix = new double[classCount][classCount];
+        m_ClassNames = new String[classCount];
+        classPriors = new double[classCount];
         setPriors(data);
-        m_MarginCounts = new double[k_MarginResolution + 1];
+        marginCounts = new double[marginResolution + 1];
     }
 
     /**
@@ -271,12 +179,12 @@ public class Evaluation {
      * @throws Exception if the class attribute of the instances is not set
      */
     public void setPriors(Instances train) {
-        m_NoPriors = false;
-        m_NumTrainClassVals = 0;
-        m_TrainClassVals = null;
-        m_TrainClassWeights = null;
-        m_MinTarget = Double.MAX_VALUE;
-        m_MaxTarget = -Double.MAX_VALUE;
+        noPriors = false;
+        numTrainClassVals = 0;
+        trainClassVals = null;
+        trainClassWeights = null;
+        minTarget = Double.MAX_VALUE;
+        maxTarget = -Double.MAX_VALUE;
 
         for (int i = 0; i < train.numInstances(); i++) {
             Instance currentInst = train.instance(i);
@@ -285,12 +193,12 @@ public class Evaluation {
             }
         }
 
-        m_ClassPriors[0] = m_ClassPriorsSum = 0;
+        classPriors[0] = classPriorsSum = 0;
         for (int i = 0; i < train.numInstances(); i++) {
             if (!train.instance(i).classIsMissing()) {
-                m_ClassPriors[0] += train.instance(i).classValue()
+                classPriors[0] += train.instance(i).classValue()
                         * train.instance(i).weight();
-                m_ClassPriorsSum += train.instance(i).weight();
+                classPriorsSum += train.instance(i).weight();
             }
         }
     }
@@ -298,31 +206,31 @@ public class Evaluation {
     protected void addNumericTrainClass(double classValue, double weight) {
 
         // Update minimum and maximum target value
-        if (classValue > m_MaxTarget) {
-            m_MaxTarget = classValue;
+        if (classValue > maxTarget) {
+            maxTarget = classValue;
         }
-        if (classValue < m_MinTarget) {
-            m_MinTarget = classValue;
+        if (classValue < minTarget) {
+            minTarget = classValue;
         }
 
         // Update buffer
-        if (m_TrainClassVals == null) {
-            m_TrainClassVals = new double[100];
-            m_TrainClassWeights = new double[100];
+        if (trainClassVals == null) {
+            trainClassVals = new double[100];
+            trainClassWeights = new double[100];
         }
-        if (m_NumTrainClassVals == m_TrainClassVals.length) {
-            double[] temp = new double[m_TrainClassVals.length * 2];
-            System.arraycopy(m_TrainClassVals, 0, temp, 0, m_TrainClassVals.length);
-            m_TrainClassVals = temp;
+        if (numTrainClassVals == trainClassVals.length) {
+            double[] temp = new double[trainClassVals.length * 2];
+            System.arraycopy(trainClassVals, 0, temp, 0, trainClassVals.length);
+            trainClassVals = temp;
 
-            temp = new double[m_TrainClassWeights.length * 2];
-            System.arraycopy(m_TrainClassWeights, 0, temp, 0,
-                    m_TrainClassWeights.length);
-            m_TrainClassWeights = temp;
+            temp = new double[trainClassWeights.length * 2];
+            System.arraycopy(trainClassWeights, 0, temp, 0,
+                    trainClassWeights.length);
+            trainClassWeights = temp;
         }
-        m_TrainClassVals[m_NumTrainClassVals] = classValue;
-        m_TrainClassWeights[m_NumTrainClassVals] = weight;
-        m_NumTrainClassVals++;
+        trainClassVals[numTrainClassVals] = classValue;
+        trainClassWeights[numTrainClassVals] = weight;
+        numTrainClassVals++;
     }
 
     public double evaluationForSingleInstance(HoeffdingTree classifier,
@@ -352,15 +260,15 @@ public class Evaluation {
         double probActual = predictedDistribution[actualClass];
         double probNext = 0;
 
-        for (int i = 0; i < m_NumClasses; i++) {
+        for (int i = 0; i < classCount; i++) {
             if ((i != actualClass) && (predictedDistribution[i] > probNext)) {
                 probNext = predictedDistribution[i];
             }
         }
 
         double margin = probActual - probNext;
-        int bin = (int) ((margin + 1.0) / 2.0 * k_MarginResolution);
-        m_MarginCounts[bin] += weight;
+        int bin = (int) ((margin + 1.0) / 2.0 * marginResolution);
+        marginCounts[bin] += weight;
     }
 
     protected void updateStatsForClassifier(double[] predictedDistribution,
@@ -375,60 +283,60 @@ public class Evaluation {
             // classifications)
             int predictedClass = -1;
             double bestProb = 0.0;
-            for (int i = 0; i < m_NumClasses; i++) {
+            for (int i = 0; i < classCount; i++) {
                 if (predictedDistribution[i] > bestProb) {
                     predictedClass = i;
                     bestProb = predictedDistribution[i];
                 }
             }
 
-            m_WithClass += instance.weight();
+            withClass += instance.weight();
             // Update counts when no class was predicted
             if (predictedClass < 0) {
-                m_Unclassified += instance.weight();
+                unClassified += instance.weight();
                 return;
             }
 
             double predictedProb = Math.max(MIN_SF_PROB,
                     predictedDistribution[actualClass]);
-            double priorProb = Math.max(MIN_SF_PROB, m_ClassPriors[actualClass]
-                    / m_ClassPriorsSum);
+            double priorProb = Math.max(MIN_SF_PROB, classPriors[actualClass]
+                    / classPriorsSum);
             if (predictedProb >= priorProb) {
-                m_SumKBInfo += (Utils.log2(predictedProb) - Utils.log2(priorProb))
+                sumKBInfo += (Utils.log2(predictedProb) - Utils.log2(priorProb))
                         * instance.weight();
             } else {
-                m_SumKBInfo -= (Utils.log2(1.0 - predictedProb) - Utils
+                sumKBInfo -= (Utils.log2(1.0 - predictedProb) - Utils
                         .log2(1.0 - priorProb)) * instance.weight();
             }
 
-            m_SumSchemeEntropy -= Utils.log2(predictedProb) * instance.weight();
-            m_SumPriorEntropy -= Utils.log2(priorProb) * instance.weight();
+            sumSchemeEntropy -= Utils.log2(predictedProb) * instance.weight();
+            sumPriorEntropy -= Utils.log2(priorProb) * instance.weight();
 
 
             // Update coverage stats
             int[] indices = Utils.stableSort(predictedDistribution);
             double sum = 0, sizeOfRegions = 0;
             for (int i = predictedDistribution.length - 1; i >= 0; i--) {
-                if (sum >= m_ConfLevel) {
+                if (sum >= confLevel) {
                     break;
                 }
                 sum += predictedDistribution[indices[i]];
                 sizeOfRegions++;
                 if (actualClass == indices[i]) {
-                    m_TotalCoverage += instance.weight();
+                    totalCoverage += instance.weight();
                 }
             }
-            m_TotalSizeOfRegions += sizeOfRegions / (m_MaxTarget - m_MinTarget);
+            totalSizeOfRegions += sizeOfRegions / (maxTarget - minTarget);
 
             // Update other stats
-            m_ConfusionMatrix[actualClass][predictedClass] += instance.weight();
+            confusionMatrix[actualClass][predictedClass] += instance.weight();
             if (predictedClass != actualClass) {
-                m_Incorrect += instance.weight();
+                inCorrectResults += instance.weight();
             } else {
-                m_Correct += instance.weight();
+                correctResults += instance.weight();
             }
         } else {
-            m_MissingClass += instance.weight();
+            missingClass += instance.weight();
         }
     }
 }

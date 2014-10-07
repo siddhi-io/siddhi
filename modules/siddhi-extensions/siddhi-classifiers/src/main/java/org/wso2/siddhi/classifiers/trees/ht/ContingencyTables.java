@@ -23,7 +23,6 @@ package org.wso2.siddhi.classifiers.trees.ht;
 import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
 
 public class ContingencyTables {
-
     public static final double log2 = Math.log(2);
 
     /** Cache of integer logs */

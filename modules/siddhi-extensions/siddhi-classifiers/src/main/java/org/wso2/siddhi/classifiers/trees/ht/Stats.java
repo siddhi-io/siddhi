@@ -24,9 +24,7 @@ import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
 
 import java.io.Serializable;
 
-public class Stats implements Serializable {
-    private static final long serialVersionUID = 4585789825245385836L;
-
+public class Stats {
     /** for serialization */
     /**
      * The number of values seen
