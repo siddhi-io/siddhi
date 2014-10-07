@@ -144,30 +144,19 @@ public abstract class HNode implements Serializable {
      */
     public double[] getDistribution(Attribute classAtt)
             throws Exception {
-        AttributeInfo attributeInfo = classAtt.getAttributeInfo();
-        if( Attribute.Type.NOMINAL.equals(classAtt.getType())) {
-            NominalAttributeInfo nAttributeInfo = (NominalAttributeInfo) attributeInfo;
-            int size = nAttributeInfo.getNumValues();
+        double[] dist = new double[classAtt.numValues()];
 
-            double[] dist = new double[size];
-
-            for (int i = 0; i < size; i++) {
-                Object o = nAttributeInfo.getM_Values().get(i);
-                if(o instanceof byte[]) {
-                    o = ByteSerializer.BToO((byte[]) o);
-                }
-                WeightMass w = m_classDistribution.get(o); // if we have serialized we have to deserialize
-                if (w != null) {
-                    dist[i] = w.m_weight;
-                } else {
-                    dist[i] = 1.0;
-                }
+        for (int i = 0; i < classAtt.numValues(); i++) {
+            WeightMass w = m_classDistribution.get(classAtt.value(i));
+            if (w != null) {
+                dist[i] = w.m_weight;
+            } else {
+                dist[i] = 1.0;
             }
-
-            Utils.normalize(dist);
-            return dist;
         }
-        return null;
+
+        Utils.normalize(dist);
+        return dist;
     }
 
     public int installNodeNums(int nodeNum) {

@@ -50,13 +50,28 @@ public class ClassifyHTWindowProcessorTestCase {
     public void testHoeffdingTreeClassifier() throws InterruptedException {
         log.info("Hoeffding Tree test is Running");
         siddhiManager.defineStream("define stream weather (outlook nominal(sunny, overcast, rainy), temperature int(hot, mild, cool),humidity nominal(high, normal),windy nominal(TRUE, FALSE),play nominal(yes, no))");
-        String queryReference = siddhiManager.addQuery("from weather#window.classifyHt(100)" +
+        siddhiManager.addQuery("from weather#window.classifyHt(14,no)" +
                 "select play " +
                 "insert into Results for all-events ;");
 
         InputHandler loginSucceedEvents = siddhiManager.getInputHandler("weather");
         inEventCount = 0;
         removeEventCount = 0;
+        loginSucceedEvents.send(new Object[]{"sunny", "hot", "high", "FALSE", "no"});
+        loginSucceedEvents.send(new Object[]{"sunny","hot","high","TRUE","no"});
+        loginSucceedEvents.send(new Object[]{"overcast","hot","high","FALSE","yes"});
+        loginSucceedEvents.send(new Object[]{"rainy","mild","high","FALSE","yes"});
+        loginSucceedEvents.send(new Object[]{"rainy","cool","normal","FALSE","yes"});
+        loginSucceedEvents.send(new Object[]{"rainy","cool","normal","TRUE","no"});
+        loginSucceedEvents.send(new Object[]{"overcast","cool","normal","TRUE","yes"});
+        loginSucceedEvents.send(new Object[]{"sunny","mild","high","FALSE","no"});
+        loginSucceedEvents.send(new Object[]{"sunny","cool","normal","FALSE","yes"});
+        loginSucceedEvents.send(new Object[]{"rainy","mild","normal","FALSE","yes"});
+        loginSucceedEvents.send(new Object[]{"sunny","mild","normal","TRUE","yes"});
+        loginSucceedEvents.send(new Object[]{"overcast","mild","high","TRUE","yes"});
+        loginSucceedEvents.send(new Object[]{"overcast","hot","normal","FALSE","yes"});
+        loginSucceedEvents.send(new Object[]{"rainy","mild","high","TRUE","no"});
+
         loginSucceedEvents.send(new Object[]{"sunny", "hot", "high", "FALSE", "no"});
         loginSucceedEvents.send(new Object[]{"sunny","hot","high","TRUE","no"});
         loginSucceedEvents.send(new Object[]{"overcast","hot","high","FALSE","yes"});

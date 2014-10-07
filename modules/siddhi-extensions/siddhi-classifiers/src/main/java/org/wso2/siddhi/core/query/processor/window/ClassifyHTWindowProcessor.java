@@ -22,7 +22,9 @@ package org.wso2.siddhi.core.query.processor.window;
 
 import org.wso2.siddhi.classifiers.trees.ht.DenseInstance;
 import org.wso2.siddhi.classifiers.trees.ht.HoeffdingTree;
+import org.wso2.siddhi.classifiers.trees.ht.Instance;
 import org.wso2.siddhi.classifiers.trees.ht.Instances;
+import org.wso2.siddhi.classifiers.utils.Evaluation;
 import org.wso2.siddhi.classifiers.utils.InstancesUtil;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.Event;
@@ -30,35 +32,59 @@ import org.wso2.siddhi.core.event.StreamEvent;
 import org.wso2.siddhi.core.event.in.InEvent;
 import org.wso2.siddhi.core.event.in.InListEvent;
 import org.wso2.siddhi.core.query.QueryPostProcessingElement;
-import org.wso2.siddhi.core.query.processor.window.WindowProcessor;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.Variable;
 import org.wso2.siddhi.query.api.expression.constant.IntConstant;
-import org.wso2.siddhi.query.api.extension.annotation.SiddhiExtension;
 import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
 public class ClassifyHtWindowProcessor extends WindowProcessor {
     private int testModeCount = -1;
+    private int capacity = 14;
     private boolean trainMode = true;
     private HoeffdingTree hoeffdingTree;
     private int attributeCount = 0;
     private List<Attribute> attributeList;
     private Instances instances;
+    private List<String> outClassValues;
+    private Evaluation evaluation;
+
     @Override
     protected void processEvent(InEvent event) {
-//        acquireLock();
+        acquireLock();
         try {
             DenseInstance instance = InstancesUtil.getInstance(attributeList, event);
             instances.add(instance);
-            instances.toString();
+            System.out.println(instances.toString());
+            if (instances.size() == testModeCount && trainMode) {
+                hoeffdingTree.buildClassifier(instances);
+                evaluation = new Evaluation(instances);
+                instances = new Instances(instances.relationName(), attributeList, capacity);
+                instances.setClassIndex(instances.numAttributes() - 1);
+                trainMode = false;
+            }else {
+                if (instances.size() == capacity && !trainMode) {
+                    Enumeration<Instance> instanceEnumeration = instances.enumerateInstances();
+                    while (instanceEnumeration.hasMoreElements()) {
+                        Instance instance1 = instanceEnumeration.nextElement();
+                        if(attributeList.get(attributeList.size()-1).indexOfValue(outClassValues.get(0))==evaluation.evaluationForSingleInstance(hoeffdingTree, instance1)){
+                            nextProcessor.process(event);
+                        }
+                    }
+                    instances = new Instances(instances.relationName(), attributeList, capacity);
+                    instances.setClassIndex(instances.numAttributes() - 1);
+                }
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Error building the Tree");
-        }finally {
-//            releaseLock();
+            throw new RuntimeException("Error building the Tree", e);
+        } finally {
+            releaseLock();
         }
     }
 
@@ -102,19 +128,25 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
         // first we check the stream definition, currently we do not support numerica attributes,
         // we first check the stream only have nominal attributes
         attributeList = streamDefinition.getAttributeList();
-        for(Attribute attribute: attributeList){
-            if(!Attribute.Type.NOMINAL.equals(attribute.getType())) {
+        for (Attribute attribute : attributeList) {
+            if (!Attribute.Type.NOMINAL.equals(attribute.getType())) {
                 throw new SiddhiParserException("This Window can only handle nominal attributes");
             }
         }
         // during initialization we have to set the mode
-        if(parameters.length==0){
+        if (parameters.length == 0) {
             throw new SiddhiParserException("Should provide the minimum number of test events for tree building");
         }
         try {
             testModeCount = ((IntConstant) parameters[0]).getValue();
-        }catch (ClassCastException e){
+        } catch (ClassCastException e) {
             throw new SiddhiParserException("First input to this window should be the minimum test event count");
+        }
+        if (parameters.length > 1) {
+            outClassValues = new ArrayList<String>();
+            for (int i = 1; i < parameters.length; i++) {
+                outClassValues.add(((Variable) parameters[i]).getAttributeName());
+            }
         }
 
         // todo we need to implement a way to load the training dataset during initialization and start the siddhi with
@@ -131,12 +163,6 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
         System.out.println("\nClass is numeric: "
                 + instances.classAttribute().isNumeric());
         System.out.println("\nClasses:\n");
-        for (int i = 0; i < instances.numClasses(); i++) {
-            System.out.println(instances.classAttribute().value(i));
-        }
-
-        System.out.println("\nClass values and labels of instances:\n");
-
         hoeffdingTree = new HoeffdingTree();
     }
 

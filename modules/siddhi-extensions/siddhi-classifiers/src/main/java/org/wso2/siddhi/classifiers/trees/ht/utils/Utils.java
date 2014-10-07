@@ -138,6 +138,16 @@ public class Utils {
         return Double.isNaN(val);
     }
 
+    private static void quickSort(/* @non_null@ */int[] array, /* @non_null@ */
+                                  int[] index, int left, int right) {
+
+        if (left < right) {
+            int middle = partition(array, index, left, right);
+            quickSort(array, index, left, middle);
+            quickSort(array, index, middle + 1, right);
+        }
+    }
+
     private static void quickSort(/* @non_null@ */double[] array, /* @non_null@ */
                                   int[] index, int left, int right) {
 
@@ -617,6 +627,67 @@ public class Utils {
 
         return Math.log(a) / log2;
     }
+
+    public static/* @pure@ */int maxIndex(double[] doubles) {
+
+        double maximum = 0;
+        int maxIndex = 0;
+
+        for (int i = 0; i < doubles.length; i++) {
+            if ((i == 0) || (doubles[i] > maximum)) {
+                maxIndex = i;
+                maximum = doubles[i];
+            }
+        }
+
+        return maxIndex;
+    }
+
+    public static/* @pure@ */int[] stableSort(double[] array) {
+
+        int[] index = initialIndex(array.length);
+
+        if (array.length > 1) {
+
+            int[] newIndex = new int[array.length];
+            int[] helpIndex;
+            int numEqual;
+
+            array = array.clone();
+            replaceMissingWithMAX_VALUE(array);
+            quickSort(array, index, 0, array.length - 1);
+
+            // Make sort stable
+
+            int i = 0;
+            while (i < index.length) {
+                numEqual = 1;
+                for (int j = i + 1; ((j < index.length) && Utils.eq(array[index[i]],
+                        array[index[j]])); j++) {
+                    numEqual++;
+                }
+                if (numEqual > 1) {
+                    helpIndex = new int[numEqual];
+                    for (int j = 0; j < numEqual; j++) {
+                        helpIndex[j] = i + j;
+                    }
+                    quickSort(index, helpIndex, 0, numEqual - 1);
+                    for (int j = 0; j < numEqual; j++) {
+                        newIndex[i + j] = index[helpIndex[j]];
+                    }
+                    i += numEqual;
+                } else {
+                    newIndex[i] = index[i];
+                    i++;
+                }
+            }
+            return newIndex;
+        } else {
+            return index;
+        }
+    }
+
+
 
 
 }
