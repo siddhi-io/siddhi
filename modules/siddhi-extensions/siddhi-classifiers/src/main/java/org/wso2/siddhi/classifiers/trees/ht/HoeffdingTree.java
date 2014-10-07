@@ -26,6 +26,7 @@ import org.wso2.siddhi.classifiers.trees.ht.nodes.HNode;
 import org.wso2.siddhi.classifiers.trees.ht.nodes.InactiveHNode;
 import org.wso2.siddhi.classifiers.trees.ht.nodes.LeafNode;
 import org.wso2.siddhi.classifiers.trees.ht.nodes.LearningNode;
+import org.wso2.siddhi.classifiers.trees.ht.utils.Utils;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.Collections;
@@ -176,10 +177,7 @@ public class HoeffdingTree extends AbstractClassifier implements
      */
     protected ActiveHNode newLearningNode() throws Exception {
         ActiveHNode newChild=null;
-
-        if (m_leafStrategy == LEAF_MAJ_CLASS) {
-            newChild = new ActiveHNode();
-        }
+        newChild = new ActiveHNode();
       /*  else if (m_leafStrategy == LEAF_NB) {
             newChild = new NBNode(m_header, m_nbThreshold);
         } else {
@@ -302,4 +300,32 @@ public class HoeffdingTree extends AbstractClassifier implements
         m_activeLeafCount--;
         m_inactiveLeafCount++;
     }
+    public double[] distributionForInstance(Instance inst) throws Exception {
+
+        Attribute classAtt = inst.classAttribute();
+        double[] pred = new double[classAtt.numValues()];
+
+        if (m_root != null) {
+            LeafNode l = m_root.leafForInstance(inst, null, null);
+            HNode actualNode = l.m_theNode;
+
+            if (actualNode == null) {
+                actualNode = l.m_parentNode;
+            }
+
+            pred = actualNode.getDistribution(classAtt);
+
+        } else {
+            // all class values equally likely
+            for (int i = 0; i < classAtt.numValues(); i++) {
+                pred[i] = 1;
+            }
+            Utils.normalize(pred);
+        }
+
+        // Utils.normalize(pred);
+        return pred;
+    }
+
+
 }

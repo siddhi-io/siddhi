@@ -201,11 +201,11 @@ public class Attribute implements Serializable {
         }
         Integer index = ((NominalAttributeInfo) attributeInfo).m_Hashtable.get(store);
         if (index != null) {
-            return index.intValue();
+            return index;
         } else {
             int intIndex = ((NominalAttributeInfo) attributeInfo).m_Values.size();
             ((NominalAttributeInfo) attributeInfo).m_Values.add(store);
-            ((NominalAttributeInfo) attributeInfo).m_Hashtable.put(store, new Integer(intIndex));
+            ((NominalAttributeInfo) attributeInfo).m_Hashtable.put(store,intIndex);
             return intIndex;
         }
     }
