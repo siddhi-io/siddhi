@@ -78,7 +78,7 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>com.hazelcast</groupId>
+                <groupId>com.hazelcast.wso2</groupId>
                 <artifactId>hazelcast</artifactId>
                 <version>${hazelcast.version}</version>
             </dependency>
@@ -163,7 +163,7 @@
         <junit.version>4.10</junit.version>
         <log4j.version>1.2.14</log4j.version>
         <mvel2.version>2.0.19</mvel2.version>
-        <hazelcast.version>2.2</hazelcast.version>
+        <hazelcast.version>3.2.6.wso2v2</hazelcast.version>
         <antlr.runtime.version>3.4</antlr.runtime.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
