@@ -548,9 +548,9 @@ POSITIVE_DOUBLE_VAL : NUM ('.' NUM NUM_SCI? ('D'|'d')?| NUM_SCI? ('D'|'d'));
 BOOL_VAL: ('true'|'false');
 
 //Need to be in the top to get high priority
-ID_QUOTES : '`'('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*'`' {setText(getText().substring(1, getText().length()-1));};
+ID_QUOTES : '`'('a'..'z'|'A'..'Z'|'_'|'0'..'9') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*'`' {setText(getText().substring(1, getText().length()-1));};
 
-ID : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
+ID : ('a'..'z'|'A'..'Z'|'_'|'0'..'9') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
 
 //('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'-'|','|' '|'\t')*
 

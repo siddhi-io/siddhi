@@ -18,6 +18,7 @@
 package org.wso2.siddhi.query.api.definition;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.Variable;
+import org.wso2.siddhi.query.api.expression.constant.IntConstant;
 import org.wso2.siddhi.query.api.expression.constant.StringConstant;
 import org.wso2.siddhi.query.api.utils.CommonUtils;
 import org.wso2.siddhi.query.api.utils.SerializedObject;
@@ -85,7 +86,9 @@ public class Attribute implements Serializable {
         for(Expression e:expressions){
             if(e instanceof Variable){
                 attributeValues.add(((Variable)e).getAttributeName());
-            }else {
+            }else if(e instanceof IntConstant){
+                attributeValues.add(((IntConstant) e).getValue().toString());
+            } else{
                 throw new RuntimeException("Bad Arguments !");
             }
         }

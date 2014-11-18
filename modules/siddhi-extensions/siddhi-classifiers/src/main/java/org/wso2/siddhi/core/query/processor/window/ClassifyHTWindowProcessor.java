@@ -153,7 +153,11 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
         if (parameters.length > 1) {
             outClassValues = new ArrayList<String>();
             for (int i = 1; i < parameters.length; i++) {
-                outClassValues.add(((Variable) parameters[i]).getAttributeName());
+                if(parameters[i] instanceof Variable) {
+                    outClassValues.add(((Variable) parameters[i]).getAttributeName());
+                }else if(parameters[i] instanceof IntConstant){
+                    outClassValues.add(((IntConstant) parameters[i]).getValue().toString());
+                }
             }
         }
 

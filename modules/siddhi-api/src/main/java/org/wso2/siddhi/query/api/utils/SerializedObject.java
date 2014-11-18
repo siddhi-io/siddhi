@@ -110,7 +110,6 @@ public class SerializedObject implements java.io.Serializable {
      * for more details).
      *
      * @return the restored object
-     * @throws Exception if the object couldn't be restored
      */
     public Object getObject() {
 

@@ -64,7 +64,7 @@ public class ClassifyHTWindowProcessorTestCase {
         String[] humid = {"high","normal"};
         String[] windy = {"TRUE", "FALSE"};
         String[] play = {"yes","no"};
-        while(true) {
+       /* while(true) {
             int index1 = new Random().nextInt(Integer.MAX_VALUE) % outlook.length;
             int index2 = new Random().nextInt(Integer.MAX_VALUE) % tempreture.length;
             int index3 = new Random().nextInt(Integer.MAX_VALUE) % humid.length;
@@ -74,8 +74,8 @@ public class ClassifyHTWindowProcessorTestCase {
             loginSucceedEvents.send(new Object[]{outlook[index1], tempreture[index2],
                     humid[index3], windy[index4],
                     play[index5]});
-        }
-        /*loginSucceedEvents.send(new Object[]{"sunny", "hot", "high", "FALSE", "no"});
+        }*/
+        loginSucceedEvents.send(new Object[]{"sunny", "hot", "high", "FALSE", "no"});
         loginSucceedEvents.send(new Object[]{"sunny","hot","high","TRUE","no"});
         loginSucceedEvents.send(new Object[]{"overcast","hot","high","FALSE","yes"});
         loginSucceedEvents.send(new Object[]{"rainy","mild","high","FALSE","yes"});
@@ -104,7 +104,7 @@ public class ClassifyHTWindowProcessorTestCase {
         loginSucceedEvents.send(new Object[]{"overcast","mild","high","TRUE","yes"});
         loginSucceedEvents.send(new Object[]{"overcast","hot","normal","FALSE","yes"});
         loginSucceedEvents.send(new Object[]{"rainy","mild","high","TRUE","no"});
-        Thread.sleep(1000);*/
+        Thread.sleep(1000);
     }
 
 }
