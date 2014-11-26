@@ -1,0 +1,16 @@
+@relation contact-lenses-weka.filters.unsupervised.instance.Resample-S1-Z60.0-no-replacement-weka.filters.unsupervised.instance.Resample-S1-Z50.0-no-replacement-V
+
+@attribute age {young,prepresbyopic,presbyopic}
+@attribute spectacleprescrip {myope,hypermetrope}
+@attribute astigmatism {no,yes}
+@attribute tearprodrate {reduced,normal}
+@attribute contactlenses {soft,hard,none}
+
+@data
+young,myope,no,normal,soft
+young,myope,yes,normal,hard
+young,hypermetrope,yes,normal,hard
+prepresbyopic,myope,yes,reduced,none
+presbyopic,myope,no,normal,none
+presbyopic,hypermetrope,no,normal,soft
+presbyopic,hypermetrope,yes,normal,none

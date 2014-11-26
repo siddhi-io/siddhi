@@ -39,6 +39,9 @@ import org.wso2.siddhi.query.api.expression.Variable;
 import org.wso2.siddhi.query.api.expression.constant.IntConstant;
 import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -46,7 +49,6 @@ import java.util.List;
 
 public class ClassifyHtWindowProcessor extends WindowProcessor {
     private int testModeCount = -1;
-    private int capacity = 14;
     private boolean trainMode = true;
     private HoeffdingTree hoeffdingTree;
     private int attributeCount = 0;
@@ -54,6 +56,9 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
     private Instances instances;
     private List<String> outClassValues;
     private Evaluation evaluation;
+    private int maxCount = 53629;
+    private int totalCount = 0;
+    PrintWriter writer;
 
     @Override
     protected void processEvent(InEvent event) {
@@ -70,24 +75,40 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
     private void runClassification(Event event) throws Exception {
         DenseInstance instance = InstancesUtil.getInstance(attributeList, event);
         instances.add(instance);
+        totalCount++;
         if (instances.size() == testModeCount && trainMode) {
             hoeffdingTree.buildClassifier(instances);
             evaluation = new Evaluation(instances);
-            instances = new Instances(instances.relationName(), attributeList, capacity);
+            instances = new Instances(instances.relationName(), attributeList, 0);
             instances.setClassIndex(instances.numAttributes() - 1);
             trainMode = false;
-        }else {
-            if (instances.size() == capacity && !trainMode) {
+            System.gc();
+        }else if (instances.size()==maxCount && trainMode){ // when the testModeCount is too high we want to build the classifier, but not change the trainMode to false
+            hoeffdingTree.buildClassifier(instances);
+            evaluation = new Evaluation(instances);
+            instances = new Instances(instances.relationName(), attributeList, 0);
+            instances.setClassIndex(instances.numAttributes() - 1);
+            System.gc();
+        }else if(totalCount==testModeCount && trainMode){                // this happens when testModeCount is large and classfier is built batchwise.
+            hoeffdingTree.buildClassifier(instances);
+            evaluation = new Evaluation(instances);
+            instances = new Instances(instances.relationName(), attributeList, 0);
+            instances.setClassIndex(instances.numAttributes() - 1);
+            trainMode = false;
+            System.gc();
+        }
+        else{
+            if (!trainMode) {
                 Enumeration<Instance> instanceEnumeration = instances.enumerateInstances();
                 while (instanceEnumeration.hasMoreElements()) {
                     Instance instance1 = instanceEnumeration.nextElement();
                     double v = evaluation.evaluationForSingleInstance(hoeffdingTree, instance1);
-                    System.out.println(v);
+                    writer.println((int)v);
                     if(attributeList.get(attributeList.size()-1).indexOfValue(outClassValues.get(0))== v){
                         nextProcessor.process(event);
                     }
                 }
-                instances = new Instances(instances.relationName(), attributeList, capacity);
+                instances = new Instances(instances.relationName(), attributeList, 0);
                 instances.setClassIndex(instances.numAttributes() - 1);
             }
         }
@@ -163,7 +184,7 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
 
         // todo we need to implement a way to load the training dataset during initialization and start the siddhi with
         // todo a properly trained tree, otherwise we have to do a check to do whether build or update the tree
-        instances = new Instances(streamDefinition.getId(), streamDefinition.getAttributeList(), 10);
+        instances = new Instances(streamDefinition.getId(), streamDefinition.getAttributeList(), 0);
 
         instances.setClassIndex(instances.numAttributes() - 1); // this is by default and stream has to be defined accordingly
 
@@ -174,12 +195,18 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
                 + instances.classAttribute().isNominal());
         System.out.println("\nClass is numeric: "
                 + instances.classAttribute().isNumeric());
-        System.out.println("\nClasses:\n");
         hoeffdingTree = new HoeffdingTree();
+        try {
+            writer = new PrintWriter("/tmp/evaluation.txt", "UTF-8");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void destroy() {
-
+        System.out.println(totalCount);
     }
 }

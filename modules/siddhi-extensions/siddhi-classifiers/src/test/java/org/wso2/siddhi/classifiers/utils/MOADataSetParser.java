@@ -114,6 +114,81 @@ public class MOADataSetParser {
             e.printStackTrace();
         }
     }
+
+    public static void evaluate(String testFile, String resultFile) {
+        StringBuffer buffer1 = new StringBuffer();
+        StringBuffer buffer2 = new StringBuffer();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(testFile));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                buffer1.append(line);
+                buffer1.append("\n");
+            }
+            reader.close();
+
+            reader = new BufferedReader(new FileReader(resultFile));
+            while ((line = reader.readLine()) != null) {
+                buffer2.append(line);
+                buffer2.append("\n");
+            }
+            reader.close();
+            List<String> tuples1 = Arrays.asList(buffer1.toString().split("\\r?\\n"));
+            List<String> tuples2 = Arrays.asList(buffer2.toString().split("\\r?\\n"));
+
+            if(tuples1.size()==tuples2.size()){
+               int total = tuples1.size();
+                int success = 0;
+                for(int i =0;i<total;i++){
+                    if(tuples1.get(i).equals(tuples2.get(i))){
+                        success++;
+                    }
+                }
+                float t = ((float)success/(float)total);
+                t = t*100;
+                System.out.printf("Success Rate: " + t);
+            }else {
+                throw new Exception("Error evaluating results, counts are different,"+tuples1.size()+" and " + tuples2.size());
+            }
+        } catch (Exception e) {
+            System.err.format("Exception occurred trying to read '%s' and '%s'.", testFile,resultFile);
+            log.error(e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public static void createClassValueFile(String fileName) {
+        StringBuffer buffer = new StringBuffer();
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter("/tmp/original.txt", "UTF-8");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line);
+                buffer.append("\n");
+            }
+            reader.close();
+            String data = buffer.toString().split("@data")[1];
+            List<String> tuples = Arrays.asList(data.split("\\r?\\n"));
+            for (String tuple : tuples) {
+                if (!tuple.isEmpty()) {
+                    String[] split = tuple.split(",");
+                    writer.println(split[split.length - 1]);
+                }
+            }
+        } catch (Exception e) {
+            System.err.format("Exception occurred trying to read '%s'.", fileName);
+            log.error(e.getMessage());
+            e.printStackTrace();
+        }
+    }
     public static void main(String[] args) {
         File file = new File(".");
         file.getAbsoluteFile();
