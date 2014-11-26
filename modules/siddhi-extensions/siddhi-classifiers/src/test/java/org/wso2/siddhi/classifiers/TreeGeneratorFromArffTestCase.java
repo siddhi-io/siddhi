@@ -52,8 +52,8 @@ public class TreeGeneratorFromArffTestCase {
     public void airlineDataTest() throws InterruptedException {
         log.info("Hoeffding Tree test is Running...");
         String streamName = "airline";
-        String trainingFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/contact-lenses-train.arff";
-        String testFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/contact-lenses-cv.arff";
+        String trainingFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/weather.nominal-train.arff";
+        String testFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/weather.nominal-test.arff";
         String airline = MOADataSetParser.getStreamDefinition(streamName, testFileName);
         siddhiManager.defineStream(airline);
         StreamDefinition streamDefinition = siddhiManager.getStreamDefinition(streamName);
