@@ -14,3 +14,10 @@ prepresbyopic,myope,no,normal,soft
 presbyopic,myope,no,reduced,none
 presbyopic,myope,yes,normal,hard
 presbyopic,hypermetrope,no,reduced,none
+young,myope,no,normal,soft
+young,myope,yes,normal,hard
+young,hypermetrope,yes,normal,hard
+prepresbyopic,myope,yes,reduced,none
+presbyopic,myope,no,normal,none
+presbyopic,hypermetrope,no,normal,soft
+presbyopic,hypermetrope,yes,normal,none

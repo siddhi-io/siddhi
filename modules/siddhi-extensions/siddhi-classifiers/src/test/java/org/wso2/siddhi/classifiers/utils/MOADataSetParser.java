@@ -24,6 +24,8 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.config.SiddhiConfiguration;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.io.*;
 import java.util.Arrays;
@@ -157,11 +159,13 @@ public class MOADataSetParser {
         }
     }
 
-    public static void createClassValueFile(String fileName) {
+    public static void createClassValueFile(String fileName,StreamDefinition streamDefinition) {
         StringBuffer buffer = new StringBuffer();
         PrintWriter writer = null;
         try {
-            writer = new PrintWriter("/tmp/original.txt", "UTF-8");
+            String prefix = streamDefinition.getStreamId();
+            String filePath = File.separator + "tmp" + File.separator + prefix + "-original.txt";
+            writer = new PrintWriter(filePath, "UTF-8");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -180,13 +184,17 @@ public class MOADataSetParser {
             for (String tuple : tuples) {
                 if (!tuple.isEmpty()) {
                     String[] split = tuple.split(",");
-                    writer.println(split[split.length - 1]);
+                    Attribute attribute = streamDefinition.getAttributeList().get(streamDefinition.getAttributeList().size()-1);
+                    int classIndex = attribute.indexOfValue(split[split.length - 1]);
+                    writer.println(classIndex);
                 }
             }
         } catch (Exception e) {
             System.err.format("Exception occurred trying to read '%s'.", fileName);
             log.error(e.getMessage());
             e.printStackTrace();
+        }finally {
+            writer.close();
         }
     }
     public static void main(String[] args) {

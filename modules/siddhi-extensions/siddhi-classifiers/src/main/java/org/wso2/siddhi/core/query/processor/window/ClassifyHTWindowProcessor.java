@@ -39,6 +39,7 @@ import org.wso2.siddhi.query.api.expression.Variable;
 import org.wso2.siddhi.query.api.expression.constant.IntConstant;
 import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -104,6 +105,7 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
                     Instance instance1 = instanceEnumeration.nextElement();
                     double v = evaluation.evaluationForSingleInstance(hoeffdingTree, instance1);
                     writer.println((int)v);
+                    writer.flush();
                     if(attributeList.get(attributeList.size()-1).indexOfValue(outClassValues.get(0))== v){
                         nextProcessor.process(event);
                     }
@@ -197,7 +199,8 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
                 + instances.classAttribute().isNumeric());
         hoeffdingTree = new HoeffdingTree();
         try {
-            writer = new PrintWriter("/tmp/evaluation.txt", "UTF-8");
+            String prefix = streamDefinition.getId();
+            writer = new PrintWriter(File.separator+"tmp"+File.separator+prefix+"-evaluation.txt", "UTF-8");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -208,5 +211,6 @@ public class ClassifyHtWindowProcessor extends WindowProcessor {
     @Override
     public void destroy() {
         System.out.println(totalCount);
+        writer.close();
     }
 }

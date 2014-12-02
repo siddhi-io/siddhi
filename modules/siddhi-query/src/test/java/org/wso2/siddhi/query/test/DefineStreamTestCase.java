@@ -35,15 +35,22 @@ public class DefineStreamTestCase {
 
     @Test
     public void Test3() throws RecognitionException, SiddhiParserException {
-        StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("define stream `define` ( `string` nominal(test1,test2), price nominal(high,low,average), volume nominal(high,low) );");
+        StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("define stream `define` ( `string` nominal(1-1,test2), price-1 nominal(high,low,average), volume nominal(high,low) );");
         String[] priceValues = {"high","low","average"};
         Assert.assertEquals(new StreamDefinition().
                         name("define").
                         attribute("string", Attribute.Type.NOMINAL).
-                        attribute("price", Attribute.Type.NOMINAL,priceValues).
+                        attribute("price-1", Attribute.Type.NOMINAL,priceValues).
                         attribute("volume", Attribute.Type.NOMINAL).toString(),
                 streamDefinition.toString());
     }
+
+
+    @Test
+    public void Test4() throws RecognitionException, SiddhiParserException {
+        StreamDefinition streamDefinition = SiddhiCompiler.parseStreamDefinition("define stream breastCancer( age nominal(10-19,20-29,30-39,40-49,50-59,60-69,70-79,80-89,90-99),breast nominal(left1,right1));");
+    }
+
 
 
 }

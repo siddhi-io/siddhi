@@ -49,11 +49,32 @@ public class TreeGeneratorFromArffTestCase {
     }
 
     @Test
-    public void airlineDataTest() throws InterruptedException {
+    public void weatherDataTest() throws InterruptedException {
         log.info("Hoeffding Tree test is Running...");
-        String streamName = "airline";
+        String streamName = "weather";
         String trainingFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/weather.nominal-train.arff";
         String testFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/weather.nominal-test.arff";
+        String airline = MOADataSetParser.getStreamDefinition(streamName, testFileName);
+        siddhiManager.defineStream(airline);
+        StreamDefinition streamDefinition = siddhiManager.getStreamDefinition(streamName);
+        siddhiManager.addQuery("from " + streamName + "#window.classifyHt(8,1)" +
+                "select " + streamDefinition.getAttributeList().get(((ArrayList) streamDefinition.getAttributeList()).size()-1).getName() + " " +
+                "insert into Results for all-events ;");
+
+        InputHandler loginSucceedEvents = siddhiManager.getInputHandler(streamName);
+        MOADataSetParser.sendAllEvents(loginSucceedEvents,trainingFileName); // sending training data-set
+        MOADataSetParser.sendAllEvents(loginSucceedEvents,testFileName); // sending training data-set
+        MOADataSetParser.createClassValueFile(testFileName,streamDefinition);
+        MOADataSetParser.evaluate("/tmp/weather-original.txt","/tmp/weather-evaluation.txt");
+        Thread.sleep(1000);
+    }
+
+    @Test
+    public void contactLensesDataTest() throws InterruptedException {
+        log.info("Hoeffding Tree test is Running...");
+        String streamName = "contactlenses";
+        String trainingFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/contact-lenses-train.arff";
+        String testFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/contact-lenses-test.arff";
         String airline = MOADataSetParser.getStreamDefinition(streamName, testFileName);
         siddhiManager.defineStream(airline);
         StreamDefinition streamDefinition = siddhiManager.getStreamDefinition(streamName);
@@ -64,28 +85,56 @@ public class TreeGeneratorFromArffTestCase {
         InputHandler loginSucceedEvents = siddhiManager.getInputHandler(streamName);
         MOADataSetParser.sendAllEvents(loginSucceedEvents,trainingFileName); // sending training data-set
         MOADataSetParser.sendAllEvents(loginSucceedEvents,testFileName); // sending training data-set
-        MOADataSetParser.createClassValueFile(testFileName);
-        MOADataSetParser.evaluate("/tmp/original.txt","/tmp/evaluation.txt");
+        MOADataSetParser.createClassValueFile(testFileName, streamDefinition);
+        MOADataSetParser.evaluate("/tmp/contactlenses-original.txt", "/tmp/contactlenses-evaluation.txt");
         Thread.sleep(1000);
     }
 
-
-
     @Test
-    public void porkerDataTest() throws InterruptedException {
+    public void breastCancerDataTest() throws InterruptedException {
         log.info("Hoeffding Tree test is Running...");
-        String streamName = "porker";
-        String fileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/contact-lenses.arff";
-        String airline = MOADataSetParser.getStreamDefinition(streamName, fileName);
+        String streamName = "breastCancer";
+        String trainingFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/breast-cancer-train.arff";
+        String testFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/breast-cancer-cv.arff";
+        String airline = MOADataSetParser.getStreamDefinition(streamName, testFileName);
         siddhiManager.defineStream(airline);
         StreamDefinition streamDefinition = siddhiManager.getStreamDefinition(streamName);
-        siddhiManager.addQuery("from " + streamName + "#window.classifyHt(14,1)" +
+        siddhiManager.addQuery("from " + streamName + "#window.classifyHt(171,1)" +
                 "select " + streamDefinition.getAttributeList().get(((ArrayList) streamDefinition.getAttributeList()).size()-1).getName() + " " +
                 "insert into Results for all-events ;");
 
         InputHandler loginSucceedEvents = siddhiManager.getInputHandler(streamName);
-        MOADataSetParser.sendAllEvents(loginSucceedEvents,fileName);
+        MOADataSetParser.sendAllEvents(loginSucceedEvents,trainingFileName); // sending training data-set
+        MOADataSetParser.sendAllEvents(loginSucceedEvents,testFileName); // sending training data-set
+        MOADataSetParser.createClassValueFile(testFileName,streamDefinition);
+        MOADataSetParser.evaluate("/tmp/breastCancer-original.txt","/tmp/breastCancer-evaluation.txt");
         Thread.sleep(1000);
     }
+
+
+    @Test
+    public void eslDataTest() throws InterruptedException {
+        log.info("Hoeffding Tree test is Running...");
+        String streamName = "esl";
+        String trainingFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/esl-train.arff";
+        String testFileName = "/Users/lginnali/masters/independent-study-01/siddhi/modules/siddhi-extensions/siddhi-classifiers/src/test/resources/esl-test.arff";
+        String airline = MOADataSetParser.getStreamDefinition(streamName, testFileName);
+        siddhiManager.defineStream(airline);
+        StreamDefinition streamDefinition = siddhiManager.getStreamDefinition(streamName);
+        siddhiManager.addQuery("from " + streamName + "#window.classifyHt(600,1)" +
+                "select " + streamDefinition.getAttributeList().get(((ArrayList) streamDefinition.getAttributeList()).size()-1).getName() + " " +
+                "insert into Results for all-events ;");
+
+        InputHandler loginSucceedEvents = siddhiManager.getInputHandler(streamName);
+        MOADataSetParser.sendAllEvents(loginSucceedEvents,trainingFileName); // sending training data-set
+        MOADataSetParser.sendAllEvents(loginSucceedEvents,testFileName); // sending training data-set
+        MOADataSetParser.createClassValueFile(testFileName,streamDefinition);
+        MOADataSetParser.evaluate("/tmp/esl-original.txt","/tmp/esl-evaluation.txt");
+        Thread.sleep(1000);
+    }
+
+
+
+
 
 }
