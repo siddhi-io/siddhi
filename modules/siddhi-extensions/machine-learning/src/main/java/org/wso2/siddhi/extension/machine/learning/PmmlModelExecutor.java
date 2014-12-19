@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -116,7 +116,7 @@ public class PmmlModelExecutor extends TransformProcessor {
         * selecting only the fields that exist in the given siddhi query.
         */
         for (FieldName field : allFields) {
-            if (parameterPositions.keySet().contains(field.getValue())) {
+            if (parameterPositions.containsKey(field.getValue())) {
                 inputs.add(field);
             }
         }
@@ -235,7 +235,8 @@ public class PmmlModelExecutor extends TransformProcessor {
         Object[] resltObjct = new Object[result.size()];
         int i = 0;
         for (FieldName fieldName : result.keySet()) {
-            resltObjct[i++] = EvaluatorUtil.decode(result.get(fieldName));
+            resltObjct[i] = EvaluatorUtil.decode(result.get(fieldName));
+            i++;
         }
         return new InEvent("pmmlPredictedStream", System.currentTimeMillis(), resltObjct);
     }
@@ -275,7 +276,7 @@ public class PmmlModelExecutor extends TransformProcessor {
      */
     private boolean isFilePath(String path) {
         File file = new File(path);
-        if (file.exists() && !file.isDirectory()) {
+        if (file.exists() && !file.isDirectory() && file.canRead()) {
             return true;
         } else {
             return false;
