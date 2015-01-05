@@ -84,6 +84,7 @@ public class InputStreamParser {
             return StateInputStreamParser.parseInputStream(((StateInputStream) inputStream), executionPlanContext,
                     metaStateEvent, executors, definitionMap);
         } else {
+            //TODO: pattern, etc
             throw new OperationNotSupportedException();
         }
     }
@@ -99,8 +100,12 @@ public class InputStreamParser {
     public static MetaStreamEvent generateMetaStreamEvent(SingleInputStream inputStream, Map<String,
             AbstractDefinition> definitionMap) {
         MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
-        if (definitionMap != null && definitionMap.containsKey(inputStream.getStreamId())) {
-            AbstractDefinition inputDefinition = definitionMap.get(inputStream.getStreamId());
+        String streamId = inputStream.getStreamId();
+        if(inputStream.isInnerStream()){
+            streamId = "#".concat(streamId);
+        }
+        if (definitionMap != null && definitionMap.containsKey(streamId)) {
+            AbstractDefinition inputDefinition = definitionMap.get(streamId);
             metaStreamEvent.setInputDefinition(inputDefinition);
             metaStreamEvent.setInitialAttributeSize(inputDefinition.getAttributeList().size());
         } else {

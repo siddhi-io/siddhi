@@ -152,8 +152,12 @@ public class SingleInputStreamParser {
      */
     private static void initMetaStreamEvent(SingleInputStream inputStream, Map<String,
             AbstractDefinition> definitionMap, MetaStreamEvent metaStreamEvent) {
-        if (definitionMap != null && definitionMap.containsKey(inputStream.getStreamId())) {
-            AbstractDefinition inputDefinition = definitionMap.get(inputStream.getStreamId());
+        String streamId = inputStream.getStreamId();
+        if(inputStream.isInnerStream()){
+            streamId = "#".concat(streamId);
+        }
+        if (definitionMap != null && definitionMap.containsKey(streamId)) {
+            AbstractDefinition inputDefinition = definitionMap.get(streamId);
             metaStreamEvent.setInputDefinition(inputDefinition);
             metaStreamEvent.setInitialAttributeSize(inputDefinition.getAttributeList().size());
         } else {
@@ -164,4 +168,6 @@ public class SingleInputStreamParser {
             metaStreamEvent.setInputReferenceId(inputStream.getStreamReferenceId());
         }
     }
+
+
 }
