@@ -68,7 +68,6 @@ public class PartitionRuntime {
     private ConcurrentMap<String, QueryRuntime> metaQueryRuntimeMap = new ConcurrentHashMap<String, QueryRuntime>();
     private List<PartitionInstanceRuntime> partitionInstanceRuntimeList = new ArrayList<PartitionInstanceRuntime>();
     private ConcurrentMap<String, PartitionStreamReceiver> partitionStreamReceivers = new ConcurrentHashMap<String, PartitionStreamReceiver>();
-    private ExecutionPlanRuntime executionPlanRuntime;
     private ExecutionPlanContext executionPlanContext;
 
     public PartitionRuntime(ExecutionPlanRuntime executionPlanRuntime, Partition partition, ExecutionPlanContext executionPlanContext) {
@@ -88,7 +87,6 @@ public class PartitionRuntime {
         this.streamDefinitionMap = executionPlanRuntime.getStreamDefinitionMap();
         this.streamJunctionMap = executionPlanRuntime.getStreamJunctions();
         this.eventTableMap = executionPlanRuntime.getEventTableMap();
-        this.executionPlanRuntime = executionPlanRuntime;
     }
 
     public QueryRuntime addQuery(QueryRuntime metaQueryRuntime) {
@@ -96,7 +94,7 @@ public class PartitionRuntime {
         OutputCallback outputCallback;
         if (query.getOutputStream() instanceof InsertIntoStream && ((InsertIntoStream) query.getOutputStream()).isInnerStream()) {
             metaQueryRuntime.setToLocalStream(true);
-            outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(), localStreamJunctionMap, eventTableMap,
+            outputCallback = OutputParser.constructLocalOutputCallback(query.getOutputStream(), localStreamJunctionMap, eventTableMap,
                     metaQueryRuntime.getOutputStreamDefinition(), executionPlanContext);
         } else {
             outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(), streamJunctionMap, eventTableMap,
@@ -189,15 +187,16 @@ public class PartitionRuntime {
                 if (queryRuntime.isFromLocalStream()) {
                     for (int i = 0; i < clonedQueryRuntime.getStreamRuntime().getSingleStreamRuntimes().size(); i++) {
                         String streamId = queryRuntime.getStreamRuntime().getSingleStreamRuntimes().get(i).getProcessStreamReceiver().getStreamId();
+                        StreamDefinition streamDefinition;
+                        if(streamId.startsWith("#")) {
+                            streamDefinition = (StreamDefinition) localStreamDefinitionMap.get(streamId);
+                        } else {
+                            streamDefinition = (StreamDefinition) streamDefinitionMap.get(streamId);
+                        }
                         StreamJunction streamJunction = localStreamJunctionMap.get(streamId + key);
                         if (streamJunction == null) {
-                            StreamDefinition streamDefinition = (StreamDefinition) localStreamDefinitionMap.get("#" + streamId);
-                            if (streamDefinition == null) {
-                                streamDefinition = (StreamDefinition) streamDefinitionMap.get(streamId);
-                            }
                             streamJunction = new StreamJunction(streamDefinition, executionPlanContext.getExecutorService(),
-                                    executionPlanContext.getSiddhiContext().getEventBufferSize(), executionPlanContext
-                            );
+                                    executionPlanContext.getSiddhiContext().getEventBufferSize(), executionPlanContext);
                             localStreamJunctionMap.put(streamId + key, streamJunction);
                         }
                         streamJunction.subscribe(clonedQueryRuntime.getStreamRuntime().getSingleStreamRuntimes().get(i).getProcessStreamReceiver());

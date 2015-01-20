@@ -43,9 +43,29 @@ public class OutputParser {
 
 
     public static OutputCallback constructOutputCallback(OutputStream outStream, ConcurrentMap<String, StreamJunction> streamJunctionMap,
-                                                         ConcurrentMap<String, EventTable> eventTableMap,
-                                                         StreamDefinition outputStreamDefinition, ExecutionPlanContext executionPlanContext) {
+                                                         ConcurrentMap<String, EventTable> eventTableMap, StreamDefinition outputStreamDefinition,
+                                                         ExecutionPlanContext executionPlanContext) {
         String id = outStream.getId();
+        return constructOutputCallback(id, outStream, streamJunctionMap, eventTableMap, outputStreamDefinition, executionPlanContext);
+    }
+
+    public static OutputCallback constructLocalOutputCallback(OutputStream outStream, ConcurrentMap<String, StreamJunction> streamJunctionMap,
+                                                              ConcurrentMap<String, EventTable> eventTableMap, StreamDefinition outputStreamDefinition,
+                                                              ExecutionPlanContext executionPlanContext) {
+        String id = "#" + outStream.getId();
+        StreamJunction outputStreamJunction = streamJunctionMap.get(id);
+        if (outputStreamJunction == null) {
+            outputStreamJunction = new StreamJunction(outputStreamDefinition,
+                    executionPlanContext.getExecutorService(),
+                    executionPlanContext.getSiddhiContext().getEventBufferSize(), executionPlanContext);
+            streamJunctionMap.putIfAbsent(id, outputStreamJunction);
+        }
+        return constructOutputCallback(id, outStream, streamJunctionMap, eventTableMap, outputStreamDefinition, executionPlanContext);
+    }
+
+    private static OutputCallback constructOutputCallback(String id, OutputStream outStream, ConcurrentMap<String, StreamJunction> streamJunctionMap,
+                                                          ConcurrentMap<String, EventTable> eventTableMap, StreamDefinition outputStreamDefinition,
+                                                          ExecutionPlanContext executionPlanContext) {
         //Construct CallBack
         if (outStream instanceof InsertIntoStream) {
             StreamJunction outputStreamJunction = streamJunctionMap.get(id);
@@ -125,7 +145,7 @@ public class OutputParser {
                                                          ConcurrentMap<String, StreamJunction> streamJunctionMap,
                                                          StreamDefinition outputStreamDefinition,
                                                          ExecutionPlanContext executionPlanContext) {
-        String id = outStream.getId();
+        String id = "#" + outStream.getId();
         //Construct CallBack
         if (outStream instanceof InsertIntoStream) {
             StreamJunction outputStreamJunction = streamJunctionMap.get(id + key);
