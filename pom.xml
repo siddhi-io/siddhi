@@ -244,9 +244,9 @@
     </build>
 
     <scm>
-        <url>https://github.com/wso2/wso2-axiom.git</url>
-        <developerConnection>scm:git:https://github.com/wso2/wso2-axiom.git</developerConnection>
-        <connection>scm:git:https://github.com/wso2/wso2-axiom.git</connection>
+        <url>https://github.com/wso2/siddhi.git</url>
+        <developerConnection>scm:git:https://github.com/wso2/siddhi.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2/siddhi.git</connection>
         <tag>HEAD</tag>
     </scm>
 
