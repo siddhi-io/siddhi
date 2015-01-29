@@ -18,7 +18,6 @@
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
             <artifactId>siddhi-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>

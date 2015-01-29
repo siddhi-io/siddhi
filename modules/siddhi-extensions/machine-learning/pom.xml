@@ -52,34 +52,21 @@
 			<artifactId>log4j</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.wso2.siddhi</groupId>
-			<artifactId>siddhi-distribution</artifactId>
-			<version>${siddhi.distribution.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>pmml-model</artifactId>
-			<version>${jpmml.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>pmml-evaluator</artifactId>
-			<version>${jpmml.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>pmml-manager</artifactId>
-			<version>${jpmml.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jpmml</groupId>
 			<artifactId>pmml-schema</artifactId>
-			<version>${jpmml.version}</version>
 		</dependency>
 	</dependencies>
   
-   <properties>
-        <jpmml.version>1.0.22</jpmml.version>
-        <siddhi.distribution.version>3.0.0-SNAPSHOT</siddhi.distribution.version>
-   </properties>
 </project>
