@@ -360,6 +360,7 @@
         <tika-app.version>0.8</tika-app.version>
         <hadoop-common.version>2.5.2</hadoop-common.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.scm.id>my-scm-server</project.scm.id>
     </properties>
 
 </project>
