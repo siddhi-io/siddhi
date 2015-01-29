@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>siddhi</artifactId>
         <groupId>org.wso2.siddhi</groupId>
-        <version>2.2.0-SNAPSHOT</version>
+        <version>2.2.0</version>
         <relativePath>../../pom.xml</relativePath>
 
     </parent>
@@ -136,33 +134,30 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <copy todir="${dest.dir}/jar-with-dependencies"
-                                      includeemptydirs="false">
+                                <copy todir="${dest.dir}/jar-with-dependencies" includeemptydirs="false">
                                     <fileset dir="target">
-                                        <include name="**/*.jar"/>
+                                        <include name="**/*.jar" />
                                     </fileset>
                                 </copy>
-                                <copy todir="${dest.dir}/samples" overwrite="false"
-                                      includeemptydirs="false">
+                                <copy todir="${dest.dir}/samples" overwrite="false" includeemptydirs="false">
                                     <fileset dir="../samples">
-                                        <exclude name="**/build/**"/>
+                                        <exclude name="**/build/**" />
                                     </fileset>
                                 </copy>
                                 <copy todir="${dest.dir}/jars" includeemptydirs="false">
                                     <fileset dir="${dest.dir}/samples/lib">
-                                        <include name="**/siddhi*.jar"/>
+                                        <include name="**/siddhi*.jar" />
                                     </fileset>
                                 </copy>
-                                <copy todir="${dest.dir}/" overwrite="false"
-                                      includeemptydirs="false">
+                                <copy todir="${dest.dir}/" overwrite="false" includeemptydirs="false">
                                     <fileset dir="../../">
-                                        <include name="**/README.txt"/>
+                                        <include name="**/README.txt" />
                                     </fileset>
                                 </copy>
                                 <zip destfile="target/siddhi-${project.version}.zip">
-                                    <zipfileset dir="target/temp"/>
+                                    <zipfileset dir="target/temp" />
                                 </zip>
-                                <delete dir="target/temp"/>
+                                <delete dir="target/temp" />
                             </tasks>
                         </configuration>
                     </execution>
