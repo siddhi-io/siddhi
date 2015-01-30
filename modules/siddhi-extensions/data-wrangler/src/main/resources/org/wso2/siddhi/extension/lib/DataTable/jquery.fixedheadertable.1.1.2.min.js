@@ -1,0 +1,23 @@
+(function($)
+{$.fn.fixedHeaderTable=function(options){var defaults={loader:false,footer:false,colBorder:true,cloneHeaderToFooter:false,autoResize:false,onComplete:null};var options=$.extend(defaults,options);return this.each(function(){var obj=$(this);var origWidth=obj.width();buildTable(obj,options);if(options.autoResize==true){$(window).resize(function(){if(table.resizeTable){clearTimeout(table.resizeTable);}
+table.resizeTable=setTimeout(function(){buildTable(obj,options);},200);});options.origWidth=obj.width();}});};var table=function(){this.resizeTable;}
+function buildTable(obj,options){var objClass=obj.attr('class');var hasTable=obj.find("table").size()>0;var hasTHead=obj.find("thead").size()>0;var hasTBody=obj.find("tbody").size()>0;if(hasTable&&hasTHead&&hasTBody){var parentDivWidth=obj.innerWidth();var parentDivHeight=obj.innerHeight();var tableBodyWidth=parentDivWidth;var footerHeight=0;jQuery('.fht_table_body tr div.icon-row a').show();obj.find('div.fht_fixed_header').remove();if(obj.find('div.fht_table_body').size()==0){obj.wrapInner('<div class="fht_table_body"></div>');}
+var table=obj.find('div.fht_table_body table');var tableWidth=parentDivWidth;if(options.footer&&!options.cloneHeaderToFooter){var footerId=options.footerId;var footerHeight=obj.find('#'+footerId).outerHeight();if(!options.footerId){$('body').css('background','#f00');alert('Footer ID required');}
+else{var footerId=options.footerId;$('#'+footerId).appendTo(obj);}}
+obj.find('div.fht_table_body table thead tr:first th').each(function(){$(this).removeAttr('width');});var headerHeight=table.find('thead').outerHeight();if(options.footer&&options.cloneHeaderToFooter){footerHeight=headerHeight;}
+var tableBodyHeight=parentDivHeight-headerHeight-footerHeight;obj.find('div.fht_table_body').css({'width':parentDivWidth+'px','height':tableBodyHeight+'px'});table.css('width','100%');if((table.outerHeight()-headerHeight)>=tableBodyHeight){if($.browser.msie==true){tableWidth=tableWidth-20;}
+else if(jQuery.browser.safari==true){tableWidth=tableWidth-15;}
+else{tableWidth=tableWidth-20;}
+obj.find('.fht_table_body').css('overflow','auto');}
+else if(table.outerWidth()<=tableBodyWidth){obj.find('.fht_table_body').css('overflow','hidden');}
+table.css('width',tableWidth+'px');if(obj.find('div.fht_fixed_header').size()==0){obj.prepend('<div class="fht_fixed_header"><table width="'+obj.find('div.fht_table_body table').width()+'px"></table></div>');}
+obj.find('div.fht_fixed_header').css({'width':parentDivWidth+'px','height':table.find('thead').outerHeight()+'px'});var i=0;obj.find('div.fht_table_body table thead tr:first th').each(function(){var width=($.browser.msie=='true')?$(this).width():$(this).width()+1;$(this).attr('width',width+'px');if($(this).find('.empty-cell').size()==0){$(this).wrapInner('<div class="empty-cell" style="width:'+width+'px;"></div>');}
+if($(this).is(':first-child')){$(this).addClass('first-cell');}
+if($(this).is(':last-child')){$(this).addClass('last-cell');}});if(table.outerHeight()<tableBodyHeight){var lastRowHeight=tableBodyHeight-table.outerHeight();if(lastRowHeight>40){lastRowHeight=40;}
+lastRowHeight=40;if(table.find('tbody').children('tr.last-row').size()==0){table.find('tbody').append('<tr class="last-row"></tr>');table.find('tbody tr:first td').each(function(){table.find('tbody tr.last-row').append('<td class="empty-cell"><div style="height:'+lastRowHeight+'px"></div></td>');});}
+else{table.find('tbody').children('tr.last-row').children('td.empty-cell').children('div').each(function(){$(this).css('height',lastRowHeight+'px');});}}
+else{table.find('tbody').children('tr.last-row').remove();}
+var tableHeader=obj.find('div.fht_table_body table thead');tableHeader.clone().appendTo('div.fht_fixed_header table');obj.find('div.fht_table_body table').css({'margin-top':-(tableHeader.height())+'px'});if(options.footer&&options.cloneHeaderToFooter){obj.find('div.fht_fixed_header').clone().appendTo(obj);}
+if(options.loader){$('.'+options.loaderClass).fadeOut('medium');}
+$.isFunction(options.onComplete)&&options.onComplete.call(this);obj.find('.fht_table_body').scroll(function(){obj.find('.fht_fixed_header table').css('margin-left',(-this.scrollLeft)+'px');if(options.footer&&options.cloneHeaderToFooter){obj.find('.fht_fixed_footer_border').css('margin-left',(-this.scrollLeft)+'px');}});}
+else{$('body').css('background','#f00');alert('Invalid HTML. A table, thead, and tbody are required');}}})(jQuery);

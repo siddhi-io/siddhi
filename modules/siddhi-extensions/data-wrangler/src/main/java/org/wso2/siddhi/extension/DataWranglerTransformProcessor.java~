@@ -1,0 +1,132 @@
+package org.wso2.siddhi.extension;
+ 
+
+import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.config.SiddhiContext;
+import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.event.in.InEvent;
+import org.wso2.siddhi.core.event.in.InListEvent;
+import org.wso2.siddhi.core.event.in.InStream;
+import org.wso2.siddhi.core.executor.expression.ExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.transform.TransformProcessor;
+import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.Variable;
+import org.wso2.siddhi.query.api.extension.annotation.SiddhiExtension;
+
+import java.util.HashMap;
+
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.registry.api.Registry;
+import org.wso2.carbon.registry.api.RegistryException;
+import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.utils.ServerConstants;
+
+
+
+
+
+
+
+
+
+
+
+import java.util.List;
+import java.util.Map;
+ 
+@SiddhiExtension(namespace = "datawrangler", function = "transform")
+
+public class DataWranglerTransformProcessor extends TransformProcessor {
+    private Map<String, Integer> paramPositions = new HashMap<String, Integer>();
+
+    public DataWranglerTransformProcessor() {
+        this.outStreamDefinition = new StreamDefinition().name("velocityStream")
+                .attribute("velocityX", Attribute.Type.DOUBLE)
+                .attribute("velocityY", Attribute.Type.DOUBLE)
+                .attribute("velocityZ", Attribute.Type.DOUBLE);
+             
+      
+    }
+    @Override
+    protected InStream processEvent(InEvent inEvent) {
+       
+    	double vMagnitude = (Double) inEvent.getData(paramPositions.get("v"));
+        double vxComponent = (Double) inEvent.getData(paramPositions.get("vx"));
+        double vyComponent = (Double) inEvent.getData(paramPositions.get("vy"));
+        double vzComponent = (Double) inEvent.getData(paramPositions.get("vz"));
+        
+        
+        Object[] data = new Object[]{vMagnitude * vxComponent / 10000000000L,
+                vMagnitude * vyComponent / 10000000000L,
+                vMagnitude * vzComponent / 10000000000L};
+        return new InEvent(inEvent.getStreamId(), System.currentTimeMillis(), data);
+    }
+    @Override
+    protected InStream processEvent(InListEvent inListEvent) {
+        InListEvent transformedListEvent = new InListEvent();
+        for (Event event : inListEvent.getEvents()) {
+            if (event instanceof InEvent) {
+                transformedListEvent.addEvent((Event) processEvent((InEvent) event));
+            }
+        }
+        return transformedListEvent;
+    }
+    @Override
+    protected Object[] currentState() {
+        return new Object[]{paramPositions};
+    }
+    @Override
+    protected void restoreState(Object[] objects) {
+        if (objects.length > 0 && objects[0] instanceof Map) {
+            paramPositions = (Map<String, Integer>) objects[0];
+        }
+    }
+    @Override
+    protected void init(Expression[] parameters, List<ExpressionExecutor> expressionExecutors, StreamDefinition inStreamDefinition, StreamDefinition outStreamDefinition, String elementId, SiddhiContext siddhiContext) {
+        for (Expression parameter : parameters) {
+            if (parameter instanceof Variable) {
+                Variable var = (Variable) parameter;
+                String attributeName = var.getAttributeName();
+                paramPositions.put(attributeName, inStreamDefinition.getAttributePosition(attributeName));
+            }
+        }
+        
+        // SiddhiContext con=new SiddhiContext();
+        
+        CarbonContext cCtx = CarbonContext.getCurrentContext();
+        Registry registry = cCtx.getRegistry(RegistryType.SYSTEM_CONFIGURATION);
+        String registryType = RegistryType.SYSTEM_GOVERNANCE.toString();
+        if(registryType != null) {
+            registry = cCtx.getRegistry(RegistryType.valueOf(registryType));
+        }
+
+        
+        try {
+        	Resource resource = registry.newResource();
+            
+        	resource.setContent("Tharindu");
+			String resourcePath = "/_system/myjs";
+	        registry.put(resourcePath, resource);
+
+        } catch (RegistryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+
+        
+        
+        
+        
+        
+        
+    }
+    @Override
+    public void destroy() {
+    	
+    }
+}
