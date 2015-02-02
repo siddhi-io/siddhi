@@ -182,6 +182,9 @@ public class FunctionTestCase {
             }
         });
 
+
+
+
         inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60l, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, null, 40l, 10});
         inputHandler.send(new Object[]{"WSO2", null, 44f, 200l, 56});
@@ -387,5 +390,333 @@ public class FunctionTestCase {
 
     }
 
+    @Test
+    public void testFunctionQuery11() throws InterruptedException {
+        log.info("Function test11");
 
+        SiddhiManager siddhiManager = new SiddhiManager();
+        InputHandler inputHandler = siddhiManager.defineStream(QueryFactory.createStreamDefinition().
+                name("cseEventStream").attribute("symbol", Attribute.Type.STRING).
+                attribute("price1", Attribute.Type.FLOAT).
+                attribute("price2", Attribute.Type.FLOAT).
+                attribute("volume", Attribute.Type.LONG).
+                attribute("quantity", Attribute.Type.INT));
+
+        String queryReference = siddhiManager.addQuery("from cseEventStream[isMatch('[A-Z0-9]+\\t',symbol)]" +
+                " select symbol, coalesce(price1,price2) as price,quantity;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventCount++;
+                if(eventCount == 1) {
+                    Assert.assertEquals(50.0f, inEvents[0].getData1());
+                }
+            }
+        });
+
+        inputHandler.send(new Object[]{"WSO2\t", 50f, 60f, 60l, 6});
+        inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60l, 6});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, eventCount);
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testFunctionQuery12() throws InterruptedException {
+        log.info("Function test12");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        InputHandler inputHandler = siddhiManager.defineStream(QueryFactory.createStreamDefinition().
+                name("cseEventStream").attribute("symbol", Attribute.Type.STRING).
+                attribute("price1", Attribute.Type.FLOAT).
+                attribute("price2", Attribute.Type.FLOAT).
+                attribute("volume", Attribute.Type.LONG).
+                attribute("quantity", Attribute.Type.INT));
+
+        String queryReference = siddhiManager.addQuery("from cseEventStream[isMatch('^W[A-Z0-9]+',symbol)]" +
+                " select symbol, coalesce(price1,price2) as price,quantity;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventCount++;
+                if(eventCount == 1) {
+                    Assert.assertEquals(50.0f, inEvents[0].getData1());
+                }
+            }
+        });
+
+        inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60l, 6});
+        inputHandler.send(new Object[]{"SO2", 50f, 60f, 60l, 6});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, eventCount);
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testFunctionQuery13() throws InterruptedException {
+        log.info("Function test13");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        InputHandler inputHandler = siddhiManager.defineStream(QueryFactory.createStreamDefinition().
+                name("cseEventStream").attribute("symbol", Attribute.Type.STRING).
+                attribute("price1", Attribute.Type.FLOAT).
+                attribute("price2", Attribute.Type.FLOAT).
+                attribute("volume", Attribute.Type.LONG).
+                attribute("quantity", Attribute.Type.INT));
+
+        String queryReference = siddhiManager.addQuery("from cseEventStream[isMatch('[A-Z0-9]+2$',symbol)]" +
+                " select symbol, coalesce(price1,price2) as price,quantity;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventCount++;
+                if(eventCount == 1) {
+                    Assert.assertEquals(50.0f, inEvents[0].getData1());
+                }
+            }
+        });
+
+        inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60l, 6});
+        inputHandler.send(new Object[]{"WSO", 50f, 60f, 60l, 6});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, eventCount);
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testFunctionQuery14() throws InterruptedException {
+        log.info("Function test14");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        InputHandler inputHandler = siddhiManager.defineStream(QueryFactory.createStreamDefinition().
+                name("cseEventStream").attribute("symbol", Attribute.Type.STRING).
+                attribute("price1", Attribute.Type.FLOAT).
+                attribute("price2", Attribute.Type.FLOAT).
+                attribute("volume", Attribute.Type.LONG).
+                attribute("quantity", Attribute.Type.INT));
+
+        String queryReference = siddhiManager.addQuery("from cseEventStream[isMatch('[A-Z0-9]*',symbol)]" +
+                " select symbol, coalesce(price1,price2) as price,quantity;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventCount++;
+                if(eventCount == 1) {
+                    Assert.assertEquals(50.0f, inEvents[0].getData1());
+                }
+            }
+        });
+
+        inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60l, 6});
+        inputHandler.send(new Object[]{"wso2", 50f, 60f, 60l, 6});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, eventCount);
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testFunctionQuery15() throws InterruptedException {
+        log.info("Function test15");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        InputHandler inputHandler = siddhiManager.defineStream(QueryFactory.createStreamDefinition().
+                name("cseEventStream").attribute("symbol", Attribute.Type.STRING).
+                attribute("price1", Attribute.Type.FLOAT).
+                attribute("price2", Attribute.Type.FLOAT).
+                attribute("volume", Attribute.Type.LONG).
+                attribute("quantity", Attribute.Type.INT));
+
+        String queryReference = siddhiManager.addQuery("from cseEventStream[isMatch('WSO[0-9]?',symbol)]" +
+                " select symbol, coalesce(price1,price2) as price,quantity;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventCount++;
+                if(eventCount == 1) {
+                    Assert.assertEquals(50.0f, inEvents[0].getData1());
+                }
+            }
+        });
+
+        inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60l, 6});
+        inputHandler.send(new Object[]{"WSO21", 50f, 60f, 60l, 6});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, eventCount);
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testFunctionQuery17() throws InterruptedException {
+        log.info("Function test17");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        InputHandler inputHandler = siddhiManager.defineStream(QueryFactory.createStreamDefinition().
+                name("cseEventStream").attribute("symbol", Attribute.Type.STRING).
+                attribute("price1", Attribute.Type.FLOAT).
+                attribute("price2", Attribute.Type.FLOAT).
+                attribute("volume", Attribute.Type.LONG).
+                attribute("quantity", Attribute.Type.INT));
+
+        String queryReference = siddhiManager.addQuery("from cseEventStream[isMatch('[A-Z0-9]{4}',symbol)]" +
+                " select symbol, coalesce(price1,price2) as price,quantity;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventCount++;
+                if(eventCount == 1) {
+                    Assert.assertEquals(50.0f, inEvents[0].getData1());
+                }
+            }
+        });
+
+        inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60l, 6});
+        inputHandler.send(new Object[]{"WSO21", 50f, 60f, 60l, 6});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, eventCount);
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testFunctionQuery18() throws InterruptedException {
+        log.info("Function test18");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        InputHandler inputHandler = siddhiManager.defineStream(QueryFactory.createStreamDefinition().
+                name("cseEventStream").attribute("symbol", Attribute.Type.STRING).
+                attribute("price1", Attribute.Type.FLOAT).
+                attribute("price2", Attribute.Type.FLOAT).
+                attribute("volume", Attribute.Type.LONG).
+                attribute("quantity", Attribute.Type.INT));
+
+        String queryReference = siddhiManager.addQuery("from cseEventStream[isMatch('[A-Z0-9]{4,5}',symbol)]" +
+                " select symbol, coalesce(price1,price2) as price,quantity;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventCount++;
+                if(eventCount == 1) {
+                    Assert.assertEquals(50.0f, inEvents[0].getData1());
+                }
+            }
+        });
+
+        inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60l, 6});
+        inputHandler.send(new Object[]{"WSO2123", 50f, 60f, 60l, 6});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, eventCount);
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testFunctionQuery19() throws InterruptedException {
+        log.info("Function test19");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        InputHandler inputHandler = siddhiManager.defineStream(QueryFactory.createStreamDefinition().
+                name("cseEventStream").attribute("symbol", Attribute.Type.STRING).
+                attribute("price1", Attribute.Type.FLOAT).
+                attribute("price2", Attribute.Type.FLOAT).
+                attribute("volume", Attribute.Type.LONG).
+                attribute("quantity", Attribute.Type.INT));
+
+        String queryReference = siddhiManager.addQuery("from cseEventStream[isMatch('[A-Z&&[^M-P]]+',symbol)]" +
+                " select symbol, coalesce(price1,price2) as price,quantity;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventCount++;
+                if(eventCount == 1) {
+                    Assert.assertEquals(50.0f, inEvents[0].getData1());
+                }
+            }
+        });
+
+        inputHandler.send(new Object[]{"WS", 50f, 60f, 60l, 6});
+        inputHandler.send(new Object[]{"WSO", 50f, 60f, 60l, 6});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, eventCount);
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testFunctionQuery20() throws InterruptedException {
+        log.info("Function test20");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        InputHandler inputHandler = siddhiManager.defineStream(QueryFactory.createStreamDefinition().
+                name("cseEventStream").attribute("symbol", Attribute.Type.STRING).
+                attribute("price1", Attribute.Type.FLOAT).
+                attribute("price2", Attribute.Type.FLOAT).
+                attribute("volume", Attribute.Type.LONG).
+                attribute("quantity", Attribute.Type.INT));
+
+        String queryReference = siddhiManager.addQuery("from cseEventStream[isMatch('\\p{Lower}+',symbol)]" +
+                " select symbol, coalesce(price1,price2) as price,quantity;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventCount++;
+                if(eventCount == 1) {
+                    Assert.assertEquals(50.0f, inEvents[0].getData1());
+                }
+            }
+        });
+
+        inputHandler.send(new Object[]{"wso", 50f, 60f, 60l, 6});
+        inputHandler.send(new Object[]{"WSO", 50f, 60f, 60l, 6});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, eventCount);
+        siddhiManager.shutdown();
+    }
+
+    @Test
+    public void testFunctionQuery21() throws InterruptedException {
+        log.info("Function test21");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        InputHandler inputHandler = siddhiManager.defineStream(QueryFactory.createStreamDefinition().
+                name("cseEventStream").attribute("symbol", Attribute.Type.STRING).
+                attribute("price1", Attribute.Type.FLOAT).
+                attribute("price2", Attribute.Type.FLOAT).
+                attribute("volume", Attribute.Type.LONG).
+                attribute("quantity", Attribute.Type.INT));
+
+        String queryReference = siddhiManager.addQuery("from cseEventStream[isMatch('.+',symbol)]" +
+                " select symbol, coalesce(price1,price2) as price,quantity;");
+
+        siddhiManager.addCallback(queryReference, new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventCount++;
+                if(eventCount == 1) {
+                    Assert.assertEquals(50.0f, inEvents[0].getData1());
+                }
+            }
+        });
+
+        inputHandler.send(new Object[]{"wso", 50f, 60f, 60l, 6});
+        inputHandler.send(new Object[]{"", 50f, 60f, 60l, 6});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, eventCount);
+        siddhiManager.shutdown();
+    }
 }
