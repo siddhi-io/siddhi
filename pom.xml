@@ -93,6 +93,16 @@
             <!--<artifactId>mysql-connector-java</artifactId>-->
             <!--<version>5.1.6</version>-->
             <!--</dependency>-->
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-query-api</artifactId>
+                <version>${siddhi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-core</artifactId>
+                <version>${siddhi.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -161,6 +171,7 @@
     </build>
 
     <properties>
+        <siddhi.version>3.0.0-SNAPSHOT</siddhi.version>
         <junit.version>4.10</junit.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <mvel2.version>2.2.1.Final</mvel2.version>
