@@ -30,6 +30,7 @@
         <module>modules/siddhi-query-api</module>
         <module>modules/siddhi-query-compiler</module>
         <module>modules/siddhi-core</module>
+        <module>modules/siddhi-extensions</module>
         <module>modules/siddhi-samples</module>
         <!--<module>modules/siddhi-distribution</module>-->
     </modules>
