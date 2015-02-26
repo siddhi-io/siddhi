@@ -19,6 +19,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.wso2</groupId>
+        <artifactId>wso2</artifactId>
+        <version>1</version>
+    </parent>
+
     <groupId>org.wso2.siddhi</groupId>
     <artifactId>siddhi</artifactId>
     <packaging>pom</packaging>
@@ -238,23 +244,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!--<scm>-->
-    <!--<connection>scm:svn:http://svn.wso2.org/repos/wso2/trunk/commons/siddhi</connection>-->
-    <!--<developerConnection>scm:svn:https://svn.wso2.org/repos/wso2/trunk/commons/siddhi-->
-    <!--</developerConnection>-->
-    <!--<url>http://svn.wso2.org/repos/wso2/trunk/commons/siddhi</url>-->
-    <!--</scm>-->
-
-    <mailingLists>
-        <mailingList>
-            <name>Architecture</name>
-            <subscribe>architecture-request@wso2.org</subscribe>
-            <unsubscribe>architecture-request@wso2.org</unsubscribe>
-            <post>architecture@wso2.org</post>
-            <archive>http://wso2.markmail.org/search/?q=list%3Aorg.wso2.architecture+siddhi
-            </archive>
-        </mailingList>
-    </mailingLists>
+    <scm>
+        <url>https://github.com/wso2/siddhi.git</url>
+        <developerConnection>scm:git:https://github.com/wso2/siddhi.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2/siddhi.git</connection>
+        <tag>HEAD</tag>
+    </scm>
 
     <repositories>
         <repository>
