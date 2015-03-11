@@ -15,6 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.siddhi.extension.objectdetection;
 
 import nu.pattern.OpenCV;
@@ -43,6 +44,8 @@ import org.wso2.siddhi.query.api.extension.annotation.SiddhiExtension;
  * The extension take 2 input arguments.
  * 1. The image as a hex string.
  * 2. The cascade file path for the object detection.
+ * </p>
+ * Suppressing "UnusedDeclaration" as this is referenced through CEP.
  */
 @SuppressWarnings("UnusedDeclaration")
 @SiddhiExtension(namespace = "imageprocessorobjectdetection", function = "count")
@@ -51,12 +54,12 @@ public class ObjectDetectionExtension extends FunctionExecutor {
     /**
      * The logger to log information, warnings or errors.
      */
-    Logger log = Logger.getLogger(ObjectDetectionExtension.class);
+    private static final Logger log = Logger.getLogger(ObjectDetectionExtension.class);
 
     /**
      * The return type for the functional extension.
      */
-    Attribute.Type returnType;
+    private Attribute.Type returnType;
 
     /**
      * Loads the native libraries for OpenCV.
@@ -86,7 +89,7 @@ public class ObjectDetectionExtension extends FunctionExecutor {
      * {@inheritDoc}
      */
     @Override
-    public void init(Type[] types, SiddhiContext arg1) {
+    public void init(Type[] types, SiddhiContext siddhiContext) {
         returnType = Attribute.Type.LONG;
     }
 
@@ -94,15 +97,15 @@ public class ObjectDetectionExtension extends FunctionExecutor {
      * {@inheritDoc}
      */
     @Override
-    protected Object process(Object obj) {
-        long detectedObjectCount = 0;
-        if (obj instanceof Object[]) {
-            Object[] arguments = (Object[]) obj;
+    protected Object process(Object inputData) {
+        long detectedObjectCount;
+        if (inputData instanceof Object[]) {
+            Object[] arguments = (Object[]) inputData;
             if (arguments.length == 2) {
                 if (arguments[0] instanceof String && arguments[1] instanceof String) {
                     String imageHex = (String) arguments[0];
-                    String cascadePath = (String) arguments[1];
-                    detectedObjectCount = this.detectObjects(imageHex, cascadePath);
+                    String cascadeFilePath = (String) arguments[1];
+                    detectedObjectCount = this.detectObjects(imageHex, cascadeFilePath);
                 } else {
                     throw new IllegalArgumentException(
                             "2 String arguments of the hex string of the image and the cascade " +
@@ -135,30 +138,30 @@ public class ObjectDetectionExtension extends FunctionExecutor {
      * </p>
      * Grayscaling and histogram equalization of the image helps to identify objects better.
      *
-     * @param imageHex    The image as a hex string.
-     * @param cascadePath The physical path for the cascade file.
+     * @param imageHex        The image as a hex string.
+     * @param cascadeFilePath The physical path for the cascade file.
      * @return The detected object count
      */
-    private long detectObjects(String imageHex, String cascadePath) {
+    private long detectObjects(String imageHex, String cascadeFilePath) {
         long objectCount;
         try {
-            // conversion to Mat
+            // Conversion to OpenCV Mat object.
             byte[] imageByteArr = (byte[]) new Hex().decode(imageHex);
             Mat image = Highgui.imdecode(new MatOfByte(imageByteArr), Highgui.IMREAD_UNCHANGED);
 
-            // initializing classifier
+            // Initializing classifier.
             CascadeClassifier cClassifier = new CascadeClassifier();
-            cClassifier.load(cascadePath);
+            cClassifier.load(cascadeFilePath);
 
-            // pre-processing
+            // Pre-processing of the image.
             Imgproc.cvtColor(image, image, Imgproc.COLOR_RGB2GRAY);
             Imgproc.equalizeHist(image, image);
 
-            // detecting objects
+            // Detecting objects using classifier of the image.
             MatOfRect imageRect = new MatOfRect();
             cClassifier.detectMultiScale(image, imageRect);
 
-            // image count
+            // Detected image count.
             objectCount = ((Integer) imageRect.toList().size()).longValue();
         } catch (DecoderException e) {
             log.error("Unable to decode the hex string of the image.", e);
