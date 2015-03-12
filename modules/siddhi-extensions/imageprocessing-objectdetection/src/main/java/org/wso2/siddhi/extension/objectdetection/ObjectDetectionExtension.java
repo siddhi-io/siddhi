@@ -38,7 +38,7 @@ import org.wso2.siddhi.query.api.extension.annotation.SiddhiExtension;
 /**
  * The following class represents a functional siddhi extension. The extension allows to detect
  * objects of a given image using OpenCV functions. The object detection is done using a method
- * called Haar Classifier in image processing context. An xml file is used to describe the type of
+ * called HAAR Classifier in image processing context. An xml file is used to describe the type of
  * object needs to be detected. This xml file is also known as a cascade file.
  * </p>
  * The extension take 2 input arguments.
@@ -109,17 +109,17 @@ public class ObjectDetectionExtension extends FunctionExecutor {
                 } else {
                     throw new IllegalArgumentException(
                             "2 String arguments of the hex string of the image and the cascade " +
-                            "path is expected.");
+                            "path is expected. The received arguments are not String objects.");
                 }
             } else {
                 throw new IllegalArgumentException(
                         "2 String arguments of the hex string of the image and the cascade path " +
-                        "is expected.");
+                        "is expected. Did not receive 2 arguments.");
             }
         } else {
             throw new IllegalArgumentException(
                     "2 String arguments of the hex string of the image and the cascade path is " +
-                    "expected.");
+                    "expected. But received a non-object array.");
         }
 
         return detectedObjectCount;
@@ -164,8 +164,10 @@ public class ObjectDetectionExtension extends FunctionExecutor {
             // Detected image count.
             objectCount = ((Integer) imageRect.toList().size()).longValue();
         } catch (DecoderException e) {
-            log.error("Unable to decode the hex string of the image.", e);
-            throw new RuntimeException("Unable to decode the hex string of the image.", e);
+            log.error("Unable to decode the hex string of the image. Make sure the image is not " +
+                                                                                "corrupted.", e);
+            throw new RuntimeException("Unable to decode the hex string of the image. Make sure " +
+                                                                "the image is not corrupted.", e);
         }
 
         return objectCount;
