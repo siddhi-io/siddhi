@@ -93,9 +93,9 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Runnabl
 
     @Override
     public void run() {
+        long scheduledTime = System.currentTimeMillis();
         acquireLock();
         try {
-            long scheduledTime = System.currentTimeMillis();
             try {
                 oldEventList.clear();
                 while (true) {
@@ -141,7 +141,6 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Runnabl
             releaseLock();
         }
     }
-
 
     @Override
     protected Object[] currentState() {

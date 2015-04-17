@@ -21,28 +21,23 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.executor.conditon.ConditionExecutor;
 import org.wso2.siddhi.core.executor.expression.ExpressionExecutor;
+import org.wso2.siddhi.core.extension.holder.TransformExtensionHolder;
+import org.wso2.siddhi.core.extension.holder.WindowExtensionHolder;
 import org.wso2.siddhi.core.query.processor.filter.FilterProcessor;
 import org.wso2.siddhi.core.query.processor.filter.PassthruFilterProcessor;
 import org.wso2.siddhi.core.query.processor.handler.HandlerProcessor;
 import org.wso2.siddhi.core.query.processor.handler.SimpleHandlerProcessor;
 import org.wso2.siddhi.core.query.processor.handler.TableHandlerProcessor;
-import org.wso2.siddhi.core.query.processor.handler.pattern.AndPatternInnerHandlerProcessor;
-import org.wso2.siddhi.core.query.processor.handler.pattern.CountPatternInnerHandlerProcessor;
-import org.wso2.siddhi.core.query.processor.handler.pattern.OrPatternInnerHandlerProcessor;
-import org.wso2.siddhi.core.query.processor.handler.pattern.PatternHandlerProcessor;
-import org.wso2.siddhi.core.query.processor.handler.pattern.PatternInnerHandlerProcessor;
+import org.wso2.siddhi.core.query.processor.handler.pattern.*;
 import org.wso2.siddhi.core.query.processor.handler.sequence.CountSequenceInnerHandlerProcessor;
 import org.wso2.siddhi.core.query.processor.handler.sequence.OrSequenceInnerHandlerProcessor;
 import org.wso2.siddhi.core.query.processor.handler.sequence.SequenceHandlerProcessor;
 import org.wso2.siddhi.core.query.processor.handler.sequence.SequenceInnerHandlerProcessor;
-import org.wso2.siddhi.core.query.processor.join.JoinProcessor;
-import org.wso2.siddhi.core.query.processor.join.LeftInStreamJoinProcessor;
-import org.wso2.siddhi.core.query.processor.join.LeftRemoveStreamJoinProcessor;
-import org.wso2.siddhi.core.query.processor.join.RightInStreamJoinProcessor;
-import org.wso2.siddhi.core.query.processor.join.RightRemoveStreamJoinProcessor;
+import org.wso2.siddhi.core.query.processor.join.*;
 import org.wso2.siddhi.core.query.processor.transform.TransformProcessor;
 import org.wso2.siddhi.core.query.processor.window.RunnableWindowProcessor;
 import org.wso2.siddhi.core.query.processor.window.TableWindowProcessor;
+import org.wso2.siddhi.core.query.processor.window.TimeBatchWindowProcessor;
 import org.wso2.siddhi.core.query.processor.window.WindowProcessor;
 import org.wso2.siddhi.core.query.statemachine.pattern.AndPatternState;
 import org.wso2.siddhi.core.query.statemachine.pattern.CountPatternState;
@@ -54,8 +49,6 @@ import org.wso2.siddhi.core.query.statemachine.sequence.SequenceState;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.util.QueryPartComposite;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
-import org.wso2.siddhi.core.extension.holder.TransformExtensionHolder;
-import org.wso2.siddhi.core.extension.holder.WindowExtensionHolder;
 import org.wso2.siddhi.query.api.condition.Condition;
 import org.wso2.siddhi.query.api.condition.ConditionValidator;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
@@ -72,27 +65,24 @@ import org.wso2.siddhi.query.api.query.input.handler.Window;
 import org.wso2.siddhi.query.api.query.input.pattern.PatternStream;
 import org.wso2.siddhi.query.api.query.input.sequence.SequenceStream;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class StreamParser {
 
-    static final Logger log = Logger.getLogger(StreamParser.class);
+    private static final Logger log = Logger.getLogger(StreamParser.class);
+    private static final String TIME_BATCH_WINDOW_PROCESSOR_NAME = "timeBatch";
 
     public static QueryPartComposite parseSingleStream(Stream queryStream, QueryEventSource queryEventSource, List<QueryEventSource> queryEventSourceList, ConcurrentMap<String, AbstractDefinition> streamTableDefinitionMap,
-                                                   ConcurrentMap<String, EventTable> eventTableMap, SiddhiContext siddhiContext) {
+                                                       ConcurrentMap<String, EventTable> eventTableMap, SiddhiContext siddhiContext) {
         QueryPartComposite queryPartComposite = new QueryPartComposite();
 
         SimpleHandlerProcessor simpleHandlerProcessor = new SimpleHandlerProcessor(queryEventSource,
-                                                                                   generateFilerProcessor(queryEventSource, queryEventSourceList, streamTableDefinitionMap, eventTableMap, siddhiContext),
-                                                                                   generateTransformProcessor(queryEventSource, queryEventSourceList, siddhiContext),
-                                                                                   siddhiContext);
+                generateFilerProcessor(queryEventSource, queryEventSourceList, streamTableDefinitionMap, eventTableMap, siddhiContext),
+                generateTransformProcessor(queryEventSource, queryEventSourceList, siddhiContext),
+                siddhiContext);
 
         if (queryStream instanceof WindowStream) {
             WindowProcessor windowProcessor = generateWindowProcessor(queryEventSource, siddhiContext, null, false);
@@ -108,8 +98,8 @@ public class StreamParser {
     }
 
     public static QueryPartComposite parseJoinStream(Stream queryStream, QueryEventSource leftQueryEventSource, QueryEventSource rightQueryEventSource, List<QueryEventSource> queryEventSourceList,
-                                                 ConcurrentMap<String, AbstractDefinition> streamTableDefinitionMap,
-                                                 ConcurrentMap<String, EventTable> eventTableMap, SiddhiContext siddhiContext) {
+                                                     ConcurrentMap<String, AbstractDefinition> streamTableDefinitionMap,
+                                                     ConcurrentMap<String, EventTable> eventTableMap, SiddhiContext siddhiContext) {
         QueryPartComposite queryPartComposite = new QueryPartComposite();
 
         boolean fromDB = false;
@@ -122,9 +112,9 @@ public class StreamParser {
             }
         } else {
             leftSimpleHandlerProcessor = new SimpleHandlerProcessor(leftQueryEventSource,
-                                                                    generateFilerProcessor(leftQueryEventSource, queryEventSourceList, streamTableDefinitionMap, eventTableMap, siddhiContext),
-                                                                    generateTransformProcessor(leftQueryEventSource, queryEventSourceList, siddhiContext),
-                                                                    siddhiContext);
+                    generateFilerProcessor(leftQueryEventSource, queryEventSourceList, streamTableDefinitionMap, eventTableMap, siddhiContext),
+                    generateTransformProcessor(leftQueryEventSource, queryEventSourceList, siddhiContext),
+                    siddhiContext);
         }
 
         SimpleHandlerProcessor rightSimpleHandlerProcessor;
@@ -136,9 +126,9 @@ public class StreamParser {
             }
         } else {
             rightSimpleHandlerProcessor = new SimpleHandlerProcessor(rightQueryEventSource,
-                                                                     generateFilerProcessor(rightQueryEventSource, queryEventSourceList, streamTableDefinitionMap, eventTableMap, siddhiContext),
-                                                                     generateTransformProcessor(rightQueryEventSource, queryEventSourceList, siddhiContext),
-                                                                     siddhiContext);
+                    generateFilerProcessor(rightQueryEventSource, queryEventSourceList, streamTableDefinitionMap, eventTableMap, siddhiContext),
+                    generateTransformProcessor(rightQueryEventSource, queryEventSourceList, siddhiContext),
+                    siddhiContext);
         }
 
         ConditionExecutor onConditionExecutor;
@@ -155,7 +145,13 @@ public class StreamParser {
         if (siddhiContext.isDistributedProcessingEnabled()) {
             lock = siddhiContext.getHazelcastInstance().getLock(siddhiContext.getElementIdGenerator().createNewId() + "-join-lock");
         } else {
-            lock = new ReentrantLock();
+            if ((leftQueryEventSource.getWindow() != null && leftQueryEventSource.getWindow().getName().equals(TIME_BATCH_WINDOW_PROCESSOR_NAME)) ||
+                    rightQueryEventSource.getWindow() != null && rightQueryEventSource.getWindow().getName().equals(TIME_BATCH_WINDOW_PROCESSOR_NAME)) {
+                log.debug("Found TimeBatchWindow in left or right event source for the join query. Setting fairness policy to true on lock for WindowProcessor");
+                lock = new ReentrantLock(true);
+            } else {
+                lock = new ReentrantLock();
+            }
         }
         switch (((JoinStream) queryStream).getTrigger()) {
             case LEFT:
@@ -233,7 +229,7 @@ public class StreamParser {
     }
 
     public static QueryPartComposite parsePatternStream(Stream queryStream, List<PatternState> patternStateList, List<QueryEventSource> queryEventSourceList, ConcurrentMap<String, AbstractDefinition> streamTableDefinitionMap,
-                                                    ConcurrentMap<String, EventTable> eventTableMap, SiddhiContext siddhiContext) {
+                                                        ConcurrentMap<String, EventTable> eventTableMap, SiddhiContext siddhiContext) {
         QueryPartComposite queryPartComposite = new QueryPartComposite();
 
         Map<Integer, PatternInnerHandlerProcessor> statePatternInnerHandlerProcessorMap = new HashMap<Integer, PatternInnerHandlerProcessor>();
@@ -253,16 +249,16 @@ public class StreamParser {
 
                     if (state instanceof OrPatternState) {
                         patternInnerHandlerProcessor = new OrPatternInnerHandlerProcessor(((OrPatternState) state), filterProcessor, patternStateList.size(), siddhiContext,
-                                                                                          siddhiContext.getElementIdGenerator().createNewId());
+                                siddhiContext.getElementIdGenerator().createNewId());
                     } else if (state instanceof AndPatternState) {
                         patternInnerHandlerProcessor = new AndPatternInnerHandlerProcessor(((AndPatternState) state), filterProcessor, patternStateList.size(), siddhiContext,
-                                                                                           siddhiContext.getElementIdGenerator().createNewId());
+                                siddhiContext.getElementIdGenerator().createNewId());
                     } else if (state instanceof CountPatternState) {
                         patternInnerHandlerProcessor = new CountPatternInnerHandlerProcessor(((CountPatternState) state), filterProcessor, patternStateList.size(), siddhiContext,
-                                                                                             siddhiContext.getElementIdGenerator().createNewId());
+                                siddhiContext.getElementIdGenerator().createNewId());
                     } else {
                         patternInnerHandlerProcessor = new PatternInnerHandlerProcessor(state, filterProcessor, patternStateList.size(), siddhiContext,
-                                                                                        siddhiContext.getElementIdGenerator().createNewId());
+                                siddhiContext.getElementIdGenerator().createNewId());
                     }
 
                     statePatternInnerHandlerProcessorMap.put(state.getStateNumber(), patternInnerHandlerProcessor);
@@ -300,7 +296,7 @@ public class StreamParser {
     }
 
     public static QueryPartComposite parseSequenceStream(Stream queryStream, List<SequenceState> sequenceStateList, List<QueryEventSource> queryEventSourceList, ConcurrentMap<String, AbstractDefinition> streamTableDefinitionMap,
-                                                     ConcurrentMap<String, EventTable> eventTableMap, SiddhiContext siddhiContext) {
+                                                         ConcurrentMap<String, EventTable> eventTableMap, SiddhiContext siddhiContext) {
         QueryPartComposite queryPartComposite = new QueryPartComposite();
 
         Map<Integer, SequenceInnerHandlerProcessor> stateSequenceInnerHandlerProcessorMap = new HashMap<Integer, SequenceInnerHandlerProcessor>();
@@ -323,13 +319,13 @@ public class StreamParser {
 
                     if (state instanceof OrSequenceState) {
                         sequenceInnerHandlerProcessor = new OrSequenceInnerHandlerProcessor(((OrSequenceState) state), filterProcessor, sequenceStateList.size(),
-                                                                                            siddhiContext, siddhiContext.getElementIdGenerator().createNewId());
+                                siddhiContext, siddhiContext.getElementIdGenerator().createNewId());
                     } else if (state instanceof CountSequenceState) {
                         sequenceInnerHandlerProcessor = new CountSequenceInnerHandlerProcessor(((CountSequenceState) state), filterProcessor, sequenceStateList.size(),
-                                                                                               siddhiContext, siddhiContext.getElementIdGenerator().createNewId());
+                                siddhiContext, siddhiContext.getElementIdGenerator().createNewId());
                     } else {
                         sequenceInnerHandlerProcessor = new SequenceInnerHandlerProcessor(state, filterProcessor, sequenceStateList.size(),
-                                                                                          siddhiContext, siddhiContext.getElementIdGenerator().createNewId());
+                                siddhiContext, siddhiContext.getElementIdGenerator().createNewId());
                     }
 
                     stateSequenceInnerHandlerProcessorMap.put(state.getStateNumber(), sequenceInnerHandlerProcessor);
@@ -401,7 +397,7 @@ public class StreamParser {
             return null;
         }
         TransformProcessor transformProcessor = (TransformProcessor) SiddhiClassLoader.loadProcessor(queryEventSource.getTransformer().getName(), queryEventSource.getTransformer().getExtension(),
-                                                                                                     TransformProcessor.class, TransformExtensionHolder.getInstance(siddhiContext));
+                TransformProcessor.class, TransformExtensionHolder.getInstance(siddhiContext));
 
         siddhiContext.addEternalReferencedHolder(transformProcessor);
         transformProcessor.setSiddhiContext(siddhiContext);
@@ -456,7 +452,7 @@ public class StreamParser {
             window = new Window("length", new Expression[]{Expression.value(Integer.MAX_VALUE)});
         }
         WindowProcessor windowProcessor = (WindowProcessor) SiddhiClassLoader.loadProcessor(window.getName(), window.getExtension(),
-                                                                                            WindowProcessor.class, WindowExtensionHolder.getInstance(siddhiContext));
+                WindowProcessor.class, WindowExtensionHolder.getInstance(siddhiContext));
 
         siddhiContext.addEternalReferencedHolder(windowProcessor);
 
@@ -476,7 +472,12 @@ public class StreamParser {
             if (siddhiContext.isDistributedProcessingEnabled()) {
                 windowProcessor.setLock(siddhiContext.getHazelcastInstance().getLock(windowProcessor.getElementId() + "-lock"));
             } else {
-                windowProcessor.setLock(new ReentrantLock());
+                if (windowProcessor instanceof TimeBatchWindowProcessor) {
+                    log.debug("Creating TimeBatchWindow. Setting fairness policy to true on lock for WindowProcessor");
+                    windowProcessor.setLock(new ReentrantLock(true));
+                } else {
+                    windowProcessor.setLock(new ReentrantLock());
+                }
             }
         } else {
             windowProcessor.setLock(lock);
@@ -496,7 +497,7 @@ public class StreamParser {
             return;
         }
         TransformProcessor transformProcessor = (TransformProcessor) SiddhiClassLoader.loadProcessor(queryEventSource.getTransformer().getName(), queryEventSource.getTransformer().getExtension(),
-                                                                                                     TransformProcessor.class, TransformExtensionHolder.getInstance(siddhiContext));
+                TransformProcessor.class, TransformExtensionHolder.getInstance(siddhiContext));
         siddhiContext.addEternalReferencedHolder(transformProcessor);
         transformProcessor.setSiddhiContext(siddhiContext);
         transformProcessor.setInStreamDefinition((StreamDefinition) queryEventSource.getInDefinition());
