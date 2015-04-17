@@ -57,18 +57,20 @@ public class SubstrFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals("efghiJ KLMN", inEvents[0].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals("yut", inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("o", inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("efghiJ KLMN", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("yut", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("o", event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });
@@ -101,18 +103,20 @@ public class SubstrFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals("CDef", inEvents[0].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals("rtyu", inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("lloo", inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("CDef", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("rtyu", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("lloo", event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });
@@ -145,18 +149,20 @@ public class SubstrFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals("WSO2D efghiJ KLMN", inEvents[0].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals("", inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("", inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("WSO2D efghiJ KLMN", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("", event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });
@@ -189,18 +195,20 @@ public class SubstrFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals(" ello", inEvents[0].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals("o", inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("llo", inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(" ello", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("o", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("llo", event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });

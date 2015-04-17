@@ -54,18 +54,20 @@ public class ReverseFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals("NMLK JihgfeDCbA", inEvents[0].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals("87654321", inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("dlroW olleH", inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("NMLK JihgfeDCbA", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("87654321", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("dlroW olleH", event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });

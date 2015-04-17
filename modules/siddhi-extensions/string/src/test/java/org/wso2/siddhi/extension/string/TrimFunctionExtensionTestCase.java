@@ -54,21 +54,23 @@ public class TrimFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals("AbCDefghiJ KLMN", inEvents[0].getData(1));
-                    Assert.assertEquals(15, inEvents[0].getData(1).toString().length());
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals("ertyut", inEvents[1].getData(1));
-                    Assert.assertEquals(6, inEvents[1].getData(1).toString().length());
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("", inEvents[2].getData(1));
-                    Assert.assertEquals(0, inEvents[2].getData(1).toString().length());
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("AbCDefghiJ KLMN", event.getData(1));
+                        Assert.assertEquals(15, event.getData(1).toString().length());
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("ertyut", event.getData(1));
+                        Assert.assertEquals(6, event.getData(1).toString().length());
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("", event.getData(1));
+                        Assert.assertEquals(0, event.getData(1).toString().length());
+                        eventArrived = true;
+                    }
                 }
             }
         });

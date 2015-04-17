@@ -54,18 +54,20 @@ public class UpperFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals("ABCDEFGHIJ KLMNAAAAAAAAAA", inEvents[0].getData(1));    //Note: Assertion doesn't count the spaces infront or in the back
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals("123456XYZ ABC 78AAAAAA", inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("HELLO WORLDAAAA", inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("ABCDEFGHIJ KLMNAAAAAAAAAA", event.getData(1));    //Note: Assertion doesn't count the spaces infront or in the back
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("123456XYZ ABC 78AAAAAA", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("HELLO WORLDAAAA", event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });

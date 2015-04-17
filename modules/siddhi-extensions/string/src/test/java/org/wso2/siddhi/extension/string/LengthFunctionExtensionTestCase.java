@@ -54,18 +54,20 @@ public class LengthFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals(15, inEvents[0].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals(8, inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals(11, inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(15, event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(8, event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals(11, event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });

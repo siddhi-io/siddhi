@@ -54,18 +54,20 @@ public class LowerFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals("hello how are you ", inEvents[0].getData(1));    //Note: Assertion doesn't count the spaces infront or in the back
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals(" my name is tharindu", inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("wso2 cep ", inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("hello how are you ", event.getData(1));    //Note: Assertion doesn't count the spaces infront or in the back
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(" my name is tharindu", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("wso2 cep ", event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });

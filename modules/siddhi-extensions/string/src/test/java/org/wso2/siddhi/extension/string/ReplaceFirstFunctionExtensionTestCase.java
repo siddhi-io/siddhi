@@ -58,18 +58,20 @@ public class ReplaceFirstFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals("test hi hello", inEvents[0].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals("WSO2 hi test", inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("WSO2 cep", inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("test hi hello", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("WSO2 hi test", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("WSO2 cep", event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });
@@ -103,18 +105,20 @@ public class ReplaceFirstFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals("hello XXXX hi hello", inEvents[0].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals("XXXX ", inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("WSO2 bam", inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("hello XXXX A hi hello", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("XXXX ", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("WSO2 bam", event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });
@@ -124,7 +128,7 @@ public class ReplaceFirstFunctionExtensionTestCase {
         inputHandler.send(new Object[]{"hello WSO2 A hi hello", "WSO2", "XXXX"});
         inputHandler.send(new Object[]{"WSO2 hi helloA ", "WSO2(.*)A", "XXXX"});
         inputHandler.send(new Object[]{"WSO2 cep", "cep", "bam"});
-        Thread.sleep(100);
+        Thread.sleep(4000);
         Assert.assertEquals(3, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
@@ -149,18 +153,20 @@ public class ReplaceFirstFunctionExtensionTestCase {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
-                    Assert.assertEquals("hello XXXX hi hello", inEvents[0].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 2) {
-                    Assert.assertEquals("XXXX ", inEvents[1].getData(1));
-                    eventArrived = true;
-                }
-                if (count == 3) {
-                    Assert.assertEquals("WSO2 cep", inEvents[2].getData(1));
-                    eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("hello XXXX hi hello", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("XXXX ", event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count == 3) {
+                        Assert.assertEquals("WSO2 cep", event.getData(1));
+                        eventArrived = true;
+                    }
                 }
             }
         });
