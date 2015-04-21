@@ -94,6 +94,11 @@
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.quartz-scheduler.wso2</groupId>
+                <artifactId>quartz</artifactId>
+                <version>${quartz.version}</version>
+            </dependency>
 
             <!--Eval Script-->
             <dependency>
@@ -112,12 +117,31 @@
                 <version>${scala.version}</version>
             </dependency>
 
+            <!--Geo-->
             <dependency>
                 <groupId>com.google.code.geocoder-java</groupId>
                 <artifactId>geocoder-java</artifactId>
                 <version>${geocoder.version}</version>
             </dependency>
 
+            <!--Event Table-->
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-common</artifactId>
+                <version>${hadoop.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.connector.version}</version>
+            </dependency>
+
+            <!--Time-->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.wso2.siddhi</groupId>
@@ -134,26 +158,7 @@
                 <artifactId>siddhi-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.quartz-scheduler.wso2</groupId>
-                <artifactId>quartz</artifactId>
-                <version>${quartz.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.connector.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-common</artifactId>
-                <version>${hadoop.common.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${commons-lang3.version}</version>
-            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
