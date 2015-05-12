@@ -15,6 +15,7 @@
     <modules>
         <module>time-series</module>
         <module>machine-learning</module>
+        <module>imageprocessing-objectdetection</module>
     </modules>
 
 </project>
