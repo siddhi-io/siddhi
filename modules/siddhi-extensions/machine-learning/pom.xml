@@ -25,7 +25,7 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>machine-learning</artifactId>
-	<name>machine-learning</name>
+    <name>Machine Learning Extension</name>
 
 	<dependencies>
 		<dependency>
