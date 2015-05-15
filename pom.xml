@@ -149,6 +149,18 @@
                 <version>${commons-lang3.version}</version>
             </dependency>
 
+            <!--ML-->
+            <dependency>
+                <groupId>org.wso2.carbon.ml</groupId>
+                <artifactId>org.wso2.carbon.ml.core</artifactId>
+                <version>${ml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.ml</groupId>
+                <artifactId>org.wso2.carbon.ml.commons</artifactId>
+                <version>${ml.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-query-api</artifactId>
@@ -295,6 +307,7 @@
         <mysql.connector.version>5.1.6</mysql.connector.version>
         <hadoop.common.version>2.6.0</hadoop.common.version>
         <commons-lang3.version>3.3.2</commons-lang3.version>
+        <ml.version>1.0.0</ml.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
