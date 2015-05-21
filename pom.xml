@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -168,6 +169,16 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-math</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-time</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-query-compiler</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -176,6 +187,18 @@
                 <artifactId>siddhi-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!-- Time Series -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math3</artifactId>
+                <version>${commons-math3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gov.nist.math</groupId>
+                <artifactId>jama</artifactId>
+                <version>${jama.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -308,6 +331,8 @@
         <hadoop.common.version>2.6.0</hadoop.common.version>
         <commons-lang3.version>3.3.2</commons-lang3.version>
         <ml.version>1.0.0</ml.version>
+        <commons-math3.version>3.2</commons-math3.version>
+        <jama.version>1.0.3</jama.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
