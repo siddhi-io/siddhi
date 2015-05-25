@@ -142,6 +142,11 @@
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.connector.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.wso2</groupId>
+                <artifactId>jdbc-pool</artifactId>
+                <version>${jdbc-pool.version}</version>
+            </dependency>
 
             <!--Time-->
             <dependency>
@@ -333,6 +338,7 @@
         <ml.version>1.0.0</ml.version>
         <commons-math3.version>3.2</commons-math3.version>
         <jama.version>1.0.3</jama.version>
+        <jdbc-pool.version>7.0.34.wso2v2</jdbc-pool.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
