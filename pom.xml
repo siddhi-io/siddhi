@@ -337,7 +337,7 @@
         <mysql.connector.version>5.1.6</mysql.connector.version>
         <hadoop.common.version>2.6.0</hadoop.common.version>
         <commons-lang3.version>3.3.2</commons-lang3.version>
-        <ml.version>1.0.0</ml.version>
+        <ml.version>1.0.1-SNAPSHOT</ml.version>
         <commons-math3.version>3.2</commons-math3.version>
         <jama.version>1.0.3</jama.version>
         <jdbc-pool.version>7.0.34.wso2v2</jdbc-pool.version>
