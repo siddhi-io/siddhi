@@ -67,7 +67,7 @@ public class QuerySelector implements Processor {
             log.trace("event is processed by selector " + id + this);
         }
 
-        if(!containsAggregator) {
+        if (!containsAggregator) {
             boolean eventSent = false;
             complexEventChunk.reset();
 
