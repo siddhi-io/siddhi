@@ -197,7 +197,7 @@
             <dependency>
                 <groupId>org.jacoco</groupId>
                 <artifactId>org.jacoco.agent</artifactId>
-                <version>0.7.4.201502262128</version>
+                <version>${org.jacoco.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -366,6 +366,7 @@
         <commons-math3.version>3.2</commons-math3.version>
         <jama.version>1.0.3</jama.version>
         <jdbc-pool.version>7.0.34.wso2v2</jdbc-pool.version>
+        <org.jacoco.version>0.7.4.201502262128</org.jacoco.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.scm.id>scm-server</project.scm.id>
