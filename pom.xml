@@ -2,17 +2,19 @@
 <!--
   ~ Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
   ~ You may obtain a copy of the License at
   ~
   ~     http://www.apache.org/licenses/LICENSE-2.0
   ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -195,7 +197,7 @@
             <dependency>
                 <groupId>org.jacoco</groupId>
                 <artifactId>org.jacoco.agent</artifactId>
-                <version>0.7.4.201502262128</version>
+                <version>${org.jacoco.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -351,7 +353,7 @@
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <slf4j.version>1.7.12</slf4j.version>
         <mvel2.version>2.2.1.Final</mvel2.version>
-        <antlr.runtime.version>4.5</antlr.runtime.version>
+        <antlr.runtime.version>4.5.1</antlr.runtime.version>
         <disruptor.version>3.3.2.wso2v2</disruptor.version>
         <guava.version>14.0.1</guava.version>
         <scala.version>2.11.0</scala.version>
@@ -364,6 +366,7 @@
         <commons-math3.version>3.2</commons-math3.version>
         <jama.version>1.0.3</jama.version>
         <jdbc-pool.version>7.0.34.wso2v2</jdbc-pool.version>
+        <org.jacoco.version>0.7.4.201502262128</org.jacoco.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.scm.id>scm-server</project.scm.id>
