@@ -383,7 +383,7 @@
         <commons-math3.version>3.2</commons-math3.version>
         <jama.version>1.0.3</jama.version>
         <jdbc-pool.version>7.0.34.wso2v2</jdbc-pool.version>
-        <jdbc-pool.imp.pkg.version.range>[7.0.34, 7.1.0)</jdbc-pool.imp.pkg.version.range>
+        <jdbc-pool.imp.pkg.version.range>[1.7.0, 1.8.0)</jdbc-pool.imp.pkg.version.range>
         <org.jacoco.version>0.7.4.201502262128</org.jacoco.version>
         <org.eclipse.osgi.version>3.7.0.v20110613</org.eclipse.osgi.version>
         <version.equinox.osgi.services>3.3.100.v20120522-1822</version.equinox.osgi.services>
