@@ -367,6 +367,7 @@
         <siddhi.version>3.0.3-SNAPSHOT</siddhi.version>
         <junit.version>4.10</junit.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
+        <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
         <slf4j.version>1.7.12</slf4j.version>
         <mvel2.version>2.2.1.Final</mvel2.version>
         <antlr.runtime.version>4.5.1</antlr.runtime.version>
@@ -382,10 +383,12 @@
         <commons-math3.version>3.2</commons-math3.version>
         <jama.version>1.0.3</jama.version>
         <jdbc-pool.version>7.0.34.wso2v2</jdbc-pool.version>
+        <jdbc-pool.imp.pkg.version.range>[7.0.34, 7.1.0)</jdbc-pool.imp.pkg.version.range>
         <org.jacoco.version>0.7.4.201502262128</org.jacoco.version>
         <org.eclipse.osgi.version>3.7.0.v20110613</org.eclipse.osgi.version>
         <version.equinox.osgi.services>3.3.100.v20120522-1822</version.equinox.osgi.services>
         <hazelcast.version>3.5.0.wso2v1</hazelcast.version>
+        <hazelcast.imp.pkg.version.range>[3.5, 3.6.0)</hazelcast.imp.pkg.version.range>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.scm.id>scm-server</project.scm.id>
