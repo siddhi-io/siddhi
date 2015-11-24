@@ -1,17 +1,19 @@
 /*
  * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.siddhi.extension.math;
@@ -102,8 +104,8 @@ public class RandomFunctionExtensionTestCase {
                     randNumbers[1] = (Double) inEvents[1].getData(1);
                     randNumbers[2] = (Double) inEvents[2].getData(1);
                     boolean isDuplicatePresent = false;
-                    System.out.println(randNumbers[0]+", "+randNumbers[1]);
-                    if(randNumbers[0] == randNumbers[1] ||
+                    System.out.println(randNumbers[0] + ", " + randNumbers[1]);
+                    if (randNumbers[0] == randNumbers[1] ||
                             randNumbers[0] == randNumbers[2] ||
                             randNumbers[1] == randNumbers[2]) {
                         isDuplicatePresent = true;
@@ -118,9 +120,9 @@ public class RandomFunctionExtensionTestCase {
         inputHandler.send(new Object[]{"IBM", 700f, 100l});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
         inputHandler.send(new Object[]{"XYZ", 60.5f, 200l});
-        Thread.sleep(100);
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
         junit.framework.Assert.assertEquals(3, count);
         junit.framework.Assert.assertTrue(eventArrived);
-        executionPlanRuntime.shutdown();
     }
 }

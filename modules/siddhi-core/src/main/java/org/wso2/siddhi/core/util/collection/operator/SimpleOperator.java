@@ -1,17 +1,19 @@
 /*
  * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.siddhi.core.util.collection.operator;
@@ -37,12 +39,12 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANY;
 public class SimpleOperator implements Operator {
     private final ZeroStreamEventConverter streamEventConverter;
     private final StreamEvent matchingEvent;
-    private FinderStateEvent event;
     protected ExpressionExecutor expressionExecutor;
     protected int candidateEventPosition;
     protected int matchingEventPosition;
     protected int streamEventSize;
     protected long withinTime;
+    private FinderStateEvent event;
     private int matchingEventOutputSize;
 
     public SimpleOperator(ExpressionExecutor expressionExecutor, int candidateEventPosition, int matchingEventPosition, int streamEventSize, long withinTime, int matchingEventOutputSize) {
@@ -59,11 +61,21 @@ public class SimpleOperator implements Operator {
 
     }
 
-    public boolean execute(StreamEvent candidateEvent) {
+    private boolean execute(StreamEvent candidateEvent) {
         event.setEvent(candidateEventPosition, candidateEvent);
         boolean result = (Boolean) expressionExecutor.execute(event);
         event.setEvent(candidateEventPosition, null);
         return result;
+    }
+
+    private boolean outsideTimeWindow(StreamEvent streamEvent) {
+        if (withinTime != ANY) {
+            long timeDifference = event.getStreamEvent(matchingEventPosition).getTimestamp() - streamEvent.getTimestamp();
+            if ((0 > timeDifference) || (timeDifference > withinTime)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -76,9 +88,9 @@ public class SimpleOperator implements Operator {
 
         try {
             if (matchingEvent instanceof StreamEvent) {
-                this.event.setEvent(matchingEventPosition, ((StreamEvent) matchingEvent));
+                this.event.setEvent(matchingEventPosition, (StreamEvent) matchingEvent);
             } else {
-                this.event.setEvent(((StateEvent) matchingEvent));
+                this.event.setEvent((StateEvent) matchingEvent);
             }
             if (candidateEvents instanceof ComplexEventChunk) {
                 return find((ComplexEventChunk) candidateEvents, streamEventCloner);
@@ -126,11 +138,8 @@ public class SimpleOperator implements Operator {
         candidateEventChunk.reset();
         while (candidateEventChunk.hasNext()) {
             StreamEvent streamEvent = candidateEventChunk.next();
-            if (withinTime != ANY) {
-                long timeDifference = Math.abs(event.getStreamEvent(matchingEventPosition).getTimestamp() - streamEvent.getTimestamp());
-                if (timeDifference > withinTime) {
-                    break;
-                }
+            if (outsideTimeWindow(streamEvent)) {
+                break;
             }
             if (execute(streamEvent)) {
                 candidateEventChunk.remove();
@@ -141,11 +150,8 @@ public class SimpleOperator implements Operator {
     private void delete(Collection<StreamEvent> candidateEvents) {
         for (Iterator<StreamEvent> iterator = candidateEvents.iterator(); iterator.hasNext(); ) {
             StreamEvent streamEvent = iterator.next();
-            if (withinTime != ANY) {
-                long timeDifference = Math.abs(event.getStreamEvent(matchingEventPosition).getTimestamp() - streamEvent.getTimestamp());
-                if (timeDifference > withinTime) {
-                    break;
-                }
+            if (outsideTimeWindow(streamEvent)) {
+                break;
             }
             if (execute(streamEvent)) {
                 iterator.remove();
@@ -180,11 +186,8 @@ public class SimpleOperator implements Operator {
         candidateEventChunk.reset();
         while (candidateEventChunk.hasNext()) {
             StreamEvent streamEvent = candidateEventChunk.next();
-            if (withinTime != ANY) {
-                long timeDifference = Math.abs(event.getStreamEvent(matchingEventPosition).getTimestamp() - streamEvent.getTimestamp());
-                if (timeDifference > withinTime) {
-                    break;
-                }
+            if (outsideTimeWindow(streamEvent)) {
+                break;
             }
             if (execute(streamEvent)) {
                 for (int i = 0, size = mappingPosition.length; i < size; i++) {
@@ -196,11 +199,8 @@ public class SimpleOperator implements Operator {
 
     private void update(Collection<StreamEvent> candidateEvents, int[] mappingPosition) {
         for (StreamEvent streamEvent : candidateEvents) {
-            if (withinTime != ANY) {
-                long timeDifference = Math.abs(event.getStreamEvent(matchingEventPosition).getTimestamp() - streamEvent.getTimestamp());
-                if (timeDifference > withinTime) {
-                    break;
-                }
+            if (outsideTimeWindow(streamEvent)) {
+                break;
             }
             if (execute(streamEvent)) {
                 for (int i = 0, size = mappingPosition.length; i < size; i++) {
@@ -214,9 +214,9 @@ public class SimpleOperator implements Operator {
     public boolean contains(ComplexEvent matchingEvent, Object candidateEvents) {
         try {
             if (matchingEvent instanceof StreamEvent) {
-                this.event.setEvent(matchingEventPosition, ((StreamEvent) matchingEvent));
+                this.event.setEvent(matchingEventPosition, (StreamEvent) matchingEvent);
             } else {
-                this.event.setEvent(((StateEvent) matchingEvent));
+                this.event.setEvent((StateEvent) matchingEvent);
             }
             if (candidateEvents instanceof ComplexEventChunk) {
                 return contains((ComplexEventChunk) candidateEvents);
@@ -239,11 +239,8 @@ public class SimpleOperator implements Operator {
     private boolean contains(Collection<StreamEvent> candidateEvents) {
 
         for (StreamEvent streamEvent : candidateEvents) {
-            if (withinTime != ANY) {
-                long timeDifference = Math.abs(event.getStreamEvent(matchingEventPosition).getTimestamp() - streamEvent.getTimestamp());
-                if (timeDifference > withinTime) {
-                    break;
-                }
+            if (outsideTimeWindow(streamEvent)) {
+                break;
             }
             if (execute(streamEvent)) {
                 return true;
@@ -256,11 +253,8 @@ public class SimpleOperator implements Operator {
         candidateEventChunk.reset();
         while (candidateEventChunk.hasNext()) {
             StreamEvent streamEvent = candidateEventChunk.next();
-            if (withinTime != ANY) {
-                long timeDifference = Math.abs(event.getStreamEvent(matchingEventPosition).getTimestamp() - streamEvent.getTimestamp());
-                if (timeDifference > withinTime) {
-                    break;
-                }
+            if (outsideTimeWindow(streamEvent)) {
+                break;
             }
             if (execute(streamEvent)) {
                 return true;
@@ -274,11 +268,8 @@ public class SimpleOperator implements Operator {
         ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
         while (candidateEventChunk.hasNext()) {
             StreamEvent streamEvent = candidateEventChunk.next();
-            if (withinTime != ANY) {
-                long timeDifference = Math.abs(event.getStreamEvent(matchingEventPosition).getTimestamp() - streamEvent.getTimestamp());
-                if (timeDifference > withinTime) {
-                    break;
-                }
+            if (outsideTimeWindow(streamEvent)) {
+                break;
             }
             if (execute(streamEvent)) {
                 returnEventChunk.add(streamEventCloner.copyStreamEvent(streamEvent));
@@ -287,15 +278,11 @@ public class SimpleOperator implements Operator {
         return returnEventChunk.getFirst();
     }
 
-
     protected StreamEvent find(Collection<StreamEvent> candidateEvents, StreamEventCloner streamEventCloner) {
         ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>();
         for (StreamEvent streamEvent : candidateEvents) {
-            if (withinTime != ANY) {
-                long timeDifference = Math.abs(event.getStreamEvent(matchingEventPosition).getTimestamp() - streamEvent.getTimestamp());
-                if (timeDifference > withinTime) {
-                    break;
-                }
+            if (outsideTimeWindow(streamEvent)) {
+                break;
             }
             if (execute(streamEvent)) {
                 returnEventChunk.add(streamEventCloner.copyStreamEvent(streamEvent));

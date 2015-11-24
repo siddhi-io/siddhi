@@ -1,17 +1,19 @@
 /*
  * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.siddhi.core.util.collection.operator;
@@ -32,15 +34,24 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANY;
  * Created on 12/8/14.
  */
 public class SimpleIndexedOperator implements Operator {
-    private ExpressionExecutor expressionExecutor;
     private final long withinTime;
+    private ExpressionExecutor expressionExecutor;
     private int matchingEventPosition;
 
     public SimpleIndexedOperator(ExpressionExecutor expressionExecutor, int matchingEventPosition, long withinTime) {
-
         this.expressionExecutor = expressionExecutor;
         this.matchingEventPosition = matchingEventPosition;
         this.withinTime = withinTime;
+    }
+
+    private boolean outsideTimeWindow(ComplexEvent matchingEvent, StreamEvent streamEvent) {
+        if (withinTime != ANY) {
+            long timeDifference = matchingEvent.getTimestamp() - streamEvent.getTimestamp();
+            if ((0 > timeDifference) || (timeDifference > withinTime)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -50,18 +61,14 @@ public class SimpleIndexedOperator implements Operator {
 
     @Override
     public StreamEvent find(ComplexEvent matchingEvent, Object candidateEvents, StreamEventCloner streamEventCloner) {
-
         Object matchingKey = expressionExecutor.execute(matchingEvent);
         if (candidateEvents instanceof Map) {
             StreamEvent streamEvent = ((Map<Object, StreamEvent>) candidateEvents).get(matchingKey);
             if (streamEvent == null) {
                 return null;
             } else {
-                if (withinTime != ANY) {
-                    long timeDifference = Math.abs(matchingEvent.getTimestamp() - streamEvent.getTimestamp());
-                    if (timeDifference > withinTime) {
-                        return null;
-                    }
+                if (outsideTimeWindow(matchingEvent, streamEvent)) {
+                    return null;
                 }
                 return streamEventCloner.copyStreamEvent(streamEvent);
             }
@@ -78,16 +85,13 @@ public class SimpleIndexedOperator implements Operator {
             ComplexEvent deletingEvent = deletingEventChunk.next();
             Object matchingKey = expressionExecutor.execute(deletingEvent);
             if (candidateEvents instanceof Map) {
-                if (withinTime != ANY) {
-                    StreamEvent streamEvent = ((Map<Object, StreamEvent>) candidateEvents).get(matchingKey);
-                    if (streamEvent != null) {
-                        long timeDifference = Math.abs(deletingEvent.getTimestamp() - streamEvent.getTimestamp());
-                        if (timeDifference > withinTime) {
-                            return;
-                        }
+                StreamEvent streamEvent = ((Map<Object, StreamEvent>) candidateEvents).get(matchingKey);
+                if (streamEvent != null) {
+                    if (outsideTimeWindow(deletingEvent, streamEvent)) {
+                        return;
                     }
+                    ((Map<Object, StreamEvent>) candidateEvents).remove(matchingKey);
                 }
-                ((Map<Object, StreamEvent>) candidateEvents).remove(matchingKey);
             } else {
                 throw new OperationNotSupportedException(SimpleIndexedOperator.class.getCanonicalName() + " does not support " + candidateEvents.getClass().getCanonicalName());
             }
@@ -103,13 +107,9 @@ public class SimpleIndexedOperator implements Operator {
             if (candidateEvents instanceof Map) {
                 StreamEvent streamEvent = ((Map<Object, StreamEvent>) candidateEvents).get(matchingKey);
                 if (streamEvent != null) {
-                    if (withinTime != ANY) {
-                        long timeDifference = Math.abs(updatingEvent.getTimestamp() - streamEvent.getTimestamp());
-                        if (timeDifference > withinTime) {
-                            return;
-                        }
+                    if (outsideTimeWindow(updatingEvent, streamEvent)) {
+                        return;
                     }
-
                     for (int i = 0, size = mappingPosition.length; i < size; i++) {
                         streamEvent.setOutputData(updatingEvent.getOutputData()[i], mappingPosition[i]);
                     }
@@ -117,7 +117,6 @@ public class SimpleIndexedOperator implements Operator {
             } else {
                 throw new OperationNotSupportedException(SimpleIndexedOperator.class.getCanonicalName() + " does not support " + candidateEvents.getClass().getCanonicalName());
             }
-
         }
     }
 
@@ -132,19 +131,9 @@ public class SimpleIndexedOperator implements Operator {
         Object matchingKey = expressionExecutor.execute(matchingStreamEvent);
         if (candidateEvents instanceof Map) {
             StreamEvent streamEvent = ((Map<Object, StreamEvent>) candidateEvents).get(matchingKey);
-            if (streamEvent != null) {
-                if (withinTime != ANY) {
-                    long timeDifference = Math.abs(matchingStreamEvent.getTimestamp() - streamEvent.getTimestamp());
-                    if (timeDifference > withinTime) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            return false;
+            return streamEvent != null && !outsideTimeWindow(matchingStreamEvent, streamEvent);
         } else {
             throw new OperationNotSupportedException(SimpleIndexedOperator.class.getCanonicalName() + " does not support " + candidateEvents.getClass().getCanonicalName());
         }
-
     }
 }
