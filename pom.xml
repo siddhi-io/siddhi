@@ -215,7 +215,11 @@
                 <version>${org.jacoco.version}</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -391,7 +395,7 @@
         </equinox.osgi.services.imp.pkg.version.range>
         <hazelcast.version>3.5.0.wso2v1</hazelcast.version>
         <hazelcast.imp.pkg.version.range>[3.5, 3.6.0)</hazelcast.imp.pkg.version.range>
-
+        <metrics.version>3.1.0</metrics.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.scm.id>scm-server</project.scm.id>
     </properties>
