@@ -39,6 +39,8 @@
         <module>time</module>
         <module>timeseries</module>
         <module>ooh</module>
+        <module>map</module>
+        <module>common</module>
     </modules>
 
 </project>
