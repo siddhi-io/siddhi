@@ -11,7 +11,7 @@
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -56,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Kalman2DFilterWithMatrices extends StreamFunctionProcessor {
 
-    private ConcurrentHashMap<String, ConcurrentHashMap<Integer, KalmonFilter>> kalmonFilterHashMap;
+    private ConcurrentHashMap<String, ConcurrentHashMap<Integer, KFRelatedValueHolder>> kalmonFilterHashMap;
 
     @Override
     public void start() {
@@ -116,13 +116,13 @@ public class Kalman2DFilterWithMatrices extends StreamFunctionProcessor {
         long timestamp = (Long) data[4];
         String objectId = (String) data[5];
         int level = (Integer) data[6]; //level should be the same if the all the objects are on the same plane
-        ConcurrentHashMap<Integer, KalmonFilter> levelSpecificKalmonFilterMap = kalmonFilterHashMap.get(objectId);
+        ConcurrentHashMap<Integer, KFRelatedValueHolder> levelSpecificKalmonFilterMap = kalmonFilterHashMap.get(objectId);
 
         if (levelSpecificKalmonFilterMap == null) {
-            kalmonFilterHashMap.put(objectId, new ConcurrentHashMap<Integer, KalmonFilter>());
+            kalmonFilterHashMap.put(objectId, new ConcurrentHashMap<Integer, KFRelatedValueHolder>());
         }
 
-        KalmonFilter kalmonFilter = kalmonFilterHashMap.get(objectId).get(level);
+        KFRelatedValueHolder kfRelatedValueHolder = kalmonFilterHashMap.get(objectId).get(level);
 
         long timestampDiff;
         RealMatrix transitionMatrixA;
@@ -136,22 +136,22 @@ public class Kalman2DFilterWithMatrices extends StreamFunctionProcessor {
         RealMatrix Rmatrix = MatrixUtils.createRealMatrix(Rvalues);
         long prevTimestamp;
 
-        if (kalmonFilter == null) {
+        if (kfRelatedValueHolder == null) {
             timestampDiff = 1;
             double[][] varianceValues = {{1000, 0}, {0, 1000}};
             double[][] measurementValues = {{1, 0}, {0, 1}};
             measurementMatrixH = MatrixUtils.createRealMatrix(measurementValues);
-            kalmonFilter = new KalmonFilter();
+            kfRelatedValueHolder = new KFRelatedValueHolder();
             varianceMatrixP = MatrixUtils.createRealMatrix(varianceValues);
             prevMeasuredMatrixX = MatrixUtils.createRealMatrix(measuredValues);
             prevMeasuredMatrixY = MatrixUtils.createRealMatrix(measuredValuesY);
         } else {
-            prevTimestamp = kalmonFilter.getPrevTimestamp();
+            prevTimestamp = kfRelatedValueHolder.getPrevTimestamp();
             timestampDiff = (timestamp - prevTimestamp);
-            prevMeasuredMatrixX = kalmonFilter.getPrevMeasuredMatrixX();
-            prevMeasuredMatrixY = kalmonFilter.getPrevMeasuredMatrixY();
-            measurementMatrixH = kalmonFilter.getMeasurementMatrixH();
-            varianceMatrixP = kalmonFilter.getVarianceMatrixP();
+            prevMeasuredMatrixX = kfRelatedValueHolder.getPrevMeasuredMatrixX();
+            prevMeasuredMatrixY = kfRelatedValueHolder.getPrevMeasuredMatrixY();
+            measurementMatrixH = kfRelatedValueHolder.getMeasurementMatrixH();
+            varianceMatrixP = kfRelatedValueHolder.getVarianceMatrixP();
         }
 
         double[][] transitionValues = {{1d, timestampDiff}, {0d, 1d}};
@@ -186,12 +186,12 @@ public class Kalman2DFilterWithMatrices extends StreamFunctionProcessor {
                 (kalmanGainMatrix.multiply(measurementMatrixH)).multiply(varianceMatrixP));
 
         prevTimestamp = timestamp;
-        kalmonFilter.setPrevMeasuredMatrixX(prevMeasuredMatrixX);
-        kalmonFilter.setPrevMeasuredMatrixY(prevMeasuredMatrixY);
-        kalmonFilter.setVarianceMatrixP(varianceMatrixP);
-        kalmonFilter.setPrevTimestamp(prevTimestamp);
-        kalmonFilter.setMeasurementMatrixH(measurementMatrixH);
-        kalmonFilterHashMap.get(objectId).put(level, kalmonFilter);
+        kfRelatedValueHolder.setPrevMeasuredMatrixX(prevMeasuredMatrixX);
+        kfRelatedValueHolder.setPrevMeasuredMatrixY(prevMeasuredMatrixY);
+        kfRelatedValueHolder.setVarianceMatrixP(varianceMatrixP);
+        kfRelatedValueHolder.setPrevTimestamp(prevTimestamp);
+        kfRelatedValueHolder.setMeasurementMatrixH(measurementMatrixH);
+        kalmonFilterHashMap.get(objectId).put(level, kfRelatedValueHolder);
         return new Object[]{prevMeasuredMatrixX.getRow(0)[0], prevMeasuredMatrixY.getRow(0)[0]};
     }
 
@@ -204,19 +204,19 @@ public class Kalman2DFilterWithMatrices extends StreamFunctionProcessor {
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors,
                                    ExecutionPlanContext executionPlanContext) {
-        kalmonFilterHashMap = new ConcurrentHashMap<String, ConcurrentHashMap<Integer, KalmonFilter>>();
+        kalmonFilterHashMap = new ConcurrentHashMap<String, ConcurrentHashMap<Integer, KFRelatedValueHolder>>();
         if (attributeExpressionExecutors.length != 7) {
             throw new ExecutionPlanValidationException("Invalid no of arguments passed to " +
                                                        "kf:kalman2DFilter() function, " +
                                                        "requires 7, but found " + attributeExpressionExecutors.length);
         }
         ArrayList<Attribute> attributes = new ArrayList<Attribute>(2);
-        attributes.add(new Attribute("kalmonLatitude", Attribute.Type.DOUBLE));
-        attributes.add(new Attribute("kalmonLongitude", Attribute.Type.DOUBLE));
+        attributes.add(new Attribute("estimatedX", Attribute.Type.DOUBLE));
+        attributes.add(new Attribute("estimatedY", Attribute.Type.DOUBLE));
         return attributes;
     }
 
-    private class KalmonFilter {
+    private class KFRelatedValueHolder {
         private double[][] measurementValues = {{1, 0}, {0, 1}};
         private RealMatrix measurementMatrixH = MatrixUtils.createRealMatrix(measurementValues);
         private RealMatrix varianceMatrixP;
