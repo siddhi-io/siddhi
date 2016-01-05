@@ -33,10 +33,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-
+/**
+ * kalman2DFilter(measuredXValue, measuredYValue, timestamp, objectId, level)
+ * These methods attempts to find the next sub-sequence of the 'inputSequence' that matches the 'regex' pattern.
+ * kalman2DFilter - estimate values for noisy data.
+ *   measuredXValue - measured value X eg:40.695881
+ *   measuredYValue - measured value Y eg:-74.178444
+ *   measuredChangingRate - Changing rate. eg: Velocity of the point which describes from measured value X and Y - 0.003d meters per second
+ *   measurementNoiseSD - standard deviation of the noise. eg: 0.01
+ *   timestamp - the timestamp at the measured time eg: 1445234861l
+ *   objectId - object id of the measured object eg: id1
+ *   level - if the object is in a building with floors, the floor number will be the level eg: 1, 2, etc.
+ * Accept Type(s) for kalman2DFilter(measuredXValue, measuredYValue, measuredChangingRate, timestamp, objectId, level);
+ *   measuredXValue : DOUBLE
+ *   measuredYValue : DOUBLE
+ *   measuredChangingRate : DOUBLE
+ *   measurementNoiseSD : DOUBLE
+ *   timestamp : LONG
+ *   objectId : STRING
+ *   level : INT
+ * Return Type(s): DOUBLE, DOUBLE
+ */
 public class Kalman2DFilterWithMatrices extends StreamFunctionProcessor {
 
-    private ConcurrentHashMap<String, ConcurrentHashMap<Integer, RecordLocatorKalmonFilter>> kalmonFilterHashMap;
+    private ConcurrentHashMap<String, ConcurrentHashMap<Integer, KalmonFilter>> kalmonFilterHashMap;
 
     @Override
     public void start() {
@@ -61,69 +81,77 @@ public class Kalman2DFilterWithMatrices extends StreamFunctionProcessor {
     @Override
     protected Object[] process(Object[] data) {
         if (data[0] == null) {
-            throw new ExecutionPlanRuntimeException("Invalid input given to geo:kalman2DFilter() " +
+            throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalman2DFilter() " +
                                                     "function. First argument cannot be null");
         }
         if (data[1] == null) {
-            throw new ExecutionPlanRuntimeException("Invalid input given to geo:kalman2DFilter() " +
-                                                    "function. First argument cannot be null");
+            throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalman2DFilter() " +
+                                                    "function. Second argument cannot be null");
         }
         if (data[2] == null) {
-            throw new ExecutionPlanRuntimeException("Invalid input given to geo:kalman2DFilter() " +
-                                                    "function. First argument cannot be null");
+            throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalman2DFilter() " +
+                                                    "function. Third argument cannot be null");
         }
         if (data[3] == null) {
-            throw new ExecutionPlanRuntimeException("Invalid input given to geo:kalman2DFilter() " +
-                                                    "function. First argument cannot be null");
+            throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalman2DFilter() " +
+                                                    "function. Fourth argument cannot be null");
         }
         if (data[4] == null) {
-            throw new ExecutionPlanRuntimeException("Invalid input given to geo:kalman2DFilter() " +
-                                                    "function. First argument cannot be null");
+            throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalman2DFilter() " +
+                                                    "function. Fifth argument cannot be null");
+        }
+        if (data[5] == null) {
+            throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalman2DFilter() " +
+                                                    "function. Sixth argument cannot be null");
+        }
+        if (data[6] == null) {
+            throw new ExecutionPlanRuntimeException("Invalid input given to kf:kalman2DFilter() " +
+                                                    "function. Seventh argument cannot be null");
         }
 
-        double measuredValue = (Double) data[0];
-        double measuredValue2 = (Double) data[1];
-        double measuredChangingRate = 0.003;
-        long timestamp = (Long) data[2];
-        String recordLocator = (String) data[3];
-        int floor = (Integer) data[4];
-        ConcurrentHashMap<Integer, RecordLocatorKalmonFilter> floorSpecificRecordLocatorKalmonFilterMap = kalmonFilterHashMap.get(recordLocator);
+        double measuredXValue = (Double) data[0];
+        double measuredYValue = (Double) data[1];
+        double measuredChangingRate = (Double) data[2];
+        double measurementNoiseSD = (Double) data[3];
+        long timestamp = (Long) data[4];
+        String objectId = (String) data[5];
+        int level = (Integer) data[6]; //level should be the same if the all the objects are on the same plane
+        ConcurrentHashMap<Integer, KalmonFilter> levelSpecificKalmonFilterMap = kalmonFilterHashMap.get(objectId);
 
-        if (floorSpecificRecordLocatorKalmonFilterMap == null) {
-            kalmonFilterHashMap.put(recordLocator, new ConcurrentHashMap<Integer, RecordLocatorKalmonFilter>());
+        if (levelSpecificKalmonFilterMap == null) {
+            kalmonFilterHashMap.put(objectId, new ConcurrentHashMap<Integer, KalmonFilter>());
         }
 
-        RecordLocatorKalmonFilter recordLocatorKalmonFilter = kalmonFilterHashMap.get(recordLocator).get(floor);
+        KalmonFilter kalmonFilter = kalmonFilterHashMap.get(objectId).get(level);
 
         long timestampDiff;
         RealMatrix transitionMatrixA;
         RealMatrix measurementMatrixH;
         RealMatrix varianceMatrixP;
-        double[][] measuredValues = {{measuredValue}, {measuredChangingRate}};
-        double[][] measuredValuesY = {{measuredValue2}, {measuredChangingRate}};
+        double[][] measuredValues = {{measuredXValue}, {measuredChangingRate}};
+        double[][] measuredValuesY = {{measuredYValue}, {measuredChangingRate}};
         RealMatrix prevMeasuredMatrixX;
         RealMatrix prevMeasuredMatrixY;
-        double measurementNoiseSD = 0.01d;
         double[][] Rvalues = {{measurementNoiseSD, 0}, {0, measurementNoiseSD}};
         RealMatrix Rmatrix = MatrixUtils.createRealMatrix(Rvalues);
         long prevTimestamp;
 
-        if (recordLocatorKalmonFilter == null) {
+        if (kalmonFilter == null) {
             timestampDiff = 1;
             double[][] varianceValues = {{1000, 0}, {0, 1000}};
             double[][] measurementValues = {{1, 0}, {0, 1}};
             measurementMatrixH = MatrixUtils.createRealMatrix(measurementValues);
-            recordLocatorKalmonFilter = new RecordLocatorKalmonFilter();
+            kalmonFilter = new KalmonFilter();
             varianceMatrixP = MatrixUtils.createRealMatrix(varianceValues);
             prevMeasuredMatrixX = MatrixUtils.createRealMatrix(measuredValues);
             prevMeasuredMatrixY = MatrixUtils.createRealMatrix(measuredValuesY);
         } else {
-            prevTimestamp = recordLocatorKalmonFilter.getPrevTimestamp();
+            prevTimestamp = kalmonFilter.getPrevTimestamp();
             timestampDiff = (timestamp - prevTimestamp);
-            prevMeasuredMatrixX = recordLocatorKalmonFilter.getPrevMeasuredMatrixX();
-            prevMeasuredMatrixY = recordLocatorKalmonFilter.getPrevMeasuredMatrixY();
-            measurementMatrixH = recordLocatorKalmonFilter.getMeasurementMatrixH();
-            varianceMatrixP = recordLocatorKalmonFilter.getVarianceMatrixP();
+            prevMeasuredMatrixX = kalmonFilter.getPrevMeasuredMatrixX();
+            prevMeasuredMatrixY = kalmonFilter.getPrevMeasuredMatrixY();
+            measurementMatrixH = kalmonFilter.getMeasurementMatrixH();
+            varianceMatrixP = kalmonFilter.getVarianceMatrixP();
         }
 
         double[][] transitionValues = {{1d, timestampDiff}, {0d, 1d}};
@@ -158,12 +186,12 @@ public class Kalman2DFilterWithMatrices extends StreamFunctionProcessor {
                 (kalmanGainMatrix.multiply(measurementMatrixH)).multiply(varianceMatrixP));
 
         prevTimestamp = timestamp;
-        recordLocatorKalmonFilter.setPrevMeasuredMatrixX(prevMeasuredMatrixX);
-        recordLocatorKalmonFilter.setPrevMeasuredMatrixY(prevMeasuredMatrixY);
-        recordLocatorKalmonFilter.setVarianceMatrixP(varianceMatrixP);
-        recordLocatorKalmonFilter.setPrevTimestamp(prevTimestamp);
-        recordLocatorKalmonFilter.setMeasurementMatrixH(measurementMatrixH);
-        kalmonFilterHashMap.get(recordLocator).put(floor, recordLocatorKalmonFilter);
+        kalmonFilter.setPrevMeasuredMatrixX(prevMeasuredMatrixX);
+        kalmonFilter.setPrevMeasuredMatrixY(prevMeasuredMatrixY);
+        kalmonFilter.setVarianceMatrixP(varianceMatrixP);
+        kalmonFilter.setPrevTimestamp(prevTimestamp);
+        kalmonFilter.setMeasurementMatrixH(measurementMatrixH);
+        kalmonFilterHashMap.get(objectId).put(level, kalmonFilter);
         return new Object[]{prevMeasuredMatrixX.getRow(0)[0], prevMeasuredMatrixY.getRow(0)[0]};
     }
 
@@ -176,11 +204,11 @@ public class Kalman2DFilterWithMatrices extends StreamFunctionProcessor {
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors,
                                    ExecutionPlanContext executionPlanContext) {
-        kalmonFilterHashMap = new ConcurrentHashMap<String, ConcurrentHashMap<Integer, RecordLocatorKalmonFilter>>();
-        if (attributeExpressionExecutors.length != 5) {
+        kalmonFilterHashMap = new ConcurrentHashMap<String, ConcurrentHashMap<Integer, KalmonFilter>>();
+        if (attributeExpressionExecutors.length != 7) {
             throw new ExecutionPlanValidationException("Invalid no of arguments passed to " +
-                                                       "locationAverageCalculate() function, " +
-                                                       "requires 5, but found " + attributeExpressionExecutors.length);
+                                                       "kf:kalman2DFilter() function, " +
+                                                       "requires 7, but found " + attributeExpressionExecutors.length);
         }
         ArrayList<Attribute> attributes = new ArrayList<Attribute>(2);
         attributes.add(new Attribute("kalmonLatitude", Attribute.Type.DOUBLE));
@@ -188,10 +216,10 @@ public class Kalman2DFilterWithMatrices extends StreamFunctionProcessor {
         return attributes;
     }
 
-    private class RecordLocatorKalmonFilter {
+    private class KalmonFilter {
         private double[][] measurementValues = {{1, 0}, {0, 1}};
         private RealMatrix measurementMatrixH = MatrixUtils.createRealMatrix(measurementValues);
-        private RealMatrix varianceMatrixP; //something other that zero
+        private RealMatrix varianceMatrixP;
         private RealMatrix prevMeasuredMatrixX;
         private RealMatrix prevMeasuredMatrixY;
         private long prevTimestamp;

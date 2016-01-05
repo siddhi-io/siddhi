@@ -251,6 +251,13 @@
                 <scope>test</scope>
                 <version>${jsonassert.version}</version>
             </dependency>
+
+            <!-- KF-->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math3</artifactId>
+                <version>${apache.commons.math3.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -434,6 +441,7 @@
         <axiom-api.version>1.2.11-wso2v10</axiom-api.version>
         <axiom-impl.version>1.2.11-wso2v10</axiom-impl.version>
         <jsonassert.version>1.3.0</jsonassert.version>
+        <apache.commons.math3.version>3.5</apache.commons.math3.version>
     </properties>
 
     <scm>

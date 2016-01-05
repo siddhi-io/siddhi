@@ -43,13 +43,16 @@
             <artifactId>siddhi-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-query-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.log4j.wso2</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
-            <version>3.5</version>
         </dependency>
     </dependencies>
 
@@ -64,8 +67,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.siddhi.extension.geo,
-                            org.wso2.siddhi.extension.geo.*
+                            org.wso2.siddhi.extension.kf,
+                            org.wso2.siddhi.extension.kf.*
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional
@@ -76,5 +79,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
