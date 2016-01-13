@@ -30,6 +30,8 @@ import org.wso2.siddhi.core.event.EventFactory;
 import org.wso2.siddhi.core.stream.input.InputProcessor;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
+import org.wso2.siddhi.core.util.statistics.metrics.SiddhiThroughputMetric;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.exception.DuplicateAnnotationException;
@@ -53,6 +55,7 @@ public class StreamJunction {
     private Boolean parallel = null;
     private Disruptor<Event> disruptor;
     private RingBuffer<Event> ringBuffer;
+    private ThroughputTracker throughputTracker = null;
     private boolean isTraceEnabled;
 
     public StreamJunction(StreamDefinition streamDefinition, ExecutorService executorService, int defaultBufferSize,
@@ -62,16 +65,22 @@ public class StreamJunction {
         this.executorService = executorService;
         this.executionPlanContext = executionPlanContext;
 
+        if (executionPlanContext.getStatisticsManager()!=null) {
+            String metricName = executionPlanContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix() + ".stream." + streamDefinition.getId();
+            this.throughputTracker = executionPlanContext
+                    .getSiddhiContext()
+                    .getStatisticsConfiguration()
+                    .getFactory()
+                    .createThroughputTracker(metricName, executionPlanContext.getStatisticsManager());
+        }
+
         try {
-            Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PARALLEL,
-                    streamDefinition.getAnnotations());
+            Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PARALLEL, streamDefinition.getAnnotations());
             if (annotation != null) {
                 parallel = true;
             }
-
         } catch (DuplicateAnnotationException e) {
-            throw new DuplicateAnnotationException(e.getMessage() + " for the same Stream " +
-                    streamDefinition.getId());
+            throw new DuplicateAnnotationException(e.getMessage() + " for the same Stream " + streamDefinition.getId());
         }
         isTraceEnabled = log.isTraceEnabled();
 
@@ -81,10 +90,14 @@ public class StreamJunction {
         if (isTraceEnabled) {
             log.trace("event is received by streamJunction " + this);
         }
+
         ComplexEvent complexEventList = complexEvent;
         if (disruptor != null) {
-
             while (complexEventList != null) {
+                if (throughputTracker != null) {
+                    throughputTracker.eventIn();
+                }
+
                 long sequenceNo = ringBuffer.next();
                 try {
                     Event existingEvent = ringBuffer.get(sequenceNo);
@@ -96,6 +109,15 @@ public class StreamJunction {
             }
 
         } else {
+            if (throughputTracker != null) {
+                int messageCount = 0;
+                while (complexEventList != null) {
+                    messageCount++;
+                    complexEventList = complexEventList.getNext();
+                }
+                throughputTracker.eventsIn(messageCount);
+            }
+
             for (Receiver receiver : receivers) {
                 receiver.receive(complexEvent);
             }
@@ -104,6 +126,10 @@ public class StreamJunction {
     }
 
     public void sendEvent(Event event) {
+        if (throughputTracker != null) {
+            throughputTracker.eventIn();
+        }
+
         if (isTraceEnabled) {
             log.trace(event + " event is received by streamJunction " + this);
         }
@@ -124,6 +150,10 @@ public class StreamJunction {
     }
 
     private void sendEvent(Event[] events) {
+        if (throughputTracker != null) {
+            throughputTracker.eventsIn(events.length);
+        }
+
         if (isTraceEnabled) {
             log.trace("event is received by streamJunction " + this);
         }
@@ -166,6 +196,10 @@ public class StreamJunction {
     }
 
     private void sendData(long timeStamp, Object[] data) {
+        if (throughputTracker != null) {
+            throughputTracker.eventIn();
+        }
+
         if (disruptor != null) {
             long sequenceNo = ringBuffer.next();
             try {
