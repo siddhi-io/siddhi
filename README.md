@@ -9,7 +9,7 @@ Siddhi Complex Event Processing Engine
 
 ---
 
-##### Latest Released Version v3.0.2.
+##### Latest Released Version v3.0.4.
 
 Siddhi CEP is a lightweight, easy-to-use Open Source Complex Event Processing
 Engine (CEP) under  Apache Software License v2.0. Siddhi CEP processes
