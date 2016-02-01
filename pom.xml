@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
   ~ You may obtain a copy of the License at
   ~
   ~     http://www.apache.org/licenses/LICENSE-2.0
   ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -27,7 +29,7 @@
     <groupId>org.wso2.siddhi</groupId>
     <artifactId>siddhi</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.0.5-SNAPSHOT</version>
     <name>Siddhi</name>
     <description>Siddhi, high performing Complex Event Processing Engine</description>
 
@@ -92,6 +94,13 @@
                 <version>${guava.version}</version>
             </dependency>
 
+            <!--metrics-->
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+
             <!--quartz-->
             <dependency>
                 <groupId>org.quartz-scheduler.wso2</groupId>
@@ -145,6 +154,21 @@
                 <artifactId>jdbc-pool</artifactId>
                 <version>${jdbc-pool.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.osgi</groupId>
+                <artifactId>org.eclipse.osgi</artifactId>
+                <version>${org.eclipse.osgi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.osgi</groupId>
+                <artifactId>org.eclipse.osgi.services</artifactId>
+                <version>${version.equinox.osgi.services}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.hazelcast</groupId>
+                <artifactId>hazelcast</artifactId>
+                <version>${hazelcast.version}</version>
+            </dependency>
 
             <!--Time-->
             <dependency>
@@ -178,6 +202,17 @@
                 <artifactId>siddhi-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-api</artifactId>
+                <version>${axiom-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.axiom</groupId>
+                <artifactId>axiom-impl</artifactId>
+                <version>${axiom-impl.version}</version>
+                <scope>runtime</scope>
+            </dependency>
 
 
             <!-- Time Series -->
@@ -195,8 +230,26 @@
             <dependency>
                 <groupId>org.jacoco</groupId>
                 <artifactId>org.jacoco.agent</artifactId>
-                <version>0.7.4.201502262128</version>
+                <version>${org.jacoco.version}</version>
                 <scope>test</scope>
+            </dependency>
+
+            <!-- Map -->
+            <dependency>
+                <groupId>org.json.wso2</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.wso2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-string</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.skyscreamer</groupId>
+                <artifactId>jsonassert</artifactId>
+                <scope>test</scope>
+                <version>${jsonassert.version}</version>
             </dependency>
 
         </dependencies>
@@ -260,7 +313,8 @@
                                 <goal>report</goal>
                             </goals>
                             <configuration>
-                                <outputDirectory>${basedir}/target/coverage-reports/</outputDirectory>
+                                <outputDirectory>${basedir}/target/coverage-reports/
+                                </outputDirectory>
                             </configuration>
                         </execution>
                     </executions>
@@ -347,11 +401,13 @@
     </build>
 
     <properties>
+        <siddhi.version>3.0.3</siddhi.version>
         <junit.version>4.10</junit.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
+        <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
         <slf4j.version>1.7.12</slf4j.version>
         <mvel2.version>2.2.1.Final</mvel2.version>
-        <antlr.runtime.version>4.5</antlr.runtime.version>
+        <antlr.runtime.version>4.5.1</antlr.runtime.version>
         <disruptor.version>3.3.2.wso2v2</disruptor.version>
         <guava.version>14.0.1</guava.version>
         <scala.version>2.11.0</scala.version>
@@ -364,9 +420,21 @@
         <commons-math3.version>3.2</commons-math3.version>
         <jama.version>1.0.3</jama.version>
         <jdbc-pool.version>7.0.34.wso2v2</jdbc-pool.version>
-
+        <jdbc-pool.imp.pkg.version.range>[1.7.0, 1.8.0)</jdbc-pool.imp.pkg.version.range>
+        <org.jacoco.version>0.7.4.201502262128</org.jacoco.version>
+        <org.eclipse.osgi.version>3.7.0.v20110613</org.eclipse.osgi.version>
+        <version.equinox.osgi.services>3.3.100.v20120522-1822</version.equinox.osgi.services>
+        <equinox.osgi.services.imp.pkg.version.range>[1.2.0, 1.3.0)
+        </equinox.osgi.services.imp.pkg.version.range>
+        <hazelcast.version>3.5.0.wso2v1</hazelcast.version>
+        <hazelcast.imp.pkg.version.range>[3.5, 3.6.0)</hazelcast.imp.pkg.version.range>
+        <metrics.version>3.1.0</metrics.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.scm.id>scm-server</project.scm.id>
+        <org.json.wso2.version>3.0.0.wso2v1</org.json.wso2.version>
+        <axiom-api.version>1.2.11-wso2v10</axiom-api.version>
+        <axiom-impl.version>1.2.11-wso2v10</axiom-impl.version>
+        <jsonassert.version>1.3.0</jsonassert.version>
     </properties>
 
     <scm>
