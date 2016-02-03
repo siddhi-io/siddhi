@@ -35,6 +35,7 @@ package org.wso2.siddhi.query.compiler;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.definition.FunctionDefinition;
@@ -64,6 +65,7 @@ public class SiddhiCompiler {
 
         SiddhiQLVisitor eval = new SiddhiQLBaseVisitorImpl();
         return (ExecutionPlan) eval.visit(tree);
+
     }
 
     public static StreamDefinition parseStreamDefinition(String source) {
