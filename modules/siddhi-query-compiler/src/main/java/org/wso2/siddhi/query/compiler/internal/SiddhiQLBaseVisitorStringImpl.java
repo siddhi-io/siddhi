@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.siddhi.query.compiler.internal;
 
 import org.antlr.v4.runtime.TokenStreamRewriter;
@@ -109,7 +126,6 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
                 }
             }
         }
-
         streamText = new StringBuilder(streamText.substring(0, streamText.length() - 1));
         streamText.append(" }]}");
 
@@ -155,7 +171,6 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
         } else {
             triggerText.append(" \"triggerValue\":\"").append(ctx.string_value().getText()).append("\",");
         }
-
         triggerText.append(" \"triggerText\":\"").append(tokenStreamRewriter.getTokenStream().getText(ctx.getStart(), ctx.getStop()).replaceAll("\\n", "\\\\n")).append("\",");
 
         triggerText = new StringBuilder(triggerText.substring(0,triggerText.length() - 1));
@@ -187,7 +202,6 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
                 tableText.append(" \"annoElement\":\"").append(annotationContext.annotation_element(2).property_value().getText()).append("\" ,");
             }
         }
-
         tableText = new StringBuilder(tableText.substring(0, tableText.length() - 1));
         tableText.append(" }]}");
 
@@ -250,7 +264,6 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
             partitionWith.append(" \"condition\":").append(condition).append(", ");
             partitionWith.append(" \"attribute\":").append(attribute).append("  ");
         }
-
         partitionWith = new StringBuilder(partitionWith.substring(0, partitionWith.length() - 1));
         partitionWith.append(" }],");
 
@@ -265,7 +278,6 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
         if (ctx.anonymous_stream() != null) {
             anonymousStream.append(visit(ctx.anonymous_stream().query_input()));
         }
-
         return anonymousStream;
     }
 
@@ -353,9 +365,7 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
         if (ctx.window() != null && ctx.post_window_handlers != null) {
             standardStream_Text.append("\"post_window_Handler\":\"").append(ctx.post_window_handlers.getText()).append("\",");
         }
-
         standardStream_Text = new StringBuilder(standardStream_Text.substring(0, standardStream_Text.length() - 1));
-
 
         return standardStream_Text;
     }
@@ -381,7 +391,6 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
             inner.add("\"false\"");
         }
 
-
         joinStreamText.append("\"streamId\":").append(streamId).append(",");
         joinStreamText.append("\"innerStream\":").append(inner).append(",");
         joinStreamText.append("\"stream\":\"").append(ctx.getText()).append("\",");
@@ -393,12 +402,10 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
         if (ctx.expression() != null) {
             joinStreamText.append(" \"onCondition\":\"").append(ctx.expression().getText()).append("\",");
         }
-
         joinStreamText = new StringBuilder(joinStreamText.substring(0, joinStreamText.length() - 1));
         joinStreamText.append(" }");
 
         return joinStreamText;
-
     }
 
     @Override
@@ -460,7 +467,6 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
         } else if (ctx.pattern_source_chain() != null) {  // pattern_source_chain
             every_pattern_sourceText.append(visit(ctx.pattern_source_chain()));
         }
-
         return every_pattern_sourceText;
     }
 
@@ -485,7 +491,6 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
         return standard_source;
     }
 
-
     @Override
     public Object visitLogical_stateful_source(@NotNull SiddhiQLParser.Logical_stateful_sourceContext ctx) {
 
@@ -505,7 +510,6 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
             logical_stateful_sourceText.append(visit(ctx.standard_stateful_source(0)));
             logical_stateful_sourceText.append(visit(ctx.standard_stateful_source(1)));
         }
-
         return logical_stateful_sourceText;
     }
 
@@ -549,7 +553,6 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
         } else if (ctx.sequence_source() != null) {
             sequence_source_chain.append(visit(ctx.sequence_source()));
         }
-
         return sequence_source_chain;
     }
 
@@ -587,12 +590,9 @@ public class SiddhiQLBaseVisitorStringImpl extends SiddhiQLBaseVisitor {
         return annotation;
     }
 
-
     private class Source {
 
         private String streamId;
         private boolean isInnerStream;
     }
-
-
 }
