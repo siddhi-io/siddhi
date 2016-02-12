@@ -409,7 +409,7 @@
         <mvel2.version>2.2.1.Final</mvel2.version>
         <antlr.runtime.version>4.5.1</antlr.runtime.version>
         <disruptor.version>3.3.2.wso2v2</disruptor.version>
-        <guava.version>14.0.1</guava.version>
+        <guava.version>15.0</guava.version>
         <scala.version>2.11.0</scala.version>
         <scalascriptengine.version>1.3.10</scalascriptengine.version>
         <geocoder.version>0.16_1</geocoder.version>
@@ -431,9 +431,9 @@
         <metrics.version>3.1.0</metrics.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.scm.id>scm-server</project.scm.id>
-        <org.json.wso2.version>3.0.0.wso2v1</org.json.wso2.version>
-        <axiom-api.version>1.2.11-wso2v10</axiom-api.version>
-        <axiom-impl.version>1.2.11-wso2v10</axiom-impl.version>
+        <org.json.wso2.version>2.0.0.wso2v1</org.json.wso2.version>
+        <axiom-api.version>1.2.11-wso2v9</axiom-api.version>
+        <axiom-impl.version>1.2.11-wso2v9</axiom-impl.version>
         <jsonassert.version>1.3.0</jsonassert.version>
     </properties>
 
