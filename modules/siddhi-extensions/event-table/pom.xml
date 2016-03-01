@@ -74,6 +74,36 @@
             <groupId>org.wso2.orbit.com.hazelcast</groupId>
             <artifactId>hazelcast</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.databind.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.wso2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>${httpcore.wso2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+            <version>${geronimo.jms.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-all</artifactId>
+            <version>${activemq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+        </dependency>
 
         <!--&lt;!&ndash; Temporary Dependencies&ndash;&gt;-->
         <!--<dependency>-->
@@ -110,7 +140,11 @@
                             org.wso2.siddhi.extension.eventtable.*;version="${siddhi.version}",
                         </Export-Package>
                         <Import-Package>
+                            com.fasterxml.jackson.databind.*;version="${hadoop.common.version}",
                             org.apache.hadoop.util.bloom;version="${hadoop.common.version}",
+                            org.apache.http.client.*;version="${httpclient.wso2.version}",
+                            org.apache.http.impl.*;version="${httpclient.wso2.version}",
+                            org.apache.http.*;version="${httpcore.wso2.version}",
                             org.osgi.service.component;version="${equinox.osgi.services.imp.pkg.version.range}",
                             com.hazelcast.*;version="${hazelcast.imp.pkg.version.range}",
                             org.wso2.siddhi.*;version="${siddhi.version}",
@@ -127,4 +161,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <httpclient.wso2.version>4.2.5.wso2v1</httpclient.wso2.version>
+        <httpcore.wso2.version>4.3.0.wso2v1</httpcore.wso2.version>
+        <jackson.databind.version>2.7.1-1</jackson.databind.version>
+        <activemq.version>5.9.1</activemq.version>
+        <geronimo.jms.version>1.1.1</geronimo.jms.version>
+    </properties>
+
 </project>
