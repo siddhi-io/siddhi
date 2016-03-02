@@ -19,7 +19,8 @@
 package org.wso2.siddhi.extension.eventtable.sync;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.hadoop.util.bloom.CountingBloomFilter;
 import org.apache.hadoop.util.bloom.Key;
 import org.apache.hadoop.util.hash.Hash;
@@ -32,12 +33,15 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.extension.eventtable.SyncEventTable;
-import org.wso2.siddhi.extension.eventtable.util.ThrottleObject;
+import org.wso2.siddhi.extension.eventtable.exception.ThrottleConfigurationException;
+import org.wso2.siddhi.extension.eventtable.util.ThrottleConstants;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.*;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -126,8 +130,12 @@ public class SyncTableHandler {
 //    }
 
     private String[] retrieveThrottlingData() {
-        String url = "http://10.100.1.65:9763/throttle/data/v1/throttleAsString";
+//        String url = "http://10.100.1.65:9763/throttle/data/v1/throttleAsString";
+
         try {
+            GlobalThrottleEngineConfig globalThrottleEngineConfig = loadCEPConfig();
+            String url = "http://" + globalThrottleEngineConfig.getHostname() + ":" + globalThrottleEngineConfig.getHTTPPort() + "/throttle/data/v1/throttleAsString";
+
             HttpGet method = new HttpGet(url);
             httpClient = new DefaultHttpClient();
             HttpResponse httpResponse = httpClient.execute(method);
@@ -140,11 +148,104 @@ public class SyncTableHandler {
 
         } catch (IOException e) {
             log.error("Exception when retrieving throttling data from remote endpoint ", e);
+        } catch (ThrottleConfigurationException e) {
+            log.error("Exception while loading the throttling configuration ", e);
         }
 
         return null;
 
     }
+
+
+    public static GlobalThrottleEngineConfig loadCEPConfig() throws ThrottleConfigurationException {
+        String carbonHome = System.getProperty("carbon.config.dir.path");
+        String path = carbonHome + File.separator + ThrottleConstants.CEP_CONFIG_XML;
+        OMElement configElement = loadConfigXML(path);
+
+        OMElement hostNameElement;
+        OMElement tcpPortElement;
+        OMElement sslPortElement;
+        OMElement httpPortElement;
+        OMElement httpsPortElement;
+        OMElement usernameElement;
+        OMElement passwordElement;
+        OMElement streamNameElement;
+        OMElement streamVersionElement;
+
+        if ((hostNameElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.HOST_NAME))) == null) {
+            throw new ThrottleConfigurationException("Invalid config element with no host name in " +
+                    ThrottleConstants.CEP_CONFIG_XML);
+        }
+        if ((tcpPortElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.TCP_PORT))) == null) {
+            throw new ThrottleConfigurationException("Invalid config element with no TCP port in " +
+                    ThrottleConstants.CEP_CONFIG_XML);
+        }
+        if ((httpPortElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.HTTP_PORT))) == null) {
+            throw new ThrottleConfigurationException("Invalid config element with no HTTP port in " +
+                    ThrottleConstants.CEP_CONFIG_XML);
+        }
+        if ((httpsPortElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.HTTPS_PORT))) == null) {
+            throw new ThrottleConfigurationException("Invalid config element with no HTTPS port in " +
+                    ThrottleConstants.CEP_CONFIG_XML);
+        }
+        if ((sslPortElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.SSL_PORT))) == null) {
+            throw new ThrottleConfigurationException("Invalid config element with no SSL port in " +
+                    ThrottleConstants.CEP_CONFIG_XML);
+        }
+        if ((usernameElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.USERNAME))) == null) {
+            throw new ThrottleConfigurationException("Invalid config element with no username in " +
+                    ThrottleConstants.CEP_CONFIG_XML);
+        }
+        if ((passwordElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.PASSWORD))) == null) {
+            throw new ThrottleConfigurationException("Invalid config element with no password in " +
+                    ThrottleConstants.CEP_CONFIG_XML);
+        }
+        if ((streamNameElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.STREAM_NAME))) == null) {
+            throw new ThrottleConfigurationException("Invalid config element with no stream name in " +
+                    ThrottleConstants.CEP_CONFIG_XML);
+        }
+        if ((streamVersionElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.STREAM_VERSION))) == null) {
+            throw new ThrottleConfigurationException("Invalid config element with no stream version in " +
+                    ThrottleConstants.CEP_CONFIG_XML);
+        }
+
+        return new GlobalThrottleEngineConfig(hostNameElement.getText(), tcpPortElement.getText(), sslPortElement.getText(),
+                httpPortElement.getText(), httpsPortElement.getText(), usernameElement.getText(), passwordElement.getText(), streamNameElement.getText(),
+                streamVersionElement.getText());
+    }
+
+    /**
+     * Loads the configuration file in the given path as an OM element
+     *
+     * @return OMElement of config file
+     * @throws ThrottleConfigurationException
+     */
+    private static OMElement loadConfigXML(String path) throws ThrottleConfigurationException {
+
+        BufferedInputStream inputStream = null;
+        try {
+            inputStream = new BufferedInputStream(new FileInputStream(new File(path)));
+            XMLStreamReader parser = XMLInputFactory.newInstance().
+                    createXMLStreamReader(inputStream);
+            StAXOMBuilder builder = new StAXOMBuilder(parser);
+            OMElement omElement = builder.getDocumentElement();
+            omElement.build();
+            return omElement;
+        } catch (FileNotFoundException e) {
+            throw new ThrottleConfigurationException("Configuration file cannot be found in the path : " + path, e);
+        } catch (XMLStreamException e) {
+            throw new ThrottleConfigurationException("Invalid XML syntax for configuration file located in the path :" + path, e);
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                log.error("Can not shutdown the input stream", e);
+            }
+        }
+    }
+
 
     public void addToBloomFilters(String key) {
         bloomFilters[0].add(new Key(key.getBytes()));
