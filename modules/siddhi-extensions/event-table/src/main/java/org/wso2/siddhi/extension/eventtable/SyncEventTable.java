@@ -99,8 +99,6 @@ public class SyncEventTable implements EventTable, Snapshotable {
 
         //Bloom Filter
         String bloomsEnabled = fromAnnotation.getElement(RDBMSEventTableConstants.ANNOTATION_ELEMENT_BLOOM_FILTERS);
-        String bloomFilterValidityInterval = fromAnnotation.getElement(RDBMSEventTableConstants.ANNOTATION_ELEMENT_BLOOM_VALIDITY_PERIOD);
-
 
         // Adding indexes.
         Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_INDEX_BY,
@@ -138,16 +136,9 @@ public class SyncEventTable implements EventTable, Snapshotable {
 
             syncTableHandler.setBloomFilterProperties(bloomFilterSize, bloomFilterHashFunctions);
             syncTableHandler.buildBloomFilters(syncEventTable);
-            if (bloomFilterValidityInterval != null) {
-//                Long bloomTimeInterval = Long.parseLong(bloomFilterValidityInterval);
-//                Timer timer = new Timer();
-//                BloomsUpdateTask bloomsUpdateTask = new BloomsUpdateTask();
-//                timer.schedule(bloomsUpdateTask, bloomTimeInterval, bloomTimeInterval);
-                subscribeForJmsEvents();
-
-            }
         }
 
+        subscribeForJmsEvents();
         streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         streamEventCloner = new StreamEventCloner(metaStreamEvent, streamEventPool);
     }
@@ -260,11 +251,11 @@ public class SyncEventTable implements EventTable, Snapshotable {
         this.eventsMap = eventsMap;
     }
 
-    public void addToInMemoryEventMap(Object key, StreamEvent streamEvent){
-        this.eventsMap.put(key,streamEvent);
+    public void addToInMemoryEventMap(Object key, StreamEvent streamEvent) {
+        this.eventsMap.put(key, streamEvent);
     }
 
-    public void removeFromMemoryEventMap(Object key){
+    public void removeFromMemoryEventMap(Object key) {
         this.eventsMap.remove(key);
     }
 
@@ -274,20 +265,15 @@ public class SyncEventTable implements EventTable, Snapshotable {
             properties.load(ClassLoader.getSystemClassLoader().getResourceAsStream("activemq.properties"));
             Context context = new InitialContext(properties);
             TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) context.lookup("ConnectionFactory");
-            TopicConsumer topicConsumer = new TopicConsumer(topicConnectionFactory,  "throttleData", syncTableHandler, this);
+            TopicConsumer topicConsumer = new TopicConsumer(topicConnectionFactory, "throttleData", syncTableHandler, this);
             Thread consumerThread = new Thread(topicConsumer);
             log.info("Starting jms consumerQueue thread...");
             consumerThread.start();
-            Thread.sleep(5 * 60000);
 
-            log.info("Shutting down jms consumerQueue...");
-            topicConsumer.shutdown();
         } catch (IOException e) {
             log.error("Cannot read properties file from resources. " + e.getMessage(), e);
         } catch (NamingException e) {
             log.error("Invalid properties in the properties " + e.getMessage(), e);
-        } catch (InterruptedException e) {
-            log.error("Error when consuming events from jms Queue");
         }
     }
 
