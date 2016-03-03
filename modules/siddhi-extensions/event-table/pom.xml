@@ -95,11 +95,6 @@
             <version>${geronimo.jms.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-all</artifactId>
-            <version>${activemq.version}</version>
-        </dependency>
-        <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
             <version>1.1.1</version>
@@ -145,11 +140,8 @@
                             org.wso2.siddhi.extension.eventtable.*;version="${siddhi.version}",
                         </Export-Package>
                         <Import-Package>
-                            javax.jms.*;version="${orbit.version.axiom}",
-                            javax.xml.*;version="${orbit.version.axiom}",
                             org.apache.axiom.om.*;version="${orbit.version.axiom}",
-                            javax.jms.*;version="${geronimo.jms.version}",
-                            javax.naming.*;version="${geronimo.jms.version}",
+                            javax.naming.*,
                             org.apache.commons.logging.*;version="${geronimo.jms.version}",
                             com.fasterxml.jackson.databind.*;version="${hadoop.common.version}",
                             org.apache.hadoop.util.bloom;version="${hadoop.common.version}",
@@ -164,8 +156,8 @@
                             org.apache.tomcat.jdbc.pool;version="${jdbc-pool.imp.pkg.version.range}",
                             javax.sql,
                             javax.xml.bind,
-                            javax.xml.bind.annotation
-                            <!--*;resolution:=optional-->
+                            javax.xml.bind.annotation,
+                            *;resolution:=optional
                         </Import-Package>
                     </instructions>
                 </configuration>

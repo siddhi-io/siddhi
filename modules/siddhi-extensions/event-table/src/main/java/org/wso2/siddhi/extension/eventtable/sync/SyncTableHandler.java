@@ -200,18 +200,9 @@ public class SyncTableHandler {
             throw new ThrottleConfigurationException("Invalid config element with no password in " +
                     ThrottleConstants.CEP_CONFIG_XML);
         }
-        if ((streamNameElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.STREAM_NAME))) == null) {
-            throw new ThrottleConfigurationException("Invalid config element with no stream name in " +
-                    ThrottleConstants.CEP_CONFIG_XML);
-        }
-        if ((streamVersionElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.STREAM_VERSION))) == null) {
-            throw new ThrottleConfigurationException("Invalid config element with no stream version in " +
-                    ThrottleConstants.CEP_CONFIG_XML);
-        }
 
         return new GlobalThrottleEngineConfig(hostNameElement.getText(), tcpPortElement.getText(), sslPortElement.getText(),
-                httpPortElement.getText(), httpsPortElement.getText(), usernameElement.getText(), passwordElement.getText(), streamNameElement.getText(),
-                streamVersionElement.getText());
+                httpPortElement.getText(), httpsPortElement.getText(), usernameElement.getText(), passwordElement.getText());
     }
 
     /**
