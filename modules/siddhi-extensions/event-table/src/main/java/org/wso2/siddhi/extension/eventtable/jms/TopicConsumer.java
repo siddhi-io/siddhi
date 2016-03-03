@@ -75,7 +75,7 @@ public class TopicConsumer implements Runnable {
 
                         String throttleKey = map.get("throttleKey").toString();
                         String throttleState = map.get("throttleState").toString();
-                        if (throttleState.equals("yes")) {
+                        if (throttleState.equals("true")) {
                             syncTableHandler.addToBloomFilters(throttleKey);
                             StreamEvent streamEvent = new StreamEvent(0, 0, 1);
                             streamEvent.setOutputData(new Object[]{throttleKey});
