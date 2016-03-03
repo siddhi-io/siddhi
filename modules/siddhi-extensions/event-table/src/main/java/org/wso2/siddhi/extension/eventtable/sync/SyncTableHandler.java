@@ -81,7 +81,6 @@ public class SyncTableHandler {
     public void buildBloomFilters(SyncEventTable syncEventTable) {
 
         SortedMap<Object, StreamEvent> remoteDataMap = new TreeMap<Object, StreamEvent>();
-
         //TODO Hack - restrict to size 1
         CountingBloomFilter[] bloomFilters = new CountingBloomFilter[1];
 
@@ -90,9 +89,8 @@ public class SyncTableHandler {
         }
 
         String[] throttleKeyArray = retrieveThrottlingData();
-        if (throttleKeyArray != null) {
+        if (throttleKeyArray != null && throttleKeyArray.length > 0) {
             for (String throttleKey : throttleKeyArray) {
-
                 StreamEvent streamEvent = new StreamEvent(0, 0, 1);
                 streamEvent.setOutputData(new Object[]{throttleKey});
                 remoteDataMap.put(throttleKey, streamEvent);

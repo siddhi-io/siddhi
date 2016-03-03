@@ -262,7 +262,8 @@ public class SyncEventTable implements EventTable, Snapshotable {
     public void subscribeForJmsEvents() {
         Properties properties = new Properties();
         try {
-            properties.load(ClassLoader.getSystemClassLoader().getResourceAsStream("activemq.properties"));
+            ClassLoader classLoader = getClass().getClassLoader();
+            properties.load(classLoader.getResourceAsStream("activemq.properties"));
             Context context = new InitialContext(properties);
             TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) context.lookup("ConnectionFactory");
             TopicConsumer topicConsumer = new TopicConsumer(topicConnectionFactory, "throttleData", syncTableHandler, this);
