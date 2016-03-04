@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.eventtable.cache;
+package org.wso2.siddhi.extension.eventtable.rdbms.cache;
 
 
 import org.wso2.siddhi.core.event.stream.StreamEvent;

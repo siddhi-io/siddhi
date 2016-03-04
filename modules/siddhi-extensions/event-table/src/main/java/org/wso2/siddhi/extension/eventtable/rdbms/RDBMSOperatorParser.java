@@ -28,7 +28,7 @@ import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
-import org.wso2.siddhi.extension.eventtable.cache.CachingTable;
+import org.wso2.siddhi.extension.eventtable.rdbms.cache.CachingTable;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;

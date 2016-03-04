@@ -16,34 +16,37 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.eventtable.jaxbMappings;
+package org.wso2.siddhi.extension.eventtable.rdbms.jaxbMappings;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
- * Contains list of elements for a specific db type
+ * Contain key value pair of a element eg: key- String value- VARCHAR
  */
-public class Mapping {
+@XmlAccessorType(XmlAccessType.NONE)
+public class Element {
 
-    private String db;
-    private Elements elements;
+    private String key;
+    private String value;
 
-    public String getDb() {
-        return db;
+    public String getKey() {
+        return key;
     }
 
     @XmlAttribute
-    public void setDb(String db) {
-        this.db = db;
+    public void setKey(String key) {
+        this.key = key;
     }
 
-    public Elements getElements() {
-        return elements;
+    public String getValue() {
+        return value;
     }
 
-    @XmlElement
-    public void setElements(Elements elements) {
-        this.elements = elements;
+    @XmlValue
+    public void setValue(String value) {
+        this.value = value;
     }
 }

@@ -16,36 +16,34 @@
  * under the License.
  */
 
+package org.wso2.siddhi.extension.eventtable.rdbms.jaxbMappings;
 
-package org.wso2.siddhi.extension.eventtable.jaxbMappings;
-
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import java.util.List;
 
 /**
- * Contain list of elements available for each db type
+ * Contains list of elements for a specific db type
  */
-public class Elements {
+public class Mapping {
 
-    private List<Element> elementList;
+    private String db;
+    private Elements elements;
 
-    public List<Element> getElementList() {
-        return elementList;
+    public String getDb() {
+        return db;
     }
 
-    @XmlElement(name = "element")
-    public void setElementList(List<Element> elementList) {
-        this.elementList = elementList;
+    @XmlAttribute
+    public void setDb(String db) {
+        this.db = db;
     }
 
-    public Element getType(String javaType) {
-        Element matchedElement = null;
-        for (Element element : elementList) {
-            if (element.getKey().equals(javaType)) {
-                matchedElement = element;
-                break;
-            }
-        }
-        return matchedElement;
+    public Elements getElements() {
+        return elements;
+    }
+
+    @XmlElement
+    public void setElements(Elements elements) {
+        this.elements = elements;
     }
 }

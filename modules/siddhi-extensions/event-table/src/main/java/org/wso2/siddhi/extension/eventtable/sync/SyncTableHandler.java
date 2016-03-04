@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.extension.eventtable.SyncEventTable;
 import org.wso2.siddhi.extension.eventtable.exception.ThrottleConfigurationException;
-import org.wso2.siddhi.extension.eventtable.util.ThrottleConstants;
+import org.wso2.siddhi.extension.eventtable.sync.util.ThrottleConstants;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
 import javax.xml.namespace.QName;

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.eventtable.util;
+package org.wso2.siddhi.extension.eventtable.sync.util;
 
 public class ThrottleConstants {
 

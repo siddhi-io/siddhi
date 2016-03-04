@@ -16,42 +16,57 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.eventtable.cache;
+package org.wso2.siddhi.extension.eventtable.rdbms.cache;
+
 
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class BasicCacheManager implements CacheManager {
+public class LRUCacheManager implements CacheManager {
 
+    private ConcurrentHashMap<StreamEvent, Long> eventTimestamps;
     private final LinkedList<StreamEvent> cacheList;
     private long limit;
 
-    public BasicCacheManager(LinkedList<StreamEvent> cacheList, long limit) {
+    public LRUCacheManager(LinkedList<StreamEvent> cacheList, long limit) {
+        this.eventTimestamps = new ConcurrentHashMap<StreamEvent, Long>();
         this.cacheList = cacheList;
         this.limit = limit;
     }
 
     @Override
     public void add(StreamEvent item) {
-        if (cacheList.size() >= limit) {
-            cacheList.remove(0);
+        eventTimestamps.put(item, System.currentTimeMillis());
+        if (eventTimestamps.size() >= limit) {
+            StreamEvent leastRecent = null;
+            long leastRecentTime = Long.MAX_VALUE;
+            for (Map.Entry<StreamEvent, Long> entry : eventTimestamps.entrySet()) {
+                if (leastRecentTime > entry.getValue()) {
+                    leastRecentTime = entry.getValue();
+                    leastRecent = entry.getKey();
+                }
+            }
+            eventTimestamps.remove(leastRecent);
+            cacheList.remove(leastRecent);
         }
     }
 
     @Override
     public void delete(StreamEvent item) {
-        //No implementation Required
+        eventTimestamps.remove(item);
     }
 
     @Override
     public void read(StreamEvent item) {
-        //No implementation Required
+        eventTimestamps.put(item, System.currentTimeMillis());
     }
 
     @Override
     public void update(StreamEvent item) {
-        //No implementation Required
+        eventTimestamps.put(item, System.currentTimeMillis());
     }
 
     @Override
@@ -61,6 +76,6 @@ public class BasicCacheManager implements CacheManager {
 
     @Override
     public boolean isContains(StreamEvent item) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return cacheList.contains(item);
     }
 }

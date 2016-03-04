@@ -15,30 +15,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.siddhi.extension.eventtable.exception;
 
-package org.wso2.siddhi.extension.eventtable.jaxbMappings;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
-
-/**
- * Contains List of mapping objects
- */
-@XmlRootElement(name = "eventTableConfiguration")
-public class Mappings {
-
-    private List<Mapping> mapping;
-
-    public List<Mapping> getMapping() {
-        return mapping;
+public class SiddhiEventTableRunTimeException extends RuntimeException {
+    public SiddhiEventTableRunTimeException() {
+        super();
     }
 
-    @XmlElementWrapper(name = "mappings")
-    @XmlElement(name = "mapping")
-    public void setMapping(List<Mapping> mapping) {
-        this.mapping = mapping;
+    public SiddhiEventTableRunTimeException(String message) {
+        super(message);
     }
 
+    public SiddhiEventTableRunTimeException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
+
+    public SiddhiEventTableRunTimeException(Throwable throwable) {
+        super(throwable);
+    }
 }

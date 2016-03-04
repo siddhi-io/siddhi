@@ -28,7 +28,7 @@ import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
-import org.wso2.siddhi.extension.eventtable.cache.CachingTable;
+import org.wso2.siddhi.extension.eventtable.rdbms.cache.CachingTable;
 
 import java.util.Collection;
 import java.util.Iterator;

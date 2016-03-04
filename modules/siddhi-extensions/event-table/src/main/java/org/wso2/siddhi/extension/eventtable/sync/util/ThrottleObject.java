@@ -1,4 +1,4 @@
-package org.wso2.siddhi.extension.eventtable.util;
+package org.wso2.siddhi.extension.eventtable.sync.util;
 
 public class ThrottleObject {
     private String throttleKey;

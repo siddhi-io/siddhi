@@ -21,9 +21,9 @@ package org.wso2.siddhi.extension.eventtable.rdbms;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.exception.CannotLoadConfigurationException;
-import org.wso2.siddhi.extension.eventtable.jaxbMappings.Element;
-import org.wso2.siddhi.extension.eventtable.jaxbMappings.Mapping;
-import org.wso2.siddhi.extension.eventtable.jaxbMappings.Mappings;
+import org.wso2.siddhi.extension.eventtable.rdbms.jaxbMappings.Element;
+import org.wso2.siddhi.extension.eventtable.rdbms.jaxbMappings.Mapping;
+import org.wso2.siddhi.extension.eventtable.rdbms.jaxbMappings.Mappings;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

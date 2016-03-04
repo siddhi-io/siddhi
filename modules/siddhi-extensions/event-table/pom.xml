@@ -18,7 +18,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.siddhi</groupId>
         <artifactId>siddhi-extensions</artifactId>
@@ -104,6 +105,22 @@
             <artifactId>axiom</artifactId>
             <version>${orbit.version.axiom}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.axis2.wso2</groupId>
+            <artifactId>axis2</artifactId>
+            <version>${orbit.version.axis2}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2.transport</groupId>
+            <artifactId>axis2-transport-jms</artifactId>
+            <version>${axis2-transports.version}</version>
+        </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>org.apache.activemq</groupId>-->
+            <!--<artifactId>activemq-all</artifactId>-->
+            <!--<version>${activemq.version}</version>-->
+        <!--</dependency>-->
 
         <!--&lt;!&ndash; Temporary Dependencies&ndash;&gt;-->
         <!--<dependency>-->
@@ -142,6 +159,10 @@
                         <Import-Package>
                             org.apache.axiom.om.*;version="${orbit.version.axiom}",
                             javax.naming.*,
+                            org.apache.axis2.*,
+                            javax.jms.*,
+                            javax.transaction.*,
+                            javax.xml.*,
                             org.apache.commons.logging.*;version="${geronimo.jms.version}",
                             com.fasterxml.jackson.databind.*;version="${hadoop.common.version}",
                             org.apache.hadoop.util.bloom;version="${hadoop.common.version}",
@@ -157,7 +178,7 @@
                             javax.sql,
                             javax.xml.bind,
                             javax.xml.bind.annotation,
-                            *;resolution:=optional
+                            <!--*;resolution:=optional-->
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -172,6 +193,8 @@
         <activemq.version>5.9.1</activemq.version>
         <geronimo.jms.version>1.1.1</geronimo.jms.version>
         <orbit.version.axiom>1.2.11.wso2v9</orbit.version.axiom>
+        <orbit.version.axis2>1.6.1.wso2v11</orbit.version.axis2>
+        <axis2-transports.version>1.1.0-wso2v13</axis2-transports.version>
     </properties>
 
 </project>

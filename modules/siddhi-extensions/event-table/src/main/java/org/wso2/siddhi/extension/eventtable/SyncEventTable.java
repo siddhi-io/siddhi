@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.extension.eventtable;
 
+import org.apache.axis2.transport.base.threads.NativeWorkerPool;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
@@ -35,10 +36,10 @@ import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
-import org.wso2.siddhi.extension.eventtable.jms.TopicConsumer;
 import org.wso2.siddhi.extension.eventtable.rdbms.RDBMSEventTableConstants;
 import org.wso2.siddhi.extension.eventtable.sync.SyncOperatorParser;
 import org.wso2.siddhi.extension.eventtable.sync.SyncTableHandler;
+import org.wso2.siddhi.extension.eventtable.sync.util.jms.*;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -46,10 +47,6 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
-import javax.jms.TopicConnectionFactory;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.io.IOException;
 import java.util.*;
 
@@ -60,7 +57,6 @@ import java.util.*;
 public class SyncEventTable implements EventTable, Snapshotable {
 
     private TableDefinition tableDefinition;
-    private ExecutionPlanContext executionPlanContext;
     private StreamEventCloner streamEventCloner;
     private StreamEventPool streamEventPool;
     private ZeroStreamEventConverter eventConverter = new ZeroStreamEventConverter();
@@ -69,7 +65,10 @@ public class SyncEventTable implements EventTable, Snapshotable {
     // For indexed table.
     private String indexAttribute = null;
     private SyncTableHandler syncTableHandler;
-    private SyncEventTable syncEventTable;
+    private int minThreadPoolSize = 4;
+    private int maxThreadPoolSize = 4;
+    private int KeepAliveTimeInMillis = 1000;
+    private int jobQueueSize = 1000;
 
     private int indexPosition;
     private SortedMap<Object, StreamEvent> eventsMap;
@@ -81,10 +80,9 @@ public class SyncEventTable implements EventTable, Snapshotable {
             elementId = executionPlanContext.getElementIdGenerator().createNewId();
         }
         executionPlanContext.getSnapshotService().addSnapshotable(this);
-        this.syncEventTable = this;
+        SyncEventTable syncEventTable = this;
 
         this.tableDefinition = tableDefinition;
-        this.executionPlanContext = executionPlanContext;
         int bloomFilterSize = RDBMSEventTableConstants.BLOOM_FILTER_SIZE;
         int bloomFilterHashFunctions = RDBMSEventTableConstants.BLOOM_FILTER_HASH_FUNCTIONS;
 
@@ -268,17 +266,26 @@ public class SyncEventTable implements EventTable, Snapshotable {
         try {
             ClassLoader classLoader = getClass().getClassLoader();
             properties.load(classLoader.getResourceAsStream("activemq.properties"));
-            Context context = new InitialContext(properties);
-            TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory) context.lookup("ConnectionFactory");
-            TopicConsumer topicConsumer = new TopicConsumer(topicConnectionFactory, "throttleData", syncTableHandler, this);
-            Thread consumerThread = new Thread(topicConsumer);
+            Hashtable<String, String> parameters = new Hashtable<String, String>();
+            for (final String name : properties.stringPropertyNames()) {
+                parameters.put(name, properties.getProperty(name));
+            }
+
+            String destination = "throttleData";
+            JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(parameters, "Siddhi-JMS-Consumer");
+            Map<String, String> messageConfig = new HashMap<String, String>();
+            messageConfig.put(JMSConstants.PARAM_DESTINATION, destination);
+            JMSTaskManager jmsTaskManager = JMSTaskManagerFactory.createTaskManagerForService(jmsConnectionFactory, "Siddhi-JMS-Consumer", new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize, KeepAliveTimeInMillis, jobQueueSize, "JMS Threads",
+                    "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
+            jmsTaskManager.setJmsMessageListener(new JMSMessageListener(syncTableHandler, this));
+
+            JMSListener jmsListener = new JMSListener("Siddhi-JMS-Consumer" + "#" + destination,
+                    jmsTaskManager);
+            jmsListener.startListener();
             log.info("Starting jms consumerQueue thread...");
-            consumerThread.start();
 
         } catch (IOException e) {
             log.error("Cannot read properties file from resources. " + e.getMessage(), e);
-        } catch (NamingException e) {
-            log.error("Invalid properties in the properties " + e.getMessage(), e);
         }
     }
 
