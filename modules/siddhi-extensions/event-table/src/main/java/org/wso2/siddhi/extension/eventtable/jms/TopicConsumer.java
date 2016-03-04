@@ -62,7 +62,7 @@ public class TopicConsumer implements Runnable {
             MessageConsumer consumer = session.createConsumer(destination);
             log.info("Listening for messages");
             while (active) {
-                Message message = consumer.receive(1000);
+                Message message = consumer.receive();
                 if (message != null) {
                     if (message instanceof MapMessage) {
                         MapMessage mapMessage = (MapMessage) message;
