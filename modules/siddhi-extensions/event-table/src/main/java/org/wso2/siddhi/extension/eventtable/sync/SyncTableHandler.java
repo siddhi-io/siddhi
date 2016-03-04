@@ -241,7 +241,15 @@ public class SyncTableHandler {
     }
 
     public void removeFromBloomFilters(String key) {
-        bloomFilters[0].delete(new Key(key.getBytes()));
+        try {
+            bloomFilters[0].delete(new Key(key.getBytes()));
+        } catch (Exception e) {
+            if (e.getMessage().equals("Key is not a member")) {
+                log.debug("Silently ignoring key not available in Bloom Filter case");
+            } else {
+                log.error("Exception when deleting a key from Bloom Filter");
+            }
+        }
     }
 
 }
