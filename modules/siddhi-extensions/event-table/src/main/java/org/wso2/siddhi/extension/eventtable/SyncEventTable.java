@@ -252,7 +252,11 @@ public class SyncEventTable implements EventTable, Snapshotable {
     }
 
     public void addToInMemoryEventMap(Object key, StreamEvent streamEvent) {
-        this.eventsMap.put(key, streamEvent);
+        if (indexAttribute != null) {
+            this.eventsMap.put(key, streamEvent);
+        } else {
+            eventsList.add(streamEvent);
+        }
     }
 
     public void removeFromMemoryEventMap(Object key) {

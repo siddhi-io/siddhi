@@ -73,8 +73,8 @@ public class TopicConsumer implements Runnable {
                             map.put(key, mapMessage.getObject(key));
                         }
 
-                        String throttleKey = map.get("throttleKey").toString();
-                        String throttleState = map.get("throttleState").toString();
+                        String throttleKey = map.get("throttle_key").toString();
+                        String throttleState = map.get("isThrottled").toString();
                         if (throttleState.equals("true")) {
                             syncTableHandler.addToBloomFilters(throttleKey);
                             StreamEvent streamEvent = new StreamEvent(0, 0, 1);
@@ -86,7 +86,7 @@ public class TopicConsumer implements Runnable {
                         }
 
                     } else {
-                        log.error("Incorrect message format received");
+                        log.error("Incorrect message format received. Expecting javax.jms.MapMessage");
                     }
 
 
