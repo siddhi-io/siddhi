@@ -142,7 +142,9 @@ public class SyncTableHandler {
             }
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-            return responseString.split(",");
+            if(responseString !=null && !responseString.isEmpty()){
+                return responseString.split(",");
+            }
 
         } catch (IOException e) {
             log.error("Exception when retrieving throttling data from remote endpoint ", e);
