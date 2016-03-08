@@ -175,7 +175,13 @@ public class DBHandler {
 
         } catch (SQLException e) {
             throw new ExecutionPlanRuntimeException("Error while deleting the event," + e.getMessage(), e);
-        } finally {
+        } catch (Exception e) {
+            if (e.getMessage().equals("Key is not a member")) {
+                log.info("Key not available issue " +complexEvent.getOutputData());
+            } else {
+                log.error("Exception when deleting a key from Bloom Filter");
+            }
+        }finally {
             cleanUpConnections(stmt, con);
         }
     }
