@@ -20,41 +20,17 @@ package org.wso2.siddhi.extension.eventtable.sync.util;
 
 public class ThrottleConstants {
 
-
-
     private ThrottleConstants(){
         //avoids initialization
     }
 
-    public static final String THROTTLE_POLICY_XML = "throttle-policy.xml";
-    public static final String POLICY_ELEMENT = "policy";
-    public static final String NAME = "name";
-    public static final String TIER = "tier";
-    public static final String LEVEL = "level";
-    public static final String DESCRIPTION = "description";
-    public static final String ELIGIBILITY_QUERY = "eligibilityQuery";
-    public static final String DECISION_QUERY = "decisionQuery";
     public static final String CEP_CONFIG_XML = "global-CEP-config.xml";
-    public static final String THROTTLE_COMMON_CONFIG_XML = "common_throttle_config.xml";
-    public static final String CONFIG_ELEMENT = "GlobalCEPConfig";
     public static final String HOST_NAME = "hostName";
     public static final String TCP_PORT = "binaryTCPPort";
     public static final String SSL_PORT = "binarySSLPort";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
-    public static final String STREAM_NAME = "streamName";
-    public static final String STREAM_VERSION = "streamVersion";
-    public static final String REQUEST_STREAM = "RequestStream";
-    public static final String ELIGIBILITY_STREAM = "EligibilityStream";
-    public static final String EVENT_TABLE = "EventTable";
-    public static final String LOCAL_QUERY = "LocalQuery";
-    public static final String GLOBAL_QUERY = "GlobalQuery";
     public static final String HTTPS_PORT = "HTTPSPort";
     public static final String HTTP_PORT = "HTTPPort";
-    public static final String REQUEST_STREAM_ID = "RequestStreamID";
-    public static final String THROTTLE_STREAM = "ThrottleStream";
-    public static final String THROTTLE_STREAM_ID = "ThrottleStreamID";
-    public static final String EMITTING_QUERY = "EmittingQuery";
-    public static final String COMMON_PLAN = "common-throttling-plan";
 
 }

@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -15,6 +15,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
+
 package org.wso2.siddhi.extension.eventtable.sync.util.jms;
 
 import org.apache.axis2.client.Options;
@@ -34,19 +35,19 @@ public class JMSConstants {
      */
     public static final String DEFAULT_CONFAC_NAME = "default";
     /**
-     * The default JMS time out waiting for a reply - also see {@link JMS_WAIT_REPLY}
+     * The default JMS time out waiting for a reply
      */
     public static final long DEFAULT_JMS_TIMEOUT = Options.DEFAULT_TIMEOUT_MILLISECONDS;
     /**
-     * Value indicating a Queue used for {@link DEST_PARAM_TYPE}, {@link REPLY_PARAM_TYPE}
+     * Value indicating a Queue used
      */
     public static final String DESTINATION_TYPE_QUEUE = "queue";
     /**
-     * Value indicating a Topic used for {@link DEST_PARAM_TYPE}, {@link REPLY_PARAM_TYPE}
+     * Value indicating a Topic
      */
     public static final String DESTINATION_TYPE_TOPIC = "topic";
     /**
-     * Value indicating a JMS 1.1 Generic Destination used by {@link DEST_PARAM_TYPE}, {@link REPLY_PARAM_TYPE}
+     * Value indicating a JMS 1.1 Generic Destination
      */
     public static final String DESTINATION_TYPE_GENERIC = "generic";
 
@@ -100,7 +101,7 @@ public class JMSConstants {
     public static final String PARAM_DESTINATION = "transport.jms.Destination";
     /**
      * The Service level Parameter name indicating the destination type for requests.
-     * also see {@link DESTINATION_TYPE_QUEUE}, {@link DESTINATION_TYPE_TOPIC}
+     *
      */
     public static final String PARAM_DEST_TYPE = "transport.jms.DestinationType";
     /**
@@ -109,7 +110,7 @@ public class JMSConstants {
     public static final String PARAM_REPLY_DESTINATION = "transport.jms.ReplyDestination";
     /**
      * The Service level Parameter name indicating the response destination type
-     * also see {@link DESTINATION_TYPE_QUEUE}, {@link DESTINATION_TYPE_TOPIC}
+     *
      */
     public static final String PARAM_REPLY_DEST_TYPE = "transport.jms.ReplyDestinationType";
     /**
@@ -162,17 +163,15 @@ public class JMSConstants {
      */
     public static final String PARAM_MSG_SELECTOR = "transport.jms.MessageSelector";
     /**
-     * Is the Subscription durable ? - "true" or "false" See {@link PARAM_DURABLE_SUB_NAME}
+     * Is the Subscription durable ? - "true" or "false"
      */
     public static final String PARAM_SUB_DURABLE = "transport.jms.SubscriptionDurable";
     /**
-     * The name for the durable subscription See {@link PARAM_SUB_DURABLE}
+     * The name for the durable subscription
      */
     public static final String PARAM_DURABLE_SUB_NAME = "transport.jms.DurableSubscriberName";
     /**
      * JMS Resource cachable level to be used for the service One of the following:
-     * {@link CACHE_NONE}, {@link CACHE_CONNECTION}, {@link CACHE_SESSION}, {@link CACHE_PRODUCER},
-     * {@link CACHE_CONSUMER}, or {@link CACHE_AUTO} - to let the transport decide
      */
     public static final String PARAM_CACHE_LEVEL = "transport.jms.CacheLevel";
     /**
@@ -192,7 +191,7 @@ public class JMSConstants {
      */
     public static final String PARAM_CONCURRENT_CONSUMERS = "transport.jms.ConcurrentConsumers";
     /**
-     * The maximum number of concurrent consumers for the service - See {@link PARAM_CONCURRENT_CONSUMERS}
+     * The maximum number of concurrent consumers for the service
      */
     public static final String PARAM_MAX_CONSUMERS = "transport.jms.MaxConcurrentConsumers";
     /**
@@ -209,16 +208,12 @@ public class JMSConstants {
      * Number of milliseconds before the first reconnection attempt is tried, on detection of an
      * error. Subsequent retries follow a geometric series, where the
      * duration = previous duration * factor
-     * This is further limited by the {@link PARAM_RECON_MAX_DURATION} to be meaningful
+     *
      */
     public static final String PARAM_RECON_INIT_DURATION = "transport.jms.InitialReconnectDuration";
-    /**
-     * @see PARAM_RECON_INIT_DURATION
-     */
+
     public static final String PARAM_RECON_FACTOR = "transport.jms.ReconnectProgressFactor";
-    /**
-     * @see PARAM_RECON_INIT_DURATION
-     */
+
     public static final String PARAM_RECON_MAX_DURATION = "transport.jms.MaxReconnectDuration";
 
     /**
@@ -239,15 +234,15 @@ public class JMSConstants {
      */
     public static final String JMS_MESSAGE_TYPE = "JMS_MESSAGE_TYPE";
     /**
-     * The message type indicating a BytesMessage. See {@link JMS_MESSAGE_TYPE}
+     * The message type indicating a BytesMessage.
      */
     public static final String JMS_BYTE_MESSAGE = "JMS_BYTE_MESSAGE";
     /**
-     * The message type indicating a TextMessage. See {@link JMS_MESSAGE_TYPE}
+     * The message type indicating a TextMessage.
      */
     public static final String JMS_TEXT_MESSAGE = "JMS_TEXT_MESSAGE";
     /**
-     * The message type indicating a TextMessage. See {@link JMS_MESSAGE_TYPE}
+     * The message type indicating a TextMessage.
      */
     public static final String JMS_MAP_MESSAGE = "JMS_MAP_MESSAGE";
     /**
@@ -287,7 +282,7 @@ public class JMSConstants {
     public static final String JMS_REPLY_TO = "JMS_REPLY_TO";
     /**
      * A MessageContext property or client Option indicating the JMS replyTo Destination type
-     * See {@link DESTINATION_TYPE_QUEUE} and {@link DESTINATION_TYPE_TOPIC}
+     *
      */
     public static final String JMS_REPLY_TO_TYPE = "JMS_REPLY_TO_TYPE";
     /**
@@ -295,7 +290,7 @@ public class JMSConstants {
      */
     public static final String JMS_TIMESTAMP = "JMS_TIMESTAMP";
     /**
-     * A MessageContext property indicating the JMS type String returned by {@link javax.jms.Message.getJMSType()}
+     * A MessageContext property indicating the JMS type String returned by
      */
     public static final String JMS_TYPE = "JMS_TYPE";
     /**

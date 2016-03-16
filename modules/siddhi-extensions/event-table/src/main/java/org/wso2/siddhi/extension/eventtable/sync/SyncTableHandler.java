@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -55,12 +55,8 @@ public class SyncTableHandler {
     private int bloomFilterSize;
     private int bloomFilterHashFunction;
     private static final Logger log = Logger.getLogger(SyncTableHandler.class);
-    private HttpClient httpClient;
-    private TableDefinition tableDefinition;
 
-
-    public SyncTableHandler(TableDefinition tableDefinition) {
-        this.tableDefinition = tableDefinition;
+    public SyncTableHandler() {
 
     }
 
@@ -105,41 +101,15 @@ public class SyncTableHandler {
         syncEventTable.setInMemoryEventMap(remoteDataMap);
     }
 
-//    private List<ThrottleObject> retrieveThrottlingData() {
-//        String url = "http://localhost:9763/throttle/data/v1/throttle";
-//        try {
-//            HttpGet method = new HttpGet(url);
-//            httpClient = new DefaultHttpClient();
-//            HttpResponse httpResponse = httpClient.execute(method);
-//            if (httpClient == null) {
-//                httpClient = new SystemDefaultHttpClient();
-//            }
-//
-//            String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-//            ObjectMapper mapper = new ObjectMapper();
-//            return Arrays.asList(mapper.readValue(responseString, ThrottleObject[].class));
-//
-//        } catch (IOException e) {
-//            log.error("Exception when retrieving throttling data from remote endpoint ", e);
-//        }
-//
-//        return null;
-//
-//    }
-
     private String[] retrieveThrottlingData() {
-//        String url = "http://10.100.1.65:9763/throttle/data/v1/throttleAsString";
 
         try {
             GlobalThrottleEngineConfig globalThrottleEngineConfig = loadCEPConfig();
             String url = "http://" + globalThrottleEngineConfig.getHostname() + ":" + globalThrottleEngineConfig.getHTTPPort() + "/throttle/data/v1/throttleAsString";
 
             HttpGet method = new HttpGet(url);
-            httpClient = new DefaultHttpClient();
+            HttpClient httpClient = new DefaultHttpClient();
             HttpResponse httpResponse = httpClient.execute(method);
-            if (httpClient == null) {
-                httpClient = new SystemDefaultHttpClient();
-            }
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
             if(responseString !=null && !responseString.isEmpty()){
@@ -157,7 +127,7 @@ public class SyncTableHandler {
     }
 
 
-    public static GlobalThrottleEngineConfig loadCEPConfig() throws ThrottleConfigurationException {
+    private static GlobalThrottleEngineConfig loadCEPConfig() throws ThrottleConfigurationException {
         String carbonHome = System.getProperty("carbon.config.dir.path");
         String path = carbonHome + File.separator + ThrottleConstants.CEP_CONFIG_XML;
         OMElement configElement = loadConfigXML(path);
@@ -169,8 +139,6 @@ public class SyncTableHandler {
         OMElement httpsPortElement;
         OMElement usernameElement;
         OMElement passwordElement;
-        OMElement streamNameElement;
-        OMElement streamVersionElement;
 
         if ((hostNameElement = configElement.getFirstChildWithName(new QName(ThrottleConstants.HOST_NAME))) == null) {
             throw new ThrottleConfigurationException("Invalid config element with no host name in " +

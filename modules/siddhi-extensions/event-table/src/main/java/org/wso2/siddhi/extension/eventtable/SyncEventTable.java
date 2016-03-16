@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -52,7 +52,7 @@ import java.util.*;
 
 
 /**
- * In-memory event table implementation of SiddhiQL.
+ * Sync event table implementation of SiddhiQL.
  */
 public class SyncEventTable implements EventTable, Snapshotable {
 
@@ -62,20 +62,18 @@ public class SyncEventTable implements EventTable, Snapshotable {
     private ZeroStreamEventConverter eventConverter = new ZeroStreamEventConverter();
     private List<StreamEvent> eventsList;
     private String elementId;
-    // For indexed table.
-    private String indexAttribute = null;
-    private SyncTableHandler syncTableHandler;
-    private int minThreadPoolSize = 4;
-    private int maxThreadPoolSize = 4;
-    private int KeepAliveTimeInMillis = 1000;
-    private int jobQueueSize = 1000;
 
+    // For indexed table.
+    private String indexAttribute;
+    private SyncTableHandler syncTableHandler;
     private int indexPosition;
     private SortedMap<Object, StreamEvent> eventsMap;
+
     private Logger log = Logger.getLogger(SyncEventTable.class);
 
     @Override
     public void init(TableDefinition tableDefinition, ExecutionPlanContext executionPlanContext) {
+
         if (elementId == null) {
             elementId = executionPlanContext.getElementIdGenerator().createNewId();
         }
@@ -118,7 +116,7 @@ public class SyncEventTable implements EventTable, Snapshotable {
             eventsList = new LinkedList<StreamEvent>();
         }
 
-        this.syncTableHandler = new SyncTableHandler(tableDefinition);
+        this.syncTableHandler = new SyncTableHandler();
 
 
         //Bloom Filter Implementation
@@ -148,47 +146,24 @@ public class SyncEventTable implements EventTable, Snapshotable {
 
     @Override
     public synchronized void add(ComplexEventChunk addingEventChunk) {
-        addingEventChunk.reset();
-        while (addingEventChunk.hasNext()) {
-            ComplexEvent complexEvent = addingEventChunk.next();
-            StreamEvent streamEvent = streamEventPool.borrowEvent();
-            eventConverter.convertStreamEvent(complexEvent, streamEvent);
-            if (indexAttribute != null) {
-                eventsMap.put(streamEvent.getOutputData()[indexPosition], streamEvent);
-            } else {
-                eventsList.add(streamEvent);
-            }
-        }
+        throw new OperationNotSupportedException("Insertion to Sync Event Table is not supported. Sync Table is used only for read purpose");
     }
 
     @Override
     public synchronized void delete(ComplexEventChunk deletingEventChunk, Operator operator) {
-        if (indexAttribute != null) {
-            operator.delete(deletingEventChunk, eventsMap);
-        } else {
-            operator.delete(deletingEventChunk, eventsList);
-        }
-
+        throw new OperationNotSupportedException("Deletion to Sync Table is not supported. Sync Table only used only for read purposes");
     }
 
     @Override
     public synchronized void update(ComplexEventChunk updatingEventChunk, Operator operator,
                                     int[] mappingPosition) {
-        if (indexAttribute != null) {
-            operator.update(updatingEventChunk, eventsMap, mappingPosition);
-        } else {
-            operator.update(updatingEventChunk, eventsList, mappingPosition);
-        }
+        throw new OperationNotSupportedException("Deletion to Sync Table is not supported. Sync Table only used only for read purposes");
     }
 
     @Override
     public void overwriteOrAdd(ComplexEventChunk overwritingOrAddingEventChunk, Operator operator,
                                int[] mappingPosition) {
-        if (indexAttribute != null) {
-            operator.overwriteOrAdd(overwritingOrAddingEventChunk, eventsMap, mappingPosition);
-        } else {
-            operator.overwriteOrAdd(overwritingOrAddingEventChunk, eventsList, mappingPosition);
-        }
+        throw new OperationNotSupportedException("Deletion to Sync Table is not supported. Sync Table only used only for read purposes");
     }
 
     @Override
@@ -245,6 +220,9 @@ public class SyncEventTable implements EventTable, Snapshotable {
         return elementId;
     }
 
+
+    //JMS Event retrieval related methods
+
     public void setInMemoryEventMap(SortedMap<Object, StreamEvent> eventsMap) {
         this.eventsMap = eventsMap;
     }
@@ -265,7 +243,7 @@ public class SyncEventTable implements EventTable, Snapshotable {
         Properties properties = new Properties();
         try {
             ClassLoader classLoader = getClass().getClassLoader();
-            properties.load(classLoader.getResourceAsStream("activemq.properties"));
+            properties.load(classLoader.getResourceAsStream("mb.properties"));
             Hashtable<String, String> parameters = new Hashtable<String, String>();
             for (final String name : properties.stringPropertyNames()) {
                 parameters.put(name, properties.getProperty(name));
@@ -275,14 +253,18 @@ public class SyncEventTable implements EventTable, Snapshotable {
             JMSConnectionFactory jmsConnectionFactory = new JMSConnectionFactory(parameters, "Siddhi-JMS-Consumer");
             Map<String, String> messageConfig = new HashMap<String, String>();
             messageConfig.put(JMSConstants.PARAM_DESTINATION, destination);
-            JMSTaskManager jmsTaskManager = JMSTaskManagerFactory.createTaskManagerForService(jmsConnectionFactory, "Siddhi-JMS-Consumer", new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize, KeepAliveTimeInMillis, jobQueueSize, "JMS Threads",
+            int minThreadPoolSize = 4;
+            int maxThreadPoolSize = 4;
+            int keepAliveTimeInMillis = 1000;
+            int jobQueueSize = 1000;
+            JMSTaskManager jmsTaskManager = JMSTaskManagerFactory.createTaskManagerForService(jmsConnectionFactory, "Siddhi-JMS-Consumer", new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize, keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
                     "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
             jmsTaskManager.setJmsMessageListener(new JMSMessageListener(syncTableHandler, this));
 
             JMSListener jmsListener = new JMSListener("Siddhi-JMS-Consumer" + "#" + destination,
                     jmsTaskManager);
             jmsListener.startListener();
-            log.info("Starting jms consumerQueue thread...");
+            log.info("Starting jms topic consumer thread...");
 
         } catch (IOException e) {
             log.error("Cannot read properties file from resources. " + e.getMessage(), e);
