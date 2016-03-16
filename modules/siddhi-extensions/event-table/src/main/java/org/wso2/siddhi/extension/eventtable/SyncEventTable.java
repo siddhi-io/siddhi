@@ -151,19 +151,19 @@ public class SyncEventTable implements EventTable, Snapshotable {
 
     @Override
     public synchronized void delete(ComplexEventChunk deletingEventChunk, Operator operator) {
-        throw new OperationNotSupportedException("Deletion to Sync Table is not supported. Sync Table only used only for read purposes");
+        throw new OperationNotSupportedException("Deletion to Sync Table is not supported. Sync Table is used only for read purposes");
     }
 
     @Override
     public synchronized void update(ComplexEventChunk updatingEventChunk, Operator operator,
                                     int[] mappingPosition) {
-        throw new OperationNotSupportedException("Deletion to Sync Table is not supported. Sync Table only used only for read purposes");
+        throw new OperationNotSupportedException("Update to Sync Table is not supported. Sync Table is used only for read purposes");
     }
 
     @Override
     public void overwriteOrAdd(ComplexEventChunk overwritingOrAddingEventChunk, Operator operator,
                                int[] mappingPosition) {
-        throw new OperationNotSupportedException("Deletion to Sync Table is not supported. Sync Table only used only for read purposes");
+        throw new OperationNotSupportedException("Insert or Overwrite to Sync Table is not supported. Sync Table is used only for read purposes");
     }
 
     @Override
