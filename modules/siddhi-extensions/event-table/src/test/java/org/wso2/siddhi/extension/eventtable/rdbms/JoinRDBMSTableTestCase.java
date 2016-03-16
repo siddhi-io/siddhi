@@ -56,7 +56,7 @@ public class JoinRDBMSTableTestCase {
 
         try {
             if ((dataSource.getConnection()) != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
@@ -136,7 +136,7 @@ public class JoinRDBMSTableTestCase {
 
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
@@ -214,7 +214,7 @@ public class JoinRDBMSTableTestCase {
 
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
@@ -292,7 +292,7 @@ public class JoinRDBMSTableTestCase {
 
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
@@ -369,7 +369,7 @@ public class JoinRDBMSTableTestCase {
 
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
@@ -447,7 +447,7 @@ public class JoinRDBMSTableTestCase {
 
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
@@ -524,7 +524,7 @@ public class JoinRDBMSTableTestCase {
 
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
@@ -602,7 +602,7 @@ public class JoinRDBMSTableTestCase {
 
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,"table2");
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, "table2");
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float); " +
@@ -671,7 +671,7 @@ public class JoinRDBMSTableTestCase {
     }
 
 
-   //----------------------------------------------- Connection Properties ----------------------------------------------------------
+    //----------------------------------------------- Connection Properties ----------------------------------------------------------
 
     @Test
     public void testTableJoinQuery9() throws InterruptedException {
@@ -682,7 +682,7 @@ public class JoinRDBMSTableTestCase {
 
         try {
             if ((dataSource.getConnection()) != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +

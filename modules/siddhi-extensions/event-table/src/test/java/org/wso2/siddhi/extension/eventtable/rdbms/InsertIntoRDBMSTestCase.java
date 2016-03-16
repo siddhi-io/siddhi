@@ -40,7 +40,7 @@ public class InsertIntoRDBMSTestCase {
 
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' , datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "') " +

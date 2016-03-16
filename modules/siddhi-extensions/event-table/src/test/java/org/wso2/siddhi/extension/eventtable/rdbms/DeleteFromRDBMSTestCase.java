@@ -40,7 +40,7 @@ public class DeleteFromRDBMSTestCase {
         siddhiManager.setDataSource(RDBMSTestConstants.DATA_SOURCE_NAME, dataSource);
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
@@ -94,7 +94,7 @@ public class DeleteFromRDBMSTestCase {
         try {
             if (dataSource.getConnection() != null) {
 
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
                         "define stream DeleteStockStream (symbol string, price float, volume long); " +
@@ -145,7 +145,7 @@ public class DeleteFromRDBMSTestCase {
         try {
             if (dataSource.getConnection() != null) {
 
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
                         "define stream DeleteStockStream (symbol string, price float, volume long); " +
@@ -195,7 +195,7 @@ public class DeleteFromRDBMSTestCase {
         try {
             if (dataSource.getConnection() != null) {
 
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
                         "define stream DeleteStockStream (symbol string, price float, volume long); " +
@@ -245,7 +245,7 @@ public class DeleteFromRDBMSTestCase {
         try {
             if (dataSource.getConnection() != null) {
 
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
                         "define stream DeleteStockStream (symbol string, price float, volume long); " +
@@ -295,7 +295,7 @@ public class DeleteFromRDBMSTestCase {
         try {
             if (dataSource.getConnection() != null) {
 
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
                         "define stream DeleteStockStream (symbol string, price float, volume long); " +
@@ -345,7 +345,7 @@ public class DeleteFromRDBMSTestCase {
         try {
             if (dataSource.getConnection() != null) {
 
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
                         "define stream DeleteStockStream (symbol string, price float, volume long); " +
@@ -394,7 +394,7 @@ public class DeleteFromRDBMSTestCase {
         try {
             if (dataSource.getConnection() != null) {
 
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
                         "define stream DeleteStockStream (symbol string, price float, volume long); " +
@@ -444,7 +444,7 @@ public class DeleteFromRDBMSTestCase {
         siddhiManager.setDataSource(RDBMSTestConstants.DATA_SOURCE_NAME, dataSource);
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +
@@ -496,7 +496,7 @@ public class DeleteFromRDBMSTestCase {
         siddhiManager.setDataSource(RDBMSTestConstants.DATA_SOURCE_NAME, dataSource);
         try {
             if (dataSource.getConnection() != null) {
-                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
                         "define stream StockStream (symbol string, price float, volume long); " +

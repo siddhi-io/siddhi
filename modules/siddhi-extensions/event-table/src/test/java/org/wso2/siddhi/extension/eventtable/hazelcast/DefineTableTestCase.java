@@ -111,7 +111,7 @@ public class DefineTableTestCase {
                     executionPlanRuntime.getName());
             List<StreamEvent> streamEvents = instance.getList(
                     HazelcastEventTableConstants.HAZELCAST_LIST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + '_' + tableDefinition.getId());
+                            executionPlanRuntime.getName() + '_' + tableDefinition.getId());
 
             SiddhiTestHelper.waitForEvents(100, 2, streamEvents, 60000);
             List<Object[]> expected = Arrays.asList(new Object[]{"WSO2", 55.6f}, new Object[]{"IBM", 75.6f});
@@ -469,7 +469,7 @@ public class DefineTableTestCase {
             stockStream.send(new Object[]{"IBM", 75.6f});
             List<StreamEvent> streamEvents = instance_2.getList(
                     HazelcastEventTableConstants.HAZELCAST_LIST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + '_' + tableDefinition.getId());
+                            executionPlanRuntime.getName() + '_' + tableDefinition.getId());
 
             SiddhiTestHelper.waitForEvents(100, 2, streamEvents, 60000);
             List<Object[]> expected = Arrays.asList(new Object[]{"WSO2", 55.6f}, new Object[]{"IBM", 75.6f});
@@ -519,7 +519,7 @@ public class DefineTableTestCase {
             HazelcastInstance hci = Hazelcast.getOrCreateHazelcastInstance(cfg);
             List<StreamEvent> streamEvents = hci.getList(
                     HazelcastEventTableConstants.HAZELCAST_LIST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + '_' + tableDefinition.getId());
+                            executionPlanRuntime.getName() + '_' + tableDefinition.getId());
 
             SiddhiTestHelper.waitForEvents(100, 2, streamEvents, 60000);
             List<Object[]> expected = Arrays.asList(new Object[]{"WSO2", 55.6f}, new Object[]{"IBM", 75.6f});

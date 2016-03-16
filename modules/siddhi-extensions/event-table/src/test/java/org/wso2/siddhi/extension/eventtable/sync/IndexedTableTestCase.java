@@ -28,8 +28,8 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.extension.eventtable.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.extension.eventtable.test.util.SiddhiTestHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,8 +50,6 @@ public class IndexedTableTestCase {
         eventArrived = false;
         inEventsList = new ArrayList<Object[]>();
     }
-
-
 
 
     @Test
@@ -103,7 +101,6 @@ public class IndexedTableTestCase {
 //            Assert.assertEquals("Event arrived", true, eventArrived);
 
 
-
             Thread.sleep(10000000);
 
         } finally {
@@ -122,7 +119,7 @@ public class IndexedTableTestCase {
                 "define stream CheckStockStream (symbol string, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long);" +
                 "@IndexBy('symbol') " +
-                "@From(eventtable='sync', bloom.filters = 'enable', bloom.validity='3000') "+
+                "@From(eventtable='sync', bloom.filters = 'enable', bloom.validity='3000') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -180,7 +177,6 @@ public class IndexedTableTestCase {
                     new Object[]{"IBM", 200l},
                     new Object[]{"WSO2", 100l}
             );
-
 
 
             SiddhiTestHelper.waitForEvents(100, 4, inEventCount, 60000);

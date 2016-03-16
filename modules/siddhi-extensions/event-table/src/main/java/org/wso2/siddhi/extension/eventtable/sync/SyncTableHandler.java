@@ -28,14 +28,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.extension.eventtable.SyncEventTable;
 import org.wso2.siddhi.extension.eventtable.exception.ThrottleConfigurationException;
 import org.wso2.siddhi.extension.eventtable.sync.util.ThrottleConstants;
-import org.wso2.siddhi.query.api.definition.TableDefinition;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -48,6 +46,7 @@ import java.util.TreeMap;
 /**
  * Class which act as layer between the database and Siddhi. This class performs all the RDBMS related operations and Blooms Filter
  */
+
 public class SyncTableHandler {
 
     private CountingBloomFilter[] bloomFilters;
@@ -112,7 +111,7 @@ public class SyncTableHandler {
             HttpResponse httpResponse = httpClient.execute(method);
 
             String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-            if(responseString !=null && !responseString.isEmpty()){
+            if (responseString != null && !responseString.isEmpty()) {
                 return responseString.split(",");
             }
 

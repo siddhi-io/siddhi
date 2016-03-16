@@ -28,7 +28,6 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.EventTable;
@@ -54,12 +53,13 @@ import java.util.*;
 /**
  * Sync event table implementation of SiddhiQL.
  */
+
+//TODO, Indexing is must to use Sync Event Table
+
 public class SyncEventTable implements EventTable, Snapshotable {
 
     private TableDefinition tableDefinition;
     private StreamEventCloner streamEventCloner;
-    private StreamEventPool streamEventPool;
-    private ZeroStreamEventConverter eventConverter = new ZeroStreamEventConverter();
     private List<StreamEvent> eventsList;
     private String elementId;
 
@@ -135,7 +135,7 @@ public class SyncEventTable implements EventTable, Snapshotable {
         }
 
         subscribeForJmsEvents();
-        streamEventPool = new StreamEventPool(metaStreamEvent, 10);
+        StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         streamEventCloner = new StreamEventCloner(metaStreamEvent, streamEventPool);
     }
 

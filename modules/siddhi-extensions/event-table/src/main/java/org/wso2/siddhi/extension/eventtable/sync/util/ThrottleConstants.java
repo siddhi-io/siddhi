@@ -20,7 +20,7 @@ package org.wso2.siddhi.extension.eventtable.sync.util;
 
 public class ThrottleConstants {
 
-    private ThrottleConstants(){
+    private ThrottleConstants() {
         //avoids initialization
     }
 

@@ -42,7 +42,7 @@ public class DBConnectionHelper {
         return dbConnectionHelper;
     }
 
-    public void clearDatabaseTable(DataSource dataSource,String tableName) {
+    public void clearDatabaseTable(DataSource dataSource, String tableName) {
         PreparedStatement stmt = null;
         Connection con = null;
         try {

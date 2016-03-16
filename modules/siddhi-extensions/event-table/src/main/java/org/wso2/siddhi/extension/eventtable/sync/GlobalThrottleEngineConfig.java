@@ -33,12 +33,13 @@ public class GlobalThrottleEngineConfig {
 
     /**
      * Constructor enforcing to provide every parameter.
-     * @param hostname Hostname of the global CEP node
+     *
+     * @param hostname      Hostname of the global CEP node
      * @param binaryTCPPort Binary TCP transport port of the global CEP node (Default : 9611)
      * @param binarySSLPort Binary SSL transport port of the global CEP node (Default : 9711)
-     * @param HTTPSPort HTTPS port of the global CEP node (Default : 9443)
-     * @param username Username of the user to authenticate to CEP before start sending events (Default : admin)
-     * @param password Password of the user to authenticate to CEP before start sending events (Default : admin)
+     * @param HTTPSPort     HTTPS port of the global CEP node (Default : 9443)
+     * @param username      Username of the user to authenticate to CEP before start sending events (Default : admin)
+     * @param password      Password of the user to authenticate to CEP before start sending events (Default : admin)
      */
     public GlobalThrottleEngineConfig(String hostname, String binaryTCPPort, String binarySSLPort, String HTTPPort, String HTTPSPort, String username,
                                       String password) {

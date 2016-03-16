@@ -101,7 +101,6 @@ public class JMSConstants {
     public static final String PARAM_DESTINATION = "transport.jms.Destination";
     /**
      * The Service level Parameter name indicating the destination type for requests.
-     *
      */
     public static final String PARAM_DEST_TYPE = "transport.jms.DestinationType";
     /**
@@ -110,7 +109,6 @@ public class JMSConstants {
     public static final String PARAM_REPLY_DESTINATION = "transport.jms.ReplyDestination";
     /**
      * The Service level Parameter name indicating the response destination type
-     *
      */
     public static final String PARAM_REPLY_DEST_TYPE = "transport.jms.ReplyDestinationType";
     /**
@@ -208,7 +206,6 @@ public class JMSConstants {
      * Number of milliseconds before the first reconnection attempt is tried, on detection of an
      * error. Subsequent retries follow a geometric series, where the
      * duration = previous duration * factor
-     *
      */
     public static final String PARAM_RECON_INIT_DURATION = "transport.jms.InitialReconnectDuration";
 
@@ -282,7 +279,6 @@ public class JMSConstants {
     public static final String JMS_REPLY_TO = "JMS_REPLY_TO";
     /**
      * A MessageContext property or client Option indicating the JMS replyTo Destination type
-     *
      */
     public static final String JMS_REPLY_TO_TYPE = "JMS_REPLY_TO_TYPE";
     /**

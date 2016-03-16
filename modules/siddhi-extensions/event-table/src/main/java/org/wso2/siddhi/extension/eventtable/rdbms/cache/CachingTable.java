@@ -108,7 +108,7 @@ public class CachingTable {
             StreamEvent streamEvent = streamEventPool.borrowEvent();
             eventConverter.convertStreamEvent(updatingEvent, streamEvent);
             cacheManager.update(streamEvent);
-        }else {
+        } else {
             StreamEvent streamEvent = streamEventPool.borrowEvent();
             eventConverter.convertStreamEvent(updatingEvent, streamEvent);
             list.add(streamEvent);

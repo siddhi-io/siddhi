@@ -830,7 +830,7 @@ public class JMSTaskManager {
          * Get a Session that could/should be used by this task - depends on the cache level to reuse
          *
          * @return the shared Session if cache level is higher than CACHE_CONNECTION, or a new Session
-         * created using the Connection passed, or a new/shared connection
+         *         created using the Connection passed, or a new/shared connection
          */
         private Session getSession() {
             if (session == null || cacheLevel < JMSConstants.CACHE_SESSION) {
@@ -844,7 +844,7 @@ public class JMSTaskManager {
          * level to reuse
          *
          * @return the shared MessageConsumer if cache level is higher than CACHE_SESSION, or a new
-         * MessageConsumer possibly using the Connection and Session passed in
+         *         MessageConsumer possibly using the Connection and Session passed in
          */
         private MessageConsumer getMessageConsumer() {
             if (consumer == null || cacheLevel < JMSConstants.CACHE_CONSUMER) {

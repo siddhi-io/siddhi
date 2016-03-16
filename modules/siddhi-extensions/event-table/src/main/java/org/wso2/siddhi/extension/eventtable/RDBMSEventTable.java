@@ -215,7 +215,7 @@ public class RDBMSEventTable implements EventTable {
     @Override
     public void overwriteOrAdd(ComplexEventChunk overwritingOrAddingEventChunk, Operator operator, int[] mappingPosition) {
         operator.overwriteOrAdd(overwritingOrAddingEventChunk, null, null);
-        if(isCachingEnabled){
+        if (isCachingEnabled) {
             ((RDBMSOperator) operator).getInMemoryEventTableOperator().overwriteOrAdd(overwritingOrAddingEventChunk, cachedTable.getCacheList(), mappingPosition);
         }
     }
