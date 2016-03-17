@@ -206,7 +206,10 @@ public class SyncTableHandler {
 
 
     public void addToBloomFilters(String key) {
-        bloomFilters[0].add(new Key(key.getBytes()));
+        Key membershipKey = new Key(key.getBytes());
+        if(bloomFilters[0].membershipTest(membershipKey)){
+            bloomFilters[0].add(membershipKey);
+        }
     }
 
     public void removeFromBloomFilters(String key) {
