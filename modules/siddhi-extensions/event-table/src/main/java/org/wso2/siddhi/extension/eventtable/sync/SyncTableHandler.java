@@ -207,7 +207,7 @@ public class SyncTableHandler {
 
     public void addToBloomFilters(String key) {
         Key membershipKey = new Key(key.getBytes());
-        if(bloomFilters[0].membershipTest(membershipKey)){
+        if(! bloomFilters[0].membershipTest(membershipKey)){
             bloomFilters[0].add(membershipKey);
         }
     }
