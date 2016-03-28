@@ -38,9 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created on 1/19/15.
- */
+
 public class SyncOperatorParser {
 
     public static Operator parse(Expression expression, MetaComplexEvent matchingMetaComplexEvent, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors,

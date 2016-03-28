@@ -160,7 +160,7 @@
                             org.apache.axiom.om.*;version="${orbit.version.axiom}",
                             javax.naming.*,
                             org.apache.axis2.*,
-                            javax.jms.*,
+                            javax.jms.*;version="0.0.0",
                             javax.transaction.*,
                             javax.xml.*,
                             org.apache.commons.logging.*;version="${geronimo.jms.version}",
