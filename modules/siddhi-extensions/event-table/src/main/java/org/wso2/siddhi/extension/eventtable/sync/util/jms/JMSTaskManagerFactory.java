@@ -40,7 +40,7 @@ public class JMSTaskManagerFactory {
      * @param name       JMS consumer name
      * @param workerPool Shared thread pool from the Listener
      * @param svc        JNDI context properties and other general properties
-     * @return
+     * @return JMSTaskManager instance
      */
     public static JMSTaskManager createTaskManagerForService(JMSConnectionFactory jcf,
                                                              String name, WorkerPool workerPool,

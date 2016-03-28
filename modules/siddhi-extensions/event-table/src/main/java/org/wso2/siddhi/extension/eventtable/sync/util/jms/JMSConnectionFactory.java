@@ -29,11 +29,9 @@ import javax.naming.NamingException;
 import java.util.Hashtable;
 
 /**
- * Encapsulate a JMS Connection factory definition within an Axis2.xml
- * <p/>
+ * Encapsulate a JMS Connection factory definition within an Axis2.xml  *
  * JMS Connection Factory definitions, allows JNDI properties as well as other service
- * level parameters to be defined, and re-used by each service that binds to it
- * <p/>
+ * level parameters to be defined, and re-used by each service that binds to it       *
  * When used for sending messages out, the JMSConnectionFactory'ies are able to cache
  * a Connection, Session or Producer
  */
@@ -80,6 +78,7 @@ public class JMSConnectionFactory {
      * Digest a JMS CF definition from an axis2.xml 'Parameter' and construct
      *
      * @param parameters the axis2.xml 'Parameter' that defined the JMS CF
+     * @param name JMS Connection name
      */
     public JMSConnectionFactory(Hashtable<String, String> parameters, String name) {
         this.parameters = parameters;
@@ -182,7 +181,7 @@ public class JMSConnectionFactory {
     /**
      * Get the shared Destination - if defined
      *
-     * @return
+     * @return sharedDestination name
      */
     public Destination getSharedDestination() {
         return sharedDestination;

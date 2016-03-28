@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * idle tasks created for it, for message receipt. This will also allow individual tasks to cache
  * the Connection, Session or Consumer as necessary, considering the transactionality required and
  * user preference.
- * <p/>
+ *
  * This also acts as the ExceptionListener for all JMS connections made on behalf of the adapter.
  * Since the ExceptionListener is notified by a JMS provider on a "serious" error, we simply try
  * to re-connect. Thus a connection failure for a single task, will re-initialize the state afresh

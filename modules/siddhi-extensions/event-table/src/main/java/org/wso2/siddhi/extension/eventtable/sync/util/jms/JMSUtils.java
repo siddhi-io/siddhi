@@ -301,7 +301,7 @@ public class JMSUtils extends BaseUtils {
      * @param dest            Destination for which the Consumer is to be created
      * @param messageSelector the message selector to be used if any
      * @return a MessageConsumer for the specified Destination
-     * @throws javax.jms.JMSException
+     * @throws javax.jms.JMSException when jms connection is not succeeded
      */
     public static MessageConsumer createConsumer(Session session, Destination dest,
                                                  String messageSelector)
@@ -320,7 +320,7 @@ public class JMSUtils extends BaseUtils {
      *
      * @param session the JMS Session to use
      * @return a temporary Queue or Topic, depending on the session
-     * @throws javax.jms.JMSException
+     * @throws javax.jms.JMSException when jms connection is not succeeded
      */
     public static Destination createTemporaryDestination(Session session) throws JMSException {
 
@@ -538,6 +538,7 @@ public class JMSUtils extends BaseUtils {
      * @param destinationName name of the destination to be looked up
      * @param destinationType type of the destination to be looked up
      * @return the JMS destination, or null if it does not exist
+     * @throws NamingException when destination lookup fails
      */
     public static Destination lookupDestination(Context context, String destinationName,
                                                 String destinationType) throws NamingException {

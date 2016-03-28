@@ -31,18 +31,17 @@ import java.util.Hashtable;
 /**
  * The revamped JMS Transport listener implementation. Creates {@link JMSTaskManager} instances
  * for each service requesting exposure over JMS, and stops these if they are undeployed / stopped.
- * <p/>
+ *
  * A service indicates a JMS Connection factory definition by name, which would be defined in the
  * JMSListner on the axis2.xml, and this provides a way to reuse common configuration between
  * services, as well as to optimize resources utilized
- * <p/>
+ *
  * If the connection factory name was not specified, it will default to the one named "default"
- * {@see JMSConstants.DEFAULT_CONFAC_NAME}
- * <p/>
+ *
  * If a destination JNDI name is not specified, a service will expect to use a Queue with the same
  * JNDI name as of the service. Additional Parameters allows one to bind to a Topic or specify
  * many more detailed control options. See package documentation for more details
- * <p/>
+ *
  * All Destinations / JMS Administered objects used MUST be pre-created or already available
  */
 public class JMSListener implements Runnable {
@@ -165,8 +164,7 @@ public class JMSListener implements Runnable {
      * When an object implementing interface <code>Runnable</code> is used
      * to create a thread, starting the thread causes the object's
      * <code>run</code> method to be called in that separately executing
-     * thread.
-     * <p/>
+     * thread.       *
      * The general contract of the method <code>run</code> is that it may
      * take any action whatsoever.
      *
