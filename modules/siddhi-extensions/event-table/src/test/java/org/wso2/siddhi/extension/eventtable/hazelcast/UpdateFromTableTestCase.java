@@ -18,7 +18,10 @@
 
 package org.wso2.siddhi.extension.eventtable.hazelcast;
 
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +45,7 @@ public class UpdateFromTableTestCase {
     private int removeEventCount;
     private boolean eventArrived;
     private List<Object[]> inEventsList;
+    private static List<String> instances;
 
     @Before
     public void init() {
@@ -49,6 +53,20 @@ public class UpdateFromTableTestCase {
         removeEventCount = 0;
         eventArrived = false;
         inEventsList = new ArrayList<Object[]>();
+        instances = new ArrayList<String>();
+        for (HazelcastInstance instance : Hazelcast.getAllHazelcastInstances()) {
+            instances.add(instance.getName());
+        }
+    }
+
+    @After
+    public void cleanup() {
+        for (HazelcastInstance instance : Hazelcast.getAllHazelcastInstances()) {
+            if (!instances.contains(instance.getName())) {
+                log.info("shutting down : " + instance.getName());
+                instance.shutdown();
+            }
+        }
     }
 
     @Test
@@ -59,7 +77,7 @@ public class UpdateFromTableTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance')" +
+                "@from(eventtable = 'hazelcast')" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -96,7 +114,7 @@ public class UpdateFromTableTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance')" +
+                "@from(eventtable = 'hazelcast')" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -133,7 +151,7 @@ public class UpdateFromTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance')" +
+                "@from(eventtable = 'hazelcast')" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -206,7 +224,7 @@ public class UpdateFromTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
                 "define stream UpdateStockStream (comp string, vol long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance')" +
+                "@from(eventtable = 'hazelcast')" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -281,7 +299,7 @@ public class UpdateFromTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long, price float); " +
                 "define stream UpdateStockStream (comp string, vol long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance')" +
+                "@from(eventtable = 'hazelcast')" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -355,7 +373,7 @@ public class UpdateFromTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long, price float); " +
                 "define stream UpdateStockStream (comp string, vol long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance')" +
+                "@from(eventtable = 'hazelcast')" +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +

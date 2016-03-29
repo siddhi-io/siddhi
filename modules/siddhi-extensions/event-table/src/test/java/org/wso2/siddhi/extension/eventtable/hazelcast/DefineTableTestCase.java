@@ -24,12 +24,17 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.eventtable.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.annotation.Annotation;
@@ -43,10 +48,38 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefineTableTestCase {
     private static final Logger log = Logger.getLogger(DefineTableTestCase.class);
     private static final long RESULT_WAIT = 500;
+    private static List<String> instances;
+    private AtomicInteger inEventCount = new AtomicInteger(0);
+    private boolean eventArrived;
+    private int removeEventCount;
+    private List<Object[]> inEventsList;
+
+    @Before
+    public void init() {
+        inEventCount.set(0);
+        eventArrived = false;
+        removeEventCount = 0;
+        inEventsList = new ArrayList<Object[]>();
+        instances = new ArrayList<String>();
+        for (HazelcastInstance instance : Hazelcast.getAllHazelcastInstances()) {
+            instances.add(instance.getName());
+        }
+    }
+
+    @After
+    public void cleanup() {
+        for (HazelcastInstance instance : Hazelcast.getAllHazelcastInstances()) {
+            if (!instances.contains(instance.getName())) {
+                log.info("shutting down : " + instance.getName());
+                instance.shutdown();
+            }
+        }
+    }
 
     @Test
     public void testQuery1() throws InterruptedException {
@@ -68,7 +101,7 @@ public class DefineTableTestCase {
                 hciNames.add(hci.getName());
             }
             Assert.assertTrue(hciNames.contains(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName()));
+                    executionPlanRuntime.getName() + ".cseEventStream"));
         } finally {
             executionPlanRuntime.shutdown();
         }
@@ -106,12 +139,12 @@ public class DefineTableTestCase {
                 instanceMap.put(hci.getName(), hci);
             }
             Assert.assertTrue(instanceMap.containsKey(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName()));
+                    executionPlanRuntime.getName() + "." + tableDefinition.getId()));
             HazelcastInstance instance = instanceMap.get(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName());
+                    executionPlanRuntime.getName() + "." + tableDefinition.getId());
             List<StreamEvent> streamEvents = instance.getList(
-                    HazelcastEventTableConstants.HAZELCAST_LIST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + '_' + tableDefinition.getId());
+                    HazelcastEventTableConstants.HAZELCAST_COLLECTION_PREFIX +
+                            executionPlanRuntime.getName() + '.' + tableDefinition.getId());
 
             SiddhiTestHelper.waitForEvents(100, 2, streamEvents, 60000);
             List<Object[]> expected = Arrays.asList(new Object[]{"WSO2", 55.6f}, new Object[]{"IBM", 75.6f});
@@ -141,7 +174,7 @@ public class DefineTableTestCase {
                 hciNames.add(hci.getName());
             }
             Assert.assertTrue(hciNames.contains(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName()));
+                    executionPlanRuntime.getName() + ".EventTable"));
         } finally {
             executionPlanRuntime.shutdown();
         }
@@ -192,7 +225,7 @@ public class DefineTableTestCase {
                 hciNames.add(hci.getName());
             }
             Assert.assertTrue(hciNames.contains(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName()));
+                    executionPlanRuntime.getName() + ".TestEventTable"));
         } finally {
             executionPlanRuntime.shutdown();
         }
@@ -378,10 +411,10 @@ public class DefineTableTestCase {
                 instanceMap.put(hci.getName(), hci);
             }
             Assert.assertTrue(instanceMap.containsKey(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName()));
+                    executionPlanRuntime.getName() + ".EventTable"));
 
             HazelcastInstance instance = instanceMap.get(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName());
+                    executionPlanRuntime.getName() + ".EventTable");
             Assert.assertEquals(clusterName, instance.getConfig().getGroupConfig().getName());
         } finally {
             executionPlanRuntime.shutdown();
@@ -406,10 +439,10 @@ public class DefineTableTestCase {
                 instanceMap.put(hci.getName(), hci);
             }
             Assert.assertTrue(instanceMap.containsKey(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName()));
+                    executionPlanRuntime.getName() + ".EventTable"));
 
             HazelcastInstance instance = instanceMap.get(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName());
+                    executionPlanRuntime.getName() + ".EventTable");
             Assert.assertEquals(clusterName, instance.getConfig().getGroupConfig().getName());
             Assert.assertEquals(clusterPassword, instance.getConfig().getGroupConfig().getPassword());
         } finally {
@@ -423,6 +456,7 @@ public class DefineTableTestCase {
 
         String clusterName = "siddhi_cluster_t19";
         String clusterPassword = "cluster_pw";
+        String collectionName = "siddhi_instance";
 
         Config cfg_1 = new Config();
         cfg_1.getGroupConfig().setName(clusterName).setPassword(clusterPassword);
@@ -449,9 +483,74 @@ public class DefineTableTestCase {
         TableDefinition tableDefinition = TableDefinition.id("StockTable")
                 .annotation(Annotation.annotation("from")
                         .element("eventtable", "hazelcast")
+                        .element("mode", "client")
                         .element("cluster.name", clusterName)
                         .element("cluster.password", clusterPassword)
+                        .element("cluster.collection", collectionName)
                         .element("cluster.addresses", addresses))
+                .attribute("symbol", Attribute.Type.STRING)
+                .attribute("price", Attribute.Type.INT);
+        Query query = Query.query();
+        query.from(InputStream.stream("StockStream"));
+        query.insertInto("StockTable");
+        ExecutionPlan executionPlan = new ExecutionPlan("ep1");
+        executionPlan.addQuery(query);
+        executionPlan.defineStream(streamDefinition);
+        executionPlan.defineTable(tableDefinition);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+        InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f});
+        stockStream.send(new Object[]{"IBM", 75.6f});
+        Thread.sleep(RESULT_WAIT * 4);
+
+        List<StreamEvent> streamEvents = instance_2.getList(collectionName);
+        Assert.assertEquals(2, streamEvents.size());
+        executionPlanRuntime.shutdown();
+    }
+
+
+    @Test
+    public void testQuery20() throws InterruptedException {
+        log.info("testTableDefinition20 - OUT 0");
+
+        String clusterName = "siddhi_cluster_t20";
+        String clusterPassword = "cluster_pw";
+        String collectionName = "hzList";
+
+        Config config_1 = new Config("instance_01");
+        config_1.setProperty("hazelcast.logging.type", "log4j");
+        config_1.getGroupConfig().setName(clusterName);
+        config_1.getGroupConfig().setPassword(clusterPassword);
+        config_1.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+        config_1.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
+        config_1.getNetworkConfig().getJoin().getTcpIpConfig().addMember("localhost");
+        HazelcastInstance instance_1 = Hazelcast.newHazelcastInstance(config_1);
+
+        Config config_2 = new Config("instance_02");
+        config_2.setProperty("hazelcast.logging.type", "log4j");
+        config_2.getGroupConfig().setName(clusterName);
+        config_2.getGroupConfig().setPassword(clusterPassword);
+        config_2.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+        config_2.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
+        config_2.getNetworkConfig().getJoin().getTcpIpConfig().addMember("localhost");
+        HazelcastInstance instance_2 = Hazelcast.newHazelcastInstance(config_2);
+
+        Thread.sleep(RESULT_WAIT);
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        StreamDefinition streamDefinition = StreamDefinition
+                .id("StockStream")
+                .attribute("symbol", Attribute.Type.STRING)
+                .attribute("price", Attribute.Type.INT);
+        TableDefinition tableDefinition = TableDefinition.id("StockTable")
+                .annotation(Annotation.annotation("from")
+                        .element("eventtable", "hazelcast")
+                        .element("cluster.name", clusterName)
+                        .element("cluster.password", clusterPassword)
+                        .element("cluster.collection", collectionName)
+                        .element("cluster.addresses", "localhost"))
                 .attribute("symbol", Attribute.Type.STRING)
                 .attribute("price", Attribute.Type.INT);
         Query query = Query.query();
@@ -467,28 +566,34 @@ public class DefineTableTestCase {
             executionPlanRuntime.start();
             stockStream.send(new Object[]{"WSO2", 55.6f});
             stockStream.send(new Object[]{"IBM", 75.6f});
-            List<StreamEvent> streamEvents = instance_2.getList(
-                    HazelcastEventTableConstants.HAZELCAST_LIST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + '_' + tableDefinition.getId());
 
-            SiddhiTestHelper.waitForEvents(100, 2, streamEvents, 60000);
+            List<StreamEvent> streamEvents_1 = instance_1.getList(collectionName);
+            List<StreamEvent> streamEvents_2 = instance_2.getList(collectionName);
+
+            SiddhiTestHelper.waitForEvents(100, 2, streamEvents_1, 60000);
             List<Object[]> expected = Arrays.asList(new Object[]{"WSO2", 55.6f}, new Object[]{"IBM", 75.6f});
-            List<Object[]> actual = new ArrayList<Object[]>();
-            for (StreamEvent event : streamEvents) {
-                actual.add(event.getOutputData());
+            List<Object[]> actual_1 = new ArrayList<Object[]>();
+            List<Object[]> actual_2 = new ArrayList<Object[]>();
+            for (StreamEvent event : streamEvents_1) {
+                actual_1.add(event.getOutputData());
             }
-            Assert.assertEquals(2, streamEvents.size());
-            Assert.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(actual, expected));
+            for (StreamEvent event : streamEvents_2) {
+                actual_2.add(event.getOutputData());
+            }
+            Assert.assertEquals(2, streamEvents_1.size());
+            Assert.assertEquals(2, streamEvents_2.size());
+            Assert.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(actual_1, expected));
+            Assert.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(actual_2, expected));
         } finally {
             executionPlanRuntime.shutdown();
         }
     }
 
     @Test
-    public void testQuery20() throws InterruptedException {
-        log.info("testTableDefinition20 - OUT 0");
+    public void testQuery21() throws InterruptedException {
+        log.info("testTableDefinition21 - OUT 0");
 
-        String instanceName = "siddhi_instance_t20";
+        String instanceName = "siddhi_instance_t21";
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition streamDefinition = StreamDefinition
                 .id("StockStream")
@@ -496,8 +601,7 @@ public class DefineTableTestCase {
                 .attribute("price", Attribute.Type.INT);
         TableDefinition tableDefinition = TableDefinition.id("StockTable")
                 .annotation(Annotation.annotation("from")
-                        .element("eventtable", "hazelcast")
-                        .element("instance.name", instanceName))
+                        .element("eventtable", "hazelcast"))
                 .attribute("symbol", Attribute.Type.STRING)
                 .attribute("price", Attribute.Type.INT);
         Query query = Query.query();
@@ -518,8 +622,8 @@ public class DefineTableTestCase {
             cfg.setProperty("hazelcast.logging.type", "log4j");
             HazelcastInstance hci = Hazelcast.getOrCreateHazelcastInstance(cfg);
             List<StreamEvent> streamEvents = hci.getList(
-                    HazelcastEventTableConstants.HAZELCAST_LIST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + '_' + tableDefinition.getId());
+                    HazelcastEventTableConstants.HAZELCAST_COLLECTION_PREFIX +
+                            executionPlanRuntime.getName() + '.' + tableDefinition.getId());
 
             SiddhiTestHelper.waitForEvents(100, 2, streamEvents, 60000);
             List<Object[]> expected = Arrays.asList(new Object[]{"WSO2", 55.6f}, new Object[]{"IBM", 75.6f});
@@ -531,6 +635,76 @@ public class DefineTableTestCase {
             Assert.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(actual, expected));
         } finally {
             executionPlanRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void testQuery22() throws InterruptedException {
+        log.info("testTableDefinition22 - OUT 0");
+
+        SiddhiManager siddhiManager1 = new SiddhiManager();
+        String ep1 = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "@from(eventtable = 'hazelcast', cluster.addresses = 'localhost', cluster.collection = 'stock')" +
+                "define table StockTable (symbol string, price float, volume long); " +
+                "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;";
+        ExecutionPlanRuntime executionPlanRuntime1 = siddhiManager1.createExecutionPlanRuntime(ep1);
+
+        SiddhiManager siddhiManager2 = new SiddhiManager();
+        String ep2 = "" +
+                "define stream StockCheckStream (symbol string); " +
+                "@from(eventtable = 'hazelcast', cluster.addresses = 'localhost', cluster.collection = 'stock')" +
+                "define table StockTable (symbol string, price float, volume long); " +
+                "" +
+                "@info(name = 'query1') " +
+                "from StockCheckStream[StockTable.symbol==StockCheckStream.symbol in StockTable] " +
+                "insert into OutStream ;";
+        ExecutionPlanRuntime executionPlanRuntime2 = siddhiManager2.createExecutionPlanRuntime(ep2);
+
+        try {
+            executionPlanRuntime2.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        for (Event event : inEvents) {
+                            inEventsList.add(event.getData());
+                            inEventCount.incrementAndGet();
+                        }
+                        eventArrived = true;
+                    }
+                    if (removeEvents != null) {
+                        removeEventCount = removeEventCount + removeEvents.length;
+                    }
+                    eventArrived = true;
+                }
+            });
+
+            InputHandler stockStream = executionPlanRuntime1.getInputHandler("StockStream");
+            InputHandler stockCheckStream = executionPlanRuntime2.getInputHandler("StockCheckStream");
+            executionPlanRuntime1.start();
+            executionPlanRuntime2.start();
+
+            Thread.sleep(RESULT_WAIT * 10);
+            stockStream.send(new Object[]{"WSO2", 55.6f, 100l});
+            stockStream.send(new Object[]{"IBM", 55.6f, 100l});
+
+            Thread.sleep(RESULT_WAIT * 10);
+            stockCheckStream.send(new Object[]{"IBM"});
+            stockCheckStream.send(new Object[]{"WSO2"});
+
+            List<Object[]> expected = Arrays.asList(new Object[]{"IBM"}, new Object[]{"WSO2"});
+            SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
+            Assert.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
+            Assert.assertEquals("Number of success events", 2, inEventCount.get());
+            Assert.assertEquals("Number of remove events", 0, removeEventCount);
+            Assert.assertEquals("Event arrived", true, eventArrived);
+        } finally {
+            executionPlanRuntime1.shutdown();
+            executionPlanRuntime2.shutdown();
         }
     }
 }

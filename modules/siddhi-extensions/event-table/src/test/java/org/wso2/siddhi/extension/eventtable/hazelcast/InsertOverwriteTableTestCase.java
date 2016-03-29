@@ -18,11 +18,10 @@
 
 package org.wso2.siddhi.extension.eventtable.hazelcast;
 
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 import org.apache.log4j.Logger;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -32,6 +31,8 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.eventtable.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InsertOverwriteTableTestCase {
@@ -40,12 +41,27 @@ public class InsertOverwriteTableTestCase {
     private AtomicInteger inEventCount = new AtomicInteger(0);
     private AtomicInteger removeEventCount = new AtomicInteger(0);
     private boolean eventArrived;
+    private static List<String> instances;
 
     @Before
     public void init() {
         inEventCount.set(0);
         removeEventCount.set(0);
         eventArrived = false;
+        instances = new ArrayList<String>();
+        for (HazelcastInstance instance : Hazelcast.getAllHazelcastInstances()) {
+            instances.add(instance.getName());
+        }
+    }
+
+    @After
+    public void cleanup() {
+        for (HazelcastInstance instance : Hazelcast.getAllHazelcastInstances()) {
+            if (!instances.contains(instance.getName())) {
+                log.info("shutting down : " + instance.getName());
+                instance.shutdown();
+            }
+        }
     }
 
     @Test
@@ -56,7 +72,7 @@ public class InsertOverwriteTableTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
+                "@from(eventtable = 'hazelcast') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -91,7 +107,7 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
+                "@from(eventtable = 'hazelcast') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query2') " +
@@ -123,7 +139,7 @@ public class InsertOverwriteTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
                 "define stream UpdateStockStream (symbol string, price float, volume long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
+                "@from(eventtable = 'hazelcast') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -201,7 +217,7 @@ public class InsertOverwriteTableTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
+                "@from(eventtable = 'hazelcast') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query2') " +
@@ -275,7 +291,7 @@ public class InsertOverwriteTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
                 "define stream UpdateStockStream (comp string, vol long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
+                "@from(eventtable = 'hazelcast') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -329,7 +345,7 @@ public class InsertOverwriteTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long); " +
                 "define stream UpdateStockStream (comp string, vol long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
+                "@from(eventtable = 'hazelcast') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -412,7 +428,7 @@ public class InsertOverwriteTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long, price float); " +
                 "define stream UpdateStockStream (comp string, vol long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
+                "@from(eventtable = 'hazelcast') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -489,7 +505,7 @@ public class InsertOverwriteTableTestCase {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long, price float); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
+                "@from(eventtable = 'hazelcast') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query2') " +
@@ -562,7 +578,7 @@ public class InsertOverwriteTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long, price float); " +
                 "define stream UpdateStockStream (comp string, vol long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
+                "@from(eventtable = 'hazelcast') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -641,7 +657,7 @@ public class InsertOverwriteTableTestCase {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream CheckStockStream (symbol string, volume long, price float); " +
                 "define stream UpdateStockStream (comp string, vol long); " +
-                "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
+                "@from(eventtable = 'hazelcast') " +
                 "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
