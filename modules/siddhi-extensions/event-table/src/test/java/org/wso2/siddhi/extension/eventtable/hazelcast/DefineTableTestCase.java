@@ -21,8 +21,6 @@ package org.wso2.siddhi.extension.eventtable.hazelcast;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Member;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
@@ -101,7 +99,7 @@ public class DefineTableTestCase {
                 hciNames.add(hci.getName());
             }
             Assert.assertTrue(hciNames.contains(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + ".cseEventStream"));
+                    executionPlanRuntime.getName()));
         } finally {
             executionPlanRuntime.shutdown();
         }
@@ -139,9 +137,9 @@ public class DefineTableTestCase {
                 instanceMap.put(hci.getName(), hci);
             }
             Assert.assertTrue(instanceMap.containsKey(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + "." + tableDefinition.getId()));
+                    executionPlanRuntime.getName()));
             HazelcastInstance instance = instanceMap.get(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + "." + tableDefinition.getId());
+                    executionPlanRuntime.getName());
             List<StreamEvent> streamEvents = instance.getList(
                     HazelcastEventTableConstants.HAZELCAST_COLLECTION_PREFIX +
                             executionPlanRuntime.getName() + '.' + tableDefinition.getId());
@@ -174,7 +172,7 @@ public class DefineTableTestCase {
                 hciNames.add(hci.getName());
             }
             Assert.assertTrue(hciNames.contains(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + ".EventTable"));
+                    executionPlanRuntime.getName()));
         } finally {
             executionPlanRuntime.shutdown();
         }
@@ -225,7 +223,7 @@ public class DefineTableTestCase {
                 hciNames.add(hci.getName());
             }
             Assert.assertTrue(hciNames.contains(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + ".TestEventTable"));
+                    executionPlanRuntime.getName()));
         } finally {
             executionPlanRuntime.shutdown();
         }
@@ -411,10 +409,10 @@ public class DefineTableTestCase {
                 instanceMap.put(hci.getName(), hci);
             }
             Assert.assertTrue(instanceMap.containsKey(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + ".EventTable"));
+                    executionPlanRuntime.getName()));
 
             HazelcastInstance instance = instanceMap.get(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + ".EventTable");
+                    executionPlanRuntime.getName());
             Assert.assertEquals(clusterName, instance.getConfig().getGroupConfig().getName());
         } finally {
             executionPlanRuntime.shutdown();
@@ -439,10 +437,10 @@ public class DefineTableTestCase {
                 instanceMap.put(hci.getName(), hci);
             }
             Assert.assertTrue(instanceMap.containsKey(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + ".EventTable"));
+                    executionPlanRuntime.getName()));
 
             HazelcastInstance instance = instanceMap.get(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                    executionPlanRuntime.getName() + ".EventTable");
+                    executionPlanRuntime.getName());
             Assert.assertEquals(clusterName, instance.getConfig().getGroupConfig().getName());
             Assert.assertEquals(clusterPassword, instance.getConfig().getGroupConfig().getPassword());
         } finally {
@@ -456,24 +454,14 @@ public class DefineTableTestCase {
 
         String clusterName = "siddhi_cluster_t19";
         String clusterPassword = "cluster_pw";
-        String collectionName = "siddhi_instance";
+        String collectionName = "siddhi_collection";
 
-        Config cfg_1 = new Config();
+        Config cfg_1 = new Config("instance_1");
         cfg_1.getGroupConfig().setName(clusterName).setPassword(clusterPassword);
         cfg_1.setProperty("hazelcast.logging.type", "log4j");
+        cfg_1.setProperty("hazelcast.socket.keep.alive", "true");
         HazelcastInstance instance_1 = Hazelcast.newHazelcastInstance(cfg_1);
-
-        Config cfg_2 = new Config();
-        cfg_2.getGroupConfig().setName(clusterName).setPassword(clusterPassword);
-        cfg_2.setProperty("hazelcast.logging.type", "log4j");
-        HazelcastInstance instance_2 = Hazelcast.newHazelcastInstance(cfg_2);
-
-        StringBuilder sb = new StringBuilder();
-        for (Member member : instance_2.getCluster().getMembers()) {
-            sb.append(member.getSocketAddress()).append(',');
-        }
-        String addresses = StringUtils.replace(sb.toString(), "/", "");
-        addresses = StringUtils.removeEnd(addresses, ",");
+        String address = instance_1.getCluster().getLocalMember().getSocketAddress().toString().replace("/", "");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         StreamDefinition streamDefinition = StreamDefinition
@@ -483,11 +471,10 @@ public class DefineTableTestCase {
         TableDefinition tableDefinition = TableDefinition.id("StockTable")
                 .annotation(Annotation.annotation("from")
                         .element("eventtable", "hazelcast")
-                        .element("mode", "client")
                         .element("cluster.name", clusterName)
                         .element("cluster.password", clusterPassword)
-                        .element("cluster.collection", collectionName)
-                        .element("cluster.addresses", addresses))
+                        .element("collection.name", collectionName)
+                        .element("cluster.addresses", address))
                 .attribute("symbol", Attribute.Type.STRING)
                 .attribute("price", Attribute.Type.INT);
         Query query = Query.query();
@@ -505,7 +492,8 @@ public class DefineTableTestCase {
         stockStream.send(new Object[]{"IBM", 75.6f});
         Thread.sleep(RESULT_WAIT * 4);
 
-        List<StreamEvent> streamEvents = instance_2.getList(collectionName);
+        List<StreamEvent> streamEvents = instance_1.getList(collectionName);
+        SiddhiTestHelper.waitForEvents(100, 2, streamEvents, 60000);
         Assert.assertEquals(2, streamEvents.size());
         executionPlanRuntime.shutdown();
     }
@@ -521,6 +509,7 @@ public class DefineTableTestCase {
 
         Config config_1 = new Config("instance_01");
         config_1.setProperty("hazelcast.logging.type", "log4j");
+        config_1.setProperty("hazelcast.socket.keep.alive", "true");
         config_1.getGroupConfig().setName(clusterName);
         config_1.getGroupConfig().setPassword(clusterPassword);
         config_1.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
@@ -530,6 +519,7 @@ public class DefineTableTestCase {
 
         Config config_2 = new Config("instance_02");
         config_2.setProperty("hazelcast.logging.type", "log4j");
+        config_2.setProperty("hazelcast.socket.keep.alive", "true");
         config_2.getGroupConfig().setName(clusterName);
         config_2.getGroupConfig().setPassword(clusterPassword);
         config_2.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
@@ -549,8 +539,8 @@ public class DefineTableTestCase {
                         .element("eventtable", "hazelcast")
                         .element("cluster.name", clusterName)
                         .element("cluster.password", clusterPassword)
-                        .element("cluster.collection", collectionName)
-                        .element("cluster.addresses", "localhost"))
+                        .element("collection.name", collectionName)
+                        .element("well.known.addresses", "localhost"))
                 .attribute("symbol", Attribute.Type.STRING)
                 .attribute("price", Attribute.Type.INT);
         Query query = Query.query();
@@ -645,7 +635,8 @@ public class DefineTableTestCase {
         SiddhiManager siddhiManager1 = new SiddhiManager();
         String ep1 = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@from(eventtable = 'hazelcast', cluster.addresses = 'localhost', cluster.collection = 'stock')" +
+                "@from(eventtable = 'hazelcast', well.known.addresses = 'localhost', collection.name = 'stock')" +
+                "@IndexBy('symbol') " +
                 "define table StockTable (symbol string, price float, volume long); " +
                 "" +
                 "@info(name = 'query1') " +
@@ -656,7 +647,8 @@ public class DefineTableTestCase {
         SiddhiManager siddhiManager2 = new SiddhiManager();
         String ep2 = "" +
                 "define stream StockCheckStream (symbol string); " +
-                "@from(eventtable = 'hazelcast', cluster.addresses = 'localhost', cluster.collection = 'stock')" +
+                "@from(eventtable = 'hazelcast', well.known.addresses = 'localhost', collection.name = 'stock')" +
+                "@IndexBy('symbol') " +
                 "define table StockTable (symbol string, price float, volume long); " +
                 "" +
                 "@info(name = 'query1') " +
@@ -688,11 +680,10 @@ public class DefineTableTestCase {
             executionPlanRuntime1.start();
             executionPlanRuntime2.start();
 
-            Thread.sleep(RESULT_WAIT * 10);
             stockStream.send(new Object[]{"WSO2", 55.6f, 100l});
             stockStream.send(new Object[]{"IBM", 55.6f, 100l});
 
-            Thread.sleep(RESULT_WAIT * 10);
+            Thread.sleep(RESULT_WAIT);
             stockCheckStream.send(new Object[]{"IBM"});
             stockCheckStream.send(new Object[]{"WSO2"});
 
