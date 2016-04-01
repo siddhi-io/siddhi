@@ -49,7 +49,7 @@ public class JMSMessageListener implements MessageListener {
 
             if (message != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Event received in JMS Event Adaptor - " + message);
+                    log.debug("Event received in JMS Event Receiver - " + message);
                 } else if (message instanceof MapMessage) {
                     MapMessage mapMessage = (MapMessage) message;
                     Map<String, Object> map = new HashMap<String, Object>();
@@ -74,7 +74,7 @@ public class JMSMessageListener implements MessageListener {
                     log.warn("Event dropped due to unsupported message type");
                 }
             } else {
-                log.warn("Dropping the empty/null event received through jms adaptor");
+                log.warn("Dropping the empty/null event received through jms receiver");
             }
         } catch (JMSException e) {
             log.error(e);
