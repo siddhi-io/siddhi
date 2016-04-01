@@ -25,13 +25,12 @@ public final class HazelcastEventTableConstants {
 
     public static final String HAZELCAST_INSTANCE_PREFIX = "org.wso2.siddhi.hazelcast.cluster.instance.";
     public static final String HAZELCAST_COLLECTION_PREFIX = "org.wso2.siddhi.hazelcast.cluster.collection.";
-    public static final String HAZELCAST_CLIENT_MODE = "client";
 
-    public static final String ANNOTATION_INSTANCE_MODE = "mode";
-    public static final String ANNOTATION_ELEMENT_CLUSTER_NAME = "cluster.name";
-    public static final String ANNOTATION_ELEMENT_CLUSTER_PASSWORD = "cluster.password";
-    public static final String ANNOTATION_ELEMENT_CLUSTER_ADDRESSES = "cluster.addresses";
-    public static final String ANNOTATION_ELEMENT_CLUSTER_COLLECTION = "cluster.collection";
+    public static final String ANNOTATION_ELEMENT_HAZELCAST_CLUSTER_NAME = "cluster.name";
+    public static final String ANNOTATION_ELEMENT_HAZELCAST_CLUSTER_PASSWORD = "cluster.password";
+    public static final String ANNOTATION_ELEMENT_HAZELCAST_CLUSTER_ADDRESSES = "cluster.addresses";
+    public static final String ANNOTATION_ELEMENT_HAZELCAST_WELL_KNOWN_ADDRESSES = "well.known.addresses";
+    public static final String ANNOTATION_ELEMENT_HAZELCAST_CLUSTER_COLLECTION = "collection.name";
 
     public static final int STREAM_EVENT_POOL_SIZE = 10;
 }

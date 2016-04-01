@@ -85,18 +85,20 @@ public class HazelcastEventTable implements EventTable {
         Annotation fromAnnotation = AnnotationHelper.getAnnotation(
                 SiddhiConstants.ANNOTATION_FROM, tableDefinition.getAnnotations());
         String clusterName = fromAnnotation.getElement(
-                HazelcastEventTableConstants.ANNOTATION_ELEMENT_CLUSTER_NAME);
-        String mode = fromAnnotation.getElement(
-                HazelcastEventTableConstants.ANNOTATION_INSTANCE_MODE);
+                HazelcastEventTableConstants.ANNOTATION_ELEMENT_HAZELCAST_CLUSTER_NAME);
         String clusterPassword = fromAnnotation.getElement(
-                HazelcastEventTableConstants.ANNOTATION_ELEMENT_CLUSTER_PASSWORD);
-        String clusterAddresses = fromAnnotation.getElement(
-                HazelcastEventTableConstants.ANNOTATION_ELEMENT_CLUSTER_ADDRESSES);
+                HazelcastEventTableConstants.ANNOTATION_ELEMENT_HAZELCAST_CLUSTER_PASSWORD);
+        String hosts = fromAnnotation.getElement(
+                HazelcastEventTableConstants.ANNOTATION_ELEMENT_HAZELCAST_CLUSTER_ADDRESSES);
         String collectionName = fromAnnotation.getElement(
-                HazelcastEventTableConstants.ANNOTATION_ELEMENT_CLUSTER_COLLECTION);
+                HazelcastEventTableConstants.ANNOTATION_ELEMENT_HAZELCAST_CLUSTER_COLLECTION);
         Annotation annotation = AnnotationHelper.getAnnotation(
                 SiddhiConstants.ANNOTATION_INDEX_BY, tableDefinition.getAnnotations());
-        boolean serverMode = !HazelcastEventTableConstants.HAZELCAST_CLIENT_MODE.equalsIgnoreCase(mode);
+        boolean serverMode = (hosts == null || hosts.isEmpty());
+        if (serverMode) {
+            hosts = fromAnnotation.getElement(
+                    HazelcastEventTableConstants.ANNOTATION_ELEMENT_HAZELCAST_WELL_KNOWN_ADDRESSES);
+        }
         if (collectionName == null || collectionName.isEmpty()) {
             collectionName = HazelcastEventTableConstants.HAZELCAST_COLLECTION_PREFIX +
                     executionPlanContext.getName() + '.' + tableDefinition.getId();
@@ -106,7 +108,7 @@ public class HazelcastEventTable implements EventTable {
         for (Attribute attribute : tableDefinition.getAttributeList()) {
             metaStreamEvent.addOutputData(attribute);
         }
-        HazelcastInstance hzInstance = getHazelcastInstance(serverMode, clusterName, clusterPassword, clusterAddresses);
+        HazelcastInstance hzInstance = getHazelcastInstance(serverMode, clusterName, clusterPassword, hosts);
 
         if (annotation != null) {
             if (annotation.getElements().size() != 1) {
@@ -144,7 +146,7 @@ public class HazelcastEventTable implements EventTable {
                 Config config = new Config();
                 config.setProperty("hazelcast.logging.type", "log4j");
                 config.setInstanceName(HazelcastEventTableConstants.HAZELCAST_INSTANCE_PREFIX +
-                        executionPlanContext.getName() + "." + tableDefinition.getId());
+                        executionPlanContext.getName());
                 if (groupName != null && !groupName.isEmpty()) {
                     config.getGroupConfig().setName(groupName);
                 }
