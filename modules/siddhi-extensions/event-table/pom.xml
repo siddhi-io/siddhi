@@ -160,7 +160,6 @@
                             org.apache.axiom.om.*;version="${orbit.version.axiom}",
                             javax.naming.*,
                             org.apache.axis2.*,
-                            javax.jms.*;version="0.0.0",
                             javax.transaction.*,
                             javax.xml.*,
                             org.apache.commons.logging.*;version="${geronimo.jms.version}",
@@ -178,7 +177,7 @@
                             javax.sql,
                             javax.xml.bind,
                             javax.xml.bind.annotation,
-                            <!--*;resolution:=optional-->
+                            *;resolution:=optional
                         </Import-Package>
                     </instructions>
                 </configuration>
