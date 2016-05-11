@@ -401,7 +401,7 @@
     </build>
 
     <properties>
-        <siddhi.version>3.0.3</siddhi.version>
+        <siddhi.version>3.0.6-SNAPSHOT</siddhi.version>
         <junit.version>4.10</junit.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
@@ -409,7 +409,7 @@
         <mvel2.version>2.2.1.Final</mvel2.version>
         <antlr.runtime.version>4.5.1</antlr.runtime.version>
         <disruptor.version>3.3.2.wso2v2</disruptor.version>
-        <guava.version>15.0</guava.version>
+        <guava.version>19.0</guava.version>
         <scala.version>2.11.0</scala.version>
         <scalascriptengine.version>1.3.10</scalascriptengine.version>
         <geocoder.version>0.16_1</geocoder.version>
