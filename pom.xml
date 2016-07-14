@@ -401,7 +401,7 @@
     </build>
 
     <properties>
-        <siddhi.version>3.1.0</siddhi.version>
+        <siddhi.version>3.1.1-SNAPSHOT</siddhi.version>
         <junit.version>4.10</junit.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
