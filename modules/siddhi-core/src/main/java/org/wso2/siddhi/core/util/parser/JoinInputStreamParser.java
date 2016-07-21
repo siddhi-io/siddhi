@@ -95,10 +95,10 @@ public class JoinInputStreamParser {
                     rightMetaStreamEvent.setTableEvent(true);
                 }
             }
-            leftProcessStreamReceiver = new ProcessStreamReceiver(leftInputStreamId, latencyTracker);
+            leftProcessStreamReceiver = new ProcessStreamReceiver(leftInputStreamId, latencyTracker, queryName);
             leftProcessStreamReceiver.setBatchProcessingAllowed(leftMetaStreamEvent.isWindowEvent());
 
-            rightProcessStreamReceiver = new ProcessStreamReceiver(rightInputStreamId, latencyTracker);
+            rightProcessStreamReceiver = new ProcessStreamReceiver(rightInputStreamId, latencyTracker, queryName);
             rightProcessStreamReceiver.setBatchProcessingAllowed(rightMetaStreamEvent.isWindowEvent());
 
             if (leftMetaStreamEvent.isTableEvent() && rightMetaStreamEvent.isTableEvent()) {
@@ -108,11 +108,11 @@ public class JoinInputStreamParser {
             if (windowDefinitionMap.containsKey(joinInputStream.getAllStreamIds().get(0))) {
                 leftMetaStreamEvent.setWindowEvent(true);
                 rightMetaStreamEvent.setWindowEvent(true);
-                rightProcessStreamReceiver = new MultiProcessStreamReceiver(joinInputStream.getAllStreamIds().get(0), 1, latencyTracker);
+                rightProcessStreamReceiver = new MultiProcessStreamReceiver(joinInputStream.getAllStreamIds().get(0), 1, latencyTracker, queryName);
                 rightProcessStreamReceiver.setBatchProcessingAllowed(true);
                 leftProcessStreamReceiver = rightProcessStreamReceiver;
             } else if (streamDefinitionMap.containsKey(joinInputStream.getAllStreamIds().get(0))) {
-                rightProcessStreamReceiver = new MultiProcessStreamReceiver(joinInputStream.getAllStreamIds().get(0), 2, latencyTracker);
+                rightProcessStreamReceiver = new MultiProcessStreamReceiver(joinInputStream.getAllStreamIds().get(0), 2, latencyTracker, queryName);
                 leftProcessStreamReceiver = rightProcessStreamReceiver;
             } else {
                 throw new ExecutionPlanCreationException("Input of join is from static source " + leftInputStreamId + " and " + rightInputStreamId);

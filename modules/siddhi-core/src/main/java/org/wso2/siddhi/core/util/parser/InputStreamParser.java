@@ -60,7 +60,7 @@ public class InputStreamParser {
             SingleInputStream singleInputStream = (SingleInputStream) inputStream;
             EventWindow eventWindow = eventWindowMap.get(singleInputStream.getStreamId());
             boolean batchProcessingAllowed = eventWindow != null;      // If stream is from window, allow batch processing
-            ProcessStreamReceiver processStreamReceiver = new ProcessStreamReceiver(singleInputStream.getStreamId(), latencyTracker);
+            ProcessStreamReceiver processStreamReceiver = new ProcessStreamReceiver(singleInputStream.getStreamId(), latencyTracker,queryName);
             processStreamReceiver.setBatchProcessingAllowed(batchProcessingAllowed);
             return SingleInputStreamParser.parseInputStream((SingleInputStream) inputStream,
                     executionPlanContext, executors, streamDefinitionMap, null, windowDefinitionMap, eventTableMap, new MetaStreamEvent(), processStreamReceiver, true, outputExpectsExpiredEvents,queryName);

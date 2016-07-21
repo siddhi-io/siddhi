@@ -61,15 +61,15 @@ public class StateInputStreamParser {
             int streamCount = stateInputStream.getStreamCount(streamId);
             if (streamCount == 1) {
                 if (stateInputStream.getStateType() == StateInputStream.Type.SEQUENCE) {
-                    processStreamReceiverMap.put(streamId, new SequenceSingleProcessStreamReceiver(streamId, stateStreamRuntime, defaultLockKey, latencyTracker));
+                    processStreamReceiverMap.put(streamId, new SequenceSingleProcessStreamReceiver(streamId, stateStreamRuntime, defaultLockKey, latencyTracker,queryName));
                 } else {
-                    processStreamReceiverMap.put(streamId, new PatternSingleProcessStreamReceiver(streamId, defaultLockKey, latencyTracker));
+                    processStreamReceiverMap.put(streamId, new PatternSingleProcessStreamReceiver(streamId, defaultLockKey, latencyTracker, queryName));
                 }
             } else {
                 if (stateInputStream.getStateType() == StateInputStream.Type.SEQUENCE) {
-                    processStreamReceiverMap.put(streamId, new SequenceMultiProcessStreamReceiver(streamId, streamCount, stateStreamRuntime, latencyTracker));
+                    processStreamReceiverMap.put(streamId, new SequenceMultiProcessStreamReceiver(streamId, streamCount, stateStreamRuntime, latencyTracker, queryName));
                 } else {
-                    processStreamReceiverMap.put(streamId, new PatternMultiProcessStreamReceiver(streamId, streamCount, latencyTracker));
+                    processStreamReceiverMap.put(streamId, new PatternMultiProcessStreamReceiver(streamId, streamCount, latencyTracker, queryName));
                 }
             }
         }

@@ -155,7 +155,7 @@ public class QueryRuntime {
             queryRuntime.outputCallback = this.outputCallback;
         } else {
             OutputCallback clonedQueryOutputCallback = OutputParser.constructOutputCallback(query.getOutputStream(), key,
-                    localStreamJunctionMap, outputStreamDefinition, executionPlanContext);
+                    localStreamJunctionMap, outputStreamDefinition, executionPlanContext,queryId);
             queryRuntime.outputRateLimiter.setOutputCallback(clonedQueryOutputCallback);
             queryRuntime.outputCallback = clonedQueryOutputCallback;
         }

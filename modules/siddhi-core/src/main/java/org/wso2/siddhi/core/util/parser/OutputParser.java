@@ -56,7 +56,7 @@ public class OutputParser {
 
 
     public static OutputCallback constructOutputCallback(OutputStream outStream, StreamDefinition outputStreamDefinition,
-                                                         Map<String, EventTable> eventTableMap, Map<String, EventWindow> eventWindowMap, ExecutionPlanContext executionPlanContext, boolean convertToStreamEvent) {
+                                                         Map<String, EventTable> eventTableMap, Map<String, EventWindow> eventWindowMap, ExecutionPlanContext executionPlanContext, boolean convertToStreamEvent,String queryName) {
         String id = outStream.getId();
         EventTable eventTable = eventTableMap.get(id);
         EventWindow eventWindow = eventWindowMap.get(id);
@@ -87,7 +87,7 @@ public class OutputParser {
                 DefinitionParserHelper.validateOutputStream(outputStreamDefinition, eventTable.getTableDefinition());
                 return new InsertIntoTableCallback(eventTable, outputStreamDefinition, convertToStreamEvent, streamEventPool, streamEventConvertor);
             } else {
-                return new InsertIntoStreamCallback(outputStreamDefinition);
+                return new InsertIntoStreamCallback(outputStreamDefinition,queryName);
             }
         } else if (outStream instanceof DeleteStream || outStream instanceof UpdateStream || outStream instanceof InsertOverwriteStream) {
             if (eventTable != null) {
@@ -154,7 +154,7 @@ public class OutputParser {
     public static OutputCallback constructOutputCallback(OutputStream outStream, String key,
                                                          ConcurrentMap<String, StreamJunction> streamJunctionMap,
                                                          StreamDefinition outputStreamDefinition,
-                                                         ExecutionPlanContext executionPlanContext) {
+                                                         ExecutionPlanContext executionPlanContext, String queryName) {
         String id = outStream.getId();
         //Construct CallBack
         if (outStream instanceof InsertIntoStream) {
@@ -165,7 +165,7 @@ public class OutputParser {
                         executionPlanContext.getBufferSize(), executionPlanContext);
                 streamJunctionMap.putIfAbsent(id + key, outputStreamJunction);
             }
-            InsertIntoStreamCallback insertIntoStreamCallback = new InsertIntoStreamCallback(outputStreamDefinition);
+            InsertIntoStreamCallback insertIntoStreamCallback = new InsertIntoStreamCallback(outputStreamDefinition, queryName);
             insertIntoStreamCallback.init(streamJunctionMap.get(id + key));
             return insertIntoStreamCallback;
 

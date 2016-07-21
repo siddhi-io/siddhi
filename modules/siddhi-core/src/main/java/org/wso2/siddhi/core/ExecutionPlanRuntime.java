@@ -90,6 +90,8 @@ public class ExecutionPlanRuntime {
                     .createMemoryUsageTracker(executionPlanContext.getStatisticsManager());
             monitorQueryMemoryUsage();
         }
+        siddhiBreakPoint = new SiddhiBreakPoint();
+        siddhiDebugger = new SiddhiDebugger(siddhiBreakPoint,executionPlanContext);
     }
 
     public String getName() {
