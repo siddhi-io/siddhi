@@ -37,19 +37,21 @@ public class AllPerTimeOutputRateLimiter extends OutputRateLimiter implements Sc
     private Scheduler scheduler;
     private ComplexEventChunk<ComplexEvent> allComplexEventChunk;
     private long scheduledTime;
+    private String queryName;
 
     static final Logger log = Logger.getLogger(AllPerTimeOutputRateLimiter.class);
 
-    public AllPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService) {
+    public AllPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService,String queryName) {
         this.id = id;
         this.value = value;
+        this.queryName=queryName;
         this.scheduledExecutorService = scheduledExecutorService;
         allComplexEventChunk = new ComplexEventChunk<ComplexEvent>(false);
     }
 
     @Override
     public OutputRateLimiter clone(String key) {
-        AllPerTimeOutputRateLimiter instance = new AllPerTimeOutputRateLimiter(id + key, value, scheduledExecutorService);
+        AllPerTimeOutputRateLimiter instance = new AllPerTimeOutputRateLimiter(id + key, value, scheduledExecutorService,queryName);
         instance.setLatencyTracker(latencyTracker);
         return instance;
     }
@@ -89,7 +91,7 @@ public class AllPerTimeOutputRateLimiter extends OutputRateLimiter implements Sc
     public void start() {
         scheduler = new Scheduler(scheduledExecutorService, this, executionPlanContext);
         scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
-        scheduler.init(lockWrapper);
+        scheduler.init(lockWrapper,queryName);
         long currentTime = System.currentTimeMillis();
         scheduledTime = currentTime + value;
         scheduler.notifyAt(scheduledTime);

@@ -42,7 +42,6 @@ import org.wso2.siddhi.core.util.collection.UpdateAttributeMapper;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
-import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.extension.eventtable.hazelcast.HazelcastCollectionEventHolder;
 import org.wso2.siddhi.extension.eventtable.hazelcast.HazelcastEventTableConstants;
 import org.wso2.siddhi.extension.eventtable.hazelcast.HazelcastOperatorParser;
@@ -222,7 +221,7 @@ public class HazelcastEventTable implements EventTable {
                                   List<VariableExpressionExecutor> variableExpressionExecutors,
                                   Map<String, EventTable> eventTableMap) {
         return HazelcastOperatorParser.constructOperator(eventHolder, expression, matchingMetaStateHolder,
-                executionPlanContext, variableExpressionExecutors, eventTableMap);
+                executionPlanContext, variableExpressionExecutors, eventTableMap,tableDefinition.getId());
     }
 
 
@@ -232,6 +231,6 @@ public class HazelcastEventTable implements EventTable {
                                       List<VariableExpressionExecutor> variableExpressionExecutors,
                                       Map<String, EventTable> eventTableMap) {
         return HazelcastOperatorParser.constructOperator(eventHolder, expression, matchingMetaStateHolder,
-                executionPlanContext, variableExpressionExecutors, eventTableMap);
+                executionPlanContext, variableExpressionExecutors, eventTableMap,tableDefinition.getId());
     }
 }

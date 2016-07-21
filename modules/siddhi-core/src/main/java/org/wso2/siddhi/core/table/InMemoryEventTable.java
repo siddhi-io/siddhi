@@ -67,7 +67,7 @@ public class InMemoryEventTable implements EventTable, Snapshotable {
         if (elementId == null) {
             elementId = executionPlanContext.getElementIdGenerator().createNewId();
         }
-        executionPlanContext.getSnapshotService().addSnapshotable(this);
+        executionPlanContext.getSnapshotService().addSnapshotable(tableDefinition.getId(), this);
     }
 
     @Override
@@ -151,7 +151,7 @@ public class InMemoryEventTable implements EventTable, Snapshotable {
                                   List<VariableExpressionExecutor> variableExpressionExecutors,
                                   Map<String, EventTable> eventTableMap) {
         return OperatorParser.constructOperator(eventHolder, expression, matchingMetaStateHolder,
-                executionPlanContext, variableExpressionExecutors, eventTableMap);
+                executionPlanContext, variableExpressionExecutors, eventTableMap,tableDefinition.getId());
     }
 
 
@@ -161,7 +161,7 @@ public class InMemoryEventTable implements EventTable, Snapshotable {
                                       List<VariableExpressionExecutor> variableExpressionExecutors,
                                       Map<String, EventTable> eventTableMap) {
         return OperatorParser.constructOperator(eventHolder, expression, matchingMetaStateHolder,
-                executionPlanContext, variableExpressionExecutors, eventTableMap);
+                executionPlanContext, variableExpressionExecutors, eventTableMap,tableDefinition.getId());
     }
 
 

@@ -32,8 +32,8 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
 
     public GroupByAggregationAttributeExecutor(AttributeAggregator attributeAggregator,
                                                ExpressionExecutor[] attributeExpressionExecutors,
-                                               ExecutionPlanContext executionPlanContext) {
-        super(attributeAggregator, attributeExpressionExecutors, executionPlanContext);
+                                               ExecutionPlanContext executionPlanContext,String queryName) {
+        super(attributeAggregator, attributeExpressionExecutors, executionPlanContext,queryName);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
     }
 
     public ExpressionExecutor cloneExecutor(String key) {
-        return new GroupByAggregationAttributeExecutor(attributeAggregator.cloneAggregator(key), attributeExpressionExecutors, executionPlanContext);
+        return new GroupByAggregationAttributeExecutor(attributeAggregator.cloneAggregator(key), attributeExpressionExecutors, executionPlanContext, queryName);
     }
 
 

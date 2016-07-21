@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.core.query.output.callback;
 
+import org.wso2.siddhi.core.debugger.SiddhiBreakPoint;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.stream.StreamJunction;
@@ -25,6 +26,7 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 public class InsertIntoStreamCallback extends OutputCallback {
     private StreamDefinition outputStreamDefinition;
     private StreamJunction.Publisher publisher;
+    private SiddhiBreakPoint siddhiBreakPoint;
 
     public InsertIntoStreamCallback(StreamDefinition outputStreamDefinition) {
         this.outputStreamDefinition = outputStreamDefinition;
@@ -32,6 +34,9 @@ public class InsertIntoStreamCallback extends OutputCallback {
 
     public void init(StreamJunction outputStreamJunction) {
         this.publisher = outputStreamJunction.constructPublisher();
+    }
+    public void setSiddhiBreakPoint(SiddhiBreakPoint siddhiBreakPoint) {
+        this.siddhiBreakPoint = siddhiBreakPoint;
     }
 
     @Override

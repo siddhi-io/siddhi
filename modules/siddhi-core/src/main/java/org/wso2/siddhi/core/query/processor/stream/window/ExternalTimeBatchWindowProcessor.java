@@ -391,7 +391,7 @@ public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements
             expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
             storeExpiredEvents = true;
         }
-        return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap);
+        return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap,queryName);
     }
 
     @Override

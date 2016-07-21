@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.core.query.input;
 
+import org.wso2.siddhi.core.debugger.SiddhiBreakPoint;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.Event;
@@ -47,6 +48,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     protected LockWrapper lockWrapper;
     protected ComplexEventChunk<StreamEvent> batchingStreamEventChunk = new ComplexEventChunk<StreamEvent>(false);
     protected boolean batchProcessingAllowed;
+    private SiddhiBreakPoint siddhiBreakPoint;
 
     public ProcessStreamReceiver(String streamId, LatencyTracker latencyTracker) {
         this.streamId = streamId;
@@ -63,7 +65,9 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         processStreamReceiver.batchProcessingAllowed = this.batchProcessingAllowed;
         return processStreamReceiver;
     }
-
+    public void setSiddhiBreakPoint(SiddhiBreakPoint siddhiBreakPoint) {
+        this.siddhiBreakPoint = siddhiBreakPoint;
+    }
     private void process(ComplexEventChunk<StreamEvent> streamEventChunk) {
         if(lockWrapper !=null) {
             lockWrapper.lock();

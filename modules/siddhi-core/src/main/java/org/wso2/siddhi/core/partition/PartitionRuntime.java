@@ -128,7 +128,7 @@ public class PartitionRuntime implements Snapshotable {
     public void addPartitionReceiver(QueryRuntime queryRuntime, List<VariableExpressionExecutor> executors, MetaStateEvent metaEvent) {
         Query query = queryRuntime.getQuery();
         List<List<PartitionExecutor>> partitionExecutors = new StreamPartitioner(query.getInputStream(), partition, metaEvent,
-                executors, executionPlanContext).getPartitionExecutorLists();
+                executors, executionPlanContext,null).getPartitionExecutorLists();
         if (queryRuntime.getStreamRuntime() instanceof SingleStreamRuntime) {
             SingleInputStream singleInputStream = (SingleInputStream) query.getInputStream();
             addPartitionReceiver(singleInputStream.getStreamId(), singleInputStream.isInnerStream(), metaEvent.getMetaStreamEvent(0), partitionExecutors.get(0));

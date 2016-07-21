@@ -156,6 +156,6 @@ public class FrequentWindowProcessor extends WindowProcessor implements Findable
     @Override
     public Finder constructFinder(Expression expression, MatchingMetaStateHolder matchingMetaStateHolder, ExecutionPlanContext executionPlanContext,
                                   List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap) {
-        return OperatorParser.constructOperator(map.values(), expression, matchingMetaStateHolder,executionPlanContext,variableExpressionExecutors,eventTableMap);
+        return OperatorParser.constructOperator(map.values(), expression, matchingMetaStateHolder,executionPlanContext,variableExpressionExecutors,eventTableMap, queryName);
     }
 }

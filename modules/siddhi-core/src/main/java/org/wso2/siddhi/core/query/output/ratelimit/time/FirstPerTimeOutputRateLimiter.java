@@ -36,10 +36,11 @@ public class FirstPerTimeOutputRateLimiter extends OutputRateLimiter implements 
     private ScheduledExecutorService scheduledExecutorService;
     private Scheduler scheduler;
     private long scheduledTime;
-
+    private String queryName;
     static final Logger log = Logger.getLogger(FirstPerTimeOutputRateLimiter.class);
 
-    public FirstPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService) {
+    public FirstPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService,String queryName) {
+        this.queryName=queryName;
         this.id = id;
         this.value = value;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -47,7 +48,7 @@ public class FirstPerTimeOutputRateLimiter extends OutputRateLimiter implements 
 
     @Override
     public OutputRateLimiter clone(String key) {
-        FirstPerTimeOutputRateLimiter instance = new FirstPerTimeOutputRateLimiter(id + key, value, scheduledExecutorService);
+        FirstPerTimeOutputRateLimiter instance = new FirstPerTimeOutputRateLimiter(id + key, value, scheduledExecutorService,queryName);
         instance.setLatencyTracker(latencyTracker);
         return instance;
     }
@@ -88,7 +89,7 @@ public class FirstPerTimeOutputRateLimiter extends OutputRateLimiter implements 
     public void start() {
         scheduler = new Scheduler(scheduledExecutorService, this, executionPlanContext);
         scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
-        scheduler.init(lockWrapper);
+        scheduler.init(lockWrapper,queryName);
         long currentTime = System.currentTimeMillis();
         scheduledTime = currentTime + value;
         scheduler.notifyAt(scheduledTime);
