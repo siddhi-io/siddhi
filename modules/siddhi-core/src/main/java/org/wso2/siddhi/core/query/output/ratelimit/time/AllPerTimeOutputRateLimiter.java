@@ -26,7 +26,9 @@ import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.util.Schedulable;
 import org.wso2.siddhi.core.util.Scheduler;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class AllPerTimeOutputRateLimiter extends OutputRateLimiter implements Schedulable {
@@ -104,12 +106,13 @@ public class AllPerTimeOutputRateLimiter extends OutputRateLimiter implements Sc
 
     @Override
     public Object[] currentState() {
-        return new Object[]{allComplexEventChunk};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("AllComplexEventChunk", allComplexEventChunk)};
     }
 
     @Override
     public void restoreState(Object[] state) {
-        allComplexEventChunk = (ComplexEventChunk<ComplexEvent>) state[0];
+        Map.Entry<String, Object> entry = (Map.Entry<String, Object>) state[0];
+        allComplexEventChunk = (ComplexEventChunk<ComplexEvent>) entry.getValue();
     }
 
 

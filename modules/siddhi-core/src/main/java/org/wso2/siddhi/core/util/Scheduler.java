@@ -30,6 +30,8 @@ import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -93,19 +95,20 @@ public class Scheduler implements Snapshotable {
         this.lockWrapper = lockWrapper;
         this.queryName = queryName;
         if (elementId == null) {
-            elementId = executionPlanContext.getElementIdGenerator().createNewId();
+            elementId = "Scheduler-"+executionPlanContext.getElementIdGenerator().createNewId();
         }
         executionPlanContext.getSnapshotService().addSnapshotable(queryName, this);
     }
 
     @Override
     public Object[] currentState() {
-        return new Object[]{toNotifyQueue};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("ToNotifyQueue", toNotifyQueue)};
     }
 
     @Override
     public void restoreState(Object[] state) {
-        BlockingQueue<Long> restoreToNotifyQueue = (BlockingQueue<Long>) state[0];
+        Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+        BlockingQueue<Long> restoreToNotifyQueue = (BlockingQueue<Long>) stateEntry.getValue();
         for (Long time : restoreToNotifyQueue) {
             notifyAt(time);
         }

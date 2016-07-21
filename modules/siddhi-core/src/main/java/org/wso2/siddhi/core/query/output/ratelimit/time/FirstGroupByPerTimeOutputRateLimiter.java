@@ -27,8 +27,10 @@ import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.util.Schedulable;
 import org.wso2.siddhi.core.util.Scheduler;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class FirstGroupByPerTimeOutputRateLimiter extends OutputRateLimiter implements Schedulable {
@@ -111,13 +113,15 @@ public class FirstGroupByPerTimeOutputRateLimiter extends OutputRateLimiter impl
 
     @Override
     public Object[] currentState() {
-        return new Object[]{allComplexEventChunk, groupByKeys};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("AllComplexEventChunk", allComplexEventChunk), new AbstractMap.SimpleEntry<String, Object>("GroupByKeys", groupByKeys)};
     }
 
     @Override
     public void restoreState(Object[] state) {
-        allComplexEventChunk = (ComplexEventChunk<ComplexEvent>) state[0];
-        groupByKeys = (List<String>) state[1];
+        Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+        allComplexEventChunk = (ComplexEventChunk<ComplexEvent>) stateEntry.getValue();
+        Map.Entry<String, Object> stateEntry2 = (Map.Entry<String, Object>) state[1];
+        groupByKeys = (List<String>) stateEntry2.getValue();
     }
 
 }

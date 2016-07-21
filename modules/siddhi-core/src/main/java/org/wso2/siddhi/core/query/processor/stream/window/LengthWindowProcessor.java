@@ -33,6 +33,7 @@ import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
@@ -109,13 +110,15 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
 
     @Override
     public Object[] currentState() {
-        return new Object[]{expiredEventChunk.getFirst(), count};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("ExpiredEventChunk", expiredEventChunk.getFirst()), new AbstractMap.SimpleEntry<String, Object>("Count", count)};
     }
 
     @Override
     public void restoreState(Object[] state) {
         expiredEventChunk.clear();
-        expiredEventChunk.add((StreamEvent) state[0]);
-        count = (Integer) state[1];
+        Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+        expiredEventChunk.add((StreamEvent) stateEntry.getValue());
+        Map.Entry<String, Object> stateEntry2 = (Map.Entry<String, Object>) state[1];
+        count = (Integer) stateEntry2.getValue();
     }
 }

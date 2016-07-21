@@ -50,7 +50,7 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
             this.lockWrapper = lockWrapper;
         }
         if (elementId == null) {
-            elementId = executionPlanContext.getElementIdGenerator().createNewId();
+            elementId = "OutputRateLimiter-"+ executionPlanContext.getElementIdGenerator().createNewId();
         }
         executionPlanContext.getSnapshotService().addSnapshotable(queryName, this);
     }

@@ -69,7 +69,7 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         this.executionPlanContext = executionPlanContext;
         this.queryName = queryName;
         if (elementId == null) {
-            this.elementId = executionPlanContext.getElementIdGenerator().createNewId();
+            this.elementId = "StreamPreStateProcessor-"+ executionPlanContext.getElementIdGenerator().createNewId();
         }
         executionPlanContext.getSnapshotService().addSnapshotable(queryName, this);
     }

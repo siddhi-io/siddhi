@@ -36,6 +36,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
@@ -155,12 +156,13 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
 
     @Override
     public Object[] currentState() {
-        return new Object[]{expiredEventChunk};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("ExpiredEventChunk", expiredEventChunk)};
     }
 
     @Override
     public void restoreState(Object[] state) {
-        expiredEventChunk = (ComplexEventChunk<StreamEvent>) state[0];
+        Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+        expiredEventChunk = (ComplexEventChunk<StreamEvent>) stateEntry.getValue();
     }
 
 }

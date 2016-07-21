@@ -43,7 +43,7 @@ public abstract class FunctionExecutor implements ExpressionExecutor, EternalRef
             this.queryName = queryName;
             executionPlanContext.addEternalReferencedHolder(this);
             if (elementId == null) {
-                elementId = executionPlanContext.getElementIdGenerator().createNewId();
+                elementId = "FunctionExecutor-" +executionPlanContext.getElementIdGenerator().createNewId();
             }
             executionPlanContext.getSnapshotService().addSnapshotable(queryName, this);
             init(attributeExpressionExecutors, executionPlanContext);

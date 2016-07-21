@@ -151,12 +151,13 @@ public class SortWindowProcessor extends WindowProcessor implements FindableProc
 
     @Override
     public Object[] currentState() {
-        return new Object[]{sortedWindow};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("SortedWindow", sortedWindow)};
     }
 
     @Override
     public void restoreState(Object[] state) {
-        sortedWindow = (ArrayList<StreamEvent>) state[0];
+        Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+        sortedWindow = (ArrayList<StreamEvent>) stateEntry.getValue();
     }
 
     @Override

@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
 
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,12 +68,13 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
         for (Map.Entry<String, AttributeAggregator> entry : aggregatorMap.entrySet()) {
             data.put(entry.getKey(), entry.getValue().currentState());
         }
-        return new Object[]{data};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("Data", data)};
     }
 
     @Override
     public void restoreState(Object[] state) {
-        HashMap<String, Object[]> data = (HashMap<String, Object[]>) state[0];
+        Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+        HashMap<String, Object[]> data = (HashMap<String, Object[]>) stateEntry.getValue();
 
         for (Map.Entry<String, Object[]> entry : data.entrySet()) {
             String key = entry.getKey();

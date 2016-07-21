@@ -64,7 +64,7 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
             this.attributeExpressionLength = attributeExpressionExecutors.length;
             this.queryName = queryName;
             if (elementId == null) {
-                elementId = executionPlanContext.getElementIdGenerator().createNewId();
+                elementId = "AbstractStreamProcessor-"+ executionPlanContext.getElementIdGenerator().createNewId();
             }
             executionPlanContext.getSnapshotService().addSnapshotable(queryName, this);
             this.additionalAttributes = init(inputDefinition, attributeExpressionExecutors, executionPlanContext, outputExpectsExpiredEvents);

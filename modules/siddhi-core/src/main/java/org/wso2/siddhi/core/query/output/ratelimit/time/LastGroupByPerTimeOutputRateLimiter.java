@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.util.Schedulable;
 import org.wso2.siddhi.core.util.Scheduler;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -108,12 +109,13 @@ public class LastGroupByPerTimeOutputRateLimiter extends OutputRateLimiter imple
 
     @Override
     public Object[] currentState() {
-        return new Object[]{allGroupByKeyEvents};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("AllGroupByKeyEvents", allGroupByKeyEvents)};
     }
 
     @Override
     public void restoreState(Object[] state) {
-        allGroupByKeyEvents = (Map<String, ComplexEvent>) state[0];
+        Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+        allGroupByKeyEvents = (Map<String, ComplexEvent>) stateEntry.getValue();
     }
 
 }

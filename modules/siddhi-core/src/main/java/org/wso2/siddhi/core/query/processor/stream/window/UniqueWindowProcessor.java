@@ -33,6 +33,7 @@ import org.wso2.siddhi.core.util.collection.operator.Finder;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,7 +116,7 @@ public class UniqueWindowProcessor extends WindowProcessor implements FindablePr
      */
     @Override
     public Object[] currentState() {
-        return new Object[]{map};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("Map", map)};
     }
 
     /**
@@ -127,7 +128,8 @@ public class UniqueWindowProcessor extends WindowProcessor implements FindablePr
      */
     @Override
     public void restoreState(Object[] state) {
-        map = (ConcurrentHashMap<String, StreamEvent>) state[0];
+        Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+        map = (ConcurrentHashMap<String, StreamEvent>) stateEntry.getValue();
     }
 
     /**

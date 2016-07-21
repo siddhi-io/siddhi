@@ -38,6 +38,7 @@ import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -65,7 +66,7 @@ public class InMemoryEventTable implements EventTable, Snapshotable {
         eventHolder = EventHolderPasser.parse(tableDefinition, tableStreamEventPool);
 
         if (elementId == null) {
-            elementId = executionPlanContext.getElementIdGenerator().createNewId();
+            elementId = "InMemoryEventTable"+ executionPlanContext.getElementIdGenerator().createNewId();
         }
         executionPlanContext.getSnapshotService().addSnapshotable(tableDefinition.getId(), this);
     }
@@ -167,12 +168,13 @@ public class InMemoryEventTable implements EventTable, Snapshotable {
 
     @Override
     public Object[] currentState() {
-        return new Object[]{eventHolder};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("EventHolder", eventHolder)};
     }
 
     @Override
     public void restoreState(Object[] state) {
-        eventHolder = (EventHolder) state[0];
+        Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+        eventHolder = (EventHolder) stateEntry.getValue();
     }
 
     @Override
