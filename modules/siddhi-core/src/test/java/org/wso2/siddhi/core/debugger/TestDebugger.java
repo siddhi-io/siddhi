@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.siddhi.core.debugger;
 
 import junit.framework.Assert;
@@ -12,7 +29,9 @@ import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -187,8 +206,7 @@ public class TestDebugger {
         waitForEvents(siddhiTestCallback);
         siddhiDebugger.getQueryState("query1");
         QueryState receivedQueryState=siddhiTestCallback.getQueryStates();
-        String[] quotedQuery=receivedQueryState.toString().split("\n\n");
-        Assert.assertEquals(true, patternMatch("AbstractStreamProcessor", "outputData=[WSO2]", quotedQuery[0]));
+        Assert.assertEquals(true, verifyState(receivedQueryState, "AbstractStreamProcessor", "outputData=[WSO2]"));
 
         executionPlanRuntime.shutdown();
 
@@ -229,8 +247,7 @@ public class TestDebugger {
         siddhiDebugger.getQueryState("query1");
 
         QueryState receivedQueryState = siddhiTestCallback.getQueryStates();
-        String[] quotedQuery = receivedQueryState.toString().split("\n\n");
-        Assert.assertEquals(true, patternMatch("FunctionExecutor", "unknown field[220.0]", quotedQuery[0]));
+        Assert.assertEquals(true, verifyState(receivedQueryState, "FunctionExecutor", "220.0"));
     }
 
     private void waitForEvents(SiddhiTestCallback siddhiDebuggerCallback) {
@@ -245,12 +262,37 @@ public class TestDebugger {
         siddhiDebuggerCallback.setEventReceived(false);
     }
 
-    public boolean patternMatch(String expectedSnapshotableClass, String expectedOutputData, String receivedQueryState) {
-        Boolean matchSnapshotableClass=receivedQueryState.contains(expectedSnapshotableClass);
-        Boolean matchOutputData=receivedQueryState.contains(expectedOutputData);
-        if (matchSnapshotableClass && matchOutputData) {
-            return true;
+    public boolean verifyState(QueryState queryState, String expectedSnapshotableClass, String expectedOutputData) {
+        HashMap<String, Map<String, Object>> knownFields = queryState.getKnownFields();
+        HashMap<String, Object[]> unknownFields = queryState.getUnknownFields();
+        boolean result = false;
+        String actualSnapshotableClass;
+        Map<String, Object> snapShots;
+        for (Map.Entry<String, Map<String, Object>> entry : knownFields.entrySet()) {
+            actualSnapshotableClass = entry.getKey();
+            if (actualSnapshotableClass.contains(expectedSnapshotableClass)) {
+                snapShots = entry.getValue();
+                for (Map.Entry<String, Object> snapShotEntry : snapShots.entrySet()) {
+                    if (entry.getValue().toString().contains(expectedOutputData)) {
+                        result = true;
+                    }
+                }
+            }
         }
-        return false;
+        if (!result) {
+            for (Map.Entry<String, Object[]> unknownfield : unknownFields.entrySet()) {
+                if (unknownfield.getKey().contains(expectedSnapshotableClass)) {
+                    for (Object object : unknownfield.getValue()) {
+                        if (object.toString().contains(expectedOutputData)) {
+                            result = true;
+                        }
+                    }
+
+                }
+            }
+        }
+
+
+        return result;
     }
 }
