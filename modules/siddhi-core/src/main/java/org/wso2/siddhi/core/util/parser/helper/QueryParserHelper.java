@@ -38,7 +38,10 @@ import org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import static org.wso2.siddhi.core.util.SiddhiConstants.*;
 
@@ -79,11 +82,29 @@ public class QueryParserHelper {
                 metaStreamEvent.getOnAfterWindowData().remove(attribute);
             }
         }
-        for (Attribute attribute : metaStreamEvent.getOnAfterWindowData()) {
-            if (metaStreamEvent.getBeforeWindowData().contains(attribute)) {
-                metaStreamEvent.getBeforeWindowData().remove(attribute);
+        Set<Attribute> duplicateFinder = new HashSet<Attribute>();
+        for (Iterator<Attribute> iterator = metaStreamEvent.getOnAfterWindowData().iterator(); iterator.hasNext(); ) {
+            Attribute attribute = iterator.next();
+            if (attribute != null) {
+                if (duplicateFinder.add(attribute)) {
+                    if (metaStreamEvent.getBeforeWindowData().contains(attribute)) {
+                        metaStreamEvent.getBeforeWindowData().remove(attribute);
+                    }
+                } else {
+                    iterator.remove();
+                }
             }
         }
+
+        for (Iterator<Attribute> iterator = metaStreamEvent.getBeforeWindowData().iterator(); iterator.hasNext(); ) {
+            Attribute attribute = iterator.next();
+            if (attribute != null) {
+                if (!duplicateFinder.add(attribute)) {
+                    iterator.remove();
+                }
+            }
+        }
+
     }
 
     public static void updateVariablePosition(MetaComplexEvent metaComplexEvent, List<VariableExpressionExecutor> variableExpressionExecutorList) {
