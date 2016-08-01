@@ -41,7 +41,7 @@
         <module>reorder</module>
         <module>map</module>
         <module>kalman-filter</module>
-        <module>sentiment-analysis</module>
+        <module>sentiment</module>
     </modules>
 
 </project>

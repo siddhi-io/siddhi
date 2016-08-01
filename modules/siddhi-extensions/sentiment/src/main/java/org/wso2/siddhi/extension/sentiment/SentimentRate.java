@@ -17,19 +17,11 @@
  *
  */
 
-package org.wso2.siddhi.extension.sentimentanalysis;
+package org.wso2.siddhi.extension.sentiment;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.CoreMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
-import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.function.FunctionExecutor;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -38,13 +30,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SentimentRate extends FunctionExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SentimentRate.class);
-    private static String method;
 
     @Override
     public Attribute.Type getReturnType() {
@@ -74,40 +64,20 @@ public class SentimentRate extends FunctionExecutor {
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
-        if (attributeExpressionExecutors.length > 2) {
+        if (attributeExpressionExecutors.length != 1) {
             throw new IllegalArgumentException(
-                    "Invalid no of arguments passed to SentimentRate:getSentiment() function, "
-                            + "required less than 3, but found " + attributeExpressionExecutors.length);
-        }
-        if (attributeExpressionExecutors.length == 2){
-            if (!(attributeExpressionExecutors[1] instanceof ConstantExpressionExecutor)) {
-                throw new IllegalArgumentException("Required either  \"affin\" or \"stanford\" as second argument");
-            } else {
-                method = attributeExpressionExecutors[1].execute(null).toString().toLowerCase();
-            }
+                    "Invalid no of arguments passed to sentiment:getRate() function, "
+                            + "required 1, but found " + attributeExpressionExecutors.length);
         }
     }
 
     @Override
     protected Object execute(Object[] data) {
-        String text = data[0].toString().toLowerCase();
-        if ("affin".equals(method)) {
-            return getAffinSentimentRate(text);
-        } else if ("stanford".equals(method)) {
-            return getStanfordSentimentRate(text);
-        } else {
-            LOGGER.error("Invalid option of SentimentRate. Option can be only \"affin\" or \"stanford\"");
-            return null;
-        }
+        return null;
     }
 
     @Override
     protected Object execute(Object data) {
-        String text = data.toString().toLowerCase();
-        return getStanfordSentimentRate(text);
-    }
-
-    private int getAffinSentimentRate(String text) {
         String[] affinWordBucket = null;
         try {
             affinWordBucket = getWordsBuckets("affinwords.txt");
@@ -121,33 +91,13 @@ public class SentimentRate extends FunctionExecutor {
                 split = affinWordBucket[i].split(" ");
                 String word = split[0].trim();
                 int val = Integer.parseInt(split[split.length-1].replaceAll("\\s+", " ").trim());
-                Matcher m = Pattern.compile("\\b" + word + "\\b").matcher(text);
+                Matcher m = Pattern.compile("\\b" + word + "\\b").matcher(data.toString().toLowerCase());
                 while (m.find()) {
                     rank += val;
                 }
             }
         }
         return rank;
-    }
-
-    private int getStanfordSentimentRate(String text) {
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-        int totalRate = 0;
-        String[] linesArr = text.split("\\.");
-        for (int i = 0; i < linesArr.length; i++) {
-            if (linesArr[i] != null) {
-                Annotation annotation = pipeline.process(linesArr[i]);
-                for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-                    Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
-                    int score = RNNCoreAnnotations.getPredictedClass(tree);
-                    totalRate = totalRate + (score - 2);
-                }
-            }
-        }
-
-        return totalRate;
     }
 
     private String[] getWordsBuckets(String fileName) throws IOException {

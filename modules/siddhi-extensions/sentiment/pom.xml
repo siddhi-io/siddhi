@@ -20,17 +20,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>siddhi-extensions</artifactId>
         <groupId>org.wso2.siddhi</groupId>
+        <artifactId>siddhi-extensions</artifactId>
         <version>3.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
 
-    <artifactId>siddhi-extension-sentiment-analysis</artifactId>
-    <name>Siddhi Extension - Sentiment Analysis</name>
-
+    <artifactId>siddhi-extension-sentiment</artifactId>
+    <name>Siddhi Extension - Sentiment</name>
     <dependencies>
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
@@ -43,17 +42,6 @@
         <dependency>
             <groupId>org.apache.log4j.wso2</groupId>
             <artifactId>log4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>3.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>3.6.0</version>
-            <classifier>models</classifier>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -72,8 +60,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.siddhi.extension.sentiment-analysis,
-                            org.wso2.siddhi.extension.sentiment-analysis.*
+                            org.wso2.siddhi.extension.sentiment,
+                            org.wso2.siddhi.extension.sentiment.*
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional
@@ -84,4 +72,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

@@ -16,10 +16,11 @@
  *  under the License.
  *
  */
-package org.wso2.siddhi.extension.sentimentanalysis;
+package org.wso2.siddhi.extension.sentiment;
 
+import junit.framework.Assert;
 import org.apache.log4j.Logger;
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -28,8 +29,16 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class SentimentRateTestCase {
     private static Logger logger = Logger.getLogger(SentimentRateTestCase.class);
+    private AtomicInteger count = new AtomicInteger(0);
+
+    @Before
+    public void init() {
+        count.set(0);
+    }
 
     @Test
     public void testProcess() throws Exception {
@@ -37,7 +46,7 @@ public class SentimentRateTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "@config(async = 'true')define stream inputStream (text string);";
         String query = ("@info(name = 'query1') " + "from inputStream "
-                + "select sentimentanalysis:getSentimentRate(text) as isRate " + "insert into outputStream;");
+                + "select sentiment:getRate(text) as isRate " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
 
@@ -46,6 +55,21 @@ public class SentimentRateTestCase {
             public void receive(long timeStamp, Event[] inEvents,
                                 Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        Assert.assertEquals(3, inEvent.getData(0));
+                    }
+                    if (count.get() == 2) {
+                        Assert.assertEquals(-3, inEvent.getData(0));
+                    }
+                    if (count.get() == 3) {
+                        Assert.assertEquals(0, inEvent.getData(0));
+                    }
+                    if (count.get() == 4) {
+                        Assert.assertEquals(-2, inEvent.getData(0));
+                    }
+                }
             }
         });
         InputHandler inputHandler = executionPlanRuntime
@@ -55,7 +79,6 @@ public class SentimentRateTestCase {
         inputHandler.send(new Object[] { "Trump is a bad person." });
         inputHandler.send(new Object[] { "Trump is a good person. Trump is a bad person" });
         inputHandler.send(new Object[] { "What is wrong with these people" });
-        Thread.sleep(100);
         executionPlanRuntime.shutdown();
     }
 }
