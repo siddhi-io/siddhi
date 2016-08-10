@@ -42,6 +42,7 @@
         <module>map</module>
         <module>kalman-filter</module>
         <module>priority-window</module>
+        <module>largest-clique</module>
     </modules>
 
 </project>
