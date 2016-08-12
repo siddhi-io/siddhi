@@ -16,3 +16,4 @@
 # under the License.
 #
 largestClique=org.wso2.siddhi.extension.largestClique.LargestCliqueStreamProcessor
+lcc=org.wso2.siddhi.extension.largestClique.LargestConnectedComponentProcessor

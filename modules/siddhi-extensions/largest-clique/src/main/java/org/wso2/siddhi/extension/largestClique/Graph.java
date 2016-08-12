@@ -62,5 +62,12 @@ public class Graph {
         return adjacencyList.get(u);
     }
 
+    public int size() {
+        return adjacencyList.size();
+    }
+
+    public HashMap<Long, Set<Long>> getGraph() {
+        return adjacencyList;
+    }
 }
 
