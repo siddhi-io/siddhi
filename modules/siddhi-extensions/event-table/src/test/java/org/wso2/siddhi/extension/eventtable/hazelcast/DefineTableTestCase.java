@@ -526,7 +526,7 @@ public class DefineTableTestCase {
         }
     }
 
-    // @Ignore("Ignoring due to conflict with other test cases.")
+    @Ignore("Ignoring due to conflict with other test cases.")
     @Test
     public void testQuery20() throws InterruptedException {
         log.info("testTableDefinition20 - OUT 0");
@@ -607,7 +607,6 @@ public class DefineTableTestCase {
         }
     }
 
-    // @Ignore("Ignoring due to conflict with other test cases.")
     @Test
     public void testQuery21() throws InterruptedException {
         log.info("testTableDefinition21 - OUT 0");
@@ -657,7 +656,7 @@ public class DefineTableTestCase {
         }
     }
 
-    // @Ignore("Ignoring due to conflict with other test cases.")
+    @Ignore("Ignoring due to conflict with other test cases.")
     @Test
     public void testQuery22() throws InterruptedException {
         log.info("testTableDefinition22 - OUT 0");
