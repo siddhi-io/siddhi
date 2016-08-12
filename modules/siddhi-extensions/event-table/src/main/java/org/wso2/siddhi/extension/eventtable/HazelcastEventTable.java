@@ -43,7 +43,6 @@ import org.wso2.siddhi.core.util.collection.UpdateAttributeMapper;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
-import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.extension.eventtable.hazelcast.HazelcastCollectionEventHolder;
 import org.wso2.siddhi.extension.eventtable.hazelcast.HazelcastEventTableConstants;
 import org.wso2.siddhi.extension.eventtable.hazelcast.HazelcastOperatorParser;
@@ -121,12 +120,12 @@ public class HazelcastEventTable implements EventTable {
             }
             String indexAttribute = annotation.getElements().get(0).getValue();
             int indexPosition = tableDefinition.getAttributePosition(indexAttribute);
-            eventHolder = new HazelcastPrimaryKeyEventHolder(hcInstance.getMap(collectionName), tableStreamEventPool, eventConverter, indexPosition, indexAttribute);
+            eventHolder = new HazelcastPrimaryKeyEventHolder(hzInstance.getMap(collectionName), tableStreamEventPool, eventConverter, indexPosition, indexAttribute);
         } else {
-            eventHolder = new HazelcastCollectionEventHolder(hcInstance.getList(collectionName), tableStreamEventPool, eventConverter);
+            eventHolder = new HazelcastCollectionEventHolder(hzInstance.getList(collectionName), tableStreamEventPool, eventConverter);
         }
-//        streamEventPool = new StreamEventPool(metaStreamEvent, HazelcastEventTableConstants.STREAM_EVENT_POOL_SIZE);
-//        tableStreamEventCloner = new StreamEventCloner(metaStreamEvent, streamEventPool);
+        // streamEventPool = new StreamEventPool(metaStreamEvent, HazelcastEventTableConstants.STREAM_EVENT_POOL_SIZE);
+        // tableStreamEventCloner = new StreamEventCloner(metaStreamEvent, streamEventPool);
         if (elementId == null) {
             elementId = executionPlanContext.getElementIdGenerator().createNewId();
         }
@@ -135,9 +134,9 @@ public class HazelcastEventTable implements EventTable {
     /**
      * Called to get the most suitable Hazelcast Instance for the given set of parameters.
      *
-     * @param groupName      Hazelcast cluster name.
-     * @param groupPassword  Hazelcast cluster password.
-     * @param addresses Hazelcast node addresses ("ip1,ip2,..").
+     * @param groupName     Hazelcast cluster name.
+     * @param groupPassword Hazelcast cluster password.
+     * @param addresses     Hazelcast node addresses ("ip1,ip2,..").
      * @return Hazelcast Instance
      */
     protected HazelcastInstance getHazelcastInstance(boolean serverMode, String groupName,
