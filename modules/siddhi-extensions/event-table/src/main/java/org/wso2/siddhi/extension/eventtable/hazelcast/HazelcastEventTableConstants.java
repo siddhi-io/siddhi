@@ -32,5 +32,4 @@ public final class HazelcastEventTableConstants {
     public static final String ANNOTATION_ELEMENT_HAZELCAST_WELL_KNOWN_ADDRESSES = "well.known.addresses";
     public static final String ANNOTATION_ELEMENT_HAZELCAST_CLUSTER_COLLECTION = "collection.name";
 
-    public static final int STREAM_EVENT_POOL_SIZE = 10;
 }

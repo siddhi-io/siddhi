@@ -66,9 +66,9 @@ public class StateInputStreamParser {
                 }
             } else {
                 if (stateInputStream.getStateType() == StateInputStream.Type.SEQUENCE) {
-                    processStreamReceiverMap.put(streamId, new SequenceMultiProcessStreamReceiver(streamId, streamCount, stateStreamRuntime, defaultLockKey, latencyTracker));
+                    processStreamReceiverMap.put(streamId, new SequenceMultiProcessStreamReceiver(streamId, streamCount, stateStreamRuntime, latencyTracker));
                 } else {
-                    processStreamReceiverMap.put(streamId, new PatternMultiProcessStreamReceiver(streamId, streamCount, defaultLockKey, latencyTracker));
+                    processStreamReceiverMap.put(streamId, new PatternMultiProcessStreamReceiver(streamId, streamCount, latencyTracker));
                 }
             }
         }
@@ -80,6 +80,8 @@ public class StateInputStreamParser {
                 new ArrayList<Map.Entry<Long, Set<Integer>>>(), latencyTracker);
 
         stateStreamRuntime.setInnerStateRuntime(innerStateRuntime);
+
+        ((StreamPreStateProcessor) innerStateRuntime.getFirstProcessor()).setThisLastProcessor((StreamPostStateProcessor) innerStateRuntime.getLastProcessor());
 
         return stateStreamRuntime;
     }
@@ -101,7 +103,7 @@ public class StateInputStreamParser {
             BasicSingleInputStream basicSingleInputStream = ((StreamStateElement) stateElement).getBasicSingleInputStream();
             SingleStreamRuntime singleStreamRuntime = SingleInputStreamParser.parseInputStream(basicSingleInputStream,
                     executionPlanContext, variableExpressionExecutors, streamDefinitionMap, tableDefinitionMap, eventTableMap, metaStateEvent,
-                    processStreamReceiverMap.get(basicSingleInputStream.getUniqueStreamIds().get(0)), false, latencyTracker);
+                    processStreamReceiverMap.get(basicSingleInputStream.getUniqueStreamIds().get(0)), false, false);
 
             int stateIndex = metaStateEvent.getStreamEventCount() - 1;
             if (streamPreStateProcessor == null) {
@@ -129,6 +131,7 @@ public class StateInputStreamParser {
             singleStreamRuntime.getProcessorChain().setToLast(streamPostStateProcessor);
             streamPostStateProcessor.setThisStatePreProcessor(streamPreStateProcessor);
             streamPreStateProcessor.setThisStatePostProcessor(streamPostStateProcessor);
+            streamPreStateProcessor.setThisLastProcessor(streamPostStateProcessor);
 
             StreamInnerStateRuntime innerStateRuntime = new StreamInnerStateRuntime(stateType);
 

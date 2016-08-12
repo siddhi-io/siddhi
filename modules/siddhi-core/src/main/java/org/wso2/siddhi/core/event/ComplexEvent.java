@@ -24,7 +24,7 @@ import java.io.Serializable;
  */
 public interface ComplexEvent extends Serializable {
 
-    public enum Type {
+    enum Type {
         CURRENT, EXPIRED, TIMER, RESET
     }
 
@@ -39,6 +39,8 @@ public interface ComplexEvent extends Serializable {
     long getTimestamp();
 
     Object getAttribute(int[] position);
+
+    void setAttribute(Object object, int[] position);
 
     Type getType();
 

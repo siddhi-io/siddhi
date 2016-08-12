@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.GroupedComplexEvent;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -40,37 +41,39 @@ public class LastGroupByPerEventOutputRateLimiter extends OutputRateLimiter {
 
     @Override
     public OutputRateLimiter clone(String key) {
-        LastGroupByPerEventOutputRateLimiter lastGroupByPerEventOutputRateLimiter = new LastGroupByPerEventOutputRateLimiter(id+key,value);
-        lastGroupByPerEventOutputRateLimiter.setLatencyTracker(latencyTracker);
-        return lastGroupByPerEventOutputRateLimiter;
+        LastGroupByPerEventOutputRateLimiter instance = new LastGroupByPerEventOutputRateLimiter(id+key,value);
+        instance.setLatencyTracker(latencyTracker);
+        return instance;
     }
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        while (complexEventChunk.hasNext()) {
-            ComplexEvent event = complexEventChunk.next();
-            if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
-                complexEventChunk.remove();
-                GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
-                allGroupByKeyEvents.put(groupedComplexEvent.getGroupKey(), groupedComplexEvent.getComplexEvent());
-                if (++counter == value) {
-                    counter = 0;
-                    sendEvents();
+        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        synchronized (this) {
+            while (complexEventChunk.hasNext()) {
+                ComplexEvent event = complexEventChunk.next();
+                if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
+                    complexEventChunk.remove();
+                    GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
+                    allGroupByKeyEvents.put(groupedComplexEvent.getGroupKey(), groupedComplexEvent.getComplexEvent());
+                    if (++counter == value) {
+                        counter = 0;
+                        if (allGroupByKeyEvents.size() != 0) {
+                            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(complexEventChunk.isBatch());
+
+                            for (ComplexEvent complexEvent : allGroupByKeyEvents.values()) {
+                                outputEventChunk.add(complexEvent);
+                            }
+                            allGroupByKeyEvents.clear();
+                            outputEventChunks.add(outputEventChunk);
+                        }
+                    }
                 }
             }
         }
-    }
-
-    private void sendEvents() {
-        if (allGroupByKeyEvents.size() != 0) {
-            ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<ComplexEvent>();
-
-            for (ComplexEvent complexEvent : allGroupByKeyEvents.values()) {
-                complexEventChunk.add(complexEvent);
-            }
-            allGroupByKeyEvents.clear();
-            sendToCallBacks(complexEventChunk);
+        for (ComplexEventChunk eventChunk : outputEventChunks) {
+            sendToCallBacks(eventChunk);
         }
     }
 

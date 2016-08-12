@@ -19,6 +19,7 @@
 package org.wso2.siddhi.extension.reorder;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
@@ -26,29 +27,33 @@ import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
+import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
+import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The following code conducts reordering of an out-of-order event stream.
  * This implements the K-Slack based disorder handling algorithm which was originally described in
  * https://www2.informatik.uni-erlangen.de/publication/download/IPDPS2013.pdf
  */
-public class KSlackExtension extends StreamProcessor {
+public class KSlackExtension extends StreamProcessor implements SchedulingProcessor {
     private long k = 0; //In the beginning the K is zero.
     private long greatestTimestamp = 0; //Used to track the greatest timestamp of tuples seen so far in the stream history.
     private TreeMap<Long, ArrayList<StreamEvent>> eventTreeMap;
     private TreeMap<Long, ArrayList<StreamEvent>> expiredEventTreeMap;
     private ExpressionExecutor timestampExecutor;
     private long MAX_K = Long.MAX_VALUE;
-    private KSlackTimerTask timerTask;
-    private Timer timer;
     private long TIMER_DURATION = -1l;
     private boolean expireFlag = false;
     private long lastSentTimeStamp = -1l;
+    private Scheduler scheduler;
+    private long lastScheduledTimestamp = -1;
+    private ReentrantLock lock = new ReentrantLock();
 
     @Override
     public void start() {
@@ -73,80 +78,92 @@ public class KSlackExtension extends StreamProcessor {
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
-        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>();
-
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        lock.lock();
         try {
             while (streamEventChunk.hasNext()) {
                 StreamEvent event = streamEventChunk.next();
-                streamEventChunk.remove(); //We might have the rest of the events linked to this event forming a chain.
 
-                long timestamp = (Long) timestampExecutor.execute(event);
+                if(event.getType() != ComplexEvent.Type.TIMER) {
 
-                if(expireFlag){
-                    if (timestamp < lastSentTimeStamp){
-                        continue;
-                    }
-                }
+                    streamEventChunk.remove(); //We might have the rest of the events linked to this event forming a chain.
 
-                ArrayList<StreamEvent> eventList = eventTreeMap.get(timestamp);
-                if (eventList == null) {
-                    eventList = new ArrayList<StreamEvent>();
-                }
-                eventList.add(event);
-                eventTreeMap.put(timestamp, eventList);
+                    long timestamp = (Long) timestampExecutor.execute(event);
 
-                if (timestamp > greatestTimestamp) {
-
-                    greatestTimestamp = timestamp;
-                    long minTimestamp = eventTreeMap.firstKey();
-
-                    if ((greatestTimestamp - minTimestamp) > k) {
-                        if((greatestTimestamp - minTimestamp) < MAX_K) {
-                            k = greatestTimestamp - minTimestamp;
-                        }else{
-                            k = MAX_K;
+                    if (expireFlag) {
+                        if (timestamp < lastSentTimeStamp) {
+                            continue;
                         }
                     }
 
-                    Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = eventTreeMap.entrySet().iterator();
-                    while (entryIterator.hasNext()) {
-                        Map.Entry<Long, ArrayList<StreamEvent>> entry = entryIterator.next();
-                        ArrayList<StreamEvent> list = expiredEventTreeMap.get(entry.getKey());
-
-                        if (list != null) {
-                            list.addAll(entry.getValue());
-                        } else {
-                            expiredEventTreeMap.put(entry.getKey(), entry.getValue());
-                        }
+                    ArrayList<StreamEvent> eventList = eventTreeMap.get(timestamp);
+                    if (eventList == null) {
+                        eventList = new ArrayList<StreamEvent>();
                     }
-                    eventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
+                    eventList.add(event);
+                    eventTreeMap.put(timestamp, eventList);
 
-                    entryIterator = expiredEventTreeMap.entrySet().iterator();
-                    while (entryIterator.hasNext()) {
-                        Map.Entry<Long, ArrayList<StreamEvent>> entry = entryIterator.next();
+                    if (timestamp > greatestTimestamp) {
+                        greatestTimestamp = timestamp;
+                        long minTimestamp = eventTreeMap.firstKey();
+                        long timeDifference = greatestTimestamp - minTimestamp;
 
-                        if (entry.getKey() + k <= greatestTimestamp) {
-                            entryIterator.remove();
-                            ArrayList<StreamEvent> timeEventList = entry.getValue();
-                            lastSentTimeStamp = entry.getKey();
+                        if (timeDifference > k) {
+                            if (timeDifference < MAX_K) {
+                                k = timeDifference;
+                            } else {
+                                k = MAX_K;
+                            }
+                        }
 
-                            for (StreamEvent aTimeEventList : timeEventList) {
-                                complexEventChunk.add(aTimeEventList);
+                        Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = eventTreeMap.entrySet().iterator();
+                        while (entryIterator.hasNext()) {
+                            Map.Entry<Long, ArrayList<StreamEvent>> entry = entryIterator.next();
+                            ArrayList<StreamEvent> list = expiredEventTreeMap.get(entry.getKey());
+
+                            if (list != null) {
+                                list.addAll(entry.getValue());
+                            } else {
+                                expiredEventTreeMap.put(entry.getKey(), entry.getValue());
+                            }
+                        }
+                        eventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
+
+                        entryIterator = expiredEventTreeMap.entrySet().iterator();
+                        while (entryIterator.hasNext()) {
+                            Map.Entry<Long, ArrayList<StreamEvent>> entry = entryIterator.next();
+
+                            if (entry.getKey() + k <= greatestTimestamp) {
+                                entryIterator.remove();
+                                ArrayList<StreamEvent> timeEventList = entry.getValue();
+                                lastSentTimeStamp = entry.getKey();
+
+                                for (StreamEvent aTimeEventList : timeEventList) {
+                                    complexEventChunk.add(aTimeEventList);
+                                }
                             }
                         }
                     }
+                } else {
+                    if(expiredEventTreeMap.size() > 0) {
+                        TreeMap<Long, ArrayList<StreamEvent>> expiredEventTreeMapSnapShot = expiredEventTreeMap;
+                        expiredEventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
+                        onTimerEvent(expiredEventTreeMapSnapShot, nextProcessor);
+                        lastScheduledTimestamp = lastScheduledTimestamp + TIMER_DURATION;
+                        scheduler.notifyAt(lastScheduledTimestamp);
+                    }
                 }
+
+
+
             }
         } catch (ArrayIndexOutOfBoundsException ec) {
             //This happens due to user specifying an invalid field index.
             throw new ExecutionPlanCreationException("The very first parameter must be an Integer with a valid " +
                     " field index (0 to (fieldsLength-1)).");
         }
-
+        lock.unlock();
         nextProcessor.process(complexEventChunk);
-        if(TIMER_DURATION != -1l) {
-            timerTask.setInfo(expiredEventTreeMap, nextProcessor);
-        }
     }
 
     @Override
@@ -268,41 +285,38 @@ public class KSlackExtension extends StreamProcessor {
         eventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
         expiredEventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
 
-        if(TIMER_DURATION != -1l) {
-            timer = new Timer();
-            timerTask = new KSlackTimerTask();
-            timer.schedule(timerTask, 0, TIMER_DURATION);
+        if(TIMER_DURATION != -1l && scheduler != null) {
+            lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime() + TIMER_DURATION;
+            scheduler.notifyAt(lastScheduledTimestamp);
         }
         return attributes;
     }
 
-    class KSlackTimerTask extends TimerTask{
-        private TreeMap<Long, ArrayList<StreamEvent>> expiredEventTreeMap;
-        private Processor nextProcessor;
-
-        public void setInfo(TreeMap<Long, ArrayList<StreamEvent>> treeMap, Processor np){
-            expiredEventTreeMap = treeMap;
-            nextProcessor = np;
+    @Override
+    public void setScheduler(Scheduler scheduler) {
+        this.scheduler = scheduler;
+        if (lastScheduledTimestamp < 0) {
+            lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime() + TIMER_DURATION;
+            scheduler.notifyAt(lastScheduledTimestamp);
         }
+    }
 
-        @Override
-        public void run() {
-            if((expiredEventTreeMap != null) && (expiredEventTreeMap.keySet().size() != 0)) {
-                Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = expiredEventTreeMap.entrySet().iterator();
-                ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>();
+    @Override
+    public Scheduler getScheduler() {
+        return this.scheduler;
+    }
 
-                while (entryIterator.hasNext()) {
-                    Map.Entry<Long, ArrayList<StreamEvent>> entry = entryIterator.next();
-                    entryIterator.remove();
-                    ArrayList<StreamEvent> timeEventList = entry.getValue();
+    private void onTimerEvent(TreeMap<Long, ArrayList<StreamEvent>> treeMap, Processor nextProcessor) {
+        Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = treeMap.entrySet().iterator();
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>(false);
 
-                    for (StreamEvent aTimeEventList : timeEventList) {
-                        complexEventChunk.add(aTimeEventList);
-                    }
-                }
+        while (entryIterator.hasNext()) {
+            ArrayList<StreamEvent> timeEventList = entryIterator.next().getValue();
 
-                nextProcessor.process(complexEventChunk);
+            for (StreamEvent aTimeEventList : timeEventList) {
+                complexEventChunk.add(aTimeEventList);
             }
         }
+        nextProcessor.process(complexEventChunk);
     }
 }

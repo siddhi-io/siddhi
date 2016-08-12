@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.query.output.ratelimit.snapshot;
 
+import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.GroupedComplexEvent;
@@ -29,29 +30,27 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends Aggr
     private Map<String, Map<Integer, Object>> groupByAggregateAttributeValueMap;
     protected LinkedList<GroupedComplexEvent> eventList;
 
-    protected AggregationGroupByWindowedPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService, List<Integer> aggregateAttributePositionList, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter) {
-        super(id, value, scheduledExecutorService, aggregateAttributePositionList, wrappedSnapshotOutputRateLimiter);
+    protected AggregationGroupByWindowedPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService, List<Integer> aggregateAttributePositionList, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter, ExecutionPlanContext executionPlanContext) {
+        super(id, value, scheduledExecutorService, aggregateAttributePositionList, wrappedSnapshotOutputRateLimiter, executionPlanContext);
         groupByAggregateAttributeValueMap = new HashMap<String, Map<Integer, Object>>();
         eventList = new LinkedList<GroupedComplexEvent>();
     }
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        try {
-            lock.lock();
+        complexEventChunk.reset();
+        List<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        synchronized (this) {
             complexEventChunk.reset();
             String currentGroupByKey = null;
             Map<Integer, Object> currentAggregateAttributeValueMap = null;
             while (complexEventChunk.hasNext()) {
                 ComplexEvent event = complexEventChunk.next();
                 if (event.getType() == ComplexEvent.Type.TIMER) {
-                    if (event.getTimestamp() >= scheduledTime) {
-                        sendEvents();
-                        scheduledTime = scheduledTime + value;
-                        scheduler.notifyAt(scheduledTime);
-                    }
+                    tryFlushEvents(outputEventChunks, event);
                 } else {
                     complexEventChunk.remove();
+                    tryFlushEvents(outputEventChunks, event);
                     GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
                     if (currentGroupByKey == null || !currentGroupByKey.equals(groupedComplexEvent.getGroupKey())) {
                         currentGroupByKey = groupedComplexEvent.getGroupKey();
@@ -60,7 +59,6 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends Aggr
                             currentAggregateAttributeValueMap = new HashMap<Integer, Object>(aggregateAttributePositionList.size());
                             groupByAggregateAttributeValueMap.put(currentGroupByKey, currentAggregateAttributeValueMap);
                         }
-
                     }
                     if (groupedComplexEvent.getType() == ComplexEvent.Type.CURRENT) {
                         eventList.add(groupedComplexEvent);
@@ -78,31 +76,38 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends Aggr
                                 break;
                             }
                         }
+                    }else if (groupedComplexEvent.getType() == ComplexEvent.Type.RESET) {
+                        eventList.clear();
+                        groupByAggregateAttributeValueMap.clear();
                     }
                 }
             }
-        } finally {
-            lock.unlock();
+        }
+        for (ComplexEventChunk eventChunk : outputEventChunks) {
+            sendToCallBacks(eventChunk);
         }
     }
 
-    private synchronized void sendEvents() {
-        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<ComplexEvent>();
+    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event) {
+        if (event.getTimestamp() >= scheduledTime) {
+            constructOutputChunk(outputEventChunks);
+            scheduledTime = scheduledTime + value;
+            scheduler.notifyAt(scheduledTime);
+        }
+    }
 
+    private void constructOutputChunk(List<ComplexEventChunk<ComplexEvent>> outputEventChunks) {
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
         for (GroupedComplexEvent originalComplexEvent : eventList) {
-            String currentGroupByKey = null;
-            Map<Integer, Object> currentAggregateAttributeValueMap = null;
-            if (currentGroupByKey == null || !currentGroupByKey.equals(originalComplexEvent.getGroupKey())) {
-                currentGroupByKey = originalComplexEvent.getGroupKey();
-                currentAggregateAttributeValueMap = groupByAggregateAttributeValueMap.get(currentGroupByKey);
-            }
+            String currentGroupByKey = originalComplexEvent.getGroupKey();
+            Map<Integer, Object> currentAggregateAttributeValueMap = groupByAggregateAttributeValueMap.get(currentGroupByKey);
             ComplexEvent eventCopy = cloneComplexEvent(originalComplexEvent.getComplexEvent());
             for (Integer position : aggregateAttributePositionList) {
                 eventCopy.getOutputData()[position] = currentAggregateAttributeValueMap.get(position);
             }
-            complexEventChunk.add(eventCopy);
+            outputEventChunk.add(eventCopy);
         }
-        sendToCallBacks(complexEventChunk);
+        outputEventChunks.add(outputEventChunk);
     }
 
     @Override
@@ -118,6 +123,6 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends Aggr
 
     @Override
     public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter) {
-        return new AggregationGroupByWindowedPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService, aggregateAttributePositionList, wrappedSnapshotOutputRateLimiter);
+        return new AggregationGroupByWindowedPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService, aggregateAttributePositionList, wrappedSnapshotOutputRateLimiter, executionPlanContext);
     }
 }

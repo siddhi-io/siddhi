@@ -18,9 +18,8 @@
 package org.wso2.siddhi.core.query.processor.stream.window;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
-import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.MetaComplexEvent;
+import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
@@ -30,8 +29,9 @@ import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.util.Scheduler;
+import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
-import org.wso2.siddhi.core.util.parser.CollectionOperatorParser;
+import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
@@ -48,10 +48,6 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
     private Scheduler scheduler;
     private ExecutionPlanContext executionPlanContext;
 
-    public void setTimeInMilliSeconds(long timeInMilliSeconds) {
-        this.timeInMilliSeconds = timeInMilliSeconds;
-    }
-
     @Override
     public void setScheduler(Scheduler scheduler) {
         this.scheduler = scheduler;
@@ -65,7 +61,7 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
         this.executionPlanContext = executionPlanContext;
-        expiredEventChunk = new ComplexEventChunk<StreamEvent>();
+        expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 2) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
@@ -86,74 +82,65 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
     }
 
     @Override
-    protected synchronized void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
-        long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
+        synchronized (this) {
+            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
 
-        while (streamEventChunk.hasNext()) {
+            while (streamEventChunk.hasNext()) {
+                StreamEvent streamEvent = streamEventChunk.next();
 
-            boolean flag = false;
-            StreamEvent streamEvent = streamEventChunk.next();
-
-            StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
-            clonedEvent.setType(StreamEvent.Type.EXPIRED);
-
-            boolean eventScheduled = false;
-            while (expiredEventChunk.hasNext()) {
-                StreamEvent expiredEvent = expiredEventChunk.next();
-                long timeDiff = expiredEvent.getTimestamp() - currentTime + timeInMilliSeconds;
-                if (timeDiff <= 0) {
-                    expiredEventChunk.remove();
-                    count--;
-                    expiredEvent.setTimestamp(currentTime);
-                    streamEventChunk.insertBeforeCurrent(expiredEvent);
-                    flag = true;
-                } else {
-                    scheduler.notifyAt(expiredEvent.getTimestamp() + timeInMilliSeconds);
-                    expiredEventChunk.reset();
-                    eventScheduled = true;
-                    break;
-                }
-            }
-
-            expiredEventChunk.reset();
-
-            if (streamEvent.getType() == StreamEvent.Type.CURRENT) {
-                if (count < length) {
-                    count++;
-                    this.expiredEventChunk.add(clonedEvent);
-                } else {
-                    StreamEvent firstEvent = this.expiredEventChunk.poll();
-                    if (firstEvent != null) {
-                        if (!flag) {
-                            firstEvent.setTimestamp(currentTime);
-                            streamEventChunk.insertBeforeCurrent(firstEvent);
-                        }
-                        this.expiredEventChunk.add(clonedEvent);
-                    } else if (!flag) {
-                        streamEventChunk.insertBeforeCurrent(clonedEvent);
+                expiredEventChunk.reset();
+                while (expiredEventChunk.hasNext()) {
+                    StreamEvent expiredEvent = expiredEventChunk.next();
+                    long timeDiff = expiredEvent.getTimestamp() - currentTime + timeInMilliSeconds;
+                    if (timeDiff <= 0) {
+                        expiredEventChunk.remove();
+                        count--;
+                        expiredEvent.setTimestamp(currentTime);
+                        streamEventChunk.insertBeforeCurrent(expiredEvent);
+                    } else {
+                        break;
                     }
                 }
-            }
 
-            if (!eventScheduled) {
-                if (clonedEvent != null) {
+                expiredEventChunk.reset();
+
+                if (streamEvent.getType() == StreamEvent.Type.CURRENT) {
+                    StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                    clonedEvent.setType(StreamEvent.Type.EXPIRED);
+                    if (count < length) {
+                        count++;
+                        this.expiredEventChunk.add(clonedEvent);
+                    } else {
+                        StreamEvent firstEvent = this.expiredEventChunk.poll();
+                        if (firstEvent != null) {
+                            firstEvent.setTimestamp(currentTime);
+                            streamEventChunk.insertBeforeCurrent(firstEvent);
+                            this.expiredEventChunk.add(clonedEvent);
+                        }
+                    }
                     scheduler.notifyAt(clonedEvent.getTimestamp() + timeInMilliSeconds);
+                } else {
+                    streamEventChunk.remove();
                 }
             }
         }
-        expiredEventChunk.reset();
-        nextProcessor.process(streamEventChunk);
+        streamEventChunk.reset();
+        if (streamEventChunk.hasNext()) {
+            nextProcessor.process(streamEventChunk);
+        }
     }
 
 
     @Override
-    public synchronized StreamEvent find(ComplexEvent matchingEvent, Finder finder) {
+    public synchronized StreamEvent find(StateEvent matchingEvent, Finder finder) {
         return finder.find(matchingEvent, expiredEventChunk, streamEventCloner);
     }
 
     @Override
-    public Finder constructFinder(Expression expression, MetaComplexEvent matchingMetaComplexEvent, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap, int matchingStreamIndex, long withinTime) {
-        return CollectionOperatorParser.parse(expression, matchingMetaComplexEvent, executionPlanContext, variableExpressionExecutors, eventTableMap, matchingStreamIndex, inputDefinition, withinTime);
+    public Finder constructFinder(Expression expression, MatchingMetaStateHolder matchingMetaStateHolder, ExecutionPlanContext executionPlanContext,
+                                  List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap) {
+        return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap);
     }
 
     @Override

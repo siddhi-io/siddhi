@@ -20,17 +20,17 @@ package org.wso2.siddhi.core.query.processor.stream.window;
 
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
-import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.MetaComplexEvent;
+import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.table.EventTable;
+import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
-import org.wso2.siddhi.core.util.parser.CollectionOperatorParser;
+import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.List;
@@ -43,8 +43,7 @@ public class UniqueWindowProcessor extends WindowProcessor implements FindablePr
 
     /**
      * The init method of the WindowProcessor, this method will be called before other methods
-     *
-     * @param attributeExpressionExecutors the executors of each function parameters
+     *  @param attributeExpressionExecutors the executors of each function parameters
      * @param executionPlanContext         the context of the execution plan
      */
     @Override
@@ -63,26 +62,28 @@ public class UniqueWindowProcessor extends WindowProcessor implements FindablePr
      * @param streamEventCloner helps to clone the incoming event for local storage or modification
      */
     @Override
-    protected synchronized void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
-        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>();
-        long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
+        synchronized (this) {
+            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
 
-        StreamEvent streamEvent = streamEventChunk.getFirst();
-        while (streamEvent != null) {
-            StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
-            clonedEvent.setType(StreamEvent.Type.EXPIRED);
+            StreamEvent streamEvent = streamEventChunk.getFirst();
+            streamEventChunk.clear();
+            while (streamEvent != null) {
+                StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                clonedEvent.setType(StreamEvent.Type.EXPIRED);
 
-            StreamEvent oldEvent = map.put(generateKey(clonedEvent), clonedEvent);
-            if (oldEvent != null) {
-                oldEvent.setTimestamp(currentTime);
-                complexEventChunk.add(oldEvent);
+                StreamEvent oldEvent = map.put(generateKey(clonedEvent), clonedEvent);
+                if (oldEvent != null) {
+                    oldEvent.setTimestamp(currentTime);
+                    streamEventChunk.add(oldEvent);
+                }
+                StreamEvent next = streamEvent.getNext();
+                streamEvent.setNext(null);
+                streamEventChunk.add(streamEvent);
+                streamEvent = next;
             }
-            StreamEvent next = streamEvent.getNext();
-            streamEvent.setNext(null);
-            complexEventChunk.add(streamEvent);
-            streamEvent = next;
         }
-        nextProcessor.process(complexEventChunk);
+        nextProcessor.process(streamEventChunk);
     }
 
     /**
@@ -138,7 +139,7 @@ public class UniqueWindowProcessor extends WindowProcessor implements FindablePr
      * @return the matched events
      */
     @Override
-    public synchronized StreamEvent find(ComplexEvent matchingEvent, Finder finder) {
+    public synchronized StreamEvent find(StateEvent matchingEvent, Finder finder) {
         return finder.find(matchingEvent, map.values(), streamEventCloner);
     }
 
@@ -147,19 +148,17 @@ public class UniqueWindowProcessor extends WindowProcessor implements FindablePr
      * matchingEvent and the given matching expression logic.
      *
      * @param expression                  the matching expression
-     * @param matchingMetaComplexEvent            the meta structure of the incoming matchingEvent
+     * @param matchingMetaStateHolder       the meta structure of the incoming matchingEvent
      * @param executionPlanContext        current execution plan context
      * @param variableExpressionExecutors the list of variable ExpressionExecutors already created
      * @param eventTableMap               map of event tables
-     * @param matchingStreamIndex         the stream index of the incoming matchingEvent
-     * @param withinTime                  the maximum time gap between the events to be matched
      * @return finder having the capability of finding events at the processor against the expression and incoming
      * matchingEvent
      */
     @Override
-    public Finder constructFinder(Expression expression, MetaComplexEvent matchingMetaComplexEvent, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap, int matchingStreamIndex, long withinTime) {
-        return CollectionOperatorParser.parse(expression, matchingMetaComplexEvent, executionPlanContext, variableExpressionExecutors, eventTableMap, matchingStreamIndex, inputDefinition, withinTime);
-
+    public Finder constructFinder(Expression expression, MatchingMetaStateHolder matchingMetaStateHolder, ExecutionPlanContext executionPlanContext,
+                                  List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap) {
+        return OperatorParser.constructOperator(map.values(), expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap);
     }
 
     private String generateKey(StreamEvent event) {

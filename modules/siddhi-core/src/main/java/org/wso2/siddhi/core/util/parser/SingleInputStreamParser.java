@@ -25,8 +25,8 @@ import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
+import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
-import org.wso2.siddhi.core.query.input.stream.single.SingleThreadEntryValveProcessor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.filter.FilterProcessor;
@@ -41,7 +41,6 @@ import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.extension.holder.StreamFunctionProcessorExtensionHolder;
 import org.wso2.siddhi.core.util.extension.holder.StreamProcessorExtensionHolder;
 import org.wso2.siddhi.core.util.extension.holder.WindowProcessorExtensionHolder;
-import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.execution.query.input.handler.Filter;
@@ -69,15 +68,16 @@ public class SingleInputStreamParser {
      * @param eventTableMap               EventTable Map
      * @param metaComplexEvent            MetaComplexEvent
      * @param processStreamReceiver       ProcessStreamReceiver
-     * @param latencyTracker              latency tracker
+     * @param supportsBatchProcessing     supports batch processing
+     * @param outputExpectsExpiredEvents  is output expects ExpiredEvents
      * @return SingleStreamRuntime
      */
     public static SingleStreamRuntime parseInputStream(SingleInputStream inputStream, ExecutionPlanContext executionPlanContext,
                                                        List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, AbstractDefinition> streamDefinitionMap,
                                                        Map<String, AbstractDefinition> tableDefinitionMap, Map<String, EventTable> eventTableMap, MetaComplexEvent metaComplexEvent,
-                                                       ProcessStreamReceiver processStreamReceiver, boolean supportsBatchProcessing, LatencyTracker latencyTracker) {
+                                                       ProcessStreamReceiver processStreamReceiver, boolean supportsBatchProcessing, boolean outputExpectsExpiredEvents) {
         Processor processor = null;
-        SingleThreadEntryValveProcessor singleThreadValve = null;
+        EntryValveProcessor entryValveProcessor = null;
         boolean first = true;
         MetaStreamEvent metaStreamEvent;
         if (metaComplexEvent instanceof MetaStateEvent) {
@@ -90,20 +90,19 @@ public class SingleInputStreamParser {
         }
         if (!inputStream.getStreamHandlers().isEmpty()) {
             for (StreamHandler handler : inputStream.getStreamHandlers()) {
-                Processor currentProcessor = generateProcessor(handler, metaComplexEvent, variableExpressionExecutors, executionPlanContext, eventTableMap, supportsBatchProcessing);
+                Processor currentProcessor = generateProcessor(handler, metaComplexEvent, variableExpressionExecutors, executionPlanContext, eventTableMap, supportsBatchProcessing, outputExpectsExpiredEvents);
                 if (currentProcessor instanceof SchedulingProcessor) {
-                    if (singleThreadValve == null) {
+                    if (entryValveProcessor == null) {
 
-                        singleThreadValve = new SingleThreadEntryValveProcessor(executionPlanContext);
+                        entryValveProcessor = new EntryValveProcessor(executionPlanContext);
                         if (first) {
-                            processor = singleThreadValve;
+                            processor = entryValveProcessor;
                             first = false;
                         } else {
-                            processor.setToLast(singleThreadValve);
+                            processor.setToLast(entryValveProcessor);
                         }
                     }
-                    Scheduler scheduler = new Scheduler(executionPlanContext.getScheduledExecutorService(), singleThreadValve);
-                    scheduler.init(executionPlanContext, latencyTracker);
+                    Scheduler scheduler = new Scheduler(executionPlanContext.getScheduledExecutorService(), entryValveProcessor, executionPlanContext);
                     ((SchedulingProcessor) currentProcessor).setScheduler(scheduler);
                 }
                 if (first) {
@@ -121,7 +120,7 @@ public class SingleInputStreamParser {
     }
 
 
-    private static Processor generateProcessor(StreamHandler streamHandler, MetaComplexEvent metaEvent, List<VariableExpressionExecutor> variableExpressionExecutors, ExecutionPlanContext executionPlanContext, Map<String, EventTable> eventTableMap, boolean supportsBatchProcessing) {
+    private static Processor generateProcessor(StreamHandler streamHandler, MetaComplexEvent metaEvent, List<VariableExpressionExecutor> variableExpressionExecutors, ExecutionPlanContext executionPlanContext, Map<String, EventTable> eventTableMap, boolean supportsBatchProcessing, boolean outputExpectsExpiredEvents) {
         Expression[] parameters = streamHandler.getParameters();
         MetaStreamEvent metaStreamEvent;
         int stateIndex = SiddhiConstants.UNKNOWN_STATE;
@@ -165,7 +164,7 @@ public class SingleInputStreamParser {
                 windowProcessor = (WindowProcessor) SiddhiClassLoader.loadSiddhiImplementation(((Window) streamHandler).getFunction(),
                         WindowProcessor.class);
             }
-            windowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(), attributeExpressionExecutors, executionPlanContext);
+            windowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(), attributeExpressionExecutors, executionPlanContext, outputExpectsExpiredEvents);
             return windowProcessor;
 
         } else if (streamHandler instanceof StreamFunction) {
@@ -180,7 +179,7 @@ public class SingleInputStreamParser {
                                 ((StreamFunction) streamHandler).getFunction(), StreamProcessor.class);
                     }
                     metaStreamEvent.addInputDefinition(abstractStreamProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(),
-                            attributeExpressionExecutors, executionPlanContext));
+                            attributeExpressionExecutors, executionPlanContext, outputExpectsExpiredEvents));
                     return abstractStreamProcessor;
                 } catch (ExecutionPlanCreationException e) {
                     if (!e.isClassLoadingIssue()) {
@@ -196,7 +195,7 @@ public class SingleInputStreamParser {
                         ((StreamFunction) streamHandler).getFunction(), StreamFunctionProcessor.class);
             }
             metaStreamEvent.addInputDefinition(abstractStreamProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(),
-                    attributeExpressionExecutors, executionPlanContext));
+                    attributeExpressionExecutors, executionPlanContext, outputExpectsExpiredEvents));
             return abstractStreamProcessor;
         } else {
             throw new IllegalStateException(streamHandler.getClass().getName() + " is not supported");

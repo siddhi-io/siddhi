@@ -20,7 +20,7 @@ package org.wso2.siddhi.core.query.processor.stream.window;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.MetaComplexEvent;
+import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
@@ -30,8 +30,9 @@ import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.util.Scheduler;
+import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
-import org.wso2.siddhi.core.util.parser.CollectionOperatorParser;
+import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
@@ -42,11 +43,14 @@ import java.util.Map;
 public class TimeBatchWindowProcessor extends WindowProcessor implements SchedulingProcessor, FindableProcessor {
 
     private long timeInMilliSeconds;
-    private long lastSentTime;
-    private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>();
-    private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>();
+    private long nextEmitTime = -1;
+    private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(false);
+    private ComplexEventChunk<StreamEvent> expiredEventChunk = null;
+    private StreamEvent resetEvent = null;
     private Scheduler scheduler;
     private ExecutionPlanContext executionPlanContext;
+    private boolean isStartTimeEnabled = false;
+    private long startTime = 0;
 
     public void setTimeInMilliSeconds(long timeInMilliSeconds) {
         this.timeInMilliSeconds = timeInMilliSeconds;
@@ -65,7 +69,9 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
         this.executionPlanContext = executionPlanContext;
-        this.expiredEventChunk = new ComplexEventChunk<StreamEvent>();
+        if (outputExpectsExpiredEvents) {
+            this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        }
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
@@ -79,61 +85,116 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
             } else {
                 throw new ExecutionPlanValidationException("Time window should have constant parameter attribute but found a dynamic attribute " + attributeExpressionExecutors[0].getClass().getCanonicalName());
             }
+        } else if (attributeExpressionExecutors.length == 2) {
+            if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
+                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
+                    timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
+
+                } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
+                    timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
+                } else {
+                    throw new ExecutionPlanValidationException("Time window's parameter attribute should be either int or long, but found " + attributeExpressionExecutors[0].getReturnType());
+                }
+            } else {
+                throw new ExecutionPlanValidationException("Time window should have constant parameter attribute but found a dynamic attribute " + attributeExpressionExecutors[0].getClass().getCanonicalName());
+            }
+            // start time
+            isStartTimeEnabled = true;
+            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
+                startTime = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue()));
+            } else {
+                startTime = Long.parseLong(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue()));
+            }
         } else {
-            throw new ExecutionPlanValidationException("Time window should only have one parameter (<int|long|time> windowTime), but found " + attributeExpressionExecutors.length + " input attributes");
+            throw new ExecutionPlanValidationException("Time window should only have one or two parameters. (<int|long|time> windowTime), but found " + attributeExpressionExecutors.length + " input attributes");
         }
-        lastSentTime = executionPlanContext.getTimestampGenerator().currentTime();
     }
+
 
     @Override
-    protected synchronized void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
-        long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
-        boolean sendEvents;
-        if (currentTime >= lastSentTime + timeInMilliSeconds) {
-            lastSentTime = currentTime;
-            if (currentEventChunk.getFirst() != null || expiredEventChunk.getFirst() != null) {
-                scheduler.notifyAt(lastSentTime + timeInMilliSeconds);
+    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
+        synchronized (this) {
+            if (nextEmitTime == -1) {
+                long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+                if (isStartTimeEnabled) {
+                    nextEmitTime = getNextEmitTime(currentTime);
+                } else {
+                    nextEmitTime = executionPlanContext.getTimestampGenerator().currentTime() + timeInMilliSeconds;
+                }
+                scheduler.notifyAt(nextEmitTime);
             }
-            sendEvents = true;
-        } else {
-            scheduler.notifyAt(lastSentTime + timeInMilliSeconds);
-            sendEvents = false;
-        }
+            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+            boolean sendEvents;
 
-        while (streamEventChunk.hasNext()) {
-            StreamEvent streamEvent = streamEventChunk.next();
-            if (streamEvent.getType() != ComplexEvent.Type.CURRENT) {
-                continue;
+            if (currentTime >= nextEmitTime) {
+                nextEmitTime += timeInMilliSeconds;
+                scheduler.notifyAt(nextEmitTime);
+                sendEvents = true;
+            } else {
+                sendEvents = false;
             }
-            StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-            currentEventChunk.add(clonedStreamEvent);
+
+            while (streamEventChunk.hasNext()) {
+                StreamEvent streamEvent = streamEventChunk.next();
+                if (streamEvent.getType() != ComplexEvent.Type.CURRENT) {
+                    continue;
+                }
+                StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                currentEventChunk.add(clonedStreamEvent);
+            }
+            streamEventChunk.clear();
+            if (sendEvents) {
+
+                if (outputExpectsExpiredEvents) {
+                    if (expiredEventChunk.getFirst() != null) {
+                        while (expiredEventChunk.hasNext()) {
+                            StreamEvent expiredEvent = expiredEventChunk.next();
+                            expiredEvent.setTimestamp(currentTime);
+                        }
+                        streamEventChunk.add(expiredEventChunk.getFirst());
+                    }
+                }
+                if (expiredEventChunk != null) {
+                    expiredEventChunk.clear();
+                }
+
+                if (currentEventChunk.getFirst() != null) {
+
+                    // add reset event in front of current events
+                    streamEventChunk.add(resetEvent);
+                    resetEvent = null;
+
+                    if (expiredEventChunk != null) {
+                        currentEventChunk.reset();
+                        while (currentEventChunk.hasNext()) {
+                            StreamEvent currentEvent = currentEventChunk.next();
+                            StreamEvent toExpireEvent = streamEventCloner.copyStreamEvent(currentEvent);
+                            toExpireEvent.setType(StreamEvent.Type.EXPIRED);
+                            expiredEventChunk.add(toExpireEvent);
+                        }
+                    }
+
+                    resetEvent = streamEventCloner.copyStreamEvent(currentEventChunk.getFirst());
+                    resetEvent.setType(ComplexEvent.Type.RESET);
+                    streamEventChunk.add(currentEventChunk.getFirst());
+                }
+                currentEventChunk.clear();
+            }
         }
-        if (sendEvents) {
-            currentEventChunk.reset();
-            ComplexEventChunk<StreamEvent> newEventChunk = new ComplexEventChunk<StreamEvent>();
-            while (expiredEventChunk.hasNext()) {
-                StreamEvent expiredEvent = expiredEventChunk.next();
-                expiredEvent.setTimestamp(currentTime);
-            }
-            if (expiredEventChunk.getFirst() != null) {
-                newEventChunk.add(expiredEventChunk.getFirst());
-            }
-            expiredEventChunk.clear();
-            while (currentEventChunk.hasNext()) {
-                StreamEvent currentEvent = currentEventChunk.next();
-                StreamEvent toExpireEvent = streamEventCloner.copyStreamEvent(currentEvent);
-                toExpireEvent.setType(StreamEvent.Type.EXPIRED);
-                expiredEventChunk.add(toExpireEvent);
-            }
-            if (currentEventChunk.getFirst() != null) {
-                newEventChunk.add(currentEventChunk.getFirst());
-            }
-            currentEventChunk.clear();
-            if (newEventChunk.getFirst() != null) {
-                nextProcessor.process(newEventChunk);
-            }
+        if (streamEventChunk.getFirst() != null) {
+            streamEventChunk.setBatch(true);
+            nextProcessor.process(streamEventChunk);
+            streamEventChunk.setBatch(false);
         }
     }
+
+    private long getNextEmitTime(long currentTime) {
+        // returns the next emission time based on system clock round time values.
+        long elapsedTimeSinceLastEmit = (currentTime - startTime) % timeInMilliSeconds;
+        long emitTime = currentTime + (timeInMilliSeconds - elapsedTimeSinceLastEmit);
+        return emitTime;
+    }
+
 
     @Override
     public void start() {
@@ -147,22 +208,39 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
 
     @Override
     public Object[] currentState() {
-        return new Object[]{expiredEventChunk.getFirst()};
+        if (expiredEventChunk != null) {
+            return new Object[]{currentEventChunk.getFirst(), expiredEventChunk.getFirst(), resetEvent};
+        } else {
+            return new Object[]{currentEventChunk.getFirst(), resetEvent};
+        }
     }
 
     @Override
     public void restoreState(Object[] state) {
-        expiredEventChunk.clear();
-        expiredEventChunk.add((StreamEvent) state[0]);
+        if (state.length > 2) {
+            currentEventChunk.clear();
+            currentEventChunk.add((StreamEvent) state[0]);
+            expiredEventChunk.clear();
+            expiredEventChunk.add((StreamEvent) state[1]);
+            resetEvent = (StreamEvent) state[2];
+        } else {
+            currentEventChunk.clear();
+            currentEventChunk.add((StreamEvent) state[0]);
+            resetEvent = (StreamEvent) state[1];
+        }
     }
 
     @Override
-    public synchronized StreamEvent find(ComplexEvent matchingEvent, Finder finder) {
+    public synchronized StreamEvent find(StateEvent matchingEvent, Finder finder) {
         return finder.find(matchingEvent, expiredEventChunk, streamEventCloner);
     }
 
     @Override
-    public Finder constructFinder(Expression expression, MetaComplexEvent matchingMetaComplexEvent, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap, int matchingStreamIndex, long withinTime) {
-        return CollectionOperatorParser.parse(expression, matchingMetaComplexEvent, executionPlanContext, variableExpressionExecutors, eventTableMap, matchingStreamIndex, inputDefinition, withinTime);
+    public Finder constructFinder(Expression expression, MatchingMetaStateHolder matchingMetaStateHolder, ExecutionPlanContext executionPlanContext,
+                                  List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap) {
+        if (expiredEventChunk == null) {
+            expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        }
+        return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap);
     }
 }

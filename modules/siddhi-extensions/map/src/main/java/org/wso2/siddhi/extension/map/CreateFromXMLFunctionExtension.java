@@ -20,6 +20,7 @@ package org.wso2.siddhi.extension.map;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -62,10 +63,8 @@ public class CreateFromXMLFunctionExtension extends FunctionExecutor {
     protected Object execute(Object data) {
         if (data instanceof String) {
             try {
-                Map<Object, Object> topLevelMap = new HashMap<Object, Object>();
                 OMElement parentElement = AXIOMUtil.stringToOM(data.toString());
-                topLevelMap.put(parentElement.getQName().toString(), getMapFromXML(parentElement));
-                return topLevelMap;
+                return getMapFromXML(parentElement);
             } catch (XMLStreamException e) {
                 throw new ExecutionPlanRuntimeException("Input data cannot be parsed to xml: " + e.getMessage(), e);
             }
@@ -75,7 +74,7 @@ public class CreateFromXMLFunctionExtension extends FunctionExecutor {
     }
 
     private Object getMapFromXML(OMElement parentElement) throws XMLStreamException {
-        Map<Object, Object> map = new HashMap<Object, Object>();
+        Map<Object, Object> topLevelMap = new HashMap<Object, Object>();
         Iterator iterator = parentElement.getChildElements();
         while (iterator.hasNext()) {
             OMElement streamAttributeElement = (OMElement) iterator.next();
@@ -88,18 +87,21 @@ public class CreateFromXMLFunctionExtension extends FunctionExecutor {
                 if (elementText.equals("true") || elementText.equals("false")) {
                     value = Boolean.parseBoolean(elementText);
                 } else {
-                    try {
-                        value = numberFormat.parse(elementText);
-                    } catch (ParseException e) {
+                    if (NumberUtils.isNumber(elementText)) {
+                        try {
+                            value = numberFormat.parse(elementText);
+                        } catch (ParseException e) {
+                            value = elementText;
+                        }
+                    } else {
                         value = elementText;
                     }
                 }
             }
-            map.put(key, value);
+            topLevelMap.put(key, value);
         }
-        return map;
+        return topLevelMap;
     }
-
 
     @Override
     public void start() {

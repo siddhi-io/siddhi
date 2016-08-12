@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
+import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.output.ratelimit.snapshot.WrappedSnapshotOutputRateLimiter;
@@ -39,11 +40,13 @@ import org.wso2.siddhi.query.api.execution.query.input.handler.StreamHandler;
 import org.wso2.siddhi.query.api.execution.query.input.handler.Window;
 import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class QueryParser {
 
@@ -63,27 +66,33 @@ public class QueryParser {
                                      Map<String, EventTable> eventTableMap) {
         List<VariableExpressionExecutor> executors = new ArrayList<VariableExpressionExecutor>();
         QueryRuntime queryRuntime;
-        Element element = null;
+        Element nameElement = null;
         LatencyTracker latencyTracker = null;
+        ReentrantLock queryLock = null;
         try {
-            element = AnnotationHelper.getAnnotationElement("info", "name", query.getAnnotations());
+            nameElement = AnnotationHelper.getAnnotationElement("info", "name", query.getAnnotations());
             if (executionPlanContext.isStatsEnabled() && executionPlanContext.getStatisticsManager() != null) {
-                if (element != null) {
+                if (nameElement != null) {
                     String metricName =
                             executionPlanContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix() +
                                     SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_EXECUTION_PLANS +
                                     SiddhiConstants.METRIC_DELIMITER + executionPlanContext.getName() +
                                     SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_SIDDHI +
                                     SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_QUERIES +
-                                    SiddhiConstants.METRIC_DELIMITER + element.getValue();
+                                    SiddhiConstants.METRIC_DELIMITER + nameElement.getValue();
                     latencyTracker = executionPlanContext.getSiddhiContext()
                             .getStatisticsConfiguration()
                             .getFactory()
                             .createLatencyTracker(metricName, executionPlanContext.getStatisticsManager());
                 }
             }
+            OutputStream.OutputEventType outputEventType = query.getOutputStream().getOutputEventType();
+            boolean outputExpectsExpiredEvents = false;
+            if (outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS) {
+                outputExpectsExpiredEvents = true;
+            }
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    executionPlanContext, streamDefinitionMap, tableDefinitionMap, eventTableMap, executors, latencyTracker);
+                    executionPlanContext, streamDefinitionMap, tableDefinitionMap, eventTableMap, executors, latencyTracker, outputExpectsExpiredEvents);
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
                     executionPlanContext, streamRuntime.getMetaComplexEvent(), eventTableMap, executors);
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
@@ -96,38 +105,52 @@ public class QueryParser {
                 }
             }
 
+            Element synchronizedElement = AnnotationHelper.getAnnotationElement("synchronized", null, query.getAnnotations());
+            if (synchronizedElement != null) {
+                if (!("false".equalsIgnoreCase(synchronizedElement.getValue()))) {
+                    queryLock = new ReentrantLock();
+                }
+            } else {
+                if (isWindow || !(streamRuntime instanceof SingleStreamRuntime)) {
+                    queryLock = new ReentrantLock();
+                }
+            }
+
             OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(query.getOutputStream().getId(),
                     query.getOutputRate(), query.getSelector().getGroupByList().size() != 0, isWindow,
-                    executionPlanContext.getScheduledExecutorService());
-            if (outputRateLimiter != null) {
-                outputRateLimiter.init(executionPlanContext, latencyTracker);
+                    executionPlanContext.getScheduledExecutorService(), executionPlanContext);
+            if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
+                selector.setBatchingEnabled(false);
             }
             executionPlanContext.addEternalReferencedHolder(outputRateLimiter);
 
             OutputCallback outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(),
-                    streamRuntime.getMetaComplexEvent().getOutputStreamDefinition(), eventTableMap, executionPlanContext);
+                    streamRuntime.getMetaComplexEvent().getOutputStreamDefinition(), eventTableMap, executionPlanContext, !(streamRuntime instanceof SingleStreamRuntime));
+
             QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
-            QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent());
+            QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent(), queryLock);
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime.getMetaComplexEvent()));
-
             queryRuntime = new QueryRuntime(query, executionPlanContext, streamRuntime, selector, outputRateLimiter,
-                    outputCallback, streamRuntime.getMetaComplexEvent());
+                    outputCallback, streamRuntime.getMetaComplexEvent(), queryLock != null);
 
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
+                selector.setBatchingEnabled(false);
                 ((WrappedSnapshotOutputRateLimiter) outputRateLimiter)
                         .init(streamRuntime.getMetaComplexEvent().getOutputStreamDefinition().getAttributeList().size(),
                                 selector.getAttributeProcessorList(), streamRuntime.getMetaComplexEvent());
             }
+            outputRateLimiter.init(executionPlanContext, queryLock);
+
         } catch (DuplicateDefinitionException e) {
-            if (element != null) {
-                throw new DuplicateDefinitionException(e.getMessage() + ", when creating query " + element.getValue(), e);
+            if (nameElement != null) {
+                throw new DuplicateDefinitionException(e.getMessage() + ", when creating query " + nameElement.getValue(), e);
             } else {
                 throw new DuplicateDefinitionException(e.getMessage(), e);
             }
         } catch (RuntimeException e) {
-            if (element != null) {
-                throw new ExecutionPlanCreationException(e.getMessage() + ", when creating query " + element.getValue(), e);
+            if (nameElement != null) {
+                throw new ExecutionPlanCreationException(e.getMessage() + ", when creating query " + nameElement.getValue(), e);
             } else {
                 throw new ExecutionPlanCreationException(e.getMessage(), e);
             }

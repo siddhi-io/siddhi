@@ -25,7 +25,7 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.ConversionStreamEventChunk;
 import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
-import org.wso2.siddhi.core.query.input.stream.single.SingleThreadEntryValveProcessor;
+import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 
@@ -33,14 +33,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * Created on 12/3/14.
- */
 public class Scheduler implements Snapshotable {
 
     private static final Logger log = Logger.getLogger(Scheduler.class);
     private final BlockingQueue<Long> toNotifyQueue = new LinkedBlockingQueue<Long>();
+    private final ThreadBarrier threadBarrier;
     private ScheduledExecutorService scheduledExecutorService;
     private EventCaller eventCaller;
     private volatile boolean running = false;
@@ -49,11 +48,14 @@ public class Scheduler implements Snapshotable {
     private ExecutionPlanContext executionPlanContext;
     private String elementId;
     private LatencyTracker latencyTracker;
+    private ReentrantLock queryLock;
 
 
-    public Scheduler(ScheduledExecutorService scheduledExecutorService, Schedulable singleThreadEntryValve) {
+    public Scheduler(ScheduledExecutorService scheduledExecutorService, Schedulable singleThreadEntryValve, ExecutionPlanContext executionPlanContext) {
+        this.threadBarrier = executionPlanContext.getThreadBarrier();
         this.scheduledExecutorService = scheduledExecutorService;
-        eventCaller = new EventCaller(singleThreadEntryValve);
+        this.eventCaller = new EventCaller(singleThreadEntryValve);
+        this.executionPlanContext = executionPlanContext;
     }
 
     public void notifyAt(long time) {
@@ -86,9 +88,8 @@ public class Scheduler implements Snapshotable {
         streamEventChunk = new ConversionStreamEventChunk((StreamEventConverter) null, streamEventPool);
     }
 
-    public void init(ExecutionPlanContext executionPlanContext, LatencyTracker latencyTracker) {
-        this.latencyTracker = latencyTracker;
-        this.executionPlanContext = executionPlanContext;
+    public void init(ReentrantLock queryLock) {
+        this.queryLock = queryLock;
         if (elementId == null) {
             elementId = executionPlanContext.getElementIdGenerator().createNewId();
         }
@@ -113,11 +114,14 @@ public class Scheduler implements Snapshotable {
         return elementId;
     }
 
-    public Scheduler clone(String key, SingleThreadEntryValveProcessor singleThreadEntryValveProcessor) {
-        Scheduler scheduler = new Scheduler(scheduledExecutorService, singleThreadEntryValveProcessor);
+    public Scheduler clone(String key, EntryValveProcessor entryValveProcessor) {
+        Scheduler scheduler = new Scheduler(scheduledExecutorService, entryValveProcessor, executionPlanContext);
         scheduler.elementId = elementId + "-" + key;
-        scheduler.init(executionPlanContext, latencyTracker);
         return scheduler;
+    }
+
+    public void setLatencyTracker(LatencyTracker latencyTracker) {
+        this.latencyTracker = latencyTracker;
     }
 
     private class EventCaller implements Runnable {
@@ -141,42 +145,56 @@ public class Scheduler implements Snapshotable {
          */
         @Override
         public void run() {
-            Long toNotifyTime = toNotifyQueue.peek();
-            long currentTime = System.currentTimeMillis();
-            while (toNotifyTime != null && toNotifyTime - currentTime <= 0) {
+            try {
+                Long toNotifyTime = toNotifyQueue.peek();
+                long currentTime = System.currentTimeMillis();
+                while (toNotifyTime != null && toNotifyTime - currentTime <= 0) {
+                    toNotifyQueue.poll();
 
-                toNotifyQueue.poll();
-
-                StreamEvent timerEvent = streamEventPool.borrowEvent();
-                timerEvent.setType(StreamEvent.Type.TIMER);
-                timerEvent.setTimestamp(currentTime);
-                streamEventChunk.add(timerEvent);
-                if (latencyTracker != null) {
+                    StreamEvent timerEvent = streamEventPool.borrowEvent();
+                    timerEvent.setType(StreamEvent.Type.TIMER);
+                    timerEvent.setTimestamp(toNotifyTime);
+                    streamEventChunk.add(timerEvent);
+                    if (queryLock != null) {
+                        queryLock.lock();
+                    }
+                    threadBarrier.pass();
                     try {
-                        latencyTracker.markIn();
-                        singleThreadEntryValve.process(streamEventChunk);
+                        if (latencyTracker != null) {
+                            try {
+                                latencyTracker.markIn();
+                                singleThreadEntryValve.process(streamEventChunk);
+                            } finally {
+                                latencyTracker.markOut();
+                            }
+                        } else {
+                            singleThreadEntryValve.process(streamEventChunk);
+                        }
                     } finally {
-                        latencyTracker.markOut();
+                        if (queryLock != null && queryLock.isHeldByCurrentThread()) {
+                            queryLock.unlock();
+                        }
                     }
+                    streamEventChunk.clear();
+
+                    toNotifyTime = toNotifyQueue.peek();
+                    currentTime = System.currentTimeMillis();
+
+                }
+                if (toNotifyTime != null) {
+                    scheduledExecutorService.schedule(eventCaller, toNotifyTime - currentTime, TimeUnit.MILLISECONDS);
                 } else {
-                    singleThreadEntryValve.process(streamEventChunk);
-                }
-                streamEventChunk.clear();
-
-                toNotifyTime = toNotifyQueue.peek();
-                currentTime = System.currentTimeMillis();
-
-            }
-            if (toNotifyTime != null) {
-                scheduledExecutorService.schedule(eventCaller, toNotifyTime - currentTime, TimeUnit.MILLISECONDS);
-            } else {
-                synchronized (toNotifyQueue) {
-                    running = false;
-                    if (toNotifyQueue.peek() != null) {
-                        running = true;
-                        scheduledExecutorService.schedule(eventCaller, 0, TimeUnit.MILLISECONDS);
+                    synchronized (toNotifyQueue) {
+                        running = false;
+                        if (toNotifyQueue.peek() != null) {
+                            running = true;
+                            scheduledExecutorService.schedule(eventCaller, 0, TimeUnit.MILLISECONDS);
+                        }
                     }
                 }
+
+            } catch (Throwable t) {
+                log.error(t);
             }
         }
 

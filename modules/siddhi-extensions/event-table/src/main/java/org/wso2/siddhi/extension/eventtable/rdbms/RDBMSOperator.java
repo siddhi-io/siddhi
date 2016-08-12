@@ -22,14 +22,18 @@ package org.wso2.siddhi.extension.eventtable.rdbms;
 import org.apache.hadoop.util.bloom.Key;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.util.collection.OverwritingStreamEventExtractor;
+import org.wso2.siddhi.core.util.collection.UpdateAttributeMapper;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,8 +47,6 @@ public class RDBMSOperator implements Operator {
     private boolean isBloomEnabled;
     private final int[] attributeIndexArray;
     private ExecutionInfo executionInfo;
-    private final StreamEvent matchingEvent;
-    private final ZeroStreamEventConverter streamEventConverter;
     private int matchingEventOutputSize;
 
     public RDBMSOperator(ExecutionInfo executionInfo, List<ExpressionExecutor> expressionExecutorList, DBHandler dbHandler, Operator inMemoryEventTableOperator, int matchingEventOutputSize) {
@@ -53,8 +55,6 @@ public class RDBMSOperator implements Operator {
         this.inMemoryEventTableOperator = inMemoryEventTableOperator;
         this.executionInfo = executionInfo;
         this.matchingEventOutputSize = matchingEventOutputSize;
-        this.matchingEvent = new StreamEvent(0, 0, matchingEventOutputSize);
-        this.streamEventConverter = new ZeroStreamEventConverter();
 
         if (dbHandler.isBloomFilterEnabled() && executionInfo.isBloomFilterCompatible()) {
             this.isBloomEnabled = true;
@@ -69,72 +69,84 @@ public class RDBMSOperator implements Operator {
     }
 
     @Override
-    public void delete(ComplexEventChunk deletingEventChunk, Object candidateEvents) {
+    public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, Object candidateEvents) {
         deletingEventChunk.reset();
+        List<Object[]> deletionEventList = new ArrayList<Object[]>();
         while (deletingEventChunk.hasNext()) {
             Object[] obj;
             ComplexEvent deletingEvent = deletingEventChunk.next();
-            streamEventConverter.convertStreamEvent(deletingEvent, matchingEvent);
             if (expressionExecutorList != null) {
                 obj = new Object[expressionExecutorList.size()];
                 int count = 0;
                 for (ExpressionExecutor expressionExecutor : expressionExecutorList) {
-                    Object value = expressionExecutor.execute(matchingEvent);
+                    Object value = expressionExecutor.execute(deletingEvent);
                     obj[count] = value;
                     count++;
                 }
             } else {
                 obj = new Object[]{};
             }
-            dbHandler.deleteEvent(obj, matchingEvent, executionInfo);
+
+            deletionEventList.add(obj);
+        }
+
+        if(deletionEventList.size() > 0){
+            dbHandler.deleteEvent(deletionEventList, executionInfo);
         }
     }
 
     @Override
-    public void update(ComplexEventChunk updatingEventChunk, Object candidateEvents, int[] mappingPosition) {
+    public void update(ComplexEventChunk<StateEvent> updatingEventChunk, Object candidateEvents, UpdateAttributeMapper[] updateAttributeMappers) {
         updatingEventChunk.reset();
+        List<Object[]> updateEventList = new ArrayList<Object[]>();
         while (updatingEventChunk.hasNext()) {
-            ComplexEvent updatingEvent = updatingEventChunk.next();
-            streamEventConverter.convertStreamEvent(updatingEvent, matchingEvent);
-            Object[] incomingEvent = matchingEvent.getOutputData();
-            Object[] obj = new Object[incomingEvent.length + expressionExecutorList.size()];
-            System.arraycopy(incomingEvent, 0, obj, 0, incomingEvent.length);
-            int count = incomingEvent.length;
+            StateEvent updatingEvent = updatingEventChunk.next();
+            Object[] incomingEvent = updatingEvent.getStreamEvent(0).getOutputData();
+            Object[] obj = new Object[matchingEventOutputSize + expressionExecutorList.size()];
+            System.arraycopy(incomingEvent, 0, obj, 0, matchingEventOutputSize);
+            int count = matchingEventOutputSize;
             for (ExpressionExecutor expressionExecutor : expressionExecutorList) {
-                Object value = expressionExecutor.execute(matchingEvent);
+                Object value = expressionExecutor.execute(updatingEvent);
                 obj[count] = value;
                 count++;
             }
-            dbHandler.updateEvent(obj, executionInfo);
+            updateEventList.add(obj);
+        }
+
+        if(updateEventList.size() > 0){
+            dbHandler.updateEvent(updateEventList, executionInfo);
         }
     }
 
     @Override
-    public void overwriteOrAdd(ComplexEventChunk overwritingOrAddingEventChunk, Object candidateEvents, int[] mappingPosition) {
+    public ComplexEventChunk<StreamEvent> overwriteOrAdd(ComplexEventChunk<StateEvent> overwritingOrAddingEventChunk, Object candidateEvents, UpdateAttributeMapper[] updateAttributeMappers, OverwritingStreamEventExtractor overwritingStreamEventExtractor) {
         overwritingOrAddingEventChunk.reset();
+        List<Object[]> updateEventList = new ArrayList<Object[]>();
+
         while (overwritingOrAddingEventChunk.hasNext()) {
-            ComplexEvent overwritingOrAddingEvent = overwritingOrAddingEventChunk.next();
-            streamEventConverter.convertStreamEvent(overwritingOrAddingEvent, matchingEvent);
-            Object[] incomingEvent = matchingEvent.getOutputData();
-            Object[] obj = new Object[incomingEvent.length + expressionExecutorList.size()];
-            System.arraycopy(incomingEvent, 0, obj, 0, incomingEvent.length);
-            int count = incomingEvent.length;
+            StateEvent overwritingOrAddingEvent = overwritingOrAddingEventChunk.next();
+            Object[] incomingEvent = overwritingOrAddingEvent.getStreamEvent(0).getOutputData();
+            Object[] obj = new Object[matchingEventOutputSize + expressionExecutorList.size()];
+            System.arraycopy(incomingEvent, 0, obj, 0, matchingEventOutputSize);
+            int count = matchingEventOutputSize;
             for (ExpressionExecutor expressionExecutor : expressionExecutorList) {
-                Object value = expressionExecutor.execute(matchingEvent);
+                Object value = expressionExecutor.execute(overwritingOrAddingEvent);
                 obj[count] = value;
                 count++;
             }
-            dbHandler.overwriteOrAddEvent(overwritingOrAddingEvent, obj, executionInfo);
+            updateEventList.add(obj);
         }
+        dbHandler.overwriteOrAddEvent(updateEventList, executionInfo);
+        return null;
     }
 
     @Override
-    public Finder cloneFinder() {
+    public Finder cloneFinder(String key) {
         return new RDBMSOperator(executionInfo, expressionExecutorList, dbHandler, inMemoryEventTableOperator, matchingEventOutputSize);
     }
 
     @Override
-    public StreamEvent find(ComplexEvent matchingEvent, Object candidateEvents, StreamEventCloner streamEventCloner) {
+    public StreamEvent find(StateEvent matchingEvent, Object candidateEvents, StreamEventCloner candidateEventCloner) {
 
         Object[] obj;
         if (expressionExecutorList != null) {
@@ -158,7 +170,7 @@ public class RDBMSOperator implements Operator {
     }
 
     @Override
-    public boolean contains(ComplexEvent matchingEvent, Object candidateEvents) {
+    public boolean contains(StateEvent matchingEvent, Object candidateEvents) {
 
         Object[] obj;
         if (expressionExecutorList != null) {

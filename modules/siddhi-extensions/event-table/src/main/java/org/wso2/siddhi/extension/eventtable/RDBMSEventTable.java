@@ -21,17 +21,21 @@ package org.wso2.siddhi.extension.eventtable;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
-import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.MetaComplexEvent;
+import org.wso2.siddhi.core.event.state.StateEvent;
+import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.exception.CannotLoadConfigurationException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
-import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.core.util.collection.OverwritingStreamEventExtractor;
+import org.wso2.siddhi.core.util.collection.UpdateAttributeMapper;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
+import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.extension.eventtable.cache.CachingTable;
 import org.wso2.siddhi.extension.eventtable.rdbms.*;
@@ -59,7 +63,6 @@ public class RDBMSEventTable implements EventTable {
     private boolean isCachingEnabled;
     private static final Logger log = Logger.getLogger(RDBMSEventTable.class);
 
-
     /*
     Loads rdbms-table-config.xml file which provides DB mapping details
      */
@@ -74,10 +77,13 @@ public class RDBMSEventTable implements EventTable {
     /**
      * Event Table initialization method, it checks the annotation and do necessary pre configuration tasks.
      *
-     * @param tableDefinition      Definition of event table
-     * @param executionPlanContext ExecutionPlan related meta information
+     * @param tableDefinition        Definition of event table
+     * @param tableMetaStreamEvent
+     * @param tableStreamEventPool
+     * @param tableStreamEventCloner
+     * @param executionPlanContext   ExecutionPlan related meta information
      */
-    public void init(TableDefinition tableDefinition, ExecutionPlanContext executionPlanContext) {
+    public void init(TableDefinition tableDefinition, MetaStreamEvent tableMetaStreamEvent, StreamEventPool tableStreamEventPool, StreamEventCloner tableStreamEventCloner, ExecutionPlanContext executionPlanContext) {
         this.tableDefinition = tableDefinition;
         Connection con = null;
         int bloomFilterSize = RDBMSEventTableConstants.BLOOM_FILTER_SIZE;
@@ -90,7 +96,7 @@ public class RDBMSEventTable implements EventTable {
         DataSource dataSource = executionPlanContext.getSiddhiContext().getSiddhiDataSource(dataSourceName);
         List<Attribute> attributeList = tableDefinition.getAttributeList();
 
-        if (dataSource == null) {
+        if (dataSource == null && dataSourceName == null) {
             String jdbcConnectionUrl = fromAnnotation.getElement(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_TABLE_JDBC_URL);
             String username = fromAnnotation.getElement(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_TABLE_USERNAME);
             String password = fromAnnotation.getElement(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_TABLE_PASSWORD);
@@ -104,8 +110,11 @@ public class RDBMSEventTable implements EventTable {
             dataSource = PooledDataSource.getPoolDataSource(driverName, jdbcConnectionUrl, username, password, connectionPropertyElements);
         }
 
-        if (dataSource == null || tableName == null) {
-            throw new ExecutionPlanCreationException("Invalid query specified. Required properties (datasourceName or/and tableName) not found ");
+        if (dataSource == null) {
+            throw new ExecutionPlanCreationException("Datasource specified for the event table is invalid/null");
+        }
+        if (tableName == null) {
+            throw new ExecutionPlanCreationException("Invalid query specified. Required properties (tableName) not found ");
         }
 
         String cacheType = fromAnnotation.getElement(RDBMSEventTableConstants.ANNOTATION_ELEMENT_CACHE);
@@ -147,7 +156,7 @@ public class RDBMSEventTable implements EventTable {
                     bloomFilterHashFunctions = Integer.parseInt(bloomsFilterHash);
                 }
 
-                dbHandler.setBloomFilterProperties(bloomFilterSize, bloomFilterHashFunctions);
+                dbHandler.setBloomFilters(bloomFilterSize, bloomFilterHashFunctions);
                 dbHandler.buildBloomFilters();
                 if (bloomFilterValidityInterval != null) {
                     Long bloomTimeInterval = Long.parseLong(bloomFilterValidityInterval);
@@ -181,43 +190,23 @@ public class RDBMSEventTable implements EventTable {
      * @param addingEventChunk input event list
      */
     @Override
-    public void add(ComplexEventChunk addingEventChunk) {
+    public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
         dbHandler.addEvent(addingEventChunk);
     }
 
-    /**
-     * Called when deleting an event chunk from event table
-     *
-     * @param deletingEventChunk Event list for deletion
-     * @param operator           Operator that perform RDBMS related operations
-     */
     @Override
-    public void delete(ComplexEventChunk deletingEventChunk, Operator operator) {
-        operator.delete(deletingEventChunk, null);
-        if (isCachingEnabled) {
-            ((RDBMSOperator) operator).getInMemoryEventTableOperator().delete(deletingEventChunk, cachedTable.getCacheList());
-        }
-    }
-
-    /**
-     * Called when updating the event table entries
-     *
-     * @param updatingEventChunk Event list that needs to be updated
-     * @param operator           Operator that perform RDBMS related operations
-     */
-    @Override
-    public void update(ComplexEventChunk updatingEventChunk, Operator operator, int[] mappingPosition) {
+    public void update(ComplexEventChunk<StateEvent> updatingEventChunk, Operator operator, UpdateAttributeMapper[] updateAttributeMappers) {
         operator.update(updatingEventChunk, null, null);
         if (isCachingEnabled) {
-            ((RDBMSOperator) operator).getInMemoryEventTableOperator().update(updatingEventChunk, cachedTable.getCacheList(), mappingPosition);
+            ((RDBMSOperator) operator).getInMemoryEventTableOperator().update(updatingEventChunk, cachedTable.getCacheList(), updateAttributeMappers);
         }
     }
 
     @Override
-    public void overwriteOrAdd(ComplexEventChunk overwritingOrAddingEventChunk, Operator operator, int[] mappingPosition) {
-        operator.overwriteOrAdd(overwritingOrAddingEventChunk, null, null);
-        if(isCachingEnabled){
-            ((RDBMSOperator) operator).getInMemoryEventTableOperator().overwriteOrAdd(overwritingOrAddingEventChunk, cachedTable.getCacheList(), mappingPosition);
+    public void overwriteOrAdd(ComplexEventChunk<StateEvent> overwritingOrAddingEventChunk, Operator operator, UpdateAttributeMapper[] updateAttributeMappers, OverwritingStreamEventExtractor overwritingStreamEventExtractor) {
+        operator.overwriteOrAdd(overwritingOrAddingEventChunk, null, null, overwritingStreamEventExtractor);
+        if (isCachingEnabled) {
+            ((RDBMSOperator) operator).getInMemoryEventTableOperator().overwriteOrAdd(overwritingOrAddingEventChunk, cachedTable.getCacheList(), updateAttributeMappers, overwritingStreamEventExtractor);
         }
     }
 
@@ -228,27 +217,41 @@ public class RDBMSEventTable implements EventTable {
      * @param finder        Operator that perform RDBMS related search
      */
     @Override
-    public boolean contains(ComplexEvent matchingEvent, Finder finder) {
+    public synchronized boolean contains(StateEvent matchingEvent, Finder finder) {
         if (isCachingEnabled) {
             return ((RDBMSOperator) finder).getInMemoryEventTableOperator().contains(matchingEvent, cachedTable.getCacheList()) || finder.contains(matchingEvent, null);
+        } else {
+            return finder.contains(matchingEvent, null);
         }
-        return finder.contains(matchingEvent, null);
+    }
+
+    /**
+     * Called when deleting an event chunk from event table
+     *
+     * @param deletingEventChunk Event list for deletion
+     * @param operator           Operator that perform RDBMS related operations
+     */
+    @Override
+    public synchronized void delete(ComplexEventChunk deletingEventChunk, Operator operator) {
+        operator.delete(deletingEventChunk, null);
+        if (isCachingEnabled) {
+            ((RDBMSOperator) operator).getInMemoryEventTableOperator().delete(deletingEventChunk, cachedTable.getCacheList());
+        }
     }
 
     /**
      * Called to construct a operator to perform delete and update operations
      */
     @Override
-    public Operator constructOperator(Expression expression, MetaComplexEvent metaComplexEvent, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap, int matchingStreamIndex, long withinTime) {
-        return RDBMSOperatorParser.parse(dbHandler, expression, metaComplexEvent, executionPlanContext, variableExpressionExecutors, eventTableMap, matchingStreamIndex, tableDefinition, withinTime, cachedTable);
+    public Operator constructOperator(Expression expression, MatchingMetaStateHolder matchingMetaStateHolder, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap) {
+        return RDBMSOperatorParser.parse(dbHandler, expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap, tableDefinition, cachedTable);
     }
-
 
     /**
      * Called to find a event from event table
      */
     @Override
-    public StreamEvent find(ComplexEvent matchingEvent, Finder finder) {
+    public synchronized StreamEvent find(StateEvent matchingEvent, Finder finder) {
         return finder.find(matchingEvent, null, null);
     }
 
@@ -256,10 +259,9 @@ public class RDBMSEventTable implements EventTable {
      * Called to construct a operator to perform search operations
      */
     @Override
-    public Finder constructFinder(Expression expression, MetaComplexEvent matchingMetaComplexEvent, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap, int matchingStreamIndex, long withinTime) {
-        return RDBMSOperatorParser.parse(dbHandler, expression, matchingMetaComplexEvent, executionPlanContext, variableExpressionExecutors, eventTableMap, matchingStreamIndex, tableDefinition, withinTime, cachedTable);
+    public Finder constructFinder(Expression expression, MatchingMetaStateHolder matchingMetaStateHolder, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap) {
+        return RDBMSOperatorParser.parse(dbHandler, expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap, tableDefinition, cachedTable);
     }
-
 
     class CacheUpdateTask extends TimerTask {
         public void run() {

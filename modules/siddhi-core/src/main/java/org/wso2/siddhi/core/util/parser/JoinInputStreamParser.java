@@ -39,6 +39,7 @@ import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
+import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -49,6 +50,8 @@ import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class JoinInputStreamParser {
 
@@ -59,7 +62,7 @@ public class JoinInputStreamParser {
                                                  Map<String, AbstractDefinition> tableDefinitionMap,
                                                  Map<String, EventTable> eventTableMap,
                                                  List<VariableExpressionExecutor> executors,
-                                                 LatencyTracker latencyTracker) {
+                                                 LatencyTracker latencyTracker, boolean outputExpectsExpiredEvents) {
 
         ProcessStreamReceiver leftProcessStreamReceiver;
         ProcessStreamReceiver rightProcessStreamReceiver;
@@ -96,7 +99,7 @@ public class JoinInputStreamParser {
 
         SingleStreamRuntime leftStreamRuntime = SingleInputStreamParser.parseInputStream(
                 (SingleInputStream) joinInputStream.getLeftInputStream(), executionPlanContext, executors, streamDefinitionMap,
-                !leftMetaStreamEvent.isTableEvent() ? null : tableDefinitionMap, eventTableMap, leftMetaStreamEvent, leftProcessStreamReceiver, true, latencyTracker);
+                !leftMetaStreamEvent.isTableEvent() ? null : tableDefinitionMap, eventTableMap, leftMetaStreamEvent, leftProcessStreamReceiver, true, outputExpectsExpiredEvents);
 
         for (VariableExpressionExecutor variableExpressionExecutor : executors) {
             variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX] = 0;
@@ -105,7 +108,7 @@ public class JoinInputStreamParser {
 
         SingleStreamRuntime rightStreamRuntime = SingleInputStreamParser.parseInputStream(
                 (SingleInputStream) joinInputStream.getRightInputStream(), executionPlanContext, executors, streamDefinitionMap,
-                !rightMetaStreamEvent.isTableEvent() ? null : tableDefinitionMap, eventTableMap, rightMetaStreamEvent, rightProcessStreamReceiver, true, latencyTracker);
+                !rightMetaStreamEvent.isTableEvent() ? null : tableDefinitionMap, eventTableMap, rightMetaStreamEvent, rightProcessStreamReceiver, true, outputExpectsExpiredEvents);
 
         for (int i = size; i < executors.size(); i++) {
             VariableExpressionExecutor variableExpressionExecutor = executors.get(i);
@@ -114,12 +117,12 @@ public class JoinInputStreamParser {
 
         if (leftMetaStreamEvent.isTableEvent()) {
             TableWindowProcessor tableWindowProcessor = new TableWindowProcessor(eventTableMap.get(leftInputStreamId));
-            tableWindowProcessor.initProcessor(leftMetaStreamEvent.getLastInputDefinition(), new ExpressionExecutor[0], executionPlanContext);
+            tableWindowProcessor.initProcessor(leftMetaStreamEvent.getLastInputDefinition(), new ExpressionExecutor[0], executionPlanContext, outputExpectsExpiredEvents);
             leftStreamRuntime.setProcessorChain(tableWindowProcessor);
         }
         if (rightMetaStreamEvent.isTableEvent()) {
             TableWindowProcessor tableWindowProcessor = new TableWindowProcessor(eventTableMap.get(rightInputStreamId));
-            tableWindowProcessor.initProcessor(rightMetaStreamEvent.getLastInputDefinition(), new ExpressionExecutor[0], executionPlanContext);
+            tableWindowProcessor.initProcessor(rightMetaStreamEvent.getLastInputDefinition(), new ExpressionExecutor[0], executionPlanContext, outputExpectsExpiredEvents);
             rightStreamRuntime.setProcessorChain(tableWindowProcessor);
         }
 
@@ -138,34 +141,40 @@ public class JoinInputStreamParser {
                 break;
         }
 
-        JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true, leftOuterJoinProcessor);
-        JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false, leftOuterJoinProcessor);
+        Lock joinLock = new ReentrantLock();
+        JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true, leftOuterJoinProcessor, 0);
+        JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false, leftOuterJoinProcessor, 0);
 
-        FindableProcessor leftFindableProcessor = insertJoinProcessorsAndGetFindable(leftPreJoinProcessor, leftPostJoinProcessor, leftStreamRuntime, executionPlanContext);
+        FindableProcessor leftFindableProcessor = insertJoinProcessorsAndGetFindable(leftPreJoinProcessor, leftPostJoinProcessor, leftStreamRuntime, executionPlanContext, outputExpectsExpiredEvents);
 
-        JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true, rightOuterJoinProcessor);
-        JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false, rightOuterJoinProcessor);
+        JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true, rightOuterJoinProcessor, 1);
+        JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false, rightOuterJoinProcessor, 1);
 
-        FindableProcessor rightFindableProcessor = insertJoinProcessorsAndGetFindable(rightPreJoinProcessor, rightPostJoinProcessor, rightStreamRuntime, executionPlanContext);
+        FindableProcessor rightFindableProcessor = insertJoinProcessorsAndGetFindable(rightPreJoinProcessor, rightPostJoinProcessor, rightStreamRuntime, executionPlanContext, outputExpectsExpiredEvents);
 
         leftPreJoinProcessor.setFindableProcessor(rightFindableProcessor);
+        leftPreJoinProcessor.setJoinLock(joinLock);
         leftPostJoinProcessor.setFindableProcessor(rightFindableProcessor);
+        leftPostJoinProcessor.setJoinLock(joinLock);
 
         rightPreJoinProcessor.setFindableProcessor(leftFindableProcessor);
+        rightPreJoinProcessor.setJoinLock(joinLock);
         rightPostJoinProcessor.setFindableProcessor(leftFindableProcessor);
+        rightPostJoinProcessor.setJoinLock(joinLock);
 
         Expression compareCondition = joinInputStream.getOnCompare();
         if (compareCondition == null) {
             compareCondition = Expression.value(true);
         }
 
-        long withinTime = SiddhiConstants.ANY;
         if (joinInputStream.getWithin() != null) {
-            withinTime = ((TimeConstant) joinInputStream.getWithin()).getValue();
+            throw new OperationNotSupportedException("within not support for joins, found withing time '"+((TimeConstant) joinInputStream.getWithin()).getValue()+" ms'");
         }
 
-        Finder leftFinder = rightFindableProcessor.constructFinder(compareCondition, metaStateEvent, executionPlanContext, executors, eventTableMap, 0, withinTime);
-        Finder rightFinder = leftFindableProcessor.constructFinder(compareCondition, metaStateEvent, executionPlanContext, executors, eventTableMap, 1, withinTime);
+        MatchingMetaStateHolder rightMatchingMetaStateHolder = MatcherParser.constructMatchingMetaStateHolder(metaStateEvent, 0, rightMetaStreamEvent.getLastInputDefinition());
+        Finder leftFinder = rightFindableProcessor.constructFinder(compareCondition, rightMatchingMetaStateHolder, executionPlanContext, executors, eventTableMap);
+        MatchingMetaStateHolder leftMatchingMetaStateHolder = MatcherParser.constructMatchingMetaStateHolder(metaStateEvent, 1, leftMetaStreamEvent.getLastInputDefinition());
+        Finder rightFinder = leftFindableProcessor.constructFinder(compareCondition, leftMatchingMetaStateHolder, executionPlanContext, executors, eventTableMap);
 
         if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT) {
             rightPreJoinProcessor.setTrigger(true);
@@ -188,7 +197,7 @@ public class JoinInputStreamParser {
 
     private static FindableProcessor insertJoinProcessorsAndGetFindable(JoinProcessor preJoinProcessor,
                                                                         JoinProcessor postJoinProcessor,
-                                                                        SingleStreamRuntime streamRuntime, ExecutionPlanContext executionPlanContext) {
+                                                                        SingleStreamRuntime streamRuntime, ExecutionPlanContext executionPlanContext, boolean outputExpectsExpiredEvents) {
 
         Processor lastProcessor = streamRuntime.getProcessorChain();
         Processor prevLastProcessor = null;
@@ -204,7 +213,7 @@ public class JoinInputStreamParser {
             ExpressionExecutor[] expressionExecutors = new ExpressionExecutor[1];
             expressionExecutors[0] = new ConstantExpressionExecutor(0, Attribute.Type.INT);
             windowProcessor.initProcessor(((MetaStreamEvent) streamRuntime.getMetaComplexEvent()).getLastInputDefinition(),
-                    expressionExecutors, executionPlanContext);
+                    expressionExecutors, executionPlanContext, outputExpectsExpiredEvents);
             lastProcessor = windowProcessor;
         }
         if (lastProcessor instanceof FindableProcessor) {

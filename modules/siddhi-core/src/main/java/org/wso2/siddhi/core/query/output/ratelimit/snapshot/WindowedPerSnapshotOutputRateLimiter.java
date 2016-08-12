@@ -18,19 +18,15 @@
 
 package org.wso2.siddhi.core.query.output.ratelimit.snapshot;
 
+import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.GroupedComplexEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.util.Scheduler;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimiter {
     private String id;
@@ -40,15 +36,13 @@ public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimi
     private Comparator comparator;
     private Scheduler scheduler;
     private long scheduledTime;
-    private Lock lock;
 
-    public WindowedPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter) {
-        super(wrappedSnapshotOutputRateLimiter);
+    public WindowedPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter, ExecutionPlanContext executionPlanContext) {
+        super(wrappedSnapshotOutputRateLimiter, executionPlanContext);
         this.id = id;
         this.value = value;
         this.scheduledExecutorService = scheduledExecutorService;
         this.eventList = new LinkedList<ComplexEvent>();
-        lock = new ReentrantLock();
         this.comparator = new Comparator<ComplexEvent>() {
 
             @Override
@@ -66,24 +60,22 @@ public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimi
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        try {
-            lock.lock();
-            complexEventChunk.reset();
+        List<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        complexEventChunk.reset();
+        synchronized (this) {
             while (complexEventChunk.hasNext()) {
                 ComplexEvent event = complexEventChunk.next();
                 if (event instanceof GroupedComplexEvent) {
                     event = ((GroupedComplexEvent) event).getComplexEvent();
                 }
                 if (event.getType() == ComplexEvent.Type.TIMER) {
-                    if (event.getTimestamp() >= scheduledTime) {
-                        sendEvents();
-                        scheduledTime = scheduledTime + value;
-                        scheduler.notifyAt(scheduledTime);
-                    }
+                    tryFlushEvents(outputEventChunks, event);
                 } else if (event.getType() == ComplexEvent.Type.CURRENT) {
                     complexEventChunk.remove();
+                    tryFlushEvents(outputEventChunks, event);
                     eventList.add(event);
                 } else if (event.getType() == ComplexEvent.Type.EXPIRED) {
+                    tryFlushEvents(outputEventChunks, event);
                     for (Iterator<ComplexEvent> iterator = eventList.iterator(); iterator.hasNext(); ) {
                         ComplexEvent currentEvent = iterator.next();
                         if (comparator.compare(currentEvent, event) == 0) {
@@ -91,25 +83,42 @@ public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimi
                             break;
                         }
                     }
+                } else if (event.getType() == ComplexEvent.Type.RESET) {
+                    tryFlushEvents(outputEventChunks, event);
+                    eventList.clear();
                 }
             }
-        } finally {
-            lock.unlock();
+        }
+        for (ComplexEventChunk eventChunk : outputEventChunks) {
+            sendToCallBacks(eventChunk);
+        }
+    }
+
+    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event) {
+        if (event.getTimestamp() >= scheduledTime) {
+            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+            for (ComplexEvent complexEvent : eventList) {
+                outputEventChunk.add(cloneComplexEvent(complexEvent));
+            }
+            outputEventChunks.add(outputEventChunk);
+            scheduledTime = scheduledTime + value;
+            scheduler.notifyAt(scheduledTime);
         }
     }
 
     @Override
     public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter) {
-        return new WindowedPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService, wrappedSnapshotOutputRateLimiter);
+        return new WindowedPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService, wrappedSnapshotOutputRateLimiter, executionPlanContext);
     }
 
     @Override
     public void start() {
-        scheduler = new Scheduler(scheduledExecutorService, this);
+        scheduler = new Scheduler(scheduledExecutorService, this, executionPlanContext);
         scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
+        scheduler.init(queryLock);
         long currentTime = System.currentTimeMillis();
-        scheduler.notifyAt(currentTime);
-        scheduledTime = currentTime;
+        scheduledTime = currentTime + value;
+        scheduler.notifyAt(scheduledTime);
     }
 
     @Override
@@ -125,14 +134,6 @@ public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimi
     @Override
     public void restoreState(Object[] state) {
         eventList = (LinkedList<ComplexEvent>) state[0];
-    }
-
-    private synchronized void sendEvents() {
-        ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<ComplexEvent>();
-        for (ComplexEvent complexEvent : eventList) {
-            complexEventChunk.add(cloneComplexEvent(complexEvent));
-        }
-        sendToCallBacks(complexEventChunk);
     }
 
 }
