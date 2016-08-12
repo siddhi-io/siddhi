@@ -124,8 +124,6 @@ public class HazelcastEventTable implements EventTable {
         } else {
             eventHolder = new HazelcastCollectionEventHolder(hzInstance.getList(collectionName), tableStreamEventPool, eventConverter);
         }
-        // streamEventPool = new StreamEventPool(metaStreamEvent, HazelcastEventTableConstants.STREAM_EVENT_POOL_SIZE);
-        // tableStreamEventCloner = new StreamEventCloner(metaStreamEvent, streamEventPool);
         if (elementId == null) {
             elementId = executionPlanContext.getElementIdGenerator().createNewId();
         }
