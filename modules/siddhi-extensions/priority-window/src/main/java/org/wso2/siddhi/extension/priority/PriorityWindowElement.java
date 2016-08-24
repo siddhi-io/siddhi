@@ -28,12 +28,14 @@ public class PriorityWindowElement {
     private long location;
     private PriorityWindowElement nextElement;
     private StreamEvent event;
+    private long timeStamp;
 
-    public PriorityWindowElement(StreamEvent event, String id, long priority, long location) {
+    public PriorityWindowElement(StreamEvent event, String id, long priority, long location, long timeStamp) {
         this.id = id;
         this.priority = priority;
         this.location = location;
         this.event = event;
+        this.timeStamp=timeStamp;
     }
 
     public long getPriority() {
@@ -62,5 +64,20 @@ public class PriorityWindowElement {
 
     public StreamEvent getEvent() {
         return event;
+    }
+
+    public boolean hasNext(){
+        if(nextElement!=null){
+            return true;
+        }
+        return false;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 }

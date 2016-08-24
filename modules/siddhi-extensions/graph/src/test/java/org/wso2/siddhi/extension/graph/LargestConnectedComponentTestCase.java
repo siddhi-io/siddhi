@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.largestClique;
+package org.wso2.siddhi.extension.graph;
 
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
@@ -31,7 +31,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created on 8/10/16.
+ * Test class for the LargestConnectedComponentProcessor
  */
 public class LargestConnectedComponentTestCase {
     private static final Logger log = Logger.getLogger(LargestConnectedComponentTestCase.class);
@@ -45,14 +45,14 @@ public class LargestConnectedComponentTestCase {
     }
 
     @Test
-    public void LargestCliqueTest1() throws InterruptedException {
+    public void LargestConnectedComponentTest1() throws InterruptedException {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (id long, friendsId long, volume int);";
+                "define stream cseEventStream (id String, friendsId String, volume int);";
         String query = "" + "@info(name = 'query1') " +
-                "from cseEventStream#largestClique:lcc(id,friendsId) " +
+                "from cseEventStream#graph:lcc(id,friendsId,false) " +
                 "select largestConnectedComponent " +
                 "insert all events into outputStream ;";
 
@@ -71,23 +71,22 @@ public class LargestConnectedComponentTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{1234L, 2345L, 0});
+        inputHandler.send(new Object[]{"1234", "2345", 0});
         Thread.sleep(1000);
-        inputHandler.send(new Object[]{2345L, 5678L, 1});
+        inputHandler.send(new Object[]{"2345", "5678", 1});
         Thread.sleep(1000);
-        inputHandler.send(new Object[]{5678L, 1234L, 3});
+        inputHandler.send(new Object[]{"5678", "1234", 3});
         Thread.sleep(1000);
-        inputHandler.send(new Object[]{5522L, 3322L, 3});
+        inputHandler.send(new Object[]{"5522", "3322", 3});
         Thread.sleep(1000);
-        inputHandler.send(new Object[]{3322L, 4567L, 3});
+        inputHandler.send(new Object[]{"3322", "4567", 3});
         Thread.sleep(1000);
-        inputHandler.send(new Object[]{4567L, 7890L, 3});
+        inputHandler.send(new Object[]{"4567", "7890", 3});
         Thread.sleep(1000);
-        inputHandler.send(new Object[]{7890L, 5428L, 3});
+        inputHandler.send(new Object[]{"7890", "5428", 3});
         Thread.sleep(4000);
         Assert.assertEquals(4, count.get());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
-
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -31,7 +31,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * on 8/3/16.
+ * test cases for PriorityWindowProcessor
  */
 public class PriorityWindowTestCase {
     private static final Logger log = Logger.getLogger(PriorityWindowTestCase.class);
@@ -46,6 +46,44 @@ public class PriorityWindowTestCase {
 
     @Test
     public void priorityWindowTest1() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (id string, priority long, volume int);";
+        String query = "" + "@info(name = 'query1') " +
+                "from cseEventStream#priority:priorityWindow(id,priority,5 sec) " +
+                "select changedEvents " +
+                "insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count.incrementAndGet();
+                    eventArrived = true;
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 2, 0});
+        Thread.sleep(1500);
+        inputHandler.send(new Object[]{"WSO2", 5, 1});
+        Thread.sleep(4500);
+        inputHandler.send(new Object[]{"WSO2", 5, 3});
+        Thread.sleep(4000);
+        Assert.assertEquals(5, count.get());
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+    @Test
+    public void priorityWindowTest2() throws InterruptedException {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -77,6 +115,82 @@ public class PriorityWindowTestCase {
         Thread.sleep(1000);
         inputHandler.send(new Object[]{"WSO2", 5, 3});
         Thread.sleep(4000);
+        Assert.assertEquals(5, count.get());
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+    @Test
+    public void priorityWindowTest3() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (id string, priority long, volume int);";
+        String query = "" +                "@info(name = 'query1') " +
+                "from cseEventStream#priority:priorityWindow(id,priority,5 sec) " +
+                "select changedEvents " +
+                "insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count.incrementAndGet();
+                    eventArrived = true;
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 2, 0});
+        Thread.sleep(1500);
+        inputHandler.send(new Object[]{"WSO2", 5, 1});
+        Thread.sleep(4500);
+        inputHandler.send(new Object[]{"WSO2", 5, 3});
+        Thread.sleep(4000);
+        Assert.assertEquals(5, count.get());
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+    @Test
+    public void priorityWindowTest4() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (id string, priority long, volume int);";
+        String query = "" +                "@info(name = 'query1') " +
+                "from cseEventStream#priority:priorityWindow(id,priority,5 sec) " +
+                "select changedEvents " +
+                "insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count.incrementAndGet();
+                    eventArrived = true;
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 2, 0});
+        Thread.sleep(1500);
+        inputHandler.send(new Object[]{"WSO2", 5, 1});
+        Thread.sleep(5500);
+        inputHandler.send(new Object[]{"WSO2", 5, 3});
+        Thread.sleep(1000);
         Assert.assertEquals(5, count.get());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
