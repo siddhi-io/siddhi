@@ -86,7 +86,7 @@ System Requirements
 * Post your questions on http://stackoverflow.com/ tagging ["siddhi"] (http://stackoverflow.com/search?q=siddhi)
 
 ## How to Contribute
-* Please report issues at [CEP JIRA] (https://wso2.org/jira/browse/CEP)
+* Please report issues at [Siddhi JIRA] (https://wso2.org/jira/browse/SIDDHI)
 * Send your bug fixes pull requests to [master branch] (https://github.com/wso2/carbon-event-processing/tree/master) 
 
 ## Contact us 
