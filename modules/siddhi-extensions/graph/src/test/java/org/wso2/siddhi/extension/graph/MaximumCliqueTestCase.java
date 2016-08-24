@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.largestClique;
+package org.wso2.siddhi.extension.graph;
 
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
@@ -31,10 +31,10 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created on 8/5/16.
+ * Test class for the MaximumCliqueStreamProcessor
  */
-public class LargestCliqueTestCase {
-    private static final Logger log = Logger.getLogger(LargestCliqueTestCase.class);
+public class MaximumCliqueTestCase {
+    private static final Logger log = Logger.getLogger(MaximumCliqueTestCase.class);
     private AtomicInteger count = new AtomicInteger(0);
     private boolean eventArrived;
 
@@ -45,15 +45,15 @@ public class LargestCliqueTestCase {
     }
 
     @Test
-    public void LargestCliqueTest1() throws InterruptedException {
+    public void MaximumCliqueTest1() throws InterruptedException {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (id long, friendsId long, volume int);";
+                "define stream cseEventStream (id String, friendsId String, volume int);";
         String query = "" + "@info(name = 'query1') " +
-                "from cseEventStream#largestClique:largestClique(id,friendsId) " +
-                "select largestClique " +
+                "from cseEventStream#graph:maximumClique(id,friendsId,false) " +
+                "select maximumClique " +
                 "insert all events into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
@@ -71,16 +71,14 @@ public class LargestCliqueTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{1234L, 2345L, 0});
+        inputHandler.send(new Object[]{"1234", "2345", 0});
         Thread.sleep(1000);
-        inputHandler.send(new Object[]{2345L, 5678L, 1});
+        inputHandler.send(new Object[]{"2345", "5678", 1});
         Thread.sleep(1000);
-        inputHandler.send(new Object[]{5678L, 1234L, 3});
+        inputHandler.send(new Object[]{"5678", "1234", 3});
         Thread.sleep(4000);
         Assert.assertEquals(2, count.get());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
-
     }
-
 }
