@@ -43,7 +43,7 @@
         <module>kalman-filter</module>
  		<module>markov-models</module>
         <module>priority-window</module>
-        <module>largest-clique</module>
+        <module>graph</module>
     </modules>
 
 </project>

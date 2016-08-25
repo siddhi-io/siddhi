@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -20,7 +20,7 @@ package org.wso2.siddhi.extension.priority;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 
 /**
- *  on 8/3/16.
+ * linked list for storing events arrived to PriorityWindowProcessor
  */
 public class PriorityWindowElement {
     private long priority;
@@ -35,7 +35,7 @@ public class PriorityWindowElement {
         this.priority = priority;
         this.location = location;
         this.event = event;
-        this.timeStamp=timeStamp;
+        this.timeStamp = timeStamp;
     }
 
     public long getPriority() {
@@ -66,8 +66,13 @@ public class PriorityWindowElement {
         return event;
     }
 
-    public boolean hasNext(){
-        if(nextElement!=null){
+    /**
+     * Check whether a node has a successor
+     *
+     * @return true or false
+     */
+    public boolean hasNext() {
+        if (nextElement != null) {
             return true;
         }
         return false;
