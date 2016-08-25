@@ -54,22 +54,22 @@ public class InputStreamParser {
                                       Map<String, AbstractDefinition> windowDefinitionMap,
                                       Map<String, EventTable> eventTableMap, Map<String, EventWindow> eventWindowMap,
                                       List<VariableExpressionExecutor> executors,
-                                      LatencyTracker latencyTracker, boolean outputExpectsExpiredEvents) {
+                                      LatencyTracker latencyTracker, boolean outputExpectsExpiredEvents,String queryName) {
 
         if (inputStream instanceof BasicSingleInputStream || inputStream instanceof SingleInputStream) {
             SingleInputStream singleInputStream = (SingleInputStream) inputStream;
             EventWindow eventWindow = eventWindowMap.get(singleInputStream.getStreamId());
             boolean batchProcessingAllowed = eventWindow != null;      // If stream is from window, allow batch processing
-            ProcessStreamReceiver processStreamReceiver = new ProcessStreamReceiver(singleInputStream.getStreamId(), latencyTracker);
+            ProcessStreamReceiver processStreamReceiver = new ProcessStreamReceiver(singleInputStream.getStreamId(), latencyTracker,queryName);
             processStreamReceiver.setBatchProcessingAllowed(batchProcessingAllowed);
             return SingleInputStreamParser.parseInputStream((SingleInputStream) inputStream,
-                    executionPlanContext, executors, streamDefinitionMap, null, windowDefinitionMap, eventTableMap, new MetaStreamEvent(), processStreamReceiver, true, outputExpectsExpiredEvents);
+                    executionPlanContext, executors, streamDefinitionMap, null, windowDefinitionMap, eventTableMap, new MetaStreamEvent(), processStreamReceiver, true, outputExpectsExpiredEvents,queryName);
         } else if (inputStream instanceof JoinInputStream) {
-            return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream), executionPlanContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, eventTableMap, eventWindowMap, executors, latencyTracker, outputExpectsExpiredEvents);
+            return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream), executionPlanContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, eventTableMap, eventWindowMap, executors, latencyTracker, outputExpectsExpiredEvents,queryName);
         } else if (inputStream instanceof StateInputStream) {
             MetaStateEvent metaStateEvent = new MetaStateEvent(inputStream.getAllStreamIds().size());
             return StateInputStreamParser.parseInputStream(((StateInputStream) inputStream), executionPlanContext,
-                    metaStateEvent, streamDefinitionMap, null, null, eventTableMap, executors, latencyTracker);
+                    metaStateEvent, streamDefinitionMap, null, null, eventTableMap, executors, latencyTracker,queryName);
         } else {
             throw new OperationNotSupportedException();
         }

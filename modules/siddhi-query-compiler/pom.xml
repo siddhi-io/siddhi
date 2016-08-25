@@ -52,6 +52,11 @@
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-query-compiler</artifactId>
+            <version>3.0.6-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

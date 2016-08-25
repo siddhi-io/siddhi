@@ -25,9 +25,7 @@ import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * percentile(value, p)
@@ -263,13 +261,15 @@ public class PercentileFunctionExtension extends AttributeAggregator {
 
         @Override
         public Object[] currentState() {
-            return new Object[] { valuesList, count };
+            return new Object[] { new AbstractMap.SimpleEntry<String, Object>("ValueList",valuesList),new AbstractMap.SimpleEntry<String, Object>("Count", count)};
         }
 
         @Override
         public void restoreState(Object[] state) {
-            valuesList = (List) state[0];
-            count = (Long) state[1];
+            Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+            valuesList = (List) stateEntry.getValue();
+            Map.Entry<String, Object> stateEntry2 = (Map.Entry<String, Object>) state[1];
+            count = (Long) stateEntry2.getValue();
         }
     }
 
@@ -321,13 +321,15 @@ public class PercentileFunctionExtension extends AttributeAggregator {
 
         @Override
         public Object[] currentState() {
-            return new Object[] { valuesList, count };
+            return new Object[] { new AbstractMap.SimpleEntry<String, Object>("ValueList",valuesList),new AbstractMap.SimpleEntry<String, Object>("Count", count)};
         }
 
         @Override
         public void restoreState(Object[] state) {
-            valuesList = (List) state[0];
-            count = (Long) state[1];
+            Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+            valuesList = (List) stateEntry.getValue();
+            Map.Entry<String, Object> stateEntry2 = (Map.Entry<String, Object>) state[1];
+            count = (Long) stateEntry2.getValue();
         }
     }
 
@@ -379,13 +381,15 @@ public class PercentileFunctionExtension extends AttributeAggregator {
 
         @Override
         public Object[] currentState() {
-            return new Object[] { valuesList, count };
+            return new Object[] { new AbstractMap.SimpleEntry<String, Object>("ValueList",valuesList),new AbstractMap.SimpleEntry<String, Object>("Count", count)};
         }
 
         @Override
         public void restoreState(Object[] state) {
-            valuesList = (List) state[0];
-            count = (Long) state[1];
+            Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+            valuesList = (List) stateEntry.getValue();
+            Map.Entry<String, Object> stateEntry2 = (Map.Entry<String, Object>) state[1];
+            count = (Long) stateEntry2.getValue();
         }
 
     }
@@ -438,13 +442,15 @@ public class PercentileFunctionExtension extends AttributeAggregator {
 
         @Override
         public Object[] currentState() {
-            return new Object[] { valuesList, count };
+            return new Object[] { new AbstractMap.SimpleEntry<String, Object>("ValueList",valuesList),new AbstractMap.SimpleEntry<String, Object>("Count", count)};
         }
 
         @Override
         public void restoreState(Object[] state) {
-            valuesList = (List) state[0];
-            count = (Long) state[1];
+            Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+            valuesList = (List) stateEntry.getValue();
+            Map.Entry<String, Object> stateEntry2 = (Map.Entry<String, Object>) state[1];
+            count = (Long) stateEntry2.getValue();
         }
 
     }
