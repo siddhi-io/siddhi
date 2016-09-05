@@ -41,16 +41,18 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
     protected ExecutionPlanContext executionPlanContext;
     protected LatencyTracker latencyTracker;
     protected LockWrapper lockWrapper;
+    protected String queryName;
 
-    public void init(ExecutionPlanContext executionPlanContext, LockWrapper lockWrapper) {
+    public void init(ExecutionPlanContext executionPlanContext, LockWrapper lockWrapper, String queryName) {
         this.executionPlanContext = executionPlanContext;
+        this.queryName = queryName;
         if (outputCallback != null && outputCallback instanceof InsertIntoStreamCallback) {
             this.lockWrapper = lockWrapper;
         }
         if (elementId == null) {
-            elementId = executionPlanContext.getElementIdGenerator().createNewId();
+            elementId = "OutputRateLimiter-"+ executionPlanContext.getElementIdGenerator().createNewId();
         }
-        executionPlanContext.getSnapshotService().addSnapshotable(this);
+        executionPlanContext.getSnapshotService().addSnapshotable(queryName, this);
     }
 
     protected void sendToCallBacks(ComplexEventChunk complexEventChunk) {

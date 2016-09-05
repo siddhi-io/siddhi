@@ -43,9 +43,7 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.InsertIntoStream;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -78,7 +76,7 @@ public class PartitionRuntime implements Snapshotable {
         if (partitionId == null) {
             this.partitionId = UUID.randomUUID().toString();
         }
-        elementId = executionPlanContext.getElementIdGenerator().createNewId();
+        elementId = "PartitionRuntime-"+ executionPlanContext.getElementIdGenerator().createNewId();
         this.partition = partition;
         this.streamDefinitionMap = streamDefinitionMap;
         this.streamJunctionMap = streamJunctionMap;
@@ -128,7 +126,7 @@ public class PartitionRuntime implements Snapshotable {
     public void addPartitionReceiver(QueryRuntime queryRuntime, List<VariableExpressionExecutor> executors, MetaStateEvent metaEvent) {
         Query query = queryRuntime.getQuery();
         List<List<PartitionExecutor>> partitionExecutors = new StreamPartitioner(query.getInputStream(), partition, metaEvent,
-                executors, executionPlanContext).getPartitionExecutorLists();
+                executors, executionPlanContext,null).getPartitionExecutorLists();
         if (queryRuntime.getStreamRuntime() instanceof SingleStreamRuntime) {
             SingleInputStream singleInputStream = (SingleInputStream) query.getInputStream();
             addPartitionReceiver(singleInputStream.getStreamId(), singleInputStream.isInnerStream(), metaEvent.getMetaStreamEvent(0), partitionExecutors.get(0));
@@ -256,12 +254,13 @@ public class PartitionRuntime implements Snapshotable {
     @Override
     public Object[] currentState() {
         List<String> partitionKeys = new ArrayList<String>(partitionInstanceRuntimeMap.keySet());
-        return new Object[]{partitionKeys};
+        return new Object[]{new AbstractMap.SimpleEntry<String, Object>("PartitionKeys", partitionKeys)};
     }
 
     @Override
     public void restoreState(Object[] state) {
-        List<String> partitionKeys = (List<String>) state[0];
+        Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
+        List<String> partitionKeys = (List<String>) stateEntry.getValue();
         for (String key : partitionKeys) {
             clonePartition(key);
         }

@@ -101,9 +101,9 @@ public class QueryParser {
                 outputExpectsExpiredEvents = true;
             }
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    executionPlanContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, eventTableMap, eventWindowMap, executors, latencyTracker, outputExpectsExpiredEvents);
+                    executionPlanContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, eventTableMap, eventWindowMap, executors, latencyTracker, outputExpectsExpiredEvents,nameElement.getValue());
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
-                    executionPlanContext, streamRuntime.getMetaComplexEvent(), eventTableMap, executors);
+                    executionPlanContext, streamRuntime.getMetaComplexEvent(), eventTableMap, executors, nameElement.getValue());
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
             if (!isWindow && query.getInputStream() instanceof SingleInputStream) {
                 for (StreamHandler streamHandler : ((SingleInputStream) query.getInputStream()).getStreamHandlers()) {
@@ -160,18 +160,18 @@ public class QueryParser {
 
             OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(query.getOutputStream().getId(),
                     query.getOutputRate(), query.getSelector().getGroupByList().size() != 0, isWindow,
-                    executionPlanContext.getScheduledExecutorService(), executionPlanContext);
+                    executionPlanContext.getScheduledExecutorService(), executionPlanContext,nameElement.getValue());
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
                 selector.setBatchingEnabled(false);
             }
             executionPlanContext.addEternalReferencedHolder(outputRateLimiter);
 
             OutputCallback outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(),
-                    streamRuntime.getMetaComplexEvent().getOutputStreamDefinition(), eventTableMap, eventWindowMap, executionPlanContext, !(streamRuntime instanceof SingleStreamRuntime));
+                    streamRuntime.getMetaComplexEvent().getOutputStreamDefinition(), eventTableMap, eventWindowMap, executionPlanContext, !(streamRuntime instanceof SingleStreamRuntime),nameElement.getValue());
 
             QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
-            QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent(), lockWrapper);
+            QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent(), lockWrapper,nameElement.getValue());
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime.getMetaComplexEvent()));
             queryRuntime = new QueryRuntime(query, executionPlanContext, streamRuntime, selector, outputRateLimiter,
                     outputCallback, streamRuntime.getMetaComplexEvent(), lockWrapper != null);
@@ -182,7 +182,7 @@ public class QueryParser {
                         .init(streamRuntime.getMetaComplexEvent().getOutputStreamDefinition().getAttributeList().size(),
                                 selector.getAttributeProcessorList(), streamRuntime.getMetaComplexEvent());
             }
-            outputRateLimiter.init(executionPlanContext, lockWrapper);
+            outputRateLimiter.init(executionPlanContext, lockWrapper,nameElement.getValue());
 
         } catch (DuplicateDefinitionException e) {
             if (nameElement != null) {

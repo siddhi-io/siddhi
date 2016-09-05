@@ -38,9 +38,11 @@ public class GroupByPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimit
     private Map<String, ComplexEvent> groupByKeyEvents = new LinkedHashMap<String, ComplexEvent>();
     private Scheduler scheduler;
     private long scheduledTime;
+    private String queryName;
 
-    public GroupByPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter, ExecutionPlanContext executionPlanContext) {
+    public GroupByPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter, ExecutionPlanContext executionPlanContext,String queryName) {
         super(wrappedSnapshotOutputRateLimiter, executionPlanContext);
+        this.queryName=queryName;
         this.id = id;
         this.value = value;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -90,7 +92,7 @@ public class GroupByPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimit
     public void start() {
         scheduler = new Scheduler(scheduledExecutorService, this, executionPlanContext);
         scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
-        scheduler.init(lockWrapper);
+        scheduler.init(lockWrapper,queryName);
         long currentTime = System.currentTimeMillis();
         scheduledTime = currentTime + value;
         scheduler.notifyAt(scheduledTime);
@@ -113,7 +115,7 @@ public class GroupByPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimit
 
     @Override
     public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter) {
-        return new GroupByPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService, wrappedSnapshotOutputRateLimiter, executionPlanContext);
+        return new GroupByPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService, wrappedSnapshotOutputRateLimiter, executionPlanContext, queryName);
     }
 
 }

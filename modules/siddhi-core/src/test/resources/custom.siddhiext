@@ -17,4 +17,5 @@
 #
 plus=org.wso2.siddhi.core.query.extension.util.CustomFunctionExtension
 getAll=org.wso2.siddhi.core.query.extension.util.StringConcatAggregatorString
+sum=org.wso2.siddhi.core.debugger.extension.CustomSumExtension
 
