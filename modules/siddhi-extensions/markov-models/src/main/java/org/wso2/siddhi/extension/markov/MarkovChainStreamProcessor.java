@@ -39,8 +39,9 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 /**
- * markovChain( id, state, durationToKeep, alertThreshold, notificationsHoldLimit/markovMatrixStorageLocation, train )
- * Returns last state, transition probability and notification
+ * StreamProcessor which implements the following function.
+ * <code>markovChain( id, state, durationToKeep, alertThreshold, notificationsHoldLimit/markovMatrixStorageLocation, train )</code>
+ * Returns last state, transition probability and notification.
  * Accept Type(s): STRING, STRING, INT/LONG/TIME, DOUBLE, (INT/LONG, STRING), BOOLEAN
  * Return Type: STRING, DOUBLE, BOOLEAN
  */
@@ -61,38 +62,29 @@ public class MarkovChainStreamProcessor extends StreamProcessor implements Sched
     private MarkovChainTransitionProbabilitiesCalculator markovChainTransitionProbabilitiesCalculator;
     private long lastScheduledTime;
 
-    /**
-     * The init method of the MarkovChainStreamProcessor,
-     * this method will be called before other methods
-     *
-     * @param inputDefinition the incoming stream definition
-     * @param attributeExpressionExecutors the executors of each function parameters
-     * @param executionPlanContext the context of the execution plan
-     * @return the additional output attributes introduced by the function
-     */
     @Override
     protected List<Attribute> init(AbstractDefinition inputDefinition,
             ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
 
-        if (attributeExpressionExecutors.length != 5 && attributeExpressionExecutors.length != 6) {
+        if (!(attributeExpressionExecutors.length == 5 || attributeExpressionExecutors.length == 6)) {
             throw new ExecutionPlanValidationException(
                     "Markov chain function has to have exactly 5 or 6 parameters, currently "
-                            + attributeExpressionExecutors.length + " parameters provided");
+                            + attributeExpressionExecutors.length + " parameters provided.");
         }
 
         trainingOption = true;
         trainingMode = TrainingMode.REAL_TIME;
 
         if (!(attributeExpressionExecutors[2] instanceof ConstantExpressionExecutor)) {
-            throw new ExecutionPlanValidationException("Duration has to be a constant");
+            throw new ExecutionPlanValidationException("Duration has to be a constant.");
         }
 
         if (!(attributeExpressionExecutors[3] instanceof ConstantExpressionExecutor)) {
-            throw new ExecutionPlanValidationException("Alert threshold probability value has to be a constant");
+            throw new ExecutionPlanValidationException("Alert threshold probability value has to be a constant.");
         }
 
         if (!(attributeExpressionExecutors[4] instanceof ConstantExpressionExecutor)) {
-            throw new ExecutionPlanValidationException("Training batch size has to be a constant");
+            throw new ExecutionPlanValidationException("Training batch size has to be a constant.");
         }
 
         Object durationObject = attributeExpressionExecutors[2].execute(null);
@@ -122,12 +114,11 @@ public class MarkovChainStreamProcessor extends StreamProcessor implements Sched
             File file = new File(markovMatrixStorageLocation);
             if (!file.exists()) {
                 throw new ExecutionPlanValidationException(
-                        markovMatrixStorageLocation + " is not exists. Please provide a valid file path");
+                        markovMatrixStorageLocation + " does not exist. Please provide a valid file path.");
             } else if (!file.isFile()) {
                 throw new ExecutionPlanValidationException(
-                        markovMatrixStorageLocation + " is not a file. Please provide a valid csv file");
+                        markovMatrixStorageLocation + " is not a file. Please provide a valid csv file.");
             }
-
         } else if (object instanceof Integer) {
             notificationsHoldLimit = (Integer) object;
         } else if (object instanceof Long) {
@@ -140,7 +131,6 @@ public class MarkovChainStreamProcessor extends StreamProcessor implements Sched
         }
 
         if (attributeExpressionExecutors.length == 6) {
-
             if (attributeExpressionExecutors[5] instanceof ConstantExpressionExecutor) {
                 Object trainingOptionObject = attributeExpressionExecutors[5].execute(null);
                 if (trainingOptionObject instanceof Boolean) {
@@ -152,7 +142,6 @@ public class MarkovChainStreamProcessor extends StreamProcessor implements Sched
             } else {
                 trainingOptionExpressionExecutor = attributeExpressionExecutors[5];
             }
-
         }
 
         if (trainingMode == TrainingMode.PREDEFINED_MATRIX) {
@@ -161,7 +150,6 @@ public class MarkovChainStreamProcessor extends StreamProcessor implements Sched
         } else {
             markovChainTransitionProbabilitiesCalculator = new MarkovChainTransitionProbabilitiesCalculator(
                     durationToKeep, alertThresholdProbability, notificationsHoldLimit);
-
         }
 
         List<Attribute> attributeList = new ArrayList<Attribute>(3);
@@ -171,22 +159,9 @@ public class MarkovChainStreamProcessor extends StreamProcessor implements Sched
         return attributeList;
     }
 
-    /**
-     * The main processing method that will be called upon event arrival
-     *
-     * @param streamEventChunk the event chunk that need to be processed
-     * @param nextProcessor the next processor to which the success events need to be passed
-     * @param streamEventCloner helps to clone the incoming event for local storage or
-     *            modification
-     * @param complexEventPopulater helps to populate the events with the resultant attributes
-     */
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
             StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
-
-        if (streamEventChunk.getFirst() == null) {
-            return;
-        }
 
         synchronized (this) {
             while (streamEventChunk.hasNext()) {
@@ -220,45 +195,22 @@ public class MarkovChainStreamProcessor extends StreamProcessor implements Sched
         nextProcessor.process(streamEventChunk);
     }
 
-    /**
-     * This will be called only once and this can be used to acquire required resources for the
-     * processing element.
-     * This will be called after initializing the system and before starting to process the events.
-     */
     @Override
     public void start() {
 
     }
 
-    /**
-     * This will be called only once and this can be used to release the acquired resources
-     * for processing.
-     * This will be called before shutting down the system.
-     */
     @Override
     public void stop() {
 
     }
 
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for reconstructing the element to the same state at a different point of time
-     *
-     * @return stateful objects of the processing element as an array
-     */
     @Override
     public Object[] currentState() {
         return new Object[] { markovChainTransitionProbabilitiesCalculator, trainingOption,
                 trainingOptionExpressionExecutor, lastScheduledTime };
     }
 
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     * the element to the same state as if was on a previous point of time.
-     *
-     * @param state the stateful objects of the element as an array on the same order provided
-     *            by currentState().
-     */
     @Override
     public void restoreState(Object[] state) {
         markovChainTransitionProbabilitiesCalculator = (MarkovChainTransitionProbabilitiesCalculator) state[0];

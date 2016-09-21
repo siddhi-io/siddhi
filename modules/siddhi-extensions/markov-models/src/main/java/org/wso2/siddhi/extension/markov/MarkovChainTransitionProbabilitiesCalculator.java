@@ -21,8 +21,17 @@ package org.wso2.siddhi.extension.markov;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.io.FileInputStream;
+import java.io.BufferedInputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.Closeable;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class MarkovChainTransitionProbabilitiesCalculator implements Serializable {
 
@@ -37,7 +46,7 @@ public class MarkovChainTransitionProbabilitiesCalculator implements Serializabl
     private MarkovMatrix markovMatrix = new MarkovMatrix();
 
     /**
-     * Constructor for real time training method
+     * Constructor for real time training method.
      *
      * @param durationToKeep
      * @param alertThresholdProbability
@@ -51,7 +60,7 @@ public class MarkovChainTransitionProbabilitiesCalculator implements Serializabl
     }
 
     /**
-     * Constructor for predefined markov matrix method
+     * Constructor for predefined markov matrix method.
      *
      * @param durationToKeep
      * @param alertThresholdProbability
@@ -65,41 +74,37 @@ public class MarkovChainTransitionProbabilitiesCalculator implements Serializabl
     }
 
     /**
-     * Method to process new events
+     * Method to process new events.
      *
-     * @param userId
-     * @param state
-     * @param trainingOption
-     * @return Array containing output results
+     * @param id
+     * @param currentState
+     * @param hasTrainingEnabled
+     * @return Array containing output results.
      */
-    protected Object[] processData(String userId, String state, boolean trainingOption) {
+    protected Object[] processData(String id, String currentState, boolean hasTrainingEnabled) {
 
         eventCount++;
-        String id = userId;
-        String currentState = state;
-        boolean currentTrainingOption = trainingOption;
         Object[] markovChainAlert = null;
 
-        String lastState = updateStates(id, currentState);
+        String lastState = idToLastStates.get(id);
+        updateStates(id, currentState);
 
         if (eventCount > notificationsHoldLimit) {
             markovChainAlert = getMarkovChainAlert(lastState, currentState);
         }
 
-        if (currentTrainingOption && lastState != null) {
+        if (hasTrainingEnabled && lastState != null) {
             markovMatrix.updateStartStateCount(lastState, 1);
             markovMatrix.updateTransitionCount(lastState, currentState, 1);
         }
-
         return markovChainAlert;
     }
 
     /**
-     * Method to updateTransitionCount States
+     * Method to updateTransitionCount States.
      */
-    private String updateStates(String id, String currentState) {
+    private void updateStates(String id, String currentState) {
 
-        String lastState = idToLastStates.get(id);
         // updateTransitionCount the last state to current state
         idToLastStates.put(id, currentState);
 
@@ -107,14 +112,12 @@ public class MarkovChainTransitionProbabilitiesCalculator implements Serializabl
         long currentEventTime = System.currentTimeMillis();
         long expiryTime = currentEventTime + durationToKeep;
         idToLastStatesExpiryTime.put(id, expiryTime);
-
-        return lastState;
     }
 
     /**
-     * Method which updateTransitionCount markov matrix and return notifications
+     * Method which updateTransitionCount markov matrix and return notifications.
      *
-     * @return Array containing last state, transition probability and notify values
+     * @return Array containing last state, transition probability and notify values.
      */
     private Object[] getMarkovChainAlert(String lastState, String currentState) {
 
@@ -126,10 +129,10 @@ public class MarkovChainTransitionProbabilitiesCalculator implements Serializabl
 
         if (lastState != null) {
             key = markovMatrix.getKey(lastState, currentState);
-
             totalCount = markovMatrix.getStartStateCount().get(lastState);
             transitionCount = markovMatrix.getTransitionCount().get(key);
-            if (totalCount != null && transitionCount != null) {
+
+            if (totalCount != null && totalCount != 0 && transitionCount != null) {
                 stateTransitionProbability = transitionCount / totalCount;
             }
 
@@ -141,7 +144,7 @@ public class MarkovChainTransitionProbabilitiesCalculator implements Serializabl
     }
 
     /**
-     * Method to remove events which have expired based on time
+     * Method to remove events which have expired based on time.
      */
     protected void removeExpiredEvents(long currentEventTime) {
 
@@ -155,14 +158,14 @@ public class MarkovChainTransitionProbabilitiesCalculator implements Serializabl
     }
 
     /**
-     * Method to populate the markov matrix using a file input
+     * Method to populate the markov matrix using a file input.
      */
     private void populateMarkovMatrix(String markovMatrixStorageLocation) {
 
         File file = new File(markovMatrixStorageLocation);
-        FileInputStream fis = null;
-        BufferedInputStream bis = null;
-        BufferedReader br = null;
+        FileInputStream fileInputStream = null;
+        BufferedInputStream bufferedInputStream = null;
+        BufferedReader bufferedReader = null;
         String[] statesNames = null;
         String key;
         String startState;
@@ -173,21 +176,21 @@ public class MarkovChainTransitionProbabilitiesCalculator implements Serializabl
 
         try {
 
-            fis = new FileInputStream(file);
-            bis = new BufferedInputStream(fis);
-            br = new BufferedReader(new InputStreamReader(bis));
+            fileInputStream = new FileInputStream(file);
+            bufferedInputStream = new BufferedInputStream(fileInputStream);
+            bufferedReader = new BufferedReader(new InputStreamReader(bufferedInputStream));
             int rowNumber = 0;
-            String row = br.readLine();
+            String row = bufferedReader.readLine();
             if (row != null) {
                 statesNames = row.split(",");
             }
 
-            while ((row = br.readLine()) != null) {
+            while ((row = bufferedReader.readLine()) != null) {
 
                 if (rowNumber >= statesNames.length) {
                     throw new OperationNotSupportedException(
                             "Number of rows in the matrix should be equal to number of states. please provide a "
-                                    + statesNames.length + " x " + statesNames.length + " matrix");
+                                    + statesNames.length + " x " + statesNames.length + " matrix.");
                 }
 
                 startState = statesNames[rowNumber];
@@ -197,11 +200,16 @@ public class MarkovChainTransitionProbabilitiesCalculator implements Serializabl
                 if (values.length != statesNames.length) {
                     throw new OperationNotSupportedException(
                             "Number of columns in the matrix should be equal to number of states. please provide a "
-                                    + statesNames.length + " x " + statesNames.length + " matrix");
+                                    + statesNames.length + " x " + statesNames.length + " matrix.");
                 }
 
                 for (String value : values) {
-                    totalCount = totalCount + Double.parseDouble(value);
+                    try {
+                        totalCount = totalCount + Double.parseDouble(value);
+                    } catch (NumberFormatException e) {
+                        log.error("Exception occurred while reading the data file: " + markovMatrixStorageLocation
+                                + ". All values in the matrix should be in double.", e);
+                    }
                 }
                 startStateCount.put(startState, totalCount);
 
@@ -214,24 +222,27 @@ public class MarkovChainTransitionProbabilitiesCalculator implements Serializabl
             }
 
         } catch (IOException e) {
-            log.error("Exception occurred while reading the data file " + markovMatrixStorageLocation, e);
+            log.error("Exception occurred while reading the data file: " + markovMatrixStorageLocation, e);
         } finally {
-            try {
-                if (fis != null) {
-                    fis.close();
-                }
-                if (bis != null) {
-                    bis.close();
-                }
-                if (br != null) {
-                    br.close();
-                }
-            } catch (IOException ex) {
-                log.error("Exception occurred when closing the file stream of the data file "
-                        + markovMatrixStorageLocation, ex);
-            }
+            closedQuietly(markovMatrixStorageLocation, bufferedReader, bufferedInputStream, fileInputStream);
         }
         markovMatrix.setStartStateCount(startStateCount);
         markovMatrix.setTransitionCount(transitionCount);
     }
+
+    private void closedQuietly(String closingFile, Closeable... closeables) {
+        if (closeables == null) {
+            return;
+        }
+        for (Closeable closeable : closeables) {
+            try {
+                if (closeable != null) {
+                    closeable.close();
+                }
+            } catch (IOException e) {
+                log.error("Exception occurred while closing the stream related to data file: " + closingFile, e);
+            }
+        }
+    }
+    
 }

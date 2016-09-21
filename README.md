@@ -18,10 +18,10 @@ Siddhi CEP is a lightweight, easy-to-use Open Source Complex Event Processing En
 This project was initiated as a research project at University of Moratuwa, Sri Lanka, and now being improved by WSO2 Inc.
 
 ####Documentation 
-https://docs.wso2.com/display/CEP400/SiddhiQL+Guide+3.0
+https://docs.wso2.com/display/CEP420/SiddhiQL+Guide+3.1
 
-####Try it with [WSO2 Complex Event Processor 4.0] (http://wso2.com/products/complex-event-processor/)
-https://docs.wso2.com/display/CEP400/Siddhi+Try+It+Tool
+####Try it with [WSO2 Complex Event Processor 4.2] (http://wso2.com/products/complex-event-processor/)
+https://docs.wso2.com/display/CEP420/Siddhi+Try+It+Tool
 
 
 Features Supported

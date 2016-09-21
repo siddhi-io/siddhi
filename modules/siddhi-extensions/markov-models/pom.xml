@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.siddhi</groupId>
         <artifactId>siddhi-extensions</artifactId>
-        <version>3.1.2</version>
+        <version>3.1.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -62,11 +62,11 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.siddhi.extension.markov,
-                            org.wso2.siddhi.extension.markov.*
+                            org.wso2.siddhi.extension.markov.*;version="${siddhi.version}"
                         </Export-Package>
                         <Import-Package>
-                            *;resolution:=optional
+                            org.wso2.siddhi.*;version="${siddhi.version}",
+                            org.apache.log4j;version="${log4j.imp.pkg.version.range}"
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
