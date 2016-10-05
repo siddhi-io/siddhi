@@ -1,14 +1,12 @@
 package org.wso2.siddhi.extension.reorder;
 
 import org.apache.log4j.Logger;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.extension.reorder.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,36 +15,23 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingQueue;
 
-
+//import static com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Text.NEW_LINE;
 /**
- * This is the test case for KSlackExtension.
- * Created by miyurud on 8/10/15.
+ * Created by vithursa on 10/5/16.
  */
-public class KSlackExtensionTestCase {
-    static final Logger log = Logger.getLogger(KSlackExtensionTestCase.class);
-    private volatile int count;
-    private volatile boolean eventArrived;
+public class AlphaKSlackExtensionTestCase {
+    static final Logger log = Logger.getLogger(AlphaKSlackExtensionTestCase.class);
     private File file;
     private BufferedWriter bw;
-
-    public static void main(String[] args){
-        KSlackExtensionTestCase testObj = new KSlackExtensionTestCase();
-        try {
-            testObj.orderTest();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+    private String content;
 
     @Before
     public void init() {
-        count = 0;
-        eventArrived = false;
     }
 
     @Test
-    public void orderTest() throws InterruptedException {
-        file = new File("/home/vithursa/Desktop/Reorder_Result/KSlack");
+    public void OrderTest() throws InterruptedException, IOException {
+        file = new File("/home/vithursa/Desktop/Reorder_Result/AKSlack");
 
         if (!file.exists()) {
             try {
@@ -64,25 +49,25 @@ public class KSlackExtensionTestCase {
         }
 
         bw = new BufferedWriter(fw);
-        log.info("KSlackExtensionTestCase TestCase 1");
 
-
-
+        log.info("AlphaKSlackExtensionTestCase TestCase 1");
         SiddhiManager siddhiManager = new SiddhiManager();
-        //System.out.println("----AAAAAAA2-----");
-        String inStreamDefinition = "define stream inputStream (sid int, eventtt long, x int, y int, z int, " +
-                "v_abs int, a_abs int, vx int, vy int, vz int, ax int, ay int, az int); ";
-        String query = "@info(name = 'query1') from inputStream#reorder:kslack(eventtt) select sid, " +
-                "eventtt, x, y, z, v_abs, a_abs, vx, vy, vz, ax, ay, az " +
-                "insert into outputStream;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-        // System.out.println("----AAAAAAA3-----");
+        String inStreamDefinition = "define stream inputStream (sid int, eventtt long, x int, y int, z int, " +
+                "v_abs int, a_abs int, vx int, vy int, vz int, ax int, ay int, az int);";
+        String query = ("@info(name = 'query1') from inputStream#reorder:akslack(eventtt,v_abs) select sid, " +
+                "eventtt, x, y, z, v_abs, a_abs, vx, vy, vz, ax, ay, az " +
+                "insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
 
             @Override
             public void receive(org.wso2.siddhi.core.event.Event[] events) {
                 for (org.wso2.siddhi.core.event.Event event : events) {
+
                     try {
                         bw.write(""+event.getData()[0] + "," +
                                 event.getData()[1] + "," +
@@ -103,7 +88,9 @@ public class KSlackExtensionTestCase {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
                 }
+
             }
         });
 
@@ -118,7 +105,6 @@ public class KSlackExtensionTestCase {
         while(itr.hasNext()){
             inputHandler.send((Object[]) itr.next());
         }
-
         Thread.sleep(2000);
         executionPlanRuntime.shutdown();
 
