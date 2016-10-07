@@ -52,6 +52,7 @@ public class AlphaKSlackExtension extends StreamProcessor {
     private ArrayList dataList = new ArrayList();
     private LinkedHashSet bufferSize = new LinkedHashSet();
     private long cumulativeTime=0;
+    private int counter_now=0;
 
 
     @Override
@@ -109,6 +110,7 @@ public class AlphaKSlackExtension extends StreamProcessor {
                     eventTreeMap.put(timestamp, eventList);
 
                     counter+=1;
+                    counter_now+=1;
                     int dataItem = (Integer) dataItemExecutor.execute(event);
                     dataItemList.add(dataItem);
 
@@ -145,7 +147,7 @@ public class AlphaKSlackExtension extends StreamProcessor {
                         eventTimeStamps = new LinkedHashSet<Long>();
                         counter=0;
                         count2+=1;
-                        System.out.println(cumulativeTime*1.0/batchSize);
+                        //System.out.println(cumulativeTime*1.0/batchSize);
                         cumulativeTime =0;
                     }
 
@@ -155,7 +157,6 @@ public class AlphaKSlackExtension extends StreamProcessor {
                         long minTimestamp = eventTreeMap.firstKey();
                         long timeDifference = greatestTimestamp - minTimestamp;
                         if (timeDifference > k) {
-                            System.out.println(timestamp);
                             if (timeDifference < MAX_K) {
                                 if (count2!=0) {
                                     k = (Math.round(timeDifference * alpha));
@@ -171,6 +172,7 @@ public class AlphaKSlackExtension extends StreamProcessor {
                             }
                         }
                         bufferSize.add(k);
+                        //System.out.println(bufferSize);
 
                         Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = eventTreeMap.entrySet().iterator();
                         while (entryIterator.hasNext()) {
@@ -228,6 +230,11 @@ public class AlphaKSlackExtension extends StreamProcessor {
         double endTime = System.nanoTime();
         double executionTime = endTime - startTime;
         cumulativeTime+=executionTime;
+        if(counter_now>batchSize){
+            System.out.println(cumulativeTime);
+            cumulativeTime=0;
+            counter_now=0;
+        }
     }
 
     @Override

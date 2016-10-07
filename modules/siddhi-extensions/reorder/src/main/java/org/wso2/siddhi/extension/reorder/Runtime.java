@@ -23,16 +23,13 @@ public class Runtime{
     private int denominator;
     private double windowCoverage;
     private static int MILISECOND = 1000;
-    private static int MICROSECOND = 1000000;
     private int NANOSECOND = 1000000000;
     private int TIME_UNIT=MILISECOND;
-    private int TIME_WINDOW_LEN= 20;
     //private long windowSize = TIME_WINDOW_LEN;
     private long windowSize = 10000l;
     private long currentTimeStamp;
     private long q =1;
     private LinkedBlockingQueue<Object> eventBuffer;
-    private DataLoader dataLoader;
     private HashMap<Long, ArrayList<Long>> timeStampMap = new HashMap<Long, ArrayList<Long>>();
     private long lowerIndex;
 
@@ -98,7 +95,6 @@ public class Runtime{
                     }
                 }
                 windowCoverage = numerator * 1.0 / denominator;
-                //windowCoverageList.add(windowCoverage);
             } catch (Exception e) {
                 System.out.println(e);
             }

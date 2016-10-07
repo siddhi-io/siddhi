@@ -46,7 +46,7 @@ public class KSlackExtensionTestCase {
 
     @Test
     public void orderTest() throws InterruptedException {
-        file = new File("/home/vithursa/Desktop/Reorder_Result/KSlack");
+        file = new File("/home/vithursa/Desktop/Reorder_Result/KSlackCurr");
 
         if (!file.exists()) {
             try {

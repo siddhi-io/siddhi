@@ -14,7 +14,7 @@ public class OOOccurence {
     private long lateArrival;
     private long tCurr;
     private long delay;
-    private long cumulativeDelay;
+    private long cumulativeDelay=0;
     private int eventCounter =0;
     private int count=0;
     private int count2=0;
@@ -23,7 +23,7 @@ public class OOOccurence {
     private int batchSize=10000;
     private ArrayList<Long> eventts = new ArrayList<Long>();
     private LinkedHashSet hashset = new LinkedHashSet();
-
+    private boolean flag = false;
     public OOOccurence(String filePath, int events){
         this.filepath = filePath;
         this.events = events;
@@ -52,26 +52,24 @@ public class OOOccurence {
                 //System.out.println(delay);
                 count +=1;
                 cumulativeDelay += delay;
-                if(count2>batchSize){
+                /*if(count2>batchSize){
                     System.out.println(count4);
                     count3+=1;
                     System.out.println(cumulativeDelay/batchSize+"\t\t"+count3);
                     count2=0;
                     cumulativeDelay =0;
-                }
+                }*/
 
             }
-            count2+=1;
-            count4+=1;
         }
-        /*System.out.println(count);
-        System.out.println("Cumulative Delay:\t"+cumulativeDelay);
+        System.out.println(count);
+        /*System.out.println("Cumulative Delay:\t"+cumulativeDelay);
         System.out.println("Events:\t\t\t\t"+eventCounter);*/
     }
 
 
     public static void main(String[] args){
-        OOOccurence obj = new OOOccurence("/home/vithursa/Desktop/Reorder_Result/AKSlack",500000);
+        OOOccurence obj = new OOOccurence("/home/vithursa/Desktop/Reorder_Result/AKSlackCurr",500000);
         obj.counter();
     }
 }

@@ -17,8 +17,6 @@ public class ThetaThreshold {
     private double delta;
     private int windowSize;
     private double errorThreshold;
-    //---------------------------How to calculate TupleArrivalRate?????-------------------------------------------------
-    private double tupleArrivalRate = 10; //refers to the number of tuples arrive within unit time interval.
 
     //--------------------------need to calculate IdealMean and IdealVariance-------------------------------------------
     private double idealMean;
@@ -33,13 +31,6 @@ public class ThetaThreshold {
         this.delta = delta;
         this.windowSize =windowSize;
         this.errorThreshold = errorThreshold;
-    }
-
-
-    //------------------------------------Number of tuples in ideal window scope ---------------------------------------
-    public long ActualTupleSizeCalculator() {
-        N = windowSize * round(tupleArrivalRate);
-        return N;
     }
 
     //-------------------------------------Calculation of mean and variance --------------------------------------------

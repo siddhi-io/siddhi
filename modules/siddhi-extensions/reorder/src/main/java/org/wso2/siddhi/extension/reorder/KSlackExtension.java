@@ -30,6 +30,7 @@ import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.Scheduler;
+import org.wso2.siddhi.core.util.timestamp.SystemCurrentTimeMillisTimestampGenerator;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -54,6 +55,11 @@ public class KSlackExtension extends StreamProcessor {
     private Scheduler scheduler;
     private long lastScheduledTimestamp = -1;
     private ReentrantLock lock = new ReentrantLock();
+    private LinkedHashSet bufferSize = new LinkedHashSet();
+    private int batchSize =10000;
+    private int cumulativeTime=0;
+    private int counter_now=0;
+
 
     @Override
     public void start() {
@@ -78,6 +84,7 @@ public class KSlackExtension extends StreamProcessor {
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
+        double startTime = System.nanoTime();
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>(false);
         lock.lock();
         try {
@@ -102,6 +109,8 @@ public class KSlackExtension extends StreamProcessor {
                     }
                     eventList.add(event);
                     eventTreeMap.put(timestamp, eventList);
+                    counter_now+=1;
+
 
                     if (timestamp > greatestTimestamp) {
                         greatestTimestamp = timestamp;
@@ -115,6 +124,8 @@ public class KSlackExtension extends StreamProcessor {
                                 k = MAX_K;
                             }
                         }
+                        bufferSize.add(k);
+                        //System.out.println(bufferSize);
 
                         Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = eventTreeMap.entrySet().iterator();
                         while (entryIterator.hasNext()) {
@@ -164,6 +175,14 @@ public class KSlackExtension extends StreamProcessor {
         }
         lock.unlock();
         nextProcessor.process(complexEventChunk);
+        double endTime = System.nanoTime();
+        double executionTime = endTime - startTime;
+        cumulativeTime+=executionTime;
+        if(counter_now>batchSize){
+            System.out.println(cumulativeTime);
+            cumulativeTime=0;
+            counter_now=0;
+        }
     }
 
     @Override

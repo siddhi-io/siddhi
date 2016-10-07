@@ -31,7 +31,7 @@ public class AlphaKSlackExtensionTestCase {
 
     @Test
     public void OrderTest() throws InterruptedException, IOException {
-        file = new File("/home/vithursa/Desktop/Reorder_Result/AKSlack");
+        file = new File("/home/vithursa/Desktop/Reorder_Result/AKSlackCurr");
 
         if (!file.exists()) {
             try {
@@ -98,7 +98,7 @@ public class AlphaKSlackExtensionTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
 
-        DataLoader inputData = new DataLoader("/home/vithursa/Desktop/OOEventsCopy",500000);
+        DataLoader inputData = new DataLoader("/home/vithursa/Desktop/OOEventsDUP",500000);
         inputData.runSingleStream();
         LinkedBlockingQueue<Object> events = inputData.getEventBuffer();
         Iterator<Object> itr = events.iterator();
