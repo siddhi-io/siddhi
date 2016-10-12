@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -53,7 +53,7 @@ public class IfThenElseFunctionExecutor extends FunctionExecutor {
     @Override
     protected Object execute(Object[] data) {
         // check whether first argument true or null
-        if (data[0].equals(Boolean.TRUE)) {
+        if (Boolean.TRUE.equals(data[0])) {
             return data[1];
         } else {
             return data[2];
@@ -94,8 +94,7 @@ public class IfThenElseFunctionExecutor extends FunctionExecutor {
     @Override
     public Object execute(ComplexEvent event) {
         try {
-            Boolean condition = (attributeExpressionExecutors[0].execute(event) != null
-                    && attributeExpressionExecutors[0].execute(event).equals(Boolean.TRUE));
+            Boolean condition = Boolean.TRUE.equals(attributeExpressionExecutors[0].execute(event));
             return execute(
                     new Object[]{
                             condition,
