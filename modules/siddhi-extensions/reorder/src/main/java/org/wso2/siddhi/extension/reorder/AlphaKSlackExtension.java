@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by vithursa on 10/3/16.
  */
-public class AlphaKSlackExtension extends StreamProcessor {
+public class AlphaKSlackExtension extends StreamProcessor implements SchedulingProcessor {
     private long k = 0; //In the beginning the K is zero.
     private long greatestTimestamp = 0; //Used to track the greatest timestamp of tuples seen so far in the stream history.
     private TreeMap<Long, ArrayList<StreamEvent>> eventTreeMap;
@@ -52,7 +52,12 @@ public class AlphaKSlackExtension extends StreamProcessor {
     private ArrayList dataList = new ArrayList();
     private LinkedHashSet bufferSize = new LinkedHashSet();
     private long cumulativeTime=0;
-    private int counter_now=0;
+    private int count=0;
+    private double Kp,Kd;
+    private int size;
+    private long tempK;
+    private ArrayList temp = new ArrayList();
+
 
 
     @Override
@@ -79,7 +84,6 @@ public class AlphaKSlackExtension extends StreamProcessor {
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
-        double startTime = System.nanoTime();
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>(false);
         lock.lock();
         Runtime obj5 = new Runtime();
@@ -110,7 +114,6 @@ public class AlphaKSlackExtension extends StreamProcessor {
                     eventTreeMap.put(timestamp, eventList);
 
                     counter+=1;
-                    counter_now+=1;
                     int dataItem = (Integer) dataItemExecutor.execute(event);
                     dataItemList.add(dataItem);
 
@@ -140,14 +143,15 @@ public class AlphaKSlackExtension extends StreamProcessor {
                         else{
                             differenceError = error- (Double) errorList.get(errorList.indexOf(error)-1);
                         }
+                        Kp =0.1;
+                        Kd = 0.1;
 
-                        alpha = Math.abs(0.1*error + 0.1*differenceError);
+                        alpha = Math.abs(Kp*error + Kd*differenceError);
                         timeStampList = new ArrayList<Long>();
                         dataItemList = new ArrayList<Integer>();
                         eventTimeStamps = new LinkedHashSet<Long>();
                         counter=0;
                         count2+=1;
-                        //System.out.println(cumulativeTime*1.0/batchSize);
                         cumulativeTime =0;
                     }
 
@@ -172,7 +176,6 @@ public class AlphaKSlackExtension extends StreamProcessor {
                             }
                         }
                         bufferSize.add(k);
-                        //System.out.println(bufferSize);
 
                         Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = eventTreeMap.entrySet().iterator();
                         while (entryIterator.hasNext()) {
@@ -190,7 +193,6 @@ public class AlphaKSlackExtension extends StreamProcessor {
                         entryIterator = expiredEventTreeMap.entrySet().iterator();
                         while (entryIterator.hasNext()) {
                             Map.Entry<Long, ArrayList<StreamEvent>> entry = entryIterator.next();
-
                             if (entry.getKey() + k <= greatestTimestamp) {
                                 entryIterator.remove();
                                 ArrayList<StreamEvent> timeEventList = entry.getValue();
@@ -202,12 +204,17 @@ public class AlphaKSlackExtension extends StreamProcessor {
                                 }
                             }
                         }
+                        for(int i=0;i<expiredEventTreeMap.size();i++){
+
+                        }
                     }
                 } else {
                     if(expiredEventTreeMap.size() > 0) {
                         TreeMap<Long, ArrayList<StreamEvent>> expiredEventTreeMapSnapShot = expiredEventTreeMap;
                         expiredEventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
+                        onTimerEvent(expiredEventTreeMapSnapShot, nextProcessor);
                         lastScheduledTimestamp = lastScheduledTimestamp + TIMER_DURATION;
+                        scheduler.notifyAt(lastScheduledTimestamp);
                     }
                 }
 
@@ -220,6 +227,7 @@ public class AlphaKSlackExtension extends StreamProcessor {
                     " field index (0 to (fieldsLength-1)).");
         }
         lock.unlock();
+        count+=1;
         if(flag) {
             nextProcessor.process(complexEventChunk);
         }
@@ -227,14 +235,7 @@ public class AlphaKSlackExtension extends StreamProcessor {
             int i = 0;
         }
         flag = false;
-        double endTime = System.nanoTime();
-        double executionTime = endTime - startTime;
-        cumulativeTime+=executionTime;
-        if(counter_now>batchSize){
-            System.out.println(cumulativeTime);
-            cumulativeTime=0;
-            counter_now=0;
-        }
+        //System.out.println(cumulativeTime);
     }
 
     @Override
@@ -242,7 +243,7 @@ public class AlphaKSlackExtension extends StreamProcessor {
                                    ExecutionPlanContext executionPlanContext) {
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 
-        if (attributeExpressionLength > 2) {
+        if (attributeExpressionLength > 3) {
             throw new ExecutionPlanCreationException("Maximum two input parameters can be specified for AKSlack. " +
                     " Timestamp field (long) and velocity field. But found " +
                     attributeExpressionLength + " attributes.");
@@ -277,7 +278,36 @@ public class AlphaKSlackExtension extends StreamProcessor {
                         " reorder:akslack() function. Required INT, but found " +
                         attributeExpressionExecutors[1].getReturnType());
             }
-            //In the third case we have both the timer operating in the background and we have also specified a K-slack window length.
+            //In the third case we have both the timer operating in the background.
+        }else if(attributeExpressionExecutors.length == 3){
+            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
+                timestampExecutor = attributeExpressionExecutors[0];
+                attributes.add(new Attribute("beta0", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the first argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[0].getReturnType());
+            }
+
+            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
+                dataItemExecutor = attributeExpressionExecutors[1];
+                attributes.add(new Attribute("beta1", Attribute.Type.INT));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the second argument of " +
+                        " reorder:akslack() function. Required INT, but found " +
+                        attributeExpressionExecutors[1].getReturnType());
+            }
+
+            if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
+                TIMER_DURATION = (Long)attributeExpressionExecutors[2].execute(null);
+                attributes.add(new Attribute("beta2", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the third argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[2].getReturnType());
+            }
+            //In the fourth case we have an additional boolean flag other than the above three parameters. If the flag
+            // is set to true any out-of-order events which arrive after the expiration of K-slack are discarded.
         }
         eventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
         expiredEventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
@@ -289,8 +319,21 @@ public class AlphaKSlackExtension extends StreamProcessor {
 
         return attributes;
     }
+    @Override
+    public void setScheduler(Scheduler scheduler) {
+        this.scheduler = scheduler;
+        if (lastScheduledTimestamp < 0) {
+            lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime() + TIMER_DURATION;
+            scheduler.notifyAt(lastScheduledTimestamp);
+        }
+    }
 
-    /*private void onTimerEvent(TreeMap<Long, ArrayList<StreamEvent>> treeMap, Processor nextProcessor) {
+    @Override
+    public Scheduler getScheduler() {
+        return this.scheduler;
+    }
+
+    private void onTimerEvent(TreeMap<Long, ArrayList<StreamEvent>> treeMap, Processor nextProcessor) {
         Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = treeMap.entrySet().iterator();
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>(false);
 
@@ -302,9 +345,5 @@ public class AlphaKSlackExtension extends StreamProcessor {
             }
         }
         nextProcessor.process(complexEventChunk);
-    }*/
-    //public static void main(String[] args){
-    // KSlackExtension obj = new KSlackExtension();
-    //obj.process();
-    //}
+    }
 }
