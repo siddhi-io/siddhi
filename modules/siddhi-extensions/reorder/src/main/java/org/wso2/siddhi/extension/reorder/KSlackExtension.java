@@ -34,6 +34,8 @@ import org.wso2.siddhi.core.util.timestamp.SystemCurrentTimeMillisTimestampGener
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -42,7 +44,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * This implements the K-Slack based disorder handling algorithm which was originally described in
  * https://www2.informatik.uni-erlangen.de/publication/download/IPDPS2013.pdf
  */
-public class KSlackExtension extends StreamProcessor {
+public class KSlackExtension extends StreamProcessor implements SchedulingProcessor {
     private long k = 0; //In the beginning the K is zero.
     private long greatestTimestamp = 0; //Used to track the greatest timestamp of tuples seen so far in the stream history.
     private TreeMap<Long, ArrayList<StreamEvent>> eventTreeMap;
@@ -56,10 +58,11 @@ public class KSlackExtension extends StreamProcessor {
     private long lastScheduledTimestamp = -1;
     private ReentrantLock lock = new ReentrantLock();
     private LinkedHashSet bufferSize = new LinkedHashSet();
-    private int batchSize =10000;
-    private int cumulativeTime=0;
-    private int counter_now=0;
-
+    private File file1;
+    private BufferedWriter bw1;
+    private int count=0;
+    private int batchSize = 10000;
+    private boolean flag = true;
 
     @Override
     public void start() {
@@ -84,7 +87,6 @@ public class KSlackExtension extends StreamProcessor {
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
-        double startTime = System.nanoTime();
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>(false);
         lock.lock();
         try {
@@ -109,14 +111,11 @@ public class KSlackExtension extends StreamProcessor {
                     }
                     eventList.add(event);
                     eventTreeMap.put(timestamp, eventList);
-                    counter_now+=1;
-
 
                     if (timestamp > greatestTimestamp) {
                         greatestTimestamp = timestamp;
                         long minTimestamp = eventTreeMap.firstKey();
                         long timeDifference = greatestTimestamp - minTimestamp;
-
                         if (timeDifference > k) {
                             if (timeDifference < MAX_K) {
                                 k = timeDifference;
@@ -125,7 +124,6 @@ public class KSlackExtension extends StreamProcessor {
                             }
                         }
                         bufferSize.add(k);
-                        //System.out.println(bufferSize);
 
                         Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = eventTreeMap.entrySet().iterator();
                         while (entryIterator.hasNext()) {
@@ -174,15 +172,9 @@ public class KSlackExtension extends StreamProcessor {
                     " field index (0 to (fieldsLength-1)).");
         }
         lock.unlock();
+        count+=1;
         nextProcessor.process(complexEventChunk);
-        double endTime = System.nanoTime();
-        double executionTime = endTime - startTime;
-        cumulativeTime+=executionTime;
-        if(counter_now>batchSize){
-            System.out.println(cumulativeTime);
-            cumulativeTime=0;
-            counter_now=0;
-        }
+        //System.out.println(cumulativeTime);
     }
 
     @Override
@@ -199,6 +191,7 @@ public class KSlackExtension extends StreamProcessor {
 
         //This is the most basic case. Here we do not use a timer. The basic K-slack algorithm is implemented.
         if(attributeExpressionExecutors.length == 1){
+            flag = false;
             if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
                 timestampExecutor = attributeExpressionExecutors[0];
                 attributes.add(new Attribute("beta0", Attribute.Type.LONG));
@@ -311,10 +304,10 @@ public class KSlackExtension extends StreamProcessor {
         return attributes;
     }
 
-    /*@Override
+    @Override
     public void setScheduler(Scheduler scheduler) {
         this.scheduler = scheduler;
-        if (lastScheduledTimestamp < 0) {
+        if (lastScheduledTimestamp < 0 && flag) {
             lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime() + TIMER_DURATION;
             scheduler.notifyAt(lastScheduledTimestamp);
         }
@@ -323,7 +316,7 @@ public class KSlackExtension extends StreamProcessor {
     @Override
     public Scheduler getScheduler() {
         return this.scheduler;
-    }*/
+    }
 
     private void onTimerEvent(TreeMap<Long, ArrayList<StreamEvent>> treeMap, Processor nextProcessor) {
         Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = treeMap.entrySet().iterator();
@@ -338,4 +331,5 @@ public class KSlackExtension extends StreamProcessor {
         }
         nextProcessor.process(complexEventChunk);
     }
+
 }

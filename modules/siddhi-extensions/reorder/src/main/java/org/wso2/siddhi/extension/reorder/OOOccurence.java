@@ -59,14 +59,14 @@ public class OOOccurence {
 
             if (eventts.get(j) < maximum) {
                 count += 1;
-                //long delay = maximum - eventts.get(j);
-                //cumulative +=delay;
+                long delay = maximum - eventts.get(j);
+                cumulative +=delay;
             }
 
             if (counter >= 10000) {
                 System.out.println(count);
                 //System.out.println(cumulative/10000);
-                //cumulative=0;
+                cumulative=0;
                 count = 0;
                 counter = 0;
             }
@@ -91,15 +91,12 @@ public class OOOccurence {
 
             }
         }*/
-            System.out.println(count);
-        /*System.out.println("Cumulative Delay:\t"+cumulativeDelay);
-        System.out.println("Events:\t\t\t\t"+eventCounter);*/
         }
     }
 
 
     public static void main(String[] args){
-        OOOccurence obj = new OOOccurence("/home/vithursa/Desktop/Reorder_Result/AKSlack",500000);
+        OOOccurence obj = new OOOccurence("/home/vithursa/Desktop/Today/AKSlackDelay",500000);
         obj.counter();
     }
 }

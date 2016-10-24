@@ -38,6 +38,7 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
     private long lastScheduledTimestamp = -1;
     private ReentrantLock lock = new ReentrantLock();
     private double alpha=0;
+    private double deltaAlpha;
     private int counter =0;
     private int batchSize = 10000;
     private int NANOSECOND = 1000000000;
@@ -57,6 +58,7 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
     private int size;
     private long tempK;
     private ArrayList temp = new ArrayList();
+    private boolean flag = true;
 
 
 
@@ -130,7 +132,7 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
 
                         Iterator itr2 = dataItemList.iterator();
                         while(itr.hasNext()){
-                            dataList.add((Integer) itr2.next()*1.0/1000000);
+                           dataList.add((Integer) itr2.next()*1.0/1000000);
                         }
                         thetaThreshold = obj2.ThetaThresholdCalculator(criticalValue,obj2.MeanCalculator(dataList),
                                 obj2.VarianceCalculator(dataList));
@@ -146,7 +148,17 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                         Kp =0.1;
                         Kd = 0.1;
 
-                        alpha = Math.abs(Kp*error + Kd*differenceError);
+                        //alpha = Math.abs(Kp*error + Kd*differenceError);
+                        deltaAlpha = Kp*error + Kd*differenceError;
+                        if(count2!=0){
+                            alpha =Math.abs(deltaAlpha + (Double) temp.get(0));
+                            temp.remove(0);
+                            temp.add(0,alpha);
+                        }
+                        else{
+                            alpha = Math.abs(deltaAlpha);
+                            temp.add(0,alpha);
+                        }
                         timeStampList = new ArrayList<Long>();
                         dataItemList = new ArrayList<Integer>();
                         eventTimeStamps = new LinkedHashSet<Long>();
@@ -161,6 +173,7 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                         long minTimestamp = eventTreeMap.firstKey();
                         long timeDifference = greatestTimestamp - minTimestamp;
                         if (timeDifference > k) {
+                            System.out.println(timestamp);
                             if (timeDifference < MAX_K) {
                                 if (count2!=0) {
                                     k = (Math.round(timeDifference * alpha));
@@ -261,6 +274,7 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
             }
             //In the following case we have the timer operating in background. But we do not impose a K-slack window length.
         }else if(attributeExpressionExecutors.length == 2){
+            flag = false;
             if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
                 timestampExecutor = attributeExpressionExecutors[0];
                 attributes.add(new Attribute("beta0", Attribute.Type.LONG));
@@ -322,7 +336,7 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
     @Override
     public void setScheduler(Scheduler scheduler) {
         this.scheduler = scheduler;
-        if (lastScheduledTimestamp < 0) {
+        if (lastScheduledTimestamp < 0 && flag) {
             lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime() + TIMER_DURATION;
             scheduler.notifyAt(lastScheduledTimestamp);
         }

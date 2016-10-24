@@ -67,7 +67,6 @@ public class ThetaThreshold {
     public double ThetaThresholdCalculator(double criticalValue, double idealMean, double idealVariance) {
         double temp1 = Math.sqrt((pow(idealMean, 2) + pow(idealVariance, 2)) / (N * pow(idealMean, 2)));
         double temp2 = pow(criticalValue, 2) * pow(temp1, 2);
-        //System.out.println((pow(idealMean, 2) + pow(idealVariance, 2)));
 
         double a1, b1, c1, b2, c2;
         a1 = 1 + temp2;
@@ -75,7 +74,6 @@ public class ThetaThreshold {
         c1 = pow((1 - errorThreshold), 2);
         b2 = -(2 + (2 * errorThreshold) + temp2);
         c2 = pow((1 + errorThreshold), 2);
-        //System.out.println(a1+"\t\t\t"+b1+"\t\t\t"+c1+"\t\t\t"+b2+"\t\t\t"+c2);
         double tempSq1 = pow(b1, 2) - (4 * a1 * c1);
         double tempSq2 = pow(b2, 2) - (4 * a1 * c2);
 
@@ -108,31 +106,8 @@ public class ThetaThreshold {
             thetaThresholdValue = min(min(theta1, theta2), min(theta3, theta4));
         }
         return thetaThresholdValue;
-        //System.out.println(theta1+"\t\t\t"+theta2+"\t\t\t"+theta3+"\t\t\t"+theta4);
     }
 
-   /* public static void main(String[] args) {
-        try {
-            my = new PrintStream(new FileOutputStream("MyOutFile.txt"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        /*for (int i = 0; i < 1000; i++) {
-            windowCoverageArray.add(random.nextDouble());
-        }*/
-
-
-        /*for(int i=0; i < 10; i++){
-            for(int j=0; j < 10; j++){
-                for(int k=0; k < 10; k++){
-                    org.wso2.siddhi.extension.reorder.ThetaThreshold obj1 = new ThetaThreshold((0.01 * i),(0.01*j),k);
-                    obj1.ActualTupleSizeCalculator(k);
-                    ans = obj1.ThetaThresholdCalculator(obj1.CriticalValueCalculator((0.01 * i)),34.3,2.5,(0.01 * j));
-                    thresholdArray.add(ans);
-                }
-            }
-
-        }*/
 
     //--------------------------------------Error and deltaAlpha calculation----------------------------------------
         /*for (int j = 0; j < windowCoverageArray.size(); j++) {

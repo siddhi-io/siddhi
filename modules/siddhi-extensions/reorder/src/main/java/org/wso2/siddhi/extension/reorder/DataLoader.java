@@ -68,7 +68,8 @@ public class DataLoader implements DataLoaderThread{
                             Integer.parseInt(vz),
                             Integer.parseInt(ax),
                             Integer.parseInt(ay),
-                            Integer.parseInt(az)
+                            Integer.parseInt(az),
+                            -1l
                     };
                 }catch(NumberFormatException e){
                     //e.printStackTrace();

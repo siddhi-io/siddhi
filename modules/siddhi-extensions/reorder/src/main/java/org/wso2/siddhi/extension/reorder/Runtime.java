@@ -38,7 +38,6 @@ public class Runtime{
     public ArrayList CurentTimeStamp(LinkedHashSet<Long> timeStamps){
         Iterator<Long> itr = timeStamps.iterator();
         int counter = 1;
-        //int WINDOW_SIZE = 1000;
         long item = 0;
         long largestItem = 0;
         ArrayList<Long> list = new ArrayList<Long>();

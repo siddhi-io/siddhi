@@ -24,6 +24,10 @@ public class AlphaKSlackExtensionTestCase {
     private File file;
     private BufferedWriter bw;
     private String content;
+    private long sum=0;
+    private int counter =0;
+    private int count =0;
+
 
     @Before
     public void init() {
@@ -31,7 +35,7 @@ public class AlphaKSlackExtensionTestCase {
 
     @Test
     public void OrderTest() throws InterruptedException, IOException {
-        file = new File("/home/vithursa/Desktop/Reorder_Result/AKSlackCurr");
+        file = new File("/home/vithursa/Desktop/Today/AKSlackDelay");
 
         if (!file.exists()) {
             try {
@@ -54,9 +58,9 @@ public class AlphaKSlackExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (sid int, eventtt long, x int, y int, z int, " +
-                "v_abs int, a_abs int, vx int, vy int, vz int, ax int, ay int, az int);";
-        String query = ("@info(name = 'query1') from inputStream#reorder:akslack(eventtt,v_abs) select sid, " +
-                "eventtt, x, y, z, v_abs, a_abs, vx, vy, vz, ax, ay, az " +
+                "v_abs int, a_abs int, vx int, vy int, vz int, ax int, ay int, az int, iij_timestamp long);";
+        String query = ("@info(name = 'query1') from inputStream #reorder:akslack(eventtt,v_abs) select sid, " +
+                "eventtt, x, y, z, v_abs, a_abs, vx, vy, vz, ax, ay, az, iij_timestamp " +
                 "insert into outputStream;");
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
@@ -67,6 +71,17 @@ public class AlphaKSlackExtensionTestCase {
             @Override
             public void receive(org.wso2.siddhi.core.event.Event[] events) {
                 for (org.wso2.siddhi.core.event.Event event : events) {
+                    long difference = System.currentTimeMillis() - (Long)event.getData()[13];
+                    sum += difference;
+                    count+=1;
+                    //System.out.println(count);
+                    if(count>=10000){
+                        //System.out.println(sum*1.0/count);
+                        //System.out.println(sum*1.0/count);
+                        sum =0;
+                        count=0;
+                        //counter=0;
+                    }
 
                     try {
                         bw.write(""+event.getData()[0] + "," +
@@ -98,12 +113,14 @@ public class AlphaKSlackExtensionTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
 
-        DataLoader inputData = new DataLoader("/home/vithursa/Desktop/OOEventsDUP",500000);
+        DataLoader inputData = new DataLoader("/home/vithursa/Desktop/OOEventsDelay",500000);
         inputData.runSingleStream();
         LinkedBlockingQueue<Object> events = inputData.getEventBuffer();
         Iterator<Object> itr = events.iterator();
         while(itr.hasNext()){
-            inputHandler.send((Object[]) itr.next());
+            Object[] obj = (Object[]) itr.next();
+            obj[13] = System.currentTimeMillis();
+            inputHandler.send(obj);
         }
         Thread.sleep(2000);
         executionPlanRuntime.shutdown();

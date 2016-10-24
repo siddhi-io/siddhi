@@ -28,6 +28,8 @@ public class KSlackExtensionTestCase {
     private volatile boolean eventArrived;
     private File file;
     private BufferedWriter bw;
+    private long sum;
+
 
     public static void main(String[] args){
         KSlackExtensionTestCase testObj = new KSlackExtensionTestCase();
@@ -46,7 +48,7 @@ public class KSlackExtensionTestCase {
 
     @Test
     public void orderTest() throws InterruptedException {
-        file = new File("/home/vithursa/Desktop/Reorder_Result/KSlackCurr");
+        file = new File("/home/vithursa/Desktop/Reorder_Result/rk");
 
         if (!file.exists()) {
             try {
@@ -71,9 +73,9 @@ public class KSlackExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         //System.out.println("----AAAAAAA2-----");
         String inStreamDefinition = "define stream inputStream (sid int, eventtt long, x int, y int, z int, " +
-                "v_abs int, a_abs int, vx int, vy int, vz int, ax int, ay int, az int); ";
-        String query = "@info(name = 'query1') from inputStream#reorder:kslack(eventtt) select sid, " +
-                "eventtt, x, y, z, v_abs, a_abs, vx, vy, vz, ax, ay, az " +
+                "v_abs int, a_abs int, vx int, vy int, vz int, ax int, ay int, az int,iij_timestamp long); ";
+        String query = "@info(name = 'query1') from inputStream#reorder:kslack(eventtt,1000l) select sid, " +
+                "eventtt, x, y, z, v_abs, a_abs, vx, vy, vz, ax, ay, az, iij_timestamp " +
                 "insert into outputStream;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
@@ -83,6 +85,17 @@ public class KSlackExtensionTestCase {
             @Override
             public void receive(org.wso2.siddhi.core.event.Event[] events) {
                 for (org.wso2.siddhi.core.event.Event event : events) {
+                    long difference = System.currentTimeMillis() - (Long)event.getData()[13];
+                    sum += difference;
+                    count+=1;
+                    if(count>=10000){
+                        System.out.println(sum*1.0/count);
+                        //System.out.println(sum*1.0/count);
+                        sum =0;
+                        count=0;
+                        //counter=0;
+                    }
+
                     try {
                         bw.write(""+event.getData()[0] + "," +
                                 event.getData()[1] + "," +
@@ -96,7 +109,8 @@ public class KSlackExtensionTestCase {
                                 event.getData()[9] + "," +
                                 event.getData()[10] + "," +
                                 event.getData()[11] + "," +
-                                event.getData()[12] +
+                                event.getData()[12] +"," +
+                                (difference) +
                                 "");
                         bw.write("\r\n");
                         bw.flush();
@@ -116,7 +130,9 @@ public class KSlackExtensionTestCase {
         LinkedBlockingQueue<Object> events = inputData.getEventBuffer();
         Iterator<Object> itr = events.iterator();
         while(itr.hasNext()){
-            inputHandler.send((Object[]) itr.next());
+            Object[] obj = (Object[]) itr.next();
+            obj[13] = System.currentTimeMillis();
+            inputHandler.send(obj);
         }
 
         Thread.sleep(2000);
