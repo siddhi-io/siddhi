@@ -32,6 +32,7 @@ import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.persistence.PersistenceService;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import org.wso2.siddhi.core.util.timestamp.EventTimeMillisTimestampGenerator;
 import org.wso2.siddhi.core.util.timestamp.SystemCurrentTimeMillisTimestampGenerator;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.annotation.Annotation;
@@ -51,7 +52,7 @@ import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
 
 public class ExecutionPlanParser {
     private static final Logger log = Logger.getLogger(ExecutionPlanRuntimeBuilder.class);
@@ -130,7 +131,13 @@ public class ExecutionPlanParser {
             executionPlanContext.setScheduledExecutorService(Executors.newScheduledThreadPool(5,
                     new ThreadFactoryBuilder().setNameFormat("Siddhi-" +
                             executionPlanContext.getName() + "-scheduler-thread-%d").build()));
-            executionPlanContext.setTimestampGenerator(new SystemCurrentTimeMillisTimestampGenerator());
+
+            // Select the TimestampGenerator based on playback mode on/off
+            if (executionPlanContext.isPlayback()) {
+                executionPlanContext.setTimestampGenerator(new EventTimeMillisTimestampGenerator());
+            } else {
+                executionPlanContext.setTimestampGenerator(new SystemCurrentTimeMillisTimestampGenerator());
+            }
             executionPlanContext.setSnapshotService(new SnapshotService(executionPlanContext));
             executionPlanContext.setPersistenceService(new PersistenceService(executionPlanContext));
             executionPlanContext.setElementIdGenerator(new ElementIdGenerator(executionPlanContext.getName()));
