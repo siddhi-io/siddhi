@@ -376,6 +376,129 @@ public class TimeBatchWindowTestCase {
 
     }
 
+    /**
+     * Testing playback enabled execution plan contains timeBatch window with 1 sec interval.
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void timeWindowBatchTest8() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "@Plan:playback " +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeBatch(1 sec) " +
+                "select * " +
+                "insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEventCount == 0) {
+                    Assert.assertTrue("Remove Events will only arrive after the second time period. ", removeEvents == null);
+                }
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        long timestamp = System.currentTimeMillis();
+        inputHandler.send(timestamp, new Object[]{"IBM", 700f, 0});
+
+        timestamp += 500;
+        inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 1});
+
+        timestamp += 500;   // 1 sec passed
+        inputHandler.send(timestamp, new Object[]{"GOOGLE", 85.0f, 1});
+
+        timestamp += 1000;   // Another 1 sec passed
+        inputHandler.send(timestamp, new Object[]{"ORACLE", 90.5f, 1});
+
+        Thread.sleep(100);
+
+        Assert.assertEquals(3, inEventCount);
+        Assert.assertEquals(2, removeEventCount);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+
+    /**
+     * Testing playback enabled execution plan contains timeBatch window with 2 sec interval starting at every 0th second.
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void timeWindowBatchTest9() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "@Plan:playback " +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeBatch(2 sec , 0) " +
+                "select symbol, sum(price) as sumPrice, volume " +
+                "insert into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEventCount == 0) {
+                    Assert.assertTrue("Remove Events will only arrive after the second time period. ", removeEvents == null);
+                }
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                } else if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        // Start sending events in the beginning of a cycle
+        long timestamp = 0;
+        inputHandler.send(timestamp, new Object[]{"IBM", 700f, 0});
+        inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 1});
+        timestamp += 8500;
+        inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 1});
+        inputHandler.send(timestamp, new Object[]{"II", 60.5f, 1});
+        timestamp += 13000;
+        inputHandler.send(timestamp, new Object[]{"TT", 60.5f, 1});
+        inputHandler.send(timestamp, new Object[]{"YY", 60.5f, 1});
+        timestamp += 5000;
+        inputHandler.send(timestamp, new Object[]{"ZZ", 0.0f, 0});
+
+        Thread.sleep(100);
+
+        Assert.assertEquals(3, inEventCount);
+        Assert.assertEquals(0, removeEventCount);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
 
 //    @Test
 //    public void timeWindowBatchStartTimeTest() throws InterruptedException {

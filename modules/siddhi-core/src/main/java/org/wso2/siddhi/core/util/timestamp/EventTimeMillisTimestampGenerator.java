@@ -44,10 +44,14 @@ public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
     }
 
     public void setTimestamp(long timestamp) {
-        synchronized (this) {
-            this.latestTimestamp = timestamp;
-            for (TimeChangeListener listener : this.timeChangeListeners) {
-                listener.onTimeChange(this.latestTimestamp);
+        if (timestamp >= this.latestTimestamp) {
+            synchronized (this) {
+                if (timestamp >= this.latestTimestamp) {
+                    this.latestTimestamp = timestamp;
+                    for (TimeChangeListener listener : this.timeChangeListeners) {
+                        listener.onTimeChange(this.latestTimestamp);
+                    }
+                }
             }
         }
     }
