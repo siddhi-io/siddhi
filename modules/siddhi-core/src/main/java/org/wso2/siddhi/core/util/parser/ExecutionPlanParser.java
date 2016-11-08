@@ -24,7 +24,6 @@ import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
-import org.wso2.siddhi.core.window.EventWindow;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.ExecutionPlanRuntimeBuilder;
 import org.wso2.siddhi.core.util.SiddhiConstants;
@@ -34,14 +33,11 @@ import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.timestamp.EventTimeMillisTimestampGenerator;
 import org.wso2.siddhi.core.util.timestamp.SystemCurrentTimeMillisTimestampGenerator;
+import org.wso2.siddhi.core.window.EventWindow;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
-import org.wso2.siddhi.query.api.definition.FunctionDefinition;
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
-import org.wso2.siddhi.query.api.definition.TableDefinition;
-import org.wso2.siddhi.query.api.definition.TriggerDefinition;
-import org.wso2.siddhi.query.api.definition.WindowDefinition;
+import org.wso2.siddhi.query.api.definition.*;
 import org.wso2.siddhi.query.api.exception.DuplicateAnnotationException;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
@@ -49,6 +45,7 @@ import org.wso2.siddhi.query.api.execution.ExecutionElement;
 import org.wso2.siddhi.query.api.execution.partition.Partition;
 import org.wso2.siddhi.query.api.execution.query.Query;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
+import org.wso2.siddhi.query.compiler.SiddhiCompiler;
 
 import java.util.Map;
 import java.util.UUID;
@@ -78,13 +75,7 @@ public class ExecutionPlanParser {
                 executionPlanContext.setName(UUID.randomUUID().toString());
             }
 
-            Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PLAYBACK,
-                    executionPlan.getAnnotations());
-            if (annotation != null) {
-                executionPlanContext.setPlayback(true);
-            }
-
-            annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ENFORCE_ORDER,
+            Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ENFORCE_ORDER,
                     executionPlan.getAnnotations());
             if (annotation != null) {
                 executionPlanContext.setEnforceOrder(true);
@@ -133,8 +124,33 @@ public class ExecutionPlanParser {
                             executionPlanContext.getName() + "-scheduler-thread-%d").build()));
 
             // Select the TimestampGenerator based on playback mode on/off
-            if (executionPlanContext.isPlayback()) {
-                executionPlanContext.setTimestampGenerator(new EventTimeMillisTimestampGenerator());
+            annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PLAYBACK,
+                    executionPlan.getAnnotations());
+            if (annotation != null) {
+                String tickValue = null;
+                String incrementValue = null;
+                EventTimeMillisTimestampGenerator timestampGenerator = new EventTimeMillisTimestampGenerator(executionPlanContext.getScheduledExecutorService());
+                for (Element e : annotation.getElements()) {
+                    if (SiddhiConstants.ANNOTATION_IDLE_TIME.equalsIgnoreCase(e.getKey())) {
+                        tickValue = e.getValue();
+                    } else if (SiddhiConstants.ANNOTATION_INCREMENT.equalsIgnoreCase(e.getKey())) {
+                        incrementValue = e.getValue();
+                    } else {
+                        throw new ExecutionPlanValidationException("Playback annotation accepts only tick and increment but found " + e.getKey());
+                    }
+                }
+
+                if (tickValue != null && incrementValue == null) {
+                    throw new ExecutionPlanValidationException("Playback annotation requires both tick and increment but increment not found");
+                } else if (tickValue == null && incrementValue != null) {
+                    throw new ExecutionPlanValidationException("Playback annotation requires both tick and increment but tick not found");
+                } else if (tickValue != null && incrementValue != null) {
+                    timestampGenerator.setClockRateInMillis(SiddhiCompiler.parseTimeConstantDefinition(tickValue).value());
+                    timestampGenerator.setIncrementInMilliseconds(SiddhiCompiler.parseTimeConstantDefinition(incrementValue).value());
+                }
+
+                executionPlanContext.setTimestampGenerator(timestampGenerator);
+                executionPlanContext.setPlayback(true);
             } else {
                 executionPlanContext.setTimestampGenerator(new SystemCurrentTimeMillisTimestampGenerator());
             }
