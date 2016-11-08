@@ -81,17 +81,13 @@ public class Scheduler implements Snapshotable {
                 synchronized (toNotifyQueue) {
                     if (!running) {
                         running = true;
-                        long timeDiff = time - executionPlanContext.getTimestampGenerator().currentTime(); //todo fix
+                        long timeDiff = time - executionPlanContext.getTimestampGenerator().currentTime();
                         if (timeDiff > 0) {
                             if (!this.executionPlanContext.isPlayback()) {
                                 scheduledExecutorService.schedule(eventCaller, timeDiff, TimeUnit.MILLISECONDS);
                             }
                         } else {
-                            if (this.executionPlanContext.isPlayback()) {
-                                new Thread(eventCaller).start();
-                            } else {
-                                scheduledExecutorService.schedule(eventCaller, 0, TimeUnit.MILLISECONDS);
-                            }
+                            scheduledExecutorService.schedule(eventCaller, 0, TimeUnit.MILLISECONDS);
                         }
                     }
                 }
