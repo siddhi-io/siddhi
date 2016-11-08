@@ -127,26 +127,28 @@ public class ExecutionPlanParser {
             annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PLAYBACK,
                     executionPlan.getAnnotations());
             if (annotation != null) {
-                String tickValue = null;
-                String incrementValue = null;
+                String idleTime = null;
+                String increment = null;
                 EventTimeMillisTimestampGenerator timestampGenerator = new EventTimeMillisTimestampGenerator(executionPlanContext.getScheduledExecutorService());
+                // Get the optional elements of playback annotation
                 for (Element e : annotation.getElements()) {
                     if (SiddhiConstants.ANNOTATION_IDLE_TIME.equalsIgnoreCase(e.getKey())) {
-                        tickValue = e.getValue();
+                        idleTime = e.getValue();
                     } else if (SiddhiConstants.ANNOTATION_INCREMENT.equalsIgnoreCase(e.getKey())) {
-                        incrementValue = e.getValue();
+                        increment = e.getValue();
                     } else {
-                        throw new ExecutionPlanValidationException("Playback annotation accepts only tick and increment but found " + e.getKey());
+                        throw new ExecutionPlanValidationException("Playback annotation accepts only idleTime and increment but found " + e.getKey());
                     }
                 }
 
-                if (tickValue != null && incrementValue == null) {
-                    throw new ExecutionPlanValidationException("Playback annotation requires both tick and increment but increment not found");
-                } else if (tickValue == null && incrementValue != null) {
-                    throw new ExecutionPlanValidationException("Playback annotation requires both tick and increment but tick not found");
-                } else if (tickValue != null && incrementValue != null) {
-                    timestampGenerator.setClockRateInMillis(SiddhiCompiler.parseTimeConstantDefinition(tickValue).value());
-                    timestampGenerator.setIncrementInMilliseconds(SiddhiCompiler.parseTimeConstantDefinition(incrementValue).value());
+                // idleTime and increment are optional but if one presents, the other also should be given
+                if (idleTime != null && increment == null) {
+                    throw new ExecutionPlanValidationException("Playback annotation requires both idleTime and increment but increment does not found");
+                } else if (idleTime == null && increment != null) {
+                    throw new ExecutionPlanValidationException("Playback annotation requires both idleTime and increment but idleTime does not found");
+                } else if (idleTime != null && increment != null) {
+                    timestampGenerator.setIdleTime(SiddhiCompiler.parseTimeConstantDefinition(idleTime).value());
+                    timestampGenerator.setIncrementInMilliseconds(SiddhiCompiler.parseTimeConstantDefinition(increment).value());
                 }
 
                 executionPlanContext.setTimestampGenerator(timestampGenerator);

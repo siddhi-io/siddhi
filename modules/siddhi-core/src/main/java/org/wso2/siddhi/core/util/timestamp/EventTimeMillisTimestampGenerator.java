@@ -49,7 +49,7 @@ public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
      * If a new event does not arrive within this time, the generator
      * timestamp will be increased by incrementInMilliseconds.
      */
-    private long clockRateInMillis = -1;
+    private long idleTime = -1;
 
     /**
      * By how many milliseconds, the event timestamp should be increased.
@@ -76,6 +76,11 @@ public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
      */
     private List<TimeChangeListener> timeChangeListeners = new ArrayList<TimeChangeListener>();
 
+    /**
+     * Create an EventTimeMillisTimestampGenerator.
+     *
+     * @param scheduledExecutorService
+     */
     public EventTimeMillisTimestampGenerator(ScheduledExecutorService scheduledExecutorService) {
         this.scheduledExecutorService = scheduledExecutorService;
     }
@@ -91,6 +96,11 @@ public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
         return lastEventTimestamp;
     }
 
+    /**
+     * Set the timestamp to the {@link EventTimeMillisTimestampGenerator} and notify the interested listeners.
+     *
+     * @param timestamp
+     */
     public void setTimestamp(long timestamp) {
         if (timestamp >= this.lastEventTimestamp) {
             synchronized (this) {
@@ -102,7 +112,7 @@ public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
                     }
                 }
 
-                startHeartBeat(clockRateInMillis);
+                notifyAfter(idleTime);
             }
         }
     }
@@ -126,18 +136,34 @@ public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
         void onTimeChange(long currentTimestamp);
     }
 
-    public void setClockRateInMillis(long clockRateInMillis) {
-        this.clockRateInMillis = clockRateInMillis;
+    /**
+     * The {@link ScheduledExecutorService} waits until idleTime from the timestamp of last event
+     * and if there are no new events arrived within that period, it will inject a new timestamp.
+     *
+     * @param idleTime
+     */
+    public void setIdleTime(long idleTime) {
+        this.idleTime = idleTime;
     }
 
+    /**
+     * Set by how many milliseconds, the event timestamp should be increased.
+     *
+     * @param incrementInMilliseconds
+     */
     public void setIncrementInMilliseconds(long incrementInMilliseconds) {
         this.incrementInMilliseconds = incrementInMilliseconds;
     }
 
-    private void startHeartBeat(long timestamp) {
-        if (!heartbeatRunning && clockRateInMillis != -1) {
+    /**
+     * This method must be called within a synchronized block to avoid multiple schedulers from running simultaneously.
+     *
+     * @param duration
+     */
+    private void notifyAfter(long duration) {
+        if (!heartbeatRunning && idleTime != -1) {
             // Start the heartbeat if this is the first time
-            scheduledExecutorService.schedule(timeInjector, timestamp, TimeUnit.MILLISECONDS);
+            scheduledExecutorService.schedule(timeInjector, duration, TimeUnit.MILLISECONDS);
             heartbeatRunning = true;
         }
     }
@@ -152,13 +178,13 @@ public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
             synchronized (EventTimeMillisTimestampGenerator.this) {
                 heartbeatRunning = false;
                 long diff = currentTimestamp - lastSystemTimestamp;
-                if (diff >= clockRateInMillis) {
-                    // Siddhi has not received events for more than clockRateInMillis
+                if (diff >= idleTime) {
+                    // Siddhi has not received events for more than idleTime
                     long newTimestamp = lastEventTimestamp + incrementInMilliseconds;
                     setTimestamp(newTimestamp);
                 } else {
-                    // Wait for clockRateInMillis from the timestamp if last event arrival
-                    startHeartBeat(clockRateInMillis - diff);
+                    // Wait for idleTime from the timestamp if last event arrival
+                    notifyAfter(idleTime - diff);
                 }
             }
         }
