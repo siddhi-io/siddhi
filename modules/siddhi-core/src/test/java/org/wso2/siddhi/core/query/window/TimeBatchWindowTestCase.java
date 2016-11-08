@@ -500,6 +500,66 @@ public class TimeBatchWindowTestCase {
 
     }
 
+    /**
+     * Testing playback with heartbeat enabled execution plan contains timeBatch window with 2 sec interval starting at every 0th second.
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void timeWindowBatchTest10() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "@Plan:playback(idleTime = '100 millisecond', increment = '2 sec') " +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeBatch(2 sec , 0) " +
+                "select symbol, sum(price) as sumPrice, volume " +
+                "insert into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEventCount == 0) {
+                    Assert.assertTrue("Remove Events will only arrive after the second time period. ", removeEvents == null);
+                }
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                } else if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        // Start sending events in the beginning of a cycle
+        long timestamp = 0;
+        inputHandler.send(timestamp, new Object[]{"IBM", 700f, 0});
+        inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 1});
+        timestamp += 8500;
+        inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 1});
+        inputHandler.send(timestamp, new Object[]{"II", 60.5f, 1});
+        timestamp += 13000;
+        inputHandler.send(timestamp, new Object[]{"TT", 60.5f, 1});
+        inputHandler.send(timestamp, new Object[]{"YY", 60.5f, 1});
+
+        Thread.sleep(200);  // Anything more than 100 is enough. Used 200 to be on safe side
+
+        Assert.assertEquals(3, inEventCount);
+        Assert.assertEquals(0, removeEventCount);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+
 //    @Test
 //    public void timeWindowBatchStartTimeTest() throws InterruptedException {
 //

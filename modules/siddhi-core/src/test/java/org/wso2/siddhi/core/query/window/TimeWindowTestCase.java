@@ -221,6 +221,56 @@ public class TimeWindowTestCase {
         Assert.assertEquals(2, removeEventCount);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
+    }
 
+    /**
+     * Testing playback with heartbeat enabled execution plan contains time window with 2 sec interval.
+     *
+     * @throws InterruptedException
+     */
+    @Test
+    public void timeWindowTest5() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "@Plan:playback(idleTime = '100 millisecond', increment = '2 sec') " +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.time(2 sec) " +
+                "select symbol,price,volume " +
+                "insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    Assert.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        long timestamp = System.currentTimeMillis();
+        inputHandler.send(timestamp, new Object[]{"IBM", 700f, 0});
+        inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 1});
+
+        Thread.sleep(200);  // Anything more than 100 is enough. Used 200 to be on safe side
+
+        Assert.assertEquals(2, inEventCount);
+        Assert.assertEquals(2, removeEventCount);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
     }
 }
