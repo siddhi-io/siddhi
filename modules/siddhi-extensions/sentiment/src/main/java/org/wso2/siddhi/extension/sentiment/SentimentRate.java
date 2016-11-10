@@ -25,16 +25,18 @@ import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.function.FunctionExecutor;
 import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SentimentRate extends FunctionExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SentimentRate.class);
+    private Map<String, Integer> affinWordMap;
 
     @Override
     public Attribute.Type getReturnType() {
@@ -43,7 +45,18 @@ public class SentimentRate extends FunctionExecutor {
 
     @Override
     public void start() {
-        // Nothing to do here
+        // Load affinwords.txt in to affinWordMap
+        affinWordMap = new HashMap<String, Integer>();
+        String[] split;
+        try {
+            String[] wordBuckets = getWordsBuckets("affinwords.txt");
+            for (String bucket : wordBuckets) {
+                split = bucket.split(" ");
+                affinWordMap.put(split[0].trim(), Integer.parseInt(split[split.length - 1].trim()));
+            }
+        } catch (IOException e) {
+            LOGGER.error("Failed to load affinwords.txt file");
+        }
     }
 
     @Override
@@ -69,6 +82,10 @@ public class SentimentRate extends FunctionExecutor {
                     "Invalid no of arguments passed to sentiment:getRate() function, "
                             + "required 1, but found " + attributeExpressionExecutors.length);
         }
+        if (attributeExpressionExecutors[0].getReturnType() != Attribute.Type.STRING) {
+            throw new ExecutionPlanValidationException("First parameter should be of type string. But found "
+                    + attributeExpressionExecutors[0].getReturnType());
+        }
     }
 
     @Override
@@ -78,23 +95,11 @@ public class SentimentRate extends FunctionExecutor {
 
     @Override
     protected Object execute(Object data) {
-        String[] affinWordBucket = null;
-        try {
-            affinWordBucket = getWordsBuckets("affinwords.txt");
-        } catch (IOException e) {
-            LOGGER.error("Failed to load affinwords.txt file ");
-        }
         int rank = 0;
-        String[] split;
-        if (affinWordBucket != null){
-            for (int i = 0; i < affinWordBucket.length; i++) {
-                split = affinWordBucket[i].split(" ");
-                String word = split[0].trim();
-                int val = Integer.parseInt(split[split.length-1].replaceAll("\\s+", " ").trim());
-                Matcher m = Pattern.compile("\\b" + word + "\\b").matcher(data.toString().toLowerCase());
-                while (m.find()) {
-                    rank += val;
-                }
+        String[] words = data.toString().split("\\W+");
+        for (String word : words) {
+            if (affinWordMap.containsKey(word)) {
+                rank += affinWordMap.get(word);
             }
         }
         return rank;
@@ -105,7 +110,6 @@ public class SentimentRate extends FunctionExecutor {
         try {
             InputStream in = getClass().getResourceAsStream("/" + fileName);
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
             String line;
             while ((line = reader.readLine()) != null) {
                 textChunk.append(line).append("\n");

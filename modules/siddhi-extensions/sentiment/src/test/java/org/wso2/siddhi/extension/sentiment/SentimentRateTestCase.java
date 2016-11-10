@@ -44,7 +44,7 @@ public class SentimentRateTestCase {
     public void testProcess() throws Exception {
         logger.info("Sentiment Extension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inStreamDefinition = "@config(async = 'true')define stream inputStream (text string);";
+        String inStreamDefinition = "define stream inputStream (text string); ";
         String query = ("@info(name = 'query1') " + "from inputStream "
                 + "select sentiment:getRate(text) as isRate " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
@@ -52,8 +52,7 @@ public class SentimentRateTestCase {
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
-            public void receive(long timeStamp, Event[] inEvents,
-                                Event[] removeEvents) {
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event inEvent : inEvents) {
                     count.incrementAndGet();
@@ -72,8 +71,7 @@ public class SentimentRateTestCase {
                 }
             }
         });
-        InputHandler inputHandler = executionPlanRuntime
-                .getInputHandler("inputStream");
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[] { "Trump is a good person." });
         inputHandler.send(new Object[] { "Trump is a bad person." });
