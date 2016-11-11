@@ -383,6 +383,7 @@ public class TimeBatchWindowTestCase {
      */
     @Test
     public void timeWindowBatchTest8() throws InterruptedException {
+        log.info("TimeBatchWindow Test8: Playback with heartbeat disabled in query containing regular time batch window");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -445,6 +446,7 @@ public class TimeBatchWindowTestCase {
      */
     @Test
     public void timeWindowBatchTest9() throws InterruptedException {
+        log.info("TimeBatchWindow Test9: Playback with heartbeat disabled in query with start time enabled time batch window");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -507,6 +509,7 @@ public class TimeBatchWindowTestCase {
      */
     @Test
     public void timeWindowBatchTest10() throws InterruptedException {
+        log.info("TimeBatchWindow Test10: Playback with heartbeat enabled");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -558,6 +561,57 @@ public class TimeBatchWindowTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
 
+    }
+
+    @Test
+    public void timeWindowBatchTest11() throws InterruptedException {
+        log.info("TimeBatchWindow Test11: Playback with query joining two windows");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@Plan:playback(idleTime = '100 millisecond', increment = '1 sec') " +
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeBatch(1 sec) join twitterStream#window.timeBatch(1 sec) " +
+                "on cseEventStream.symbol== twitterStream.company " +
+                "select cseEventStream.symbol as symbol, twitterStream.tweet, cseEventStream.price " +
+                "insert into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+        try {
+            executionPlanRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        inEventCount += (inEvents.length);
+                    }
+                    if (removeEvents != null) {
+                        removeEventCount += (removeEvents.length);
+                    }
+                    eventArrived = true;
+                }
+            });
+            InputHandler cseEventStreamHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+            InputHandler twitterStreamHandler = executionPlanRuntime.getInputHandler("twitterStream");
+            executionPlanRuntime.start();
+            long currentTime = System.currentTimeMillis();
+            cseEventStreamHandler.send(currentTime, new Object[]{"WSO2", 55.6f, 100});
+            twitterStreamHandler.send(currentTime, new Object[]{"User1", "Hello World", "WSO2"});
+            cseEventStreamHandler.send(currentTime, new Object[]{"IBM", 75.6f, 100});
+            currentTime += 1500;
+            cseEventStreamHandler.send(currentTime, new Object[]{"WSO2", 57.6f, 100});
+
+            Thread.sleep(200);  // Anything more than 100 is enough. Used 200 to be on safe side
+
+            Assert.assertTrue("In Events can be 1 or 2 ", inEventCount == 1 || inEventCount == 2);
+            Assert.assertEquals(0, removeEventCount);
+            Assert.assertTrue(eventArrived);
+        } finally {
+            executionPlanRuntime.shutdown();
+        }
     }
 
 //    @Test

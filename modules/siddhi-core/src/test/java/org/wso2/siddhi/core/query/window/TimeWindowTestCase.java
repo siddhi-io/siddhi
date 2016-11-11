@@ -179,6 +179,7 @@ public class TimeWindowTestCase {
      */
     @Test
     public void timeWindowTest4() throws InterruptedException {
+        log.info("TimeWindow Test4: Testing playback without heartbeat");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -230,6 +231,7 @@ public class TimeWindowTestCase {
      */
     @Test
     public void timeWindowTest5() throws InterruptedException {
+        log.info("TimeWindow Test5: Testing playback with heartbeat enabled");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
