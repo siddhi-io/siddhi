@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.siddhi.extension.reorder;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
@@ -12,38 +30,46 @@ import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.Scheduler;
+import org.wso2.siddhi.extension.reorder.alphakslack.Runtime;
+import org.wso2.siddhi.extension.reorder.alphakslack.ThetaThreshold;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
-
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+
 /**
- * Created by vithursa on 10/3/16.
+ * The following code conducts reordering of an out-of-order event stream.
+ * This implements the Adaptive K-Slack based disorder handling algorithm which was originally described in
+ * http://dl.acm.org/citation.cfm?doid=2675743.2771828
  */
 public class AlphaKSlackExtension extends StreamProcessor implements SchedulingProcessor {
     private long k = 0; //In the beginning the K is zero.
-    private long greatestTimestamp = 0; //Used to track the greatest timestamp of tuples seen so far in the stream history.
+    private long greatestTimestamp = 0; //Used to track the greatest timestamp of tuples seen so far.
     private TreeMap<Long, ArrayList<StreamEvent>> eventTreeMap;
     private TreeMap<Long, ArrayList<StreamEvent>> expiredEventTreeMap;
     private ExpressionExecutor timestampExecutor;
     private ExpressionExecutor dataItemExecutor;
+    private ExpressionExecutor batchSizeExecutor;
     private long MAX_K = Long.MAX_VALUE;
     private long TIMER_DURATION = -1l;
     private boolean expireFlag = false;
     private long lastSentTimeStamp = -1l;
     private Scheduler scheduler;
-    private long lastScheduledTimestamp = -1;
+    private long lastScheduledTimestamp = -1l;
     private ReentrantLock lock = new ReentrantLock();
     private double alpha=0;
-    private double deltaAlpha;
     private int counter =0;
-    private int batchSize = 10000;
+    private long batchSize = -1;
     private int NANOSECOND = 1000000000;
     private ArrayList<Long> timeStampList = new ArrayList<Long>();
-    private ArrayList<Integer> dataItemList = new ArrayList<Integer>();
+    private ArrayList<Long> dataItemList = new ArrayList<Long>();
     private LinkedHashSet<Long> eventTimeStamps = new LinkedHashSet<Long>();
     private ArrayList errorList = new ArrayList();
     private int count2=0;
@@ -52,15 +78,8 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
     private double thetaThreshold=0;
     private ArrayList dataList = new ArrayList();
     private LinkedHashSet bufferSize = new LinkedHashSet();
-    private long cumulativeTime=0;
-    private int count=0;
     private double Kp,Kd;
-    private int size;
-    private long tempK;
-    private ArrayList temp = new ArrayList();
     private boolean flag = true;
-
-
 
     @Override
     public void start() {
@@ -88,26 +107,42 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>(false);
         lock.lock();
-        Runtime obj5 = new Runtime();
-        boolean flag = false;
-        ThetaThreshold obj2 = new ThetaThreshold(0.2,0.5,10000);
+
+        Runtime runTime = new Runtime();
+        ThetaThreshold thetaThreshold = new ThetaThreshold(0.2, 0.5);
+
         try {
             while (streamEventChunk.hasNext()) {
-
                 StreamEvent event = streamEventChunk.next();
 
                 if(event.getType() != ComplexEvent.Type.TIMER) {
-
-                    streamEventChunk.remove(); //We might have the rest of the events linked to this event forming a chain.
+                    streamEventChunk.remove();
 
                     long timestamp = (Long) timestampExecutor.execute(event);
                     timeStampList.add(timestamp);
+
+                    if(batchSize == -1l){
+                        batchSize = (Long) batchSizeExecutor.execute(event);
+                    }
+
+//                    if(attributeExpressionExecutors.length == 2) {
+//                        batchSize = 10000;
+//                    } else{
+//                        batchSize = (Long) batchSizeExecutor.execute(event);
+//                    }
+
+                    /*if((Long) batchSizeExecutor.execute(event)!= 0) {
+                        batchSize = (Long) batchSizeExecutor.execute(event);
+                    } else{
+                        batchSize = 10000;
+                    }*/
 
                     if (expireFlag) {
                         if (timestamp < lastSentTimeStamp) {
                             continue;
                         }
                     }
+
                     ArrayList<StreamEvent> eventList = eventTreeMap.get(timestamp);
                     if (eventList == null) {
                         eventList = new ArrayList<StreamEvent>();
@@ -116,9 +151,8 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                     eventTreeMap.put(timestamp, eventList);
 
                     counter+=1;
-                    int dataItem = (Integer) dataItemExecutor.execute(event);
+                    long dataItem = (Long) dataItemExecutor.execute(event);
                     dataItemList.add(dataItem);
-
 
                     if(counter>batchSize){
                         Iterator<Long> itr = timeStampList.iterator();
@@ -126,54 +160,42 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                             long data = itr.next()/NANOSECOND;
                             eventTimeStamps.add(data);
                         }
-                        ArrayList<Long> itemsList = obj5.CurentTimeStamp(eventTimeStamps);
-                        windowCoverage = obj5.WindowCoverageCalculator(eventTimeStamps, itemsList);
-                        double criticalValue = obj2.CriticalValueCalculator();
+                        windowCoverage = runTime.calculateWindowCoverage(eventTimeStamps);
+                        double criticalValue = thetaThreshold.calculateCriticalValue();
 
                         Iterator itr2 = dataItemList.iterator();
-                        while(itr.hasNext()){
-                           dataList.add((Integer) itr2.next()*1.0/1000000);
+                        while(itr2.hasNext()){
+                            dataList.add(itr2.next());
                         }
-                        thetaThreshold = obj2.ThetaThresholdCalculator(criticalValue,obj2.MeanCalculator(dataList),
-                                obj2.VarianceCalculator(dataList));
+                        this.thetaThreshold = thetaThreshold.calculateThetaThreshold(criticalValue, thetaThreshold.
+                                        calculateMean(dataList),
+                                thetaThreshold.calculateVariance(dataList));
 
-                        double error = thetaThreshold - windowCoverage;
+                        double error = this.thetaThreshold - windowCoverage;
                         errorList.add(error);
+
                         if(count2==0){
                             differenceError = error;
+                        } else {
+                            differenceError = error - (Double) errorList.get(errorList.indexOf(error) - 1);
                         }
-                        else{
-                            differenceError = error- (Double) errorList.get(errorList.indexOf(error)-1);
-                        }
-                        Kp =0.1;
+
+                        Kp = 0.1;
                         Kd = 0.1;
 
-                        //alpha = Math.abs(Kp*error + Kd*differenceError);
-                        deltaAlpha = Kp*error + Kd*differenceError;
-                        if(count2!=0){
-                            alpha =Math.abs(deltaAlpha + (Double) temp.get(0));
-                            temp.remove(0);
-                            temp.add(0,alpha);
-                        }
-                        else{
-                            alpha = Math.abs(deltaAlpha);
-                            temp.add(0,alpha);
-                        }
+                        alpha = Math.abs(Kp*error + Kd*differenceError);
                         timeStampList = new ArrayList<Long>();
-                        dataItemList = new ArrayList<Integer>();
+                        dataItemList = new ArrayList<Long>();
                         eventTimeStamps = new LinkedHashSet<Long>();
-                        counter=0;
-                        count2+=1;
-                        cumulativeTime =0;
+                        counter = 0;
+                        count2 += 1;
                     }
-
 
                     if (timestamp > greatestTimestamp) {
                         greatestTimestamp = timestamp;
                         long minTimestamp = eventTreeMap.firstKey();
                         long timeDifference = greatestTimestamp - minTimestamp;
                         if (timeDifference > k) {
-                            System.out.println(timestamp);
                             if (timeDifference < MAX_K) {
                                 if (count2!=0) {
                                     k = (Math.round(timeDifference * alpha));
@@ -190,7 +212,8 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                         }
                         bufferSize.add(k);
 
-                        Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = eventTreeMap.entrySet().iterator();
+                        Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = eventTreeMap.entrySet()
+                                .iterator();
                         while (entryIterator.hasNext()) {
                             Map.Entry<Long, ArrayList<StreamEvent>> entry = entryIterator.next();
                             ArrayList<StreamEvent> list = expiredEventTreeMap.get(entry.getKey());
@@ -213,12 +236,8 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
 
                                 for (StreamEvent aTimeEventList : timeEventList) {
                                     complexEventChunk.add(aTimeEventList);
-                                    flag = true;
                                 }
                             }
-                        }
-                        for(int i=0;i<expiredEventTreeMap.size();i++){
-
                         }
                     }
                 } else {
@@ -226,13 +245,10 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                         TreeMap<Long, ArrayList<StreamEvent>> expiredEventTreeMapSnapShot = expiredEventTreeMap;
                         expiredEventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
                         onTimerEvent(expiredEventTreeMapSnapShot, nextProcessor);
-                        lastScheduledTimestamp = lastScheduledTimestamp + TIMER_DURATION;
-                        scheduler.notifyAt(lastScheduledTimestamp);
+                            lastScheduledTimestamp = lastScheduledTimestamp + TIMER_DURATION;
+                            scheduler.notifyAt(lastScheduledTimestamp);
                     }
                 }
-
-
-
             }
         } catch (ArrayIndexOutOfBoundsException ec) {
             //This happens due to user specifying an invalid field index.
@@ -240,40 +256,24 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                     " field index (0 to (fieldsLength-1)).");
         }
         lock.unlock();
-        count+=1;
-        if(flag) {
-            nextProcessor.process(complexEventChunk);
-        }
-        else{
-            int i = 0;
-        }
-        flag = false;
-        //System.out.println(cumulativeTime);
+        nextProcessor.process(complexEventChunk);
     }
 
     @Override
-    protected List<Attribute> init(AbstractDefinition inputDefinition, ExpressionExecutor[] attributeExpressionExecutors,
+    protected List<Attribute> init(AbstractDefinition inputDefinition,
+                                   ExpressionExecutor[] attributeExpressionExecutors,
                                    ExecutionPlanContext executionPlanContext) {
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 
-        if (attributeExpressionLength > 3) {
-            throw new ExecutionPlanCreationException("Maximum two input parameters can be specified for AKSlack. " +
-                    " Timestamp field (long) and velocity field. But found " +
+        if (attributeExpressionLength > 6 && attributeExpressionLength<2) {
+            throw new ExecutionPlanCreationException("Maximum six input parameters and minimum two input parameters " +
+                    "can be specified for AK-Slack. " +
+                    " Timestamp (long), velocity (long), batchSize (long), timerTimeout (long), maxK (long), " +
+                    "and discardFlag (boolean)  fields. But found " +
                     attributeExpressionLength + " attributes.");
         }
 
-        //This is the most basic case. Here we do not use a timer. The basic K-slack algorithm is implemented.
-        if(attributeExpressionExecutors.length == 1){
-            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
-                timestampExecutor = attributeExpressionExecutors[0];
-                attributes.add(new Attribute("beta0", Attribute.Type.LONG));
-            } else {
-                throw new ExecutionPlanCreationException("Invalid parameter type found for the first argument of " +
-                        "reorder:akslack() function. Required LONG, but found " +
-                        attributeExpressionExecutors[0].getReturnType());
-            }
-            //In the following case we have the timer operating in background. But we do not impose a K-slack window length.
-        }else if(attributeExpressionExecutors.length == 2){
+        if(attributeExpressionExecutors.length == 2){
             flag = false;
             if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
                 timestampExecutor = attributeExpressionExecutors[0];
@@ -284,16 +284,18 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                         attributeExpressionExecutors[0].getReturnType());
             }
 
-            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
+            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
                 dataItemExecutor = attributeExpressionExecutors[1];
-                attributes.add(new Attribute("beta1", Attribute.Type.INT));
+                attributes.add(new Attribute("beta1", Attribute.Type.LONG));
             } else {
                 throw new ExecutionPlanCreationException("Invalid parameter type found for the second argument of " +
-                        " reorder:akslack() function. Required INT, but found " +
+                        " reorder:akslack() function. Required LONG, but found " +
                         attributeExpressionExecutors[1].getReturnType());
             }
-            //In the third case we have both the timer operating in the background.
+
+            batchSize = 10000;
         }else if(attributeExpressionExecutors.length == 3){
+            flag = false;
             if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
                 timestampExecutor = attributeExpressionExecutors[0];
                 attributes.add(new Attribute("beta0", Attribute.Type.LONG));
@@ -303,9 +305,36 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                         attributeExpressionExecutors[0].getReturnType());
             }
 
-            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
+            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
                 dataItemExecutor = attributeExpressionExecutors[1];
-                attributes.add(new Attribute("beta1", Attribute.Type.INT));
+                attributes.add(new Attribute("beta1", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the second argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[1].getReturnType());
+            }
+
+            if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
+                batchSizeExecutor = attributeExpressionExecutors[2];
+                attributes.add(new Attribute("beta2", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the third argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[2].getReturnType());
+            }
+        }else if(attributeExpressionExecutors.length == 4){
+            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
+                timestampExecutor = attributeExpressionExecutors[0];
+                attributes.add(new Attribute("beta0", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the first argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[0].getReturnType());
+            }
+
+            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
+                dataItemExecutor = attributeExpressionExecutors[1];
+                attributes.add(new Attribute("beta1", Attribute.Type.LONG));
             } else {
                 throw new ExecutionPlanCreationException("Invalid parameter type found for the second argument of " +
                         " reorder:akslack() function. Required INT, but found " +
@@ -313,16 +342,117 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
             }
 
             if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
-                TIMER_DURATION = (Long)attributeExpressionExecutors[2].execute(null);
+                batchSizeExecutor = attributeExpressionExecutors[2];
+                attributes.add(new Attribute("beta2", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the third argument of " +
+                        " reorder:akslack() function. Required INT, but found " +
+                        attributeExpressionExecutors[2].getReturnType());
+            }
+            if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.LONG) {
+                TIMER_DURATION = (Long)attributeExpressionExecutors[3].execute(null);
+                attributes.add(new Attribute("beta3", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the fourth argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[3].getReturnType());
+            }
+        }else if(attributeExpressionExecutors.length == 5){
+            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
+                timestampExecutor = attributeExpressionExecutors[0];
+                attributes.add(new Attribute("beta0", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the first argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[0].getReturnType());
+            }
+
+            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
+                dataItemExecutor = attributeExpressionExecutors[1];
+                attributes.add(new Attribute("beta1", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the second argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[1].getReturnType());
+            }
+
+            if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
+                batchSizeExecutor = attributeExpressionExecutors[2];
                 attributes.add(new Attribute("beta2", Attribute.Type.LONG));
             } else {
                 throw new ExecutionPlanCreationException("Invalid parameter type found for the third argument of " +
                         " reorder:akslack() function. Required LONG, but found " +
                         attributeExpressionExecutors[2].getReturnType());
             }
-            //In the fourth case we have an additional boolean flag other than the above three parameters. If the flag
-            // is set to true any out-of-order events which arrive after the expiration of K-slack are discarded.
+            if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.LONG) {
+                TIMER_DURATION = (Long)attributeExpressionExecutors[3].execute(null);
+                attributes.add(new Attribute("beta3", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the fourth argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[3].getReturnType());
+            }
+            if (attributeExpressionExecutors[4].getReturnType() == Attribute.Type.LONG) {
+                TIMER_DURATION = (Long)attributeExpressionExecutors[4].execute(null);
+                attributes.add(new Attribute("beta4", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the fifth argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[4].getReturnType());
+            }
+        }else if(attributeExpressionExecutors.length == 6){
+            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
+                timestampExecutor = attributeExpressionExecutors[0];
+                attributes.add(new Attribute("beta0", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the first argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[0].getReturnType());
+            }
+
+            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
+                dataItemExecutor = attributeExpressionExecutors[1];
+                attributes.add(new Attribute("beta1", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the second argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[1].getReturnType());
+            }
+
+            if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
+                batchSizeExecutor = attributeExpressionExecutors[2];
+                attributes.add(new Attribute("beta2", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the third argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[2].getReturnType());
+            }
+            if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.LONG) {
+                TIMER_DURATION = (Long)attributeExpressionExecutors[3].execute(null);
+                attributes.add(new Attribute("beta3", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the fourth argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[3].getReturnType());
+            }
+            if (attributeExpressionExecutors[4].getReturnType() == Attribute.Type.LONG) {
+                TIMER_DURATION = (Long)attributeExpressionExecutors[4].execute(null);
+                attributes.add(new Attribute("beta4", Attribute.Type.LONG));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the fifth argument of " +
+                        " reorder:akslack() function. Required LONG, but found " +
+                        attributeExpressionExecutors[4].getReturnType());
+            }
+            if (attributeExpressionExecutors[5].getReturnType() == Attribute.Type.BOOL) {
+                expireFlag = (Boolean) attributeExpressionExecutors[5].execute(null);
+                attributes.add(new Attribute("beta5", Attribute.Type.BOOL));
+            } else {
+                throw new ExecutionPlanCreationException("Invalid parameter type found for the sixth argument of " +
+                        " reorder:akslack() function. Required BOOL, but found " +
+                        attributeExpressionExecutors[5].getReturnType());
+            }
         }
+
         eventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
         expiredEventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
 

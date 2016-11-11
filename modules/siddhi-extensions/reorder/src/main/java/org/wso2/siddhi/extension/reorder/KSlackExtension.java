@@ -30,14 +30,17 @@ import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.Scheduler;
-import org.wso2.siddhi.core.util.timestamp.SystemCurrentTimeMillisTimestampGenerator;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+
+//import static com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Text.NEW_LINE;
 
 /**
  * The following code conducts reordering of an out-of-order event stream.
@@ -62,7 +65,9 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
     private BufferedWriter bw1;
     private int count=0;
     private int batchSize = 10000;
+    private int NANOSECOND = 1000000000;
     private boolean flag = true;
+
 
     @Override
     public void start() {
@@ -162,8 +167,6 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
                         scheduler.notifyAt(lastScheduledTimestamp);
                     }
                 }
-
-
 
             }
         } catch (ArrayIndexOutOfBoundsException ec) {
@@ -324,12 +327,10 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
 
         while (entryIterator.hasNext()) {
             ArrayList<StreamEvent> timeEventList = entryIterator.next().getValue();
-
             for (StreamEvent aTimeEventList : timeEventList) {
                 complexEventChunk.add(aTimeEventList);
             }
         }
         nextProcessor.process(complexEventChunk);
     }
-
 }

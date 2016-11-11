@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.siddhi.extension.reorder;
 
 import org.apache.log4j.Logger;
@@ -8,37 +26,11 @@ import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.extension.reorder.*;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.concurrent.LinkedBlockingQueue;
-
-
-/**
- * This is the test case for KSlackExtension.
- * Created by miyurud on 8/10/15.
- */
 public class KSlackExtensionTestCase {
     static final Logger log = Logger.getLogger(KSlackExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
-    private File file;
-    private BufferedWriter bw;
-    private long sum;
-
-
-    public static void main(String[] args){
-        KSlackExtensionTestCase testObj = new KSlackExtensionTestCase();
-        try {
-            testObj.orderTest();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Before
     public void init() {
@@ -47,75 +39,63 @@ public class KSlackExtensionTestCase {
     }
 
     @Test
-    public void orderTest() throws InterruptedException {
-        file = new File("/home/vithursa/Desktop/Reorder_Result/rk");
-
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        FileWriter fw = null;
-        try {
-            fw = new FileWriter(file.getAbsoluteFile());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        bw = new BufferedWriter(fw);
+    public void OrderTest() throws InterruptedException {
         log.info("KSlackExtensionTestCase TestCase 1");
-
-
-
         SiddhiManager siddhiManager = new SiddhiManager();
-        //System.out.println("----AAAAAAA2-----");
-        String inStreamDefinition = "define stream inputStream (sid int, eventtt long, x int, y int, z int, " +
-                "v_abs int, a_abs int, vx int, vy int, vz int, ax int, ay int, az int,iij_timestamp long); ";
-        String query = "@info(name = 'query1') from inputStream#reorder:kslack(eventtt,1000l) select sid, " +
-                "eventtt, x, y, z, v_abs, a_abs, vx, vy, vz, ax, ay, az, iij_timestamp " +
-                "insert into outputStream;";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-        // System.out.println("----AAAAAAA3-----");
+        String inStreamDefinition = "define stream inputStream (eventtt long, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream#reorder:kslack(eventtt, 1000l) select eventtt, " +
+                "price, volume " +
+                "insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
 
             @Override
             public void receive(org.wso2.siddhi.core.event.Event[] events) {
                 for (org.wso2.siddhi.core.event.Event event : events) {
-                    long difference = System.currentTimeMillis() - (Long)event.getData()[13];
-                    sum += difference;
-                    count+=1;
-                    if(count>=10000){
-                        System.out.println(sum*1.0/count);
-                        //System.out.println(sum*1.0/count);
-                        sum =0;
-                        count=0;
-                        //counter=0;
+                    count++;
+
+                    if (count == 1) {
+                        Assert.assertEquals(1l, event.getData()[0]);
                     }
 
-                    try {
-                        bw.write(""+event.getData()[0] + "," +
-                                event.getData()[1] + "," +
-                                event.getData()[2] + "," +
-                                event.getData()[3] + "," +
-                                event.getData()[4] + "," +
-                                event.getData()[5] + "," +
-                                event.getData()[6] + "," +
-                                event.getData()[7] + "," +
-                                event.getData()[8] + "," +
-                                event.getData()[9] + "," +
-                                event.getData()[10] + "," +
-                                event.getData()[11] + "," +
-                                event.getData()[12] +"," +
-                                (difference) +
-                                "");
-                        bw.write("\r\n");
-                        bw.flush();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (count == 2) {
+                        Assert.assertEquals(4l, event.getData()[0]);
+                    }
+
+                    if (count == 3) {
+                        Assert.assertEquals(3l, event.getData()[0]);
+                    }
+
+                    if (count == 4) {
+                        Assert.assertEquals(5l, event.getData()[0]);
+                    }
+
+                    if (count == 5) {
+                        Assert.assertEquals(6l, event.getData()[0]);
+                    }
+
+                    if (count == 6) {
+                        Assert.assertEquals(7l, event.getData()[0]);
+                    }
+
+                    if (count == 7) {
+                        Assert.assertEquals(8l, event.getData()[0]);
+                    }
+
+                    if (count == 8) {
+                        Assert.assertEquals(9l, event.getData()[0]);
+                    }
+
+                    if (count == 9) {
+                        Assert.assertEquals(10l, event.getData()[0]);
+                    }
+
+                    if (count == 10) {
+                        Assert.assertEquals(13l, event.getData()[0]);
                     }
                 }
             }
@@ -125,18 +105,106 @@ public class KSlackExtensionTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
 
-        DataLoader inputData = new DataLoader("/home/vithursa/Desktop/OOEventsCopy",500000);
-        inputData.runSingleStream();
-        LinkedBlockingQueue<Object> events = inputData.getEventBuffer();
-        Iterator<Object> itr = events.iterator();
-        while(itr.hasNext()){
-            Object[] obj = (Object[]) itr.next();
-            obj[13] = System.currentTimeMillis();
-            inputHandler.send(obj);
-        }
+        //The following implements the out-of-order disorder handling scenario described in the
+        //http://dl.acm.org/citation.cfm?doid=2675743.2771828
+        inputHandler.send(new Object[]{1l, 700f, 100l});
+        inputHandler.send(new Object[]{4l, 60.5f, 200l});
+        inputHandler.send(new Object[]{3l, 60.5f, 200l});
+        inputHandler.send(new Object[]{5l, 700f, 100l});
+        inputHandler.send(new Object[]{6l, 60.5f, 200l});
+        inputHandler.send(new Object[]{9l, 60.5f, 200l});
+        inputHandler.send(new Object[]{7l, 700f, 100l});
+        inputHandler.send(new Object[]{8l, 60.5f, 200l});
+        inputHandler.send(new Object[]{10l, 60.5f, 200l});
+        inputHandler.send(new Object[]{13l, 60.5f, 200l});
 
         Thread.sleep(2000);
         executionPlanRuntime.shutdown();
+        Assert.assertTrue("Event count is at least 9:",  count >= 9);
+    }
 
+    @Test
+    public void OrderTest2() throws InterruptedException {
+        log.info("KSlackExtensionTestCase TestCase 2");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (eventtt long, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream#reorder:kslack(eventtt, 1000l) select eventtt, " +
+                "price, volume " +
+                "insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+
+        executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
+
+            @Override
+            public void receive(org.wso2.siddhi.core.event.Event[] events) {
+                for (org.wso2.siddhi.core.event.Event event : events) {
+                    count++;
+
+                    if (count == 1) {
+                        Assert.assertEquals(1l, event.getData()[0]);
+                    }
+
+                    if (count == 2) {
+                        Assert.assertEquals(4l, event.getData()[0]);
+                    }
+
+                    if (count == 3) {
+                        Assert.assertEquals(3l, event.getData()[0]);
+                    }
+
+                    if (count == 4) {
+                        Assert.assertEquals(5l, event.getData()[0]);
+                    }
+
+                    if (count == 5) {
+                        Assert.assertEquals(6l, event.getData()[0]);
+                    }
+
+                    if (count == 6) {
+                        Assert.assertEquals(7l, event.getData()[0]);
+                    }
+
+                    if (count == 7) {
+                        Assert.assertEquals(8l, event.getData()[0]);
+                    }
+
+                    if (count == 8) {
+                        Assert.assertEquals(9l, event.getData()[0]);
+                    }
+
+                    if (count == 9) {
+                        Assert.assertEquals(10l, event.getData()[0]);
+                    }
+
+                    if (count == 10) {
+                        Assert.assertEquals(13l, event.getData()[0]);
+                    }
+                }
+            }
+        });
+
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+
+        //The following implements the out-of-order disorder handling scenario described in the
+        //http://dl.acm.org/citation.cfm?doid=2675743.2771828
+        inputHandler.send(new Object[]{1l, 700f, 100l});
+        inputHandler.send(new Object[]{4l, 60.5f, 200l});
+        inputHandler.send(new Object[]{3l, 60.5f, 200l});
+        inputHandler.send(new Object[]{5l, 700f, 100l});
+        inputHandler.send(new Object[]{6l, 60.5f, 200l});
+        inputHandler.send(new Object[]{9l, 60.5f, 200l});
+        inputHandler.send(new Object[]{7l, 700f, 100l});
+        inputHandler.send(new Object[]{8l, 60.5f, 200l});
+        inputHandler.send(new Object[]{10l, 60.5f, 200l});
+        inputHandler.send(new Object[]{13l, 60.5f, 200l});
+
+        Thread.sleep(3500);
+        executionPlanRuntime.shutdown();
+        Assert.assertEquals("Event count", 10, count);
     }
 }

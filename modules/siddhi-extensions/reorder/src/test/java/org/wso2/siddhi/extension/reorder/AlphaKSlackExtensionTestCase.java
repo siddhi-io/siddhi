@@ -1,127 +1,183 @@
+/*
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.siddhi.extension.reorder;
 
+import junit.framework.Assert;
 import org.apache.log4j.Logger;
-import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.concurrent.LinkedBlockingQueue;
-
-//import static com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Text.NEW_LINE;
-/**
- * Created by vithursa on 10/5/16.
- */
 public class AlphaKSlackExtensionTestCase {
     static final Logger log = Logger.getLogger(AlphaKSlackExtensionTestCase.class);
-    private File file;
-    private BufferedWriter bw;
-    private String content;
-    private long sum=0;
-    private int counter =0;
-    private int count =0;
-
-
-    @Before
-    public void init() {
-    }
+    private volatile int count;
 
     @Test
-    public void OrderTest() throws InterruptedException, IOException {
-        file = new File("/home/vithursa/Desktop/Today/AKSlackDelay");
+    public void Testcase() throws InterruptedException {
+        log.info("Alpha K-Slack Extension Testcase");
 
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        FileWriter fw = null;
-        try {
-            fw = new FileWriter(file.getAbsoluteFile());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        bw = new BufferedWriter(fw);
-
-        log.info("AlphaKSlackExtensionTestCase TestCase 1");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String inStreamDefinition = "define stream inputStream (sid int, eventtt long, x int, y int, z int, " +
-                "v_abs int, a_abs int, vx int, vy int, vz int, ax int, ay int, az int, iij_timestamp long);";
-        String query = ("@info(name = 'query1') from inputStream #reorder:akslack(eventtt,v_abs) select sid, " +
-                "eventtt, x, y, z, v_abs, a_abs, vx, vy, vz, ax, ay, az, iij_timestamp " +
+        String inStreamDefinition = "define stream inputStream (eventtt long,data long);";
+        String query = ("@info(name = 'query1') from inputStream#reorder:akslack(eventtt,data,15l) select  " +
+                "eventtt, data " +
                 "insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
 
             @Override
             public void receive(org.wso2.siddhi.core.event.Event[] events) {
+
                 for (org.wso2.siddhi.core.event.Event event : events) {
-                    long difference = System.currentTimeMillis() - (Long)event.getData()[13];
-                    sum += difference;
-                    count+=1;
-                    //System.out.println(count);
-                    if(count>=10000){
-                        //System.out.println(sum*1.0/count);
-                        //System.out.println(sum*1.0/count);
-                        sum =0;
-                        count=0;
-                        //counter=0;
+                    count++;
+
+                    if (count == 1) {
+                        Assert.assertEquals(1l, event.getData()[0]);
                     }
 
-                    try {
-                        bw.write(""+event.getData()[0] + "," +
-                                event.getData()[1] + "," +
-                                event.getData()[2] + "," +
-                                event.getData()[3] + "," +
-                                event.getData()[4] + "," +
-                                event.getData()[5] + "," +
-                                event.getData()[6] + "," +
-                                event.getData()[7] + "," +
-                                event.getData()[8] + "," +
-                                event.getData()[9] + "," +
-                                event.getData()[10] + "," +
-                                event.getData()[11] + "," +
-                                event.getData()[12] +
-                                "");
-                        bw.write("\r\n");
-                        bw.flush();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (count == 2) {
+                        Assert.assertEquals(4l, event.getData()[0]);
                     }
 
+                    if (count == 3) {
+                        Assert.assertEquals(3l, event.getData()[0]);
+                    }
+
+                    if (count == 4) {
+                        Assert.assertEquals(5l, event.getData()[0]);
+                    }
+
+                    if (count == 5) {
+                        Assert.assertEquals(6l, event.getData()[0]);
+                    }
+
+                    if (count == 6) {
+                        Assert.assertEquals(7l, event.getData()[0]);
+                    }
+
+                    if (count == 7) {
+                        Assert.assertEquals(8l, event.getData()[0]);
+                    }
+
+                    if (count == 8) {
+                        Assert.assertEquals(9l, event.getData()[0]);
+                    }
+
+                    if (count == 9) {
+                        Assert.assertEquals(10l, event.getData()[0]);
+                    }
+
+                    if (count == 10) {
+                        Assert.assertEquals(11l, event.getData()[0]);
+                    }
+
+                    if (count == 11) {
+                        Assert.assertEquals(12l, event.getData()[0]);
+                    }
+
+                    if (count == 12) {
+                        Assert.assertEquals(13l, event.getData()[0]);
+                    }
+
+                    if (count == 13) {
+                        Assert.assertEquals(14l, event.getData()[0]);
+                    }
+
+                    if (count == 14) {
+                        Assert.assertEquals(15l, event.getData()[0]);
+                    }
+
+                    if (count == 15) {
+                        Assert.assertEquals(16l, event.getData()[0]);
+                    }
+
+                    if (count == 16) {
+                        Assert.assertEquals(17l, event.getData()[0]);
+                    }
+
+                    if (count == 17) {
+                        Assert.assertEquals(18l, event.getData()[0]);
+                    }
+
+                    if (count == 18) {
+                        Assert.assertEquals(19l, event.getData()[0]);
+                    }
+
+                    if (count == 19) {
+                        Assert.assertEquals(20l, event.getData()[0]);
+                    }
+
+                    if (count == 20) {
+                        Assert.assertEquals(21l, event.getData()[0]);
+                    }
+                    if (count == 21) {
+                        Assert.assertEquals(22l, event.getData()[0]);
+                    }
+                    if (count == 22) {
+                        Assert.assertEquals(23l, event.getData()[0]);
+                    }
+                    if (count == 23) {
+                        Assert.assertEquals(24l, event.getData()[0]);
+                    }
+                    if (count == 24) {
+                        Assert.assertEquals(25l, event.getData()[0]);
+                    }
+                    if (count == 25) {
+                        Assert.assertEquals(26l, event.getData()[0]);
+                    }
                 }
-
             }
         });
-
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
 
-        DataLoader inputData = new DataLoader("/home/vithursa/Desktop/OOEventsDelay",500000);
-        inputData.runSingleStream();
-        LinkedBlockingQueue<Object> events = inputData.getEventBuffer();
-        Iterator<Object> itr = events.iterator();
-        while(itr.hasNext()){
-            Object[] obj = (Object[]) itr.next();
-            obj[13] = System.currentTimeMillis();
-            inputHandler.send(obj);
-        }
+        inputHandler.send(new Object[]{1l, 79});
+        inputHandler.send(new Object[]{4l, 60});
+        inputHandler.send(new Object[]{3l, 65});
+        inputHandler.send(new Object[]{5l, 30});
+        inputHandler.send(new Object[]{6l, 43});
+        inputHandler.send(new Object[]{9l, 90});
+        inputHandler.send(new Object[]{7l, 15});
+        inputHandler.send(new Object[]{8l, 80});
+        inputHandler.send(new Object[]{10l, 100});
+        inputHandler.send(new Object[]{12l, 19});
+        inputHandler.send(new Object[]{13l, 45});
+        inputHandler.send(new Object[]{14l, 110});
+        inputHandler.send(new Object[]{11l, 92});
+        inputHandler.send(new Object[]{15l, 29});
+        inputHandler.send(new Object[]{17l, 55});
+        inputHandler.send(new Object[]{18l, 61});
+        inputHandler.send(new Object[]{19l, 33});
+        inputHandler.send(new Object[]{16l, 30});
+        inputHandler.send(new Object[]{20l, 14});
+        inputHandler.send(new Object[]{21l, 42});
+        inputHandler.send(new Object[]{22l, 61});
+        inputHandler.send(new Object[]{24l, 33});
+        inputHandler.send(new Object[]{25l, 30});
+        inputHandler.send(new Object[]{26l, 14});
+        inputHandler.send(new Object[]{23l, 42});
+
         Thread.sleep(2000);
         executionPlanRuntime.shutdown();
 
