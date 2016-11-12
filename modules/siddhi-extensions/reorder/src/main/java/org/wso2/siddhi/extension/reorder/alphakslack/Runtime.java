@@ -58,7 +58,7 @@ public class Runtime{
 
                 if ((cdistance < distance) && (cdistance != 0)) {
                     distance = cdistance;
-                    lowerIndex = (long) count;
+                    lowerIndex = count;
                 }
                 count += 1;
             }

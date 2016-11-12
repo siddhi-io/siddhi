@@ -101,7 +101,6 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
         //Do nothing
     }
 
-
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
@@ -124,18 +123,6 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                     if(batchSize == -1l){
                         batchSize = (Long) batchSizeExecutor.execute(event);
                     }
-
-//                    if(attributeExpressionExecutors.length == 2) {
-//                        batchSize = 10000;
-//                    } else{
-//                        batchSize = (Long) batchSizeExecutor.execute(event);
-//                    }
-
-                    /*if((Long) batchSizeExecutor.execute(event)!= 0) {
-                        batchSize = (Long) batchSizeExecutor.execute(event);
-                    } else{
-                        batchSize = 10000;
-                    }*/
 
                     if (expireFlag) {
                         if (timestamp < lastSentTimeStamp) {
@@ -357,6 +344,7 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                         " reorder:akslack() function. Required LONG, but found " +
                         attributeExpressionExecutors[3].getReturnType());
             }
+
         }else if(attributeExpressionExecutors.length == 5){
             if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
                 timestampExecutor = attributeExpressionExecutors[0];
@@ -393,7 +381,7 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                         attributeExpressionExecutors[3].getReturnType());
             }
             if (attributeExpressionExecutors[4].getReturnType() == Attribute.Type.LONG) {
-                TIMER_DURATION = (Long)attributeExpressionExecutors[4].execute(null);
+                MAX_K = (Long)attributeExpressionExecutors[4].execute(null);
                 attributes.add(new Attribute("beta4", Attribute.Type.LONG));
             } else {
                 throw new ExecutionPlanCreationException("Invalid parameter type found for the fifth argument of " +
@@ -436,7 +424,7 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                         attributeExpressionExecutors[3].getReturnType());
             }
             if (attributeExpressionExecutors[4].getReturnType() == Attribute.Type.LONG) {
-                TIMER_DURATION = (Long)attributeExpressionExecutors[4].execute(null);
+                MAX_K = (Long)attributeExpressionExecutors[4].execute(null);
                 attributes.add(new Attribute("beta4", Attribute.Type.LONG));
             } else {
                 throw new ExecutionPlanCreationException("Invalid parameter type found for the fifth argument of " +
