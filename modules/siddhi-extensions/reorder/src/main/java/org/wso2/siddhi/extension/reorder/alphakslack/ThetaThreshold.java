@@ -95,14 +95,14 @@ public class ThetaThreshold {
 
         if (tempSq1 >= 0) {
             theta1 = (-b1 - Math.sqrt(tempSq1)) / (2 * a1);
-            theta2 = theta1;
+            theta2 = (-b1 + Math.sqrt(tempSq1)) / (2 * a1);
         } else {
             theta1 = theta2 = 0;
         }
 
         if (tempSq2 >= 0) {
             theta3 = (-b2 - Math.sqrt(tempSq2)) / (2 * a1);
-            theta4 = theta3;
+            theta4 = (-b2 + Math.sqrt(tempSq2)) / (2 * a1);
         } else {
             theta3 = theta4 = 0;
         }
@@ -117,7 +117,6 @@ public class ThetaThreshold {
         } else {
             thetaThresholdValue = Math.min(Math.min(theta1, theta2), Math.min(theta3, theta4));
         }
-
         return thetaThresholdValue;
     }
 }
