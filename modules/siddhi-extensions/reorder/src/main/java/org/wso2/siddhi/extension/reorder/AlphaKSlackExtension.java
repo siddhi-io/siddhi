@@ -77,7 +77,6 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
     private double windowCoverage=1;
     private double thetaThreshold=0;
     private ArrayList dataList = new ArrayList();
-    private LinkedHashSet bufferSize = new LinkedHashSet();
     private double Kp,Kd;
     private boolean flag = true;
 
@@ -197,7 +196,6 @@ public class AlphaKSlackExtension extends StreamProcessor implements SchedulingP
                                 }
                             }
                         }
-                        bufferSize.add(k);
 
                         Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = eventTreeMap.entrySet()
                                 .iterator();
