@@ -16,10 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.classification;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification;
 
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 
@@ -28,7 +25,6 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class StreamingClassification extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(StreamingClassification.class);
 
     private int maxInstance;
     private int batchSize;                       //Output display interval
@@ -39,10 +35,8 @@ public class StreamingClassification extends Thread {
     private int bagging;
     private String nominalAttributesValues;
     public int numEventsReceived;
-
     public Queue<double[]> cepEvents;                            //Cep events
     public Queue<Vector> samoaClassifiers;                       // Output prediction data
-
     public StreamingClassificationTaskBuilder classificationTask;
 
     public StreamingClassification(int maxInstance, int batchSize, int classes, int paraCount,
@@ -64,8 +58,8 @@ public class StreamingClassification extends Thread {
         try {
             this.classificationTask = new StreamingClassificationTaskBuilder(this.maxInstance,
                     this.batchSize, this.numberOfClasses, this.numberOfAttributes,
-                    this.numberOfNominals, this.cepEvents, this.samoaClassifiers, this.parallelism,
-                    this.bagging);
+                    this.numberOfNominals,this.nominalAttributesValues, this.cepEvents,
+                    this.samoaClassifiers, this.parallelism, this.bagging);
         } catch (Exception e) {
             throw new ExecutionPlanRuntimeException("Fail to Initiate the Streaming " +
                     "Classification : ", e);
@@ -73,7 +67,7 @@ public class StreamingClassification extends Thread {
     }
 
     public void run() {
-        classificationTask.initTask(nominalAttributesValues);
+        classificationTask.initTask();
         classificationTask.submit();
     }
 
@@ -81,7 +75,6 @@ public class StreamingClassification extends Thread {
         numEventsReceived++;
         cepEvents.add(eventData);
     }
-
     public Object[] getOutput() {
         Object[] output;
         if (!samoaClassifiers.isEmpty()) {

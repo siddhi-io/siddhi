@@ -15,14 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.classification;
+
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Queue;
-import java.util.Vector;
 
-import org.apache.samoa.evaluation.*;
+import com.github.javacliparser.FloatOption;
+import org.apache.samoa.evaluation.BasicClassificationPerformanceEvaluator;
+import org.apache.samoa.evaluation.BasicRegressionPerformanceEvaluator;
+import org.apache.samoa.evaluation.ClassificationPerformanceEvaluator;
+import org.apache.samoa.evaluation.PerformanceEvaluator;
+import org.apache.samoa.evaluation.RegressionPerformanceEvaluator;
 import org.apache.samoa.learners.ClassificationLearner;
 import org.apache.samoa.learners.Learner;
 import org.apache.samoa.learners.RegressionLearner;
@@ -42,22 +47,22 @@ import com.github.javacliparser.Configurable;
 import com.github.javacliparser.FileOption;
 import com.github.javacliparser.IntOption;
 import com.github.javacliparser.StringOption;
-import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification.StreamingClassificationPerformanceEvaluator;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification.StreamingClassificationStream;
 
 /**
  * Source : Samoa prequentialtask : https://github.com/apache/incubator-samoa/blob/master/samoa-api/src/main/java/org/
  * apache/samoa/tasks/PrequentialEvaluation.java
  */
-
-public class StreamingClassificationTask implements Task, Configurable {
+public abstract class ProcessTask implements Task, Configurable {
 
     private static final long serialVersionUID = -8246537378371580550L;
-    private static Logger logger = LoggerFactory.getLogger(StreamingClassificationTask.class);
+    private static Logger logger = LoggerFactory.getLogger(ProcessTask.class);
 
     public ClassOption learnerOption = new ClassOption("learner", 'l', "Classifier to train.",
             Learner.class, VerticalHoeffdingTree.class.getName());
 
-    public ClassOption streamTrainOption = new ClassOption("trainStream", 's', "Stream to learn" +
+    public ClassOption streamTrainOption = new ClassOption("trainStream", 's', "DataStream to learn" +
             " from.", InstanceStream.class, StreamingClassificationStream.class.getName());
 
     public ClassOption evaluatorOption = new ClassOption("evaluator", 'e',
@@ -85,73 +90,19 @@ public class StreamingClassificationTask implements Task, Configurable {
     public IntOption batchDelayOption = new IntOption("delayBatchSize", 'b', "The delay batch" +
             " size: delay of x milliseconds after each batch ", 1, 1, Integer.MAX_VALUE);
 
-    protected StreamingClassificationEntranceProcessor preqSource;     // EntranceProcessor
-    private InstanceStream inputStream;                                //InputStream
-    protected Stream sourcePiOutputStream;                             //OutputStream
-    private Learner classifier;                                       // Samoa Lerner - Vertical Hoeffding Tree
-    private StreamingClassificationEvaluationProcessor evaluator;     //EvaluationProcessor
-    protected Topology prequentialTopology;                           // Topology
-    protected TopologyBuilder builder;
+    public FloatOption samplingThresholdOption = new FloatOption("samplingThreshold", 'a',
+            "Ratio of instances sampled that will be used for evaluation.", 0.5, 0.0, 1.0);
 
+    protected SourceProcessor source;            // EntranceProcessor
+    protected InstanceStream inputStream;        //InputStream
+    protected Stream sourcePiOutputStream;       //OutputStream
+    protected Learner learner;                   // Samoa Lerner
+    protected Topology topology;                 // Topology
+    protected TopologyBuilder builder;
     public Queue<double[]> cepEvents;
-    public Queue<Vector> classifiers;
-    public int numClasses = 2;
 
     @Override
-    public void init() {
-        inputStream = this.streamTrainOption.getValue();
-
-        if (inputStream instanceof StreamingClassificationStream) {// Connect with classificationStream
-            StreamingClassificationStream myStream = (StreamingClassificationStream) inputStream;
-            myStream.setCepEvents(this.cepEvents);
-        } else {
-            throw new ExecutionPlanRuntimeException("Check Stream: " +
-                    "Stream is not a StreamingClusteringStream");
-        }
-
-        if (builder == null) {                                // This part done by setFactory method
-            builder = new TopologyBuilder();
-            builder.initTopology(evaluationNameOption.getValue());
-            logger.debug("Successfully initializing SAMOA topology with name {}",
-                    evaluationNameOption.getValue());
-        }
-
-        preqSource = new StreamingClassificationEntranceProcessor();
-
-        // Set stream to Entrance processor
-        preqSource.setStreamSource(inputStream);
-        builder.addEntranceProcessor(preqSource);
-        preqSource.setMaxInstances(instanceLimitOption.getValue());
-        preqSource.setSourceDelay(sourceDelayOption.getValue());
-        preqSource.setDelayBatchSize(batchDelayOption.getValue());
-
-        // Create stream from Entrance processor
-        sourcePiOutputStream = builder.createStream(preqSource);
-
-        classifier = this.learnerOption.getValue();   // Vertical Hoeffding Tree
-        classifier.init(builder, preqSource.getDataset(), 1);
-        builder.connectInputShuffleStream(sourcePiOutputStream, classifier.getInputProcessor());
-
-        // Set ClassificationPerformanceEvaluator
-        PerformanceEvaluator evaluatorOptionValue = this.evaluatorOption.getValue();
-        if (!StreamingClassificationTask.isLearnerAndEvaluatorCompatible(classifier,
-                evaluatorOptionValue)) {
-            evaluatorOptionValue = getDefaultPerformanceEvaluatorForLearner(classifier);
-        }
-
-        // Set ClassificationEvaluationProcessor
-        evaluator = new StreamingClassificationEvaluationProcessor.Builder(evaluatorOptionValue)
-                .samplingFrequency(sampleFrequencyOption.getValue()).dumpFile(
-                        dumpFileOption.getFile()).build();
-        evaluator.setSamoaClassifiers(classifiers);
-        builder.addProcessor(evaluator);
-        for (Stream evaluatorPiInputStream : classifier.getResultStreams()) {
-            builder.connectInputShuffleStream(evaluatorPiInputStream, evaluator);
-        }
-        prequentialTopology = builder.build();
-        logger.debug("Successfully building the topology");
-        logger.info("Successfully building the topology");
-    }
+    public abstract void init();
 
     @Override
     public void setFactory(ComponentFactory factory) {
@@ -160,10 +111,6 @@ public class StreamingClassificationTask implements Task, Configurable {
         logger.debug("Successfully initializing SAMOA topology with name {}",
                 evaluationNameOption.getValue());
 
-    }
-
-    public Topology getTopology() {
-        return prequentialTopology;
     }
 
     protected static boolean isLearnerAndEvaluatorCompatible(Learner learner,
@@ -182,15 +129,12 @@ public class StreamingClassificationTask implements Task, Configurable {
         return new BasicClassificationPerformanceEvaluator();
     }
 
+    public Topology getTopology() {
+        return topology;
+    }
+
     public void setCepEvents(Queue<double[]> cepEvents) {
         this.cepEvents = cepEvents;
     }
 
-    public void setSamoaClassifiers(Queue<Vector> classifiers) {
-        this.classifiers = classifiers;
-    }
-
-    public void setNumClasses(int numClasses) {
-        this.numClasses = numClasses;
-    }
 }

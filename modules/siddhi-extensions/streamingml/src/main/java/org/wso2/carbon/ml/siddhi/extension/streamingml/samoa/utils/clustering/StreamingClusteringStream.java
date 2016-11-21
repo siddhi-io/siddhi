@@ -16,36 +16,25 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.clustering;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.clustering;
 
 import com.github.javacliparser.IntOption;
 
-import org.apache.samoa.instances.*;
-import org.apache.samoa.moa.core.DataPoint;
+import org.apache.samoa.instances.Attribute;
+import org.apache.samoa.instances.DenseInstance;
+import org.apache.samoa.instances.Instance;
+import org.apache.samoa.instances.Instances;
+import org.apache.samoa.instances.InstancesHeader;
 import org.apache.samoa.moa.core.Example;
 import org.apache.samoa.moa.core.InstanceExample;
 import org.apache.samoa.moa.core.ObjectRepository;
 import org.apache.samoa.moa.tasks.TaskMonitor;
 import org.apache.samoa.streams.InstanceStream;
-import org.apache.samoa.streams.clustering.ClusteringStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.DataStream;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
 
-public class StreamingClusteringStream extends ClusteringStream {
-    private static final Logger logger = LoggerFactory.getLogger(StreamingClusteringStream.class);
-
-    protected InstancesHeader streamHeader;
-    private int numGeneratedInstances;
-    LinkedList<DataPoint> points = new LinkedList<DataPoint>();
-
-    public Queue<double[]> cepEvents;
-    double[] values;
-    private int numberOfAttributes;
+public class StreamingClusteringStream extends DataStream {
 
     public IntOption numClusterOption = new IntOption("numCluster", 'K',
             "The average number of centroids in the model.", 5, 1, Integer.MAX_VALUE);
@@ -57,34 +46,18 @@ public class StreamingClusteringStream extends ClusteringStream {
         generateHeader();
         restart();
         values = new double[numberOfAttributes];
-
         for (int i = 0; i < numberOfAttributes; i++) {
             values[i] = 0;
         }
     }
 
     @Override
-    public InstancesHeader getHeader() {
-        return streamHeader;
-    }
-
-    @Override
-    public long estimatedRemainingInstances() {
-        return -1;
-    }
-
-    @Override
-    public boolean hasMoreInstances() {
-        return true;
-    }
-
-    @Override
     public Example<Instance> nextInstance() {
         double[] values_new = new double[numAttsOption.getValue()];
-        if (numGeneratedInstances == 0) {
+        if (numberOfGeneratedInstances == 0) {
             while (cepEvents == null) ;
         }
-        numGeneratedInstances++;
+        numberOfGeneratedInstances++;
         while (cepEvents.isEmpty()) ;
         double[] values = cepEvents.poll();
         System.arraycopy(values, 0, values_new, 0, values.length);
@@ -93,20 +66,6 @@ public class StreamingClusteringStream extends ClusteringStream {
         return new InstanceExample(inst);
     }
 
-    @Override
-    public boolean isRestartable() {
-        return true;
-    }
-
-    @Override
-    public void restart() {
-        numGeneratedInstances = 0;
-    }
-
-    @Override
-    public void getDescription(StringBuilder stringBuilder, int i) {
-
-    }
 
     protected void generateHeader() {
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
@@ -125,7 +84,5 @@ public class StreamingClusteringStream extends ClusteringStream {
         streamHeader.setClassIndex(streamHeader.numAttributes() - 1);
     }
 
-    public void setCepEvents(Queue<double[]> cepEvents) {
-        this.cepEvents = cepEvents;
-    }
+
 }

@@ -16,41 +16,34 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.regression;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.regression;
 
 import com.github.javacliparser.IntOption;
-
-import org.apache.samoa.instances.*;
+import org.apache.samoa.instances.Attribute;
+import org.apache.samoa.instances.DenseInstance;
+import org.apache.samoa.instances.Instance;
+import org.apache.samoa.instances.Instances;
+import org.apache.samoa.instances.InstancesHeader;
 import org.apache.samoa.moa.core.Example;
 import org.apache.samoa.moa.core.InstanceExample;
 import org.apache.samoa.moa.core.ObjectRepository;
 import org.apache.samoa.moa.tasks.TaskMonitor;
 import org.apache.samoa.streams.InstanceStream;
-import org.apache.samoa.streams.clustering.ClusteringStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.DataStream;
 
 import java.util.ArrayList;
-import java.util.Queue;
 
-public class StreamingRegressionStream extends ClusteringStream {
+public class StreamingRegressionStream extends DataStream {
 
-    private static final Logger logger = LoggerFactory.getLogger(StreamingRegressionStream.class);
     public IntOption numAttOption = new IntOption("numberOfAttributes", 'A',
             "The number of Attributes in the stream.", 2, 1, Integer.MAX_VALUE);
-
-    private Queue<double[]> cepEvent;
-    protected InstancesHeader streamHeader;
-    private int numberOfGeneratedInstances;
-    double[] values; //Cep Event
-    private int numberOfAttributes;
 
     @Override
     protected void prepareForUseImpl(TaskMonitor taskMonitor, ObjectRepository objectRepository) {
 
         taskMonitor.setCurrentActivity("Preparing random RBF...", -1.0);
         this.numberOfAttributes = numAttOption.getValue();
+        this.numberOfGeneratedInstances=0;
         generateHeader();
         restart();
         values = new double[numberOfAttributes];
@@ -59,7 +52,7 @@ public class StreamingRegressionStream extends ClusteringStream {
         }
     }
 
-    private void generateHeader() {
+    protected void generateHeader() {
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
         for (int i = 0; i < numberOfAttributes; i++) {
             attributes.add(new Attribute("numeric" + (i + 1)));
@@ -70,29 +63,14 @@ public class StreamingRegressionStream extends ClusteringStream {
     }
 
     @Override
-    public InstancesHeader getHeader() {
-        return streamHeader;
-    }
-
-    @Override
-    public long estimatedRemainingInstances() {
-        return -1L;
-    }
-
-    @Override
-    public boolean hasMoreInstances() {
-        return true;
-    }
-
-    @Override
     public Example<Instance> nextInstance() {
         double[] values_new = new double[numberOfAttributes];
         if (numberOfGeneratedInstances == 0) {
-            while (cepEvent == null) ;
+            while (cepEvents == null) ;
         }
         numberOfGeneratedInstances++;
-        while (cepEvent.isEmpty()) ;
-        double[] values = cepEvent.poll();
+        while (cepEvents.isEmpty()) ;
+        double[] values = cepEvents.poll();
         System.arraycopy(values, 0, values_new, 0, values.length-1);
         Instance inst = new DenseInstance(1.0, values_new);
         inst.setDataset(getHeader());
@@ -100,23 +78,6 @@ public class StreamingRegressionStream extends ClusteringStream {
         return new InstanceExample(inst);
     }
 
-    @Override
-    public boolean isRestartable() {
-        return true;
-    }
 
-    @Override
-    public void restart() {
-        numberOfGeneratedInstances = 0;
-    }
-
-    @Override
-    public void getDescription(StringBuilder stringBuilder, int i) {
-        //Do nothing
-    }
-
-    public void setCepEvent(Queue<double[]> cepEvent) {
-        this.cepEvent = cepEvent;
-    }
 
 }

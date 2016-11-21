@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.classification;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification;
 
 import org.apache.samoa.core.ContentEvent;
 import org.apache.samoa.core.Processor;
@@ -28,6 +28,7 @@ import org.apache.samoa.moa.evaluation.LearningEvaluation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.EvaluationProcessor;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 
 import java.io.File;
@@ -40,7 +41,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-public class StreamingClassificationEvaluationProcessor implements Processor {
+public class StreamingClassificationEvaluationProcessor extends EvaluationProcessor {
 
     private static final long serialVersionUID = -2778051819116753612L;
     private static final Logger logger =
@@ -48,18 +49,11 @@ public class StreamingClassificationEvaluationProcessor implements Processor {
 
     private final PerformanceEvaluator evaluator;
     private final int samplingFrequency;
-    private final File dumpFile;
-    private transient PrintStream immediateResultStream;
-    private transient boolean firstDump;
-    private long totalCount;
-    private long experimentStart;
-    private long sampleStart;
-    private LearningCurve learningCurve;
-    private int id;
+    private File dumpFile;
     private Queue<Vector> statistics;
     public Queue<Vector> classifiers;
 
-    private StreamingClassificationEvaluationProcessor
+    protected StreamingClassificationEvaluationProcessor
             (StreamingClassificationEvaluationProcessor.Builder builder) {
 
         this.immediateResultStream = null;
@@ -70,7 +64,6 @@ public class StreamingClassificationEvaluationProcessor implements Processor {
         this.evaluator = builder.evaluator;
         this.samplingFrequency = builder.samplingFrequency;
         this.dumpFile = builder.dumpFile;
-
         statistics = new ConcurrentLinkedQueue<>();
     }
 
@@ -90,11 +83,6 @@ public class StreamingClassificationEvaluationProcessor implements Processor {
             }
         }
 
-        if (result.isLastEvent()) {
-            this.concludeMeasurement();
-            return true;
-        }
-
         int prediction = Utils.maxIndex(result.getClassVotes());
         if (predicting) {
             Vector instanceValues = new Vector();
@@ -108,6 +96,10 @@ public class StreamingClassificationEvaluationProcessor implements Processor {
             this.evaluator.addResult(result.getInstance(), result.getClassVotes());
             ++this.totalCount;
         }
+        if (result.isLastEvent()) {
+            this.concludeMeasurement();
+            return true;
+        }
 
         if (totalCount == 1) {
             sampleStart = System.nanoTime();
@@ -117,7 +109,7 @@ public class StreamingClassificationEvaluationProcessor implements Processor {
     }
 
     public void onCreate(int id) {
-        this.id = id;
+        this.processId = id;
         this.learningCurve = new LearningCurve("evaluation instances");
         if (this.dumpFile != null) {
             try {
@@ -139,10 +131,6 @@ public class StreamingClassificationEvaluationProcessor implements Processor {
         this.firstDump = true;
     }
 
-    public void setSamoaClassifiers(Queue<Vector> classifiers) {
-        this.classifiers = classifiers;
-    }
-
     public Processor newProcessor(Processor p) {
         StreamingClassificationEvaluationProcessor originalProcessor =
                 (StreamingClassificationEvaluationProcessor) p;
@@ -158,7 +146,7 @@ public class StreamingClassificationEvaluationProcessor implements Processor {
     public String toString() {
         StringBuilder report = new StringBuilder();
         report.append(StreamingClassificationEvaluationProcessor.class.getCanonicalName());
-        report.append("id = ").append(this.id);
+        report.append("id = ").append(this.processId);
         report.append('\n');
         if (this.learningCurve.numEntries() > 0) {
             report.append(this.learningCurve.toString());
@@ -204,6 +192,9 @@ public class StreamingClassificationEvaluationProcessor implements Processor {
             this.immediateResultStream.println("# COMPLETED");
             this.immediateResultStream.flush();
         }
+    }
+    public void setSamoaClassifiers(Queue<Vector> classifiers) {
+        this.classifiers = classifiers;
     }
 
     public static class Builder {

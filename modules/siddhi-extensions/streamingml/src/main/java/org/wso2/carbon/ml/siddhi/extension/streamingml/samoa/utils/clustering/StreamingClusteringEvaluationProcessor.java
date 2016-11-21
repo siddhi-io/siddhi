@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.clustering;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.clustering;
 
 import org.apache.samoa.core.ContentEvent;
 import org.apache.samoa.core.Processor;
@@ -28,20 +28,19 @@ import org.apache.samoa.moa.clusterers.clustream.WithKmeans;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.EvaluationProcessor;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class StreamingClusteringEvaluationProcessor implements Processor {
-    private static final long serialVersionUID = -6043613438148776446L;
-    private int processorId;
+public class StreamingClusteringEvaluationProcessor extends EvaluationProcessor {
+
     private static final Logger logger =
             LoggerFactory.getLogger(StreamingClusteringEvaluationProcessor.class);
 
     String evalPoint;
     public Queue<Clustering> samoaClusters;
     public int numClusters=0;
-
 
     StreamingClusteringEvaluationProcessor(String evalPoint){
         this.evalPoint = evalPoint;
@@ -76,8 +75,9 @@ public class StreamingClusteringEvaluationProcessor implements Processor {
 
     @Override
     public void onCreate(int id) {
-        this.processorId = id;
-        logger.debug("Creating PrequentialSourceProcessor with id {}", processorId);
+        this.processId = id;
+        logger.debug("Creating PrequentialSourceProcessor with processId {}", processId);
+        logger.info("Creating PrequentialSourceProcessor with processId {}", processId);
     }
 
     @Override

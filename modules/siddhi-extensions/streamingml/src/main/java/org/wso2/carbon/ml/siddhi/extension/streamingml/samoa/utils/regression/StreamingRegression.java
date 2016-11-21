@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.regression;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.regression;
 
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 

@@ -16,44 +16,29 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.regression;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.regression;
 
 import com.github.javacliparser.ClassOption;
 import com.github.javacliparser.FlagOption;
 import com.github.javacliparser.IntOption;
 import com.github.javacliparser.Option;
 import org.apache.samoa.tasks.Task;
-import org.apache.samoa.topology.Topology;
 import org.apache.samoa.topology.impl.SimpleComponentFactory;
-import org.apache.samoa.topology.impl.SimpleEngine;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.TaskBuilder;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 
 import java.util.Queue;
 import java.util.Vector;
 
-public class StreamingRegressionTaskBuilder {
-
-    private static final String SUPPRESS_STATUS_OUT_MSG =
-            "Suppress the task status output. Normally it is sent to stderr.";
-    private static final String SUPPRESS_RESULT_OUT_MSG =
-            "Suppress the task result output. Normally it is sent to stdout.";
-    private static final String STATUS_UPDATE_FREQ_MSG =
-            "Wait time in milliseconds between status updates.";
+public class StreamingRegressionTaskBuilder extends TaskBuilder {
 
     private static final Logger logger =
             LoggerFactory.getLogger(StreamingRegressionTaskBuilder.class);
-
-    public Queue<double[]> cepEvents;
     public Queue<Vector> samoaPredictions;
-
-    public int maxInstances;
     public int batchSize;
-    public int numberOfAttributes;
     public int parallelism;
-    private Topology topology;
 
     public StreamingRegressionTaskBuilder(int maxInstance, int batchSize, int numAtts,
                                           Queue<double[]> cepEvents, Queue<Vector> data, int parallel) {
@@ -66,11 +51,10 @@ public class StreamingRegressionTaskBuilder {
     }
 
     public void initTask() {
-
         String query = "";
-        query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.regression." +
+        query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.regression." +
                 "StreamingRegressionTask -f " + batchSize + " -i " + maxInstances +
-                " -s (org.wso2.carbon.ml.siddhi.extension.streamingml.samoa." +
+                " -s (org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils." +
                 "regression.StreamingRegressionStream -A " + numberOfAttributes + " ) " +
                 "-l  (org.apache.samoa.learners.classifiers.rules.HorizontalAMRulesRegressor " +
                 "-r 9 -p " + parallelism + ")";
@@ -81,7 +65,6 @@ public class StreamingRegressionTaskBuilder {
     }
 
     private void initRegressionTask(String[] args) {
-
         /// No usage directly
         FlagOption suppressStatusOutOpt =
                 new FlagOption("suppressStatusOut", 'S', SUPPRESS_STATUS_OUT_MSG);
@@ -121,9 +104,5 @@ public class StreamingRegressionTaskBuilder {
         task.init();
         logger.info("Successfully Initiated the StreamingRegressionTask");
         topology = task.getTopology();
-    }
-
-    public void submit() {
-        SimpleEngine.submitTopology(topology);
     }
 }

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.clustering;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.clustering;
 
 import org.apache.samoa.moa.cluster.Cluster;
 import org.apache.samoa.moa.cluster.Clustering;
@@ -81,7 +81,6 @@ public class StreamingClustering extends Thread {
                 }
                 output[i] = centerStr;
             }
-
         } else {
             output = null;
         }

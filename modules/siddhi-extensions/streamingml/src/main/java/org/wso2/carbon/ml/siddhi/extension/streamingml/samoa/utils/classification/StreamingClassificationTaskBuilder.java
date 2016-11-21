@@ -16,94 +16,77 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.classification;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification;
 
 import com.github.javacliparser.ClassOption;
 import com.github.javacliparser.FlagOption;
 import com.github.javacliparser.IntOption;
 import com.github.javacliparser.Option;
-
 import org.apache.samoa.tasks.Task;
-import org.apache.samoa.topology.Topology;
 import org.apache.samoa.topology.impl.SimpleComponentFactory;
-import org.apache.samoa.topology.impl.SimpleEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.TaskBuilder;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 
 import java.util.Queue;
 import java.util.Vector;
 
-public class StreamingClassificationTaskBuilder {
-
-
-    // It seems that the 3 extra options are not used directly, But It used when convert sting to Task object.
-    private static final String SUPPRESS_STATUS_OUT_MSG =
-            "Suppress the task status output. Normally it is sent to stderr.";
-    private static final String SUPPRESS_RESULT_OUT_MSG =
-            "Suppress the task result output. Normally it is sent to stdout.";
-    private static final String STATUS_UPDATE_FREQ_MSG =
-            "Wait time in milliseconds between status updates.";
-    private static final Logger logger =
+public class StreamingClassificationTaskBuilder extends TaskBuilder {
+    protected static final Logger logger =
             LoggerFactory.getLogger(StreamingClassificationTaskBuilder.class);
 
-
-    public Queue<double[]> cepEvents;
     public Queue<Vector> classifiers;
-
-    public int maxInstances;
-    public int batchSize;
-    public int numberOfClasses;
-    public int numberOfAttributes;
-    public int numberOfNominalAttributes;
-    public int parallelism;
-    public int bagging;
-
-    Topology topology;
+    private int batchSize;
+    private int numberOfClasses;
+    private int numberOfNominalAttributes;
+    private int parallelism;
+    private int bagging;
+    private String noiminalValues;
 
     public StreamingClassificationTaskBuilder(int maxInstance, int batchSize, int numClasses,
-                                              int numAtts, int numNominals,
+                                              int numAtts, int numNominals, String noiminalVals,
                                               Queue<double[]> cepEvents, Queue<Vector> classifiers,
                                               int par, int bag) {
-        this.numberOfClasses = numClasses;
-        this.cepEvents = cepEvents;
         this.maxInstances = maxInstance;
+        this.numberOfClasses = numClasses;
+        this.batchSize = batchSize;
         this.numberOfAttributes = numAtts;
         this.numberOfNominalAttributes = numNominals;
-        this.batchSize = batchSize;
+        this.noiminalValues=noiminalVals;
+        this.cepEvents = cepEvents;
         this.classifiers = classifiers;
         this.parallelism = par;
         this.bagging = bag;
     }
 
-    public void initTask(String str) {
+    public void initTask() {
         String query;
 
         if (bagging == 0) {
-            query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.classification." +
+            query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification." +
                     "StreamingClassificationTask -f " + batchSize + " -i " + maxInstances +
-                    " -s (org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.classification." +
-                    "StreamingClassificationStream -K " + numberOfClasses + " -A " +
-                    numberOfAttributes + " -N " + numberOfNominalAttributes + " -Z " + str +
+                    " -s (org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils." +
+                    "classification.StreamingClassificationStream -K " + numberOfClasses + " -A " +
+                    numberOfAttributes + " -N " + numberOfNominalAttributes + " -Z " + noiminalValues +
                     " ) -l (org.apache.samoa.learners.classifiers.trees.VerticalHoeffdingTree -p "
                     + parallelism + ")";
         } else {
             //---------Bagging--------------
-            query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.classification." +
+            query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification." +
                     "StreamingClassificationTask -f " + batchSize + " -i " + maxInstances +
-                    " -s (org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.classification." +
-                    "StreamingClassificationStream -K " + numberOfClasses + " -A " +
-                    numberOfAttributes + " -N " + numberOfNominalAttributes + " -Z " + str +
-                    " ) -l (classifiers.ensemble.Bagging -s " + bagging +
+                    " -s (org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils." +
+                    "classification.StreamingClassificationStream -K " + numberOfClasses + " -A " +
+                    numberOfAttributes + " -N " + numberOfNominalAttributes + " -Z " +
+                    noiminalValues + " ) -l (classifiers.ensemble.Bagging -s " + bagging +
                     " -l (classifiers.trees.VerticalHoeffdingTree -p " + parallelism + "))";
-
         }
         logger.info("QUERY: " + query);
         String args[] = {query};
         this.initClassificationTask(args);
     }
 
-    private void initClassificationTask(String[] args) {
+    protected void initClassificationTask(String[] args) {
 
         /// These variables are not directly used
         FlagOption suppressStatusOutOpt = new FlagOption("suppressStatusOut", 'S',
@@ -143,12 +126,9 @@ public class StreamingClassificationTaskBuilder {
         task.setFactory(new SimpleComponentFactory());
         task.init();
         logger.info("Successfully Initiated the StreamingClassificationTask");
-        topology=task.getTopology();
+        topology = task.getTopology();
     }
 
-    public void submit(){
-        SimpleEngine.submitTopology(topology);
-    }
 }
 
 

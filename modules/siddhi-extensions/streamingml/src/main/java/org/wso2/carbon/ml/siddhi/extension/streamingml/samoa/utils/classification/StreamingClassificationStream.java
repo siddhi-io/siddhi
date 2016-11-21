@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.classification;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification;
 
 import com.github.javacliparser.IntOption;
 import com.github.javacliparser.StringOption;
@@ -26,13 +26,12 @@ import org.apache.samoa.moa.core.InstanceExample;
 import org.apache.samoa.moa.core.ObjectRepository;
 import org.apache.samoa.moa.tasks.TaskMonitor;
 import org.apache.samoa.streams.InstanceStream;
-import org.apache.samoa.streams.clustering.ClusteringStream;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.DataStream;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
-public class StreamingClassificationStream extends ClusteringStream {
+public class StreamingClassificationStream extends DataStream {
 
     public IntOption numClassesOption = new IntOption("numberOfClasses", 'K',
             "The number of classes in the model.", 2, 2, Integer.MAX_VALUE);
@@ -43,14 +42,8 @@ public class StreamingClassificationStream extends ClusteringStream {
     public StringOption numValsPerNominalOption = new StringOption("numValsPerNominalOption", 'Z',
             "The number of values per nominal attributes", "null");
 
-    protected InstancesHeader streamHeader;
-    private int numberOfGeneratedInstances;
-    private int numberOfAttributes;
     private int numberOfNorminals;
     private int numberOfClasses;
-
-    double[] values;                       //Cep Event
-    public Queue<double[]> cepEvents;
     List<Integer> valuesForNominals;
 
     @Override
@@ -75,7 +68,7 @@ public class StreamingClassificationStream extends ClusteringStream {
         }
     }
 
-    private void generateHeader() {
+    protected void generateHeader() {
         List<Attribute> attributes = new ArrayList<Attribute>();
 
         // Add numerical values
@@ -97,7 +90,6 @@ public class StreamingClassificationStream extends ClusteringStream {
         attributes.add(new Attribute("class", classLabels));
         streamHeader = new InstancesHeader(new Instances(getCLICreationString(InstanceStream.class),
                 attributes, 0));
-        // Set class value
         streamHeader.setClassIndex(streamHeader.numAttributes() - 1);
     }
 
@@ -108,21 +100,6 @@ public class StreamingClassificationStream extends ClusteringStream {
             nominalAttValls.add("value" + (i + 1));
         }
         return nominalAttValls;
-    }
-
-    @Override
-    public InstancesHeader getHeader() {
-        return streamHeader;
-    }
-
-    @Override
-    public long estimatedRemainingInstances() {
-        return -1L;
-    }
-
-    @Override
-    public boolean hasMoreInstances() {
-        return true;
     }
 
     @Override
@@ -140,25 +117,4 @@ public class StreamingClassificationStream extends ClusteringStream {
         instance.setClassValue(values[values.length - 1]);// Set the relevant class value to the dataset
         return new InstanceExample(instance);
     }
-
-    @Override
-    public boolean isRestartable() {
-        return true;
-    }
-
-    @Override
-    public void restart() {
-        numberOfGeneratedInstances = 0;
-    }
-
-    @Override
-    public void getDescription(StringBuilder stringBuilder, int i) {
-        // Do nothing
-    }
-
-    public void setCepEvents(Queue<double[]> cepEvents) {
-        this.cepEvents = cepEvents;
-    }
-
-
 }

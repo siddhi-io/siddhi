@@ -16,50 +16,34 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.clustering;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.clustering;
 
 import com.github.javacliparser.ClassOption;
 import com.github.javacliparser.FlagOption;
 import com.github.javacliparser.IntOption;
 import com.github.javacliparser.Option;
-
 import org.apache.samoa.moa.cluster.Clustering;
 import org.apache.samoa.tasks.Task;
-import org.apache.samoa.topology.Topology;
 import org.apache.samoa.topology.impl.SimpleComponentFactory;
-import org.apache.samoa.topology.impl.SimpleEngine;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.TaskBuilder;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 
 import java.util.Queue;
 
-public class StreamingClusteringTaskBuilder {
-
-    // It seems that the 3 extra options are not used.
-    private static final String SUPPRESS_STATUS_OUT_MSG =
-            "Suppress the task status output.Normally it is sent to stderr.";
-    private static final String SUPPRESS_RESULT_OUT_MSG =
-            "Suppress the task result output.Normally it is sent to stdout.";
-    private static final String STATUS_UPDATE_FREQ_MSG =
-            "Wait time in milliseconds between status updates.";
+public class StreamingClusteringTaskBuilder extends TaskBuilder {
 
     private static final Logger logger =
             LoggerFactory.getLogger(StreamingClusteringTaskBuilder.class);
 
-    public Queue<double[]> cepEvents;
     public Queue<Clustering> samoaClusters;
     public int numberOfClusters;
-    public int maxInstance;
-    public int numberOfAttributes;
-    private Topology topology;
 
     public StreamingClusteringTaskBuilder(int maxInstance, int numAtt, int numClusters,
                                           Queue<double[]> cepEvents,
                                           Queue<Clustering> samoaClusters) {
-        this.maxInstance = maxInstance;
+        this.maxInstances = maxInstance;
         this.numberOfAttributes = numAtt;
         this.numberOfClusters = numClusters;
         this.cepEvents = cepEvents;
@@ -68,9 +52,9 @@ public class StreamingClusteringTaskBuilder {
 
     public void initTask() {
         String query = "";
-        query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.clustering." +
-                "StreamingClusteringTask -i " + maxInstance + " -s  (org.wso2.carbon.ml." +
-                "siddhi.extension.streamingml.samoa.clustering.StreamingClusteringStream -K " +
+        query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.clustering." +
+                "StreamingClusteringTask -i " + maxInstances + " -s  (org.wso2.carbon.ml." +
+                "siddhi.extension.streamingml.samoa.utils.clustering.StreamingClusteringStream -K " +
                 numberOfClusters + " -a " + numberOfAttributes + ") -l (org.apache.samoa." +
                 "learners.clusterers.simple.DistributedClusterer -l (org.apache.samoa.learners." +
                 "clusterers.ClustreamClustererAdapter -l (org.apache.samoa.moa.clusterers." +
@@ -118,7 +102,4 @@ public class StreamingClusteringTaskBuilder {
         topology=task.getTopology();
     }
 
-    public void submit(){
-        SimpleEngine.submitTopology(topology);
-    }
 }

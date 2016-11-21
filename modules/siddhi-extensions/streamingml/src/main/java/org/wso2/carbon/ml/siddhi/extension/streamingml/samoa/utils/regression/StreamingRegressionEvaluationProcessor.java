@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.regression;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.regression;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,11 +38,11 @@ import org.apache.samoa.moa.evaluation.LearningEvaluation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.EvaluationProcessor;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 
-public class StreamingRegressionEvaluationProcessor implements Processor {
+public class StreamingRegressionEvaluationProcessor extends EvaluationProcessor {
 
-    private static final long serialVersionUID = -2778051819116753612L;
     private static final Logger logger =
             LoggerFactory.getLogger(StreamingRegressionEvaluationProcessor.class);
     private static final String ORDERING_MEASUREMENT_NAME = "evaluation instances";
@@ -52,11 +52,6 @@ public class StreamingRegressionEvaluationProcessor implements Processor {
     private final File dumpFile;
     private transient PrintStream immediateResultStream;
     private transient boolean firstDump;
-    private long totalCount;
-    private long experimentStart;
-    private long sampleStart;
-    private LearningCurve learningCurve;
-    private int id;
     private Queue<Vector> regressionData;
     public Queue<Vector> samoaPredictions;
 
@@ -116,7 +111,7 @@ public class StreamingRegressionEvaluationProcessor implements Processor {
 
     @Override
     public void onCreate(int id) {
-        this.id = id;
+        this.processId = id;
         this.learningCurve = new LearningCurve(ORDERING_MEASUREMENT_NAME);
 
         if (this.dumpFile != null) {
@@ -154,19 +149,7 @@ public class StreamingRegressionEvaluationProcessor implements Processor {
         return newProcessor;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder report = new StringBuilder();
 
-        report.append(StreamingRegressionEvaluationProcessor.class.getCanonicalName());
-        report.append("id = ").append(this.id);
-        report.append('\n');
-        if (learningCurve.numEntries() > 0) {
-            report.append(learningCurve.toString());
-            report.append('\n');
-        }
-        return report.toString();
-    }
 
     private void addMeasurement() {
         Vector measurements = new Vector<>();

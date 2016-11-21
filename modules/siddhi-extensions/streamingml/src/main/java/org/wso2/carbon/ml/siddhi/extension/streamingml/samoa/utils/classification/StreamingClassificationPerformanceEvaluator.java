@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.classification;
+package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification;
 
 import org.apache.samoa.evaluation.ClassificationPerformanceEvaluator;
 import org.apache.samoa.instances.Instance;
