@@ -110,6 +110,7 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
                     clonedEvent.setType(StreamEvent.Type.EXPIRED);
                     this.expiredEventChunk.add(clonedEvent);
 
+                    // TODO: 11/21/16 bug it
                     if (lastTimestamp < clonedEvent.getTimestamp()) {
                         scheduler.notifyAt(clonedEvent.getTimestamp() + timeInMilliSeconds);
                         lastTimestamp = clonedEvent.getTimestamp();

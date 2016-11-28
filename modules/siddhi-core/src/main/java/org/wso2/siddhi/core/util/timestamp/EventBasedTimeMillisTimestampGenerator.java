@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @see org.wso2.siddhi.core.stream.StreamJunction#sendData(long, Object[])
  */
-public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
+public class EventBasedTimeMillisTimestampGenerator implements TimestampGenerator {
 
     /**
      * Timestamp as defined by the last event.
@@ -77,11 +77,11 @@ public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
     private List<TimeChangeListener> timeChangeListeners = new ArrayList<TimeChangeListener>();
 
     /**
-     * Create an EventTimeMillisTimestampGenerator.
+     * Create an EventBasedTimeMillisTimestampGenerator.
      *
      * @param scheduledExecutorService
      */
-    public EventTimeMillisTimestampGenerator(ScheduledExecutorService scheduledExecutorService) {
+    public EventBasedTimeMillisTimestampGenerator(ScheduledExecutorService scheduledExecutorService) {
         this.scheduledExecutorService = scheduledExecutorService;
     }
 
@@ -97,21 +97,22 @@ public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
     }
 
     /**
-     * Set the timestamp to the {@link EventTimeMillisTimestampGenerator} and notify the interested listeners.
+     * Set the timestamp to the {@link EventBasedTimeMillisTimestampGenerator} and notify the interested listeners.
      *
      * @param timestamp
      */
-    public void setTimestamp(long timestamp) {
+    public void setCurrentTimestamp(long timestamp) {
         if (timestamp >= this.lastEventTimestamp) {
             synchronized (this) {
                 if (timestamp >= this.lastEventTimestamp) {
                     this.lastEventTimestamp = timestamp;
-                    this.lastSystemTimestamp = System.currentTimeMillis();
+
                     for (TimeChangeListener listener : this.timeChangeListeners) {
                         listener.onTimeChange(this.lastEventTimestamp);
                     }
                 }
-
+                // Schedule the heartbeat from the current event timestamp
+                this.lastSystemTimestamp = System.currentTimeMillis();
                 notifyAfter(idleTime);
             }
         }
@@ -175,13 +176,13 @@ public class EventTimeMillisTimestampGenerator implements TimestampGenerator {
         @Override
         public void run() {
             long currentTimestamp = System.currentTimeMillis();
-            synchronized (EventTimeMillisTimestampGenerator.this) {
+            synchronized (EventBasedTimeMillisTimestampGenerator.this) {
                 heartbeatRunning = false;
                 long diff = currentTimestamp - lastSystemTimestamp;
                 if (diff >= idleTime) {
                     // Siddhi has not received events for more than idleTime
                     long newTimestamp = lastEventTimestamp + incrementInMilliseconds;
-                    setTimestamp(newTimestamp);
+                    setCurrentTimestamp(newTimestamp);
                 } else {
                     // Wait for idleTime from the timestamp if last event arrival
                     notifyAfter(idleTime - diff);
