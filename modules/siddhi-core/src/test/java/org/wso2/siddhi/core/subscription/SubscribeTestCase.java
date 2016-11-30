@@ -15,9 +15,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.query.api;
+package org.wso2.siddhi.core.subscription;
 
 import org.junit.Test;
+import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
+import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.Subscription;
@@ -114,15 +120,15 @@ public class SubscribeTestCase {
 //    map json "$.sensorData.time", "$.sensorData.data"
 //    Insert into FooStream;
     @Test
-    public void testCreatingInmemorySubscriptionJsonMapping() {
+    public void testCreatingInmemorySubscriptionJsonMapping() throws InterruptedException {
         String stream = "define stream FooStream (symbol string, price float, volume int); ";
 
         Subscription subscription = Subscription.Subscribe(
-                Transport.transport("memory").
+                Transport.transport("inMemory").
                         option("topic", "foo"));
 
         subscription.map(
-                Mapping.format("json").
+                Mapping.format("passThrough").
                         map("$.sensorData.time").
                         map("$.sensorData.data"));
 
@@ -134,5 +140,20 @@ public class SubscribeTestCase {
                 .attribute("price", Attribute.Type.FLOAT)
                 .attribute("volume", Attribute.Type.INT));
         executionPlan.addSubscription(subscription);
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("FooStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+            }
+        });
+
+        executionPlanRuntime.start();
+
+        Thread.sleep(5000);
+
+        executionPlanRuntime.shutdown();
     }
 }

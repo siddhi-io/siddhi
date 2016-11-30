@@ -20,7 +20,6 @@ package org.wso2.siddhi.core.util.parser;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
@@ -31,8 +30,6 @@ import org.wso2.siddhi.core.subscription.SubscriptionRuntime;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
 import org.wso2.siddhi.core.util.SiddhiConstants;
-import org.wso2.siddhi.core.util.extension.holder.InputMapperExecutorExtensionHolder;
-import org.wso2.siddhi.core.util.extension.holder.InputTransportExecutorExtensionHolder;
 import org.wso2.siddhi.core.util.lock.LockSynchronizer;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
@@ -101,8 +98,10 @@ public class SubscriptionParser {
                     return subscription.getTransport().getType();
                 }
             };
-            InputTransport inputTransport = (InputTransport) SiddhiClassLoader.loadExtensionImplementation(transportExtension,
-                    InputTransportExecutorExtensionHolder.getInstance(executionPlanContext));
+//            InputTransport inputTransport = (InputTransport) SiddhiClassLoader.loadExtensionImplementation(transportExtension,
+//                    InputTransportExecutorExtensionHolder.getInstance(executionPlanContext));
+
+            InputTransport inputTransport = (InputTransport) SiddhiClassLoader.loadSiddhiImplementation(transportExtension.getFunction(), InputTransport.class);
 
             Extension mapperExtension = new Extension() {
                 @Override
@@ -115,8 +114,10 @@ public class SubscriptionParser {
                     return subscription.getMapping().getFormat();
                 }
             };
-            InputMapper inputMapper = (InputMapper) SiddhiClassLoader.loadExtensionImplementation(mapperExtension,
-                    InputMapperExecutorExtensionHolder.getInstance(executionPlanContext));
+//            InputMapper inputMapper = (InputMapper) SiddhiClassLoader.loadExtensionImplementation(mapperExtension,
+//                    InputMapperExecutorExtensionHolder.getInstance(executionPlanContext));
+
+            InputMapper inputMapper = (InputMapper) SiddhiClassLoader.loadSiddhiImplementation(mapperExtension.getFunction(), InputMapper.class);
 
             StreamDefinition outputStreamDefinition = (StreamDefinition) streamDefinitionMap.get(subscription.getOutputStream().getId());
             if (outputStreamDefinition == null) {
@@ -130,11 +131,14 @@ public class SubscriptionParser {
 
             MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
             metaStreamEvent.setOutputDefinition(inputMapper.getOutputStreamDefinition());
-            for(Attribute attribute: inputMapper.getOutputStreamDefinition().getAttributeList()){
+            for (Attribute attribute : inputMapper.getOutputStreamDefinition().getAttributeList()) {
                 metaStreamEvent.addOutputData(attribute);
             }
             //todo create event creator and pass to init()
             inputMapper.init(outputCallback, metaStreamEvent);
+
+            // TODO: 11/30/16 Provide valid transport options
+            inputTransport.init(null, inputMapper);
 
             OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(subscription.getOutputStream().getId(),
                     subscription.getOutputRate(), false, false, executionPlanContext.getScheduledExecutorService(), executionPlanContext);

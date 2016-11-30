@@ -19,7 +19,12 @@
 package org.wso2.siddhi.core.subscription;
 
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
+import org.wso2.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
@@ -27,27 +32,44 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 public class PassThroughInputMapper implements InputMapper {
     private StreamDefinition outputStreamDefinition;
     private OutputCallback outputCallback;
+    private StreamEventPool streamEventPool;
+    private StreamEventConverter streamEventConverter;
 
     @Override
     public StreamDefinition getOutputStreamDefinition() {
-        return null;
+        return this.outputStreamDefinition;
     }
 
     @Override
     public void inferOutputStreamDefinition(StreamDefinition outputStreamDefinition) {
-
+        this.outputStreamDefinition = outputStreamDefinition;
     }
 
     @Override
     public void init(OutputCallback outputCallback, MetaStreamEvent metaStreamEvent) {
-
+        this.outputCallback = outputCallback;
+        this.outputStreamDefinition = metaStreamEvent.getOutputStreamDefinition();
+        this.streamEventConverter = new ZeroStreamEventConverter();
+        this.streamEventPool = new StreamEventPool(metaStreamEvent, 5);
     }
 
     @Override
     public void onEvent(Object eventObject) {
-        ComplexEventChunk complexEventChunk = new ComplexEventChunk(true);
-        ZeroStreamEventConverter eventConverter = new ZeroStreamEventConverter();
-//        eventConverter.convertEvent();
-//        outputCallback.send();
+        Event event;
+        if (eventObject == null) {
+            throw new IllegalArgumentException("Event object must be either Event or Object[] but found null");
+        } else if (eventObject instanceof Event) {
+            event = (Event) eventObject;
+        } else if (eventObject instanceof Object[]) {
+            Object[] data = (Object[]) eventObject;
+            event = new Event(data.length);
+            System.arraycopy(data, 0, event.getData(), 0, data.length);
+        } else {
+            throw new IllegalArgumentException("Event object must be either Event or Object[] but found " + eventObject.getClass().getCanonicalName());
+        }
+        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+        streamEventConverter.convertEvent(event, borrowedEvent);
+
+        outputCallback.send(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, true));
     }
 }
