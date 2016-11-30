@@ -39,7 +39,7 @@ execution_plan
     ;
 
 execution_element
-    :query|partition
+    :query|partition|subscription
     ;
 
 definition_stream_final
@@ -135,12 +135,28 @@ query_final
     : query ';'? EOF
     ;
 
+subscription_final
+    : subscription ';'? EOF
+    ;
+
 query
     : annotation* FROM query_input query_section? output_rate? query_output
     ;
 
 query_input
     : (standard_stream|join_stream|pattern_stream|sequence_stream|anonymous_stream)
+    ;
+
+subscription
+    :annotation* SUBSCRIBE transport MAP mapping subscription_output
+    ;
+
+transport
+    :type (OPTIONS '(' option (',' option)* ')')?
+    ;
+
+mapping
+    :type (map_attribute (',' map_attribute)*)? (OPTIONS '(' option (',' option)* ')')?
     ;
 
 standard_stream
@@ -260,6 +276,13 @@ query_output
     |RETURN output_event_type?
     ;
 
+subscription_output
+    :INSERT output_event_type? INTO target
+    |DELETE target (FOR output_event_type)? ON expression
+    |UPDATE target (FOR output_event_type)? ON expression
+    |INSERT OVERWRITE target (FOR output_event_type)? ON expression
+    ;
+
 output_event_type
     : ALL EVENTS | ALL RAW EVENTS | EXPIRED EVENTS | EXPIRED RAW EVENTS | CURRENT? EVENTS   
     ;
@@ -334,6 +357,10 @@ attribute_index
     : INT_LITERAL| LAST ('-' INT_LITERAL)?
     ;
 
+option
+    :key value
+    ;
+
 function_id
     :name
     ;
@@ -358,7 +385,23 @@ attribute_name
     :name
     ;
 
+type
+    :name
+    ;
+
+key
+    :name
+    ;
+
+map_attribute
+    :string_value
+    ;
+
 property_value
+    :string_value
+    ;
+
+value
     :string_value
     ;
 
@@ -480,6 +523,9 @@ keyword
     | DOUBLE
     | BOOL
     | OBJECT
+    | SUBSCRIBE
+    | OPTIONS
+    | MAP
     ;
 
 time_value
@@ -657,6 +703,9 @@ FLOAT:    F L O A T;
 DOUBLE:   D O U B L E;
 BOOL:     B O O L;
 OBJECT:   O B J E C T;
+SUBSCRIBE: S U B S C R I B E;
+OPTIONS: O P T I O N S;
+MAP: M A P;
 
 ID_QUOTES : '`'[a-zA-Z_] [a-zA-Z_0-9]*'`' {setText(getText().substring(1, getText().length()-1));};
 
