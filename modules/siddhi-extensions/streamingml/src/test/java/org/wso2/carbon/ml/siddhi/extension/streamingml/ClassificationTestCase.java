@@ -50,11 +50,11 @@ public class ClassificationTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = " define stream inputStream (attribute_0 double, " +
-                "attribute_1 double, attribute_2 double, attribute_3 double, attribute_4 string );";
+                "attribute_1 double, attribute_2 double,attribute_3 double, attribute_4 string );";
         String query = ("@info(name = 'query1') from inputStream#streamingml:" +
-                "streamingClassificationSamoa(5,3,0,\"\",1000,1,0,3000,attribute_0, attribute_1 ," +
-                " attribute_2 , attribute_3 , attribute_4) select att_0 as arrtibute_0," +
-                "att_1 as arrtibute_1,att_2 as arrtibute_2,att_3 as arrtibute_3," +
+                "streamingClassificationSamoa(5,3,0,'',10000,attribute_0, attribute_1 , " +
+                "attribute_2 ,attribute_3,attribute_4) select att_0 as attribute_0, " +
+                "att_1 as attribute_1,att_2 as attribute_2,att_3 as attribute_3," +
                 " prediction as prediction insert into outputStream;");
 
         ExecutionPlanRuntime executionPlanRuntime =
@@ -74,12 +74,10 @@ public class ClassificationTestCase {
                     Assert.assertEquals("virginica", inEvents[0].getData()[4]);
                 }
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-
             }
         });
         Scanner scn =null;
         try {
-
             File f = new File("src/test/resources/iris.csv");
             FileReader fr = new FileReader(f);
             BufferedReader br = new BufferedReader(fr);
@@ -91,8 +89,8 @@ public class ClassificationTestCase {
                 if (scn.hasNext()) {
                     String eventStr = scn.nextLine();
                     String[] event = eventStr.split(",");
-                    inputHandler.send(new Object[]{Double.valueOf(event[0]), Double.valueOf(event[1]),
-                            Double.valueOf(event[2]), Double.valueOf(event[3]), event[4]});
+                    inputHandler.send(new Object[]{Double.valueOf(event[0]),Double.valueOf(event[1])
+                            , Double.valueOf(event[2]), Double.valueOf(event[3]),  event[4]});
                 } else {
                     break;
                 }
@@ -111,8 +109,6 @@ public class ClassificationTestCase {
         }finally {
             scn.close();
         }
-
-
     }
 
 }

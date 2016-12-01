@@ -42,22 +42,22 @@ public class StreamingClassificationTaskBuilder extends TaskBuilder {
     private int numberOfNominalAttributes;
     private int parallelism;
     private int bagging;
-    private String noiminalValues;
+    private String nominalValues;
 
     public StreamingClassificationTaskBuilder(int maxInstance, int batchSize, int numClasses,
-                                              int numAtts, int numNominals, String noiminalVals,
+                                              int numAtts, int numNominals, String nominalVals,
                                               Queue<double[]> cepEvents, Queue<Vector> classifiers,
-                                              int par, int bag) {
+                                              int parallelism, int bagging) {
         this.maxInstances = maxInstance;
         this.numberOfClasses = numClasses;
         this.batchSize = batchSize;
         this.numberOfAttributes = numAtts;
         this.numberOfNominalAttributes = numNominals;
-        this.noiminalValues=noiminalVals;
+        this.nominalValues =nominalVals;
         this.cepEvents = cepEvents;
         this.classifiers = classifiers;
-        this.parallelism = par;
-        this.bagging = bag;
+        this.parallelism = parallelism;
+        this.bagging = bagging;
     }
 
     public void initTask() {
@@ -68,7 +68,7 @@ public class StreamingClassificationTaskBuilder extends TaskBuilder {
                     "StreamingClassificationTask -f " + batchSize + " -i " + maxInstances +
                     " -s (org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils." +
                     "classification.StreamingClassificationStream -K " + numberOfClasses + " -A " +
-                    numberOfAttributes + " -N " + numberOfNominalAttributes + " -Z " + noiminalValues +
+                    numberOfAttributes + " -N " + numberOfNominalAttributes + " -Z " + nominalValues +
                     " ) -l (org.apache.samoa.learners.classifiers.trees.VerticalHoeffdingTree -p "
                     + parallelism + ")";
         } else {
@@ -78,7 +78,7 @@ public class StreamingClassificationTaskBuilder extends TaskBuilder {
                     " -s (org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils." +
                     "classification.StreamingClassificationStream -K " + numberOfClasses + " -A " +
                     numberOfAttributes + " -N " + numberOfNominalAttributes + " -Z " +
-                    noiminalValues + " ) -l (classifiers.ensemble.Bagging -s " + bagging +
+                    nominalValues + " ) -l (classifiers.ensemble.Bagging -s " + bagging +
                     " -l (classifiers.trees.VerticalHoeffdingTree -p " + parallelism + "))";
         }
         logger.info("QUERY: " + query);
@@ -88,7 +88,7 @@ public class StreamingClassificationTaskBuilder extends TaskBuilder {
 
     protected void initClassificationTask(String[] args) {
 
-        /// These variables are not directly used
+        // These variables are not directly used
         FlagOption suppressStatusOutOpt = new FlagOption("suppressStatusOut", 'S',
                 SUPPRESS_STATUS_OUT_MSG);
         FlagOption suppressResultOutOpt = new FlagOption("suppressResultOut", 'R',
@@ -97,7 +97,6 @@ public class StreamingClassificationTaskBuilder extends TaskBuilder {
                 STATUS_UPDATE_FREQ_MSG, 1000, 0, Integer.MAX_VALUE);
         Option[] extraOptions = new Option[]{suppressStatusOutOpt, suppressResultOutOpt,
                 statusUpdateFreqOpt};
-        ///
 
         StringBuilder cliString = new StringBuilder();
         for (String arg : args) {
@@ -125,7 +124,7 @@ public class StreamingClassificationTaskBuilder extends TaskBuilder {
 
         task.setFactory(new SimpleComponentFactory());
         task.init();
-        logger.info("Successfully Initiated the StreamingClassificationTask");
+        logger.info("Successfully initiated the streamingClassification task");
         topology = task.getTopology();
     }
 

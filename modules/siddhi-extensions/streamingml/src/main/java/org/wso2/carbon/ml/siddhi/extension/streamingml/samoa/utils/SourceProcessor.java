@@ -34,14 +34,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 /**
- * Source : https://github.com/apache/incubator-samoa/blob/master/samoa-api/src/main/java/org/apache/samoa/streams/PrequentialSourceProcessor.java
+ * Source : https://github.com/apache/incubator-samoa/blob/master/samoa-api/src/main/java/org/
+ * apache/samoa/streams/PrequentialSourceProcessor.java
  */
 
 public abstract class SourceProcessor implements EntranceProcessor {
 
     private static final long serialVersionUID = 4169053337917578558L;
-    private static final Logger logger =
-            LoggerFactory.getLogger(org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.SourceProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(SourceProcessor.class);
     protected transient ScheduledExecutorService timer;
     protected transient ScheduledFuture<?> schedule = null;
     protected int readyEventIndex = 1; // No waiting for the first event
@@ -52,7 +52,7 @@ public abstract class SourceProcessor implements EntranceProcessor {
     protected int batchSize;
     protected int numberOfInstancesSent = 0;
     protected boolean finished = false;
-    protected boolean isInited = false;
+    protected boolean isInitialized = false;
 
     @Override
     public abstract ContentEvent nextEvent();
@@ -62,8 +62,6 @@ public abstract class SourceProcessor implements EntranceProcessor {
 
     @Override
     public boolean process(ContentEvent event) {
-        // TODO: possible refactor of the super-interface implementation
-        // of source processor does not need this method
         return false;
     }
 
@@ -80,12 +78,16 @@ public abstract class SourceProcessor implements EntranceProcessor {
 
     @Override
     public boolean isFinished() {
-        return finished;
+        return hasReachedEndOfStream();
     }
 
     protected boolean hasReachedEndOfStream() {
-        return (!streamSource.hasMoreInstances() || (maxInstances >= 0 &&
-                numberOfInstancesSent >= maxInstances));
+        if (!streamSource.hasMoreInstances() || (maxInstances >= 0 &&
+                numberOfInstancesSent >= maxInstances)) {
+            finished = true;
+            return true;
+        }
+        return false;
     }
 
 
@@ -98,10 +100,10 @@ public abstract class SourceProcessor implements EntranceProcessor {
     }
 
     protected Instance nextInstance() {
-        if (this.isInited) {
+        if (this.isInitialized) {
             return streamSource.nextInstance().getData();
         } else {
-            this.isInited = true;
+            this.isInitialized = true;
             return firstInstance;
         }
     }

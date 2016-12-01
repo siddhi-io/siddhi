@@ -28,7 +28,6 @@ public class StreamingClusteringEntranceProcessor extends SourceProcessor {
 
     @Override
     public ContentEvent nextEvent() {
-        // FIXME should it be takend from the ClusteringEvaluation -f option instead?
         if (isFinished()) {
             // send ending event
             ClusteringContentEvent contentEvent = new ClusteringContentEvent(-1, firstInstance);

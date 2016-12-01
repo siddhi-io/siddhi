@@ -44,7 +44,7 @@ public class StreamingRegressionExtension extends StreamProcessor implements
     private int maxInstance;
     private int batchSize;
     private int numberOfAttributes;
-    private int paramPosition;
+    private int parameterPosition;
     private int parallelism;
     private StreamingRegression streamingRegression;
     private long lastScheduledTimestamp = -1;
@@ -128,14 +128,12 @@ public class StreamingRegressionExtension extends StreamProcessor implements
             }
         }
 
-        paramPosition = parameterWidth;
+        parameterPosition = parameterWidth;
         lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime();
         streamingRegression = new StreamingRegression(maxInstance, batchSize, numberOfAttributes,
                 parallelism);
         new Thread(streamingRegression).start();
 
-        // Add attributes
-        String betaVal;
         ArrayList<Attribute> attributes = new ArrayList<Attribute>(numberOfAttributes);
         for (int i = 0; i < numberOfAttributes - 1; i++) {
             attributes.add(new Attribute("att_" + i, Attribute.Type.DOUBLE));
@@ -148,11 +146,14 @@ public class StreamingRegressionExtension extends StreamProcessor implements
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk,
                            Processor nextProcessor, StreamEventCloner streamEventCloner,
                            ComplexEventPopulater complexEventPopulater) {
+
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>(false);
+
         synchronized (this) {
             while (streamEventChunk.hasNext()) {
                 ComplexEvent complexEvent = streamEventChunk.next();
                 if (complexEvent.getType() != ComplexEvent.Type.TIMER) {
-                    double[] cepEvent = new double[attributeExpressionLength - paramPosition];
+                    double[] cepEvent = new double[attributeExpressionLength - parameterPosition];
                     Object evt;
 
                     Object classVal = attributeExpressionExecutors[attributeExpressionLength - 1].
@@ -161,7 +162,7 @@ public class StreamingRegressionExtension extends StreamProcessor implements
 
                     cepEvent[numberOfAttributes - 1] = classValue;
                     for (int i = 0; i < numberOfAttributes; i++) {
-                        evt = attributeExpressionExecutors[i + paramPosition].execute(complexEvent);
+                        evt = attributeExpressionExecutors[i + parameterPosition].execute(complexEvent);
                         cepEvent[i] = (double) evt;
                     }
 
@@ -171,6 +172,9 @@ public class StreamingRegressionExtension extends StreamProcessor implements
                     if (outputData == null) {
                         streamEventChunk.remove();
                     } else {
+                        StreamEvent streamEvent1 = new StreamEvent(0, 0,outputData.length);
+                        streamEvent1.setOutputData(outputData);
+                        complexEventChunk.add(streamEvent1);
                         complexEventPopulater.populateComplexEvent(complexEvent, outputData);
                     }
 
@@ -183,12 +187,15 @@ public class StreamingRegressionExtension extends StreamProcessor implements
                     if (outputData == null) {
                         streamEventChunk.remove();
                     } else {
+                        StreamEvent streamEvent1 = new StreamEvent(0, 0,outputData.length);
+                        streamEvent1.setOutputData(outputData);
+                        complexEventChunk.add(streamEvent1);
                         complexEventPopulater.populateComplexEvent(complexEvent, outputData);
                     }
                 }
             }
         }
-        nextProcessor.process(streamEventChunk);
+        nextProcessor.process(complexEventChunk);
     }
 
 
@@ -204,7 +211,7 @@ public class StreamingRegressionExtension extends StreamProcessor implements
 
     @Override
     public Object[] currentState() {
-        return new Object[]{maxInstance, batchSize, numberOfAttributes, paramPosition, parallelism,
+        return new Object[]{maxInstance, batchSize, numberOfAttributes, parameterPosition, parallelism,
                 streamingRegression, lastScheduledTimestamp, TIMER_DURATION, scheduler};
     }
 
@@ -213,7 +220,7 @@ public class StreamingRegressionExtension extends StreamProcessor implements
         maxInstance = (int) state[0];
         batchSize = (int) state[1];
         numberOfAttributes = (int) state[2];
-        paramPosition = (int) state[3];
+        parameterPosition = (int) state[3];
         parallelism = (int) state[4];
         streamingRegression = (StreamingRegression) state[5];
         lastScheduledTimestamp = (long) state[6];

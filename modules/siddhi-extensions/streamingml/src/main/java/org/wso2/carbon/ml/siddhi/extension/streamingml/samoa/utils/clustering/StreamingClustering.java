@@ -51,8 +51,8 @@ public class StreamingClustering extends Thread {
                     this.numberOfAttributes, this.numberOfClusters,
                     this.cepEvents, this.samoaClusters);
         } catch (Exception e) {
-            throw new ExecutionPlanRuntimeException("Fail to Initiate the Streaming clustering task",
-                    e);
+            throw new ExecutionPlanRuntimeException("Fail to Initiate the Streaming clustering" +
+                    " task", e);
         }
     }
 
@@ -68,18 +68,19 @@ public class StreamingClustering extends Thread {
 
     public Object[] getOutput() {
         Object[] output;
-        if (!samoaClusters.isEmpty()) {
+       if (!samoaClusters.isEmpty()) {
             output = new Object[numberOfClusters];
             Clustering clusters = samoaClusters.poll();
             for (int i = 0; i < numberOfClusters; i++) {
                 Cluster cluster = clusters.get(i);
-                String centerStr = "";
+                StringBuilder centerStr = new StringBuilder("[");
                 double[] center = cluster.getCenter();
-                centerStr += center[0];
+                centerStr.append(center[0]);
                 for (int j = 1; j < numberOfAttributes; j++) {
-                    centerStr += ("," + center[j]);
+                    centerStr.append("," + center[j]);
                 }
-                output[i] = centerStr;
+                centerStr.append("]");
+                output[i] = centerStr.toString();
             }
         } else {
             output = null;

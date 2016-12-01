@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <!--
   ~ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~
@@ -18,49 +16,39 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <parent>
-        <groupId>org.wso2.siddhi</groupId>
-        <artifactId>siddhi-extensions</artifactId>
-        <version>3.1.2-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
-
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>siddhi-extension-streamingml</artifactId>
-    <packaging>bundle</packaging>
-    <name>Siddhi Extension - StreamingML</name>
-
+    <groupId>org.wso2.carbon.ml.siddhi.extension.streamingml</groupId>
+    <artifactId>streamingml</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>streamingml</name>
+    <url>http://maven.apache.org</url>
     <dependencies>
+
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
             <artifactId>siddhi-core</artifactId>
             <version>3.1.2-SNAPSHOT</version>
         </dependency>
-
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
             <artifactId>siddhi-query-api</artifactId>
             <version>3.1.2-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_2.10</artifactId>
-            <version>1.6.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-mllib_2.10</artifactId>
-            <version>1.6.1</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.samoa</groupId>
             <artifactId>samoa-api</artifactId>
+            <version>0.4.0-incubating-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.samoa</groupId>
+            <artifactId>samoa-instances</artifactId>
             <version>0.4.0-incubating-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -73,6 +61,24 @@
             <groupId>com.github.javacliparser</groupId>
             <artifactId>javacliparser</artifactId>
             <version>0.5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId> org.apache.cassandra</groupId>
+            <artifactId>cassandra-all</artifactId>
+            <version>0.8.1</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
+
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 -->
@@ -95,11 +101,7 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.21</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.samoa</groupId>
-            <artifactId>samoa-api</artifactId>
-            <version>0.4.0-incubating-SNAPSHOT</version>
-        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -107,23 +109,7 @@
             <scope>test</scope>
         </dependency>
 
-
     </dependencies>
-
-    <!--&gt;Normal build without packing necessary jars use this if cep already has spark1.6.1 and samoa 0.4.0-incubating dependencies<-->
-    <!--<build>-->
-        <!--<plugins>-->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-compiler-plugin</artifactId>-->
-                <!--<configuration>-->
-                    <!--<source>1.8</source>-->
-                    <!--<target>1.8</target>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-        <!--</plugins>-->
-    <!--</build>-->
-
 
     <build>
         <plugins>
@@ -135,26 +121,8 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Export-Package>
-                            org.wso2.siddhi.extension.streamingml,
-                            org.wso2.siddhi.extension.streamingml.*
-                        </Export-Package>
-                        <Import-Package>
-                            *;resolution:=optional
-                        </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
+
 
 </project>

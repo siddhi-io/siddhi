@@ -38,10 +38,10 @@ public class StreamingClassificationPerformanceEvaluator extends AbstractMOAObje
     private static final long serialVersionUID = 1L;
     protected int numClasses = -1;
     protected long[] support;
-    protected long[] truePos;
-    protected long[] falsePos;
-    protected long[] trueNeg;
-    protected long[] falseNeg;
+    protected long[] truePositive;
+    protected long[] falsePositive;
+    protected long[] trueNegative;
+    protected long[] falseNegative;
 
     protected double weightObserved;
     protected double weightCorrect;
@@ -57,20 +57,20 @@ public class StreamingClassificationPerformanceEvaluator extends AbstractMOAObje
     public void reset(int numClasses) {
         this.numClasses = numClasses;
         this.support = new long[numClasses];
-        this.truePos = new long[numClasses];
-        this.falsePos = new long[numClasses];
-        this.trueNeg = new long[numClasses];
-        this.falseNeg = new long[numClasses];
+        this.truePositive = new long[numClasses];
+        this.falsePositive = new long[numClasses];
+        this.trueNegative = new long[numClasses];
+        this.falseNegative = new long[numClasses];
 
         this.rowKappa = new double[numClasses];
         this.columnKappa = new double[numClasses];
 
         for (int i = 0; i < this.numClasses; ++i) {
             this.support[i] = 0L;
-            this.truePos[i] = 0L;
-            this.falsePos[i] = 0L;
-            this.trueNeg[i] = 0L;
-            this.falseNeg[i] = 0L;
+            this.truePositive[i] = 0L;
+            this.falsePositive[i] = 0L;
+            this.trueNegative[i] = 0L;
+            this.falseNegative[i] = 0L;
 
             this.rowKappa[i] = 0.0D;
             this.columnKappa[i] = 0.0D;
@@ -116,20 +116,20 @@ public class StreamingClassificationPerformanceEvaluator extends AbstractMOAObje
 
         int i;
         if (predictedClass == trueClass) {
-            ++this.truePos[trueClass];
+            ++this.truePositive[trueClass];
 
             for (i = 0; i < this.numClasses; ++i) {
                 if (i != predictedClass) {
-                    ++this.trueNeg[i];
+                    ++this.trueNegative[i];
                 }
             }
         } else {
-            ++this.falsePos[predictedClass];
-            ++this.falseNeg[trueClass];
+            ++this.falsePositive[predictedClass];
+            ++this.falseNegative[trueClass];
 
             for (i = 0; i < this.numClasses; ++i) {
-                if (i != predictedClass && i != trueClass) {
-                    ++this.trueNeg[i];
+                if ((i != predictedClass) && (i != trueClass)) {
+                    ++this.trueNegative[i];
                 }
             }
         }
@@ -206,13 +206,13 @@ public class StreamingClassificationPerformanceEvaluator extends AbstractMOAObje
     }
 
     private double getPrecision(int classIndex) {
-        return (double) this.truePos[classIndex] / (double) (this.truePos[classIndex] +
-                this.falsePos[classIndex]);
+        return (double) this.truePositive[classIndex] / (double) (this.truePositive[classIndex] +
+                this.falsePositive[classIndex]);
     }
 
     private double getRecall(int classIndex) {
-        return (double) this.truePos[classIndex] / (double) (this.truePos[classIndex] +
-                this.falseNeg[classIndex]);
+        return (double) this.truePositive[classIndex] / (double) (this.truePositive[classIndex] +
+                this.falseNegative[classIndex]);
     }
 
     private double getF1Score(int classIndex) {

@@ -40,8 +40,9 @@ public class StreamingRegressionEntranceProcessor extends SourceProcessor {
         } else if (hasNext()) {
             numberOfInstancesSent++;
             Instance next = nextInstance();
-            Object a = next.classValue();
-            if (a.toString().equals("-0.0")) {  // Check the last value of the event; If it equals -0.0 then use it as predicting event
+            Object classValue = next.classValue();
+            if (classValue.toString().equals("-0.0")) {  // Check the last value of the event;
+                // If it equals -0.0 then use it as predicting event
                 contentEvent = new InstanceContentEvent(numberOfInstancesSent, next, false, true);
             } else {
                 contentEvent = new InstanceContentEvent(numberOfInstancesSent, next, true, true);

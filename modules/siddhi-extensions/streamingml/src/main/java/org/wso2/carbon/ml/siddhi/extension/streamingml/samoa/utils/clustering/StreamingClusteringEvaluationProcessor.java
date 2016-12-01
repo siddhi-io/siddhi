@@ -20,55 +20,44 @@ package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.clustering;
 
 import org.apache.samoa.core.ContentEvent;
 import org.apache.samoa.core.Processor;
-import org.apache.samoa.evaluation.ClusteringEvaluationContentEvent;
 import org.apache.samoa.evaluation.ClusteringResultContentEvent;
 import org.apache.samoa.learners.clusterers.ClusteringContentEvent;
 import org.apache.samoa.moa.cluster.Clustering;
 import org.apache.samoa.moa.clusterers.clustream.WithKmeans;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.EvaluationProcessor;
 
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class StreamingClusteringEvaluationProcessor extends EvaluationProcessor {
 
     private static final Logger logger =
             LoggerFactory.getLogger(StreamingClusteringEvaluationProcessor.class);
 
-    String evalPoint;
+    String evaluationPoint;
     public Queue<Clustering> samoaClusters;
-    public int numClusters=0;
+    public int numberOfClusters;
 
-    StreamingClusteringEvaluationProcessor(String evalPoint){
-        this.evalPoint = evalPoint;
+    StreamingClusteringEvaluationProcessor(String evaluationPoint) {
+        this.evaluationPoint = evaluationPoint;
     }
+
     @Override
     public boolean process(ContentEvent event) {
         if (event instanceof ClusteringContentEvent) {
-            logger.info(event.getKey()+" "+evalPoint+"ClusteringContentEvent");
-        }
+            logger.info(event.getKey() + " " + evaluationPoint + "ClusteringContentEvent");
+        } else if (event instanceof ClusteringResultContentEvent) {
+            ClusteringResultContentEvent resultEvent = (ClusteringResultContentEvent) event;
+            Clustering clustering = resultEvent.getClustering();
 
-        else if(event instanceof ClusteringResultContentEvent){
-            ClusteringResultContentEvent resultEvent = (ClusteringResultContentEvent)event;
-            Clustering clustering=resultEvent.getClustering();
-            Clustering kmeansClustering = WithKmeans.kMeans_rand(numClusters,clustering);
-            logger.info("Kmean Clusters: "+kmeansClustering.size()+" with dimention of : "
-                    +kmeansClustering.dimension());
-            //Adding samoa Clusters into my class
+            Clustering kmeansClustering = WithKmeans.kMeans_rand(numberOfClusters, clustering);
+            logger.info("K-mean Clusters: " + kmeansClustering.size() + " with dimension of : "
+                    + kmeansClustering.dimension());
+            //Adding samoa Clusters into class
             samoaClusters.add(kmeansClustering);
-            int numClusters = clustering.size();
-            logger.info("Number of Kernal Clusters : "+numClusters+" Number of KMeans Clusters :"
-                    +kmeansClustering.size());
-        }
-
-        else if(event instanceof ClusteringEvaluationContentEvent){
-            logger.info(event.getKey()+""+evalPoint+"ClusteringEvaluationContentEvent\n");
-        }
-        else{
-            logger.info(event.getKey()+""+evalPoint+"ContentEvent\n");
+            logger.info("Number of Kernel Clusters : " + numberOfClusters +
+                    " Number of k-Means Clusters:" + kmeansClustering.size());
         }
         return true;
     }
@@ -76,22 +65,21 @@ public class StreamingClusteringEvaluationProcessor extends EvaluationProcessor 
     @Override
     public void onCreate(int id) {
         this.processId = id;
-        logger.debug("Creating PrequentialSourceProcessor with processId {}", processId);
         logger.info("Creating PrequentialSourceProcessor with processId {}", processId);
     }
 
     @Override
     public Processor newProcessor(Processor p) {
-        StreamingClusteringEvaluationProcessor newEval = (StreamingClusteringEvaluationProcessor)p;
-        return newEval;
+        StreamingClusteringEvaluationProcessor newEvaluator = (StreamingClusteringEvaluationProcessor) p;
+        return newEvaluator;
     }
 
-    public void setSamoaClusters(Queue<Clustering> samoaClusters){
+    public void setSamoaClusters(Queue<Clustering> samoaClusters) {
         this.samoaClusters = samoaClusters;
     }
 
-    public void setNumClusters(int numClusters){
-        this.numClusters = numClusters;
+    public void setNumberOfClusters(int numberOfClusters) {
+        this.numberOfClusters = numberOfClusters;
     }
 
 }

@@ -75,6 +75,7 @@ public class StreamingClassification extends Thread {
         numEventsReceived++;
         cepEvents.add(eventData);
     }
+
     public Object[] getOutput() {
         Object[] output;
         if (!samoaClassifiers.isEmpty()) {

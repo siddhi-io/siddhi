@@ -36,7 +36,7 @@ import java.util.ArrayList;
 public class StreamingRegressionStream extends DataStream {
 
     public IntOption numAttOption = new IntOption("numberOfAttributes", 'A',
-            "The number of Attributes in the stream.", 2, 1, Integer.MAX_VALUE);
+            "The number of attributes in the stream.", 2, 1, Integer.MAX_VALUE);
 
     @Override
     protected void prepareForUseImpl(TaskMonitor taskMonitor, ObjectRepository objectRepository) {

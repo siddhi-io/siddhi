@@ -40,22 +40,21 @@ public class StreamingClusteringTaskBuilder extends TaskBuilder {
     public Queue<Clustering> samoaClusters;
     public int numberOfClusters;
 
-    public StreamingClusteringTaskBuilder(int maxInstance, int numAtt, int numClusters,
-                                          Queue<double[]> cepEvents,
+    public StreamingClusteringTaskBuilder(int maxInstance, int numberofAttributes,
+                                          int numberOfClusters, Queue<double[]> cepEvents,
                                           Queue<Clustering> samoaClusters) {
         this.maxInstances = maxInstance;
-        this.numberOfAttributes = numAtt;
-        this.numberOfClusters = numClusters;
+        this.numberOfAttributes = numberofAttributes;
+        this.numberOfClusters = numberOfClusters;
         this.cepEvents = cepEvents;
         this.samoaClusters = samoaClusters;
     }
 
     public void initTask() {
-        String query = "";
-        query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.clustering." +
+        String query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.clustering." +
                 "StreamingClusteringTask -i " + maxInstances + " -s  (org.wso2.carbon.ml." +
-                "siddhi.extension.streamingml.samoa.utils.clustering.StreamingClusteringStream -K " +
-                numberOfClusters + " -a " + numberOfAttributes + ") -l (org.apache.samoa." +
+                "siddhi.extension.streamingml.samoa.utils.clustering.StreamingClusteringStream -K "
+                + numberOfClusters + " -a " + numberOfAttributes + ") -l (org.apache.samoa." +
                 "learners.clusterers.simple.DistributedClusterer -l (org.apache.samoa.learners." +
                 "clusterers.ClustreamClustererAdapter -l (org.apache.samoa.moa.clusterers." +
                 "clustream.WithKmeans  -m 100 -k " + numberOfClusters + ")))";
@@ -93,13 +92,13 @@ public class StreamingClusteringTaskBuilder extends TaskBuilder {
             clusteringTask.setNumberOfClusters(this.numberOfClusters);
 
         } else {
-            throw new ExecutionPlanRuntimeException("Check Task:Not a StreamingClassificationTask");
+            throw new ExecutionPlanRuntimeException("Check the task: Not a StreamingClusteringTask");
         }
 
         task.setFactory(new SimpleComponentFactory());
         task.init();
-        logger.info("Successfully Initiated the StreamingClusteringTask");
-        topology=task.getTopology();
+        logger.info("Successfully initiated the streaming clustering task");
+        topology = task.getTopology();
     }
 
 }

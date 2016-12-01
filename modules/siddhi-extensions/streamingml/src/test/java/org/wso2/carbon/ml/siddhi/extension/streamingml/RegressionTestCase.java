@@ -79,7 +79,7 @@ public class RegressionTestCase {
             }
         });
 
-        Scanner scn=null;
+        Scanner scn = null;
         try {
             File f = new File("src/test/resources/ccpp.csv");
             FileReader fr = new FileReader(f);
@@ -111,10 +111,8 @@ public class RegressionTestCase {
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             logger.info(e.toString());
-        }finally {
+        } finally {
             scn.close();
         }
-
-
     }
 }

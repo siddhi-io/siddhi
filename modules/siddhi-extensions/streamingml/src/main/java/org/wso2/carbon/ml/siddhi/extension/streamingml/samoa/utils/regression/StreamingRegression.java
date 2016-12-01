@@ -35,10 +35,10 @@ public class StreamingRegression extends Thread {
     public Queue<Vector> samoaPredictions;
     public StreamingRegressionTaskBuilder regressionTask;
 
-    public StreamingRegression(int maxIns, int batchSize, int paramCount, int parallelism) {
+    public StreamingRegression(int maxInstance, int batchSize, int parameterCount, int parallelism) {
 
-        this.maxInstance = maxIns;
-        this.numberOfAttributes = paramCount;
+        this.maxInstance = maxInstance;
+        this.numberOfAttributes = parameterCount;
         this.batchSize = batchSize;
         this.parallelism = parallelism;
         this.numEventsReceived = 0;
@@ -49,7 +49,8 @@ public class StreamingRegression extends Thread {
             this.regressionTask = new StreamingRegressionTaskBuilder(this.maxInstance, this.batchSize,
                     this.numberOfAttributes, this.cepEvents, this.samoaPredictions, this.parallelism);
         } catch (Exception e) {
-            throw new ExecutionPlanRuntimeException("Fail to Initiate the Streaming Regression.", e);
+            throw new ExecutionPlanRuntimeException("Fail to initiate the streaming regression" +
+                    " task.", e);
         }
     }
 

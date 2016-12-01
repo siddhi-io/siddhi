@@ -60,15 +60,15 @@ public class ClusteringTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 count++;
                 if (count == 1) {
-                    Assert.assertEquals("26.689013161214312,65.2985408650787,1010.0086638445954,62.56587280444617," +
-                            "436.13502625254046", inEvents[0].getData()[0]);
-                    Assert.assertEquals("14.71610078358815,45.70548516901456,1014.585093380316,75.29614297441418," +
-                            "465.57460856962507", inEvents[0].getData()[1]);
+                    Assert.assertEquals("[26.689013161214312,65.2985408650787,1010.0086638445954,62.56587280444617," +
+                            "436.13502625254046]", inEvents[0].getData()[0]);
+                    Assert.assertEquals("[14.71610078358815,45.70548516901456,1014.585093380316,75.29614297441418," +
+                            "465.57460856962507]", inEvents[0].getData()[1]);
                 }
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
             }
         });
-        Scanner scn=null;
+        Scanner scn = null;
         try {
 
             File f = new File("src/test/resources/ccppTest.csv");
@@ -99,11 +99,8 @@ public class ClusteringTestCase {
             executionPlanRuntime.shutdown();
         } catch (Exception e) {
             logger.info(e.toString());
-         }finally {
-        scn.close();
+        } finally {
+            scn.close();
+        }
     }
-
-
-
-}
 }

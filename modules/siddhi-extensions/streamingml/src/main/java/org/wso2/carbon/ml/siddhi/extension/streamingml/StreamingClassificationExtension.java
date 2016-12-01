@@ -47,8 +47,8 @@ public class StreamingClassificationExtension extends StreamProcessor implements
     private int maxInstance;
     private int batchSize;
     private int parallelism;
-    private int numModelsBagging;
-    private int paramPosition;
+    private int numberModelsBagging;
+    private int parameterPosition;
     private int numberOfNumerics;
     private Scheduler scheduler;
     private long lastScheduledTimestamp = -1;
@@ -66,7 +66,7 @@ public class StreamingClassificationExtension extends StreamProcessor implements
         maxInstance = Integer.MAX_VALUE;
         batchSize = 1000;
         parallelism = 1;
-        numModelsBagging = 0;
+        numberModelsBagging = 0;
 
         if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
             if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
@@ -125,13 +125,13 @@ public class StreamingClassificationExtension extends StreamProcessor implements
             String[] temp = nominalAttributesValues.split(",");
             if (temp.length != numberOfNominals && numberOfNominals != 0) {
                 throw new ExecutionPlanValidationException("Number of nominal attributes and" +
-                        " entered nominal attributes values are different. required " +
+                        " entered nominal attribute values are different. required " +
                         numberOfNominals + "nominal attributes but found " + temp.length);
             }
         } else {
-            throw new ExecutionPlanValidationException("Invalid number of parameters, found "
-                    + parameterWidth + " but required atleast 4 configuration parameters. " +
-                    "streamingClassificationSamoa(parameterCount, numberOfClasses, " +
+            throw new ExecutionPlanValidationException("Invalid number of parameters. "
+                    + parameterWidth + "parameters found, but required atleast 4 configuration " +
+                    "parameters. streamingClassificationSamoa(parameterCount, numberOfClasses, " +
                     "numberOfNominals, valuesOfNominals,attribute_set) ");
         }
         if (parameterWidth > 4) {
@@ -165,7 +165,7 @@ public class StreamingClassificationExtension extends StreamProcessor implements
         if (parameterWidth > 6) {
             if (attributeExpressionExecutors[6] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[6].getReturnType() == Attribute.Type.INT) {
-                    numModelsBagging = ((Integer) attributeExpressionExecutors[6].execute(null));
+                    numberModelsBagging = ((Integer) attributeExpressionExecutors[6].execute(null));
                 } else {
                     throw new ExecutionPlanValidationException("Invalid parameter type found for" +
                             " the seventh argument, required " + Attribute.Type.INT + " but found " +
@@ -195,12 +195,12 @@ public class StreamingClassificationExtension extends StreamProcessor implements
             }
         }
 
-        paramPosition = parameterWidth;
+        parameterPosition = parameterWidth;
         numberOfNumerics = numberOfAttributes - numberOfNominals - 1;
         lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime();
         streamingClassification = new StreamingClassification(maxInstance, batchSize,
                 numberOfClasses, numberOfAttributes, numberOfNominals, nominalAttributesValues,
-                parallelism, numModelsBagging);
+                parallelism, numberModelsBagging);
 
         new Thread(streamingClassification).start();
 
@@ -221,11 +221,13 @@ public class StreamingClassificationExtension extends StreamProcessor implements
             nextProcessor, StreamEventCloner streamEventCloner, ComplexEventPopulater
                                    complexEventPopulater) {
 
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>(false);
+
         synchronized (this) {
             while (streamEventChunk.hasNext()) {
                 ComplexEvent complexEvent = streamEventChunk.next();
                 if (complexEvent.getType() != ComplexEvent.Type.TIMER) {
-                    double[] cepEvent = new double[attributeExpressionLength - paramPosition];
+                    double[] cepEvent = new double[attributeExpressionLength - parameterPosition];
                     Object evt;
 
                     // Set cep event values
@@ -249,7 +251,7 @@ public class StreamingClassificationExtension extends StreamProcessor implements
 
                     // Set other attributes
                     for (int i = 0; i < numberOfAttributes - 1; i++) {
-                        evt = attributeExpressionExecutors[i + paramPosition].execute(complexEvent);
+                        evt = attributeExpressionExecutors[i + parameterPosition].execute(complexEvent);
 
                         if (i < numberOfNumerics) {         // set Numerical attributes
                             cepEvent[i] = (Double) evt;
@@ -284,6 +286,9 @@ public class StreamingClassificationExtension extends StreamProcessor implements
                                         get(nominal_index);
                             }
                         }
+                        StreamEvent streamEvent1 = new StreamEvent(0, 0,outputData.length);
+                        streamEvent1.setOutputData(outputData);
+                        complexEventChunk.add(streamEvent1);
                         complexEventPopulater.populateComplexEvent(complexEvent, outputData);
                     }
 
@@ -305,13 +310,17 @@ public class StreamingClassificationExtension extends StreamProcessor implements
                                         get(nominal_index);
                             }
                         }
+
+                        StreamEvent streamEvent1 = new StreamEvent(0, 0,outputData.length);
+                        streamEvent1.setOutputData(outputData);
+                        complexEventChunk.add(streamEvent1);
                         complexEventPopulater.populateComplexEvent(complexEvent, outputData);
                     }
 
                 }
             }
         }
-        nextProcessor.process(streamEventChunk);
+        nextProcessor.process(complexEventChunk);
     }
 
 
@@ -328,8 +337,8 @@ public class StreamingClassificationExtension extends StreamProcessor implements
     @Override
     public Object[] currentState() {
         return new Object[]{numberOfAttributes, numberOfClasses, numberOfNominals,
-                nominalAttributesValues, maxInstance, batchSize, parallelism, numModelsBagging,
-                paramPosition, numberOfNumerics, scheduler, lastScheduledTimestamp, TIMER_DURATION,
+                nominalAttributesValues, maxInstance, batchSize, parallelism, numberModelsBagging,
+                parameterPosition, numberOfNumerics, scheduler, lastScheduledTimestamp, TIMER_DURATION,
                 streamingClassification, classes, nominals};
     }
 
@@ -342,8 +351,8 @@ public class StreamingClassificationExtension extends StreamProcessor implements
         maxInstance = (int) state[4];
         batchSize = (int) state[5];
         parallelism = (int) state[6];
-        numModelsBagging = (int) state[7];
-        paramPosition = (int) state[8];
+        numberModelsBagging = (int) state[7];
+        parameterPosition = (int) state[8];
         numberOfNumerics = (int) state[9];
         scheduler = (Scheduler) state[10];
         lastScheduledTimestamp = (long) state[11];

@@ -51,8 +51,8 @@ import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classificatio
 import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification.StreamingClassificationStream;
 
 /**
- * Source : Samoa prequentialtask : https://github.com/apache/incubator-samoa/blob/master/samoa-api/src/main/java/org/
- * apache/samoa/tasks/PrequentialEvaluation.java
+ * Source : Samoa prequentialtask : https://github.com/apache/incubator-samoa/blob/master/samoa-api
+ * /src/main/java/org/apache/samoa/tasks/PrequentialEvaluation.java
  */
 public abstract class ProcessTask implements Task, Configurable {
 
@@ -96,7 +96,7 @@ public abstract class ProcessTask implements Task, Configurable {
     protected SourceProcessor source;            // EntranceProcessor
     protected InstanceStream inputStream;        //InputStream
     protected Stream sourcePiOutputStream;       //OutputStream
-    protected Learner learner;                   // Samoa Lerner
+    protected Learner learner;                   // Samoa Learner
     protected Topology topology;                 // Topology
     protected TopologyBuilder builder;
     public Queue<double[]> cepEvents;
@@ -108,7 +108,7 @@ public abstract class ProcessTask implements Task, Configurable {
     public void setFactory(ComponentFactory factory) {
         builder = new TopologyBuilder(factory);
         builder.initTopology(evaluationNameOption.getValue());
-        logger.debug("Successfully initializing SAMOA topology with name {}",
+        logger.debug("Successfully initialized SAMOA topology with name {}",
                 evaluationNameOption.getValue());
 
     }

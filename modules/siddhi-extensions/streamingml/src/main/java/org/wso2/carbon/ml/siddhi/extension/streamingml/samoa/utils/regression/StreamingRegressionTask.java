@@ -50,7 +50,7 @@ public class StreamingRegressionTask extends ProcessTask {
         if (builder == null) {
             builder = new TopologyBuilder();
             builder.initTopology(evaluationNameOption.getValue());
-            logger.debug("Successfully initializing SAMOA topology with name {}",
+            logger.debug("Successfully initialized SAMOA topology with name {}",
                     evaluationNameOption.getValue());
         }
 
@@ -87,8 +87,7 @@ public class StreamingRegressionTask extends ProcessTask {
             builder.connectInputShuffleStream(evaluatorPiInputStream, evaluator);
         }
         topology = builder.build();
-        logger.debug("Successfully building the topology");
-        logger.info("Successfully building the topology");
+        logger.info("Successfully built the topology");
     }
 
     public void setSamoaData(Queue<Vector> data) {

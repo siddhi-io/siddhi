@@ -29,7 +29,9 @@ import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
+import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
+import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
@@ -37,13 +39,16 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StreamingClusteringExtension extends StreamProcessor {
+public class StreamingClusteringExtension extends StreamProcessor implements SchedulingProcessor {
 
     private int numberOfAttributes;
     private int paramPosition;
     private int maxInstance;
     private int numberOfClusters;
     private StreamingClustering streamingClusteringWithSamoa;
+    private Scheduler scheduler;
+    private long lastScheduledTimestamp = -1;
+    private long TIMER_DURATION = 100;
 
     @Override
     protected List<Attribute> init(AbstractDefinition inputDefinition, ExpressionExecutor[]
@@ -86,6 +91,7 @@ public class StreamingClusteringExtension extends StreamProcessor {
         }
         numberOfAttributes = attributeExpressionLength - parameterWidth;
         paramPosition = parameterWidth;
+        lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime();
         streamingClusteringWithSamoa = new StreamingClustering(maxInstance, numberOfAttributes,
                 numberOfClusters);
 
@@ -103,30 +109,50 @@ public class StreamingClusteringExtension extends StreamProcessor {
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner,
                            ComplexEventPopulater complexEventPopulater) {
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<StreamEvent>(false);
+
         synchronized (this) {
             while (streamEventChunk.hasNext()) {
                 ComplexEvent complexEvent = streamEventChunk.next();
+                if (complexEvent.getType() != ComplexEvent.Type.TIMER) {
+                    double[] cepEvent = new double[attributeExpressionLength - paramPosition];
 
-                double[] cepEvent = new double[attributeExpressionLength - paramPosition];
+                    for (int i = paramPosition; i < attributeExpressionLength; i++) {
+                        cepEvent[i - paramPosition] = (double) attributeExpressionExecutors[i].
+                                execute(complexEvent);
+                    }
+                    streamingClusteringWithSamoa.addEvents(cepEvent);
 
-                for (int i = paramPosition; i < attributeExpressionLength; i++) {
-                    cepEvent[i - paramPosition] = (double) attributeExpressionExecutors[i].
-                            execute(complexEvent);
-                }
-
-                streamingClusteringWithSamoa.addEvents(cepEvent);
-                Object[] outputData;
-                outputData = streamingClusteringWithSamoa.getOutput();
-
-                // Skip processing if user has specified calculation interval
-                if (outputData == null) {
-                    streamEventChunk.remove();
+                    Object[] outputData=null;
+                    outputData = streamingClusteringWithSamoa.getOutput();
+                    // Skip processing if user has specified calculation interval
+                    if (outputData == null) {
+                        streamEventChunk.remove();
+                    } else {
+                        StreamEvent streamEvent1 = new StreamEvent(0, 0, outputData.length);
+                        streamEvent1.setOutputData(outputData);
+                        complexEventChunk.add(streamEvent1);
+                        complexEventPopulater.populateComplexEvent(complexEvent, outputData);
+                    }
                 } else {
-                    complexEventPopulater.populateComplexEvent(complexEvent, outputData);
+                    lastScheduledTimestamp = lastScheduledTimestamp + TIMER_DURATION;
+                    scheduler.notifyAt(lastScheduledTimestamp);
+                    Object[] outputData=null;
+                    outputData = streamingClusteringWithSamoa.getOutput();
+
+                    // Skip processing if user has specified calculation interval
+                    if (outputData == null) {
+                        streamEventChunk.remove();
+                    } else {
+                        StreamEvent streamEvent1 = new StreamEvent(0, 0, outputData.length);
+                        streamEvent1.setOutputData(outputData);
+                        complexEventChunk.add(streamEvent1);
+                        complexEventPopulater.populateComplexEvent(complexEvent, outputData);
+                    }
                 }
             }
         }
-        nextProcessor.process(streamEventChunk);
+        nextProcessor.process(complexEventChunk);
     }
 
     @Override
@@ -154,4 +180,18 @@ public class StreamingClusteringExtension extends StreamProcessor {
         streamingClusteringWithSamoa = (StreamingClustering) state[4];
     }
 
+    @Override
+    public void setScheduler(Scheduler scheduler) {
+        this.scheduler = scheduler;
+        if (lastScheduledTimestamp > 0) {
+            lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime() +
+                    TIMER_DURATION;
+            scheduler.notifyAt(lastScheduledTimestamp);
+        }
+    }
+
+    @Override
+    public Scheduler getScheduler() {
+        return this.scheduler;
+    }
 }

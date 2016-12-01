@@ -43,7 +43,6 @@ import java.util.concurrent.TimeUnit;
 
 public class StreamingClassificationEvaluationProcessor extends EvaluationProcessor {
 
-    private static final long serialVersionUID = -2778051819116753612L;
     private static final Logger logger =
             LoggerFactory.getLogger(StreamingClassificationEvaluationProcessor.class);
 
@@ -193,6 +192,7 @@ public class StreamingClassificationEvaluationProcessor extends EvaluationProces
             this.immediateResultStream.flush();
         }
     }
+
     public void setSamoaClassifiers(Queue<Vector> classifiers) {
         this.classifiers = classifiers;
     }

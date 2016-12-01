@@ -48,7 +48,7 @@ public class StreamingClusteringTask extends ProcessTask {
         if (builder == null) {
             builder = new TopologyBuilder();
             builder.initTopology(evaluationNameOption.getValue(), sourceDelayOption.getValue());
-            logger.debug("Successfully initializing SAMOA topology with name {}",
+            logger.debug("Successfully initialized SAMOA topology with name {}",
                     evaluationNameOption.getValue());
         }
 
@@ -69,12 +69,10 @@ public class StreamingClusteringTask extends ProcessTask {
         builder.addEntranceProcessor(source);
         source.setMaxInstances(instanceLimitOption.getValue());
 
-        Stream sourceStream = builder.createStream(source);
-
         // distribution of instances and sampling for evaluation
         distributor = new ClusteringDistributorProcessor();
         builder.addProcessor(distributor, DISTRIBUTOR_PARALLELISM);
-        builder.connectInputShuffleStream(sourceStream, distributor);
+        builder.connectInputShuffleStream( builder.createStream(source), distributor);
         sourcePiOutputStream = builder.createStream(distributor);
         distributor.setOutputStream(sourcePiOutputStream);
         evaluationStream = builder.createStream(distributor);
@@ -87,17 +85,16 @@ public class StreamingClusteringTask extends ProcessTask {
 
         // Evaluation Processor
         StreamingClusteringEvaluationProcessor resultCheckPoint =
-                new StreamingClusteringEvaluationProcessor("Result Check Point ");
+                new StreamingClusteringEvaluationProcessor("Result check point");
         resultCheckPoint.setSamoaClusters(this.samoaClusters);
-        resultCheckPoint.setNumClusters(this.numberOfClusters);
+        resultCheckPoint.setNumberOfClusters(this.numberOfClusters);
         builder.addProcessor(resultCheckPoint);
 
         for (Stream evaluatorPiInputStream : learner.getResultStreams()) {
             builder.connectInputShuffleStream(evaluatorPiInputStream, resultCheckPoint);
         }
         topology = builder.build();
-        logger.debug("Successfully building the topology");
-        logger.info("Successfully building the topology");
+        logger.info("Successfully built the topology");
     }
 
     public void setSamoaClusters(Queue<Clustering> samoaClusters) {

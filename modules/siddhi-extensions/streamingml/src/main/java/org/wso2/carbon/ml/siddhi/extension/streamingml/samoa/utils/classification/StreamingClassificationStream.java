@@ -20,7 +20,11 @@ package org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classificati
 
 import com.github.javacliparser.IntOption;
 import com.github.javacliparser.StringOption;
-import org.apache.samoa.instances.*;
+import org.apache.samoa.instances.Attribute;
+import org.apache.samoa.instances.DenseInstance;
+import org.apache.samoa.instances.Instance;
+import org.apache.samoa.instances.Instances;
+import org.apache.samoa.instances.InstancesHeader;
 import org.apache.samoa.moa.core.Example;
 import org.apache.samoa.moa.core.InstanceExample;
 import org.apache.samoa.moa.core.ObjectRepository;
@@ -33,16 +37,16 @@ import java.util.List;
 
 public class StreamingClassificationStream extends DataStream {
 
-    public IntOption numClassesOption = new IntOption("numberOfClasses", 'K',
+    public IntOption numberOfClassesOption = new IntOption("numberOfClasses", 'K',
             "The number of classes in the model.", 2, 2, Integer.MAX_VALUE);
-    public IntOption numAttOption = new IntOption("numberOfAttributes", 'A',
+    public IntOption numberOfAttributesOption = new IntOption("numberOfAttributes", 'A',
             "The number of classes in the model.", 2, 1, Integer.MAX_VALUE);
-    public IntOption numNominalsOption = new IntOption("numNominals", 'N',
+    public IntOption numberOfNominalsOption = new IntOption("numberOfNominals", 'N',
             "The number of nominal attributes to generate.", 0, 0, 2147483647);
-    public StringOption numValsPerNominalOption = new StringOption("numValsPerNominalOption", 'Z',
-            "The number of values per nominal attributes", "null");
+    public StringOption numberOfValuesPerNominalOption = new StringOption("numberOfValuesPerNominal" +
+            "Option", 'Z', "The number of values per nominal attributes", "null");
 
-    private int numberOfNorminals;
+    private int numberOfNominals;
     private int numberOfClasses;
     List<Integer> valuesForNominals;
 
@@ -51,11 +55,11 @@ public class StreamingClassificationStream extends DataStream {
         taskMonitor.setCurrentActivity("Preparing random RBF...", -1.0);
 
         valuesForNominals = new ArrayList<Integer>();
-        this.numberOfClasses = numClassesOption.getValue();
-        this.numberOfAttributes = numAttOption.getValue();
-        this.numberOfNorminals = numNominalsOption.getValue();
-        if (numberOfNorminals != 0) {
-            String[] valsForNominal = numValsPerNominalOption.getValue().split(",");
+        this.numberOfClasses = numberOfClassesOption.getValue();
+        this.numberOfAttributes = numberOfAttributesOption.getValue();
+        this.numberOfNominals = numberOfNominalsOption.getValue();
+        if (numberOfNominals != 0) {
+            String[] valsForNominal = numberOfValuesPerNominalOption.getValue().split(",");
             for (String i : valsForNominal) {
                 valuesForNominals.add(Integer.parseInt(i));
             }
@@ -72,12 +76,12 @@ public class StreamingClassificationStream extends DataStream {
         List<Attribute> attributes = new ArrayList<Attribute>();
 
         // Add numerical values
-        for (int i = 0; i < numberOfAttributes - 1 - numNominalsOption.getValue(); i++) {
+        for (int i = 0; i < numberOfAttributes - 1 - numberOfNominalsOption.getValue(); i++) {
             attributes.add(new Attribute("numeric" + (i + 1)));
         }
 
         // Add nominal values
-        for (int i = 0; i < this.numNominalsOption.getValue(); ++i) {
+        for (int i = 0; i < this.numberOfNominalsOption.getValue(); ++i) {
             attributes.add(new Attribute("nominal" + (i + 1), getNominalAttributeValues(i)));
         }
 
@@ -104,15 +108,15 @@ public class StreamingClassificationStream extends DataStream {
 
     @Override
     public Example<Instance> nextInstance() {
-        double[] values_new = new double[numberOfAttributes];
+        double[] valuesNew = new double[numberOfAttributes];
         if (numberOfGeneratedInstances == 0) {
             while (cepEvents == null) ;
         }
         numberOfGeneratedInstances++;
         while (cepEvents.isEmpty()) ;
         double[] values = cepEvents.poll();
-        System.arraycopy(values, 0, values_new, 0, values.length - 1);
-        Instance instance = new DenseInstance(1.0, values_new);
+        System.arraycopy(values, 0, valuesNew, 0, values.length - 1);
+        Instance instance = new DenseInstance(1.0, valuesNew);
         instance.setDataset(getHeader());
         instance.setClassValue(values[values.length - 1]);// Set the relevant class value to the dataset
         return new InstanceExample(instance);

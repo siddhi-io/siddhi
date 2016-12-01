@@ -25,7 +25,8 @@ import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classificatio
 import java.io.PrintStream;
 
 /**
- * Source : https://github.com/apache/incubator-samoa/blob/master/samoa-api/src/main/java/org/apache/samoa/evaluation/EvaluatorProcessor.java
+ * Source : https://github.com/apache/incubator-samoa/blob/master/samoa-api/src/main/java/org/
+ * apache/samoa/evaluation/EvaluatorProcessor.java
  */
 public abstract class EvaluationProcessor implements Processor {
 

@@ -29,8 +29,8 @@ import java.util.Queue;
 import java.util.Vector;
 
 /**
- * Source : Samoa prequentialtask : https://github.com/apache/incubator-samoa/blob/master/samoa-api/src/main/java/org/
- * apache/samoa/tasks/PrequentialEvaluation.java
+ * Source : Samoa prequentialtask : https://github.com/apache/incubator-samoa/blob/master/
+ * samoa-api/src/main/java/org/apache/samoa/tasks/PrequentialEvaluation.java
  */
 
 public class StreamingClassificationTask extends ProcessTask {
@@ -48,13 +48,13 @@ public class StreamingClassificationTask extends ProcessTask {
             myStream.setCepEvents(this.cepEvents);
         } else {
             throw new ExecutionPlanRuntimeException("Check DataStream: " +
-                    "DataStream is not a StreamingClusteringStream");
+                    "DataStream is not a StreamingClassificationStream");
         }
 
         if (builder == null) {               // This part done by setFactory method
             builder = new TopologyBuilder();
             builder.initTopology(evaluationNameOption.getValue());
-            logger.debug("Successfully initializing SAMOA topology with name {}",
+            logger.debug("Successfully initialized SAMOA topology with name {}",
                     evaluationNameOption.getValue());
         }
 
@@ -94,8 +94,7 @@ public class StreamingClassificationTask extends ProcessTask {
         }
 
         topology = builder.build();
-        logger.debug("Successfully building the topology");
-        logger.info("Successfully building the topology");
+        logger.info("Successfully built the topology");
     }
 
 

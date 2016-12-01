@@ -41,7 +41,8 @@ public class StreamingRegressionTaskBuilder extends TaskBuilder {
     public int parallelism;
 
     public StreamingRegressionTaskBuilder(int maxInstance, int batchSize, int numAtts,
-                                          Queue<double[]> cepEvents, Queue<Vector> data, int parallel) {
+                                          Queue<double[]> cepEvents, Queue<Vector> data,
+                                          int parallel) {
         this.cepEvents = cepEvents;
         this.maxInstances = maxInstance;
         this.batchSize = batchSize;
@@ -51,13 +52,12 @@ public class StreamingRegressionTaskBuilder extends TaskBuilder {
     }
 
     public void initTask() {
-        String query = "";
-        query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.regression." +
+        String query = "org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.regression." +
                 "StreamingRegressionTask -f " + batchSize + " -i " + maxInstances +
                 " -s (org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils." +
                 "regression.StreamingRegressionStream -A " + numberOfAttributes + " ) " +
                 "-l  (org.apache.samoa.learners.classifiers.rules.HorizontalAMRulesRegressor " +
-                "-r 9 -p " + parallelism + ")";
+                " -p " + parallelism + ")";
 
         logger.info("QUERY: " + query);
         String args[] = {query};
@@ -76,7 +76,7 @@ public class StreamingRegressionTaskBuilder extends TaskBuilder {
 
         Option[] extraOptions = new Option[]{suppressStatusOutOpt, suppressResultOutOpt,
                 statusUpdateFreqOpt};
-        ///
+
 
         StringBuilder cliString = new StringBuilder();
         for (String arg : args) {
@@ -96,13 +96,12 @@ public class StreamingRegressionTaskBuilder extends TaskBuilder {
             t.setCepEvents(this.cepEvents);
             t.setSamoaData(this.samoaPredictions);
         } else {
-            throw new ExecutionPlanRuntimeException("Check Task: Not a StreamingRegressionTask");
+            throw new ExecutionPlanRuntimeException("Check the task: Not a StreamingRegressionTask");
         }
 
         task.setFactory(new SimpleComponentFactory());
-        logger.info("Successfully Initialized Component Factory");
         task.init();
-        logger.info("Successfully Initiated the StreamingRegressionTask");
+        logger.info("Successfully initiated the StreamingRegressionTask");
         topology = task.getTopology();
     }
 }
