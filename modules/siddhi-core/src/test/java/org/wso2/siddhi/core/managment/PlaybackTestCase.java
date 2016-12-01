@@ -493,16 +493,16 @@ public class PlaybackTestCase {
 
     @Test
     public void playbackTest11() throws InterruptedException {
-        log.info("Playback Test 11: Testing playback with out of order events");
+        log.info("Playback Test 11: Testing playback with out of order event with less than system timestamp");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "@Plan:playback " +
+                "@Plan:playback(idleTime = '100 millisecond', increment = '1 sec') " +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from cseEventStream#window.time(2 sec) " +
+                "from cseEventStream#window.timeBatch(2 sec) " +
                 "select symbol,price,volume " +
                 "insert all events into outputStream ;";
 
@@ -518,6 +518,10 @@ public class PlaybackTestCase {
                 if (removeEvents != null) {
                     Assert.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
                     removeEventCount = removeEventCount + removeEvents.length;
+                    if (removeEventCount == 3) {
+                        // Last timestamp is 200 + 4 sec (increment) = 2200
+                        Assert.assertEquals(4200, removeEvents[0].getTimestamp());
+                    }
                 }
                 eventArrived = true;
             }
@@ -526,15 +530,125 @@ public class PlaybackTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
         executionPlanRuntime.start();
-        long timestamp = System.currentTimeMillis();
-        inputHandler.send(timestamp, new Object[]{"IBM", 700f, 0});
-        timestamp -= 1000;
-        inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 1});
+        inputHandler.send(100, new Object[]{"IBM", 700f, 0});
+        inputHandler.send(200, new Object[]{"WSO2", 600.5f, 1});
+        Thread.sleep(150);
+        inputHandler.send(1150, new Object[]{"ORACLE", 500.0f, 2});  // Does no increase the system clock
 
-        Thread.sleep(200);  // Anything more than 100 is enough. Used 200 to be on safe side
+        Thread.sleep(350);  // Anything more than 100 is enough. Used 200 to be on safe side
 
-        Assert.assertEquals(2, inEventCount);
-        Assert.assertEquals(2, removeEventCount);
+        Assert.assertEquals(3, inEventCount);
+        Assert.assertEquals(3, removeEventCount);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void playbackTest12() throws InterruptedException {
+        log.info("Playback Test 12: Testing playback with out of order event with greater than system timestamp");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "@Plan:playback(idleTime = '100 millisecond', increment = '1 sec') " +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeBatch(2 sec) " +
+                "select symbol,price,volume " +
+                "insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    Assert.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
+                    removeEventCount = removeEventCount + removeEvents.length;
+                    if (removeEventCount == 3) {
+                        // Last timestamp is 1900 + 3 sec (increment) = 2200
+                        Assert.assertEquals(4900, removeEvents[0].getTimestamp());
+                    }
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(100, new Object[]{"IBM", 700f, 0});
+        inputHandler.send(200, new Object[]{"WSO2", 600.5f, 1});
+        Thread.sleep(150);
+        inputHandler.send(1900, new Object[]{"ORACLE", 500.0f, 2});  // Does no increase the system clock
+
+        Thread.sleep(350);  // Anything more than 100 is enough. Used 200 to be on safe side
+
+        Assert.assertEquals(3, inEventCount);
+        Assert.assertEquals(3, removeEventCount);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    // TODO: 12/1/16 Check this test case with Suho
+    // Should the new event with smaller timestamp expire immediately or not
+    // However this behavior is mainly decided by the window. In this case,
+    // window set the scheduler to 2 sec from the first event
+    @Test
+    public void playbackTest13() throws InterruptedException {
+        log.info("Playback Test 13: Testing playback with out of order event with smaller than system timestamp after window expires");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "@Plan:playback(idleTime = '100 millisecond', increment = '1 sec') " +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeBatch(2 sec) " +
+                "select symbol,price,volume " +
+                "insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    Assert.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
+                    removeEventCount = removeEventCount + removeEvents.length;
+                    if (removeEventCount == 3) {
+                        // Last timestamp is 1900 + 3 sec (increment) = 2200
+                        Assert.assertEquals(4900, removeEvents[0].getTimestamp());
+                    }
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(100, new Object[]{"IBM", 700f, 0});
+        inputHandler.send(200, new Object[]{"WSO2", 600.5f, 1});
+        Thread.sleep(220);
+        inputHandler.send(250, new Object[]{"ORACLE", 500.0f, 2});  // Does no increase the system clock
+
+        Thread.sleep(320);  // Anything more than 100 is enough. Used 200 to be on safe side
+        System.out.println("----------------------");
+        Thread.sleep(120);
+
+        Assert.assertEquals(3, inEventCount);
+        Assert.assertEquals(3, removeEventCount);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
