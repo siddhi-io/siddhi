@@ -27,6 +27,7 @@ public class Mapping {
     private String format;
     private Map<String, String> options = new HashMap<String, String>();
     private List<AttributeMapping> attributeMappingList = new ArrayList<AttributeMapping>();
+    private String body;
 
     private Mapping(String format) {
         this.format = format;
@@ -63,13 +64,18 @@ public class Mapping {
         return attributeMappingList;
     }
 
+    public Mapping body(String mapping){
+        body = mapping;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "Mapping{" +
                 "format='" + format + '\'' +
                 ", options=" + options +
                 ", attributeMappingList=" + attributeMappingList +
-                '}';
+                (body != null ? ", body=" + body + '}': '}');
     }
 
     @Override
