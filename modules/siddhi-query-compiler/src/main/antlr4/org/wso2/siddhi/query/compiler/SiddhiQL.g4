@@ -55,7 +55,11 @@ definition_table_final
     ;
 
 definition_table
-    : annotation* DEFINE TABLE source '(' attribute_name attribute_type (',' attribute_name attribute_type )* ')'
+    : annotation* DEFINE TABLE source '(' attribute_name attribute_type (',' attribute_name attribute_type )* ')' storage?
+    ;
+
+storage
+    : STORE type OPTIONS '(' option (',' option)* ')'
     ;
 
 definition_window_final
@@ -526,6 +530,7 @@ keyword
     | SUBSCRIBE
     | OPTIONS
     | MAP
+    | STORE
     ;
 
 time_value
@@ -706,6 +711,7 @@ OBJECT:   O B J E C T;
 SUBSCRIBE: S U B S C R I B E;
 OPTIONS: O P T I O N S;
 MAP: M A P;
+STORE: S T O R E;
 
 ID_QUOTES : '`'[a-zA-Z_] [a-zA-Z_0-9]*'`' {setText(getText().substring(1, getText().length()-1));};
 

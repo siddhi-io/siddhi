@@ -28,6 +28,7 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.definition.TriggerDefinition;
 import org.wso2.siddhi.query.api.definition.WindowDefinition;
+import org.wso2.siddhi.query.api.definition.io.Store;
 import org.wso2.siddhi.query.api.execution.ExecutionElement;
 import org.wso2.siddhi.query.api.execution.Subscription;
 import org.wso2.siddhi.query.api.execution.io.Transport;
@@ -307,6 +308,11 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public TableDefinition visitDefinition_table(@NotNull SiddhiQLParser.Definition_tableContext ctx) {
+
+//        definition_table
+//        : annotation* DEFINE TABLE source '(' attribute_name attribute_type (',' attribute_name attribute_type )* ')' definition_store?
+//        ;
+
         Source source = (Source) visit(ctx.source());
         if (source.isInnerStream) {
             throw newSiddhiParserException(ctx, "'#' cannot be used, because EventTables can't be defined as InnerStream!");
@@ -323,8 +329,32 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         for (SiddhiQLParser.AnnotationContext annotationContext : ctx.annotation()) {
             tableDefinition.annotation((Annotation) visit(annotationContext));
         }
+        if (ctx.storage() != null) {
+            tableDefinition.store((Store) visit(ctx.storage()));
+        }
         return tableDefinition;
 
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     *
+     * @param ctx
+     */
+    @Override public Store visitStorage(@NotNull SiddhiQLParser.StorageContext ctx) {
+
+//        definition_store
+//        :STORE type OPTIONS '(' option (',' option)* ')'
+//        ;
+
+        Store store = Store.store((String) visit(ctx.type()));
+        for (SiddhiQLParser.OptionContext optionContext : ctx.option()){
+            store.option((String) visit(optionContext.key()), ((StringConstant) visit(optionContext.value())).getValue());
+        }
+        return store;
     }
 
     @Override
