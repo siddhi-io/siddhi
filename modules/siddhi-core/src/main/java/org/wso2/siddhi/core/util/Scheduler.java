@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import org.wso2.siddhi.core.util.timestamp.EventBasedTimeMillisTimestampGenerator;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -56,20 +57,37 @@ public class Scheduler implements Snapshotable {
         this.scheduledExecutorService = scheduledExecutorService;
         this.eventCaller = new EventCaller(singleThreadEntryValve);
         this.executionPlanContext = executionPlanContext;
+
+        if (this.executionPlanContext.isPlayback()) {
+            ((EventBasedTimeMillisTimestampGenerator) this.executionPlanContext.getTimestampGenerator()).addTimeChangeListener(new EventBasedTimeMillisTimestampGenerator.TimeChangeListener() {
+                @Override
+                public void onTimeChange(long currentTimestamp) {
+                    Long lastTime = toNotifyQueue.peek();
+                    if (lastTime != null && lastTime <= currentTimestamp) {
+                        // If executed in a separate thread, while it is processing,
+                        // the new event will come into the window. As the result of it,
+                        // the window will emit the new event as an existing current event.
+                        eventCaller.run();
+                    }
+                }
+            });
+        }
     }
 
     public void notifyAt(long time) {
         try {
             toNotifyQueue.put(time);
-
-            if (!running && toNotifyQueue.size() == 1) {
+            if (!running && toNotifyQueue.size() == 1 && !this.executionPlanContext.isPlayback()) {
                 synchronized (toNotifyQueue) {
                     if (!running) {
                         running = true;
-                        long timeDiff = time - System.currentTimeMillis(); //todo fix
+                        long timeDiff = time - executionPlanContext.getTimestampGenerator().currentTime();
                         if (timeDiff > 0) {
+//                            if (!this.executionPlanContext.isPlayback()) {
                             scheduledExecutorService.schedule(eventCaller, timeDiff, TimeUnit.MILLISECONDS);
+//                            }
                         } else {
+                            // TODO: 11/21/16 check this
                             scheduledExecutorService.schedule(eventCaller, 0, TimeUnit.MILLISECONDS);
                         }
                     }
@@ -147,7 +165,7 @@ public class Scheduler implements Snapshotable {
         public void run() {
             try {
                 Long toNotifyTime = toNotifyQueue.peek();
-                long currentTime = System.currentTimeMillis();
+                long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
                 while (toNotifyTime != null && toNotifyTime - currentTime <= 0) {
                     toNotifyQueue.poll();
 
@@ -178,11 +196,13 @@ public class Scheduler implements Snapshotable {
                     streamEventChunk.clear();
 
                     toNotifyTime = toNotifyQueue.peek();
-                    currentTime = System.currentTimeMillis();
+                    currentTime = executionPlanContext.getTimestampGenerator().currentTime();
 
                 }
                 if (toNotifyTime != null) {
-                    scheduledExecutorService.schedule(eventCaller, toNotifyTime - currentTime, TimeUnit.MILLISECONDS);
+                    if (!executionPlanContext.isPlayback()) {
+                        scheduledExecutorService.schedule(eventCaller, toNotifyTime - currentTime, TimeUnit.MILLISECONDS);
+                    }
                 } else {
                     synchronized (toNotifyQueue) {
                         running = false;
