@@ -24,16 +24,22 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
-import org.wso2.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.execution.io.map.AttributeMapping;
+
+import java.util.List;
+import java.util.Map;
 
 public class PassThroughInputMapper implements InputMapper {
+
     private StreamDefinition outputStreamDefinition;
     private OutputCallback outputCallback;
     private StreamEventPool streamEventPool;
     private StreamEventConverter streamEventConverter;
+    private Map<String, String> options;
+    private List<AttributeMapping> attributeMappingList;
 
     @Override
     public StreamDefinition getOutputStreamDefinition() {
@@ -42,19 +48,33 @@ public class PassThroughInputMapper implements InputMapper {
 
     @Override
     public void inferOutputStreamDefinition(StreamDefinition outputStreamDefinition) {
-        this.outputStreamDefinition = outputStreamDefinition;
+        if (outputStreamDefinition == null) {
+            // TODO: 12/1/16 Infer the output stream definition
+        } else {
+            this.outputStreamDefinition = outputStreamDefinition;
+        }
     }
 
     @Override
-    public void init(OutputCallback outputCallback, MetaStreamEvent metaStreamEvent) {
+    public void init(OutputCallback outputCallback, MetaStreamEvent metaStreamEvent, Map<String, String> options, List<AttributeMapping> attributeMappingList) {
         this.outputCallback = outputCallback;
         this.outputStreamDefinition = metaStreamEvent.getOutputStreamDefinition();
+        this.options = options;
+        this.attributeMappingList = attributeMappingList;
         this.streamEventConverter = new ZeroStreamEventConverter();
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 5);
     }
 
     @Override
     public void onEvent(Object eventObject) {
+
+        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+        streamEventConverter.convertEvent(convertToEvent(eventObject), borrowedEvent);
+
+        outputCallback.send(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, true));
+    }
+
+    private Event convertToEvent(Object eventObject) {
         Event event;
         if (eventObject == null) {
             throw new IllegalArgumentException("Event object must be either Event or Object[] but found null");
@@ -67,9 +87,7 @@ public class PassThroughInputMapper implements InputMapper {
         } else {
             throw new IllegalArgumentException("Event object must be either Event or Object[] but found " + eventObject.getClass().getCanonicalName());
         }
-        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-        streamEventConverter.convertEvent(event, borrowedEvent);
 
-        outputCallback.send(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, true));
+        return event;
     }
 }

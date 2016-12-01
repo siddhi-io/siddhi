@@ -39,7 +39,9 @@ import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.execution.Subscription;
+import org.wso2.siddhi.query.api.execution.io.map.Mapping;
 import org.wso2.siddhi.query.api.extension.Extension;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
@@ -103,6 +105,11 @@ public class SubscriptionParser {
 
             InputTransport inputTransport = (InputTransport) SiddhiClassLoader.loadSiddhiImplementation(transportExtension.getFunction(), InputTransport.class);
 
+            Mapping mapping = subscription.getMapping();
+            if (mapping == null) {
+                // Subscription without mapping
+                throw new ExecutionPlanValidationException("Subscription must have a mapping plan but " + transportExtension.getFunction() + " subscription does not have a mapping plan");
+            }
             Extension mapperExtension = new Extension() {
                 @Override
                 public String getNamespace() {
@@ -135,10 +142,9 @@ public class SubscriptionParser {
                 metaStreamEvent.addOutputData(attribute);
             }
             //todo create event creator and pass to init()
-            inputMapper.init(outputCallback, metaStreamEvent);
+            inputMapper.init(outputCallback, metaStreamEvent, subscription.getMapping().getOptions(), subscription.getMapping().getAttributeMappingList());
 
-            // TODO: 11/30/16 Provide valid transport options
-            inputTransport.init(null, inputMapper);
+            inputTransport.init(subscription.getTransport().getOptions(), inputMapper);
 
             OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(subscription.getOutputStream().getId(),
                     subscription.getOutputRate(), false, false, executionPlanContext.getScheduledExecutorService(), executionPlanContext);

@@ -21,6 +21,10 @@ package org.wso2.siddhi.core.subscription;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.execution.io.map.AttributeMapping;
+
+import java.util.List;
+import java.util.Map;
 
 public interface InputMapper extends InputCallback {
 
@@ -28,5 +32,5 @@ public interface InputMapper extends InputCallback {
 
     void inferOutputStreamDefinition(StreamDefinition outputStreamDefinition);
 
-    void init(OutputCallback outputCallback, MetaStreamEvent metaStreamEvent);
+    void init(OutputCallback outputCallback, MetaStreamEvent metaStreamEvent, Map<String, String> options, List<AttributeMapping> attributeMappingList);
 }

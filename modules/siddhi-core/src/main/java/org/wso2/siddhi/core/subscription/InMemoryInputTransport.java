@@ -34,6 +34,7 @@ public class InMemoryInputTransport extends InputTransport {
 
     @Override
     public void init(Map<String, String> transportOptions, InputCallback inputCallback) {
+        System.out.println("Transport options: " + transportOptions);
         this.inputCallback = inputCallback;
         this.executorService = Executors.newScheduledThreadPool(5, new ThreadFactoryBuilder().setNameFormat("Siddhi-inmemoryinputtransport-scheduler-thread-%d").build());
     }

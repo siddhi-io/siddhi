@@ -26,115 +26,26 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.execution.Subscription;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 import org.wso2.siddhi.query.api.execution.io.map.Mapping;
 
 public class SubscribeTestCase {
 
-    //    subscribe http options(context ‘/test’, transport ‘http,https’)
-//    map xml “//h:time”, “//h:data”
-//    options( xmlns:h “http://www.w3.org/TR/html4/”)
-//            Insert into FooStream;
     @Test
-    public void testCreatingHttpSubscriptionXmlMapping() {
-        Subscription subscription = Subscription.Subscribe(
-                Transport.transport("http").
-                        option("context", "/test").
-                        option("transport", "http,https"));
-
-        subscription.map(Mapping.format("xml").
-                map("/h:time").
-                map("data", "//h:data").
-                option("xmlns:h", "http://www.w3.org/TR/html4/"));
-
-        subscription.insertInto("FooStream");
-
-        ExecutionPlan.executionPlan("test").addSubscription(subscription);
-
-    }
-
-    //    subscribe jms options(topic  ‘foo’)
-//    map json "$.sensorData.time", "$.sensorData.data"
-//    Insert into FooStream;
-    @Test
-    public void testCreatingHttpSubscriptionJsonMapping() {
-        Subscription subscription = Subscription.Subscribe(
-                Transport.transport("jms").
-                        option("topic", "foo"));
-
-        subscription.map(
-                Mapping.format("json").
-                        map("$.sensorData.time").
-                        map("$.sensorData.data"));
-
-        subscription.insertInto("FooStream");
-
-        ExecutionPlan.executionPlan("test").addSubscription(subscription);
-
-    }
-
-    //    --using default mapping
-//    subscribe jms options(topic ‘foo’)
-//    map json
-//    Insert into FooStream;
-    @Test
-    public void testCreatingJmsSubscriptionJsonMapping() {
-        Subscription subscription = Subscription.Subscribe(
-                Transport.transport("jms").
-                        option("topic", "foo"));
-
-        subscription.map(Mapping.format("json"));
-
-        subscription.insertInto("FooStream");
-
-        ExecutionPlan.executionPlan("test").addSubscription(subscription);
-
-    }
-
-    //    subscribe jms options(topic  ‘foo’)
-//    map text “regex1[1]” , “regex2[3]”
-//    options (	regex1  “(\w+)\s(\w+)\s(\w+)\s(\w+)”,
-//    regex2  “(\w+)\s(\w+)\s(\w+)\s(\w+)”)
-//    insert into FooStream;
-    @Test
-    public void testCreatingJmsSubscriptionTextMapping() {
-        Subscription subscription = Subscription.Subscribe(
-                Transport.transport("jms").
-                        option("topic", "foo"));
-
-        subscription.map(Mapping.format("text").
-                map("regex1[1]").
-                map("regex2[3]").
-                option("regex1", "(\\w+)\\s(\\w+)\\s(\\w+)\\s(\\w+)").
-                option("regex2", "(\\w+)\\s(\\w+)\\s(\\w+)\\s(\\w+)")
-        );
-
-        subscription.insertInto("FooStream");
-
-        ExecutionPlan.executionPlan("test").addSubscription(subscription);
-
-    }
-
-    //    subscribe jms options(topic  ‘foo’)
-//    map json "$.sensorData.time", "$.sensorData.data"
-//    Insert into FooStream;
-    @Test
-    public void testCreatingInmemorySubscriptionJsonMapping() throws InterruptedException {
+    public void testCreatingInmemorySubscription() throws InterruptedException {
         String stream = "define stream FooStream (symbol string, price float, volume int); ";
 
         Subscription subscription = Subscription.Subscribe(
                 Transport.transport("inMemory").
                         option("topic", "foo"));
 
-        subscription.map(
-                Mapping.format("passThrough").
-                        map("$.sensorData.time").
-                        map("$.sensorData.data"));
+        subscription.map(Mapping.format("passThrough"));
 
         subscription.insertInto("FooStream");
 
-        ExecutionPlan executionPlan = ExecutionPlan.executionPlan("test");
+        ExecutionPlan executionPlan = ExecutionPlan.executionPlan();
         executionPlan.defineStream(StreamDefinition.id("FooStream")
                 .attribute("symbol", Attribute.Type.STRING)
                 .attribute("price", Attribute.Type.FLOAT)
@@ -155,5 +66,26 @@ public class SubscribeTestCase {
         Thread.sleep(5000);
 
         executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testCreatingInmemorySubscriptionWithoutMapping() throws InterruptedException {
+        String stream = "define stream FooStream (symbol string, price float, volume int); ";
+
+        Subscription subscription = Subscription.Subscribe(
+                Transport.transport("inMemory").
+                        option("topic", "foo"));
+
+        subscription.insertInto("FooStream");
+
+        ExecutionPlan executionPlan = ExecutionPlan.executionPlan();
+        executionPlan.defineStream(StreamDefinition.id("FooStream")
+                .attribute("symbol", Attribute.Type.STRING)
+                .attribute("price", Attribute.Type.FLOAT)
+                .attribute("volume", Attribute.Type.INT));
+        executionPlan.addSubscription(subscription);
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
     }
 }
