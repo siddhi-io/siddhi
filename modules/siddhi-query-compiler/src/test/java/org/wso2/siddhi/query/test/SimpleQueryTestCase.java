@@ -469,6 +469,53 @@ public class SimpleQueryTestCase {
 
     }
 
+    @Test
+    public void test_publish_for_text_mapping() throws SiddhiParserException {
+        Query query = SiddhiCompiler.parseQuery("" +
+                "from FooStream " +
+                "select *" +
+                "publish email options (" +
+                "address  \"abc@test.con\"," +
+                "subject  \"{{data}}-type\")" +
+                "map text " +
+                "\"\"\"" +
+                "\nHi user\n" +
+                "{{data}} on {{time}}\n" +
+                "\"\"\"" +
+                ";");
+        Assert.assertNotNull(query);
+    }
+
+    @Test
+    public void test_publish_for_xml_mapping() throws SiddhiParserException {
+        Query query = SiddhiCompiler.parseQuery("" +
+                "from FooStream " +
+                "select *" +
+                "publish email options (" +
+                "address  \"abc@test.con\"," +
+                "subject  \"{{data}}-type\")" +
+                "map text " +
+                "\"\"\"" +
+                "<user>" +
+                "{{data}} on {{time}}" +
+                "</user>" +
+                "\"\"\"" +
+                ";");
+        Assert.assertNotNull(query);
+    }
+
+    @Test
+    public void test_publish_without_map_body() throws SiddhiParserException {
+        Query query = SiddhiCompiler.parseQuery("" +
+                "from FooStream " +
+                "select *" +
+                "publish email options (" +
+                "address  \"abc@test.con\"," +
+                "subject  \"{{data}}-type\")" +
+                "map text " +
+                ";");
+        Assert.assertNotNull(query);
+    }
 
 }
 
