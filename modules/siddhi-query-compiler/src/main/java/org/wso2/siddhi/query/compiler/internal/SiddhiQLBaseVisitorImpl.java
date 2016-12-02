@@ -63,7 +63,6 @@ import org.wso2.siddhi.query.api.execution.query.output.stream.DeleteStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.InsertIntoStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.InsertOverwriteStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
-import org.wso2.siddhi.query.api.execution.query.output.stream.PublishStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.ReturnStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import org.wso2.siddhi.query.api.execution.query.selection.OutputAttribute;
@@ -484,7 +483,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     public Query visitQuery(@NotNull SiddhiQLParser.QueryContext ctx) {
 
 //        query
-//        : annotation* query_input query_section? output_rate? query_output
+//        : annotation* query_input query_section? output_rate? (query_output | query_publish)
 //        ;
 
         try {
@@ -499,8 +498,11 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             for (SiddhiQLParser.AnnotationContext annotationContext : ctx.annotation()) {
                 query.annotation((Annotation) visit(annotationContext));
             }
-            query.outStream((OutputStream) visit(ctx.query_output()));
-
+            if (ctx.query_output() != null) {
+                query.outStream((OutputStream) visit(ctx.query_output()));
+            } else {
+                query.publish((Transport) visit(ctx.query_publish().transport()), (Mapping) visit(ctx.query_publish().mapping()));
+            }
             return query;
 
         } finally {
@@ -1225,7 +1227,6 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             } else {
                 query.outStream(new ReturnStream());
             }
-
             return new AnonymousInputStream(query);
 
         } finally {
@@ -1356,7 +1357,6 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 //        |DELETE target (FOR output_event_type)? (ON expression)?
 //        |UPDATE target (FOR output_event_type)? (ON expression)?
 //        |RETURN output_event_type?
-//        |PUBLISH transport MAP mapping
 //        ;
 
         if (ctx.INSERT() != null) {
@@ -1410,10 +1410,6 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             } else {
                 return new ReturnStream();
             }
-        } else if (ctx.PUBLISH() != null) {
-            PublishStream publishStream = new PublishStream((Transport) visit(ctx.transport()),
-                    (Mapping) visit(ctx.mapping()));
-            return publishStream;
         } else {
             throw newSiddhiParserException(ctx);
         }
