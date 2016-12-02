@@ -26,18 +26,37 @@ import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
-import org.wso2.siddhi.core.query.output.callback.*;
+import org.wso2.siddhi.core.publisher.OutputMapper;
+import org.wso2.siddhi.core.publisher.OutputTransport;
+import org.wso2.siddhi.core.query.output.callback.DeleteTableCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertIntoTableCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertIntoWindowCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertOverwriteTableCallback;
+import org.wso2.siddhi.core.query.output.callback.OutputCallback;
+import org.wso2.siddhi.core.query.output.callback.PublishStreamCallback;
+import org.wso2.siddhi.core.query.output.callback.UpdateTableCallback;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.output.ratelimit.PassThroughOutputRateLimiter;
-import org.wso2.siddhi.core.query.output.ratelimit.event.*;
+import org.wso2.siddhi.core.query.output.ratelimit.event.AllPerEventOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.event.FirstGroupByPerEventOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.event.FirstPerEventOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.event.LastGroupByPerEventOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.event.LastPerEventOutputRateLimiter;
 import org.wso2.siddhi.core.query.output.ratelimit.snapshot.WrappedSnapshotOutputRateLimiter;
-import org.wso2.siddhi.core.query.output.ratelimit.time.*;
+import org.wso2.siddhi.core.query.output.ratelimit.time.AllPerTimeOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.time.FirstGroupByPerTimeOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.time.FirstPerTimeOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.time.LastGroupByPerTimeOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.time.LastPerTimeOutputRateLimiter;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.table.EventTable;
-import org.wso2.siddhi.core.window.EventWindow;
+import org.wso2.siddhi.core.util.SiddhiClassLoader;
+import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper;
+import org.wso2.siddhi.core.window.EventWindow;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -46,7 +65,13 @@ import org.wso2.siddhi.query.api.execution.query.output.ratelimit.EventOutputRat
 import org.wso2.siddhi.query.api.execution.query.output.ratelimit.OutputRate;
 import org.wso2.siddhi.query.api.execution.query.output.ratelimit.SnapshotOutputRate;
 import org.wso2.siddhi.query.api.execution.query.output.ratelimit.TimeOutputRate;
-import org.wso2.siddhi.query.api.execution.query.output.stream.*;
+import org.wso2.siddhi.query.api.execution.query.output.stream.DeleteStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.InsertIntoStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.InsertOverwriteStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.PublishStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream;
+import org.wso2.siddhi.query.api.extension.Extension;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -55,13 +80,17 @@ import java.util.concurrent.ScheduledExecutorService;
 public class OutputParser {
 
 
-    public static OutputCallback constructOutputCallback(OutputStream outStream, StreamDefinition outputStreamDefinition,
+    public static OutputCallback constructOutputCallback(final OutputStream outStream, StreamDefinition outputStreamDefinition,
                                                          Map<String, EventTable> eventTableMap, Map<String, EventWindow> eventWindowMap, ExecutionPlanContext executionPlanContext, boolean convertToStreamEvent) {
         String id = outStream.getId();
-        EventTable eventTable = eventTableMap.get(id);
-        EventWindow eventWindow = eventWindowMap.get(id);
+        EventTable eventTable = null;
+        EventWindow eventWindow = null;
+        if (id != null) {
+            eventTable = eventTableMap.get(id);
+            eventWindow = eventWindowMap.get(id);
+        }
         StreamEventPool streamEventPool = null;
-        StreamEventConverter streamEventConvertor = null;
+        StreamEventConverter streamEventConverter = null;
         MetaStreamEvent tableMetaStreamEvent = null;
         if (eventTable != null) {
 
@@ -75,17 +104,17 @@ public class OutputParser {
             tableMetaStreamEvent.addInputDefinition(matchingTableDefinition);
 
             streamEventPool = new StreamEventPool(tableMetaStreamEvent, 10);
-            streamEventConvertor = new ZeroStreamEventConverter();
+            streamEventConverter = new ZeroStreamEventConverter();
 
         }
 
         //Construct CallBack
         if (outStream instanceof InsertIntoStream) {
-            if(eventWindow != null) {
+            if (eventWindow != null) {
                 return new InsertIntoWindowCallback(eventWindow, outputStreamDefinition);
             } else if (eventTable != null) {
                 DefinitionParserHelper.validateOutputStream(outputStreamDefinition, eventTable.getTableDefinition());
-                return new InsertIntoTableCallback(eventTable, outputStreamDefinition, convertToStreamEvent, streamEventPool, streamEventConvertor);
+                return new InsertIntoTableCallback(eventTable, outputStreamDefinition, convertToStreamEvent, streamEventPool, streamEventConverter);
             } else {
                 return new InsertIntoStreamCallback(outputStreamDefinition);
             }
@@ -109,7 +138,7 @@ public class OutputParser {
                                 matchingMetaStateHolder, executionPlanContext, null, eventTableMap);
                         StateEventPool stateEventPool = new StateEventPool(matchingMetaStateHolder.getMetaStateEvent(), 10);
                         return new DeleteTableCallback(eventTable, operator, matchingMetaStateHolder.getDefaultStreamEventIndex(),
-                                convertToStreamEvent, stateEventPool, streamEventPool, streamEventConvertor);
+                                convertToStreamEvent, stateEventPool, streamEventPool, streamEventConverter);
                     } catch (ExecutionPlanValidationException e) {
                         throw new ExecutionPlanCreationException("Cannot create delete for table '" + outStream.getId() + "', " + e.getMessage(), e);
                     }
@@ -122,7 +151,7 @@ public class OutputParser {
                         StateEventPool stateEventPool = new StateEventPool(matchingMetaStateHolder.getMetaStateEvent(), 10);
                         return new UpdateTableCallback(eventTable, operator, outputStreamDefinition,
                                 matchingMetaStateHolder.getDefaultStreamEventIndex(), convertToStreamEvent, stateEventPool,
-                                streamEventPool, streamEventConvertor);
+                                streamEventPool, streamEventConverter);
                     } catch (ExecutionPlanValidationException e) {
                         throw new ExecutionPlanCreationException("Cannot create update for table '" + outStream.getId() + "', " + e.getMessage(), e);
                     }
@@ -136,7 +165,7 @@ public class OutputParser {
                         StateEventPool stateEventPool = new StateEventPool(matchingMetaStateHolder.getMetaStateEvent(), 10);
                         return new InsertOverwriteTableCallback(eventTable, operator, outputStreamDefinition,
                                 matchingMetaStateHolder.getDefaultStreamEventIndex(), convertToStreamEvent, stateEventPool,
-                                streamEventPool, streamEventConvertor);
+                                streamEventPool, streamEventConverter);
 
                     } catch (ExecutionPlanValidationException e) {
                         throw new ExecutionPlanCreationException("Cannot create insert overwrite for table '" + outStream.getId() + "', " + e.getMessage(), e);
@@ -145,6 +174,44 @@ public class OutputParser {
             } else {
                 throw new DefinitionNotExistException("Event table with id :" + id + " does not exist");
             }
+        } else if (outStream instanceof PublishStream) {
+            // grainier : should this extension loading go here or inside QueryParser.java?????
+            Extension transportExtension = new Extension() {
+                @Override
+                public String getNamespace() {
+                    return SiddhiConstants.OUTPUT_TRANSPORT;
+                }
+
+                @Override
+                public String getFunction() {
+                    return ((PublishStream) outStream).getTransport().getType();
+                }
+            };
+            // grainier : which extension loading?
+//            OutputTransport outputTransport = (OutputTransport) SiddhiClassLoader.loadExtensionImplementation(
+//                    transportExtension, InputTransportExecutorExtensionHolder.getInstance(executionPlanContext));
+
+            OutputTransport outputTransport = (OutputTransport) SiddhiClassLoader.loadSiddhiImplementation(
+                    transportExtension.getFunction(), OutputTransport.class);
+
+            Extension mapperExtension = new Extension() {
+                @Override
+                public String getNamespace() {
+                    return SiddhiConstants.OUTPUT_MAPPER;
+                }
+
+                @Override
+                public String getFunction() {
+                    return ((PublishStream) outStream).getMapping().getFormat();
+                }
+            };
+//            OutputMapper outputMapper = (OutputMapper) SiddhiClassLoader.loadExtensionImplementation(
+//                    mapperExtension, InputMapperExecutorExtensionHolder.getInstance(executionPlanContext));
+            OutputMapper outputMapper = (OutputMapper) SiddhiClassLoader.loadSiddhiImplementation(
+                    mapperExtension.getFunction(), OutputMapper.class);
+
+            return new PublishStreamCallback(((PublishStream) outStream).getTransport().getOptions(),
+                    outputTransport, outputMapper);
         } else {
             throw new ExecutionPlanCreationException(outStream.getClass().getName() + " not supported");
         }
