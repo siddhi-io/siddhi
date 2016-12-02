@@ -47,8 +47,10 @@ import com.github.javacliparser.Configurable;
 import com.github.javacliparser.FileOption;
 import com.github.javacliparser.IntOption;
 import com.github.javacliparser.StringOption;
-import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification.StreamingClassificationPerformanceEvaluator;
-import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification.StreamingClassificationStream;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification.
+        StreamingClassificationPerformanceEvaluator;
+import org.wso2.carbon.ml.siddhi.extension.streamingml.samoa.utils.classification.
+        StreamingClassificationStream;
 
 /**
  * Source : Samoa prequentialtask : https://github.com/apache/incubator-samoa/blob/master/samoa-api
