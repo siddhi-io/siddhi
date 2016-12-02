@@ -140,7 +140,7 @@ subscription_final
     ;
 
 query
-    : annotation* FROM query_input query_section? output_rate? query_output
+    : annotation* FROM query_input query_section? output_rate? (query_output | query_publish)
     ;
 
 query_input
@@ -274,7 +274,10 @@ query_output
     |UPDATE target (FOR output_event_type)? ON expression
     |INSERT OVERWRITE target (FOR output_event_type)? ON expression
     |RETURN output_event_type?
-    |PUBLISH transport MAP mapping
+    ;
+
+query_publish
+    :PUBLISH transport MAP mapping
     ;
 
 subscription_output
