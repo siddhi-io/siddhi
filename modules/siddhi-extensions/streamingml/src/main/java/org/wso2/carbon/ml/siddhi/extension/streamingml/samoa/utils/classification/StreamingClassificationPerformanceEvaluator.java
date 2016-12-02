@@ -29,8 +29,9 @@ import java.util.Vector;
 
 /**
  * Uses for evaluate classification performance
- * Combination of Samoa  samoa/samoa-api/src/main/java/com/yahoo/labs/samoa/evaluation/BasicClassificationPerformanceEvaluator.java
- * and  samoa/samoa-api/src/main/java/com/yahoo/labs/samoa/evaluation/ClassificationPerformanceEvaluator.java
+ * Combination of Samoa  samoa/samoa-api/src/main/java/com/yahoo/labs/samoa/evaluation/
+ * BasicClassificationPerformanceEvaluator.java and  samoa/samoa-api/src/main/java/com/
+ * yahoo/labs/samoa/evaluation/ClassificationPerformanceEvaluator.java
  */
 public class StreamingClassificationPerformanceEvaluator extends AbstractMOAObject implements
         ClassificationPerformanceEvaluator {

@@ -74,7 +74,7 @@ public class StreamingRegressionStream extends DataStream {
         System.arraycopy(values, 0, values_new, 0, values.length-1);
         Instance inst = new DenseInstance(1.0, values_new);
         inst.setDataset(getHeader());
-        inst.setClassValue(values[values.length - 1]);// Set the relevant class value to the data set
+        inst.setClassValue(values[values.length - 1]);//Set the relevant class value to the data set
         return new InstanceExample(inst);
     }
 

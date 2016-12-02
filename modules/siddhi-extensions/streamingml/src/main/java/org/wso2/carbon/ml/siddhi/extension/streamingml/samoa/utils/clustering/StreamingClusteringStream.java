@@ -66,7 +66,6 @@ public class StreamingClusteringStream extends DataStream {
         return new InstanceExample(inst);
     }
 
-
     protected void generateHeader() {
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
         for (int i = 0; i < this.numAttsOption.getValue(); i++) {

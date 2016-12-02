@@ -70,7 +70,8 @@ public class StreamingClusteringEvaluationProcessor extends EvaluationProcessor 
 
     @Override
     public Processor newProcessor(Processor p) {
-        StreamingClusteringEvaluationProcessor newEvaluator = (StreamingClusteringEvaluationProcessor) p;
+        StreamingClusteringEvaluationProcessor newEvaluator =
+                (StreamingClusteringEvaluationProcessor) p;
         return newEvaluator;
     }
 

@@ -85,8 +85,8 @@ public class StreamingRegressionExtension extends StreamProcessor implements
                 if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
                     batchSize = ((Integer) attributeExpressionExecutors[1].execute(null));
                 } else {
-                    throw new ExecutionPlanValidationException("Invalid parameter type found for" +
-                            " the second argument, required " + Attribute.Type.INT + " but found " +
+                    throw new ExecutionPlanValidationException("Invalid parameter type found for " +
+                            "the second argument, required " + Attribute.Type.INT + " but found " +
                             attributeExpressionExecutors[1].getReturnType().toString());
                 }
             } else {
@@ -103,8 +103,8 @@ public class StreamingRegressionExtension extends StreamProcessor implements
                         maxInstance = Integer.MAX_VALUE;
                     }
                 } else {
-                    throw new ExecutionPlanValidationException("Invalid parameter type found for the" +
-                            " third argument, required " + Attribute.Type.INT + " but found " +
+                    throw new ExecutionPlanValidationException("Invalid parameter type found for" +
+                            " the third argument, required " + Attribute.Type.INT + " but found " +
                             attributeExpressionExecutors[0].getReturnType().toString());
                 }
             } else {
@@ -162,7 +162,8 @@ public class StreamingRegressionExtension extends StreamProcessor implements
 
                     cepEvent[numberOfAttributes - 1] = classValue;
                     for (int i = 0; i < numberOfAttributes; i++) {
-                        evt = attributeExpressionExecutors[i + parameterPosition].execute(complexEvent);
+                        evt = attributeExpressionExecutors[i + parameterPosition].
+                                execute(complexEvent);
                         cepEvent[i] = (double) evt;
                     }
 
@@ -172,7 +173,7 @@ public class StreamingRegressionExtension extends StreamProcessor implements
                     if (outputData == null) {
                         streamEventChunk.remove();
                     } else {
-                        StreamEvent streamEvent1 = new StreamEvent(0, 0,outputData.length);
+                        StreamEvent streamEvent1 = new StreamEvent(0, 0, outputData.length);
                         streamEvent1.setOutputData(outputData);
                         complexEventChunk.add(streamEvent1);
                         complexEventPopulater.populateComplexEvent(complexEvent, outputData);
@@ -187,7 +188,7 @@ public class StreamingRegressionExtension extends StreamProcessor implements
                     if (outputData == null) {
                         streamEventChunk.remove();
                     } else {
-                        StreamEvent streamEvent1 = new StreamEvent(0, 0,outputData.length);
+                        StreamEvent streamEvent1 = new StreamEvent(0, 0, outputData.length);
                         streamEvent1.setOutputData(outputData);
                         complexEventChunk.add(streamEvent1);
                         complexEventPopulater.populateComplexEvent(complexEvent, outputData);
@@ -211,8 +212,8 @@ public class StreamingRegressionExtension extends StreamProcessor implements
 
     @Override
     public Object[] currentState() {
-        return new Object[]{maxInstance, batchSize, numberOfAttributes, parameterPosition, parallelism,
-                streamingRegression, lastScheduledTimestamp, TIMER_DURATION, scheduler};
+        return new Object[]{maxInstance, batchSize, numberOfAttributes, parameterPosition,
+                parallelism, streamingRegression, lastScheduledTimestamp, TIMER_DURATION, scheduler};
     }
 
     @Override

@@ -96,7 +96,7 @@ public class StreamingRegressionTaskBuilder extends TaskBuilder {
             t.setCepEvents(this.cepEvents);
             t.setSamoaData(this.samoaPredictions);
         } else {
-            throw new ExecutionPlanRuntimeException("Check the task: Not a StreamingRegressionTask");
+            throw new ExecutionPlanRuntimeException("Check the task:Not a StreamingRegressionTask");
         }
 
         task.setFactory(new SimpleComponentFactory());

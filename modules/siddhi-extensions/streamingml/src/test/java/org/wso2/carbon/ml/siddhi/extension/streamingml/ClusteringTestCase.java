@@ -48,22 +48,23 @@ public class ClusteringTestCase {
         logger.info("StreamingClusteringStreamProcessor TestCase 1");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String inStreamDefinition = " define stream inputStream (attribute_0 double, attribute_1 double," +
-                " attribute_2 double, attribute_3 double, attribute_4 double );";
-        String query = ("@info(name = 'query3') from inputStream#streamingml:streamingClusteringSamoa(2," +
-                " attribute_0, attribute_1 , attribute_2 , attribute_3 , attribute_4) " +
-                "select center0 as center0,center1 as center1 insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        String inStreamDefinition = " define stream inputStream (attribute_0 double, " +
+                "attribute_1 double,attribute_2 double, attribute_3 double, attribute_4 double );";
+        String query = ("@info(name = 'query3') from inputStream#streamingml:" +
+                "streamingClusteringSamoa(2,attribute_0, attribute_1 , attribute_2 , attribute_3," +
+                " attribute_4) select center0 as center0,center1 as center1 insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime =
+                siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query3", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 count++;
                 if (count == 1) {
-                    Assert.assertEquals("[26.689013161214312,65.2985408650787,1010.0086638445954,62.56587280444617," +
-                            "436.13502625254046]", inEvents[0].getData()[0]);
-                    Assert.assertEquals("[14.71610078358815,45.70548516901456,1014.585093380316,75.29614297441418," +
-                            "465.57460856962507]", inEvents[0].getData()[1]);
+                    Assert.assertEquals("[26.689013161214312,65.2985408650787,1010.0086638445954," +
+                            "62.56587280444617,436.13502625254046]", inEvents[0].getData()[0]);
+                    Assert.assertEquals("[14.71610078358815,45.70548516901456,1014.585093380316," +
+                            "75.29614297441418,465.57460856962507]", inEvents[0].getData()[1]);
                 }
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
             }
@@ -82,8 +83,9 @@ public class ClusteringTestCase {
                 if (scn.hasNext()) {
                     String eventStr = scn.nextLine();
                     String[] event = eventStr.split(",");
-                    inputHandler.send(new Object[]{Double.valueOf(event[0]), Double.valueOf(event[1]),
-                            Double.valueOf(event[2]), Double.valueOf(event[3]), Double.valueOf(event[4])});
+                    inputHandler.send(new Object[]{Double.valueOf(event[0]),
+                            Double.valueOf(event[1]), Double.valueOf(event[2]),
+                            Double.valueOf(event[3]), Double.valueOf(event[4])});
                 } else {
                     break;
                 }

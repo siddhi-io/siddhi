@@ -38,7 +38,8 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StreamingClassificationExtension extends StreamProcessor implements SchedulingProcessor {
+public class StreamingClassificationExtension extends StreamProcessor
+        implements SchedulingProcessor {
 
     private int numberOfAttributes;
     private int numberOfClasses;
@@ -167,8 +168,8 @@ public class StreamingClassificationExtension extends StreamProcessor implements
                 if (attributeExpressionExecutors[6].getReturnType() == Attribute.Type.INT) {
                     numberModelsBagging = ((Integer) attributeExpressionExecutors[6].execute(null));
                 } else {
-                    throw new ExecutionPlanValidationException("Invalid parameter type found for" +
-                            " the seventh argument, required " + Attribute.Type.INT + " but found " +
+                    throw new ExecutionPlanValidationException("Invalid parameter type found for " +
+                            "the seventh argument, required " + Attribute.Type.INT + " but found " +
                             attributeExpressionExecutors[6].getReturnType().toString());
                 }
             } else {
@@ -237,7 +238,9 @@ public class StreamingClassificationExtension extends StreamProcessor implements
                     //Set class value
                     if (classValue.equals("?")) {           //these data points for prediction
                         cepEvent[numberOfAttributes - 1] = -1;
-                    } else { // These data points have class values, therefore these data use to train and test the model
+                    } else {
+                        // These data points have class values, therefore these data use to train
+                        // -and test the model
                         if (classes.contains(classValue)) {
                             cepEvent[numberOfAttributes - 1] = classes.indexOf(classValue);
                         } else {
@@ -251,7 +254,8 @@ public class StreamingClassificationExtension extends StreamProcessor implements
 
                     // Set other attributes
                     for (int i = 0; i < numberOfAttributes - 1; i++) {
-                        evt = attributeExpressionExecutors[i + parameterPosition].execute(complexEvent);
+                        evt = attributeExpressionExecutors[i + parameterPosition].
+                                execute(complexEvent);
 
                         if (i < numberOfNumerics) {         // set Numerical attributes
                             cepEvent[i] = (Double) evt;
@@ -286,7 +290,7 @@ public class StreamingClassificationExtension extends StreamProcessor implements
                                         get(nominal_index);
                             }
                         }
-                        StreamEvent streamEvent1 = new StreamEvent(0, 0,outputData.length);
+                        StreamEvent streamEvent1 = new StreamEvent(0, 0, outputData.length);
                         streamEvent1.setOutputData(outputData);
                         complexEventChunk.add(streamEvent1);
                         complexEventPopulater.populateComplexEvent(complexEvent, outputData);
@@ -311,7 +315,7 @@ public class StreamingClassificationExtension extends StreamProcessor implements
                             }
                         }
 
-                        StreamEvent streamEvent1 = new StreamEvent(0, 0,outputData.length);
+                        StreamEvent streamEvent1 = new StreamEvent(0, 0, outputData.length);
                         streamEvent1.setOutputData(outputData);
                         complexEventChunk.add(streamEvent1);
                         complexEventPopulater.populateComplexEvent(complexEvent, outputData);
@@ -338,8 +342,8 @@ public class StreamingClassificationExtension extends StreamProcessor implements
     public Object[] currentState() {
         return new Object[]{numberOfAttributes, numberOfClasses, numberOfNominals,
                 nominalAttributesValues, maxInstance, batchSize, parallelism, numberModelsBagging,
-                parameterPosition, numberOfNumerics, scheduler, lastScheduledTimestamp, TIMER_DURATION,
-                streamingClassification, classes, nominals};
+                parameterPosition, numberOfNumerics, scheduler, lastScheduledTimestamp,
+                TIMER_DURATION, streamingClassification, classes, nominals};
     }
 
     @Override

@@ -62,8 +62,8 @@ public abstract class ProcessTask implements Task, Configurable {
     public ClassOption learnerOption = new ClassOption("learner", 'l', "Classifier to train.",
             Learner.class, VerticalHoeffdingTree.class.getName());
 
-    public ClassOption streamTrainOption = new ClassOption("trainStream", 's', "DataStream to learn" +
-            " from.", InstanceStream.class, StreamingClassificationStream.class.getName());
+    public ClassOption streamTrainOption = new ClassOption("trainStream", 's', "DataStream to learn"
+            + " from.", InstanceStream.class, StreamingClassificationStream.class.getName());
 
     public ClassOption evaluatorOption = new ClassOption("evaluator", 'e',
             "StreamingClassification performance valuation method.", PerformanceEvaluator.class,
@@ -83,8 +83,8 @@ public abstract class ProcessTask implements Task, Configurable {
             " of instances to test/train on  (-1 = no limit).", 1000000, -1, Integer.MAX_VALUE);
 
     // Default=0: no delay/waiting
-    public IntOption sourceDelayOption = new IntOption("sourceDelay", 'w', "How many microseconds" +
-            " between injections of two instances.", 0, 0, Integer.MAX_VALUE);
+    public IntOption sourceDelayOption = new IntOption("sourceDelay", 'w', "How many microseconds"
+            + " between injections of two instances.", 0, 0, Integer.MAX_VALUE);
 
     // Batch size to delay the incoming stream: delay of x milliseconds after each batch
     public IntOption batchDelayOption = new IntOption("delayBatchSize", 'b', "The delay batch" +

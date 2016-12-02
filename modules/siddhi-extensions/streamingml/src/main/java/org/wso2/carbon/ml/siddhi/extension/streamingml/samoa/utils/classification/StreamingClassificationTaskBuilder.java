@@ -113,8 +113,9 @@ public class StreamingClassificationTaskBuilder extends TaskBuilder {
         }
 
         if (task instanceof StreamingClassificationTask) {
-            StreamingClassificationTask t = (StreamingClassificationTask) task;  // Cast that created task to streamingclassificationTask
-            t.setCepEvents(this.cepEvents);                                      //link task events to cepEvents
+            // Cast that created task to streamingclassificationTask
+            StreamingClassificationTask t = (StreamingClassificationTask) task;
+            t.setCepEvents(this.cepEvents);                       //link task events to cepEvents
             t.setSamoaClassifiers(this.classifiers);
             t.setNumClasses(this.numberOfClasses);
         } else {
