@@ -19,13 +19,11 @@
 package org.wso2.siddhi.core.publisher;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
-import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
-
-import java.util.Map;
+import org.wso2.siddhi.query.api.execution.io.Transport;
 
 /**
  * This is a OutputTransport type. these let users to publish events according to
@@ -38,7 +36,7 @@ public abstract class OutputTransport implements EternalReferencedHolder {
      *
      * @throws OutputTransportException if there are any configuration errors
      */
-    public abstract void init(Map<String, String> transportOptions, ExecutionPlanContext executionPlanContext)
+    public abstract void init(Transport transportOptions, ExecutionPlanContext executionPlanContext)
             throws OutputTransportException;
 
     /**
@@ -59,11 +57,10 @@ public abstract class OutputTransport implements EternalReferencedHolder {
     /**
      * To publish the events
      *
-     * @param complexEvent event to be published, it can be Map,OMElement or String
-     * @param mapper       the mapping for output events
+     * @param event event to be published, which is ideally mapped using the mapper
      * @throws ConnectionUnavailableException if it cannot connect to the backend
      */
-    public abstract void publish(ComplexEvent complexEvent, OutputMapper mapper)
+    public abstract void publish(Object event)
             throws ConnectionUnavailableException;
 
     /**

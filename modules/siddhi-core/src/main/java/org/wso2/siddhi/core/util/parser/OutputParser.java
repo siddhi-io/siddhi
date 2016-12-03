@@ -210,8 +210,9 @@ public class OutputParser {
             OutputMapper outputMapper = (OutputMapper) SiddhiClassLoader.loadSiddhiImplementation(
                     mapperExtension.getFunction(), OutputMapper.class);
 
-            return new PublishStreamCallback(((PublishStream) outStream).getTransport().getOptions(),
-                    outputTransport, outputMapper);
+            return new PublishStreamCallback(
+                    outputTransport, ((PublishStream) outStream).getTransport(),
+                    outputMapper, ((PublishStream) outStream).getMapping(), outputStreamDefinition);
         } else {
             throw new ExecutionPlanCreationException(outStream.getClass().getName() + " not supported");
         }

@@ -27,6 +27,7 @@ public class Mapping {
     private String format;
     private Map<String, String> options = new HashMap<String, String>();
     private List<AttributeMapping> attributeMappingList = new ArrayList<AttributeMapping>();
+    private String body;
 
     private Mapping(String format) {
         this.format = format;
@@ -43,12 +44,12 @@ public class Mapping {
 
     public Mapping map(String mapping) {
         attributeMappingList.add(new AttributeMapping(mapping));
-        return null;
+        return this;
     }
 
     public Mapping map(String rename, String mapping) {
         attributeMappingList.add(new AttributeMapping(rename, mapping));
-        return null;
+        return this;
     }
 
     public String getFormat() {
@@ -63,13 +64,22 @@ public class Mapping {
         return attributeMappingList;
     }
 
+    public Mapping body(String mapping) {
+        body = mapping;
+        return this;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
     @Override
     public String toString() {
         return "Mapping{" +
                 "format='" + format + '\'' +
                 ", options=" + options +
                 ", attributeMappingList=" + attributeMappingList +
-                '}';
+                (body != null ? ", body=" + body + '}' : '}');
     }
 
     @Override

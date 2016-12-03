@@ -20,18 +20,17 @@ package org.wso2.siddhi.core.publisher;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
-import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
-
-import java.util.Map;
+import org.wso2.siddhi.query.api.execution.io.Transport;
 
 public class InMemoryOutputTransport extends OutputTransport {
     private static final Logger log = Logger.getLogger(InMemoryOutputTransport.class);
 
     @Override
-    public void init(Map<String, String> transportOptions, ExecutionPlanContext executionPlanContext) throws OutputTransportException {
+    public void init(Transport transportOptions, ExecutionPlanContext executionPlanContext)
+            throws OutputTransportException {
         log.info("InMemoryOutputTransport:init()");
     }
 
@@ -46,8 +45,8 @@ public class InMemoryOutputTransport extends OutputTransport {
     }
 
     @Override
-    public void publish(ComplexEvent complexEvent, OutputMapper mapper) throws ConnectionUnavailableException {
-        log.info("InMemoryOutputTransport:publish() | event : " + complexEvent.toString());
+    public void publish(Object event) throws ConnectionUnavailableException {
+        log.info("InMemoryOutputTransport:publish() | event : " + event.toString());
     }
 
     @Override

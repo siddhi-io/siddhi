@@ -82,7 +82,7 @@ public class PublisherTestCase {
     //    publish inMemory options (topic ‘foo’)
     //    map passThrough;
     @Test
-    public void testPublisherStream() throws InterruptedException {
+    public void testPublisherWithOutMapping() throws InterruptedException {
         StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
                 .attribute("symbol", Attribute.Type.STRING)
                 .attribute("price", Attribute.Type.INT)
@@ -94,7 +94,44 @@ public class PublisherTestCase {
         );
         query.publish(
                 Transport.transport("inMemory").option("topic", "foo"), OutputStream.OutputEventType.CURRENT_EVENTS,
-                Mapping.format("passThrough")
+                Mapping.format("text")
+        );
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlan executionPlan = new ExecutionPlan("ep1");
+        executionPlan.defineStream(streamDefinition);
+        executionPlan.addQuery(query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        InputHandler stockStream = executionPlanRuntime.getInputHandler("FooStream");
+
+        executionPlanRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        Thread.sleep(100);
+        executionPlanRuntime.shutdown();
+    }
+
+    //    from FooStream
+    //    publish inMemory options (topic ‘foo’)
+    //    map text """
+    //          Hi user
+    //          {{data}} on {{time}}
+    //          """;
+    @Test
+    public void testPublisherWithMapping() throws InterruptedException {
+        StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
+                .attribute("symbol", Attribute.Type.STRING)
+                .attribute("price", Attribute.Type.INT)
+                .attribute("volume", Attribute.Type.FLOAT);
+
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("FooStream")
+        );
+        query.publish(
+                Transport.transport("inMemory").option("topic", "foo"), OutputStream.OutputEventType.CURRENT_EVENTS,
+                Mapping.format("text").body("Hi user {{data}} on {{time}}")
         );
 
         SiddhiManager siddhiManager = new SiddhiManager();
