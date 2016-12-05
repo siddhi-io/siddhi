@@ -277,7 +277,7 @@ query_output
     ;
 
 query_publish
-    :PUBLISH transport MAP mapping
+    :PUBLISH transport MAP mapping (FOR output_event_type)?
     ;
 
 subscription_output
