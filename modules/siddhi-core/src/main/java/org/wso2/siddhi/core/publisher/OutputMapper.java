@@ -31,12 +31,10 @@ import java.util.regex.Pattern;
 
 public abstract class OutputMapper {
 
+    private static final Pattern DYNAMIC_PATTERN = Pattern.compile("\\{\\{(.*?)}}");
     private boolean customMappingEnabled = false;
-
     private Mapping mapping;
-
     private String mappingString;
-
     private StreamDefinition streamDefinition;
 
     /**
@@ -46,38 +44,21 @@ public abstract class OutputMapper {
     abstract void init();
 
     /**
-     * Map the event according to given mapping.
-     *
-     * @param event event to be mapped with the given mapping.
-     * @return mapped event object
-     */
-    public abstract Object mapEvent(Event event);
-
-    /**
      * Generate mapping string if the mapping body haven't provided.
      *
      * @param streamDefinition {@link StreamDefinition}
      * @return mapping string
      */
-    abstract String generateDefaultMappingString(StreamDefinition streamDefinition);
-
-    /**
-     * Generate mapping string if the mapping body is provided.
-     *
-     * @param mapping          {@link Mapping} properties.
-     * @param streamDefinition {@link StreamDefinition}
-     * @return mapping string
-     */
-    abstract String generateCustomMappingString(Mapping mapping, StreamDefinition streamDefinition);
+    abstract String generateDefaultMapping(StreamDefinition streamDefinition);
 
     public final void init(Mapping mapping, StreamDefinition streamDefinition) {
         this.mapping = mapping;
         this.streamDefinition = streamDefinition;
         if (mapping.getBody() != null && !mapping.getBody().isEmpty()) {
             customMappingEnabled = true;
-            mappingString = generateCustomMappingString(mapping, streamDefinition);
+            mappingString = mapping.getBody();
         } else {
-            mappingString = generateDefaultMappingString(streamDefinition);
+            mappingString = generateDefaultMapping(streamDefinition);
         }
         init();
     }
@@ -102,21 +83,29 @@ public abstract class OutputMapper {
         return customMappingEnabled;
     }
 
+    /**
+     * Map the event according to given mapping.
+     *
+     * @param event event to be mapped with the given mapping.
+     * @return mapped event object
+     */
+    public final String mapEvent(Event event, String mappingText) {
+        Matcher matcher = DYNAMIC_PATTERN.matcher(mappingText);
+        while (matcher.find()) {
+            if (getValue(event, matcher.group(1)) != null) {
+                mappingText = mappingText.replaceAll(
+                        String.format("\\{\\{%s}}", matcher.group(1)),
+                        getValue(event, matcher.group(1)).toString()
+                );
+            }
+        }
+        return mappingText;
+    }
+
     public final Map<String, String> mapDynamicOptions(Event event, Map<String, String> dynamicOptions) {
         Map<String, String> mappedOptions = new HashMap<String, String>();
-        Pattern pattern = Pattern.compile("\\{\\{(.*?)}}");
         for (Map.Entry<String, String> entry : dynamicOptions.entrySet()) {
-            String mappingText = entry.getValue();
-            Matcher matcher = pattern.matcher(mappingText);
-            while (matcher.find()) {
-                if (getValue(event, matcher.group(1)) != null) {
-                    mappingText = mappingText.replaceAll(
-                            "\\{\\{" + matcher.group(1) + "}}",
-                            getValue(event, matcher.group(1)).toString()
-                    );
-                }
-            }
-            mappedOptions.put(entry.getKey(), mappingText);
+            mappedOptions.put(entry.getKey(), mapEvent(event, entry.getValue()));
         }
         return mappedOptions;
     }

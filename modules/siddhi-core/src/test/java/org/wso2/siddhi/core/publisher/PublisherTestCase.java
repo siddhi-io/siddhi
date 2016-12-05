@@ -156,7 +156,7 @@ public class PublisherTestCase {
     //          {{data}} on {{time}}
     //          """;
     @Test
-    public void testPublisherWithDynamicTransportOptionos() throws InterruptedException {
+    public void testPublisherWithDynamicTransportOptions() throws InterruptedException {
         StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
                 .attribute("symbol", Attribute.Type.STRING)
                 .attribute("price", Attribute.Type.INT)
@@ -174,7 +174,7 @@ public class PublisherTestCase {
                         .option("non-exist-symbol", "{{non-exist}}-{{symbol}}")
                         .option("non-exist", "{{non-exist}}"),
                 OutputStream.OutputEventType.CURRENT_EVENTS,
-                Mapping.format("text").body("Hi user {{data}} on {{time}}")
+                Mapping.format("text").body("Price of a {{symbol}} share is ${{price}}.")
         );
 
         SiddhiManager siddhiManager = new SiddhiManager();

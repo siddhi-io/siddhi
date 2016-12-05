@@ -65,7 +65,7 @@ public class PublishStreamCallback extends OutputCallback {
             try {
                 Event event = new Event(complexEvent.getOutputData().length).copyFrom(complexEvent);
                 outputTransport.publish(
-                        outputMapper.mapEvent(event),
+                        outputMapper.mapEvent(event, outputMapper.getMappingString()),
                         outputMapper.mapDynamicOptions(event, transportConfig.getDynamicOptions()));
             } catch (ConnectionUnavailableException e) {
                 log.error("Cannot publish to Output Transport due to unavailability of connection.", e);

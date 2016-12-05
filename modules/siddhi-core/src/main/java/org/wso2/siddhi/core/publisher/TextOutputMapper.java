@@ -18,9 +18,10 @@
 
 package org.wso2.siddhi.core.publisher;
 
-import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
-import org.wso2.siddhi.query.api.execution.io.map.Mapping;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TextOutputMapper extends OutputMapper {
 
@@ -30,17 +31,11 @@ public class TextOutputMapper extends OutputMapper {
     }
 
     @Override
-    public Object mapEvent(Event event) {
-        return String.format(getMappingString() + "%s", event.toString());
-    }
-
-    @Override
-    String generateDefaultMappingString(StreamDefinition streamDefinition) {
-        return "default : event -> ";
-    }
-
-    @Override
-    String generateCustomMappingString(Mapping mapping, StreamDefinition streamDefinition) {
-        return "custom : mapping -> " + mapping.getBody() + " | event -> ";
+    String generateDefaultMapping(StreamDefinition streamDefinition) {
+        Map<String, String> mapping = new HashMap<String, String>();
+        for (String attributeName : streamDefinition.getAttributeNameArray()) {
+            mapping.put(attributeName, String.format("{{%s}}", attributeName));
+        }
+        return mapping.toString();
     }
 }
