@@ -25,6 +25,8 @@ import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 
+import java.util.Map;
+
 public class InMemoryOutputTransport extends OutputTransport {
     private static final Logger log = Logger.getLogger(InMemoryOutputTransport.class);
 
@@ -45,8 +47,10 @@ public class InMemoryOutputTransport extends OutputTransport {
     }
 
     @Override
-    public void publish(Object event) throws ConnectionUnavailableException {
-        log.info("InMemoryOutputTransport:publish() | event : " + event.toString());
+    public void publish(Object event, Map<String, String> dynamicTransportOptions)
+            throws ConnectionUnavailableException {
+        log.info("InMemoryOutputTransport:publish() | dynamicTransportOptions : " +
+                dynamicTransportOptions.toString() + " | event : " + event.toString());
     }
 
     @Override

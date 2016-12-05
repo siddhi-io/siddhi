@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.publisher.OutputMapper;
@@ -59,16 +60,17 @@ public class PublishStreamCallback extends OutputCallback {
     @Override
     public void send(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        while (complexEventChunk.hasNext()) {
-            ComplexEvent complexEvent = complexEventChunk.next();
-            if (complexEvent.getType() == ComplexEvent.Type.EXPIRED) {
-                complexEvent.setType(ComplexEvent.Type.CURRENT);
+        ComplexEvent complexEvent = complexEventChunk.getFirst();
+        while (complexEvent != null) {
+            try {
+                Event event = new Event(complexEvent.getOutputData().length).copyFrom(complexEvent);
+                outputTransport.publish(
+                        outputMapper.mapEvent(event),
+                        outputMapper.mapDynamicOptions(event, transportConfig.getDynamicOptions()));
+            } catch (ConnectionUnavailableException e) {
+                log.error("Cannot publish to Output Transport due to unavailability of connection.", e);
             }
-        }
-        try {
-            outputTransport.publish(outputMapper.mapEvent(complexEventChunk.getFirst()));
-        } catch (ConnectionUnavailableException e) {
-            log.error("Cannot publish to Output Transport due to unavailability of connection.", e);
+            complexEvent = complexEvent.getNext();
         }
     }
 }

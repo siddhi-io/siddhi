@@ -25,6 +25,8 @@ import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 
+import java.util.Map;
+
 /**
  * This is a OutputTransport type. these let users to publish events according to
  * some type. this type can either be local, jms or ws (or any custom extension)
@@ -57,11 +59,12 @@ public abstract class OutputTransport implements EternalReferencedHolder {
     /**
      * To publish the events
      *
-     * @param event event to be published, which is ideally mapped using the mapper
+     * @param event          event to be published, which is ideally mapped using the mapper
+     * @param dynamicOptions dynamic options for the transport (which are configurable dynamically. i.e email subject)
      * @throws ConnectionUnavailableException if it cannot connect to the backend
      */
-    public abstract void publish(Object event)
-            throws ConnectionUnavailableException;
+    public abstract void publish(Object event, Map<String, String> dynamicOptions) throws ConnectionUnavailableException;
+
 
     /**
      * Will be called after all publishing is done, or when ConnectionUnavailableException is thrown

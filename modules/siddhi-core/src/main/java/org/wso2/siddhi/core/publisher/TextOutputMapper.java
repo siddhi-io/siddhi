@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.publisher;
 
-import org.wso2.siddhi.core.event.ComplexEvent;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.io.map.Mapping;
 
@@ -30,8 +30,8 @@ public class TextOutputMapper extends OutputMapper {
     }
 
     @Override
-    public Object mapEvent(ComplexEvent complexEvent) {
-        return String.format(getMappingString() + "%s", complexEvent.toString());
+    public Object mapEvent(Event event) {
+        return String.format(getMappingString() + "%s", event.toString());
     }
 
     @Override

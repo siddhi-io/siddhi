@@ -18,9 +18,16 @@
 
 package org.wso2.siddhi.core.publisher;
 
-import org.wso2.siddhi.core.event.ComplexEvent;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.io.map.Mapping;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class OutputMapper {
 
@@ -29,6 +36,8 @@ public abstract class OutputMapper {
     private Mapping mapping;
 
     private String mappingString;
+
+    private StreamDefinition streamDefinition;
 
     /**
      * This will be called only once and this can be used to acquire
@@ -39,10 +48,10 @@ public abstract class OutputMapper {
     /**
      * Map the event according to given mapping.
      *
-     * @param complexEvent event to be mapped with the given mapping.
+     * @param event event to be mapped with the given mapping.
      * @return mapped event object
      */
-    public abstract Object mapEvent(ComplexEvent complexEvent);
+    public abstract Object mapEvent(Event event);
 
     /**
      * Generate mapping string if the mapping body haven't provided.
@@ -63,6 +72,7 @@ public abstract class OutputMapper {
 
     public final void init(Mapping mapping, StreamDefinition streamDefinition) {
         this.mapping = mapping;
+        this.streamDefinition = streamDefinition;
         if (mapping.getBody() != null && !mapping.getBody().isEmpty()) {
             customMappingEnabled = true;
             mappingString = generateCustomMappingString(mapping, streamDefinition);
@@ -84,7 +94,44 @@ public abstract class OutputMapper {
         return mappingString;
     }
 
+    public final StreamDefinition getStreamDefinition() {
+        return streamDefinition;
+    }
+
     public final boolean isCustomMappingEnabled() {
         return customMappingEnabled;
     }
+
+    public final Map<String, String> mapDynamicOptions(Event event, Map<String, String> dynamicOptions) {
+        Map<String, String> mappedOptions = new HashMap<String, String>();
+        Pattern pattern = Pattern.compile("\\{\\{(.*?)}}");
+        for (Map.Entry<String, String> entry : dynamicOptions.entrySet()) {
+            String mappingText = entry.getValue();
+            Matcher matcher = pattern.matcher(mappingText);
+            while (matcher.find()) {
+                if (getValue(event, matcher.group(1)) != null) {
+                    mappingText = mappingText.replaceAll(
+                            "\\{\\{" + matcher.group(1) + "}}",
+                            getValue(event, matcher.group(1)).toString()
+                    );
+                }
+            }
+            mappedOptions.put(entry.getKey(), mappingText);
+        }
+        return mappedOptions;
+    }
+
+    public final Object getValue(Event event, String property) {
+        List<String> properties = Arrays.asList(streamDefinition.getAttributeNameArray());
+        try {
+            return event.getData()[properties.indexOf(property)];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            if (event.getArbitraryDataMap() != null) {
+                return event.getArbitraryDataMap().get(property);
+            } else {
+                return null;
+            }
+        }
+    }
+
 }
