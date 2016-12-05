@@ -501,7 +501,14 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             if (ctx.query_output() != null) {
                 query.outStream((OutputStream) visit(ctx.query_output()));
             } else {
-                query.publish((Transport) visit(ctx.query_publish().transport()), (Mapping) visit(ctx.query_publish().mapping()));
+                if (ctx.query_publish().output_event_type() != null) {
+                    query.publish((Transport) visit(ctx.query_publish().transport()),
+                            (OutputStream.OutputEventType) visit(ctx.query_publish().output_event_type()),
+                            (Mapping) visit(ctx.query_publish().mapping()));
+                } else {
+                    query.publish((Transport) visit(ctx.query_publish().transport()),
+                            (Mapping) visit(ctx.query_publish().mapping()));
+                }
             }
             return query;
 
