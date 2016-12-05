@@ -482,6 +482,7 @@ public class SimpleQueryTestCase {
                 "\nHi user\n" +
                 "{{data}} on {{time}}\n" +
                 "\"\"\"" +
+                "for current events " +
                 ";");
         Assert.assertNotNull(query);
     }
@@ -500,6 +501,7 @@ public class SimpleQueryTestCase {
                 "{{data}} on {{time}}" +
                 "</user>" +
                 "\"\"\"" +
+                "for expired events " +
                 ";");
         Assert.assertNotNull(query);
     }
@@ -513,6 +515,7 @@ public class SimpleQueryTestCase {
                 "address  \"abc@test.con\"," +
                 "subject  \"{{data}}-type\")" +
                 "map text " +
+                "for all events " +
                 ";");
         Assert.assertNotNull(query);
     }
