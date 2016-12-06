@@ -193,6 +193,50 @@ public class PublisherTestCase {
     }
 
     //    from FooStream
+    //    publish inMemory options (topic "foo", symbol "{{symbol}}")
+    //    map text """
+    //          Hi user
+    //          {{data}} on {{time}}
+    //          """;
+    @Test
+    public void testPublisherWithHttpTransport() throws InterruptedException {
+        StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
+                .attribute("symbol", Attribute.Type.STRING)
+                .attribute("price", Attribute.Type.INT)
+                .attribute("volume", Attribute.Type.FLOAT);
+
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("FooStream")
+        );
+        query.publish(
+                Transport.transport("http")
+                        .option("topic", "foo")
+                        .option("symbol", "{{symbol}}")
+                        .option("symbol-price", "{{symbol}}-{{price}}")
+                        .option("non-exist-symbol", "{{non-exist}}-{{symbol}}")
+                        .option("non-exist", "{{non-exist}}"),
+                OutputStream.OutputEventType.CURRENT_EVENTS,
+                Mapping.format("text").body("Price of a {{symbol}} share is ${{price}}.")
+        );
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlan executionPlan = new ExecutionPlan("ep1");
+        executionPlan.defineStream(streamDefinition);
+        executionPlan.addQuery(query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        InputHandler stockStream = executionPlanRuntime.getInputHandler("FooStream");
+
+        executionPlanRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        Thread.sleep(100);
+        executionPlanRuntime.shutdown();
+    }
+
+
+    //    from FooStream
     //    select *
     //    insert into OutStream;
     @Test
