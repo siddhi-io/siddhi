@@ -394,7 +394,7 @@ type
     ;
 
 key
-    :name
+    :name ('.' name )*
     ;
 
 map_attribute

@@ -1895,6 +1895,24 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     /**
      * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     *
+     * @param ctx
+     */
+    @Override
+    public Object visitKey(@NotNull SiddhiQLParser.KeyContext ctx) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (SiddhiQLParser.NameContext nameContext : ctx.name()) {
+            stringBuilder.append(".").append(visit(nameContext));
+        }
+        return stringBuilder.substring(1);
+    }
+
+    /**
+     * {@inheritDoc}
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      *
