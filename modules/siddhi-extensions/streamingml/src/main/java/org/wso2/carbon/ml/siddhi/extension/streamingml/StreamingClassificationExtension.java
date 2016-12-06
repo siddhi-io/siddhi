@@ -286,7 +286,7 @@ public class StreamingClassificationExtension extends StreamProcessor
                         outputData[outputData.length - 1] = classes.get(index_predic);
                         if (numberOfNominals != 0) {
                             for (int k = numberOfNumerics; k < numberOfAttributes - 1; k++) {
-                                int nominal_index = (int) outputData[k];
+                                int nominal_index =((Double)outputData[k]).intValue();
                                 outputData[k] = nominals.get(k - numberOfNumerics).
                                         get(nominal_index);
                             }
@@ -310,7 +310,7 @@ public class StreamingClassificationExtension extends StreamProcessor
                         outputData[outputData.length - 1] = classes.get(index_predic);
                         if (numberOfNominals != 0) {
                             for (int k = numberOfNumerics; k < numberOfAttributes - 1; k++) {
-                                int nominal_index = (int) outputData[k];
+                                int nominal_index =((Double)outputData[k]).intValue();
                                 outputData[k] = nominals.get(k - numberOfNumerics).
                                         get(nominal_index);
                             }
