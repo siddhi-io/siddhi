@@ -28,7 +28,6 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
@@ -85,10 +84,12 @@ public class HttpOutputTransport extends OutputTransport {
     private HttpClient httpClient = null;
     private HostConfiguration hostConfiguration = null;
     private Map<String, String> options;
+    private Map<String, Converter> dynamicOptionConverters;
 
     @Override
-    public void init(Transport transportOptions, ExecutionPlanContext executionPlanContext)
+    public void init(Transport transportOptions, Map<String, Converter> dynamicOptionConverters)
             throws OutputTransportException {
+        this.dynamicOptionConverters = dynamicOptionConverters;
         options = transportOptions.getOptions();
         if (executorService == null) {
             int minThread = (options.get(ADAPTER_MIN_THREAD_POOL_SIZE_NAME) != null)
@@ -116,14 +117,6 @@ public class HttpOutputTransport extends OutputTransport {
             connectionManager = new MultiThreadedHttpConnectionManager();
             connectionManager.getParams().setDefaultMaxConnectionsPerHost(defaultMaxConnectionsPerHost);
             connectionManager.getParams().setMaxTotalConnections(maxTotalConnections);
-
-            // grainier : fix why internal reference holder is not calling start()??????
-            // then move this to that
-            try {
-                connect();
-            } catch (ConnectionUnavailableException e) {
-                e.printStackTrace();
-            }
         }
     }
 

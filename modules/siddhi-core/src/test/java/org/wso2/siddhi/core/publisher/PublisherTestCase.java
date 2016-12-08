@@ -131,7 +131,7 @@ public class PublisherTestCase {
         );
         query.publish(
                 Transport.transport("inMemory").option("topic", "foo"), OutputStream.OutputEventType.CURRENT_EVENTS,
-                Mapping.format("text").body("Hi user {{data}} on {{time}}")
+                Mapping.format("text").map("Stock price of {{symbol}} is ${{price}}")
         );
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -171,10 +171,9 @@ public class PublisherTestCase {
                         .option("topic", "foo")
                         .option("symbol", "{{symbol}}")
                         .option("symbol-price", "{{symbol}}-{{price}}")
-                        .option("non-exist-symbol", "{{non-exist}}-{{symbol}}")
                         .option("non-exist", "{{non-exist}}"),
                 OutputStream.OutputEventType.CURRENT_EVENTS,
-                Mapping.format("text").body("Price of a {{symbol}} share is ${{price}}.")
+                Mapping.format("text").map("Price of a {{symbol}} share is ${{price}}.")
         );
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -217,7 +216,7 @@ public class PublisherTestCase {
                         .option("non-exist-symbol", "{{non-exist}}-{{symbol}}")
                         .option("non-exist", "{{non-exist}}"),
                 OutputStream.OutputEventType.CURRENT_EVENTS,
-                Mapping.format("text").body("Price of a {{symbol}} share is ${{price}}.")
+                Mapping.format("text").map("Price of a {{symbol}} share is ${{price}}.")
         );
 
         SiddhiManager siddhiManager = new SiddhiManager();

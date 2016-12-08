@@ -81,8 +81,8 @@ public class Transport {
     @Override
     public int hashCode() {
         int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + (options != null ? options.hashCode() : 0)
-                + (dynamicOptions != null ? dynamicOptions.hashCode() : 0);
+        result = 31 * result + (options != null ? options.hashCode() : 0);
+        result = 31 * result + (dynamicOptions != null ? dynamicOptions.hashCode() : 0);
         return result;
     }
 }

@@ -19,12 +19,15 @@
 package org.wso2.siddhi.core.publisher;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
+import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,13 +35,14 @@ import java.util.Map;
  * some type. this type can either be local, jms or ws (or any custom extension)
  */
 public abstract class OutputTransport implements EternalReferencedHolder {
+    private Map<String, Converter> dynamicOptionConverters;
 
     /**
      * The init of the transport, this will be called only once before connect() and testConnect()
      *
      * @throws OutputTransportException if there are any configuration errors
      */
-    public abstract void init(Transport transportOptions, ExecutionPlanContext executionPlanContext)
+    public abstract void init(Transport transportOptions, Map<String, Converter> dynamicOptionConverters)
             throws OutputTransportException;
 
     /**
@@ -65,7 +69,6 @@ public abstract class OutputTransport implements EternalReferencedHolder {
      */
     public abstract void publish(Object event, Map<String, String> dynamicOptions) throws ConnectionUnavailableException;
 
-
     /**
      * Will be called after all publishing is done, or when ConnectionUnavailableException is thrown
      */
@@ -82,6 +85,19 @@ public abstract class OutputTransport implements EternalReferencedHolder {
      * @return is polled
      */
     public abstract boolean isPolled();
+
+    public final void init(ExecutionPlanContext executionPlanContext, StreamDefinition streamDefinition, Transport transportConfig)
+            throws OutputTransportException {
+        dynamicOptionConverters = new HashMap<String, Converter>();
+        for (Map.Entry<String, String> entry : transportConfig.getDynamicOptions().entrySet()) {
+            dynamicOptionConverters.put(entry.getKey(), new Converter(streamDefinition, entry.getValue()));
+        }
+        init(transportConfig, dynamicOptionConverters);
+    }
+
+    public final Map<String, String> getDynamicOptions(Event event) {
+        return Converter.convert(event, dynamicOptionConverters);
+    }
 
     @Override
     public void start() {

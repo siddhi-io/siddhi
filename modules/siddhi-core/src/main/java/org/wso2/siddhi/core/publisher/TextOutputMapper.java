@@ -18,24 +18,26 @@
 
 package org.wso2.siddhi.core.publisher;
 
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TextOutputMapper extends OutputMapper {
 
     @Override
-    void init() {
-        // if there's anything to be initialized
+    void init(StreamDefinition streamDefinition, Map<String, String> options, List<String> dynamicOptions) {
+
     }
 
     @Override
-    String generateDefaultMapping(StreamDefinition streamDefinition) {
-        Map<String, String> mapping = new HashMap<String, String>();
-        for (String attributeName : streamDefinition.getAttributeNameArray()) {
-            mapping.put(attributeName, String.format("{{%s}}", attributeName));
-        }
-        return mapping.toString();
+    Object mapDefault(Event event, Map<String, String> dynamicOptions) {
+        return event;
+    }
+
+    @Override
+    Object mapCustom(Event event, List<String> mappings, Map<String, String> dynamicOptions) {
+        return mappings;
     }
 }

@@ -194,6 +194,8 @@ public class OutputParser {
             OutputTransport outputTransport = (OutputTransport) SiddhiClassLoader.loadSiddhiImplementation(
                     transportExtension.getFunction(), OutputTransport.class);
 
+            executionPlanContext.addEternalReferencedHolder(outputTransport);
+
             Extension mapperExtension = new Extension() {
                 @Override
                 public String getNamespace() {

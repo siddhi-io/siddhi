@@ -19,7 +19,6 @@
 package org.wso2.siddhi.core.publisher;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
@@ -29,11 +28,13 @@ import java.util.Map;
 
 public class InMemoryOutputTransport extends OutputTransport {
     private static final Logger log = Logger.getLogger(InMemoryOutputTransport.class);
+    private Map<String, Converter> dynamicOptionConverters;
 
     @Override
-    public void init(Transport transportOptions, ExecutionPlanContext executionPlanContext)
+    public void init(Transport transportOptions, Map<String, Converter> dynamicOptionConverters)
             throws OutputTransportException {
         log.info("InMemoryOutputTransport:init()");
+        this.dynamicOptionConverters = dynamicOptionConverters;
     }
 
     @Override

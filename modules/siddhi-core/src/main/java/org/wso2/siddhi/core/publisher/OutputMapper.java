@@ -20,107 +20,65 @@ package org.wso2.siddhi.core.publisher;
 
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.execution.io.map.AttributeMapping;
 import org.wso2.siddhi.query.api.execution.io.map.Mapping;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public abstract class OutputMapper {
-
-    private static final Pattern DYNAMIC_PATTERN = Pattern.compile("\\{\\{(.*?)}}");
-    private boolean customMappingEnabled = false;
-    private Mapping mapping;
-    private String mappingString;
-    private StreamDefinition streamDefinition;
+    private List<Converter> attributeConverters;
+    private Map<String, Converter> dynamicOptionConverters;
+    private boolean isCustomMappingEnabled;
 
     /**
      * This will be called only once and this can be used to acquire
      * required resources for processing the mapping.
      */
-    abstract void init();
+    abstract void init(StreamDefinition streamDefinition,
+                       Map<String, String> options,
+                       List<String> dynamicOptions);
 
-    /**
-     * Generate mapping string if the mapping body haven't provided.
-     *
-     * @param streamDefinition {@link StreamDefinition}
-     * @return mapping string
-     */
-    abstract String generateDefaultMapping(StreamDefinition streamDefinition);
+    abstract Object mapDefault(Event event, Map<String, String> dynamicOptions);
 
-    public final void init(Mapping mapping, StreamDefinition streamDefinition) {
-        this.mapping = mapping;
-        this.streamDefinition = streamDefinition;
-        if (mapping.getBody() != null && !mapping.getBody().isEmpty()) {
-            customMappingEnabled = true;
-            mappingString = mapping.getBody();
+    abstract Object mapCustom(Event event, List<String> mappings,
+                              Map<String, String> dynamicOptions);
+
+    public final void init(StreamDefinition streamDefinition, Mapping mapping) {
+        isCustomMappingEnabled = mapping.getAttributeMappingList().size() > 0;
+        attributeConverters = new ArrayList<Converter>();
+        if (isCustomMappingEnabled) {
+            for (AttributeMapping attributeMapping : mapping.getAttributeMappingList()) {
+                attributeConverters.add(new Converter(streamDefinition, attributeMapping.getMapping()));
+            }
+        }
+
+        List<String> dynamicOptions = new ArrayList<String>();
+        dynamicOptionConverters = new HashMap<String, Converter>();
+        for (Map.Entry<String, String> entry : mapping.getDynamicOptions().entrySet()) {
+            dynamicOptionConverters.put(entry.getKey(),
+                    new Converter(streamDefinition, entry.getValue()));
+            dynamicOptions.add(entry.getKey());
+        }
+
+        init(streamDefinition, mapping.getOptions(), dynamicOptions);
+    }
+
+    public final Object mapEvent(Event event) {
+        if (isCustomMappingEnabled) {
+            return mapCustom(event, getMappedAttributes(event), getMappedOptions(event));
         } else {
-            mappingString = generateDefaultMapping(streamDefinition);
-        }
-        init();
-    }
-
-    public final Mapping getMapping() {
-        return mapping;
-    }
-
-    public final String getMappingFormat() {
-        return mapping.getFormat();
-    }
-
-    public final String getMappingString() {
-        return mappingString;
-    }
-
-    public final StreamDefinition getStreamDefinition() {
-        return streamDefinition;
-    }
-
-    public final boolean isCustomMappingEnabled() {
-        return customMappingEnabled;
-    }
-
-    /**
-     * Map the event according to given mapping.
-     *
-     * @param event event to be mapped with the given mapping.
-     * @return mapped event object
-     */
-    public final String mapEvent(Event event, String mappingText) {
-        Matcher matcher = DYNAMIC_PATTERN.matcher(mappingText);
-        while (matcher.find()) {
-            if (getValue(event, matcher.group(1)) != null) {
-                mappingText = mappingText.replaceAll(
-                        String.format("\\{\\{%s}}", matcher.group(1)),
-                        getValue(event, matcher.group(1)).toString()
-                );
-            }
-        }
-        return mappingText;
-    }
-
-    public final Map<String, String> mapDynamicOptions(Event event, Map<String, String> dynamicOptions) {
-        Map<String, String> mappedOptions = new HashMap<String, String>();
-        for (Map.Entry<String, String> entry : dynamicOptions.entrySet()) {
-            mappedOptions.put(entry.getKey(), mapEvent(event, entry.getValue()));
-        }
-        return mappedOptions;
-    }
-
-    public final Object getValue(Event event, String property) {
-        List<String> properties = Arrays.asList(streamDefinition.getAttributeNameArray());
-        try {
-            return event.getData()[properties.indexOf(property)];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            if (event.getArbitraryDataMap() != null) {
-                return event.getArbitraryDataMap().get(property);
-            } else {
-                return null;
-            }
+            return mapDefault(event, getMappedOptions(event));
         }
     }
 
+    private Map<String, String> getMappedOptions(Event event) {
+        return Converter.convert(event, dynamicOptionConverters);
+    }
+
+    private List<String> getMappedAttributes(Event event) {
+        return Converter.convert(event, attributeConverters);
+    }
 }

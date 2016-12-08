@@ -50,8 +50,8 @@ public class PublishStreamCallback extends OutputCallback {
 
     public void init(ExecutionPlanContext executionPlanContext) {
         try {
-            outputMapper.init(mappingConfig, outputStreamDefinition);
-            outputTransport.init(transportConfig, executionPlanContext);
+            outputMapper.init(outputStreamDefinition, mappingConfig);
+            outputTransport.init(executionPlanContext, outputStreamDefinition, transportConfig);
         } catch (OutputTransportException e) {
             log.error("Error when initializing output transport.", e);
         }
@@ -65,8 +65,9 @@ public class PublishStreamCallback extends OutputCallback {
             try {
                 Event event = new Event(complexEvent.getOutputData().length).copyFrom(complexEvent);
                 outputTransport.publish(
-                        outputMapper.mapEvent(event, outputMapper.getMappingString()),
-                        outputMapper.mapDynamicOptions(event, transportConfig.getDynamicOptions()));
+                        outputMapper.mapEvent(event),
+                        outputTransport.getDynamicOptions(event)
+                );
             } catch (ConnectionUnavailableException e) {
                 log.error("Cannot publish to Output Transport due to unavailability of connection.", e);
             }
