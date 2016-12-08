@@ -40,8 +40,8 @@ public class testSiddhiLatency {
     public static void init() {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
-        String eligibilityStream = " define stream EligibilityStream (rule string, messageID string, isEligible bool," +
-                " isLocallyThrottled bool, throttle_key string , timeNow long); ";
+        String eligibilityStream = " define stream EligibilityStream (rule inputmapper, messageID inputmapper, isEligible bool," +
+                " isLocallyThrottled bool, throttle_key inputmapper , timeNow long); ";
         String commonQuery = "FROM EligibilityStream[isEligible==false]\n" +
                 "\t\tSELECT rule, messageID, false AS isThrottled, timeNow\n" +
                 "\t\tINSERT INTO ThrottleStream;\n" +
@@ -73,8 +73,8 @@ public class testSiddhiLatency {
         eligibilityStreamInputHandler = commonExecutionPlanRuntime.getInputHandler("EligibilityStream");
 
 
-        String requestStream = "define stream RequestStream (messageID string, app_key string, api_key string, " +
-                "app_tier string, api_tier string, user_id string, properties object, timeNow long);";
+        String requestStream = "define stream RequestStream (messageID inputmapper, app_key inputmapper, api_key inputmapper, " +
+                "app_tier inputmapper, api_tier inputmapper, user_id inputmapper, properties object, timeNow long);";
         String eligibilityQuery = "FROM RequestStream\n" +
                 "SELECT 'sub_gold' AS rule, messageID, ( api_tier == 'Gold') AS isEligible,false as " +
                 "isLocallyThrottled,  str:concat('sub_gold_', api_key,app_key,user_id,'_key') AS throttle_key, timeNow\n" +

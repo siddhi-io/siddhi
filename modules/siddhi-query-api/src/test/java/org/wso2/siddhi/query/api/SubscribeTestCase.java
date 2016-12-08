@@ -115,7 +115,7 @@ public class SubscribeTestCase {
 //    Insert into FooStream;
     @Test
     public void testCreatingInmemorySubscriptionJsonMapping() {
-        String stream = "define stream FooStream (symbol string, price float, volume int); ";
+        String stream = "define stream FooStream (symbol inputmapper, price float, volume int); ";
 
         Subscription subscription = Subscription.Subscribe(
                 Transport.transport("memory").

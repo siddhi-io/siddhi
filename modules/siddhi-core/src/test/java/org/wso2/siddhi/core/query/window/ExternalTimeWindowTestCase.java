@@ -49,7 +49,7 @@ public class ExternalTimeWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timeStamp long, ip string) ;";
+                "define stream LoginEvents (timeStamp long, ip inputmapper) ;";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.externalTime(timeStamp,5 sec) " +

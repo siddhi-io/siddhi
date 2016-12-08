@@ -54,8 +54,8 @@ public class TablePartitionTestCase {
         String executionPlan = "" +
                 "@plan:name('PartitionTest') " +
                 "" +
-                "define stream streamA (symbol string, price int);" +
-                "define table tableA (symbol string, price int);" +
+                "define stream streamA (symbol inputmapper, price int);" +
+                "define table tableA (symbol inputmapper, price int);" +
                 "partition with (symbol of streamA) " +
                 "begin " +
                 "   @info(name = 'query1') " +
@@ -82,9 +82,9 @@ public class TablePartitionTestCase {
 
         String executionPlan = "" +
                 "@plan:name('PartitionTest') " +
-                "define stream streamA (symbol string, price int);" +
-                "define stream streamB (symbol string);" +
-                "define table tableA (symbol string, price int);" +
+                "define stream streamA (symbol inputmapper, price int);" +
+                "define stream streamB (symbol inputmapper);" +
+                "define table tableA (symbol inputmapper, price int);" +
                 "partition with (symbol of streamA, symbol of streamB) " +
                 "begin " +
                 "   @info(name = 'query1') " +
@@ -133,9 +133,9 @@ public class TablePartitionTestCase {
 
         String executionPlan = "" +
                 "@plan:name('PartitionTest') " +
-                "define stream streamA (symbol string, price int);" +
-                "define stream streamB (symbol string);" +
-                "define table tableA (symbol string, price int);" +
+                "define stream streamA (symbol inputmapper, price int);" +
+                "define stream streamB (symbol inputmapper);" +
+                "define table tableA (symbol inputmapper, price int);" +
                 "partition with (symbol of streamA, symbol of streamB) " +
                 "begin " +
                 "   @info(name = 'query1') " +

@@ -31,8 +31,8 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.extension.inputmapper.ConcatFunctionExtension;
 import org.wso2.siddhi.extension.map.test.util.SiddhiTestHelper;
-import org.wso2.siddhi.extension.string.ConcatFunctionExtension;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -53,7 +53,7 @@ public class ToJSONFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
 
-        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String inStreamDefinition = "\ndefine stream inputStream (symbol inputmapper, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select "
                 + "map:createFromJSON(\"{'symbol':'WSO2','price':100,'volume':100,'last5val':{'price':150,'volume':200}}\") as hashMap insert into outputStream;" +
                 "from outputStream " +
@@ -100,7 +100,7 @@ public class ToJSONFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
 
-        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String inStreamDefinition = "\ndefine stream inputStream (symbol inputmapper, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select "
                 + "map:createFromJSON(str:concat('{symbol :',symbol,', price :',price,', volume :',volume,'}')) as hashMap insert into outputStream;" +
                 "from outputStream " +

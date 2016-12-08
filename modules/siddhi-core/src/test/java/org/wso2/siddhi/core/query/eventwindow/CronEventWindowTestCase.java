@@ -45,8 +45,8 @@ public class CronEventWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int); " +
-                                "define window cseEventWindow (symbol string, price float, volume int) cron('*/5 * * * * ?'); ";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) cron('*/5 * * * * ?'); ";
 
         String query = "@info(name = 'query0') " +
                 "from cseEventStream " +
@@ -99,8 +99,8 @@ public class CronEventWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define window cseEventWindow (symbol string, price float, volume int) cron('*/5 * * * * ?') output expired events; ";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) cron('*/5 * * * * ?') output expired events; ";
 
         String query = "@info(name = 'query0') " +
                 "from cseEventStream " +

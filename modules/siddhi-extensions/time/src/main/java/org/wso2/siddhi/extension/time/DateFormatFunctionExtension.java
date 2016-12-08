@@ -34,7 +34,7 @@ import java.util.Date;
 
 /**
  * dateFormat(dateValue,dateTargetFormat,dateSourceFormat)/dateFormat(dateValue,dateTargetFormat)/dateFormat(timestampInMilliseconds,dateTargetFormat)
- * Returns a formatted date string.
+ * Returns a formatted date inputmapper.
  * dateValue - value of date. eg: "2014-11-11 13:23:44.657", "2014-11-11" , "13:23:44.657"
  * dateTargetFormat - Date format which need to be converted to. eg: yyyy/MM/dd HH:mm:ss
  * dateSourceFormat - Date format of the provided date value. eg: yyyy-MM-dd HH:mm:ss.SSS

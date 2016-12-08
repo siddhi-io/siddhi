@@ -54,10 +54,10 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('InsertOverwriteTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream UpdateStockStream (symbol string, price float, volume long); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream UpdateStockStream (symbol inputmapper, price float, volume long); " +
                 "@from(eventtable = 'hazelcast') " +
-                "define table StockTableT011 (symbol string, price float, volume long); ";
+                "define table StockTableT011 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -91,9 +91,9 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('InsertOverwriteTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
                 "@from(eventtable = 'hazelcast') " +
-                "define table StockTableT021 (symbol string, price float, volume long); ";
+                "define table StockTableT021 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query2') " +
                 "from StockStream " +
@@ -122,11 +122,11 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('InsertOverwriteTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string, volume long); " +
-                "define stream UpdateStockStream (symbol string, price float, volume long); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper, volume long); " +
+                "define stream UpdateStockStream (symbol inputmapper, price float, volume long); " +
                 "@from(eventtable = 'hazelcast') " +
-                "define table StockTableT031 (symbol string, price float, volume long); ";
+                "define table StockTableT031 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -203,10 +203,10 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('InsertOverwriteTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string, volume long); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper, volume long); " +
                 "@from(eventtable = 'hazelcast') " +
-                "define table StockTableT041 (symbol string, price float, volume long); ";
+                "define table StockTableT041 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query2') " +
                 "from StockStream " +
@@ -278,11 +278,11 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('InsertOverwriteTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string, volume long); " +
-                "define stream UpdateStockStream (comp string, vol long); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper, volume long); " +
+                "define stream UpdateStockStream (comp inputmapper, vol long); " +
                 "@from(eventtable = 'hazelcast') " +
-                "define table StockTableT051 (symbol string, price float, volume long); ";
+                "define table StockTableT051 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -333,11 +333,11 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('InsertOverwriteTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string, volume long); " +
-                "define stream UpdateStockStream (comp string, vol long); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper, volume long); " +
+                "define stream UpdateStockStream (comp inputmapper, vol long); " +
                 "@from(eventtable = 'hazelcast') " +
-                "define table StockTableT061 (symbol string, price float, volume long); ";
+                "define table StockTableT061 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -418,11 +418,11 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('InsertOverwriteTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string, volume long, price float); " +
-                "define stream UpdateStockStream (comp string, vol long); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper, volume long, price float); " +
+                "define stream UpdateStockStream (comp inputmapper, vol long); " +
                 "@from(eventtable = 'hazelcast') " +
-                "define table StockTableT071 (symbol string, price float, volume long); ";
+                "define table StockTableT071 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -497,10 +497,10 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('InsertOverwriteTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string, volume long, price float); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper, volume long, price float); " +
                 "@from(eventtable = 'hazelcast') " +
-                "define table StockTableT081 (symbol string, price float, volume long); ";
+                "define table StockTableT081 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query2') " +
                 "from StockStream " +
@@ -570,11 +570,11 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('InsertOverwriteTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string, volume long, price float); " +
-                "define stream UpdateStockStream (comp string, vol long); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper, volume long, price float); " +
+                "define stream UpdateStockStream (comp inputmapper, vol long); " +
                 "@from(eventtable = 'hazelcast') " +
-                "define table StockTableT091 (symbol string, price float, volume long); ";
+                "define table StockTableT091 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -650,11 +650,11 @@ public class InsertOverwriteTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('InsertOverwriteTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string, volume long, price float); " +
-                "define stream UpdateStockStream (comp string, vol long); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper, volume long, price float); " +
+                "define stream UpdateStockStream (comp inputmapper, vol long); " +
                 "@from(eventtable = 'hazelcast') " +
-                "define table StockTableT101 (symbol string, price float, volume long); ";
+                "define table StockTableT101 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +

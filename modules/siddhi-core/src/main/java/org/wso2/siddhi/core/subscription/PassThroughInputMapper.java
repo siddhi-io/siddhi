@@ -42,21 +42,8 @@ public class PassThroughInputMapper implements InputMapper {
     private List<AttributeMapping> attributeMappingList;
 
     @Override
-    public StreamDefinition getOutputStreamDefinition() {
-        return this.outputStreamDefinition;
-    }
-
-    @Override
-    public void inferOutputStreamDefinition(StreamDefinition outputStreamDefinition) {
-        if (outputStreamDefinition == null) {
-            // TODO: 12/1/16 Infer the output stream definition
-        } else {
-            this.outputStreamDefinition = outputStreamDefinition;
-        }
-    }
-
-    @Override
-    public void init(OutputCallback outputCallback, MetaStreamEvent metaStreamEvent, Map<String, String> options, List<AttributeMapping> attributeMappingList) {
+    public void init(StreamDefinition outputStreamDefinition, OutputCallback outputCallback, MetaStreamEvent metaStreamEvent, Map<String, String> options, List<AttributeMapping> attributeMappingList) {
+        this.outputStreamDefinition = outputStreamDefinition;
         this.outputCallback = outputCallback;
         this.outputStreamDefinition = metaStreamEvent.getOutputStreamDefinition();
         this.options = options;

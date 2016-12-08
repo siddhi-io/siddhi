@@ -50,8 +50,8 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <2:5> -> e2=Stream2[price>20] " +
@@ -109,8 +109,8 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <2:5> -> e2=Stream2[price>20] " +
@@ -168,8 +168,8 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <2:5> -> e2=Stream2[price>20] " +
@@ -223,8 +223,8 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <2:5> -> e2=Stream2[price>20] " +
@@ -274,8 +274,8 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <2:5> -> e2=Stream2[price>20] " +
@@ -339,8 +339,8 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <2:5> -> e2=Stream2[price>e1[1].price] " +
@@ -393,8 +393,8 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <0:5> -> e2=Stream2[price>20] " +
@@ -441,8 +441,8 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <0:5> -> e2=Stream2[price>e1[0].price] " +
@@ -493,7 +493,7 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream EventStream (symbol string, price float, volume int); ";
+                "define stream EventStream (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1 = EventStream [price >= 50 and volume > 100] -> e2 = EventStream [price <= 40] <0:5> " +
@@ -551,7 +551,7 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream EventStream (symbol string, price float, volume int); ";
+                "define stream EventStream (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1 = EventStream [price >= 50 and volume > 100] -> e2 = EventStream [price <= 40] <:5> " +
@@ -609,7 +609,7 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream EventStream (symbol string, price float, volume int); ";
+                "define stream EventStream (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1 = EventStream [price >= 50 and volume > 100] -> e2 = EventStream [price <= 40] <:5> " +
@@ -667,7 +667,7 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream EventStream (symbol string, price float, volume int); ";
+                "define stream EventStream (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1 = EventStream [price >= 50 and volume > 100] -> e2 = EventStream [price <= 40] <:5> " +
@@ -726,7 +726,7 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream EventStream (symbol string, price float, volume int); ";
+                "define stream EventStream (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1 = EventStream -> " +
@@ -807,8 +807,8 @@ public class CountPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <0:5> -> e2=Stream2[price>e1[0].price] " +

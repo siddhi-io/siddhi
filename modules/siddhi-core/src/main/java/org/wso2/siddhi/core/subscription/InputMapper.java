@@ -28,9 +28,5 @@ import java.util.Map;
 
 public interface InputMapper extends InputCallback {
 
-    StreamDefinition getOutputStreamDefinition();
-
-    void inferOutputStreamDefinition(StreamDefinition outputStreamDefinition);
-
-    void init(OutputCallback outputCallback, MetaStreamEvent metaStreamEvent, Map<String, String> options, List<AttributeMapping> attributeMappingList);
+    void init(StreamDefinition outputStreamDefinition, OutputCallback outputCallback, MetaStreamEvent metaStreamEvent, Map<String, String> options, List<AttributeMapping> attributeMappingList);
 }

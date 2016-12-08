@@ -31,7 +31,7 @@ import java.util.Map;
 
 /**
  * toJSON(Map)
- * Returns a string representation of the map in JSON format
+ * Returns a inputmapper representation of the map in JSON format
  * Accept Type(s): (Map)
  * Return Type(s): String
  */
@@ -58,7 +58,7 @@ public class ToJSONFunctionExtension extends FunctionExecutor {
             JSONObject jsonObject = new JSONObject(map);
             return jsonObject.toString();
         } else {
-            throw new ExecutionPlanRuntimeException("Data should be a string");
+            throw new ExecutionPlanRuntimeException("Data should be a inputmapper");
         }
     }
 

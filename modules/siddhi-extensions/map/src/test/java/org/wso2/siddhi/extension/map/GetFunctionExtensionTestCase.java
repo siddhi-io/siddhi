@@ -47,7 +47,7 @@ public class GetFunctionExtensionTestCase {
     public void testGetFunctionExtension() throws InterruptedException {
         log.info("GetFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price double, volume long);";
+        String inStreamDefinition = "\ndefine stream inputStream (symbol inputmapper, price double, volume long);";
 
         String query = ("@info(name = 'query1') from inputStream " +
                 "select symbol,price,map:create() as tmpMap" +
@@ -100,14 +100,14 @@ public class GetFunctionExtensionTestCase {
     public void testGetFunctionExtension2() throws InterruptedException {
         log.info("GetFunctionExtension TestCase 2");
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String inStreamDefinition = "\ndefine stream inputStream (symbol inputmapper, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream" +
                 " select symbol,price,map:create() as tmpMap " +
                 "insert into tmpStream;" +
                 "@info(name = 'query2') from tmpStream  " +
                 "select symbol,price,tmpMap, map:put(tmpMap,symbol,price) as map1" +
                 " insert into outputStream;" +
-                "@info(name = 'query3') from outputStream  select map1, convert(cast(map:get(map1,symbol), 'int'), 'string') as priceInString" +
+                "@info(name = 'query3') from outputStream  select map1, convert(cast(map:get(map1,symbol), 'int'), 'inputmapper') as priceInString" +
                 " insert into outputStream2;"
         );
 

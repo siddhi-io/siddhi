@@ -19,10 +19,10 @@ package org.wso2.siddhi.core;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiContext;
+import org.wso2.siddhi.core.config.StatisticsConfiguration;
 import org.wso2.siddhi.core.util.ExecutionPlanRuntimeBuilder;
 import org.wso2.siddhi.core.util.parser.ExecutionPlanParser;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
-import org.wso2.siddhi.core.config.StatisticsConfiguration;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.compiler.SiddhiCompiler;
 
@@ -64,7 +64,7 @@ public class SiddhiManager {
     }
 
     /**
-     * Method to add execution plan in the form of a string. You can add valid set of Siddhi queries as a String to
+     * Method to add execution plan in the form of a inputmapper. You can add valid set of Siddhi queries as a String to
      * this method and receive {@link ExecutionPlanRuntime} object representing the queries.
      * @param executionPlan String representation of Siddhi queries
      * @return Execution Plan Runtime

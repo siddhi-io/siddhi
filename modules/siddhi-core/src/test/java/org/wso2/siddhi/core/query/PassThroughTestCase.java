@@ -197,7 +197,7 @@ public class PassThroughTestCase {
         String executionPlan = "" +
                 "@Plan:name('passThroughTest4') " +
                 "" +
-                "define stream cseEventStream (symbol string, price float, volume long);" +
+                "define stream cseEventStream (symbol inputmapper, price float, volume long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream " +

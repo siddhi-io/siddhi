@@ -38,7 +38,7 @@ public class ReverseGeocodeStreamFunctionProcessorTest {
         LOGGER.info("Test Reverse Geocode 1 - Coordinates in LK");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId string, timestamp long, latitude double, longitude double);"
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId inputmapper, timestamp long, latitude double, longitude double);"
                 + "@info(name = 'query1') from LocationStream#geo:reversegeocode(latitude, longitude) " +
                 " select streetNumber, neighborhood, route, administrativeAreaLevelTwo, administrativeAreaLevelOne, country, countryCode, postalCode, formattedAddress " +
                 " insert into OutputStream");
@@ -63,7 +63,7 @@ public class ReverseGeocodeStreamFunctionProcessorTest {
         LOGGER.info("Test Reverse Geocode 2 - Coordinates in USA");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId string, timestamp long, latitude double, longitude double);"
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId inputmapper, timestamp long, latitude double, longitude double);"
                 + "@info(name = 'query1') from LocationStream#geo:reversegeocode(latitude, longitude) " +
                 " select streetNumber, neighborhood, route, administrativeAreaLevelTwo, administrativeAreaLevelOne, country, countryCode, postalCode, formattedAddress " +
                 " insert into OutputStream");
@@ -88,7 +88,7 @@ public class ReverseGeocodeStreamFunctionProcessorTest {
         LOGGER.info("Test Reverse Geocode 3 - Coordinates in UK");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId string, timestamp long, latitude double, longitude double);"
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId inputmapper, timestamp long, latitude double, longitude double);"
                 + "@info(name = 'query1') from LocationStream#geo:reversegeocode(latitude, longitude) " +
                 " select streetNumber, neighborhood, route, administrativeAreaLevelTwo, administrativeAreaLevelOne, country, countryCode, postalCode, formattedAddress " +
                 " insert into OutputStream");
@@ -113,7 +113,7 @@ public class ReverseGeocodeStreamFunctionProcessorTest {
         LOGGER.info("Test Reverse Geocode 4 - Less precised input");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId string, timestamp long, latitude double, longitude double);"
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId inputmapper, timestamp long, latitude double, longitude double);"
                 + "@info(name = 'query1') from LocationStream#geo:reversegeocode(latitude, longitude) " +
                 " select streetNumber, neighborhood, route, administrativeAreaLevelTwo, administrativeAreaLevelOne, country, countryCode, postalCode, formattedAddress " +
                 " insert into OutputStream");
@@ -138,7 +138,7 @@ public class ReverseGeocodeStreamFunctionProcessorTest {
         LOGGER.info("Test Reverse Geocode 4 - Amazon Rain Forest");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId string, timestamp long, latitude double, longitude double);"
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId inputmapper, timestamp long, latitude double, longitude double);"
                 + "@info(name = 'query1') from LocationStream#geo:reversegeocode(latitude, longitude) " +
                 " select streetNumber, neighborhood, route, administrativeAreaLevelTwo, administrativeAreaLevelOne, country, countryCode, postalCode, formattedAddress " +
                 " insert into OutputStream");
@@ -163,7 +163,7 @@ public class ReverseGeocodeStreamFunctionProcessorTest {
         LOGGER.info("Test Reverse Geocode 5 - null inputs");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId string, timestamp long, latitude double, longitude double);"
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId inputmapper, timestamp long, latitude double, longitude double);"
                 + "@info(name = 'query1') from LocationStream#geo:reversegeocode(latitude, longitude) " +
                 " select streetNumber, neighborhood, route, administrativeAreaLevelTwo, administrativeAreaLevelOne, country, countryCode, postalCode, formattedAddress " +
                 " insert into OutputStream");
@@ -188,7 +188,7 @@ public class ReverseGeocodeStreamFunctionProcessorTest {
         LOGGER.info("Test Reverse Geocode 6 - Invalid number of input parameters");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId string, timestamp long, latitude double, longitude double);"
+        siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId inputmapper, timestamp long, latitude double, longitude double);"
                 + "@info(name = 'query1') from LocationStream#geo:reversegeocode(latitude) " +
                 " select streetNumber, neighborhood, route, administrativeAreaLevelTwo, administrativeAreaLevelOne, country, countryCode, postalCode, formattedAddress " +
                 " insert into OutputStream");
@@ -199,7 +199,7 @@ public class ReverseGeocodeStreamFunctionProcessorTest {
         LOGGER.info("Test Reverse Geocode 7 - Invalid type of input parameters");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId string, timestamp long, latitude float, longitude float);"
+        siddhiManager.createExecutionPlanRuntime("define stream LocationStream (deviceId inputmapper, timestamp long, latitude float, longitude float);"
                 + "@info(name = 'query1') from LocationStream#geo:reversegeocode(latitude, longitude) " +
                 " select streetNumber, neighborhood, route, administrativeAreaLevelTwo, administrativeAreaLevelOne, country, countryCode, postalCode, formattedAddress " +
                 " insert into OutputStream");

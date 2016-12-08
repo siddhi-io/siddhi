@@ -58,7 +58,7 @@ public class LogTestCase {
         String executionPlan = "" +
                 "@plan:name('Test') " +
                 "" +
-                "define stream StockStream ( symbol string, price float, volume int );" +
+                "define stream StockStream ( symbol inputmapper, price float, volume int );" +
                 "" +
                 "@info(name = 'query1')" +
                 "from StockStream" +

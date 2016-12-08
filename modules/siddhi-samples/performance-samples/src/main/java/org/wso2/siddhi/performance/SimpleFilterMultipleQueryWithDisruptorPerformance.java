@@ -31,7 +31,7 @@ public class SimpleFilterMultipleQueryWithDisruptorPerformance {
         String executionPlan = "" +
                 "@plan:async" +
                 " " +
-                "define stream cseEventStream (symbol string, price float, volume int, timestamp long);" +
+                "define stream cseEventStream (symbol inputmapper, price float, volume int, timestamp long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[70 > price] " +

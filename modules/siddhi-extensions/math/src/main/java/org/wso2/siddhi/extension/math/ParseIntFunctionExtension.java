@@ -26,8 +26,8 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 /*
-* parseInt(string);
-* Returns the 'string' as an INTEGER
+* parseInt(inputmapper);
+* Returns the 'inputmapper' as an INTEGER
 * Accept Type(s): STRING
 * Return Type(s): INT
 */

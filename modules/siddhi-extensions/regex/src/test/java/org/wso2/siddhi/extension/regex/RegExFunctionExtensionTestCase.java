@@ -45,7 +45,7 @@ public class RegExFunctionExtensionTestCase {
         log.info("FindFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string);";
+        String inStreamDefinition = "define stream inputStream (symbol inputmapper, price long, regex inputmapper);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , regex:find(regex, symbol) as aboutWSO2 " +
@@ -92,7 +92,7 @@ public class RegExFunctionExtensionTestCase {
         log.info("FindStartFromIndexFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string, startingIndex int);";
+        String inStreamDefinition = "define stream inputStream (symbol inputmapper, price long, regex inputmapper, startingIndex int);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , regex:find(regex, symbol, startingIndex) as aboutWSO2 " +
@@ -131,7 +131,7 @@ public class RegExFunctionExtensionTestCase {
         log.info("MatchesFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string);";
+        String inStreamDefinition = "define stream inputStream (symbol inputmapper, price long, regex inputmapper);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , regex:matches(regex, symbol) as aboutWSO2 " +
@@ -174,7 +174,7 @@ public class RegExFunctionExtensionTestCase {
         log.info("LookingAtFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string);";
+        String inStreamDefinition = "define stream inputStream (symbol inputmapper, price long, regex inputmapper);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , regex:lookingAt(regex, symbol) as aboutWSO2 " +
@@ -204,7 +204,7 @@ public class RegExFunctionExtensionTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"21 products are produced by WSO2 currently in Sri Lanka", 60.5f, "\\d\\d(.*)WSO2"});
-        inputHandler.send(new Object[]{"sample test string and WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware(.*)"});
+        inputHandler.send(new Object[]{"sample test inputmapper and WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware(.*)"});
         inputHandler.send(new Object[]{"WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware"});
         Thread.sleep(100);
         Assert.assertEquals(3, count);
@@ -217,7 +217,7 @@ public class RegExFunctionExtensionTestCase {
         log.info("GroupFunctionExtensionTestCase TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string, group int);";
+        String inStreamDefinition = "define stream inputStream (symbol inputmapper, price long, regex inputmapper, group int);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , regex:group(regex, symbol, group) as aboutWSO2 " +

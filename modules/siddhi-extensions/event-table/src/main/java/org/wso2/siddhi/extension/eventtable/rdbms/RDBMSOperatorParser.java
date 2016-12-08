@@ -35,18 +35,8 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.Variable;
-import org.wso2.siddhi.query.api.expression.condition.And;
-import org.wso2.siddhi.query.api.expression.condition.Compare;
-import org.wso2.siddhi.query.api.expression.condition.IsNull;
-import org.wso2.siddhi.query.api.expression.condition.Not;
-import org.wso2.siddhi.query.api.expression.condition.Or;
-import org.wso2.siddhi.query.api.expression.constant.BoolConstant;
-import org.wso2.siddhi.query.api.expression.constant.Constant;
-import org.wso2.siddhi.query.api.expression.constant.DoubleConstant;
-import org.wso2.siddhi.query.api.expression.constant.FloatConstant;
-import org.wso2.siddhi.query.api.expression.constant.IntConstant;
-import org.wso2.siddhi.query.api.expression.constant.LongConstant;
-import org.wso2.siddhi.query.api.expression.constant.StringConstant;
+import org.wso2.siddhi.query.api.expression.condition.*;
+import org.wso2.siddhi.query.api.expression.constant.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -168,7 +158,7 @@ public class RDBMSOperatorParser {
     }
 
     /**
-     * Method which constructs the update query string
+     * Method which constructs the update query inputmapper
      */
     private static StringBuilder getUpdateQueryAttributes(List<Attribute> updateConditionAttributeList, Map<String, String> elementMappings) {
 

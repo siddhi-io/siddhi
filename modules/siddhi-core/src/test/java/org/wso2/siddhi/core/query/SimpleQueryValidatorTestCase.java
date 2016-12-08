@@ -20,7 +20,6 @@ package org.wso2.siddhi.core.query;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.config.SiddhiContext;
-import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.parser.ExecutionPlanParser;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.compiler.SiddhiCompiler;
@@ -37,7 +36,7 @@ public class SimpleQueryValidatorTestCase {
     @Test(expected = ExecutionPlanValidationException.class)
     public void testQueryWithNotExistingAttributes() throws InterruptedException {
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume >= 50] select symbol1,price,volume insert into outputStream ;";
 
         ExecutionPlanParser.parse(SiddhiCompiler.parse(cseEventStream + query), siddhiContext);
@@ -45,8 +44,8 @@ public class SimpleQueryValidatorTestCase {
 
     @Test(expected = ExecutionPlanValidationException.class)
     public void testQueryWithDuplicateDefinition() throws InterruptedException {
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
-        String duplicateStream = "define stream outputStream (symbol string, price float);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume long);";
+        String duplicateStream = "define stream outputStream (symbol inputmapper, price float);";
         String query = "@info(name = 'query1') from cseEventStream[volume >= 50] select symbol,price,volume insert into outputStream ;";
 
         ExecutionPlanParser.parse(SiddhiCompiler.parse(cseEventStream + duplicateStream + query), siddhiContext);
@@ -54,7 +53,7 @@ public class SimpleQueryValidatorTestCase {
 
     @Test(expected = ExecutionPlanValidationException.class)
     public void testInvalidFilterCondition1() throws InterruptedException {
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[volume >= 50 and volume] select symbol,price,volume insert into outputStream ;";
 
         ExecutionPlanParser.parse(SiddhiCompiler.parse(cseEventStream + query), siddhiContext);
@@ -62,7 +61,7 @@ public class SimpleQueryValidatorTestCase {
 
     @Test(expected = ExecutionPlanValidationException.class)
     public void testInvalidFilterCondition2() throws InterruptedException {
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[not(price)] select symbol,price,volume insert into outputStream ;";
 
         ExecutionPlanParser.parse(SiddhiCompiler.parse(cseEventStream + query), siddhiContext);
@@ -71,7 +70,7 @@ public class SimpleQueryValidatorTestCase {
 
     @Test
     public void testComplexFilterQuery1() throws InterruptedException {
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long, available bool);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume long, available bool);";
         String query = "@info(name = 'query1') from cseEventStream[available] select symbol,price,volume insert into outputStream ;";
 
         ExecutionPlanParser.parse(SiddhiCompiler.parse(cseEventStream + query), siddhiContext);
@@ -79,7 +78,7 @@ public class SimpleQueryValidatorTestCase {
 
     @Test
     public void testComplexFilterQuery2() throws InterruptedException {
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long, available bool);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume long, available bool);";
         String query = "@info(name = 'query1') from cseEventStream[available and price>50] select symbol,price,volume insert into outputStream ;";
 
         ExecutionPlanParser.parse(SiddhiCompiler.parse(cseEventStream + query), siddhiContext);

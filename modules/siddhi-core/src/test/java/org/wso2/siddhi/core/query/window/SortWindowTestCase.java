@@ -50,7 +50,7 @@ public class SortWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol string, price float, volume long);";
+                "define stream cseEventStream (symbol inputmapper, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.sort(2,volume, 'asc') " +
@@ -97,7 +97,7 @@ public class SortWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String planName = "@plan:name('sortWindow2') ";
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol string, price int, volume long);";
+                "define stream cseEventStream (symbol inputmapper, price int, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.sort(2,volume, 'asc', price, 'desc') " +

@@ -42,7 +42,7 @@ public class DistinctcountAttributeAggregatorTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (eventId string, userID string, pageID string); ";
+                "define stream inputStream (eventId inputmapper, userID inputmapper, pageID inputmapper); ";
 
         String query = "" +
                 "@info(name = 'query1') " +

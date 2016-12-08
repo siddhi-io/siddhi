@@ -54,8 +54,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20],e2=Stream2[price>e1.price] " +
@@ -105,8 +105,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], e2=Stream2[price>e1.price] " +
@@ -159,8 +159,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], e2=Stream2[price>e1.price]* " +
@@ -221,8 +221,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream2[price>20]*, e2=Stream1[price>e1[0].price] " +
@@ -285,8 +285,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream2[price>20]*, e2=Stream1[price>e1[0].price] " +
@@ -348,8 +348,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream2[price>20]?, e2=Stream1[price>e1[0].price] " +
@@ -411,8 +411,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream2[price>20], e2=Stream2[price>e1.price] or e3=Stream2[symbol=='IBM'] " +
@@ -477,8 +477,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream2[price>20], e2=Stream2[price>e1.price] or e3=Stream2[symbol=='IBM'] " +
@@ -543,8 +543,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream2[price>20], e2=Stream2[price>e1.price] or e3=Stream2[symbol=='IBM'] " +
@@ -609,8 +609,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream2[price>20]+, e2=Stream1[price>e1[0].price] " +
@@ -670,8 +670,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], " +
@@ -735,8 +735,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol string, price float, volume int); " +
-                "define stream TwitterStream (symbol string, count int); ";
+                "define stream StockStream (symbol inputmapper, price float, volume int); " +
+                "define stream TwitterStream (symbol inputmapper, count int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=StockStream[ price >= 50 and volume > 100 ], e2=TwitterStream[count > 10] " +
@@ -800,8 +800,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol string, price float, volume int); " +
-                "define stream TwitterStream (symbol string, count int); ";
+                "define stream StockStream (symbol inputmapper, price float, volume int); " +
+                "define stream TwitterStream (symbol inputmapper, count int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=StockStream[ price >= 50 and volume > 100 ], e2=StockStream[price <= 40]*, e3=StockStream[volume <= 70] " +
@@ -860,8 +860,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream1 (symbol string, price float, volume int); " +
-                "define stream StockStream2 (symbol string, price float, volume int); ";
+                "define stream StockStream1 (symbol inputmapper, price float, volume int); " +
+                "define stream StockStream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=StockStream1[ price >= 50 and volume > 100 ], e2=StockStream2[price <= 40]*, e3=StockStream2[volume <= 70] " +
@@ -934,8 +934,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream1 (symbol string, price float, volume int); " +
-                "define stream StockStream2 (symbol string, price float, volume int); ";
+                "define stream StockStream1 (symbol inputmapper, price float, volume int); " +
+                "define stream StockStream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=StockStream1[ price >= 50 and volume > 100 ], e2=StockStream2[e1.symbol != 'AMBA']*, e3=StockStream2[volume <= 70] " +
@@ -1005,8 +1005,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream1 (symbol string, price float, volume int); " +
-                "define stream StockStream2 (symbol string, price float, volume int); ";
+                "define stream StockStream1 (symbol inputmapper, price float, volume int); " +
+                "define stream StockStream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=StockStream1, e2=StockStream2[e1.symbol != 'AMBA']*, e3=StockStream2[volume <= 70] " +
@@ -1076,8 +1076,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], " +
@@ -1143,8 +1143,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], " +
@@ -1206,8 +1206,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], " +
@@ -1289,8 +1289,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], " +
@@ -1362,8 +1362,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], " +
@@ -1441,8 +1441,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], " +
@@ -1518,8 +1518,8 @@ public class SequenceTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], " +
@@ -1591,7 +1591,7 @@ public class SequenceTestCase {
         log.info("testTimeBatchAndSequence  OUT 1");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream received_reclamations (timestamp long, product_id string, defect_category string);";
+                "define stream received_reclamations (timestamp long, product_id inputmapper, defect_category inputmapper);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from received_reclamations#window.timeBatch(1 sec) " +

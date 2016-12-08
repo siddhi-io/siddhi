@@ -29,7 +29,7 @@ public class SimpleFilterMultipleQueryPerformance {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "" +
-                "define stream cseEventStream (symbol string, price float, volume int, timestamp long);" +
+                "define stream cseEventStream (symbol inputmapper, price float, volume int, timestamp long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[70 > price] " +

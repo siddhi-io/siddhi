@@ -41,13 +41,13 @@ public class InMemoryInputTransport extends InputTransport {
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        System.out.printf("Connecting");
-        this.executorService.scheduleAtFixedRate(dataGenerator, 0, 1, TimeUnit.SECONDS);
+        System.out.println("Connecting");
+        this.executorService.scheduleAtFixedRate(dataGenerator, 1, 1, TimeUnit.SECONDS);
     }
 
     @Override
     public void disconnect() {
-        System.out.printf("Disconnecting");
+        System.out.println("Disconnecting");
         this.executorService.shutdown();
     }
 
@@ -70,7 +70,10 @@ public class InMemoryInputTransport extends InputTransport {
 
         @Override
         public void run() {
-            inputCallback.onEvent(new Object[]{"WSO2", 56.75f, 5});
+//            inputCallback.onEvent(new Object[]{"WSO2", 56.75f, 5});
+//            inputCallback.onEvent("{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
+//            inputCallback.onEvent("WSO2,56.75,5,Sri Lanka");
+            inputCallback.onEvent("symbol=WSO2, price=56.75, volume=5, country=Sri Lanka");
         }
     }
 }

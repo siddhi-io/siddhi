@@ -54,7 +54,7 @@ public class QuerySyncTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol string, price float, volume int);";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "@synchronized('true') " +
@@ -101,7 +101,7 @@ public class QuerySyncTestCase {
         String executionPlan = "" +
                 "@Plan:name('SnapshotOutputRateLimitTest3') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "@synchronized('true') " +
@@ -157,8 +157,8 @@ public class QuerySyncTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define stream twitterStream (user string, tweet string, company string); ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "@synchronized('true') " +
@@ -209,8 +209,8 @@ public class QuerySyncTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "@synchronized('true') " +

@@ -38,7 +38,7 @@ public class ConvertFunctionExecutor extends FunctionExecutor {
             throw new ExecutionPlanValidationException("1st parameter of convert() cannot be 'object' as it's not supported, it has to be either of (STRING, INT, LONG, FLOAT, DOUBLE, BOOL), but found " + attributeExpressionExecutors[0].getReturnType());
         }
         if (attributeExpressionExecutors[1].getReturnType() != Attribute.Type.STRING) {
-            throw new ExecutionPlanValidationException("2nd parameter of convert() must be 'string' have constant value either of (STRING, INT, LONG, FLOAT, DOUBLE, BOOL), but found " + attributeExpressionExecutors[0].getReturnType());
+            throw new ExecutionPlanValidationException("2nd parameter of convert() must be 'inputmapper' have constant value either of (STRING, INT, LONG, FLOAT, DOUBLE, BOOL), but found " + attributeExpressionExecutors[0].getReturnType());
         }
         if (!(attributeExpressionExecutors[1] instanceof ConstantExpressionExecutor)) {
             throw new ExecutionPlanValidationException("2nd parameter of convert() must have constant value either of (STRING, INT, LONG, FLOAT, DOUBLE, BOOL), but found a variable expression");

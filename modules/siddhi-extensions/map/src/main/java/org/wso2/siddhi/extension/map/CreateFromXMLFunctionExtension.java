@@ -69,7 +69,7 @@ public class CreateFromXMLFunctionExtension extends FunctionExecutor {
                 throw new ExecutionPlanRuntimeException("Input data cannot be parsed to xml: " + e.getMessage(), e);
             }
         } else {
-            throw new ExecutionPlanRuntimeException("Data should be a string");
+            throw new ExecutionPlanRuntimeException("Data should be a inputmapper");
         }
     }
 

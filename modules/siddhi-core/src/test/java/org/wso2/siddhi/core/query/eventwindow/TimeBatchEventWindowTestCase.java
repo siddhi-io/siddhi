@@ -46,8 +46,8 @@ public class TimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define window cseEventWindow (symbol string, price float, volume int) timeBatch(1 sec); ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) timeBatch(1 sec); ";
 
         String query = "" +
                 "@info(name = 'query0') " +
@@ -97,8 +97,8 @@ public class TimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define window cseEventWindow (symbol string, price float, volume int) timeBatch(1 sec); ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) timeBatch(1 sec); ";
 
         String query = "" +
                 "@info(name = 'query0') " +
@@ -153,8 +153,8 @@ public class TimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define window cseEventWindow (symbol string, price float, volume int) timeBatch(1 sec) output current events; ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) timeBatch(1 sec) output current events; ";
 
         String query = "" +
                 "@info(name = 'query0') " +
@@ -208,8 +208,8 @@ public class TimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define window cseEventWindow (symbol string, price float, volume int) timeBatch(1 sec) output expired events; ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) timeBatch(1 sec) output expired events; ";
 
         String query = "" +
                 "@info(name = 'query0') " +
@@ -263,10 +263,10 @@ public class TimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define stream twitterStream (user string, tweet string, company string); " +
-                "define window cseEventWindow (symbol string, price float, volume int) timeBatch(1 sec); " +
-                "define window twitterWindow (user string, tweet string, company string) timeBatch(1 sec); ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) timeBatch(1 sec); " +
+                "define window twitterWindow (user inputmapper, tweet inputmapper, company inputmapper) timeBatch(1 sec); ";
 
         String query = "" +
                 "@info(name = 'query0') " +
@@ -322,9 +322,9 @@ public class TimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define stream twitterStream (user string, tweet string, company string); " +
-                "define window cseEventWindow (symbol string, price float, volume int) timeBatch(1 sec); ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) timeBatch(1 sec); ";
 
         String query = "" +
                 "@info(name = 'query0') " +
@@ -378,10 +378,10 @@ public class TimeBatchEventWindowTestCase {
 
 
         String streams = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define stream twitterStream (user string, tweet string, company string); " +
-                "define window cseEventWindow (symbol string, price float, volume int) timeBatch(1 sec) output current events; " +
-                "define window twitterWindow (user string, tweet string, company string) timeBatch(1 sec) output current events; ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) timeBatch(1 sec) output current events; " +
+                "define window twitterWindow (user inputmapper, tweet inputmapper, company inputmapper) timeBatch(1 sec) output current events; ";
 
         String query = "" +
                 "@info(name = 'query0') " +
@@ -436,8 +436,8 @@ public class TimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define window cseEventWindow (symbol string, price float, volume int) timeBatch(2 sec, 0) output current events; ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) timeBatch(2 sec, 0) output current events; ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from cseEventStream " +
@@ -492,8 +492,8 @@ public class TimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define window cseEventWindow (symbol string, price float, volume int) timeBatch(2 sec , 0); ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define window cseEventWindow (symbol inputmapper, price float, volume int) timeBatch(2 sec , 0); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from cseEventStream " +

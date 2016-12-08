@@ -82,7 +82,7 @@ public class TriggerTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
                 "define trigger StockStream at 'start' ";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
@@ -115,7 +115,7 @@ public class TriggerTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String plan = "" +
-                "define stream cseEventStream (symbol string, price float, volume long);" +
+                "define stream cseEventStream (symbol inputmapper, price float, volume long);" +
                 "define trigger triggerStream at 'start';";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(plan);
@@ -146,7 +146,7 @@ public class TriggerTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String plan = "" +
-                "define stream cseEventStream (symbol string, price float, volume long);" +
+                "define stream cseEventStream (symbol inputmapper, price float, volume long);" +
                 "define trigger triggerStream at every 500 milliseconds ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(plan);
@@ -177,7 +177,7 @@ public class TriggerTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String plan = "" +
-                "define stream cseEventStream (symbol string, price float, volume long);" +
+                "define stream cseEventStream (symbol inputmapper, price float, volume long);" +
                 "define trigger triggerStream at '*/1 * * * * ?' ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(plan);

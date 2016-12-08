@@ -216,7 +216,7 @@ public class LinearRegressionTestcase {
         logger.info("Simple Forecast TestCase");
 
         siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (y double, symbol string, x double);";
+        String inputStream = "define stream InputStream (y double, symbol inputmapper, x double);";
 
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:forecast(2, 1000, 0.95, x+2, y, x) "
                 + "select * "

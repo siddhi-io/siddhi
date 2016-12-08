@@ -51,7 +51,7 @@ public class DateAddFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds long,expr int);";
+                "define stream inputStream (symbol inputmapper,dateValue inputmapper,dateFormat inputmapper,timestampInMilliseconds long,expr int);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +

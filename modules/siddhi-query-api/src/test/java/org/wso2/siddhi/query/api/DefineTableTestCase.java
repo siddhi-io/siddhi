@@ -25,7 +25,7 @@ import org.wso2.siddhi.query.api.exception.DuplicateAttributeException;
 
 public class DefineTableTestCase {
 
-    //define stream StockStream (symbol string, price int, volume float );
+    //define stream StockStream (symbol inputmapper, price int, volume float );
 
     @Test
     public void testCreatingTableDefinition() {

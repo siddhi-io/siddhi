@@ -36,7 +36,7 @@
 
 <eventTableConfiguration>
     <mappings>
-        <mapping>
+        <regex>
             <elements>
                 <element key="string">VARCHAR(255)</element>
                 <element key="double">DOUBLE</element>
@@ -65,19 +65,19 @@
                 <element key="not">NOT</element>
                 <element key="isNull">IS NULL</element>
             </elements>
-        </mapping>
-        <mapping db='mysql'>
+        </regex>
+        <regex db='mysql'>
             <elements>
                 <element key="bool">TINYINT</element>
             </elements>
-        </mapping>
-        <mapping db='postgresql'>
+        </regex>
+        <regex db='postgresql'>
             <elements>
                	<element key="bool">SMALLINT</element>
 				<element key="integer">INTEGER</element>
             </elements>
-        </mapping>
-        <mapping db='oracle'>
+        </regex>
+        <regex db='oracle'>
             <elements>
                 <element key="string">varchar2(255)</element>
                 <element key="long">NUMBER(19)</element>
@@ -87,8 +87,8 @@
                 <element key="isTableExist">SELECT * FROM $TABLE_NAME WHERE ROWNUM = 1</element>
                 <element key="isTableRowExist">SELECT * FROM $TABLE_NAME WHERE $CONDITION</element>
             </elements>
-        </mapping>
-        <mapping db='microsoft sql server'>
+        </regex>
+        <regex db='microsoft sql server'>
             <elements>
                 <element key="string">varchar(255)</element>
                 <element key="long">NUMERIC(19)</element>
@@ -96,12 +96,12 @@
                 <element key="float">FLOAT(16)</element>
                 <element key="isTableExist">SELECT TOP 1 * FROM $TABLE_NAME</element>
             </elements>
-        </mapping>
-        <mapping db='h2'>
+        </regex>
+        <regex db='h2'>
             <elements>
                 <element key="integer">varchar2(255)</element>
                 <element key="long">REAL</element>
             </elements>
-        </mapping>
+        </regex>
     </mappings>
 </eventTableConfiguration>

@@ -112,7 +112,7 @@ public class GeocodeStreamFunctionProcessor extends StreamFunctionProcessor {
     protected List<Attribute> init(AbstractDefinition inputDefinition, ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
         debugModeOn = LOGGER.isDebugEnabled();
         if (attributeExpressionExecutors[0].getReturnType() != Attribute.Type.STRING) {
-            throw new ExecutionPlanCreationException("First parameter should be of type string");
+            throw new ExecutionPlanCreationException("First parameter should be of type inputmapper");
         }
         ArrayList<Attribute> attributes = new ArrayList<Attribute>(6);
         attributes.add(new Attribute("formattedAddress", Attribute.Type.STRING));

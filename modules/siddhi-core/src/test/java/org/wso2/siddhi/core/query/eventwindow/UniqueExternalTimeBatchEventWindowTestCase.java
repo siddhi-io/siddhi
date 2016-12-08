@@ -51,8 +51,8 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timestamp long, ip string); " +
-                "define window LoginEventsWindow (timestamp long, ip string) uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0, 2 sec); ";
+                "define stream LoginEvents (timestamp long, ip inputmapper); " +
+                "define window LoginEventsWindow (timestamp long, ip inputmapper) uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0, 2 sec); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -129,8 +129,8 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timestamp long, ip string); " +
-                "define window LoginEventsWindow (timestamp long, ip string) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 6 sec); ";
+                "define stream LoginEvents (timestamp long, ip inputmapper); " +
+                "define window LoginEventsWindow (timestamp long, ip inputmapper) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 6 sec); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -184,8 +184,8 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timestamp long, ip string); " +
-                "define window LoginEventsWindow (timestamp long, ip string) uniqueExternalTimeBatch(ip,timestamp, 1 sec); ";
+                "define stream LoginEvents (timestamp long, ip inputmapper); " +
+                "define window LoginEventsWindow (timestamp long, ip inputmapper) uniqueExternalTimeBatch(ip,timestamp, 1 sec); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -244,8 +244,8 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timestamp long, ip string); " +
-                "define window LoginEventsWindow (timestamp long, ip string) uniqueExternalTimeBatch(ip,timestamp, 1 sec); ";
+                "define stream LoginEvents (timestamp long, ip inputmapper); " +
+                "define window LoginEventsWindow (timestamp long, ip inputmapper) uniqueExternalTimeBatch(ip,timestamp, 1 sec); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -306,8 +306,8 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timestamp long, ip string); " +
-                "define window LoginEventsWindow (timestamp long, ip string) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 3 sec); ";
+                "define stream LoginEvents (timestamp long, ip inputmapper); " +
+                "define window LoginEventsWindow (timestamp long, ip inputmapper) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 3 sec); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -366,8 +366,8 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timestamp long, ip string); " +
-                "define window LoginEventsWindow (timestamp long, ip string) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 3 sec); ";
+                "define stream LoginEvents (timestamp long, ip inputmapper); " +
+                "define window LoginEventsWindow (timestamp long, ip inputmapper) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 3 sec); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -433,8 +433,8 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timestamp long, ip string); " +
-                "define window LoginEventsWindow (timestamp long, ip string) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 2 sec); ";
+                "define stream LoginEvents (timestamp long, ip inputmapper); " +
+                "define window LoginEventsWindow (timestamp long, ip inputmapper) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 2 sec); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -509,8 +509,8 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timestamp long, ip string); " +
-                "define window LoginEventsWindow (timestamp long, ip string) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 2 sec); ";
+                "define stream LoginEvents (timestamp long, ip inputmapper); " +
+                "define window LoginEventsWindow (timestamp long, ip inputmapper) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 2 sec); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -584,8 +584,8 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timestamp long, ip string); " +
-                "define window LoginEventsWindow (timestamp long, ip string) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 2 sec); ";
+                "define stream LoginEvents (timestamp long, ip inputmapper); " +
+                "define window LoginEventsWindow (timestamp long, ip inputmapper) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0, 2 sec); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -660,8 +660,8 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timestamp long, ip string); " +
-                "define window LoginEventsWindow (timestamp long, ip string) uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0); ";
+                "define stream LoginEvents (timestamp long, ip inputmapper); " +
+                "define window LoginEventsWindow (timestamp long, ip inputmapper) uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -730,10 +730,10 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream cseEventStream (timestamp long, symbol string, price float, volume int, ip string); " +
-                "define stream twitterStream (timestamp long, user string, tweet string, company string, ip string); " +
-                "define window cseEventWindow (timestamp long, symbol string, price float, volume int, ip string) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0); " +
-                "define window twitterWindow (timestamp long, user string, tweet string, company string, ip string) uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0); ";
+                "define stream cseEventStream (timestamp long, symbol inputmapper, price float, volume int, ip inputmapper); " +
+                "define stream twitterStream (timestamp long, user inputmapper, tweet inputmapper, company inputmapper, ip inputmapper); " +
+                "define window cseEventWindow (timestamp long, symbol inputmapper, price float, volume int, ip inputmapper) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0); " +
+                "define window twitterWindow (timestamp long, user inputmapper, tweet inputmapper, company inputmapper, ip inputmapper) uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0); ";
 
         String query = "" +
                 "@info(name = 'query0') " +
@@ -790,10 +790,10 @@ public class UniqueExternalTimeBatchEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream cseEventStream (timestamp long, symbol string, price float, volume int, ip string); " +
-                "define stream twitterStream (timestamp long, user string, tweet string, company string, ip string); " +
-                "define window cseEventWindow (timestamp long, symbol string, price float, volume int, ip string) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0); " +
-                "define window twitterWindow (timestamp long, user string, tweet string, company string, ip string) uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0); ";
+                "define stream cseEventStream (timestamp long, symbol inputmapper, price float, volume int, ip inputmapper); " +
+                "define stream twitterStream (timestamp long, user inputmapper, tweet inputmapper, company inputmapper, ip inputmapper); " +
+                "define window cseEventWindow (timestamp long, symbol inputmapper, price float, volume int, ip inputmapper) uniqueExternalTimeBatch(ip,timestamp, 1 sec, 0); " +
+                "define window twitterWindow (timestamp long, user inputmapper, tweet inputmapper, company inputmapper, ip inputmapper) uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0); ";
 
         String query = "" +
                 "@info(name = 'query0') " +

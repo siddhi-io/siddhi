@@ -17,4 +17,5 @@
 #
 plus=org.wso2.siddhi.core.query.extension.util.CustomFunctionExtension
 getAll=org.wso2.siddhi.core.query.extension.util.StringConcatAggregatorString
+json=org.wso2.siddhi.core.subscription.JsonInputMapper
 

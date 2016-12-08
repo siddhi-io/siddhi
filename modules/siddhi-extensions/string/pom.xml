@@ -63,7 +63,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.siddhi.extension.string.*
+                            org.wso2.siddhi.extension.inputmapper.*
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional
