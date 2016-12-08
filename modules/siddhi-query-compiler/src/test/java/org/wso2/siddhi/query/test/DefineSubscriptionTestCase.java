@@ -29,8 +29,9 @@ public class DefineSubscriptionTestCase {
     @Test
     public void testCreatingHttpSubscriptionXmlMapping() throws SiddhiParserException{
         Subscription subscription = SiddhiCompiler.parseSubscription("subscribe http options(context '/test', transport 'http,https') " +
-                                                        "map xml \"//h:time\", \"//h:data\" " +
+                                                        "map xml " +
                                                         "options( xmlns \"http://www.w3.org/TR/html4/\") " +
+                                                        "\"//h:time\", \"//h:data\" " +
                                                         "Insert into FooStream;");
         Assert.assertNotNull(subscription);
     }
@@ -54,9 +55,10 @@ public class DefineSubscriptionTestCase {
     @Test
     public void testCreatingJmsSubscriptionTextMapping() throws SiddhiParserException{
         Subscription subscription =SiddhiCompiler.parseSubscription("subscribe jms options(topic 'foo') " +
-                "map text \"regex1[1]\" , \"regex2[3]\" " +
+                "map text " +
                 "options ( regex1  \"(\\w+)\\s(\\w+)\\s(\\w+)\\s(\\w+)\", " +
                 "regex2  \"(\\w+)\\s(\\w+)\\s(\\w+)\\s(\\w+)\") " +
+                "\"regex1[1]\" , \"regex2[3]\" " +
                 "insert into FooStream;");
         Assert.assertNotNull(subscription);
     }

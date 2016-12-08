@@ -160,7 +160,7 @@ transport
     ;
 
 mapping
-    :type (map_attribute (',' map_attribute)*)? (OPTIONS '(' option (',' option)* ')')?
+    :type (OPTIONS '(' option (',' option)* ')')? (map_attribute (',' map_attribute)*)?
     ;
 
 standard_stream
