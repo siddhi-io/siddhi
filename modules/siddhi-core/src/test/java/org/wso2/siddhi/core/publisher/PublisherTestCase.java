@@ -155,7 +155,7 @@ public class PublisherTestCase {
     //          Hi user
     //          {{data}} on {{time}}
     //          """;
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testPublisherWithDynamicTransportOptions() throws InterruptedException {
         StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
                 .attribute("symbol", Attribute.Type.STRING)
@@ -197,7 +197,7 @@ public class PublisherTestCase {
     //          Hi user
     //          {{data}} on {{time}}
     //          """;
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testPublisherWithHttpTransport() throws InterruptedException {
         StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
                 .attribute("symbol", Attribute.Type.STRING)

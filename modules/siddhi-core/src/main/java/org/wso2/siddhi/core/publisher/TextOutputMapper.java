@@ -21,13 +21,12 @@ package org.wso2.siddhi.core.publisher;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
-import java.util.List;
 import java.util.Map;
 
 public class TextOutputMapper extends OutputMapper {
 
     @Override
-    void init(StreamDefinition streamDefinition, Map<String, String> options, List<String> dynamicOptions) {
+    void init(StreamDefinition streamDefinition, Map<String, String> options, String[] dynamicOptions) {
 
     }
 
@@ -37,7 +36,7 @@ public class TextOutputMapper extends OutputMapper {
     }
 
     @Override
-    Object mapCustom(Event event, List<String> mappings, Map<String, String> dynamicOptions) {
+    Object mapCustom(Event event, String[] mappings, Map<String, String> dynamicOptions) {
         return mappings;
     }
 }

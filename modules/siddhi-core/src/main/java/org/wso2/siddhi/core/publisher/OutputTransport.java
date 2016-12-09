@@ -42,7 +42,7 @@ public abstract class OutputTransport implements EternalReferencedHolder {
      *
      * @throws OutputTransportException if there are any configuration errors
      */
-    public abstract void init(Transport transportOptions, Map<String, Converter> dynamicOptionConverters)
+    public abstract void init(Transport transportOptions, String[] dynamicOptions)
             throws OutputTransportException;
 
     /**
@@ -86,13 +86,16 @@ public abstract class OutputTransport implements EternalReferencedHolder {
      */
     public abstract boolean isPolled();
 
-    public final void init(ExecutionPlanContext executionPlanContext, StreamDefinition streamDefinition, Transport transportConfig)
+    public final void init(ExecutionPlanContext executionPlanContext,
+                           StreamDefinition streamDefinition, Transport transportConfig)
             throws OutputTransportException {
         dynamicOptionConverters = new HashMap<String, Converter>();
+        String[] dynamicOptions = transportConfig.getDynamicOptions().size() > 0
+                ? new String[transportConfig.getDynamicOptions().size()] : null;
         for (Map.Entry<String, String> entry : transportConfig.getDynamicOptions().entrySet()) {
             dynamicOptionConverters.put(entry.getKey(), new Converter(streamDefinition, entry.getValue()));
         }
-        init(transportConfig, dynamicOptionConverters);
+        init(transportConfig, dynamicOptions);
     }
 
     public final Map<String, String> getDynamicOptions(Event event) {

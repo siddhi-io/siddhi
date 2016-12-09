@@ -84,12 +84,10 @@ public class HttpOutputTransport extends OutputTransport {
     private HttpClient httpClient = null;
     private HostConfiguration hostConfiguration = null;
     private Map<String, String> options;
-    private Map<String, Converter> dynamicOptionConverters;
 
     @Override
-    public void init(Transport transportOptions, Map<String, Converter> dynamicOptionConverters)
+    public void init(Transport transportOptions, String[] dynamicOptions)
             throws OutputTransportException {
-        this.dynamicOptionConverters = dynamicOptionConverters;
         options = transportOptions.getOptions();
         if (executorService == null) {
             int minThread = (options.get(ADAPTER_MIN_THREAD_POOL_SIZE_NAME) != null)

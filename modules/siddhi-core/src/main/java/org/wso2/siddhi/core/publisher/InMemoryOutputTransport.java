@@ -28,13 +28,11 @@ import java.util.Map;
 
 public class InMemoryOutputTransport extends OutputTransport {
     private static final Logger log = Logger.getLogger(InMemoryOutputTransport.class);
-    private Map<String, Converter> dynamicOptionConverters;
 
     @Override
-    public void init(Transport transportOptions, Map<String, Converter> dynamicOptionConverters)
+    public void init(Transport transportOptions, String[] dynamicOptions)
             throws OutputTransportException {
         log.info("InMemoryOutputTransport:init()");
-        this.dynamicOptionConverters = dynamicOptionConverters;
     }
 
     @Override

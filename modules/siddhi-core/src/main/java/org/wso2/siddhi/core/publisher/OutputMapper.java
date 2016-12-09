@@ -23,13 +23,11 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.io.map.AttributeMapping;
 import org.wso2.siddhi.query.api.execution.io.map.Mapping;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public abstract class OutputMapper {
-    private List<Converter> attributeConverters;
+    private Converter[] attributeConverters;
     private Map<String, Converter> dynamicOptionConverters;
     private boolean isCustomMappingEnabled;
 
@@ -39,28 +37,31 @@ public abstract class OutputMapper {
      */
     abstract void init(StreamDefinition streamDefinition,
                        Map<String, String> options,
-                       List<String> dynamicOptions);
+                       String[] dynamicOptions);
 
     abstract Object mapDefault(Event event, Map<String, String> dynamicOptions);
 
-    abstract Object mapCustom(Event event, List<String> mappings,
+    abstract Object mapCustom(Event event, String[] mappings,
                               Map<String, String> dynamicOptions);
 
     public final void init(StreamDefinition streamDefinition, Mapping mapping) {
         isCustomMappingEnabled = mapping.getAttributeMappingList().size() > 0;
-        attributeConverters = new ArrayList<Converter>();
+        int i;
         if (isCustomMappingEnabled) {
+            attributeConverters = new Converter[mapping.getAttributeMappingList().size()];
+            i = 0;
             for (AttributeMapping attributeMapping : mapping.getAttributeMappingList()) {
-                attributeConverters.add(new Converter(streamDefinition, attributeMapping.getMapping()));
+                attributeConverters[i] = new Converter(streamDefinition, attributeMapping.getMapping());
             }
         }
 
-        List<String> dynamicOptions = new ArrayList<String>();
+        String[] dynamicOptions = new String[mapping.getDynamicOptions().size()];
         dynamicOptionConverters = new HashMap<String, Converter>();
+        i = 0;
         for (Map.Entry<String, String> entry : mapping.getDynamicOptions().entrySet()) {
             dynamicOptionConverters.put(entry.getKey(),
                     new Converter(streamDefinition, entry.getValue()));
-            dynamicOptions.add(entry.getKey());
+            dynamicOptions[i] = entry.getKey();
         }
 
         init(streamDefinition, mapping.getOptions(), dynamicOptions);
@@ -78,7 +79,7 @@ public abstract class OutputMapper {
         return Converter.convert(event, dynamicOptionConverters);
     }
 
-    private List<String> getMappedAttributes(Event event) {
+    private String[] getMappedAttributes(Event event) {
         return Converter.convert(event, attributeConverters);
     }
 }

@@ -24,7 +24,6 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -32,7 +31,6 @@ import java.util.regex.Pattern;
 
 public class Converter {
     private static final Pattern DYNAMIC_PATTERN = Pattern.compile("(\\{\\{[^{}]*}})|[{}]");
-    //    private static final Pattern DYNAMIC_PATTERN = Pattern.compile("\\{\\{(.*?)}}");
     private String template;
 
     public Converter(StreamDefinition streamDefinition, String template) {
@@ -47,17 +45,18 @@ public class Converter {
         return mapped;
     }
 
-    public static List<String> convert(Event event, List<Converter> converterMap) {
-        List<String> mapped = new LinkedList<String>();
-        for (Converter converter : converterMap) {
-            mapped.add(converter.map(event));
+    public static String[] convert(Event event, Converter[] converters) {
+        String[] mapped = new String[converters.length];
+        int i = 0;
+        for (Converter converter : converters) {
+            mapped[i] = converter.map(event);
         }
         return mapped;
     }
 
     public String parse(StreamDefinition streamDefinition, String template) {
         List<String> attributes = Arrays.asList(streamDefinition.getAttributeNameArray());
-        // grainier : this does not support arbitrary data
+        // todo : do we need to support arbitrary data?
         StringBuffer result = new StringBuffer();
         Matcher m = DYNAMIC_PATTERN.matcher(template);
         while (m.find()) {
