@@ -30,7 +30,7 @@ public class InMemoryOutputTransport extends OutputTransport {
     private static final Logger log = Logger.getLogger(InMemoryOutputTransport.class);
 
     @Override
-    public void init(Transport transportOptions, String[] dynamicOptions)
+    public void init(Transport transportOptions, Map<String, String> unmappedDynamicOptions)
             throws OutputTransportException {
         log.info("InMemoryOutputTransport:init()");
     }

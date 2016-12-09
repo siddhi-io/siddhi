@@ -31,6 +31,8 @@ import org.wso2.siddhi.query.api.execution.io.map.Mapping;
 import org.wso2.siddhi.query.api.execution.query.Query;
 import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
+import org.wso2.siddhi.query.api.execution.query.selection.Selector;
+import org.wso2.siddhi.query.api.expression.Variable;
 
 import java.util.Arrays;
 
@@ -76,6 +78,82 @@ public class PublisherTestCase {
                         "    {{data}} on {{time}}\n" +
                         "    "));
 
+    }
+
+    //    from FooStream
+    //    select symbol
+    //    publish inMemory options (topic ‘foo’)
+    //    map text;
+    @Test
+    public void testPublisherWithSelector() throws InterruptedException {
+        StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
+                .attribute("symbol", Attribute.Type.STRING)
+                .attribute("price", Attribute.Type.INT)
+                .attribute("volume", Attribute.Type.FLOAT);
+
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("FooStream")
+        );
+        query.select(
+                Selector.selector().select(new Variable("symbol"))
+        );
+        query.publish(
+                Transport.transport("inMemory").option("topic", "foo"), OutputStream.OutputEventType.CURRENT_EVENTS,
+                Mapping.format("text")
+        );
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlan executionPlan = new ExecutionPlan("ep1");
+        executionPlan.defineStream(streamDefinition);
+        executionPlan.addQuery(query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        InputHandler stockStream = executionPlanRuntime.getInputHandler("FooStream");
+
+        executionPlanRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        Thread.sleep(100);
+        executionPlanRuntime.shutdown();
+    }
+
+    //    from FooStream
+    //    select symbol
+    //    publish inMemory options (topic ‘foo’)
+    //    map text """Symbol is {{symbol}}""";
+    @Test
+    public void testPublisherWithSelectorAndMapping() throws InterruptedException {
+        StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
+                .attribute("symbol", Attribute.Type.STRING)
+                .attribute("price", Attribute.Type.INT)
+                .attribute("volume", Attribute.Type.FLOAT);
+
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("FooStream")
+        );
+        query.select(
+                Selector.selector().select(new Variable("symbol")).select(new Variable("price"))
+        );
+        query.publish(
+                Transport.transport("inMemory").option("topic", "foo"), OutputStream.OutputEventType.CURRENT_EVENTS,
+                Mapping.format("text").map("Symbol is {{symbol}}").map("Price is {{price}}")
+        );
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlan executionPlan = new ExecutionPlan("ep1");
+        executionPlan.defineStream(streamDefinition);
+        executionPlan.addQuery(query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        InputHandler stockStream = executionPlanRuntime.getInputHandler("FooStream");
+
+        executionPlanRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        Thread.sleep(100);
+        executionPlanRuntime.shutdown();
     }
 
     //    from FooStream

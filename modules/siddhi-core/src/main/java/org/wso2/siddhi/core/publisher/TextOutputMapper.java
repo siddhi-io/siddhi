@@ -24,19 +24,20 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import java.util.Map;
 
 public class TextOutputMapper extends OutputMapper {
+    StreamDefinition streamDefinition;
 
     @Override
-    void init(StreamDefinition streamDefinition, Map<String, String> options, String[] dynamicOptions) {
-
+    void init(StreamDefinition streamDefinition, Map<String, String> options, Map<String, String> unmappedDynamicOptions) {
+        this.streamDefinition = streamDefinition;
     }
 
     @Override
-    Object mapDefault(Event event, Map<String, String> dynamicOptions) {
+    Object generateDefaultMapping(Event event, Map<String, String> dynamicOptions) {
         return event;
     }
 
     @Override
-    Object mapCustom(Event event, String[] mappings, Map<String, String> dynamicOptions) {
-        return mappings;
+    Object generateCustomMapping(Event event, String[] mappedAttributes, Map<String, String> dynamicOptions) {
+        return mappedAttributes;
     }
 }

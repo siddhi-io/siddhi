@@ -50,11 +50,17 @@ public class Converter {
         int i = 0;
         for (Converter converter : converters) {
             mapped[i] = converter.map(event);
+            i++;
         }
         return mapped;
     }
 
-    public String parse(StreamDefinition streamDefinition, String template) {
+    public String map(Event event) {
+        // grainier : handle possible runtime exception (IllegalArgumentException)
+        return MessageFormat.format(template, event.getData());
+    }
+
+    private String parse(StreamDefinition streamDefinition, String template) {
         List<String> attributes = Arrays.asList(streamDefinition.getAttributeNameArray());
         // todo : do we need to support arbitrary data?
         StringBuffer result = new StringBuffer();
@@ -69,10 +75,5 @@ public class Converter {
         }
         m.appendTail(result);
         return result.toString();
-    }
-
-    public String map(Event event) {
-        // grainier : handle possible runtime exception (IllegalArgumentException)
-        return MessageFormat.format(template, event.getData());
     }
 }

@@ -86,7 +86,7 @@ public class HttpOutputTransport extends OutputTransport {
     private Map<String, String> options;
 
     @Override
-    public void init(Transport transportOptions, String[] dynamicOptions)
+    public void init(Transport transportOptions, Map<String, String> unmappedDynamicOptions)
             throws OutputTransportException {
         options = transportOptions.getOptions();
         if (executorService == null) {

@@ -37,12 +37,12 @@ public abstract class OutputMapper {
      */
     abstract void init(StreamDefinition streamDefinition,
                        Map<String, String> options,
-                       String[] dynamicOptions);
+                       Map<String, String> unmappedDynamicOptions);
 
-    abstract Object mapDefault(Event event, Map<String, String> dynamicOptions);
+    abstract Object generateDefaultMapping(Event event, Map<String, String> dynamicOptions);
 
-    abstract Object mapCustom(Event event, String[] mappings,
-                              Map<String, String> dynamicOptions);
+    abstract Object generateCustomMapping(Event event, String[] mappedAttributes,
+                                          Map<String, String> dynamicOptions);
 
     public final void init(StreamDefinition streamDefinition, Mapping mapping) {
         isCustomMappingEnabled = mapping.getAttributeMappingList().size() > 0;
@@ -52,26 +52,24 @@ public abstract class OutputMapper {
             i = 0;
             for (AttributeMapping attributeMapping : mapping.getAttributeMappingList()) {
                 attributeConverters[i] = new Converter(streamDefinition, attributeMapping.getMapping());
+                i++;
             }
         }
 
-        String[] dynamicOptions = new String[mapping.getDynamicOptions().size()];
         dynamicOptionConverters = new HashMap<String, Converter>();
-        i = 0;
         for (Map.Entry<String, String> entry : mapping.getDynamicOptions().entrySet()) {
             dynamicOptionConverters.put(entry.getKey(),
                     new Converter(streamDefinition, entry.getValue()));
-            dynamicOptions[i] = entry.getKey();
         }
 
-        init(streamDefinition, mapping.getOptions(), dynamicOptions);
+        init(streamDefinition, mapping.getOptions(), mapping.getDynamicOptions());
     }
 
     public final Object mapEvent(Event event) {
         if (isCustomMappingEnabled) {
-            return mapCustom(event, getMappedAttributes(event), getMappedOptions(event));
+            return generateCustomMapping(event, getMappedAttributes(event), getMappedOptions(event));
         } else {
-            return mapDefault(event, getMappedOptions(event));
+            return generateDefaultMapping(event, getMappedOptions(event));
         }
     }
 
