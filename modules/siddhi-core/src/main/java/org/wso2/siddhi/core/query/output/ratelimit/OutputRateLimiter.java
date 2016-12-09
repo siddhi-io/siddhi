@@ -22,9 +22,10 @@ import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
+import org.wso2.siddhi.core.query.output.callback.PublishStreamCallback;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
-import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
+import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 
@@ -36,15 +37,15 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
 
     protected List<QueryCallback> queryCallbacks = new ArrayList<QueryCallback>();
     protected OutputCallback outputCallback = null;
-    private boolean hasCallBack = false;
-    private String elementId;
     protected ExecutionPlanContext executionPlanContext;
     protected LatencyTracker latencyTracker;
     protected LockWrapper lockWrapper;
+    private boolean hasCallBack = false;
+    private String elementId;
 
     public void init(ExecutionPlanContext executionPlanContext, LockWrapper lockWrapper) {
         this.executionPlanContext = executionPlanContext;
-        if (outputCallback != null && outputCallback instanceof InsertIntoStreamCallback) {
+        if (outputCallback != null && (outputCallback instanceof InsertIntoStreamCallback || outputCallback instanceof PublishStreamCallback)) {
             this.lockWrapper = lockWrapper;
         }
         if (elementId == null) {
@@ -85,17 +86,17 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
         hasCallBack = true;
     }
 
+    public abstract void process(ComplexEventChunk complexEventChunk);
+
+    public OutputCallback getOutputCallback() {
+        return outputCallback;
+    }
+
     public void setOutputCallback(OutputCallback outputCallback) {
         this.outputCallback = outputCallback;
         if (outputCallback != null) {
             hasCallBack = true;
         }
-    }
-
-    public abstract void process(ComplexEventChunk complexEventChunk);
-
-    public OutputCallback getOutputCallback() {
-        return outputCallback;
     }
 
     public boolean hasCallBack() {

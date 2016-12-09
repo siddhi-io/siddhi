@@ -22,10 +22,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class Mapping {
     private String format;
     private Map<String, String> options = new HashMap<String, String>();
+    private Map<String, String> dynamicOptions = new HashMap<String, String>();
     private List<AttributeMapping> attributeMappingList = new ArrayList<AttributeMapping>();
 
     private Mapping(String format) {
@@ -37,18 +39,22 @@ public class Mapping {
     }
 
     public Mapping option(String key, String value) {
-        options.put(key, value);
+        if (Pattern.matches("\\{\\{.*?}}", value)) {
+            dynamicOptions.put(key, value);
+        } else {
+            options.put(key, value);
+        }
         return this;
     }
 
     public Mapping map(String mapping) {
         attributeMappingList.add(new AttributeMapping(mapping));
-        return null;
+        return this;
     }
 
     public Mapping map(String rename, String mapping) {
         attributeMappingList.add(new AttributeMapping(rename, mapping));
-        return null;
+        return this;
     }
 
     public String getFormat() {
@@ -57,6 +63,10 @@ public class Mapping {
 
     public Map<String, String> getOptions() {
         return options;
+    }
+
+    public Map<String, String> getDynamicOptions() {
+        return dynamicOptions;
     }
 
     public List<AttributeMapping> getAttributeMappingList() {
@@ -68,8 +78,8 @@ public class Mapping {
         return "Mapping{" +
                 "format='" + format + '\'' +
                 ", options=" + options +
-                ", attributeMappingList=" + attributeMappingList +
-                '}';
+                ", dynamicOptions=" + dynamicOptions +
+                ", attributeMappingList=" + attributeMappingList + '}';
     }
 
     @Override
@@ -89,6 +99,7 @@ public class Mapping {
     public int hashCode() {
         int result = format != null ? format.hashCode() : 0;
         result = 31 * result + (options != null ? options.hashCode() : 0);
+        result = 31 * result + (dynamicOptions != null ? dynamicOptions.hashCode() : 0);
         result = 31 * result + (attributeMappingList != null ? attributeMappingList.hashCode() : 0);
         return result;
     }
