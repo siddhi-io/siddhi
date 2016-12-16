@@ -39,6 +39,7 @@
         <module>modules/siddhi-core</module>
         <module>modules/siddhi-extensions</module>
         <module>modules/siddhi-samples</module>
+        <module>modules/siddhi-annotations</module>
     </modules>
 
     <dependencyManagement>
@@ -200,6 +201,11 @@
             <dependency>
                 <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
