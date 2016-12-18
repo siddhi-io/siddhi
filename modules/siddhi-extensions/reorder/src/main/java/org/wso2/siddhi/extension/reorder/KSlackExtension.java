@@ -35,8 +35,6 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -54,18 +52,12 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
     private TreeMap<Long, ArrayList<StreamEvent>> expiredEventTreeMap;
     private ExpressionExecutor timestampExecutor;
     private long MAX_K = Long.MAX_VALUE;
-    private long TIMER_DURATION = -1l;
+    private long timerDuration = -1l;
     private boolean expireFlag = false;
     private long lastSentTimeStamp = -1l;
     private Scheduler scheduler;
     private long lastScheduledTimestamp = -1;
     private ReentrantLock lock = new ReentrantLock();
-    private LinkedHashSet bufferSize = new LinkedHashSet();
-    private File file1;
-    private BufferedWriter bw1;
-    private int count=0;
-    private int batchSize = 10000;
-    private int NANOSECOND = 1000000000;
     private boolean flag = true;
 
 
@@ -99,7 +91,6 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
                 StreamEvent event = streamEventChunk.next();
 
                 if(event.getType() != ComplexEvent.Type.TIMER) {
-
                     streamEventChunk.remove(); //We might have the rest of the events linked to this event forming a chain.
 
                     long timestamp = (Long) timestampExecutor.execute(event);
@@ -122,13 +113,13 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
                         long minTimestamp = eventTreeMap.firstKey();
                         long timeDifference = greatestTimestamp - minTimestamp;
                         if (timeDifference > k) {
+                            System.out.println(timestamp+"\t\t\t"+k);
                             if (timeDifference < MAX_K) {
                                 k = timeDifference;
                             } else {
                                 k = MAX_K;
                             }
                         }
-                        bufferSize.add(k);
 
                         Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator = eventTreeMap.entrySet().iterator();
                         while (entryIterator.hasNext()) {
@@ -163,10 +154,27 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
                         TreeMap<Long, ArrayList<StreamEvent>> expiredEventTreeMapSnapShot = expiredEventTreeMap;
                         expiredEventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
                         onTimerEvent(expiredEventTreeMapSnapShot, nextProcessor);
-                        lastScheduledTimestamp = lastScheduledTimestamp + TIMER_DURATION;
+                        lastScheduledTimestamp = lastScheduledTimestamp + timerDuration;
                         scheduler.notifyAt(lastScheduledTimestamp);
                     }
+
+                    if (eventTreeMap.size() > 0) {
+                        Iterator<Map.Entry<Long, ArrayList<StreamEvent>>> entryIterator =
+                                eventTreeMap.entrySet().iterator();
+
+                        while (entryIterator.hasNext()) {
+                            ArrayList<StreamEvent> timeEventList = entryIterator.next().getValue();
+
+                            for (StreamEvent aTimeEventList : timeEventList) {
+                                complexEventChunk.add(aTimeEventList);
+                            }
+                        }
+                    }
+                    lastScheduledTimestamp = lastScheduledTimestamp + timerDuration;
+                    scheduler.notifyAt(lastScheduledTimestamp);
+                    nextProcessor.process(complexEventChunk);
                 }
+
 
             }
         } catch (ArrayIndexOutOfBoundsException ec) {
@@ -175,9 +183,7 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
                     " field index (0 to (fieldsLength-1)).");
         }
         lock.unlock();
-        count+=1;
         nextProcessor.process(complexEventChunk);
-        //System.out.println(cumulativeTime);
     }
 
     @Override
@@ -215,7 +221,7 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
             }
 
             if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
-                TIMER_DURATION = (Long)attributeExpressionExecutors[1].execute(null);
+                timerDuration = (Long)attributeExpressionExecutors[1].execute(null);
                 attributes.add(new Attribute("beta1", Attribute.Type.LONG));
             } else {
                 throw new ExecutionPlanCreationException("Invalid parameter type found for the second argument of " +
@@ -234,7 +240,7 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
             }
 
             if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
-                TIMER_DURATION = (Long)attributeExpressionExecutors[1].execute(null);
+                timerDuration = (Long)attributeExpressionExecutors[1].execute(null);
                 attributes.add(new Attribute("beta1", Attribute.Type.LONG));
             } else {
                 throw new ExecutionPlanCreationException("Invalid parameter type found for the second argument of " +
@@ -263,7 +269,7 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
             }
 
             if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
-                TIMER_DURATION = (Long)attributeExpressionExecutors[1].execute(null);
+                timerDuration = (Long)attributeExpressionExecutors[1].execute(null);
                 attributes.add(new Attribute("beta1", Attribute.Type.LONG));
             } else {
                 throw new ExecutionPlanCreationException("Invalid parameter type found for the second argument of " +
@@ -300,8 +306,8 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
         eventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
         expiredEventTreeMap = new TreeMap<Long, ArrayList<StreamEvent>>();
 
-        if(TIMER_DURATION != -1l && scheduler != null) {
-            lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime() + TIMER_DURATION;
+        if(timerDuration != -1l && scheduler != null) {
+            lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime() + timerDuration;
             scheduler.notifyAt(lastScheduledTimestamp);
         }
         return attributes;
@@ -311,7 +317,7 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
     public void setScheduler(Scheduler scheduler) {
         this.scheduler = scheduler;
         if (lastScheduledTimestamp < 0 && flag) {
-            lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime() + TIMER_DURATION;
+            lastScheduledTimestamp = executionPlanContext.getTimestampGenerator().currentTime() + timerDuration;
             scheduler.notifyAt(lastScheduledTimestamp);
         }
     }
