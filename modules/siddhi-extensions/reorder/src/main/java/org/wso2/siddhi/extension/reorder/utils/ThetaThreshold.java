@@ -16,18 +16,19 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.reorder.alphakslack;
+package org.wso2.siddhi.extension.reorder.utils;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class ThetaThreshold {
     private double delta;
     private double errorThreshold;
-    private long N;
-    private double idealMean;
-    private double idealVariance;
+    private long listSize;
+    private double mean;
+    private double variance;
 
     public ThetaThreshold(double errorThreshold, double delta) {
         this.errorThreshold = errorThreshold;
@@ -42,48 +43,46 @@ public class ThetaThreshold {
     public double calculateCriticalValue() {
         NormalDistribution actualDistribution = new NormalDistribution();
         double criticalValue = Math.abs(actualDistribution.inverseCumulativeProbability(delta / 2));
-
         return criticalValue;
     }
 
-    public double calculateMean(ArrayList listOfEvents) {
-        N = listOfEvents.size();
-        long mean = 0;
-        for (int i = 0; i < listOfEvents.size(); i++) {
-            mean += (Long)listOfEvents.get(i);
+    public double calculateMean(List<Double> listOfEvents) {
+        listSize = listOfEvents.size();
+        double sum = 0;
+        Iterator<Double> entries = listOfEvents.iterator();
+        while (entries.hasNext()) {
+            sum += entries.next();
         }
-        idealMean = mean *1.0/ listOfEvents.size();
-        return idealMean;
+        mean = sum * 1.0 / listSize;
+        return mean;
     }
 
-    public double calculateVariance(ArrayList listOfEvents) {
-        double variance = 0;
-        for (int i = 0; i < listOfEvents.size(); i++) {
-            variance += Math.pow(idealMean - (Long)listOfEvents.get(i), 2);
+    public double calculateVariance(List<Double> listOfEvents) {
+        double squaredSum = 0;
+        double temp=0;
+        Iterator<Double> entries = listOfEvents.iterator();
+        while (entries.hasNext()) {
+            temp = mean - entries.next();
+            squaredSum += Math.pow(temp, 2);
         }
-        idealVariance = variance*1.0 / listOfEvents.size();
-        return idealVariance;
+        variance = squaredSum * 1.0 / (listSize);
+        return variance;
     }
 
     /**
      * Solving inequality to get ThetaThreshold
      *
      * @param criticalValue
-     * @param idealMean
-     * @param idealVariance
+     * @param mean
+     * @param variance
      * @return
      */
-    public double calculateThetaThreshold(double criticalValue, double idealMean, double idealVariance) {
-        double temp1 = Math.sqrt((Math.pow(idealMean, 2) + Math.pow(idealVariance, 2)) / (N * Math.pow(idealMean, 2)));
+    public double calculateThetaThreshold(double criticalValue, double mean, double variance) {
+        double temp1 = Math.sqrt((Math.pow(mean, 2) + Math.pow(variance, 2)) / (listSize * Math.pow(mean, 2)));
         double temp2 = Math.pow(criticalValue, 2) * Math.pow(temp1, 2);
         double a1, b1, c1, b2, c2;
         double thetaThresholdValue;
-        double theta1;
-        double theta2;
-        double theta3;
-        double theta4;
-        double tempSq1;
-        double tempSq2;
+        double theta1,theta2,theta3,theta4,tempSq1,tempSq2;
 
         a1 = 1 + temp2;
         b1 = (2 * errorThreshold) - 2 - temp2;
@@ -99,15 +98,12 @@ public class ThetaThreshold {
         } else {
             theta1 = theta2 = 0;
         }
-
         if (tempSq2 >= 0) {
             theta3 = (-b2 - Math.sqrt(tempSq2)) / (2 * a1);
             theta4 = (-b2 + Math.sqrt(tempSq2)) / (2 * a1);
         } else {
             theta3 = theta4 = 0;
         }
-
-
         if ((tempSq1 >= 0) && (tempSq2 < 0)) {
             thetaThresholdValue = Math.min(theta1, theta2);
         } else if ((tempSq2 >= 0) && (tempSq1 < 0)) {

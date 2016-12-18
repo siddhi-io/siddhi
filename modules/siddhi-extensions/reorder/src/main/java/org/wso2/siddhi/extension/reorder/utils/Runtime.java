@@ -16,44 +16,42 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.reorder.alphakslack;
+package org.wso2.siddhi.extension.reorder.utils;
 
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.*;
 
 public class Runtime{
-    private final long WINDOW_SIZE = 1000l;
+//    private final long windowSize = 1000l;
 
     /**
      * Calculate Window Coverage
      *
-     * @param eventTimeStamps
+     * @param eventTimestamps
      * @return
      */
-    public double calculateWindowCoverage(LinkedHashSet<Long> eventTimeStamps) {
+    public double calculateWindowCoverage(Set<Long> eventTimestamps,long windowSize) {
         double windowCoverage = -1;
         long count = 1;
         int numerator = 0;
         int denominator = 0;
         long lowerIndex = 0;
-        long largestTimeStamp = -1;
+        long largestTimestamp = -1;
         long d = -1;
-        ArrayList timeStamps = new ArrayList();
-        timeStamps.addAll(eventTimeStamps);
-        Iterator<Long> itr;
-        itr = eventTimeStamps.iterator();
-        largestTimeStamp = getLargestTimeStamp(eventTimeStamps);
+        List timestamps = new ArrayList();
+        timestamps.addAll(eventTimestamps);
+        Iterator<Long> timestampEntry;
+        timestampEntry = eventTimestamps.iterator();
+        largestTimestamp = getLargestTimestamp(eventTimestamps);
 
-        if(itr.hasNext()) {
-            d = (Long) itr.next();
-            long edgeValue = (largestTimeStamp - WINDOW_SIZE - 1);
+        if(timestampEntry.hasNext()) {
+            d = (Long) timestampEntry.next();
+            long edgeValue = (largestTimestamp - windowSize - 1);
             long distance = Math.abs(d - edgeValue);
 
-            while (itr.hasNext()) {
-                long c = (Long) itr.next();
+            while (timestampEntry.hasNext()) {
+                long c = (Long) timestampEntry.next();
                 long cdistance = Math.abs(c - edgeValue);
 
                 if ((cdistance < distance) && (cdistance != 0)) {
@@ -64,10 +62,10 @@ public class Runtime{
             }
 
             try {
-                for (long i = edgeValue + 1; i <= largestTimeStamp - 1; i++) {
-                    if (eventTimeStamps.contains(i)) {
-                        int z = timeStamps.indexOf(i);
-                        int y = timeStamps.indexOf(largestTimeStamp);
+                for (long i = edgeValue + 1; i <= largestTimestamp - 1; i++) {
+                    if (eventTimestamps.contains(i)) {
+                        int z = timestamps.indexOf(i);
+                        int y = timestamps.indexOf(largestTimestamp);
 
                         if ((z <= (y - 1)) && (z >= lowerIndex)) {
                             numerator += 1;
@@ -80,23 +78,20 @@ public class Runtime{
                 throw new ExecutionPlanRuntimeException("Error in Window Coverage Calculation.", e);
             }
         }
-
         return windowCoverage;
     }
 
-    private long getLargestTimeStamp(LinkedHashSet<Long> eventTimeStamps){
-        Iterator<Long> itr = eventTimeStamps.iterator();
+    private long getLargestTimestamp(Set<Long> eventTimestamps){
+        Iterator<Long> entry = eventTimestamps.iterator();
         long largestItem = 0;
         long item = 0;
-
-        while(itr.hasNext()){
-            item = itr.next();
+        while(entry.hasNext()){
+            item = entry.next();
 
             if(item > largestItem){
                 largestItem = item;
             }
         }
-
         return largestItem;
     }
 }
