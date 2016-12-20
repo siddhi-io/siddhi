@@ -46,10 +46,16 @@ public class ThetaThreshold {
         return criticalValue;
     }
 
-    public double calculateMean(List<Double> listOfEvents) {
-        listSize = listOfEvents.size();
+    /**
+     * Calculation of mean of correlated data field
+     *
+     * @param listOfData
+     * @return
+     */
+    public double calculateMean(List<Double> listOfData) {
+        listSize = listOfData.size();
         double sum = 0;
-        Iterator<Double> entries = listOfEvents.iterator();
+        Iterator<Double> entries = listOfData.iterator();
         while (entries.hasNext()) {
             sum += entries.next();
         }
@@ -57,10 +63,16 @@ public class ThetaThreshold {
         return mean;
     }
 
-    public double calculateVariance(List<Double> listOfEvents) {
+    /**
+     * Calculation of variance of correlated data field
+     *
+     * @param listOfData
+     * @return
+     */
+    public double calculateVariance(List<Double> listOfData) {
         double squaredSum = 0;
         double temp=0;
-        Iterator<Double> entries = listOfEvents.iterator();
+        Iterator<Double> entries = listOfData.iterator();
         while (entries.hasNext()) {
             temp = mean - entries.next();
             squaredSum += Math.pow(temp, 2);
@@ -78,12 +90,12 @@ public class ThetaThreshold {
      * @return
      */
     public double calculateThetaThreshold(double criticalValue, double mean, double variance) {
-        double temp1 = Math.sqrt((Math.pow(mean, 2) + Math.pow(variance, 2)) / (listSize * Math.pow(mean, 2)));
+        double temp1 = Math.sqrt((Math.pow(mean, 2) + Math.pow(variance, 2)) /
+                (listSize * Math.pow(mean, 2)));
         double temp2 = Math.pow(criticalValue, 2) * Math.pow(temp1, 2);
         double a1, b1, c1, b2, c2;
         double thetaThresholdValue;
         double theta1,theta2,theta3,theta4,tempSq1,tempSq2;
-
         a1 = 1 + temp2;
         b1 = (2 * errorThreshold) - 2 - temp2;
         c1 = Math.pow((1 - errorThreshold), 2);

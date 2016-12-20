@@ -113,7 +113,6 @@ public class KSlackExtension extends StreamProcessor implements SchedulingProces
                         long minTimestamp = eventTreeMap.firstKey();
                         long timeDifference = greatestTimestamp - minTimestamp;
                         if (timeDifference > k) {
-                            System.out.println(timestamp+"\t\t\t"+k);
                             if (timeDifference < MAX_K) {
                                 k = timeDifference;
                             } else {

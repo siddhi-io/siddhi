@@ -20,54 +20,45 @@ package org.wso2.siddhi.extension.reorder.utils;
 
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-public class Runtime{
-//    private final long windowSize = 1000l;
-
+public class Runtime {
     /**
      * Calculate Window Coverage
      *
-     * @param eventTimestamps
+     * @param timestampList
+     * @param windowSize
      * @return
      */
-    public double calculateWindowCoverage(Set<Long> eventTimestamps,long windowSize) {
+    public double calculateWindowCoverage(List<Long> timestampList, long windowSize) {
         double windowCoverage = -1;
-        long count = 1;
         int numerator = 0;
         int denominator = 0;
         long lowerIndex = 0;
         long largestTimestamp = -1;
-        long d = -1;
-        List timestamps = new ArrayList();
-        timestamps.addAll(eventTimestamps);
-        Iterator<Long> timestampEntry;
-        timestampEntry = eventTimestamps.iterator();
-        largestTimestamp = getLargestTimestamp(eventTimestamps);
-
-        if(timestampEntry.hasNext()) {
-            d = (Long) timestampEntry.next();
-            long edgeValue = (largestTimestamp - windowSize - 1);
-            long distance = Math.abs(d - edgeValue);
-
+        long timestamp = -1;
+        Iterator<Long> timestampEntry = timestampList.iterator();
+        largestTimestamp = Collections.max(timestampList);
+        int indexOfLargestTimestamp = timestampList.indexOf(largestTimestamp);
+        if (timestampEntry.hasNext()) {
+            timestamp = timestampEntry.next();
+            long edgeValue = (largestTimestamp - windowSize);
+            long distance = Math.abs(timestamp - edgeValue);
             while (timestampEntry.hasNext()) {
-                long c = (Long) timestampEntry.next();
-                long cdistance = Math.abs(c - edgeValue);
-
-                if ((cdistance < distance) && (cdistance != 0)) {
+                timestamp = timestampEntry.next();
+                long cdistance = Math.abs(timestamp - edgeValue);
+                if (cdistance < distance) {
                     distance = cdistance;
-                    lowerIndex = count;
+                    lowerIndex = timestampList.indexOf(timestamp);
                 }
-                count += 1;
             }
-
             try {
-                for (long i = edgeValue + 1; i <= largestTimestamp - 1; i++) {
-                    if (eventTimestamps.contains(i)) {
-                        int z = timestamps.indexOf(i);
-                        int y = timestamps.indexOf(largestTimestamp);
-
-                        if ((z <= (y - 1)) && (z >= lowerIndex)) {
+                for (long i = edgeValue; i <= largestTimestamp; i++) {
+                    if (timestampList.contains(i)) {
+                        int z = timestampList.indexOf(i);
+                        if ((z <= indexOfLargestTimestamp) && (z >= lowerIndex)) {
                             numerator += 1;
                         }
                         denominator += 1;
@@ -79,19 +70,5 @@ public class Runtime{
             }
         }
         return windowCoverage;
-    }
-
-    private long getLargestTimestamp(Set<Long> eventTimestamps){
-        Iterator<Long> entry = eventTimestamps.iterator();
-        long largestItem = 0;
-        long item = 0;
-        while(entry.hasNext()){
-            item = entry.next();
-
-            if(item > largestItem){
-                largestItem = item;
-            }
-        }
-        return largestItem;
     }
 }
