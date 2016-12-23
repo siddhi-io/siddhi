@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+// TODO: 12/23/16 Currently this class is only used for testing purposes.
 public class InMemoryInputTransport extends InputTransport {
 
     private InputCallback inputCallback;
@@ -34,20 +35,18 @@ public class InMemoryInputTransport extends InputTransport {
 
     @Override
     public void init(Map<String, String> transportOptions, InputCallback inputCallback) {
-        System.out.println("Transport options: " + transportOptions);
         this.inputCallback = inputCallback;
-        this.executorService = Executors.newScheduledThreadPool(5, new ThreadFactoryBuilder().setNameFormat("Siddhi-inmemoryinputtransport-scheduler-thread-%d").build());
+        this.executorService = Executors.newScheduledThreadPool(5, new ThreadFactoryBuilder().setNameFormat
+                ("Siddhi-inmemoryinputtransport-scheduler-thread-%d").build());
     }
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        System.out.println("Connecting");
         this.executorService.scheduleAtFixedRate(dataGenerator, 1, 1, TimeUnit.SECONDS);
     }
 
     @Override
     public void disconnect() {
-        System.out.println("Disconnecting");
         this.executorService.shutdown();
     }
 
@@ -71,7 +70,8 @@ public class InMemoryInputTransport extends InputTransport {
         @Override
         public void run() {
 //            inputCallback.onEvent(new Object[]{"WSO2", 56.75f, 5});
-            inputCallback.onEvent("{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
+//            inputCallback.onEvent("{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
+            inputCallback.onEvent("WSO2,56.75,5");
 //            inputCallback.onEvent("WSO2,56.75,5,Sri Lanka");
 //            inputCallback.onEvent("symbol=WSO2, price=56.75, volume=5, country=Sri Lanka");
         }

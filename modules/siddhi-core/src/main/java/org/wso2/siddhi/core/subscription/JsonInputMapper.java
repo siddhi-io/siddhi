@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
+import org.wso2.siddhi.core.util.AttributeConverter;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.io.map.AttributeMapping;
@@ -193,7 +194,14 @@ public class JsonInputMapper implements InputMapper {
      * A POJO class which holds the attribute position in output stream and the user defined mapping.
      */
     private class MappingPositionData {
+        /**
+         * Attribute position in the output stream.
+         */
         private int position;
+
+        /**
+         * The JSON mapping as defined by the user.
+         */
         private String mapping;
 
         public MappingPositionData(int position, String mapping) {

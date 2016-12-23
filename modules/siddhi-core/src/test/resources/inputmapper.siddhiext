@@ -18,4 +18,4 @@
 
 json=org.wso2.siddhi.core.subscription.JsonInputMapper
 text=org.wso2.siddhi.core.subscription.TextInputMapper
-
+passThrough=org.wso2.siddhi.core.subscription.PassThroughInputMapper

@@ -1,9 +1,19 @@
-package org.wso2.siddhi.core.subscription;
+package org.wso2.siddhi.core.util;
 
 import org.wso2.siddhi.query.api.definition.Attribute;
 
+/**
+ * Utility class to convert Object to the desired type using {@link Attribute.Type}
+ */
 public class AttributeConverter {
 
+    /**
+     * Convert the given object to the given type.
+     *
+     * @param propertyValue the actual object
+     * @param attributeType the desired data type
+     * @return the converted object
+     */
     public static Object getPropertyValue(Object propertyValue, Attribute.Type attributeType) {
 
         if ((!Attribute.Type.STRING.equals(attributeType)) && propertyValue == null) {
