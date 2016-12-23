@@ -71,9 +71,9 @@ public class InMemoryInputTransport extends InputTransport {
         @Override
         public void run() {
 //            inputCallback.onEvent(new Object[]{"WSO2", 56.75f, 5});
-//            inputCallback.onEvent("{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
+            inputCallback.onEvent("{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
 //            inputCallback.onEvent("WSO2,56.75,5,Sri Lanka");
-            inputCallback.onEvent("symbol=WSO2, price=56.75, volume=5, country=Sri Lanka");
+//            inputCallback.onEvent("symbol=WSO2, price=56.75, volume=5, country=Sri Lanka");
         }
     }
 }

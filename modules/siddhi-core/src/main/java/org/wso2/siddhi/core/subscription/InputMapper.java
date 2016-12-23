@@ -26,7 +26,11 @@ import org.wso2.siddhi.query.api.execution.io.map.AttributeMapping;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Convert custom input from {@link InputTransport} to {@link org.wso2.siddhi.core.event.ComplexEventChunk}.
+ */
 public interface InputMapper extends InputCallback {
 
-    void init(StreamDefinition outputStreamDefinition, OutputCallback outputCallback, MetaStreamEvent metaStreamEvent, Map<String, String> options, List<AttributeMapping> attributeMappingList);
+    void init(StreamDefinition outputStreamDefinition, OutputCallback outputCallback, MetaStreamEvent
+            metaStreamEvent, Map<String, String> options, List<AttributeMapping> attributeMappingList);
 }

@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.ExecutionPlan;
@@ -93,6 +92,10 @@ public class SubscribeTestCase {
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
     }
 
+    /**
+     * Expected input format:
+     * {'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}
+     */
     @Test
     public void subscriptionTest1() throws InterruptedException {
         log.info("Subscription Test 1: Test an in memory transport with default json mapping");
@@ -131,13 +134,15 @@ public class SubscribeTestCase {
 
     @Test(expected = ExecutionPlanValidationException.class)
     public void subscriptionTest2() throws InterruptedException {
-        log.info("Subscription Test 2: Test an in memory transport with named and positional json mapping - expect exception");
+        log.info("Subscription Test 2: Test an in memory transport with named and positional json mapping - expect " +
+                "exception");
 
         String stream = "define stream FooStream (symbol string, price float, volume int); ";
 
         Subscription subscription = Subscription.Subscribe(
                 Transport.transport("inMemory"));
 
+        // First two parameters are based on position and the last one is named paramater
         subscription.map(Mapping.format("json").map("$.country").map("$.price").map("$.volume", "volume"));
 
         subscription.insertInto("FooStream");
@@ -154,6 +159,10 @@ public class SubscribeTestCase {
         executionPlanRuntime.shutdown();
     }
 
+    /**
+     * Expected input format:
+     * {'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}
+     */
     @Test
     public void subscriptionTest3() throws InterruptedException {
         log.info("Subscription Test 3: Test an in memory transport with custom positional json mapping");
@@ -190,6 +199,10 @@ public class SubscribeTestCase {
         executionPlanRuntime.shutdown();
     }
 
+    /**
+     * Expected input format:
+     * {'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}
+     */
     @Test
     public void subscriptionTest4() throws InterruptedException {
         log.info("Subscription Test 4: Test an in memory transport with custom named json mapping");
@@ -199,7 +212,8 @@ public class SubscribeTestCase {
         Subscription subscription = Subscription.Subscribe(
                 Transport.transport("inMemory"));
 
-        subscription.map(Mapping.format("json").map("volume", "$.volume").map("symbol", "$.symbol").map("price", "$.price"));
+        subscription.map(Mapping.format("json").map("volume", "$.volume").map("symbol", "$.symbol").map("price", "$" +
+                ".price"));
 
         subscription.insertInto("FooStream");
 
@@ -233,7 +247,8 @@ public class SubscribeTestCase {
         Subscription subscription = Subscription.Subscribe(
                 Transport.transport("inMemory"));
 
-        subscription.map(Mapping.format("json").map("volume", "$.volume").map("symbol", "$.symbol").map("price", "$.price"));
+        subscription.map(Mapping.format("json").map("volume", "$.volume").map("symbol", "$.symbol").map("price", "$" +
+                ".price"));
 
         subscription.insertInto("FooStream");
 
@@ -276,7 +291,8 @@ public class SubscribeTestCase {
         Subscription subscription = Subscription.Subscribe(
                 Transport.transport("inMemory"));
 
-        subscription.map(Mapping.format("text").map("regex1[1]").map("regex1[2]").map("regex1[3]").option("regex1", "([^,;]+),([^,;]+),([^,;]+),([^,;]+)"));
+        subscription.map(Mapping.format("text").map("regex1[1]").map("regex1[2]").map("regex1[3]").option("regex1", "" +
+                "([^,;]+),([^,;]+),([^,;]+),([^,;]+)"));
 
         subscription.insertInto("FooStream");
 
@@ -338,35 +354,6 @@ public class SubscribeTestCase {
         executionPlanRuntime.start();
 
         Thread.sleep(5000);
-
-        executionPlanRuntime.shutdown();
-    }
-
-    @Test
-    public void subscriptionTestddddd() throws InterruptedException {
-        log.info("Subscription Test 4: Test an in memory transport with custom named json mapping");
-
-        String stream = "define stream FooStream (symbol string, price float, volume int); " +
-                "from FooStream " +
-                "select * " +
-                "insert into OutputStream; ";
-
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(stream);
-        executionPlanRuntime.addCallback("OutputStream", new StreamCallback() {
-            @Override
-            public void receive(Event[] events) {
-                EventPrinter.print(events);
-            }
-        });
-
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("FooStream");
-
-        executionPlanRuntime.start();
-
-        inputHandler.send(new Object[]{"WSO2", 12.5f, 10});
-        Thread.sleep(100);
 
         executionPlanRuntime.shutdown();
     }

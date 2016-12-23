@@ -30,6 +30,8 @@ import org.wso2.siddhi.core.subscription.SubscriptionRuntime;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
 import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.core.util.extension.holder.InputMapperExecutorExtensionHolder;
+import org.wso2.siddhi.core.util.extension.holder.InputTransportExecutorExtensionHolder;
 import org.wso2.siddhi.core.util.lock.LockSynchronizer;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
@@ -101,15 +103,18 @@ public class SubscriptionParser {
                     return subscription.getTransport().getType();
                 }
             };
-//            InputTransport inputTransport = (InputTransport) SiddhiClassLoader.loadExtensionImplementation(transportExtension,
-//                    InputTransportExecutorExtensionHolder.getInstance(executionPlanContext));
 
-            InputTransport inputTransport = (InputTransport) SiddhiClassLoader.loadSiddhiImplementation(transportExtension.getFunction(), InputTransport.class);
+            InputTransport inputTransport = (InputTransport) SiddhiClassLoader.loadExtensionImplementation
+                    (transportExtension, InputTransportExecutorExtensionHolder.getInstance(executionPlanContext));
+
+//            InputTransport inputTransport = (InputTransport) SiddhiClassLoader.loadSiddhiImplementation
+//                    (transportExtension.getFunction(), InputTransport.class);
 
             Mapping mapping = subscription.getMapping();
             if (mapping == null) {
                 // Subscription without mapping
-                throw new ExecutionPlanValidationException("Subscription must have a mapping plan but " + transportExtension.getFunction() + " subscription does not have a mapping plan");
+                throw new ExecutionPlanValidationException("Subscription must have a mapping plan but " +
+                        transportExtension.getFunction() + " subscription does not have a mapping plan");
             }
 
             // Named mapping and positional mapping cannot be together
@@ -122,7 +127,9 @@ public class SubscriptionParser {
                     namedMappingFound = true;
                 }
                 if (namedMappingFound && positionalMappingFound) {
-                    throw new ExecutionPlanValidationException("Subscription mapping cannot have both named mapping and positional mapping together but " + mapping.getFormat() + " mapping uses both of them");
+                    throw new ExecutionPlanValidationException("Subscription mapping cannot have both named mapping " +
+                            "and positional mapping together but " + mapping.getFormat() + " mapping uses both of " +
+                            "them");
                 }
             }
 
@@ -137,22 +144,25 @@ public class SubscriptionParser {
                     return subscription.getMapping().getFormat();
                 }
             };
-//            InputMapper inputMapper = (InputMapper) SiddhiClassLoader.loadExtensionImplementation(mapperExtension,
-//                    InputMapperExecutorExtensionHolder.getInstance(executionPlanContext));
 
-            InputMapper inputMapper = (InputMapper) SiddhiClassLoader.loadSiddhiImplementation(mapperExtension.getFunction(), InputMapper.class);
+            InputMapper inputMapper = (InputMapper) SiddhiClassLoader.loadExtensionImplementation(mapperExtension,
+                    InputMapperExecutorExtensionHolder.getInstance(executionPlanContext));
 
-            StreamDefinition outputStreamDefinition = (StreamDefinition) streamDefinitionMap.get(subscription.getOutputStream().getId());
+            StreamDefinition outputStreamDefinition = (StreamDefinition) streamDefinitionMap.get(subscription
+                    .getOutputStream().getId());
             if (outputStreamDefinition == null) {
-                outputStreamDefinition = (StreamDefinition) windowDefinitionMap.get(subscription.getOutputStream().getId());
+                outputStreamDefinition = (StreamDefinition) windowDefinitionMap.get(subscription.getOutputStream()
+                        .getId());
             }
 
             if (outputStreamDefinition == null) {
                 // Cannot infer the output stream
-                throw new ExecutionPlanValidationException("Subscription must have an output stream or event window but " + transportExtension.getFunction() + " subscription does not have output stream");
+                throw new ExecutionPlanValidationException("Subscription must have an output stream or event window " +
+                        "but " + transportExtension.getFunction() + " subscription does not have output stream");
             }
 
-            OutputCallback outputCallback = OutputParser.constructOutputCallback(subscription.getOutputStream(), outputStreamDefinition,
+            OutputCallback outputCallback = OutputParser.constructOutputCallback(subscription.getOutputStream(),
+                    outputStreamDefinition,
                     eventTableMap, eventWindowMap, executionPlanContext, false);
 
             MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
@@ -161,19 +171,24 @@ public class SubscriptionParser {
                 metaStreamEvent.addOutputData(attribute);
             }
             //todo create event creator and pass to init()
-            inputMapper.init(outputStreamDefinition, outputCallback, metaStreamEvent, subscription.getMapping().getOptions(), subscription.getMapping().getAttributeMappingList());
+            inputMapper.init(outputStreamDefinition, outputCallback, metaStreamEvent, subscription.getMapping()
+                    .getOptions(), subscription.getMapping().getAttributeMappingList());
 
             inputTransport.init(subscription.getTransport().getOptions(), inputMapper);
 
-            OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(subscription.getOutputStream().getId(),
-                    subscription.getOutputRate(), false, false, executionPlanContext.getScheduledExecutorService(), executionPlanContext);
-            subscriptionRuntime = new SubscriptionRuntime(inputTransport, inputMapper, outputRateLimiter, outputCallback);
+            OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(subscription
+                            .getOutputStream().getId(),
+                    subscription.getOutputRate(), false, false, executionPlanContext.getScheduledExecutorService(),
+                    executionPlanContext);
+            subscriptionRuntime = new SubscriptionRuntime(inputTransport, inputMapper, outputRateLimiter,
+                    outputCallback);
 
             executionPlanContext.addEternalReferencedHolder(inputTransport);
             executionPlanContext.addEternalReferencedHolder(outputRateLimiter);
 
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
-                throw new ExecutionPlanCreationException("Snapshot rate limiting not supported in subscription of name:" +
+                throw new ExecutionPlanCreationException("Snapshot rate limiting not supported in subscription of " +
+                        "name:" +
                         nameElement + " type:" + subscription.getTransport().getType());
             }
             outputRateLimiter.init(executionPlanContext, null);
@@ -183,13 +198,15 @@ public class SubscriptionParser {
 
         } catch (DuplicateDefinitionException e) {
             if (nameElement != null) {
-                throw new DuplicateDefinitionException(e.getMessage() + ", when creating subscription " + nameElement.getValue(), e);
+                throw new DuplicateDefinitionException(e.getMessage() + ", when creating subscription " + nameElement
+                        .getValue(), e);
             } else {
                 throw new DuplicateDefinitionException(e.getMessage(), e);
             }
         } catch (RuntimeException e) {
             if (nameElement != null) {
-                throw new ExecutionPlanCreationException(e.getMessage() + ", when creating subscription " + nameElement.getValue(), e);
+                throw new ExecutionPlanCreationException(e.getMessage() + ", when creating subscription " +
+                        nameElement.getValue(), e);
             } else {
                 throw new ExecutionPlanCreationException(e.getMessage(), e);
             }
