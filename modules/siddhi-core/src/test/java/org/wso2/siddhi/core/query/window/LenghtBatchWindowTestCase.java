@@ -27,7 +27,6 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.core.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 public class LenghtBatchWindowTestCase {
@@ -51,7 +50,7 @@ public class LenghtBatchWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(4) " +
@@ -89,7 +88,7 @@ public class LenghtBatchWindowTestCase {
         final int length = 4;
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(" + length + ") " +
@@ -134,7 +133,7 @@ public class LenghtBatchWindowTestCase {
         final int length = 2;
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(" + length + ") " +
@@ -189,7 +188,7 @@ public class LenghtBatchWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int);";
         String query = "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(4) " +
                 "select symbol,sum(price) as sumPrice,volume " +
@@ -234,7 +233,7 @@ public class LenghtBatchWindowTestCase {
         final int length = 2;
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(" + length + ") " +
@@ -276,7 +275,7 @@ public class LenghtBatchWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int);";
         String query = "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(4) " +
                 "select symbol,sum(price) as sumPrice,volume " +
@@ -325,7 +324,7 @@ public class LenghtBatchWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int);";
         String query = "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(4) " +
                 "select symbol,sum(price) as sumPrice,volume " +
@@ -376,8 +375,8 @@ public class LenghtBatchWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define stream twitterStream (user string, tweet string, company string); ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(2) join twitterStream#window.lengthBatch(2) " +
@@ -425,8 +424,8 @@ public class LenghtBatchWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol string, price float, volume int); " +
-                "define stream twitterStream (user string, tweet string, company string); ";
+                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
+                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(2) join twitterStream#window.lengthBatch(2) " +

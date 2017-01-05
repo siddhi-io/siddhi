@@ -46,7 +46,7 @@ public class LengthTimeLinearRegressionForecastTestcase {
         logger.info("Simple Forecast TestCase");
 
         siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (y double, symbol string, x double);";
+        String inputStream = "define stream InputStream (y double, symbol inputmapper, x double);";
 
         // Limit number of events based on length window (query):
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeForecast(20 min, 20, x+2, 2, 0.95, y, x) "
@@ -134,7 +134,7 @@ public class LengthTimeLinearRegressionForecastTestcase {
         logger.info("Simple Forecast TestCase");
 
         siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (y double, symbol string, x double);";
+        String inputStream = "define stream InputStream (y double, symbol inputmapper, x double);";
 
         // Limit number of events based on time window (query):
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeForecast(200, 100000, x+2, 2, 0.95, y, x) "

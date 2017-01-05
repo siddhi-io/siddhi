@@ -34,7 +34,7 @@ public class PartitionSample {
 
 
         String executionPlan = "" +
-                "define stream cseEventStream (symbol string, price float,volume int);" +
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);" +
                 "" +
                 "partition with (symbol of cseEventStream)" +
                 "begin" +

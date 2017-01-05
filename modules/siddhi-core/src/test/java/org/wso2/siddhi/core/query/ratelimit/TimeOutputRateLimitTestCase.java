@@ -54,7 +54,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest1') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents " +
@@ -111,7 +111,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest2') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents " +
@@ -168,7 +168,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest3') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents " +
@@ -225,7 +225,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest4') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents " +
@@ -282,7 +282,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest5') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents " +
@@ -339,7 +339,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest6') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents " +
@@ -398,7 +398,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest7') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents " +
@@ -457,7 +457,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest8') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.lengthBatch(2) " +
@@ -516,7 +516,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest7') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.lengthBatch(2) " +
@@ -575,7 +575,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest10') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.lengthBatch(2) " +
@@ -634,7 +634,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest11') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.lengthBatch(2) " +
@@ -695,7 +695,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest11') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.lengthBatch(2) " +
@@ -756,7 +756,7 @@ public class TimeOutputRateLimitTestCase {
         String executionPlan = "" +
                 "@Plan:name('EventOutputRateLimitTest11') " +
                 "" +
-                "define stream LoginEvents (timeStamp long, ip string);" +
+                "define stream LoginEvents (timeStamp long, ip inputmapper);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from LoginEvents#window.lengthBatch(2) " +

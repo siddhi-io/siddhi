@@ -48,7 +48,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds long);";
+                "define stream inputStream (symbol inputmapper,dateValue inputmapper,dateFormat inputmapper,timestampInMilliseconds long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +

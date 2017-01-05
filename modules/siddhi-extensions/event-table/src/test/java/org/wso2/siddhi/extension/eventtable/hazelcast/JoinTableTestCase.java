@@ -59,10 +59,10 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('JoinTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper); " +
                 "@from(eventtable = 'hazelcast')" +
-                "define table StockTableT011 (symbol string, price float, volume long); ";
+                "define table StockTableT011 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -124,10 +124,10 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('JoinTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper); " +
                 "@from(eventtable = 'hazelcast')" +
-                "define table StockTableT021 (symbol string, price float, volume long); ";
+                "define table StockTableT021 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -188,10 +188,10 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('JoinTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper); " +
                 "@from(eventtable = 'hazelcast')" +
-                "define table StockTableT031 (symbol string, price float, volume long); ";
+                "define table StockTableT031 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -251,10 +251,10 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('JoinTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper); " +
                 "@from(eventtable = 'hazelcast')" +
-                "define table StockTableT041 (symbol string, price float, volume long); ";
+                "define table StockTableT041 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -323,10 +323,10 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('JoinTableExecutionPlan')" +
-                "define stream StockStream (symbol string, price float, volume long); " +
-                "define stream CheckStockStream (symbol string); " +
+                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream CheckStockStream (symbol inputmapper); " +
                 "@from(eventtable = 'hazelcast')" +
-                "define table StockTableT051 (symbol string, price float, volume long); ";
+                "define table StockTableT051 (symbol inputmapper, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +

@@ -18,8 +18,62 @@
 
 package org.wso2.siddhi.core.subscription;
 
-/**
- * Created by suho on 11/28/16.
- */
-public class InMemoryInputTransport {
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
+
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+// TODO: 12/23/16 Currently this class is only used for testing purposes.
+public class InMemoryInputTransport extends InputTransport {
+
+    private InputCallback inputCallback;
+    private ScheduledExecutorService executorService;
+    private DataGenerator dataGenerator = new DataGenerator();
+
+    @Override
+    public void init(Map<String, String> transportOptions, InputCallback inputCallback) {
+        this.inputCallback = inputCallback;
+        this.executorService = Executors.newScheduledThreadPool(5, new ThreadFactoryBuilder().setNameFormat
+                ("Siddhi-inmemoryinputtransport-scheduler-thread-%d").build());
+    }
+
+    @Override
+    public void connect() throws ConnectionUnavailableException {
+        this.executorService.scheduleAtFixedRate(dataGenerator, 1, 1, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void disconnect() {
+        this.executorService.shutdown();
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public boolean isEventDuplicatedInCluster() {
+        return false;
+    }
+
+    @Override
+    public boolean isPolling() {
+        return false;
+    }
+
+    private class DataGenerator implements Runnable {
+
+        @Override
+        public void run() {
+//            inputCallback.onEvent(new Object[]{"WSO2", 56.75f, 5});
+//            inputCallback.onEvent("{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
+            inputCallback.onEvent("WSO2,56.75,5");
+//            inputCallback.onEvent("WSO2,56.75,5,Sri Lanka");
+//            inputCallback.onEvent("symbol=WSO2, price=56.75, volume=5, country=Sri Lanka");
+        }
+    }
 }

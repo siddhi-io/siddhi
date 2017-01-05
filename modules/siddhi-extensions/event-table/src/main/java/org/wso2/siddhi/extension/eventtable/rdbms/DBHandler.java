@@ -29,12 +29,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -597,7 +592,7 @@ public class DBHandler {
      * @param values        values
      * @param column_values column_values
      * @param condition     condition
-     * @return query as string
+     * @return query as inputmapper
      */
     public String constructQuery(String tableName, String query, StringBuilder columnTypes, StringBuilder columns,
                                  StringBuilder values, StringBuilder column_values, StringBuilder condition) {

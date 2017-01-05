@@ -31,7 +31,7 @@ import java.util.Map;
 
 /**
  * toXML(Map) or toXML(Map, RootElementName)
- * Returns the string representation of the map in XML format
+ * Returns the inputmapper representation of the map in XML format
  * Accept Type(s): (Map) or (Map, String)
  * Return Type(s): String
  */
@@ -62,7 +62,7 @@ public class ToXMLFunctionExtension extends FunctionExecutor {
             Map<Object, Object> map = (Map<Object, Object>) data[0];
             return getXmlFromMapWithRootElement(map);
         } else {
-            throw new ExecutionPlanRuntimeException("Data should be a string");
+            throw new ExecutionPlanRuntimeException("Data should be a inputmapper");
         }
     }
 
@@ -72,7 +72,7 @@ public class ToXMLFunctionExtension extends FunctionExecutor {
             Map<Object, Object> map = (Map<Object, Object>) data;
             return getXmlFromMap(map);
         } else {
-            throw new ExecutionPlanRuntimeException("Data should be a string");
+            throw new ExecutionPlanRuntimeException("Data should be a inputmapper");
         }
     }
 

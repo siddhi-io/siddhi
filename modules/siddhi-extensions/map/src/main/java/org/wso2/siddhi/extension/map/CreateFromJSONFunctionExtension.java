@@ -66,7 +66,7 @@ public class CreateFromJSONFunctionExtension extends FunctionExecutor {
             }
             return getMapFromJson(map, jsonObject);
         } else {
-            throw new ExecutionPlanRuntimeException("Data should be a string");
+            throw new ExecutionPlanRuntimeException("Data should be a inputmapper");
         }
     }
 

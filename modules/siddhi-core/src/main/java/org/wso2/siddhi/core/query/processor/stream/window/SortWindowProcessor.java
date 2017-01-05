@@ -28,9 +28,9 @@ import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.table.EventTable;
-import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
+import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.Expression;
 
@@ -84,7 +84,7 @@ public class SortWindowProcessor extends WindowProcessor implements FindableProc
         eventComparator = new EventComparator();
         for (int i = 1, parametersLength = attributeExpressionExecutors.length; i < parametersLength; i++) {
             if (!(attributeExpressionExecutors[i] instanceof VariableExpressionExecutor)) {
-                throw new UnsupportedOperationException("Required a variable, but found a string parameter");
+                throw new UnsupportedOperationException("Required a variable, but found a inputmapper parameter");
             } else {
                 ExpressionExecutor variableExpressionExecutor = attributeExpressionExecutors[i];
                 int order;
@@ -98,7 +98,7 @@ public class SortWindowProcessor extends WindowProcessor implements FindableProc
                         order = 1;
                         i++;
                     } else {
-                        throw new UnsupportedOperationException("Parameter string literals should only be \"asc\" or \"desc\"");
+                        throw new UnsupportedOperationException("Parameter inputmapper literals should only be \"asc\" or \"desc\"");
                     }
                 } else {
                     order = 1; //assigning the default order: "asc"

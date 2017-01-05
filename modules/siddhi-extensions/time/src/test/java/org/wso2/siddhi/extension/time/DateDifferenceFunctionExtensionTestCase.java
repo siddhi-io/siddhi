@@ -48,7 +48,7 @@ public class DateDifferenceFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 string,dateValue2 string,dateFormat2 string," +
+                "define stream inputStream (symbol inputmapper,dateValue1 inputmapper,dateFormat1 inputmapper,dateValue2 inputmapper,dateFormat2 inputmapper," +
                 "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +

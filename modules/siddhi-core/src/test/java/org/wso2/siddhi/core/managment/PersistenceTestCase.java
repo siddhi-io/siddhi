@@ -59,7 +59,7 @@ public class PersistenceTestCase {
         String executionPlan = "" +
                 "@plan:name('Test') " +
                 "" +
-                "define stream StockStream ( symbol string, price float, volume int );" +
+                "define stream StockStream ( symbol inputmapper, price float, volume int );" +
                 "" +
                 "@info(name = 'query1')" +
                 "from StockStream[price>10]#window.length(10) " +
@@ -138,8 +138,8 @@ public class PersistenceTestCase {
         String executionPlan = "" +
                 "@plan:name('Test') " +
                 "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); " +
                 "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <2:5> -> e2=Stream2[price>20] " +
@@ -218,8 +218,8 @@ public class PersistenceTestCase {
         String executionPlan = "" +
                 "@plan:name('Test') " +
                 "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); " +
                 "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price>20] <2:5> -> e2=Stream2[price>20] " +
@@ -279,7 +279,7 @@ public class PersistenceTestCase {
         String executionPlan = "" +
                 "@plan:name('Test') " +
                 "" +
-                "define stream StockStream ( symbol string, price float, volume int );" +
+                "define stream StockStream ( symbol inputmapper, price float, volume int );" +
                 "" +
                 "@info(name = 'query1')" +
                 "from StockStream[price>10]#window.time(10 sec) " +
@@ -353,7 +353,7 @@ public class PersistenceTestCase {
         String executionPlan = "" +
                 "@plan:name('Test') " +
                 "" +
-                "define stream StockStream ( symbol string, price float, volume int );" +
+                "define stream StockStream ( symbol inputmapper, price float, volume int );" +
                 "" +
                 "@info(name = 'query1')" +
                 "from StockStream[price>10]#window.time(10 sec) " +
@@ -436,7 +436,7 @@ public class PersistenceTestCase {
         String executionPlan = "" +
                 "@plan:name('Test') " +
                 "" +
-                "define stream StockStream ( symbol string, price float, volume int );" +
+                "define stream StockStream ( symbol inputmapper, price float, volume int );" +
                 "" +
                 "@info(name = 'query1')" +
                 "from StockStream[price>10]#window.timeBatch(10) " +
@@ -514,7 +514,7 @@ public class PersistenceTestCase {
         String executionPlan = "" +
                 "@plan:name('Test') " +
                 "" +
-                "define stream StockStream (symbol string, price float, volume int, timestamp long);" +
+                "define stream StockStream (symbol inputmapper, price float, volume int, timestamp long);" +
                 "" +
                 "@info(name = 'query1')" +
                 "from StockStream#window.externalTime(timestamp,3 sec) " +

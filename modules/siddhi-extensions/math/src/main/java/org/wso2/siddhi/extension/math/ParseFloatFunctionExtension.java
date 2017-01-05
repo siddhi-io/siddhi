@@ -26,8 +26,8 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 /*
-* parseFloat(string);
-* Returns the 'string' as a FLOAT
+* parseFloat(inputmapper);
+* Returns the 'inputmapper' as a FLOAT
 * Accept Type(s): STRING
 * Return Type(s): FLOAT
 */

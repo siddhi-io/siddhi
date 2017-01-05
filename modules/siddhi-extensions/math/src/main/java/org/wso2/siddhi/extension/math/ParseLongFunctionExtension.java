@@ -26,8 +26,8 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 /*
-* parseLong(string);
-* Returns the 'string' as a LONG
+* parseLong(inputmapper);
+* Returns the 'inputmapper' as a LONG
 * Accept Type(s): STRING
 * Return Type(s): LONG
 */

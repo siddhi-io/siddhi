@@ -28,8 +28,8 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.extension.inputmapper.ConcatFunctionExtension;
 import org.wso2.siddhi.extension.map.test.util.SiddhiTestHelper;
-import org.wso2.siddhi.extension.string.ConcatFunctionExtension;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,7 +51,7 @@ public class CreateFromXMLFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
 
-        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String inStreamDefinition = "\ndefine stream inputStream (symbol inputmapper, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select "
                 + "map:createFromXML(\"<sensor>" +
                 "<commonAttr1>19</commonAttr1>" +
@@ -101,7 +101,7 @@ public class CreateFromXMLFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
 
-        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool, strAttr string);";
+        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool, strAttr inputmapper);";
         String query = ("@info(name = 'query1') from inputStream select " +
                 "map:createFromXML(str:concat('<sensor><commonAttr1>',longAttr,'</commonAttr1><commonAttr2>'," +
                 "doubleAttr,'</commonAttr2><commonAttr3>',booleanAttr,'</commonAttr3><commonAttr4>',strAttr,'</commonAttr4></sensor>')) " +

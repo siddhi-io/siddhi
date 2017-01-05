@@ -48,7 +48,7 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string, price long, volume long);";
+                "define stream inputStream (symbol inputmapper, price long, volume long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:timestampInMilliseconds('2007-11-30 10:30:19','yyyy-MM-DD HH:MM:SS') as " +
@@ -83,7 +83,7 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string, price long, volume long);";
+                "define stream inputStream (symbol inputmapper, price long, volume long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:timestampInMilliseconds('2007-11-30 10:30:19.000') as " +
@@ -118,7 +118,7 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string, price long, volume long);";
+                "define stream inputStream (symbol inputmapper, price long, volume long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:timestampInMilliseconds() as " +

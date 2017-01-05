@@ -48,8 +48,8 @@ public class FrequentWindowEventTbaleTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream purchase (cardNo string, price float); " +
-                "define window purchaseWindow (cardNo string, price float) frequent(2); ";
+                "define stream purchase (cardNo inputmapper, price float); " +
+                "define window purchaseWindow (cardNo inputmapper, price float) frequent(2); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from purchase[price >= 30] " +
@@ -102,8 +102,8 @@ public class FrequentWindowEventTbaleTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream purchase (cardNo string, price float); " +
-                "define window purchaseWindow (cardNo string, price float) frequent(2, cardNo); ";
+                "define stream purchase (cardNo inputmapper, price float); " +
+                "define window purchaseWindow (cardNo inputmapper, price float) frequent(2, cardNo); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from purchase[price >= 30] " +

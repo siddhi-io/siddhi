@@ -30,6 +30,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 import java.util.concurrent.CountDownLatch;
+
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -58,7 +59,7 @@ public class MarkovChainTestcase {
         final int EXPECTED_NO_OF_EVENTS = 11;
         countDownLatch = new CountDownLatch(EXPECTED_NO_OF_EVENTS);
         siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (id string, state string);";
+        String inputStream = "define stream InputStream (id inputmapper, state inputmapper);";
 
         ClassLoader classLoader = getClass().getClassLoader();
         String markovMatrixStorageLocation = classLoader.getResource("markovMatrix.csv").getPath();
@@ -158,7 +159,7 @@ public class MarkovChainTestcase {
         final int EXPECTED_NO_OF_EVENTS = 6;
         countDownLatch = new CountDownLatch(EXPECTED_NO_OF_EVENTS);
         siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (id string, state string);";
+        String inputStream = "define stream InputStream (id inputmapper, state inputmapper);";
 
         String executionPlan = ("@info(name = 'query1') "
                 + "from InputStream#markov:markovChain(id, state, 60 min, 0.2, 5) "
@@ -235,7 +236,7 @@ public class MarkovChainTestcase {
         final int EXPECTED_NO_OF_EVENTS = 6;
         countDownLatch = new CountDownLatch(EXPECTED_NO_OF_EVENTS);
         siddhiManager = new SiddhiManager();
-        String inputStream = "define stream InputStream (id string, state string, train bool);";
+        String inputStream = "define stream InputStream (id inputmapper, state inputmapper, train bool);";
 
         String executionPlan = ("@info(name = 'query1') "
                 + "from InputStream#markov:markovChain(id, state, 60 min, 0.2, 5, train) "

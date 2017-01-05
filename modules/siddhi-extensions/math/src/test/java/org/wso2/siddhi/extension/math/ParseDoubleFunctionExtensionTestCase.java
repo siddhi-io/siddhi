@@ -37,7 +37,7 @@ public class ParseDoubleFunctionExtensionTestCase {
         logger.info("ParseDoubleFunctionExtension TestCase");
 
         siddhiManager = new SiddhiManager();
-        String inValueStream = "define stream InValueStream (inValue string);";
+        String inValueStream = "define stream InValueStream (inValue inputmapper);";
 
         String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
                 + "select math:parseDouble(inValue) as output "

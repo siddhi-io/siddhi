@@ -61,7 +61,7 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest') " +
-                "define stream streamA (symbol string, price int);" +
+                "define stream streamA (symbol inputmapper, price int);" +
                 "partition with (symbol of streamA) " +
                 "begin " +
                 "@info(name = 'query1') " +
@@ -98,8 +98,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest1') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStreamOne (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStreamOne (symbol inputmapper, price float,volume int);"
                 + "@info(name = 'query')from cseEventStreamOne select symbol,price,volume insert into cseEventStream;"
                 + "partition with (symbol of cseEventStream) begin @info(name = 'query1') from cseEventStream[700>price] select symbol,sum(price) as price,volume insert into OutStockStream ;  end ";
 
@@ -143,8 +143,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest2') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream StockStream1 (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream StockStream1 (symbol inputmapper, price float,volume int);"
                 + "partition with (symbol of cseEventStream , symbol of StockStream1) begin @info(name = 'query1') from cseEventStream[700>price] select symbol,sum(price) as price,volume insert into OutStockStream ;  end ";
 
 
@@ -514,8 +514,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest6') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStream1 (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStream1 (symbol inputmapper, price float,volume int);"
                 + "partition with (symbol of cseEventStream , symbol of cseEventStream1) begin @info(name = 'query') from cseEventStream select symbol,price,volume insert into #StockStream ;"
                 + "@info(name = 'query1') from #StockStream select symbol,price,volume insert into OutStockStream ;"
                 + "@info(name = 'query2') from cseEventStream1 select symbol,price,volume insert into  #StockStream1 ;"
@@ -560,8 +560,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest7') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStream1 (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStream1 (symbol inputmapper, price float,volume int);"
                 + "partition with (symbol of cseEventStream)"
                 + "begin"
                 + "@info(name = 'query') from cseEventStream select symbol,sum(price) as price,volume insert into OutStockStream ;"
@@ -608,8 +608,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest8') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStream1 (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStream1 (symbol inputmapper, price float,volume int);"
                 + "partition with (symbol of cseEventStream)"
                 + "begin"
                 + "@info(name = 'query') from cseEventStream select symbol,max(price) as max_price,volume insert into OutStockStream ;"
@@ -654,8 +654,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest9') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStream1 (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStream1 (symbol inputmapper, price float,volume int);"
                 + "partition with (symbol of cseEventStream)"
                 + "begin"
                 + "@info(name = 'query') from cseEventStream select symbol,min(price) as min_price,volume insert into OutStockStream ;"
@@ -700,8 +700,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest10') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStream1 (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStream1 (symbol inputmapper, price float,volume int);"
                 + "partition with (symbol of cseEventStream)"
                 + "begin"
                 + "@info(name = 'query') from cseEventStream select symbol,avg(price) as avgPrice,volume insert into OutStockStream ;"
@@ -746,8 +746,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest11') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStream1 (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStream1 (symbol inputmapper, price float,volume int);"
                 + "partition with (symbol of cseEventStream)"
                 + "begin"
                 + "@info(name = 'query') from cseEventStream select count(symbol) as entries insert into OutStockStream ;"
@@ -793,9 +793,9 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest15') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStream1 (symbol string, price float,volume int);"
-                + "define stream StockStream (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStream1 (symbol inputmapper, price float,volume int);"
+                + "define stream StockStream (symbol inputmapper, price float,volume int);"
                 + "partition with (symbol of cseEventStream) begin @info(name = 'query') from cseEventStream select symbol,price as price,volume insert into #StockStream ;"
                 + "@info(name = 'query1') from #StockStream select symbol,price,volume insert into OutStockStream ;"
                 + "@info(name = 'query2') from #StockStream select symbol,price,volume insert into StockStream ; end ;"
@@ -854,7 +854,7 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest16') " +
-                "define stream streamA (symbol string, price int);"
+                "define stream streamA (symbol inputmapper, price int);"
                 + "partition with (symbol of streamA) begin @info(name = 'query1') from streamA select symbol,price insert into StockQuote ;"
                 + "@info(name = 'query2') from streamA select symbol,price insert into StockQuote ; end ";
 
@@ -968,8 +968,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest18') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStreamOne (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStreamOne (symbol inputmapper, price float,volume int);"
                 + "@info(name = 'query')from cseEventStreamOne select symbol,price,volume insert into cseEventStream;"
                 + "partition with (price>=100 as 'large' or price<100 as 'small' of cseEventStream) begin @info(name = 'query1') from cseEventStream#window.length(4) select symbol,sum(price) as price insert into OutStockStream ;  end ";
 
@@ -1015,8 +1015,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest19') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStreamOne (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStreamOne (symbol inputmapper, price float,volume int);"
                 + "@info(name = 'query')from cseEventStreamOne select symbol,price,volume insert into cseEventStream;"
                 + "partition with (price>=100 as 'large' or price<100 as 'medium' or price<50 as 'small' of cseEventStream) begin @info(name = 'query1') from cseEventStream select symbol,sum(price) as price insert into OutStockStream ;  end ";
 
@@ -1070,9 +1070,9 @@ public class PartitionTestCase {
                 "@plan:name('PartitionTest20') " +
                 "" +
                 "" +
-                "define stream cseEventStream (symbol string, price float,volume int); " +
+                "define stream cseEventStream (symbol inputmapper, price float,volume int); " +
                 "" +
-                "define stream cseEventStreamOne (symbol string, price float,volume int);" +
+                "define stream cseEventStreamOne (symbol inputmapper, price float,volume int);" +
                 "" +
                 "@info(name = 'query')" +
                 "from cseEventStreamOne " +
@@ -1146,9 +1146,9 @@ public class PartitionTestCase {
                 "@plan:name('PartitionTest20') " +
                 "" +
                 "" +
-                "define stream cseEventStream (symbol string, price float,volume int); " +
+                "define stream cseEventStream (symbol inputmapper, price float,volume int); " +
                 "" +
-                "define stream cseEventStreamOne (symbol string, price float,volume int);" +
+                "define stream cseEventStreamOne (symbol inputmapper, price float,volume int);" +
                 "" +
                 "@info(name = 'query')" +
                 "from cseEventStreamOne " +
@@ -1218,8 +1218,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest10') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStream1 (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStream1 (symbol inputmapper, price float,volume int);"
                 + "partition with (symbol of cseEventStream)"
                 + "begin"
                 + "@info(name = 'query') from cseEventStream#window.time(1 sec) " +
@@ -1259,8 +1259,8 @@ public class PartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "@plan:name('PartitionTest10') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStream1 (symbol string, price float,volume int);"
+                "define stream cseEventStream (symbol inputmapper, price float,volume int);"
+                + "define stream cseEventStream1 (symbol inputmapper, price float,volume int);"
                 + "partition with (symbol of cseEventStream)"
                 + "begin"
                 + "@info(name = 'query') from cseEventStream#window.time(1 sec) " +

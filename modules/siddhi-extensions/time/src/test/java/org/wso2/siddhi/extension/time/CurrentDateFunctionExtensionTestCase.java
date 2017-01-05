@@ -48,7 +48,7 @@ public class CurrentDateFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string, price long, volume long);";
+                "define stream inputStream (symbol inputmapper, price long, volume long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream select symbol , time:currentDate() as currentTime "+
                 "insert into outputStream;");

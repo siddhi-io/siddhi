@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.selector.attribute.aggregator;
 
 import junit.framework.Assert;
+import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -27,8 +28,6 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
-
-import org.apache.log4j.Logger;
 
 public class StddevAttributeAggregatorTestCase {
     static final Logger log = Logger.getLogger(StddevAttributeAggregatorTestCase.class);
@@ -49,7 +48,7 @@ public class StddevAttributeAggregatorTestCase {
         String execPlan = "" +
                 "@Plan:name('StddevAggregatorTests') " +
                 "" +
-                "define stream cseEventStream (symbol string, price double);" +
+                "define stream cseEventStream (symbol inputmapper, price double);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream " +
@@ -83,7 +82,7 @@ public class StddevAttributeAggregatorTestCase {
         String execPlan = "" +
                 "@Plan:name('StddevAggregatorTests') " +
                 "" +
-                "define stream cseEventStream (symbol string, price double);" +
+                "define stream cseEventStream (symbol inputmapper, price double);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(1) " +
@@ -117,7 +116,7 @@ public class StddevAttributeAggregatorTestCase {
         String execPlan = "" +
                 "@Plan:name('StddevAggregatorTests') " +
                 "" +
-                "define stream cseEventStream (symbol string, price double);" +
+                "define stream cseEventStream (symbol inputmapper, price double);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(3) " +
@@ -153,7 +152,7 @@ public class StddevAttributeAggregatorTestCase {
         String execPlan = "" +
                 "@Plan:name('StddevAggregatorTests') " +
                 "" +
-                "define stream cseEventStream (symbol string, price double);" +
+                "define stream cseEventStream (symbol inputmapper, price double);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(6) " +
@@ -193,7 +192,7 @@ public class StddevAttributeAggregatorTestCase {
         String execPlan = "" +
                 "@Plan:name('StddevAggregatorTests') " +
                 "" +
-                "define stream cseEventStream (symbol string, price double);" +
+                "define stream cseEventStream (symbol inputmapper, price double);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.lengthBatch(6) " +
@@ -235,7 +234,7 @@ public class StddevAttributeAggregatorTestCase {
         String windowExecPlan = "" +
                 "@Plan:name('StddevAggregatorTests') " +
                 "" +
-                "define stream cseEventStream (symbol string, price double);" +
+                "define stream cseEventStream (symbol inputmapper, price double);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.length(3) " +

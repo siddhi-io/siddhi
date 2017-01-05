@@ -31,7 +31,7 @@ public class DefineTableTestCase {
 
     @Test
     public void Test1() throws SiddhiParserException {
-        TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("define table cseStream ( symbol string, price int, volume float )");
+        TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("define table cseStream ( symbol inputmapper, price int, volume float )");
         Assert.assertEquals(TableDefinition.
                         id("cseStream").
                         attribute("symbol", Attribute.Type.STRING).
@@ -42,10 +42,10 @@ public class DefineTableTestCase {
 
     @Test
     public void Test2() throws SiddhiParserException {
-        TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("define table `define` ( `string` string, price int, volume float );");
+        TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("define table `define` ( `inputmapper` inputmapper, price int, volume float );");
         Assert.assertEquals(TableDefinition.
                         id("define").
-                        attribute("string", Attribute.Type.STRING).
+                        attribute("inputmapper", Attribute.Type.STRING).
                         attribute("price", Attribute.Type.INT).
                         attribute("volume", Attribute.Type.FLOAT).toString(),
                 streamDefinition.toString());
@@ -53,7 +53,7 @@ public class DefineTableTestCase {
 
     @Test
     public void Test3() throws SiddhiParserException {
-        TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("define table cseStream ( symbol string, price int, volume float )");
+        TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("define table cseStream ( symbol inputmapper, price int, volume float )");
         Assert.assertEquals(TableDefinition.
                         id("cseStream").
                         attribute("symbol", Attribute.Type.STRING).
@@ -66,7 +66,7 @@ public class DefineTableTestCase {
     public void Test4() throws SiddhiParserException {
         TableDefinition streamDefinition = SiddhiCompiler.parseTableDefinition("" +
                 " @from(datasource='MyDatabase','CUSTOM')" +
-                " define table cseStream ( symbol string, price int, volume float )");
+                " define table cseStream ( symbol inputmapper, price int, volume float )");
         Assert.assertEquals(TableDefinition.
                         id("cseStream").
                         attribute("symbol", Attribute.Type.STRING).

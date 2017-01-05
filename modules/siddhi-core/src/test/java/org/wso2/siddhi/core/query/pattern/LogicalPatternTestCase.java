@@ -50,8 +50,8 @@ public class LogicalPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price > 20] -> e2=Stream2[price > e1.price] or e3=Stream2['IBM' == symbol] " +
@@ -101,8 +101,8 @@ public class LogicalPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price > 20] -> e2=Stream2[price > e1.price] or e3=Stream2['IBM' == symbol] " +
@@ -152,8 +152,8 @@ public class LogicalPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price > 20] -> e2=Stream2[price > e1.price] or e3=Stream2['IBM' == symbol] " +
@@ -205,8 +205,8 @@ public class LogicalPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price > 20] -> e2=Stream2[price > e1.price] and e3=Stream2['IBM' == symbol] " +
@@ -258,8 +258,8 @@ public class LogicalPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price > 20] -> e2=Stream2[price > e1.price] and e3=Stream2['IBM' == symbol] " +
@@ -311,8 +311,8 @@ public class LogicalPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol string, price float, volume int); " +
-                "define stream Stream2 (symbol string, price float, volume int); ";
+                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
+                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1=Stream1[price > 20] -> e2=Stream2[price > e1.price] and e3=Stream1['IBM' == symbol] " +

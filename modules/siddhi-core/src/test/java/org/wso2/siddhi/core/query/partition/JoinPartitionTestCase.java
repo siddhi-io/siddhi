@@ -48,7 +48,7 @@ public class JoinPartitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String executionPlan = "define stream cseEventStream (symbol string, user string,volume int);  define stream twitterStream (user string, tweet string, company string);"
+        String executionPlan = "define stream cseEventStream (symbol inputmapper, user inputmapper,volume int);  define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper);"
                 + "partition with (user of cseEventStream, user of twitterStream) begin @info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
                 "on cseEventStream.symbol== twitterStream.company " +
@@ -88,7 +88,7 @@ public class JoinPartitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String executionPlan = "define stream cseEventStream (symbol string, user string,volume int);  define stream twitterStream (user string, tweet string, company string);"
+        String executionPlan = "define stream cseEventStream (symbol inputmapper, user inputmapper,volume int);  define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper);"
                 + "partition with (user of cseEventStream, user of twitterStream) begin @info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
                 "on cseEventStream.symbol== twitterStream.company " +
@@ -132,7 +132,7 @@ public class JoinPartitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String executionPlan = "define stream cseEventStream (symbol string, user string,volume int);  define stream twitterStream (user string, tweet string, company string);"
+        String executionPlan = "define stream cseEventStream (symbol inputmapper, user inputmapper,volume int);  define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper);"
                 + "partition with (user of cseEventStream, user of twitterStream) begin @info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
                 "on cseEventStream.symbol== twitterStream.company " +
@@ -178,7 +178,7 @@ public class JoinPartitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String executionPlan = "define stream cseEventStream (symbol string, user string,volume int);  define stream twitterStream (user string, tweet string, company string);"
+        String executionPlan = "define stream cseEventStream (symbol inputmapper, user inputmapper,volume int);  define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper);"
                 + "partition with (user of cseEventStream, user of twitterStream) begin @info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
                 "on cseEventStream.symbol== twitterStream.company " +
@@ -230,9 +230,9 @@ public class JoinPartitionTestCase {
 
         String executionPlan = "" +
                 "" +
-                "define stream cseEventStream (symbol string, user string,volume int); " +
+                "define stream cseEventStream (symbol inputmapper, user inputmapper,volume int); " +
                 "" +
-                "define stream twitterStream (user string, tweet string, company string);" +
+                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper);" +
                 " " +
                 "partition with (user of cseEventStream) begin " +
                 "@info(name = 'query2') from cseEventStream select symbol, user, sum(volume) as volume insert all events into #cseInnerStream;" +
@@ -277,7 +277,7 @@ public class JoinPartitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String executionPlan = "define stream cseEventStream (symbol string, user string,volume int);  define stream twitterStream (user string, tweet string, company string);"
+        String executionPlan = "define stream cseEventStream (symbol inputmapper, user inputmapper,volume int);  define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper);"
                 + "partition with (user of cseEventStream) begin " +
                 "@info(name = 'query2') from cseEventStream select symbol, user, sum(volume) as volume insert all events into #cseEventStream;" +
                 "@info(name = 'query1') from #cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
@@ -320,7 +320,7 @@ public class JoinPartitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String executionPlan = "define stream cseEventStream (symbol string, user string,volume int);  define stream twitterStream (user string, tweet string, company string, volume int);"
+        String executionPlan = "define stream cseEventStream (symbol inputmapper, user inputmapper,volume int);  define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper, volume int);"
                 + "partition with (volume>=100 as 'large' or volume<100 as 'small' of cseEventStream, volume>=100 as 'large' or volume<100 as 'small' of twitterStream) begin @info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
                 "on cseEventStream.user== twitterStream.user " +
@@ -366,7 +366,7 @@ public class JoinPartitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String executionPlan = "define stream cseEventStream (symbol string, user string,volume int);  define stream twitterStream (user string, tweet string, company string);"
+        String executionPlan = "define stream cseEventStream (symbol inputmapper, user inputmapper,volume int);  define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper);"
                 + "partition with (user of cseEventStream) begin @info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
                 "on cseEventStream.symbol== twitterStream.company " +
@@ -407,7 +407,7 @@ public class JoinPartitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String executionPlan = "define stream cseEventStream (symbol string, user string,volume int);  define stream twitterStream (user string, tweet string, company string);"
+        String executionPlan = "define stream cseEventStream (symbol inputmapper, user inputmapper,volume int);  define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper);"
                 + "partition with (user of cseEventStream, user of twitterStream) begin @info(name = 'query1') " +
                 "from cseEventStream#window.length(1) unidirectional join twitterStream#window.length(1) " +
                 "on cseEventStream.symbol== twitterStream.company " +
@@ -455,8 +455,8 @@ public class JoinPartitionTestCase {
 
         String executionPlan = "" +
                 "" +
-                "define stream cseEventStream (symbol string, user string,volume int);  " +
-                "define stream twitterStream (user string, tweet string, company string); " +
+                "define stream cseEventStream (symbol inputmapper, user inputmapper,volume int);  " +
+                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); " +
                 "" +
                 "partition with (user of cseEventStream, user of twitterStream) " +
                 "begin " +

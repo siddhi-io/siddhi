@@ -41,7 +41,7 @@ import java.util.List;
 
 /**
  * This extension transforms a latitude and longitude coordinates into precise address information.
- * The output contains string properties streetNumber, neighborhood, route, administrativeAreaLevelTwo,
+ * The output contains inputmapper properties streetNumber, neighborhood, route, administrativeAreaLevelTwo,
  * administrativeAreaLevelOne, country, countryCode, postalCode and formattedAddress in order.
  * However, these information are not available for all the geo coordinates. For example, if the latitude
  * and longitude represent a place in a forest, only the high level information like country will be returned.

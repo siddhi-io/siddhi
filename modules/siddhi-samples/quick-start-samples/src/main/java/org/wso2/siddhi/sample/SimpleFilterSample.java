@@ -33,7 +33,7 @@ public class SimpleFilterSample {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "" +
-                "define stream cseEventStream (symbol string, price float, volume long); " +
+                "define stream cseEventStream (symbol inputmapper, price float, volume long); " +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[volume < 150] " +

@@ -55,7 +55,7 @@ public class DefineTableTestCase {
         log.info("testTableDefinition2 - OUT 0");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        String tables = "define table EventTable(symbol string, price int, volume float) ";
+        String tables = "define table EventTable(symbol inputmapper, price int, volume float) ";
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(tables);
         executionPlanRuntime.shutdown();
     }
@@ -65,8 +65,8 @@ public class DefineTableTestCase {
         log.info("testTableDefinition3 - OUT 0");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        String tables = "define table TestEventTable(symbol string, price int, volume float); " +
-                "define table TestEventTable(symbols string, price int, volume float); ";
+        String tables = "define table TestEventTable(symbol inputmapper, price int, volume float); " +
+                "define table TestEventTable(symbols inputmapper, price int, volume float); ";
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(tables);
         executionPlanRuntime.shutdown();
     }
@@ -76,8 +76,8 @@ public class DefineTableTestCase {
         log.info("testTableDefinition4 - OUT 0");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        String tables = "define table TestEventTable(symbol string, volume float); " +
-                "define table TestEventTable(symbols string, price int, volume float); ";
+        String tables = "define table TestEventTable(symbol inputmapper, volume float); " +
+                "define table TestEventTable(symbols inputmapper, price int, volume float); ";
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(tables);
         executionPlanRuntime.shutdown();
     }
@@ -87,8 +87,8 @@ public class DefineTableTestCase {
         log.info("testTableDefinition5 - OUT 0");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        String tables = "define table TestEventTable(symbol string, price int, volume float); " +
-                "define table TestEventTable(symbol string, price int, volume float); ";
+        String tables = "define table TestEventTable(symbol inputmapper, price int, volume float); " +
+                "define table TestEventTable(symbol inputmapper, price int, volume float); ";
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(tables);
         executionPlanRuntime.shutdown();
     }
@@ -98,8 +98,8 @@ public class DefineTableTestCase {
         log.info("testTableDefinition6 - OUT 0");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        String definitions = "define stream TestEventTable(symbol string, price int, volume float); " +
-                "define table TestEventTable(symbol string, price int, volume float); ";
+        String definitions = "define stream TestEventTable(symbol inputmapper, price int, volume float); " +
+                "define table TestEventTable(symbol inputmapper, price int, volume float); ";
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(definitions);
         executionPlanRuntime.shutdown();
     }
@@ -109,8 +109,8 @@ public class DefineTableTestCase {
         log.info("testTableDefinition7 - OUT 0");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        String definitions = "define table TestEventTable(symbol string, price int, volume float); " +
-                "define stream TestEventTable(symbol string, price int, volume float); ";
+        String definitions = "define table TestEventTable(symbol inputmapper, price int, volume float); " +
+                "define stream TestEventTable(symbol inputmapper, price int, volume float); ";
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(definitions);
         executionPlanRuntime.shutdown();
     }
@@ -121,13 +121,13 @@ public class DefineTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String executionPlan = "" +
-                "define stream StockStream(symbol string, price int, volume float);" +
+                "define stream StockStream(symbol inputmapper, price int, volume float);" +
                 "" +
                 "from StockStream " +
                 "select symbol, price, volume " +
                 "insert into OutputStream;" +
                 "" +
-                "define table OutputStream (symbol string, price float, volume long); ";
+                "define table OutputStream (symbol inputmapper, price float, volume long); ";
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
         executionPlanRuntime.shutdown();
     }
@@ -139,8 +139,8 @@ public class DefineTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String executionPlan = "" +
-                "define stream StockStream(symbol string, price int, volume float);" +
-                "define table OutputStream (symbol string, price float, volume long); " +
+                "define stream StockStream(symbol inputmapper, price int, volume float);" +
+                "define table OutputStream (symbol inputmapper, price float, volume long); " +
                 "" +
                 "from StockStream " +
                 "select symbol, price, volume " +
@@ -155,8 +155,8 @@ public class DefineTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String executionPlan = "" +
-                "define stream StockStream(symbol string, price int, volume float); " +
-                "define table OutputStream (symbol string, price float, volume long);" +
+                "define stream StockStream(symbol inputmapper, price int, volume float); " +
+                "define table OutputStream (symbol inputmapper, price float, volume long);" +
                 "" +
                 "from StockStream " +
                 "select symbol, price " +
@@ -171,8 +171,8 @@ public class DefineTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String executionPlan = "" +
-                "define stream StockStream(symbol string, price int, volume float);" +
-                "define table OutputStream (symbol string, price int, volume float); " +
+                "define stream StockStream(symbol inputmapper, price int, volume float);" +
+                "define table OutputStream (symbol inputmapper, price int, volume float); " +
                 "" +
                 "from StockStream " +
                 "select symbol, price, volume " +
@@ -187,8 +187,8 @@ public class DefineTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String executionPlan = "" +
-                "define stream StockStream(symbol string, price int, volume float);" +
-                "define table OutputStream (symbol string, price int, volume float); " +
+                "define stream StockStream(symbol inputmapper, price int, volume float);" +
+                "define table OutputStream (symbol inputmapper, price int, volume float); " +
                 "" +
                 "from StockStream " +
                 "select * " +
@@ -203,8 +203,8 @@ public class DefineTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String executionPlan = "" +
-                "define stream StockStream(symbol string, price int, volume float);" +
-                "define table OutputStream (symbol string, price int, volume float, time long); " +
+                "define stream StockStream(symbol inputmapper, price int, volume float);" +
+                "define table OutputStream (symbol inputmapper, price int, volume float, time long); " +
                 "" +
                 "from StockStream " +
                 "select * " +
@@ -219,8 +219,8 @@ public class DefineTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String executionPlan = "" +
-                "define stream StockStream(symbol string, price int, volume float);" +
-                "define table OutputStream (symbol string, price int, volume int); " +
+                "define stream StockStream(symbol inputmapper, price int, volume float);" +
+                "define table OutputStream (symbol inputmapper, price int, volume int); " +
                 "" +
                 "from StockStream " +
                 "select * " +
@@ -235,8 +235,8 @@ public class DefineTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String executionPlan = "" +
-                "define stream StockStream(symbol string, price int, volume float);" +
-                "define table OutputStream (symbol string, price int, volume float); " +
+                "define stream StockStream(symbol inputmapper, price int, volume float);" +
+                "define table OutputStream (symbol inputmapper, price int, volume float); " +
                 "" +
                 "from OutputStream " +
                 "select symbol, price, volume " +

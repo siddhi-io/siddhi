@@ -51,7 +51,7 @@ public class ExtractDateFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string, dateValue string,dateFormat string);";
+                "define stream inputStream (symbol inputmapper, dateValue inputmapper,dateFormat inputmapper);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol,time:date(dateValue,dateFormat) as dateExtracted " +

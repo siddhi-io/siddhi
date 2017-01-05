@@ -26,8 +26,8 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 /*
-* parseDouble(string);
-* Returns the 'string' as a DOUBLE
+* parseDouble(inputmapper);
+* Returns the 'inputmapper' as a DOUBLE
 * Accept Type(s): STRING
 * Return Type(s): DOUBLE
 */
