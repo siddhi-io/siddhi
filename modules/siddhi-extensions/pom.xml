@@ -42,6 +42,7 @@
         <module>map</module>
         <module>kalman-filter</module>
         <module>markov-models</module>
+        <module>streamingml</module>
     </modules>
 
 </project>
