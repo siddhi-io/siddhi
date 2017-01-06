@@ -49,7 +49,8 @@ public class JoinPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "define stream cseEventStream (symbol string, user string,volume int);  define stream twitterStream (user string, tweet string, company string);"
-                + "partition with (user of cseEventStream, user of twitterStream) begin @info(name = 'query1') " +
+                + "partition with (user of cseEventStream, user of twitterStream)" +
+                " begin @info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
                 "on cseEventStream.symbol== twitterStream.company " +
                 "select cseEventStream.symbol as symbol, twitterStream.tweet, cseEventStream.volume " +
