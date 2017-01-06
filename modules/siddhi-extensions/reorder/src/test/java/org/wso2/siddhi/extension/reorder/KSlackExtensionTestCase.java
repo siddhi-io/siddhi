@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.siddhi.extension.reorder;
 
 import org.apache.log4j.Logger;
@@ -9,10 +27,6 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 
-/**
- * This is the test case for KSlackExtension.
- * Created by miyurud on 8/10/15.
- */
 public class KSlackExtensionTestCase {
     static final Logger log = Logger.getLogger(KSlackExtensionTestCase.class);
     private volatile int count;
@@ -30,10 +44,12 @@ public class KSlackExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (eventtt long, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream#reorder:kslack(eventtt, 1000l) select eventtt, price, volume " +
+        String query = ("@info(name = 'query1') from inputStream#reorder:kslack(eventtt, 1000l) select eventtt, " +
+                "price, volume " +
                 "insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
 
@@ -113,10 +129,12 @@ public class KSlackExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (eventtt long, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream#reorder:kslack(eventtt, 1000l) select eventtt, price, volume " +
+        String query = ("@info(name = 'query1') from inputStream#reorder:kslack(eventtt, 1000l) select eventtt, " +
+                "price, volume " +
                 "insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
 

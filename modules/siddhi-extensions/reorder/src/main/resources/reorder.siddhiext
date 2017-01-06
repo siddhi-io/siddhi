@@ -17,3 +17,4 @@
 #
 
 kslack=org.wso2.siddhi.extension.reorder.KSlackExtension
+akslack=org.wso2.siddhi.extension.reorder.AlphaKSlackExtension
