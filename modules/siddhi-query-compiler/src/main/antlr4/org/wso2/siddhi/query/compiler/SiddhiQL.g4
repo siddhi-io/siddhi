@@ -27,7 +27,7 @@ parse
     ;
 
 error
-    : UNEXPECTED_CHAR 
+    : UNEXPECTED_CHAR
   //      {throw new SiddhiParserException("You have an error in your SiddhiQL at line " + $UNEXPECTED_CHAR.line + ", unexpected charecter '"+ $UNEXPECTED_CHAR.text +"'");}
     ;
 
@@ -39,7 +39,7 @@ execution_plan
     ;
 
 execution_element
-    :query|partition
+    :query|partition|subscription
     ;
 
 definition_stream_final
@@ -120,7 +120,7 @@ partition_final
 
 partition_with_stream
     :attribute OF stream_id
-    |condition_ranges OF stream_id 
+    |condition_ranges OF stream_id
     ;
 
 condition_ranges
@@ -135,12 +135,28 @@ query_final
     : query ';'? EOF
     ;
 
+subscription_final
+    : subscription ';'? EOF
+    ;
+
 query
-    : annotation* FROM query_input query_section? output_rate? query_output
+    : annotation* FROM query_input query_section? output_rate? (query_output | query_publish)
     ;
 
 query_input
     : (standard_stream|join_stream|pattern_stream|sequence_stream|anonymous_stream)
+    ;
+
+subscription
+    :annotation* SUBSCRIBE transport MAP mapping subscription_output
+    ;
+
+transport
+    :type (OPTIONS '(' option (',' option)* ')')?
+    ;
+
+mapping
+    :type (map_attribute (',' map_attribute)*)? (OPTIONS '(' option (',' option)* ')')? map_body?
     ;
 
 standard_stream
@@ -162,17 +178,17 @@ pattern_stream
     ;
 
 every_pattern_source_chain
-    : '('every_pattern_source_chain')' within_time? 
-    | EVERY '('pattern_source_chain ')' within_time?   
+    : '('every_pattern_source_chain')' within_time?
+    | EVERY '('pattern_source_chain ')' within_time?
     | every_pattern_source_chain  '->' every_pattern_source_chain
     | pattern_source_chain
-    | EVERY pattern_source within_time? 
+    | EVERY pattern_source within_time?
     ;
 
 pattern_source_chain
-    : '('pattern_source_chain')' within_time? 
+    : '('pattern_source_chain')' within_time?
     | pattern_source_chain  '->' pattern_source_chain
-    | pattern_source within_time? 
+    | pattern_source within_time?
     ;
 
 pattern_source
@@ -198,7 +214,7 @@ basic_source
     ;
 
 basic_source_stream_handlers
-    :(basic_source_stream_handler)+ 
+    :(basic_source_stream_handler)+
     ;
 
 basic_source_stream_handler
@@ -210,9 +226,9 @@ sequence_stream
     ;
 
 sequence_source_chain
-    :'('sequence_source_chain ')' within_time? 
+    :'('sequence_source_chain ')' within_time?
     | sequence_source_chain ',' sequence_source_chain
-    | sequence_source  within_time? 
+    | sequence_source  within_time?
     ;
 
 sequence_source
@@ -220,7 +236,7 @@ sequence_source
     ;
 
 sequence_collection_stateful_source
-    :standard_stateful_source ('<' collect '>'|zero_or_more='*'|zero_or_one='?'|one_or_more='+') 
+    :standard_stateful_source ('<' collect '>'|zero_or_more='*'|zero_or_one='?'|one_or_more='+')
     ;
 
 anonymous_stream
@@ -260,8 +276,19 @@ query_output
     |RETURN output_event_type?
     ;
 
+query_publish
+    :PUBLISH transport MAP mapping (FOR output_event_type)?
+    ;
+
+subscription_output
+    :INSERT output_event_type? INTO target
+    |DELETE target (FOR output_event_type)? ON expression
+    |UPDATE target (FOR output_event_type)? ON expression
+    |INSERT OVERWRITE target (FOR output_event_type)? ON expression
+    ;
+
 output_event_type
-    : ALL EVENTS | ALL RAW EVENTS | EXPIRED EVENTS | EXPIRED RAW EVENTS | CURRENT? EVENTS   
+    : ALL EVENTS | ALL RAW EVENTS | EXPIRED EVENTS | EXPIRED RAW EVENTS | CURRENT? EVENTS
     ;
 
 output_rate
@@ -334,6 +361,10 @@ attribute_index
     : INT_LITERAL| LAST ('-' INT_LITERAL)?
     ;
 
+option
+    :key value
+    ;
+
 function_id
     :name
     ;
@@ -358,7 +389,27 @@ attribute_name
     :name
     ;
 
+type
+    :name
+    ;
+
+key
+    :name
+    ;
+
+map_attribute
+    :string_value
+    ;
+
+map_body
+    :multiline_string
+    ;
+
 property_value
+    :string_value
+    ;
+
+value
     :string_value
     ;
 
@@ -386,13 +437,13 @@ collect
     ;
 
 attribute_type
-    :STRING     
-    |INT        
-    |LONG       
-    |FLOAT      
-    |DOUBLE     
-    |BOOL      
-    |OBJECT     
+    :STRING
+    |INT
+    |LONG
+    |FLOAT
+    |DOUBLE
+    |BOOL
+    |OBJECT
     ;
 
 join
@@ -480,6 +531,10 @@ keyword
     | DOUBLE
     | BOOL
     | OBJECT
+    | SUBSCRIBE
+    | OPTIONS
+    | MAP
+    | PUBLISH
     ;
 
 time_value
@@ -487,13 +542,13 @@ time_value
     |  month_value ( week_value)? ( day_value)? ( hour_value)? ( minute_value)? ( second_value)?  ( millisecond_value)?
     |  week_value ( day_value)? ( hour_value)? ( minute_value)? ( second_value)?  ( millisecond_value)?
     |  day_value ( hour_value)? ( minute_value)? ( second_value)?  ( millisecond_value)?
-    |  hour_value ( minute_value)? ( second_value)?  ( millisecond_value)?       
+    |  hour_value ( minute_value)? ( second_value)?  ( millisecond_value)?
     |  minute_value ( second_value)?  ( millisecond_value)?
     |  second_value ( millisecond_value)?
     |  millisecond_value
     ;
 
-year_value 
+year_value
     : INT_LITERAL YEARS
     ;
 
@@ -531,25 +586,26 @@ signed_float_value: ('-' |'+')? FLOAT_LITERAL;
 signed_int_value: ('-' |'+')? INT_LITERAL;
 bool_value: TRUE|FALSE;
 string_value: STRING_LITERAL;
+multiline_string: MULTILINE_STRING;
 
-INT_LITERAL 
+INT_LITERAL
     :  DIGIT+
     ;
 
 LONG_LITERAL
     : DIGIT+ L
-    ; 
+    ;
 
 FLOAT_LITERAL
     : DIGIT+ ( '.' DIGIT* )? ( E [-+]? DIGIT+ )? F
     | (DIGIT+)? '.' DIGIT+ ( E [-+]? DIGIT+ )? F
-    ; 
+    ;
 
 DOUBLE_LITERAL
     : DIGIT+ ( '.' DIGIT* )? ( E [-+]? DIGIT+ )? D
     | DIGIT+ ( '.' DIGIT* )?  E [-+]? DIGIT+  D?
     | (DIGIT+)? '.' DIGIT+ ( E [-+]? DIGIT+ )? D?
-    ; 
+    ;
 
 /*
 ID_QUOTES : '`'('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*'`' {setText(getText().substring(1, getText().length()-1));};
@@ -558,7 +614,7 @@ ID_NO_QUOTES : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
 
 
 STRING_VAL
-    :('\'' ( ~('\u0000'..'\u001f' | '\\' | '\''| '\"' ) )* '\'' 
+    :('\'' ( ~('\u0000'..'\u001f' | '\\' | '\''| '\"' ) )* '\''
     |'"' ( ~('\u0000'..'\u001f' | '\\'  |'\"') )* '"' )         {setText(getText().substring(1, getText().length()-1));}
     ;
 
@@ -596,7 +652,7 @@ TRIGGER:  T R I G G E R;
 TABLE:    T A B L E;
 PLAN:     P L A N;
 FROM:     F R O M;
-PARTITION:    P A R T I T I O N; 
+PARTITION:    P A R T I T I O N;
 WINDOW:   W I N D O W;
 SELECT:   S E L E C T;
 GROUP:    G R O U P;
@@ -625,7 +681,7 @@ ON:       O N;
 IS:       I S;
 NOT:      N O T;
 WITHIN:   W I T H I N;
-WITH:     W I T H; 
+WITH:     W I T H;
 BEGIN:    B E G I N;
 END:      E N D;
 NULL:     N U L L;
@@ -657,6 +713,10 @@ FLOAT:    F L O A T;
 DOUBLE:   D O U B L E;
 BOOL:     B O O L;
 OBJECT:   O B J E C T;
+SUBSCRIBE: S U B S C R I B E;
+OPTIONS: O P T I O N S;
+MAP: M A P;
+PUBLISH: P U B L I S H;
 
 ID_QUOTES : '`'[a-zA-Z_] [a-zA-Z_0-9]*'`' {setText(getText().substring(1, getText().length()-1));};
 
@@ -664,10 +724,16 @@ ID : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 STRING_LITERAL
     :(
-        '\'' ( ~('\u0000'..'\u001f' | '\''| '\"' ) )* '\'' 
-        |'"' ( ~('\u0000'..'\u001f'  |'\"') )* '"' 
-     )  {setText(getText().substring(1, getText().length()-1));}         
-    ;	
+        '\'' ( ~('\u0000'..'\u001f' | '\''| '\"' ) )* '\''
+        |'"' ( ~('\u0000'..'\u001f'  |'\"') )* '"'
+     )  {setText(getText().substring(1, getText().length()-1));}
+    ;
+
+MULTILINE_STRING
+    :(
+        '"""'(.*?)'"""'
+     )  {setText(getText().substring(3, getText().length()-3));}
+    ;
 
 //Hidden channels
 SINGLE_LINE_COMMENT
