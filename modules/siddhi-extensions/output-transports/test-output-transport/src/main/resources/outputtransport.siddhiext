@@ -16,4 +16,4 @@
 # under the License.
 #
 
-inMemory=org.wso2.siddhi.extension.output.transport.inmemory.InMemoryOutputTransport
+test=org.wso2.siddhi.extension.output.transport.test.TestOutputTransport

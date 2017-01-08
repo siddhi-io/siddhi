@@ -16,14 +16,18 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.output.transport.inmemory;
+package org.wso2.siddhi.extension.output.transport.test;
 
 import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.extension.output.mapper.text.TextOutputMapper;
+import org.wso2.siddhi.extension.util.StaticBroker;
+import org.wso2.siddhi.extension.util.Subscriber;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
@@ -35,8 +39,18 @@ import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Variable;
 
-public class InMemoryOutputTransportTestCase {
-    static final Logger log = Logger.getLogger(InMemoryOutputTransportTestCase.class);
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class TestOutputTransportTestCase {
+    static final Logger log = Logger.getLogger(TestOutputTransportTestCase.class);
+    private AtomicInteger wso2Count = new AtomicInteger(0);
+    private AtomicInteger ibmCount = new AtomicInteger(0);
+
+    @Before
+    public void init() {
+        wso2Count.set(0);
+        ibmCount.set(0);
+    }
 
     //    from FooStream
     //    select symbol
@@ -44,6 +58,30 @@ public class InMemoryOutputTransportTestCase {
     //    map text;
     @Test
     public void testPublisherWithSelector() throws InterruptedException {
+        StaticBroker.subscribe(new Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                wso2Count.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "WSO2";
+            }
+        });
+
+        StaticBroker.subscribe(new Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                ibmCount.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "IBM";
+            }
+        });
+
         StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
                 .attribute("symbol", Attribute.Type.STRING)
                 .attribute("price", Attribute.Type.INT)
@@ -57,7 +95,7 @@ public class InMemoryOutputTransportTestCase {
                 Selector.selector().select(new Variable("symbol"))
         );
         query.publish(
-                Transport.transport("inMemory").option("topic", "foo"), OutputStream.OutputEventType.CURRENT_EVENTS,
+                Transport.transport("test").option("topic", "{{symbol}}"), OutputStream.OutputEventType.CURRENT_EVENTS,
                 Mapping.format("text")
         );
 
@@ -75,6 +113,10 @@ public class InMemoryOutputTransportTestCase {
         stockStream.send(new Object[]{"IBM", 75.6f, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
         Thread.sleep(100);
+
+        Assert.assertEquals("Number of WSO2 events", 2, wso2Count.get());
+        Assert.assertEquals("Number of IBM events", 1, ibmCount.get());
+
         executionPlanRuntime.shutdown();
     }
 }

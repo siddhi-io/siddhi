@@ -16,51 +16,63 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.output.transport.inmemory;
+package org.wso2.siddhi.extension.output.transport.test;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
+import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
 import org.wso2.siddhi.core.publisher.OutputTransport;
+import org.wso2.siddhi.extension.util.StaticBroker;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-public class InMemoryOutputTransport extends OutputTransport {
-    private static final Logger log = Logger.getLogger(InMemoryOutputTransport.class);
+public class TestOutputTransport extends OutputTransport {
+    private static final Logger log = Logger.getLogger(TestOutputTransport.class);
+    private static final String TOPIC_KEY = "topic";
 
     @Override
     public void init(Transport transportOptions, Map<String, String> unmappedDynamicOptions)
             throws OutputTransportException {
-        log.info("InMemoryOutputTransport:init()");
+        List<String> availableConfigs = new ArrayList<>();
+        availableConfigs.addAll(transportOptions.getOptions().keySet());
+        availableConfigs.addAll(unmappedDynamicOptions.keySet());
+        if (!availableConfigs.contains(TOPIC_KEY)) {
+            throw new ExecutionPlanCreationException(String.format("{{%s}} configuration " +
+                    "could not be found in provided configs.", TOPIC_KEY));
+        }
     }
 
     @Override
     public void testConnect() throws TestConnectionNotSupportedException, ConnectionUnavailableException {
-        log.info("InMemoryOutputTransport:testConnect()");
+        log.info("TestOutputTransport:testConnect()");
     }
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        log.info("InMemoryOutputTransport:connect()");
+        log.info("TestOutputTransport:connect()");
     }
 
     @Override
     public void publish(Object event, Map<String, String> dynamicTransportOptions)
             throws ConnectionUnavailableException {
-        log.info("InMemoryOutputTransport:publish() | dynamicTransportOptions : " +
+        log.info("TestOutputTransport:publish() | dynamicTransportOptions : " +
                 dynamicTransportOptions.toString() + " | event : " + event.toString());
+        StaticBroker.publish(dynamicTransportOptions.get(TOPIC_KEY), event);
     }
 
     @Override
     public void disconnect() {
-        log.info("InMemoryOutputTransport:disconnect()");
+        log.info("TestOutputTransport:disconnect()");
     }
 
     @Override
     public void destroy() {
-        log.info("InMemoryOutputTransport:destroy()");
+        log.info("TestOutputTransport:destroy()");
     }
 
     @Override

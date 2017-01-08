@@ -24,7 +24,6 @@ import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.exception.NoSuchAttributeException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.extension.output.transport.inmemory.InMemoryOutputTransport;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
@@ -57,7 +56,7 @@ public class TextOutputMapperTestCase {
                 InputStream.stream("FooStream")
         );
         query.publish(
-                Transport.transport("inMemory")
+                Transport.transport("test")
                         .option("topic", "foo")
                         .option("symbol", "{{symbol}}")
                         .option("symbol-price", "{{symbol}}-{{price}}")
@@ -68,8 +67,6 @@ public class TextOutputMapperTestCase {
         );
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setExtension("outputtransport:inMemory", InMemoryOutputTransport.class);
-
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(streamDefinition);
         executionPlan.addQuery(query);
@@ -103,14 +100,12 @@ public class TextOutputMapperTestCase {
                 Selector.selector().select(new Variable("symbol")).select(new Variable("price"))
         );
         query.publish(
-                Transport.transport("inMemory").option("topic", "foo"),
+                Transport.transport("test").option("topic", "foo"),
                 OutputStream.OutputEventType.CURRENT_EVENTS,
                 Mapping.format("text").map("Symbol is {{symbol}}").map("Price is {{price}}")
         );
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setExtension("outputtransport:inMemory", InMemoryOutputTransport.class);
-
         ExecutionPlan executionPlan = new ExecutionPlan("ep1");
         executionPlan.defineStream(streamDefinition);
         executionPlan.addQuery(query);

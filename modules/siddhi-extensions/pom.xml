@@ -33,7 +33,7 @@
     <modules>
         <module>eval-script</module>
         <module>event-table</module>
-        <module>output-transports/in-memory-output-transport</module>
+        <module>output-transports/test-output-transport</module>
         <module>output-transports/http-output-transport</module>
         <module>output-mappers/text-output-mapper</module>
     </modules>

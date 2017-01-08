@@ -126,20 +126,19 @@ public class HttpOutputTransport extends OutputTransport {
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-//        grainier : fix properly;
-//        checkHTTPClientInit(eventAdapterConfiguration.getStaticProperties());
+        // TODO: 1/8/17 fix properly
+        // checkHTTPClientInit(eventAdapterConfiguration.getStaticProperties());
         checkHTTPClientInit(new HashMap<String, String>());
     }
 
     @Override
     public void publish(Object event, Map<String, String> dynamicTransportOptions)
             throws ConnectionUnavailableException {
-        // grainier : fix properly;
-        //Load dynamic properties
-//        String url = dynamicProperties.get(ADAPTER_MESSAGE_URL);
-//        String username = dynamicProperties.get(ADAPTER_USERNAME);
-//        String password = dynamicProperties.get(ADAPTER_PASSWORD);
-//        Map<String, String> headers = this.extractHeaders(dynamicProperties.get(ADAPTER_HEADERS));
+        // TODO: 1/8/17 load dynamic properties and fix properly
+        // String url = dynamicProperties.get(ADAPTER_MESSAGE_URL);
+        // String username = dynamicProperties.get(ADAPTER_USERNAME);
+        // String password = dynamicProperties.get(ADAPTER_PASSWORD);
+        // Map<String, String> headers = this.extractHeaders(dynamicProperties.get(ADAPTER_HEADERS));
 
         String url = "http://0.0.0.0:8080/endpoint";
         String username = null;
@@ -186,7 +185,7 @@ public class HttpOutputTransport extends OutputTransport {
                 }
             }
 
-            // grainier : fix properly
+            // TODO: 1/8/17 fix properly
             // String messageFormat = eventAdapterConfiguration.getMessageFormat();
             String messageFormat = "json";
             if (messageFormat.equalsIgnoreCase("json")) {
@@ -265,7 +264,7 @@ public class HttpOutputTransport extends OutputTransport {
         public void run() {
             EntityEnclosingMethod method = null;
             try {
-                // grainier : fix this properly;
+                // TODO: 1/8/17 fix properly
                 //    if (clientMethod.equalsIgnoreCase(CONSTANT_HTTP_PUT)) {
                 //        method = new PutMethod(this.getUrl());
                 //    } else {
