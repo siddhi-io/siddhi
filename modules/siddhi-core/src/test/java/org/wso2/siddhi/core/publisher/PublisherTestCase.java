@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.exception.NoSuchAttributeException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.query.api.ExecutionPlan;
@@ -275,7 +276,7 @@ public class PublisherTestCase {
     //          Hi user
     //          {{data}} on {{time}}
     //          """;
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NoSuchAttributeException.class)
     public void testPublisherWithHttpTransport() throws InterruptedException {
         StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
                 .attribute("symbol", Attribute.Type.STRING)

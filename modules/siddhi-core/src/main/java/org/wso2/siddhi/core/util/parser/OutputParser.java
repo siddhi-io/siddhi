@@ -55,6 +55,8 @@ import org.wso2.siddhi.core.util.SiddhiClassLoader;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
+import org.wso2.siddhi.core.util.extension.holder.OutputMapperExecutorExtensionHolder;
+import org.wso2.siddhi.core.util.extension.holder.OutputTransportExecutorExtensionHolder;
 import org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper;
 import org.wso2.siddhi.core.window.EventWindow;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -175,7 +177,6 @@ public class OutputParser {
                 throw new DefinitionNotExistException("Event table with id :" + id + " does not exist");
             }
         } else if (outStream instanceof PublishStream) {
-            // grainier : should this extension loading go here or inside QueryParser.java?????
             Extension transportExtension = new Extension() {
                 @Override
                 public String getNamespace() {
@@ -187,14 +188,8 @@ public class OutputParser {
                     return ((PublishStream) outStream).getTransport().getType();
                 }
             };
-            // grainier : which extension loading?
-//            OutputTransport outputTransport = (OutputTransport) SiddhiClassLoader.loadExtensionImplementation(
-//                    transportExtension, InputTransportExecutorExtensionHolder.getInstance(executionPlanContext));
-
-            OutputTransport outputTransport = (OutputTransport) SiddhiClassLoader.loadSiddhiImplementation(
-                    transportExtension.getFunction(), OutputTransport.class);
-
-            executionPlanContext.addEternalReferencedHolder(outputTransport);
+            OutputTransport outputTransport = (OutputTransport) SiddhiClassLoader.loadExtensionImplementation(
+                    transportExtension, OutputTransportExecutorExtensionHolder.getInstance(executionPlanContext));
 
             Extension mapperExtension = new Extension() {
                 @Override
@@ -207,13 +202,12 @@ public class OutputParser {
                     return ((PublishStream) outStream).getMapping().getFormat();
                 }
             };
-//            OutputMapper outputMapper = (OutputMapper) SiddhiClassLoader.loadExtensionImplementation(
-//                    mapperExtension, InputMapperExecutorExtensionHolder.getInstance(executionPlanContext));
-            OutputMapper outputMapper = (OutputMapper) SiddhiClassLoader.loadSiddhiImplementation(
-                    mapperExtension.getFunction(), OutputMapper.class);
+            OutputMapper outputMapper = (OutputMapper) SiddhiClassLoader.loadExtensionImplementation(
+                    mapperExtension, OutputMapperExecutorExtensionHolder.getInstance(executionPlanContext));
 
-            return new PublishStreamCallback(
-                    outputTransport, ((PublishStream) outStream).getTransport(),
+            executionPlanContext.addEternalReferencedHolder(outputTransport);
+
+            return new PublishStreamCallback(outputTransport, ((PublishStream) outStream).getTransport(),
                     outputMapper, ((PublishStream) outStream).getMapping(), outputStreamDefinition);
         } else {
             throw new ExecutionPlanCreationException(outStream.getClass().getName() + " not supported");

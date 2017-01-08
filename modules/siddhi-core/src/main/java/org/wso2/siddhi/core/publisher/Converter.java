@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.publisher;
 
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.exception.NoSuchAttributeException;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.text.MessageFormat;
@@ -56,19 +57,23 @@ public class Converter {
     }
 
     public String map(Event event) {
-        // grainier : handle possible runtime exception (IllegalArgumentException)
         return MessageFormat.format(template, event.getData());
     }
 
     private String parse(StreamDefinition streamDefinition, String template) {
+        // note: currently we do not support arbitrary data to be mapped with dynamic options
         List<String> attributes = Arrays.asList(streamDefinition.getAttributeNameArray());
-        // todo : do we need to support arbitrary data?
         StringBuffer result = new StringBuffer();
         Matcher m = DYNAMIC_PATTERN.matcher(template);
         while (m.find()) {
             if (m.group(1) != null) {
-                int attrIndex = attributes.indexOf(m.group(1).replaceAll("\\p{P}", ""));
-                m.appendReplacement(result, String.format("{%s}", (attrIndex == -1) ? m.group(1) : attrIndex));
+                int attrIndex = attributes.indexOf(m.group(1).replaceAll("\\p{Ps}", "").replaceAll("\\p{Pe}", ""));
+                if (attrIndex >= 0) {
+                    m.appendReplacement(result, String.format("{%s}", attrIndex));
+                } else {
+                    throw new NoSuchAttributeException(String.format("Attribute : %s does not exist in %s.",
+                            m.group(1), streamDefinition));
+                }
             } else {
                 m.appendReplacement(result, "'" + m.group() + "'");
             }
