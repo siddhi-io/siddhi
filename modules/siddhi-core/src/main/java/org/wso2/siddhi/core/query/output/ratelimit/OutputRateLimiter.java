@@ -40,15 +40,15 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
     protected ExecutionPlanContext executionPlanContext;
     protected LatencyTracker latencyTracker;
     protected LockWrapper lockWrapper;
+    protected String queryName;
     private boolean hasCallBack = false;
     private String elementId;
-    protected String queryName;
 
     public void init(ExecutionPlanContext executionPlanContext, LockWrapper lockWrapper, String queryName) {
         this.executionPlanContext = executionPlanContext;
         this.queryName = queryName;
-        if (outputCallback != null && outputCallback instanceof InsertIntoStreamCallback) {
-        if (outputCallback != null && (outputCallback instanceof InsertIntoStreamCallback || outputCallback instanceof PublishStreamCallback)) {
+        if (outputCallback != null && (outputCallback instanceof InsertIntoStreamCallback ||
+                outputCallback instanceof PublishStreamCallback)) {
             this.lockWrapper = lockWrapper;
         }
         if (elementId == null) {

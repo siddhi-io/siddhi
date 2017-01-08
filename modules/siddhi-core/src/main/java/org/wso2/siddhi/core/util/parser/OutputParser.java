@@ -82,10 +82,8 @@ import java.util.concurrent.ScheduledExecutorService;
 public class OutputParser {
 
 
-    public static OutputCallback constructOutputCallback(OutputStream outStream, StreamDefinition outputStreamDefinition,
-                                                         Map<String, EventTable> eventTableMap, Map<String, EventWindow> eventWindowMap, ExecutionPlanContext executionPlanContext, boolean convertToStreamEvent, String queryName) {
     public static OutputCallback constructOutputCallback(final OutputStream outStream, StreamDefinition outputStreamDefinition,
-                                                         Map<String, EventTable> eventTableMap, Map<String, EventWindow> eventWindowMap, ExecutionPlanContext executionPlanContext, boolean convertToStreamEvent) {
+                                                         Map<String, EventTable> eventTableMap, Map<String, EventWindow> eventWindowMap, ExecutionPlanContext executionPlanContext, boolean convertToStreamEvent, String queryName) {
         String id = outStream.getId();
         EventTable eventTable = null;
         EventWindow eventWindow = null;
