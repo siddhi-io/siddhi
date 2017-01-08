@@ -16,8 +16,7 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <artifactId>siddhi</artifactId>
@@ -69,17 +68,9 @@
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
         </dependency>
-
-        <!-- grainier : remove these when moving HTTP transport-->
         <dependency>
-            <groupId>org.apache.axis2.transport</groupId>
-            <artifactId>axis2-transport-mail</artifactId>
-            <version>1.1.1-wso2v2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.3.1.wso2v2</version>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-annotations</artifactId>
         </dependency>
     </dependencies>
 
