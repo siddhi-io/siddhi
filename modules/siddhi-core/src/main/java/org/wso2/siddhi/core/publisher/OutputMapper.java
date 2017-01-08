@@ -35,14 +35,14 @@ public abstract class OutputMapper {
      * This will be called only once and this can be used to acquire
      * required resources for processing the mapping.
      */
-    abstract void init(StreamDefinition streamDefinition,
-                       Map<String, String> options,
-                       Map<String, String> unmappedDynamicOptions);
+    public abstract void init(StreamDefinition streamDefinition,
+                              Map<String, String> options,
+                              Map<String, String> unmappedDynamicOptions);
 
-    abstract Object generateDefaultMapping(Event event, Map<String, String> dynamicOptions);
+    public abstract Object generateDefaultMapping(Event event, Map<String, String> dynamicOptions);
 
-    abstract Object generateCustomMapping(Event event, String[] mappedAttributes,
-                                          Map<String, String> dynamicOptions);
+    public abstract Object generateCustomMapping(Event event, String[] mappedAttributes,
+                                                 Map<String, String> dynamicOptions);
 
     public final void init(StreamDefinition streamDefinition, Mapping mapping) {
         isCustomMappingEnabled = mapping.getAttributeMappingList().size() > 0;

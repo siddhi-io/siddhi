@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c)  2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,12 +16,13 @@
  * under the License.
  */
 
-package org.wso2.siddhi.core.publisher;
+package org.wso2.siddhi.extension.output.transport.inmemory;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
+import org.wso2.siddhi.core.publisher.OutputTransport;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 
 import java.util.Map;

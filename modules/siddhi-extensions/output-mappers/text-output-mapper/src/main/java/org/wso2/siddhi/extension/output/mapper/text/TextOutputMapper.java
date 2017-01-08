@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c)  2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,9 +16,10 @@
  * under the License.
  */
 
-package org.wso2.siddhi.core.publisher;
+package org.wso2.siddhi.extension.output.mapper.text;
 
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.publisher.OutputMapper;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.Map;
@@ -27,17 +28,17 @@ public class TextOutputMapper extends OutputMapper {
     StreamDefinition streamDefinition;
 
     @Override
-    void init(StreamDefinition streamDefinition, Map<String, String> options, Map<String, String> unmappedDynamicOptions) {
+    public void init(StreamDefinition streamDefinition, Map<String, String> options, Map<String, String> unmappedDynamicOptions) {
         this.streamDefinition = streamDefinition;
     }
 
     @Override
-    Object generateDefaultMapping(Event event, Map<String, String> dynamicOptions) {
+    public Object generateDefaultMapping(Event event, Map<String, String> dynamicOptions) {
         return event;
     }
 
     @Override
-    Object generateCustomMapping(Event event, String[] mappedAttributes, Map<String, String> dynamicOptions) {
+    public Object generateCustomMapping(Event event, String[] mappedAttributes, Map<String, String> dynamicOptions) {
         return mappedAttributes;
     }
 }
