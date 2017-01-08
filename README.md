@@ -6,7 +6,7 @@ Siddhi Complex Event Processing Engine
 |  Branch | Build Status |
 | :------------ |:-------------
 | master      | [![Build Status](https://wso2.org/jenkins/job/siddhi/badge/icon)](https://wso2.org/jenkins/job/siddhi) |
-| master-java8 | [![Build Status](https://wso2.org/jenkins/job/siddhi/badge/icon)]    (https://wso2.org/jenkins/job/siddhi__java8 )|
+| master-java8 | [![Build Status](https://wso2.org/jenkins/job/siddhi__java8/badge/icon)](https://wso2.org/jenkins/job/siddhi__java8 )|
 
 ---
 
