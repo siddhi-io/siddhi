@@ -295,7 +295,7 @@ public class RDBMSEventTable implements EventTable {
      */
     @Override
     public Operator constructOperator(Expression expression, MatchingMetaStateHolder matchingMetaStateHolder, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap) {
-        return RDBMSOperatorParser.parse(dbHandler, expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap, tableDefinition, cachedTable);
+        return RDBMSOperatorParser.parse(dbHandler, expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap, tableDefinition, cachedTable, tableDefinition.getId());
     }
 
     /**
@@ -311,7 +311,7 @@ public class RDBMSEventTable implements EventTable {
      */
     @Override
     public Finder constructFinder(Expression expression, MatchingMetaStateHolder matchingMetaStateHolder, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, EventTable> eventTableMap) {
-        return RDBMSOperatorParser.parse(dbHandler, expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap, tableDefinition, cachedTable);
+        return RDBMSOperatorParser.parse(dbHandler, expression, matchingMetaStateHolder, executionPlanContext, variableExpressionExecutors, eventTableMap, tableDefinition, cachedTable, tableDefinition.getId());
     }
 
     class CacheUpdateTask extends TimerTask {
