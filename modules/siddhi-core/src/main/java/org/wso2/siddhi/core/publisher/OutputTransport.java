@@ -114,7 +114,6 @@ public abstract class OutputTransport implements EternalReferencedHolder {
 
     @Override
     public void start() {
-        System.out.println("Start");
         try {
             connect();
         } catch (ConnectionUnavailableException e) {
@@ -125,7 +124,6 @@ public abstract class OutputTransport implements EternalReferencedHolder {
 
     @Override
     public void stop() {
-        System.out.println("Stop");
         disconnect();
         destroy();
     }
