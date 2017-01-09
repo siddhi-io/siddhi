@@ -25,9 +25,8 @@ import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.util.InMemoryBroker;
 import org.wso2.siddhi.extension.output.mapper.text.TextOutputMapper;
-import org.wso2.siddhi.extension.util.StaticBroker;
-import org.wso2.siddhi.extension.util.Subscriber;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
@@ -58,7 +57,7 @@ public class TestOutputTransportTestCase {
     //    map text;
     @Test
     public void testPublisherWithSelector() throws InterruptedException {
-        StaticBroker.subscribe(new Subscriber() {
+        InMemoryBroker.subscribe(new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object msg) {
                 wso2Count.incrementAndGet();
@@ -70,7 +69,7 @@ public class TestOutputTransportTestCase {
             }
         });
 
-        StaticBroker.subscribe(new Subscriber() {
+        InMemoryBroker.subscribe(new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object msg) {
                 ibmCount.incrementAndGet();

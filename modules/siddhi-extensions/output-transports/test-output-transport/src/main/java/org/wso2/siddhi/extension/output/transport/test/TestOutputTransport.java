@@ -25,7 +25,7 @@ import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
 import org.wso2.siddhi.core.publisher.MessageType;
 import org.wso2.siddhi.core.publisher.OutputTransport;
-import org.wso2.siddhi.extension.util.StaticBroker;
+import org.wso2.siddhi.core.util.InMemoryBroker;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public class TestOutputTransport extends OutputTransport {
             throws ConnectionUnavailableException {
         log.info("TestOutputTransport:publish() | dynamicTransportOptions : " +
                 dynamicTransportOptions.toString() + " | event : " + event.toString());
-        StaticBroker.publish(dynamicTransportOptions.get(TOPIC_KEY), event);
+        InMemoryBroker.publish(dynamicTransportOptions.get(TOPIC_KEY), event);
     }
 
     @Override

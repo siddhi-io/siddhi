@@ -16,14 +16,14 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.util;
+package org.wso2.siddhi.core.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StaticBroker {
+public class InMemoryBroker {
     private static final MessageBroker broker = new MessageBroker();
 
     public static void subscribe(Subscriber subscriber) {
@@ -32,6 +32,20 @@ public class StaticBroker {
 
     public static void publish(String topic, Object message) {
         broker.publish(topic, message);
+    }
+
+    interface Broker {
+        void register(Subscriber subscriber);
+
+        void unregister(Subscriber subscriber);
+
+        void broadcast(String topic, Object msg);
+    }
+
+    public interface Subscriber {
+        void onMessage(Object msg);
+
+        String getTopic();
     }
 
     private static class MessageBroker implements Broker {
