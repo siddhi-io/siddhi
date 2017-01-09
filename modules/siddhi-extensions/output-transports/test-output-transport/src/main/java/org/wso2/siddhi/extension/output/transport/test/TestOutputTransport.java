@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
+import org.wso2.siddhi.core.publisher.MessageType;
 import org.wso2.siddhi.core.publisher.OutputTransport;
 import org.wso2.siddhi.extension.util.StaticBroker;
 import org.wso2.siddhi.query.api.execution.io.Transport;
@@ -78,5 +79,12 @@ public class TestOutputTransport extends OutputTransport {
     @Override
     public boolean isPolled() {
         return false;
+    }
+
+    @Override
+    public List<String> getSupportedMessageFormats() {
+        return new ArrayList<String>() {{
+            add(MessageType.TEXT);
+        }};
     }
 }

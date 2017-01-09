@@ -31,13 +31,16 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
+import org.wso2.siddhi.core.publisher.MessageType;
 import org.wso2.siddhi.core.publisher.OutputTransport;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 
 import javax.xml.bind.DatatypeConverter;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -166,6 +169,15 @@ public class HttpOutputTransport extends OutputTransport {
     @Override
     public boolean isPolled() {
         return false;
+    }
+
+    @Override
+    public List<String> getSupportedMessageFormats() {
+        return new ArrayList<String>() {{
+            add(MessageType.TEXT);
+            add(MessageType.XML);
+            add(MessageType.JSON);
+        }};
     }
 
     private void checkHTTPClientInit(Map<String, String> staticProperties) {

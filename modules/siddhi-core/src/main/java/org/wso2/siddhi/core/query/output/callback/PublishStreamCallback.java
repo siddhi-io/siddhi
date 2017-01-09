@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.publisher.OutputMapper;
 import org.wso2.siddhi.core.publisher.OutputTransport;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 import org.wso2.siddhi.query.api.execution.io.map.Mapping;
 
@@ -50,8 +51,14 @@ public class PublishStreamCallback extends OutputCallback {
 
     public void init(ExecutionPlanContext executionPlanContext) {
         try {
-            outputMapper.init(outputStreamDefinition, mappingConfig);
-            outputTransport.init(executionPlanContext, outputStreamDefinition, transportConfig);
+            // validateSupportedMapping
+            if (outputTransport.isMessageFormatSupported(mappingConfig.getFormat())) {
+                outputMapper.init(outputStreamDefinition, mappingConfig);
+                outputTransport.init(executionPlanContext, outputStreamDefinition, transportConfig);
+            } else {
+                throw new ExecutionPlanValidationException(String.format("%s mapping is not supported by " +
+                        "transport type %s", mappingConfig.getFormat(), transportConfig.getType()));
+            }
         } catch (OutputTransportException e) {
             log.error("Error when initializing output transport.", e);
         }

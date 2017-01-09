@@ -39,10 +39,10 @@ public abstract class OutputMapper {
                               Map<String, String> options,
                               Map<String, String> unmappedDynamicOptions);
 
-    public abstract Object generateDefaultMapping(Event event, Map<String, String> dynamicOptions);
+    public abstract Object convertToMappedInputEvent(Event event, Map<String, String> dynamicOptions);
 
-    public abstract Object generateCustomMapping(Event event, String[] mappedAttributes,
-                                                 Map<String, String> dynamicOptions);
+    public abstract Object convertToTypedInputEvent(Event event, String[] mappedAttributes,
+                                                    Map<String, String> dynamicOptions);
 
     public final void init(StreamDefinition streamDefinition, Mapping mapping) {
         isCustomMappingEnabled = mapping.getAttributeMappingList().size() > 0;
@@ -67,9 +67,9 @@ public abstract class OutputMapper {
 
     public final Object mapEvent(Event event) {
         if (isCustomMappingEnabled) {
-            return generateCustomMapping(event, getMappedAttributes(event), getMappedOptions(event));
+            return convertToTypedInputEvent(event, getMappedAttributes(event), getMappedOptions(event));
         } else {
-            return generateDefaultMapping(event, getMappedOptions(event));
+            return convertToMappedInputEvent(event, getMappedOptions(event));
         }
     }
 

@@ -28,6 +28,7 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -86,6 +87,13 @@ public abstract class OutputTransport implements EternalReferencedHolder {
      */
     public abstract boolean isPolled();
 
+    /**
+     * Return the list of supported message formats.
+     *
+     * @return list of supported message formats
+     */
+    public abstract List<String> getSupportedMessageFormats();
+
     public final void init(ExecutionPlanContext executionPlanContext,
                            StreamDefinition streamDefinition,
                            Transport transportConfig) throws OutputTransportException {
@@ -98,6 +106,10 @@ public abstract class OutputTransport implements EternalReferencedHolder {
 
     public final Map<String, String> getDynamicOptions(Event event) {
         return Converter.convert(event, dynamicOptionConverters);
+    }
+
+    public final boolean isMessageFormatSupported(String messageFormat) {
+        return getSupportedMessageFormats().contains(messageFormat);
     }
 
     @Override
