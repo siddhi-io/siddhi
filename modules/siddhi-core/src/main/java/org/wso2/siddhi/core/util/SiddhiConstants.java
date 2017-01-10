@@ -23,6 +23,8 @@ public final class SiddhiConstants {
     public static final String INPUT_TRANSPORT = "inputtransport";
     public static final String INPUT_MAPPER = "inputmapper";
 
+    public static final String OUTPUT_TRANSPORT = "outputtransport";
+    public static final String OUTPUT_MAPPER = "outputmapper";
 
     public static final int BEFORE_WINDOW_DATA_INDEX = 0;
     public static final int ON_AFTER_WINDOW_DATA_INDEX = 1;
@@ -42,6 +44,8 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_INDEX_BY = "IndexBy";
     public static final String ANNOTATION_FROM = "from";
     public static final String ANNOTATION_BUFFER_SIZE = "BufferSize";
+    public static final String ANNOTATION_IDLE_TIME = "IdleTime";
+    public static final String ANNOTATION_INCREMENT = "Increment";
 
     public static final String TRUE = "true";
     public static final String TRIGGER_START = "start";

@@ -39,7 +39,7 @@ execution_plan
     ;
 
 execution_element
-    :query|partition
+    :query|partition|subscription
     ;
 
 definition_stream_final
@@ -55,7 +55,11 @@ definition_table_final
     ;
 
 definition_table
-    : annotation* DEFINE TABLE source '(' attribute_name attribute_type (',' attribute_name attribute_type )* ')'
+    : annotation* DEFINE TABLE source '(' attribute_name attribute_type (',' attribute_name attribute_type )* ')' storage?
+    ;
+
+storage
+    : STORE type OPTIONS '(' option (',' option)* ')'
     ;
 
 definition_window_final
@@ -135,12 +139,28 @@ query_final
     : query ';'? EOF
     ;
 
+subscription_final
+    : subscription ';'? EOF
+    ;
+
 query
-    : annotation* FROM query_input query_section? output_rate? query_output
+    : annotation* FROM query_input query_section? output_rate? (query_output | query_publish)
     ;
 
 query_input
     : (standard_stream|join_stream|pattern_stream|sequence_stream|anonymous_stream)
+    ;
+
+subscription
+    :annotation* SUBSCRIBE transport MAP mapping subscription_output
+    ;
+
+transport
+    :type (OPTIONS '(' option (',' option)* ')')?
+    ;
+
+mapping
+    :type (OPTIONS '(' option (',' option)* ')')? (map_attribute (',' map_attribute)*)?
     ;
 
 standard_stream
@@ -260,6 +280,17 @@ query_output
     |RETURN output_event_type?
     ;
 
+query_publish
+    :PUBLISH transport MAP mapping (FOR output_event_type)?
+    ;
+
+subscription_output
+    :INSERT output_event_type? INTO target
+    |DELETE target (FOR output_event_type)? ON expression
+    |UPDATE target (FOR output_event_type)? ON expression
+    |INSERT OVERWRITE target (FOR output_event_type)? ON expression
+    ;
+
 output_event_type
     : ALL EVENTS | ALL RAW EVENTS | EXPIRED EVENTS | EXPIRED RAW EVENTS | CURRENT? EVENTS   
     ;
@@ -334,6 +365,10 @@ attribute_index
     : INT_LITERAL| LAST ('-' INT_LITERAL)?
     ;
 
+option
+    :property_name property_value
+    ;
+
 function_id
     :name
     ;
@@ -351,15 +386,27 @@ stream_alias
     ;
 
 property_name
-    : name ('.' name )*
+    : name (property_separator name )*
     ;
 
 attribute_name
     :name
     ;
 
+type
+    :name
+    ;
+
+map_attribute
+    :string_value
+    ;
+
 property_value
     :string_value
+    ;
+
+property_separator
+    : DOT | MINUS
     ;
 
 source
@@ -480,6 +527,11 @@ keyword
     | DOUBLE
     | BOOL
     | OBJECT
+    | SUBSCRIBE
+    | OPTIONS
+    | MAP
+    | PUBLISH
+    | STORE
     ;
 
 time_value
@@ -657,6 +709,11 @@ FLOAT:    F L O A T;
 DOUBLE:   D O U B L E;
 BOOL:     B O O L;
 OBJECT:   O B J E C T;
+SUBSCRIBE: S U B S C R I B E;
+OPTIONS: O P T I O N S;
+MAP: M A P;
+PUBLISH: P U B L I S H;
+STORE: S T O R E;
 
 ID_QUOTES : '`'[a-zA-Z_] [a-zA-Z_0-9]*'`' {setText(getText().substring(1, getText().length()-1));};
 
@@ -664,10 +721,11 @@ ID : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 STRING_LITERAL
     :(
-        '\'' ( ~('\u0000'..'\u001f' | '\''| '\"' ) )* '\'' 
-        |'"' ( ~('\u0000'..'\u001f'  |'\"') )* '"' 
-     )  {setText(getText().substring(1, getText().length()-1));}         
-    ;	
+        '\'' ( ~('\u0000'..'\u001f' | '\''| '\"' ) )* '\''
+        |'"' ( ~('\u0000'..'\u001f'  |'\"') )* '"'
+     )  {setText(getText().substring(1, getText().length()-1));}
+     |('"""'(.*?)'"""')  {setText(getText().substring(3, getText().length()-3));}
+    ;
 
 //Hidden channels
 SINGLE_LINE_COMMENT
