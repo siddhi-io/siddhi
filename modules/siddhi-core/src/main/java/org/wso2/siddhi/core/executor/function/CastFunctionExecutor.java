@@ -39,28 +39,12 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
         "Cast exceptions if further processed. This function is used with map extension that returns attributes " +
         "of the object type. You can use this function to cast the object to an accurate and concrete type.")
 @Parameters({
-        @Parameter(name = "toBeCaster", type = {
-                DataType.INT,
-                DataType.LONG,
-                DataType.DOUBLE,
-                DataType.FLOAT,
-                DataType.STRING,
-                DataType.BOOL,
-                DataType.OBJECT
-        }),
-        @Parameter(name = "castTo", type = {
-                DataType.STRING
-        })
+        @Parameter(name = "toBeCaster", type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT,
+                DataType.STRING, DataType.BOOL, DataType.OBJECT}),
+        @Parameter(name = "castTo", type = {DataType.STRING})
 })
-@Return(type = {
-        DataType.INT,
-        DataType.LONG,
-        DataType.DOUBLE,
-        DataType.FLOAT,
-        DataType.STRING,
-        DataType.BOOL,
-        DataType.OBJECT
-})
+@Return(type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT, DataType.STRING, DataType.BOOL,
+        DataType.OBJECT})
 public class CastFunctionExecutor extends FunctionExecutor {
     private Attribute.Type returnType = Attribute.Type.OBJECT;
 
