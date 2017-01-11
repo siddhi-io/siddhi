@@ -51,8 +51,8 @@ public class WithinPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20] -> e2=Stream2[price>e1.price] within 1 sec " +
@@ -104,8 +104,8 @@ public class WithinPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from (every e1=Stream1[price>20]-> e2=Stream2[price>e1.price]) " +
@@ -158,8 +158,8 @@ public class WithinPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from (every (e1=Stream1[price>20] -> e3=Stream1[price>20]) -> e2=Stream2[price>e1.price]) within 2 sec " +

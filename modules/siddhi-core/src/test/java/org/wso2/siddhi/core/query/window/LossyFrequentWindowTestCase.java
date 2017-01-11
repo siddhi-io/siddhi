@@ -50,7 +50,7 @@ public class LossyFrequentWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream purchase (cardNo inputmapper, price float);";
+                "define stream purchase (cardNo string, price float);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from purchase[price >= 30]#window.lossyFrequent(0.1,0.01) " +
@@ -103,7 +103,7 @@ public class LossyFrequentWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream purchase (cardNo inputmapper, price float);";
+                "define stream purchase (cardNo string, price float);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from purchase[price >= 30]#window.lossyFrequent(0.3,0.05) " +
@@ -152,7 +152,7 @@ public class LossyFrequentWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream purchase (cardNo inputmapper, price float);";
+                "define stream purchase (cardNo string, price float);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from purchase[price >= 30]#window.lossyFrequent(0.3,0.05,cardNo) " +

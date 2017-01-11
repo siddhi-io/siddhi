@@ -45,7 +45,7 @@ public class IfThenElseFunctionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String sensorEventStream = "define stream sensorEventStream (sensorValue double,status inputmapper);";
+        String sensorEventStream = "define stream sensorEventStream (sensorValue double,status string);";
 
         String query = ("@info(name = 'query1') " +
                 "from sensorEventStream " +
@@ -91,7 +91,7 @@ public class IfThenElseFunctionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String sensorEventStream = "define stream sensorEventStream (sensorValue double,status inputmapper);";
+        String sensorEventStream = "define stream sensorEventStream (sensorValue double,status string);";
 
         String query = ("@info(name = 'query1') " +
                 "from sensorEventStream " +
@@ -137,7 +137,7 @@ public class IfThenElseFunctionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String sensorEventStream = "define stream sensorEventStream (sensorValue double,status inputmapper);";
+        String sensorEventStream = "define stream sensorEventStream (sensorValue double,status string);";
 
         String query = ("@info(name = 'query1') " +
                 "from sensorEventStream " +
@@ -183,7 +183,7 @@ public class IfThenElseFunctionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String sensorEventStream = "define stream sensorEventStream (sensorValue double,status inputmapper);";
+        String sensorEventStream = "define stream sensorEventStream (sensorValue double,status string);";
 
         String query = ("@info(name = 'query1') " +
                 "from sensorEventStream " +
@@ -275,7 +275,7 @@ public class IfThenElseFunctionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String sensorEventStream = "define stream sensorEventStream (sensorValue double,status inputmapper);";
+        String sensorEventStream = "define stream sensorEventStream (sensorValue double,status string);";
 
         String query = ("@info(name = 'query1') " +
                 "from sensorEventStream " +

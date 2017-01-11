@@ -55,8 +55,8 @@ public class StatisticsTestCase {
         String executionPlan = "" +
                 "@plan:statistics(reporter = 'console', interval = '5' )" +
                 " " +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int);" +
-                "define stream cseEventStream2 (symbol inputmapper, price float, volume int);" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "define stream cseEventStream2 (symbol string, price float, volume int);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[70 > price] " +

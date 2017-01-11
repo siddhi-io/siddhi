@@ -19,8 +19,10 @@
 package org.wso2.siddhi.core.subscription;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -71,9 +73,19 @@ public class InMemoryInputTransport extends InputTransport {
         public void run() {
 //            inputCallback.onEvent(new Object[]{"WSO2", 56.75f, 5});
 //            inputCallback.onEvent("{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
-            inputCallback.onEvent("WSO2,56.75,5");
+//            inputCallback.onEvent("WSO2,56.75,5");
 //            inputCallback.onEvent("WSO2,56.75,5,Sri Lanka");
 //            inputCallback.onEvent("symbol=WSO2, price=56.75, volume=5, country=Sri Lanka");
+//            inputCallback.onEvent("<event><symbol>WSO2</symbol><price>56.75</price><volume>5</volume><country>Sri Lanka</country></event>");
+            HashMap hashMap = new HashMap();
+            hashMap.put("symbol", "WSO2");
+            hashMap.put("price", 56.75);
+            hashMap.put("volume", 5);
+            hashMap.put("country", "Sri Lanka");
+//            inputCallback.onEvent(hashMap);
+            Event event = new Event();
+            event.setData(new Object[]{"WSO2", 56.75f, 5});
+//            inputCallback.onEvent(event);
         }
     }
 }

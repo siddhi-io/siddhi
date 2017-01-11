@@ -592,7 +592,7 @@ public class DBHandler {
      * @param values        values
      * @param column_values column_values
      * @param condition     condition
-     * @return query as inputmapper
+     * @return query as string
      */
     public String constructQuery(String tableName, String query, StringBuilder columnTypes, StringBuilder columns,
                                  StringBuilder values, StringBuilder column_values, StringBuilder condition) {

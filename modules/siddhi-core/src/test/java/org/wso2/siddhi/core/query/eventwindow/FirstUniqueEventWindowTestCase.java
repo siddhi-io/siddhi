@@ -45,8 +45,8 @@ public class FirstUniqueEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timeStamp long, ip inputmapper); " +
-                "define window LoginWindow (timeStamp long, ip inputmapper) firstUnique(ip); ";
+                "define stream LoginEvents (timeStamp long, ip string); " +
+                "define window LoginWindow (timeStamp long, ip string) firstUnique(ip); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +
@@ -98,8 +98,8 @@ public class FirstUniqueEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream LoginEvents (timeStamp long, ip inputmapper); " +
-                "define window LoginWindow (timeStamp long, ip inputmapper) firstUnique(ip); ";
+                "define stream LoginEvents (timeStamp long, ip string); " +
+                "define window LoginWindow (timeStamp long, ip string) firstUnique(ip); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from LoginEvents " +

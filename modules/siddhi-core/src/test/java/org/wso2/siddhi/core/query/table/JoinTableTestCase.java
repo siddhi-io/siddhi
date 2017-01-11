@@ -49,9 +49,9 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string); " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -118,9 +118,9 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string); " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -185,9 +185,9 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string); " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -252,9 +252,9 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string); " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -327,9 +327,9 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string); " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -396,10 +396,10 @@ public class JoinTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream RequestStream (start inputmapper, end inputmapper); " +
-                "define stream TimeTableStream (start inputmapper, end inputmapper, elapsedTime int, startTime inputmapper); " +
+                "define stream RequestStream (start string, end string); " +
+                "define stream TimeTableStream (start string, end string, elapsedTime int, startTime string); " +
                 "define stream ResultStream (totalElapsedTime int); " +
-                "define table TimeTable (start inputmapper, end inputmapper, elapsedTime int, startTime inputmapper);";
+                "define table TimeTable (start string, end string, elapsedTime int, startTime string);";
 
         String query = "" +
                 "from TimeTableStream " +

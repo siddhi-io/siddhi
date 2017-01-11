@@ -53,7 +53,7 @@ public class IsNullTestCase {
         String executionPlan = "" +
                 "@Plan:name('IsNullTest') " +
                 "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume long);" +
+                "define stream cseEventStream (symbol string, price float, volume long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[symbol is null] " +
@@ -98,8 +98,8 @@ public class IsNullTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1=Stream1[price>20], " +

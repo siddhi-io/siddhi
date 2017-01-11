@@ -158,7 +158,7 @@ public class RDBMSOperatorParser {
     }
 
     /**
-     * Method which constructs the update query inputmapper
+     * Method which constructs the update query string
      */
     private static StringBuilder getUpdateQueryAttributes(List<Attribute> updateConditionAttributeList, Map<String, String> elementMappings) {
 

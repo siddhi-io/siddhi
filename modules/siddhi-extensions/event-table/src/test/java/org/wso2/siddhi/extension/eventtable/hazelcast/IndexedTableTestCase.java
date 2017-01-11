@@ -57,12 +57,12 @@ public class IndexedTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('IndexedTableExecutionPlan')" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long); " +
-                "define stream UpdateStockStream (symbol inputmapper, price float, volume long);" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long); " +
+                "define stream UpdateStockStream (symbol string, price float, volume long);" +
                 "@from(eventtable = 'hazelcast')" +
                 "@IndexBy('symbol') " +
-                "define table StockTableT011 (symbol inputmapper, price float, volume long); ";
+                "define table StockTableT011 (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -136,11 +136,11 @@ public class IndexedTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('IndexedTableExecutionPlan')" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long); " +
                 "@from(eventtable = 'hazelcast')" +
                 "@IndexBy('symbol') " +
-                "define table StockTableT021 (symbol inputmapper, price float, volume long); ";
+                "define table StockTableT021 (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -199,12 +199,12 @@ public class IndexedTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('IndexedTableExecutionPlan')" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long); " +
-                "define stream DeleteStockStream (symbol inputmapper); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long); " +
+                "define stream DeleteStockStream (symbol string); " +
                 "@from(eventtable = 'hazelcast')" +
                 "@IndexBy('symbol') " +
-                "define table StockTableT031 (symbol inputmapper, price float, volume long); ";
+                "define table StockTableT031 (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -271,12 +271,12 @@ public class IndexedTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('IndexedTableExecutionPlan')" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long); " +
-                "define stream DeleteStockStream (symbol inputmapper); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long); " +
+                "define stream DeleteStockStream (symbol string); " +
                 "@from(eventtable = 'hazelcast')" +
                 "@IndexBy('symbol') " +
-                "define table StockTableT041 (symbol inputmapper, price float, volume long); ";
+                "define table StockTableT041 (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -340,12 +340,12 @@ public class IndexedTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('IndexedTableExecutionPlan')" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long); " +
-                "define stream DeleteStockStream (symbol inputmapper); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long); " +
+                "define stream DeleteStockStream (symbol string); " +
                 "@from(eventtable = 'hazelcast')" +
                 "@IndexBy('symbol') " +
-                "define table StockTableT051 (symbol inputmapper, price float, volume long); ";
+                "define table StockTableT051 (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -412,12 +412,12 @@ public class IndexedTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('IndexedTableExecutionPlan')" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long, price float); " +
-                "define stream UpdateStockStream (comp inputmapper, vol long); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long, price float); " +
+                "define stream UpdateStockStream (comp string, vol long); " +
                 "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
                 "@IndexBy('symbol') " +
-                "define table StockTableT061 (symbol inputmapper, price float, volume long); ";
+                "define table StockTableT061 (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -493,12 +493,12 @@ public class IndexedTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@Plan:name('IndexedTableExecutionPlan')" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long, price float); " +
-                "define stream UpdateStockStream (comp inputmapper, vol long); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long, price float); " +
+                "define stream UpdateStockStream (comp string, vol long); " +
                 "@from(eventtable = 'hazelcast', instance.name = 'siddhi_instance') " +
                 "@IndexBy('symbol') " +
-                "define table StockTableT071 (symbol inputmapper, price float, volume long); ";
+                "define table StockTableT071 (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +

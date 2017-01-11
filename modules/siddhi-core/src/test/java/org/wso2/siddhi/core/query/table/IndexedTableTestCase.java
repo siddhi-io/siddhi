@@ -56,11 +56,11 @@ public class IndexedTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long); " +
-                "define stream UpdateStockStream (symbol inputmapper, price float, volume long);" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long); " +
+                "define stream UpdateStockStream (symbol string, price float, volume long);" +
                 "@IndexBy('symbol') " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -133,10 +133,10 @@ public class IndexedTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long); " +
                 "@IndexBy('symbol') " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -194,11 +194,11 @@ public class IndexedTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long); " +
-                "define stream DeleteStockStream (symbol inputmapper); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long); " +
+                "define stream DeleteStockStream (symbol string); " +
                 "@IndexBy('symbol') " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -264,11 +264,11 @@ public class IndexedTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long); " +
-                "define stream DeleteStockStream (symbol inputmapper); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long); " +
+                "define stream DeleteStockStream (symbol string); " +
                 "@IndexBy('symbol') " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -331,11 +331,11 @@ public class IndexedTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long); " +
-                "define stream DeleteStockStream (symbol inputmapper); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long); " +
+                "define stream DeleteStockStream (symbol string); " +
                 "@IndexBy('symbol') " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -401,11 +401,11 @@ public class IndexedTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long, price float); " +
-                "define stream UpdateStockStream (comp inputmapper, vol long); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long, price float); " +
+                "define stream UpdateStockStream (comp string, vol long); " +
                 "@IndexBy('symbol') " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -480,11 +480,11 @@ public class IndexedTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper, volume long, price float); " +
-                "define stream UpdateStockStream (comp inputmapper, vol long); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string, volume long, price float); " +
+                "define stream UpdateStockStream (comp string, vol long); " +
                 "@IndexBy('symbol') " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +

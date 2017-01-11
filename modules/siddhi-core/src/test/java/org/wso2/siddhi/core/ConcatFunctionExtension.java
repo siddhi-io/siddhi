@@ -26,7 +26,7 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 /*
 * concat(string1, string2, ..., stringN)
-* Returns a inputmapper that is the result of concatenating two or more inputmapper values.
+* Returns a string that is the result of concatenating two or more string values.
 * Accept Type(s): STRING. There should be at least two arguments.
 * Return Type(s): STRING
 * */

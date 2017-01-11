@@ -46,7 +46,7 @@ public class ExtensionTestCase {
         log.info("extension test1");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume long);";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
         String query = ("@info(name = 'query1') from cseEventStream select price , custom:getAll(symbol) as toConcat " +
                 "group by volume insert into mailOutput;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
@@ -84,7 +84,7 @@ public class ExtensionTestCase {
         siddhiManager.setExtension("custom:plus", CustomFunctionExtension.class);
         siddhiManager.setExtension("email:getAll", StringConcatAggregatorString.class);
 
-        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price long, volume long);";
+        String cseEventStream = "define stream cseEventStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from cseEventStream select symbol , custom:plus(price,volume) as totalCount " +
                 "insert into mailOutput;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
@@ -128,7 +128,7 @@ public class ExtensionTestCase {
 
         String cseEventStream = "" +
                 "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume long);";
+                "define stream cseEventStream (symbol string, price float, volume long);";
         String query = ("" +
                 "@info(name = 'query1') " +
                 "from cseEventStream " +

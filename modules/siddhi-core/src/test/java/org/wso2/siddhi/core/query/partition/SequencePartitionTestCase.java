@@ -49,8 +49,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -114,8 +114,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -176,8 +176,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -247,8 +247,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -320,8 +320,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -391,8 +391,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -446,8 +446,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -525,8 +525,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -604,8 +604,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -676,8 +676,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -740,8 +740,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1 , volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -815,8 +815,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume int,name String); " +
-                "define stream TwitterStream (symbol inputmapper, count int,user String); ";
+                "define stream StockStream (symbol string, price float, volume int,name String); " +
+                "define stream TwitterStream (symbol string, count int,user String); ";
         String partitionStart = "partition with (name of StockStream , user of TwitterStream) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -880,8 +880,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume int, name String); " +
-                "define stream TwitterStream (symbol inputmapper, count int, user String); ";
+                "define stream StockStream (symbol string, price float, volume int, name String); " +
+                "define stream TwitterStream (symbol string, count int, user String); ";
         String partitionStart = "partition with (name of StockStream , user of TwitterStream) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -948,8 +948,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream1 (symbol inputmapper, price float, volume int, quantity int); " +
-                "define stream StockStream2 (symbol inputmapper, price float, volume int, quantity int); ";
+                "define stream StockStream1 (symbol string, price float, volume int, quantity int); " +
+                "define stream StockStream2 (symbol string, price float, volume int, quantity int); ";
         String partitionStart = "partition with (quantity of StockStream1 , quantity of StockStream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1044,8 +1044,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream1 (symbol inputmapper, price float, volume int,quantity int); " +
-                "define stream StockStream2 (symbol inputmapper, price float, volume int,quantity int); ";
+                "define stream StockStream1 (symbol string, price float, volume int,quantity int); " +
+                "define stream StockStream2 (symbol string, price float, volume int,quantity int); ";
         String partitionStart = "partition with (quantity of StockStream1 , quantity of StockStream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1134,8 +1134,8 @@ public class SequencePartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream1 (symbol inputmapper, price float, volume int, quantity int); " +
-                "define stream StockStream2 (symbol inputmapper, price float, volume int, quantity int); ";
+                "define stream StockStream1 (symbol string, price float, volume int, quantity int); " +
+                "define stream StockStream2 (symbol string, price float, volume int, quantity int); ";
         String partitionStart = "partition with (quantity of StockStream1 , quantity of StockStream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +

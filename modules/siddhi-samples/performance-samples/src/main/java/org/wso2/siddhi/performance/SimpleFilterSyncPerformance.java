@@ -31,8 +31,8 @@ public class SimpleFilterSyncPerformance {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = " " +
-                "define stream RequestStream (messageID inputmapper, app_key inputmapper, api_key inputmapper, app_tier inputmapper, api_tier inputmapper, user_id inputmapper, properties inputmapper, timeNow long); " +
-                "define stream EligibilityStream (rule inputmapper, messageID inputmapper, isEligible bool, isLocallyThrottled bool, throttle_key inputmapper , timeNow long); ";
+                "define stream RequestStream (messageID string, app_key string, api_key string, app_tier string, api_tier string, user_id string, properties string, timeNow long); " +
+                "define stream EligibilityStream (rule string, messageID string, isEligible bool, isLocallyThrottled bool, throttle_key string , timeNow long); ";
 
         String query = "" +
                 "@info(name = 'query1') " +

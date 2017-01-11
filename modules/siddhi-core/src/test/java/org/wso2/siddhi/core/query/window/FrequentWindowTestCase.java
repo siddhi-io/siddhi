@@ -50,7 +50,7 @@ public class FrequentWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream purchase (cardNo inputmapper, price float);";
+                "define stream purchase (cardNo string, price float);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from purchase[price >= 30]#window.frequent(2) " +
@@ -99,7 +99,7 @@ public class FrequentWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream purchase (cardNo inputmapper, price float);";
+                "define stream purchase (cardNo string, price float);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from purchase[price >= 30]#window.frequent(2,cardNo) " +

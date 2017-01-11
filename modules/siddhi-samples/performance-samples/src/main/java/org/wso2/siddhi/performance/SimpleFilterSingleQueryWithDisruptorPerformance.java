@@ -31,7 +31,7 @@ public class SimpleFilterSingleQueryWithDisruptorPerformance {
         String executionPlan = "" +
                 "@plan:async " +
                 "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume long, timestamp long);" +
+                "define stream cseEventStream (symbol string, price float, volume long, timestamp long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[700 > price] " +

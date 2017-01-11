@@ -48,8 +48,8 @@ public class InsertIntoTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -77,9 +77,9 @@ public class InsertIntoTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); " +
-                "define table StockTable2 (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define table StockTable (symbol string, price float, volume long); " +
+                "define table StockTable2 (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -111,10 +111,10 @@ public class InsertIntoTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream StockStream2 (symbol inputmapper, price float, volume long); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); " +
-                "define table StockTable2 (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream StockStream2 (symbol string, price float, volume long); " +
+                "define table StockTable (symbol string, price float, volume long); " +
+                "define table StockTable2 (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -146,9 +146,9 @@ public class InsertIntoTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream StockCheckStream (symbol inputmapper); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream StockCheckStream (symbol string); " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -211,9 +211,9 @@ public class InsertIntoTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream StockCheckStream (symbol inputmapper); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream StockCheckStream (symbol string); " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -275,9 +275,9 @@ public class InsertIntoTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream StockCheckStream (symbol inputmapper); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream StockCheckStream (symbol string); " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -343,9 +343,9 @@ public class InsertIntoTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream StockCheckStream (price float); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -408,9 +408,9 @@ public class InsertIntoTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
+                "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream StockCheckStream (price float); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from StockStream " +
@@ -473,9 +473,9 @@ public class InsertIntoTableTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream StockCheckStream (symbol inputmapper); " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream StockCheckStream (symbol string); " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query2') " +
                 "from StockCheckStream " +

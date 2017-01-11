@@ -402,11 +402,11 @@ public class ExpressionParser {
             ExpressionExecutor leftExpressionExecutor, ExpressionExecutor rightExpressionExecutor) {
         switch (leftExpressionExecutor.getReturnType()) {
             case STRING:
-                throw new OperationNotSupportedException("inputmapper cannot used in greater than comparisons");
+                throw new OperationNotSupportedException("string cannot used in greater than comparisons");
             case INT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("int cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("int cannot be compared with string");
                     case INT:
                         return new GreaterThanCompareConditionExpressionExecutorIntInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -423,7 +423,7 @@ public class ExpressionParser {
             case LONG:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("long cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("long cannot be compared with string");
                     case INT:
                         return new GreaterThanCompareConditionExpressionExecutorLongInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -440,7 +440,7 @@ public class ExpressionParser {
             case FLOAT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("float cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("float cannot be compared with string");
                     case INT:
                         return new GreaterThanCompareConditionExpressionExecutorFloatInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -457,7 +457,7 @@ public class ExpressionParser {
             case DOUBLE:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("double cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("double cannot be compared with string");
                     case INT:
                         return new GreaterThanCompareConditionExpressionExecutorDoubleInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -490,11 +490,11 @@ public class ExpressionParser {
             ExpressionExecutor leftExpressionExecutor, ExpressionExecutor rightExpressionExecutor) {
         switch (leftExpressionExecutor.getReturnType()) {
             case STRING:
-                throw new OperationNotSupportedException("inputmapper cannot used in greater than equal comparisons");
+                throw new OperationNotSupportedException("string cannot used in greater than equal comparisons");
             case INT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("int cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("int cannot be compared with string");
                     case INT:
                         return new GreaterThanEqualCompareConditionExpressionExecutorIntInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -511,7 +511,7 @@ public class ExpressionParser {
             case LONG:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("long cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("long cannot be compared with string");
                     case INT:
                         return new GreaterThanEqualCompareConditionExpressionExecutorLongInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -528,7 +528,7 @@ public class ExpressionParser {
             case FLOAT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("float cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("float cannot be compared with string");
                     case INT:
                         return new GreaterThanEqualCompareConditionExpressionExecutorFloatInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -545,7 +545,7 @@ public class ExpressionParser {
             case DOUBLE:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("double cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("double cannot be compared with string");
                     case INT:
                         return new GreaterThanEqualCompareConditionExpressionExecutorDoubleInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -578,11 +578,11 @@ public class ExpressionParser {
             ExpressionExecutor leftExpressionExecutor, ExpressionExecutor rightExpressionExecutor) {
         switch (leftExpressionExecutor.getReturnType()) {
             case STRING:
-                throw new OperationNotSupportedException("inputmapper cannot used in less than comparisons");
+                throw new OperationNotSupportedException("string cannot used in less than comparisons");
             case INT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("int cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("int cannot be compared with string");
                     case INT:
                         return new LessThanCompareConditionExpressionExecutorIntInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -599,7 +599,7 @@ public class ExpressionParser {
             case LONG:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("long cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("long cannot be compared with string");
                     case INT:
                         return new LessThanCompareConditionExpressionExecutorLongInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -616,7 +616,7 @@ public class ExpressionParser {
             case FLOAT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("float cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("float cannot be compared with string");
                     case INT:
                         return new LessThanCompareConditionExpressionExecutorFloatInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -633,7 +633,7 @@ public class ExpressionParser {
             case DOUBLE:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("double cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("double cannot be compared with string");
                     case INT:
                         return new LessThanCompareConditionExpressionExecutorDoubleInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -666,11 +666,11 @@ public class ExpressionParser {
             ExpressionExecutor leftExpressionExecutor, ExpressionExecutor rightExpressionExecutor) {
         switch (leftExpressionExecutor.getReturnType()) {
             case STRING:
-                throw new OperationNotSupportedException("inputmapper cannot used in less than equal comparisons");
+                throw new OperationNotSupportedException("string cannot used in less than equal comparisons");
             case INT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("int cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("int cannot be compared with string");
                     case INT:
                         return new LessThanEqualCompareConditionExpressionExecutorIntInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -687,7 +687,7 @@ public class ExpressionParser {
             case LONG:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("long cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("long cannot be compared with string");
                     case INT:
                         return new LessThanEqualCompareConditionExpressionExecutorLongInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -704,7 +704,7 @@ public class ExpressionParser {
             case FLOAT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("float cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("float cannot be compared with string");
                     case INT:
                         return new LessThanEqualCompareConditionExpressionExecutorFloatInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -721,7 +721,7 @@ public class ExpressionParser {
             case DOUBLE:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("double cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("double cannot be compared with string");
                     case INT:
                         return new LessThanEqualCompareConditionExpressionExecutorDoubleInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -763,7 +763,7 @@ public class ExpressionParser {
             case INT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("int cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("int cannot be compared with string");
                     case INT:
                         return new EqualCompareConditionExpressionExecutorIntInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -780,7 +780,7 @@ public class ExpressionParser {
             case LONG:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("long cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("long cannot be compared with string");
                     case INT:
                         return new EqualCompareConditionExpressionExecutorLongInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -797,7 +797,7 @@ public class ExpressionParser {
             case FLOAT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("float cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("float cannot be compared with string");
                     case INT:
                         return new EqualCompareConditionExpressionExecutorFloatInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -814,7 +814,7 @@ public class ExpressionParser {
             case DOUBLE:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("double cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("double cannot be compared with string");
                     case INT:
                         return new EqualCompareConditionExpressionExecutorDoubleInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -861,7 +861,7 @@ public class ExpressionParser {
             case INT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("int cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("int cannot be compared with string");
                     case INT:
                         return new NotEqualCompareConditionExpressionExecutorIntInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -878,7 +878,7 @@ public class ExpressionParser {
             case LONG:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("long cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("long cannot be compared with string");
                     case INT:
                         return new NotEqualCompareConditionExpressionExecutorLongInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -895,7 +895,7 @@ public class ExpressionParser {
             case FLOAT:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("float cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("float cannot be compared with string");
                     case INT:
                         return new NotEqualCompareConditionExpressionExecutorFloatInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:
@@ -912,7 +912,7 @@ public class ExpressionParser {
             case DOUBLE:
                 switch (rightExpressionExecutor.getReturnType()) {
                     case STRING:
-                        throw new OperationNotSupportedException("double cannot be compared with inputmapper");
+                        throw new OperationNotSupportedException("double cannot be compared with string");
                     case INT:
                         return new NotEqualCompareConditionExpressionExecutorDoubleInt(leftExpressionExecutor, rightExpressionExecutor);
                     case LONG:

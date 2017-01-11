@@ -48,7 +48,7 @@ public class ValidateTestCase {
         String executionPlan = "" +
                 "@Plan:name('validateTest') " +
                 "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume long);" +
+                "define stream cseEventStream (symbol string, price float, volume long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[symbol is null] " +
@@ -68,7 +68,7 @@ public class ValidateTestCase {
         String executionPlan = "" +
                 "@Plan:name('validateTest') " +
                 "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume long);" +
+                "define stream cseEventStream (symbol string, price float, volume long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStreamA[symbol is null] " +

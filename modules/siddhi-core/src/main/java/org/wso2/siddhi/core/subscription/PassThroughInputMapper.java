@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This mapper receives EVent or Object[] as input and send the {@link ComplexEventChunk} to the {@link OutputCallback}.
+ * This mapper receives Event or Object[] as input and send the {@link ComplexEventChunk} to the {@link OutputCallback}.
  * No additional options are required.
  */
 public class PassThroughInputMapper implements InputMapper {

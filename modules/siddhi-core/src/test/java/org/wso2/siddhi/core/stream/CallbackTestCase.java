@@ -55,7 +55,7 @@ public class CallbackTestCase {
         String executionPlan = "" +
                 "@Plan:name('callbackTest1') " +
                 "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long);" +
+                "define stream StockStream (symbol string, price float, volume long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from StockStream[70 > price] " +
@@ -106,7 +106,7 @@ public class CallbackTestCase {
         String executionPlan = "" +
                 "@Plan:name('callbackTest1') " +
                 "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long);" +
+                "define stream StockStream (symbol string, price float, volume long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from StockStream[70 > price] " +
@@ -135,7 +135,7 @@ public class CallbackTestCase {
         String executionPlan = "" +
                 "@Plan:name('callbackTest1') " +
                 "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long);" +
+                "define stream StockStream (symbol string, price float, volume long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from StockStream[70 > price] " +

@@ -31,7 +31,7 @@ public class PartitionPerformance {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String executionPlan = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume long);" +
+                "define stream cseEventStream (symbol string, price float, volume long);" +
                 "" +
                 "partition with (symbol of cseEventStream) " +
                 "begin " +

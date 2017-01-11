@@ -43,10 +43,10 @@ public class DeleteFromRDBMSTestCase {
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "')  " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
 
                 String query = "" +
                         "@info(name = 'query1') " +
@@ -97,10 +97,10 @@ public class DeleteFromRDBMSTestCase {
 
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "' , bloom.filters = 'enable')  " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
 
                 String query = "" +
                         "@info(name = 'query1') " +
@@ -149,10 +149,10 @@ public class DeleteFromRDBMSTestCase {
 
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "')  " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
 
                 String query = "" +
                         "@info(name = 'query1') " +
@@ -199,10 +199,10 @@ public class DeleteFromRDBMSTestCase {
 
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "')  " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
 
                 String query = "" +
                         "@info(name = 'query1') " +
@@ -249,10 +249,10 @@ public class DeleteFromRDBMSTestCase {
 
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "')  " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
 
                 String query = "" +
                         "@info(name = 'query1') " +
@@ -299,10 +299,10 @@ public class DeleteFromRDBMSTestCase {
 
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "')  " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
 
                 String query = "" +
                         "@info(name = 'query1') " +
@@ -349,10 +349,10 @@ public class DeleteFromRDBMSTestCase {
 
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "') " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
                 String query = "" +
                         "@info(name = 'query1') " +
                         "from StockStream " +
@@ -398,10 +398,10 @@ public class DeleteFromRDBMSTestCase {
 
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "') " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
                 String query = "" +
                         "@info(name = 'query1') " +
                         "from StockStream " +
@@ -449,10 +449,10 @@ public class DeleteFromRDBMSTestCase {
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "', cache='lfu', cache.size='1000')  " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
 
                 String query = "" +
                         "@info(name = 'query1') " +
@@ -501,10 +501,10 @@ public class DeleteFromRDBMSTestCase {
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                         "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "', bloom.filters = 'enable')  " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
 
                 String query = "" +
                         "@info(name = 'query1') " +
@@ -553,10 +553,10 @@ public class DeleteFromRDBMSTestCase {
                 DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
 
                 String streams = "" +
-                        "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                        "define stream DeleteStockStream (symbol inputmapper, price float, volume long); " +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
                                  "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "', bloom.filters = 'enable')  " +
-                        "define table StockTable (symbol inputmapper, price float, volume long); ";
+                        "define table StockTable (symbol string, price float, volume long); ";
 
                 String query = "" +
                                "@info(name = 'query1') " +

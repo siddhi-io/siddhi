@@ -40,8 +40,8 @@ public class CastFunctionExecutor extends FunctionExecutor {
                     "required 2 parameters, but found " + attributeExpressionExecutors.length);
         }
         if (!(attributeExpressionExecutors[1] instanceof ConstantExpressionExecutor)) {
-            throw new ExecutionPlanValidationException("The second argument has to be a inputmapper constant specifying " +
-                    "one of the supported data types (int, long, float, double, inputmapper, bool)");
+            throw new ExecutionPlanValidationException("The second argument has to be a string constant specifying " +
+                    "one of the supported data types (int, long, float, double, string, bool)");
         } else {
             String type = attributeExpressionExecutors[1].execute(null).toString();
             if (type.toLowerCase().equals("int")) {
@@ -54,10 +54,10 @@ public class CastFunctionExecutor extends FunctionExecutor {
                 returnType = Attribute.Type.DOUBLE;
             } else if (type.toLowerCase().equals("bool")) {
                 returnType = Attribute.Type.BOOL;
-            } else if (type.toLowerCase().equals("inputmapper")) {
+            } else if (type.toLowerCase().equals("string")) {
                 returnType = Attribute.Type.STRING;
             } else {
-                throw new ExecutionPlanValidationException("Type must be one of int,long,float,double,bool,inputmapper");
+                throw new ExecutionPlanValidationException("Type must be one of int,long,float,double,bool,string");
             }
         }
     }

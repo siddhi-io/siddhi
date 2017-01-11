@@ -51,8 +51,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
@@ -100,8 +100,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) as a join twitterStream#window.time(1 sec) as b " +
@@ -150,7 +150,7 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); ";
+                "define stream cseEventStream (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.time(500 milliseconds) as a " +
@@ -196,8 +196,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.time(2 sec) join twitterStream#window.time(2 sec) " +
@@ -252,8 +252,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.length(1) join twitterStream#window.length(1) " +
@@ -289,8 +289,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, symbol inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, symbol string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream join twitterStream " +
@@ -306,8 +306,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, symbol inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, symbol string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream as a join twitterStream as b " +
@@ -323,8 +323,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.length(1) join twitterStream#window.length(1) " +
@@ -360,8 +360,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream join twitterStream " +
@@ -397,8 +397,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream join twitterStream#window.length(1) " +
@@ -443,8 +443,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream unidirectional join twitterStream#window.length(1) " +
@@ -490,8 +490,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
@@ -535,8 +535,8 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, symbol inputmapper); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, symbol string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
@@ -558,9 +558,9 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream order (billnum inputmapper, custid inputmapper, items inputmapper, dow inputmapper, timestamp long); " +
-                "define table dow_items (custid inputmapper, dow inputmapper, item inputmapper) ; " +
-                "define stream dow_items_stream (custid inputmapper, dow inputmapper, item inputmapper); ";
+                "define stream order (billnum string, custid string, items string, dow string, timestamp long); " +
+                "define table dow_items (custid string, dow string, item string) ; " +
+                "define stream dow_items_stream (custid string, dow string, item string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from order join dow_items \n" +
@@ -603,9 +603,9 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream order (billnum inputmapper, custid inputmapper, items inputmapper, dow inputmapper, timestamp long); " +
-                "define table dow_items (custid inputmapper, dow inputmapper, item inputmapper) ; " +
-                "define stream dow_items_stream (custid inputmapper, dow inputmapper, item inputmapper); ";
+                "define stream order (billnum string, custid string, items string, dow string, timestamp long); " +
+                "define table dow_items (custid string, dow string, item string) ; " +
+                "define stream dow_items_stream (custid string, dow string, item string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from order join dow_items \n" +
@@ -649,9 +649,9 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream order (billnum inputmapper, custid inputmapper, items inputmapper, dow inputmapper, timestamp long); " +
-                "define table dow_items (custid inputmapper, dow inputmapper, item inputmapper) ; " +
-                "define stream dow_items_stream (custid inputmapper, dow inputmapper, item inputmapper); ";
+                "define stream order (billnum string, custid string, items string, dow string, timestamp long); " +
+                "define table dow_items (custid string, dow string, item string) ; " +
+                "define stream dow_items_stream (custid string, dow string, item string); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from order join dow_items \n" +
@@ -696,9 +696,9 @@ public class JoinTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream order (billnum inputmapper, custid inputmapper, items inputmapper, dow inputmapper, timestamp long); " +
-                "define table dow_items (custid inputmapper, dow inputmapper, item inputmapper) ; " +
-                "define stream dow_items_stream (custid inputmapper, dow inputmapper, item inputmapper); ";
+                "define stream order (billnum string, custid string, items string, dow string, timestamp long); " +
+                "define table dow_items (custid string, dow string, item string) ; " +
+                "define stream dow_items_stream (custid string, dow string, item string); ";
 
         String query = "" +
                 "@info(name = 'query1') " +

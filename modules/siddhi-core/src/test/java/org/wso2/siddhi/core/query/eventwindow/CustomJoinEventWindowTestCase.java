@@ -56,10 +56,10 @@ public class CustomJoinEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define stream CheckStockStream (symbol inputmapper); " +
-                "define window CheckStockWindow(symbol inputmapper) length(1) output all events; " +
-                "define table StockTable (symbol inputmapper, price float, volume long); ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream CheckStockStream (symbol string); " +
+                "define window CheckStockWindow(symbol string) length(1) output all events; " +
+                "define table StockTable (symbol string, price float, volume long); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from StockStream " +
@@ -243,13 +243,13 @@ public class CustomJoinEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume long); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume long); " +
-                "define stream Stream3 (symbol inputmapper, price float, volume long); " +
-                "define stream Stream4 (symbol inputmapper, price float, volume long); " +
-                "define stream Stream5 (symbol inputmapper, price float, volume long); " +
-                "define stream Stream6 (symbol inputmapper, price float, volume long); " +
-                "define window StockWindow (symbol inputmapper, price float, volume long) lengthBatch(5); ";
+                "define stream Stream1 (symbol string, price float, volume long); " +
+                "define stream Stream2 (symbol string, price float, volume long); " +
+                "define stream Stream3 (symbol string, price float, volume long); " +
+                "define stream Stream4 (symbol string, price float, volume long); " +
+                "define stream Stream5 (symbol string, price float, volume long); " +
+                "define stream Stream6 (symbol string, price float, volume long); " +
+                "define window StockWindow (symbol string, price float, volume long) lengthBatch(5); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from Stream1 " +
@@ -298,10 +298,10 @@ public class CustomJoinEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockInputStream (symbol inputmapper, price float, volume long); " +
-                "define stream SummaryOfCompanyTriggerStream (symbol inputmapper); " +
+                "define stream StockInputStream (symbol string, price float, volume long); " +
+                "define stream SummaryOfCompanyTriggerStream (symbol string); " +
                 "define stream VolumeGreaterThanTriggerStream (volume long); " +
-                "define window StockWindow (symbol inputmapper, price float, volume long) lengthBatch(10); ";
+                "define window StockWindow (symbol string, price float, volume long) lengthBatch(10); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from StockInputStream " +
@@ -382,8 +382,8 @@ public class CustomJoinEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long); " +
-                "define window StockWindow (symbol inputmapper, price float, volume long) timeBatch(1 sec) output current events; ";
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define window StockWindow (symbol string, price float, volume long) timeBatch(1 sec) output current events; ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from StockStream " +
@@ -416,10 +416,10 @@ public class CustomJoinEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define stream twitterStream (user inputmapper, tweet inputmapper, company inputmapper); " +
-                "define window cseEventWindow (symbol inputmapper, price float, volume int) lengthBatch(2); " +
-                "define window twitterWindow (user inputmapper, tweet inputmapper, company inputmapper) lengthBatch(2); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); " +
+                "define window cseEventWindow (symbol string, price float, volume int) lengthBatch(2); " +
+                "define window twitterWindow (user string, tweet string, company string) lengthBatch(2); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from cseEventStream " +
@@ -490,8 +490,8 @@ public class CustomJoinEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream SensorStream (name inputmapper, value float, roomNo int, deviceID inputmapper); " +
-                "define window SensorWindow (name inputmapper, value float, roomNo int, deviceID inputmapper) timeBatch(1 second); ";
+                "define stream SensorStream (name string, value float, roomNo int, deviceID string); " +
+                "define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from SensorStream " +
@@ -575,7 +575,7 @@ public class CustomJoinEventWindowTestCase {
                 "define stream RegulatorStream(deviceID long, roomNo int, isOn bool); " +
                 "define window TempWindow(deviceID long, roomNo int, temp double) time(1 min); " +
                 "define window RegulatorWindow(deviceID long, roomNo int, isOn bool) length(1); " +
-                "define window RegulatorActionWindow(deviceID long, roomNo int, action inputmapper) timeBatch(1 sec); ";
+                "define window RegulatorActionWindow(deviceID long, roomNo int, action string) timeBatch(1 sec); ";
 
         String query = "" +
                 "@info(name = 'query1') " +
@@ -649,8 +649,8 @@ public class CustomJoinEventWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define window cseEventWindow (symbol inputmapper, price float, volume int) length(2); ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define window cseEventWindow (symbol string, price float, volume int) length(2); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from cseEventStream " +

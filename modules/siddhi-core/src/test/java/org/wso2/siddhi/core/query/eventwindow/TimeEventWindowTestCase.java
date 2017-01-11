@@ -47,8 +47,8 @@ public class TimeEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define window cseEventWindow (symbol inputmapper, price float, volume int) time(2 sec) output all events; ";
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define window cseEventWindow (symbol string, price float, volume int) time(2 sec) output all events; ";
 
         String query = "" +
                 "@info(name = 'query0') " +
@@ -97,8 +97,8 @@ public class TimeEventWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int); " +
-                "define window cseEventWindow (symbol inputmapper, price float, volume int) time(1 sec) output all events; ";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define window cseEventWindow (symbol string, price float, volume int) time(1 sec) output all events; ";
 
         String query = "" +
                 "@info(name = 'query0') " +
@@ -153,8 +153,8 @@ public class TimeEventWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
 
-        String queries = "define stream fireAlarmEventStream (deviceID inputmapper, sonar double); " +
-                "define window fireAlarmEventWindow (deviceID inputmapper, sonar double) time(30 milliseconds) output expired events; " +
+        String queries = "define stream fireAlarmEventStream (deviceID string, sonar double); " +
+                "define window fireAlarmEventWindow (deviceID string, sonar double) time(30 milliseconds) output expired events; " +
                 "" +
                 "@info(name = 'query0') " +
                 "from fireAlarmEventStream " +

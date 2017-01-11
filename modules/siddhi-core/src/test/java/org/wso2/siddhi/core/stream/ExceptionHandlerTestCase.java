@@ -54,7 +54,7 @@ public class ExceptionHandlerTestCase {
                 "@Plan:name('callbackTest1') " +
                 "@Plan:async " +
                 "" +
-                "define stream StockStream (symbol inputmapper, price float, volume long);" +
+                "define stream StockStream (symbol string, price float, volume long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "@Parallel " +

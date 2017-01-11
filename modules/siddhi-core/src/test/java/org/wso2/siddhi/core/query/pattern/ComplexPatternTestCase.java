@@ -54,8 +54,8 @@ public class ComplexPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every ( e1=Stream1[price > 20] -> e2=Stream2[price > e1.price] or e3=Stream2['IBM' == symbol]) " +
@@ -124,8 +124,8 @@ public class ComplexPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every ( e1=Stream1[price > 20] -> e2=Stream1[price > 20]<1:2>) -> e3=Stream1[price > e1.price] " +
@@ -187,7 +187,7 @@ public class ComplexPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1 = Stream1 [ price >= 50 and volume > 100 ] -> e2 = Stream1 [price <= 40 ] <2:> -> e3 = Stream1 [volume <= 70 ] " +
@@ -261,8 +261,8 @@ public class ComplexPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1 = Stream1 [ price >= 50 and volume > 100 ] " +
@@ -332,8 +332,8 @@ public class ComplexPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from e1 = Stream1 [ price >= 50 and volume > 100 ] -> e2 = Stream2 [e1.symbol != 'AMBA' ] " +
@@ -400,8 +400,8 @@ public class ComplexPatternTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from every e1 = Stream1 -> e2 = Stream2 [e1.symbol != 'AMBA' ] <2:> -> e3 = Stream2 [volume <= 70 ] " +

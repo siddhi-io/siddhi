@@ -52,7 +52,7 @@ public class TimeLengthWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int);";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream#window.timeLength(4 sec,10) select symbol,price," +
                 "volume insert all events into outputStream ;";
 
@@ -102,7 +102,7 @@ public class TimeLengthWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int);";
+                "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.timeLength(2 sec,10) " +
@@ -154,7 +154,7 @@ public class TimeLengthWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String sensorStream = "define stream sensorStream (id inputmapper, sensorValue float);";
+        String sensorStream = "define stream sensorStream (id string, sensorValue float);";
         String query = "@info(name = 'query1') from sensorStream#window.timeLength(10 sec,4)" +
                 " select id,sensorValue" +
                 " insert all events into outputStream ;";
@@ -213,7 +213,7 @@ public class TimeLengthWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String sensorStream = "define stream sensorStream (id inputmapper, sensorValue float);";
+        String sensorStream = "define stream sensorStream (id string, sensorValue float);";
         String query = "@info(name = 'query1') from sensorStream#window.timeLength(2 sec,4)" +
                 " select id,sensorValue" +
                 " insert all events into outputStream ;";
@@ -266,7 +266,7 @@ public class TimeLengthWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String sensorStream = "define stream sensorStream (id inputmapper, sensorValue int);";
+        String sensorStream = "define stream sensorStream (id string, sensorValue int);";
         String query = "@info(name = 'query1') from sensorStream#window.timeLength(3 sec,6)" +
                 " select id,sum(sensorValue) as sum" +
                 " insert all events into outputStream ;";
@@ -342,7 +342,7 @@ public class TimeLengthWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String sensorStream = "define stream sensorStream (id inputmapper, sensorValue int);";
+        String sensorStream = "define stream sensorStream (id string, sensorValue int);";
         String query = "@info(name = 'query1') from sensorStream#window.timeLength(5 sec,5)" +
                 " select id,sum(sensorValue) as sum" +
                 " insert into outputStream ;";
@@ -387,7 +387,7 @@ public class TimeLengthWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int);";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream#window.timeLength(10 sec,5)" +
                 " select symbol,volume" +
                 " insert all events into outputStream ;";

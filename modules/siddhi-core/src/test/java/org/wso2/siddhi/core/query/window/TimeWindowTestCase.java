@@ -48,7 +48,7 @@ public class TimeWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int);";
+                "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.time(2 sec) " +
@@ -95,7 +95,7 @@ public class TimeWindowTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol inputmapper, price float, volume int);";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "@info(name = 'query1') from cseEventStream#window.time(1 sec) select symbol,price," +
                 "volume insert all events into outputStream ;";
 
@@ -141,7 +141,7 @@ public class TimeWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
 
-        String queries = "define stream fireAlarmEventStream (deviceID inputmapper, sonar double);\n" +
+        String queries = "define stream fireAlarmEventStream (deviceID string, sonar double);\n" +
                 "@info(name = 'query1')\n" +
                 "from fireAlarmEventStream#window.time(30 milliseconds)\n" +
                 "select deviceID\n" +

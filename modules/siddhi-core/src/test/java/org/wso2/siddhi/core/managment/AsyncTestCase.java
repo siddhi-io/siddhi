@@ -53,8 +53,8 @@ public class AsyncTestCase {
         String executionPlan = "" +
                 "@plan:async " +
 //                "@config(async='true') " +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int);" +
-                "define stream cseEventStream2 (symbol inputmapper, price float, volume int);" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "define stream cseEventStream2 (symbol string, price float, volume int);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[70 > price] " +
@@ -103,8 +103,8 @@ public class AsyncTestCase {
         String executionPlan = "" +
                 "@plan:async " +
                 " " +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int);" +
-                "define stream cseEventStream2 (symbol inputmapper, price float, volume int);" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "define stream cseEventStream2 (symbol string, price float, volume int);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[70 > price] " +
@@ -153,8 +153,8 @@ public class AsyncTestCase {
         String executionPlan = "" +
                 "@plan:async" +
                 " " +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int);" +
-                "define stream cseEventStream2 (symbol inputmapper, price float, volume int);" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "define stream cseEventStream2 (symbol string, price float, volume int);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[70 > price] " +
@@ -203,8 +203,8 @@ public class AsyncTestCase {
         String executionPlan = "" +
                 "@plan:async(bufferSize='2')" +
                 " " +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int);" +
-                "define stream cseEventStream2 (symbol inputmapper, price float, volume int);" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "define stream cseEventStream2 (symbol string, price float, volume int);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[70 > price] " +
@@ -266,9 +266,9 @@ public class AsyncTestCase {
         String executionPlan = "" +
                 " " +
                 "@async(bufferSize='2')" +
-                "define stream cseEventStream (symbol inputmapper, price float, volume int);" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
                 "" +
-                "define stream cseEventStream2 (symbol inputmapper, price float, volume int);" +
+                "define stream cseEventStream2 (symbol string, price float, volume int);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream[70 > price] " +

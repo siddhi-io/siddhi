@@ -36,7 +36,7 @@ public class ExtensionSample {
 
 
         String executionPlan = "" +
-                "define stream cseEventStream (symbol inputmapper, price long, volume long);" +
+                "define stream cseEventStream (symbol string, price long, volume long);" +
                 "" +
                 "@info(name = 'query1') " +
                 "from cseEventStream " +

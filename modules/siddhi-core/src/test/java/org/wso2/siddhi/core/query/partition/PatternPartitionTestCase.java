@@ -52,8 +52,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
 
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
 
@@ -111,8 +111,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price1 float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price1 float, volume int); ";
 
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
 
@@ -172,8 +172,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price1 float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price1 float, volume int); ";
 
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
 
@@ -254,8 +254,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
 
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
 
@@ -314,8 +314,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
 
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
 
@@ -388,8 +388,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
 
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
 
@@ -463,7 +463,7 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
 
         String query = "" +
@@ -528,7 +528,7 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -587,8 +587,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -661,8 +661,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -721,8 +721,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -778,8 +778,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -830,8 +830,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -897,8 +897,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -953,8 +953,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1003,8 +1003,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1057,7 +1057,7 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream EventStream (symbol inputmapper, price float, volume int , quantity int); ";
+                "define stream EventStream (symbol string, price float, volume int , quantity int); ";
         String partitionStart = "partition with (quantity of EventStream) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1115,7 +1115,7 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream EventStream (symbol inputmapper, price float, volume int,quantity int); ";
+                "define stream EventStream (symbol string, price float, volume int,quantity int); ";
         String partitionStart = "partition with (quantity of EventStream) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1173,7 +1173,7 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream EventStream (symbol inputmapper, price float, volume int, quantity int); ";
+                "define stream EventStream (symbol string, price float, volume int, quantity int); ";
         String partitionStart = "partition with (quantity of EventStream) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1231,7 +1231,7 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream EventStream (symbol inputmapper, price float, volume int,quantity int); ";
+                "define stream EventStream (symbol string, price float, volume int,quantity int); ";
         String partitionStart = "partition with (quantity of EventStream) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1290,8 +1290,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1344,8 +1344,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1396,8 +1396,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1450,8 +1450,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1518,8 +1518,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1572,8 +1572,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1626,8 +1626,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1697,8 +1697,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -1760,7 +1760,7 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int,quantity int); ";
+                "define stream Stream1 (symbol string, price float, volume int,quantity int); ";
         String partitionStart = "partition with (quantity of Stream1) begin ";
         String partitionEnd = "end";
         String query = "" +
@@ -1835,8 +1835,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int,quantity int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int,quantity int); ";
+                "define stream Stream1 (symbol string, price float, volume int,quantity int); " +
+                "define stream Stream2 (symbol string, price float, volume int,quantity int); ";
         String partitionStart = "partition with (quantity of Stream1) begin ";
         String partitionEnd = "end";
         String query = "" +
@@ -1905,8 +1905,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int,quantity int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int,quantity int); ";
+                "define stream Stream1 (symbol string, price float, volume int,quantity int); " +
+                "define stream Stream2 (symbol string, price float, volume int,quantity int); ";
         String partitionStart = "partition with (quantity of Stream1,quantity of Stream2) begin ";
         String partitionEnd = "end";
 
@@ -1975,8 +1975,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int, quantity int); " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int, quantity int); ";
+                "define stream Stream1 (symbol string, price float, volume int, quantity int); " +
+                "define stream Stream2 (symbol string, price float, volume int, quantity int); ";
         String partitionStart = "partition with (quantity of Stream1,quantity of Stream2) begin ";
         String partitionEnd = "end";
         String query = "" +
@@ -2047,8 +2047,8 @@ public class PatternPartitionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String streams = "" +
-                "define stream Stream1 (symbol inputmapper, price float, volume int);    " +
-                "define stream Stream2 (symbol inputmapper, price float, volume int); ";
+                "define stream Stream1 (symbol string, price float, volume int);    " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
 
         String partitionStart = "partition with (volume of Stream1,volume of Stream2) begin ";
 

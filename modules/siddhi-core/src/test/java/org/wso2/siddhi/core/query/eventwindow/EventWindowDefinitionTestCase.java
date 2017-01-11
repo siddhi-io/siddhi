@@ -35,7 +35,7 @@ public class EventWindowDefinitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String streams = "define window CheckStockWindow(symbol inputmapper) length(1); ";
+        String streams = "define window CheckStockWindow(symbol string) length(1); ";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
         assertTrue(true);
@@ -48,7 +48,7 @@ public class EventWindowDefinitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String streams = "define window CheckStockWindow(symbol inputmapper) length(1) output all events; ";
+        String streams = "define window CheckStockWindow(symbol string) length(1) output all events; ";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
         assertTrue(true);
@@ -61,7 +61,7 @@ public class EventWindowDefinitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String streams = "define window CheckStockWindow(symbol inputmapper) length(1) output expired events; ";
+        String streams = "define window CheckStockWindow(symbol string) length(1) output expired events; ";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
         assertTrue(true);
@@ -74,7 +74,7 @@ public class EventWindowDefinitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String streams = "define window CheckStockWindow(symbol inputmapper) length(1) output current events; ";
+        String streams = "define window CheckStockWindow(symbol string) length(1) output current events; ";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
         assertTrue(true);
@@ -87,7 +87,7 @@ public class EventWindowDefinitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String streams = "define window CheckStockWindow(symbol inputmapper) length(1) output; ";
+        String streams = "define window CheckStockWindow(symbol string) length(1) output; ";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
         executionPlanRuntime.shutdown();
@@ -99,7 +99,7 @@ public class EventWindowDefinitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String streams = "define window CheckStockWindow(symbol inputmapper, val int) sum(val); ";
+        String streams = "define window CheckStockWindow(symbol string, val int) sum(val); ";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
         executionPlanRuntime.shutdown();
@@ -111,7 +111,7 @@ public class EventWindowDefinitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String streams = "define window CheckStockWindow(symbol inputmapper) output; ";
+        String streams = "define window CheckStockWindow(symbol string) output; ";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
         executionPlanRuntime.shutdown();
@@ -123,7 +123,7 @@ public class EventWindowDefinitionTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String query = "define stream InStream (meta_tenantId int, contextId inputmapper, eventId inputmapper, eventType inputmapper, authenticationSuccess bool, username inputmapper, localUsername inputmapper, userStoreDomain inputmapper, tenantDomain inputmapper, remoteIp inputmapper, region inputmapper, inboundAuthType inputmapper, serviceProvider inputmapper, rememberMeEnabled bool, forceAuthEnabled bool, passiveAuthEnabled bool, rolesCommaSeparated inputmapper, authenticationStep inputmapper, identityProvider inputmapper, authStepSuccess bool, stepAuthenticator inputmapper, isFirstLogin bool, identityProviderType inputmapper, _timestamp long);\n" +
+        String query = "define stream InStream (meta_tenantId int, contextId string, eventId string, eventType string, authenticationSuccess bool, username string, localUsername string, userStoreDomain string, tenantDomain string, remoteIp string, region string, inboundAuthType string, serviceProvider string, rememberMeEnabled bool, forceAuthEnabled bool, passiveAuthEnabled bool, rolesCommaSeparated string, authenticationStep string, identityProvider string, authStepSuccess bool, stepAuthenticator string, isFirstLogin bool, identityProviderType string, _timestamp long);\n" +
                 "define window countWindow (meta_tenantId int, batchEndTime long, timestamp long) externalTimeBatch(batchEndTime, 1 sec, 0, 10 sec, true);\n" +
                 "from InStream\n" +
                 "select meta_tenantId, eventId\n" +
