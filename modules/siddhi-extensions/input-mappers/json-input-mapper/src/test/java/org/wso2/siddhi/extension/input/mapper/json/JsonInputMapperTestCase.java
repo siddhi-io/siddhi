@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 import org.wso2.siddhi.core.util.transport.InMemoryInputTransport;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -45,7 +46,7 @@ public class JsonInputMapperTestCase {
     public void subscriptionTest1() throws InterruptedException {
         log.info("Subscription Test 1: Test an in memory transport with default json mapping");
 
-        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory"));
+        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory").option("topic","stock"));
         subscription.map(Mapping.format("json"));
         subscription.insertInto("FooStream");
 
@@ -68,7 +69,7 @@ public class JsonInputMapperTestCase {
 
         executionPlanRuntime.start();
 
-        Thread.sleep(5000);
+        InMemoryBroker.publish("stock","{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
 
         executionPlanRuntime.shutdown();
     }
@@ -78,7 +79,7 @@ public class JsonInputMapperTestCase {
         log.info("Subscription Test 2: Test an in memory transport with named and positional json mapping - expect " +
                 "exception");
 
-        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory"));
+        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory").option("topic","stock"));
         // First two parameters are based on position and the last one is named paramater
         subscription.map(Mapping.format("json").map("$.country").map("$.price").map("$.volume", "volume"));
         subscription.insertInto("FooStream");
@@ -93,6 +94,11 @@ public class JsonInputMapperTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("inputtransport:inMemory", InMemoryInputTransport.class);
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+        executionPlanRuntime.start();
+
+        InMemoryBroker.publish("stock","{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
+
         executionPlanRuntime.shutdown();
     }
 
@@ -104,13 +110,13 @@ public class JsonInputMapperTestCase {
     public void subscriptionTest3() throws InterruptedException {
         log.info("Subscription Test 3: Test an in memory transport with custom positional json mapping");
 
-        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory"));
+        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory").option("topic","stock"));
         subscription.map(Mapping.format("json").map("$.symbol").map("$.price").map("$.volume"));
         subscription.insertInto("FooStream");
 
         ExecutionPlan executionPlan = ExecutionPlan.executionPlan();
         executionPlan.defineStream(StreamDefinition.id("FooStream")
-                .attribute("symbol", Attribute.Type.STRING)
+                .attribute("output_symbol", Attribute.Type.STRING)
                 .attribute("price", Attribute.Type.FLOAT)
                 .attribute("volume", Attribute.Type.INT));
         executionPlan.addSubscription(subscription);
@@ -127,7 +133,7 @@ public class JsonInputMapperTestCase {
 
         executionPlanRuntime.start();
 
-        Thread.sleep(5000);
+        InMemoryBroker.publish("stock","{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
 
         executionPlanRuntime.shutdown();
     }
@@ -140,7 +146,7 @@ public class JsonInputMapperTestCase {
     public void subscriptionTest4() throws InterruptedException {
         log.info("Subscription Test 4: Test an in memory transport with custom named json mapping");
 
-        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory"));
+        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory").option("topic","stock"));
         subscription.map(Mapping.format("json").map("volume", "$.volume").map("symbol", "$.symbol").map("price", "$" +
                 ".price"));
         subscription.insertInto("FooStream");
@@ -164,16 +170,16 @@ public class JsonInputMapperTestCase {
 
         executionPlanRuntime.start();
 
-        Thread.sleep(5000);
+        InMemoryBroker.publish("stock","{'country': 'Sri Lanka', 'symbol': 'WSO2', 'price': 56.75, 'volume': 5}");
 
         executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
     public void subscriptionTest5() throws InterruptedException {
-        log.info("Subscription Test 5: Test infer output stream using json mapping");
+        log.info("Subscription Test 5: Test infer output stream using json mapping - expect exception");
 
-        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory"));
+        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory").option("topic","stock"));
         subscription.map(Mapping.format("json").map("volume", "$.volume").map("symbol", "$.symbol").map("price", "$" +
                 ".price"));
         subscription.insertInto("FooStream");
@@ -184,13 +190,20 @@ public class JsonInputMapperTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("inputtransport:inMemory", InMemoryInputTransport.class);
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+        executionPlanRuntime.start();
+
+        InMemoryBroker.publish("stock","{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
+
+        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
     public void subscriptionTest6() throws InterruptedException {
-        log.info("Subscription Test 6: Test error in infer output stream using json mapping without mapping name");
+        log.info("Subscription Test 6: Test error in infer output stream using json mapping without mapping name" +
+                " - expect exception");
 
-        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory"));
+        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory").option("topic","stock"));
         subscription.map(Mapping.format("json").map("$.volume").map("$.symbol").map("$.price"));
         subscription.insertInto("FooStream");
 
@@ -206,5 +219,11 @@ public class JsonInputMapperTestCase {
                 EventPrinter.print(events);
             }
         });
+
+        executionPlanRuntime.start();
+
+        InMemoryBroker.publish("stock","{'symbol': 'WSO2', 'price': 56.75, 'volume': 5, 'country': 'Sri Lanka'}");
+
+        executionPlanRuntime.shutdown();
     }
 }
