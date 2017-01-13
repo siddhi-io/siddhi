@@ -18,14 +18,14 @@
 
 package org.wso2.siddhi.extension.output.transport.kafka;
 
+import org.I0Itec.zkclient.exception.ZkTimeoutException;
 import org.apache.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.exception.NoSuchAttributeException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.extension.output.mapper.text.TextOutputMapper;
+import org.wso2.siddhi.core.util.transport.PassThroughOutputMapper;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
@@ -35,40 +35,48 @@ import org.wso2.siddhi.query.api.execution.query.Query;
 import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 
+import java.net.ConnectException;
+
 public class KafkaOutputTransportTestCase {
     static final Logger log = Logger.getLogger(KafkaOutputTransportTestCase.class);
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPublisherWithKafkaTransport() throws InterruptedException {
-        StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
-                .attribute("symbol", Attribute.Type.STRING)
-                .attribute("price", Attribute.Type.INT)
-                .attribute("volume", Attribute.Type.FLOAT);
+        try{
+            StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
+                    .attribute("symbol", Attribute.Type.STRING)
+                    .attribute("price", Attribute.Type.INT)
+                    .attribute("volume", Attribute.Type.FLOAT);
 
-        Query query = Query.query();
-        query.from(
-                InputStream.stream("FooStream")
-        );
-        query.publish(
-                Transport.transport("kafka")
-                        .option("topic", "test")
-                        .option("meta.broker.list", "localhost:9092"),
-                OutputStream.OutputEventType.CURRENT_EVENTS,
-                Mapping.format("json")
-        );
+            Query query = Query.query();
+            query.from(
+                    InputStream.stream("FooStream")
+            );
+            query.publish(
+                    Transport.transport("kafka")
+                            .option("topic", "page_visits")
+                            .option("meta.broker.list", "localhost:9092"),
+                    OutputStream.OutputEventType.CURRENT_EVENTS,
+                    Mapping.format("text")
+            );
 
-        SiddhiManager siddhiManager = new SiddhiManager();
-        ExecutionPlan executionPlan = new ExecutionPlan("ep1");
-        executionPlan.defineStream(streamDefinition);
-        executionPlan.addQuery(query);
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
-        InputHandler stockStream = executionPlanRuntime.getInputHandler("FooStream");
+            SiddhiManager siddhiManager = new SiddhiManager();
+            siddhiManager.setExtension("outputmapper:text", PassThroughOutputMapper.class);
 
-        executionPlanRuntime.start();
-        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-//        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-//        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
-        Thread.sleep(1000);
-        executionPlanRuntime.shutdown();
+            ExecutionPlan executionPlan = new ExecutionPlan("ep1");
+            executionPlan.defineStream(streamDefinition);
+            executionPlan.addQuery(query);
+            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+            InputHandler stockStream = executionPlanRuntime.getInputHandler("FooStream");
+
+            executionPlanRuntime.start();
+            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+            stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+            stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            Thread.sleep(10000);
+            executionPlanRuntime.shutdown();
+        } catch(ZkTimeoutException ex) {
+            log.warn("No zookeeper may not be available.", ex);
+        }
     }
 }

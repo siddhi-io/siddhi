@@ -21,8 +21,6 @@ package org.wso2.siddhi.extension.input.transport.kafka;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.subscription.InputCallback;
 

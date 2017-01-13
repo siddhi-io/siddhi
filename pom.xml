@@ -270,6 +270,11 @@
                 <version>${jsonpath.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka_2.10</artifactId>
+                <version>${kafka.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.axis2.transport</groupId>
                 <artifactId>axis2-transport-mail</artifactId>
                 <version>${axis2.transport.mail}</version>

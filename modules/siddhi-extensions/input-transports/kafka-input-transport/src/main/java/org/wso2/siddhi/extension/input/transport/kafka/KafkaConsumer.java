@@ -20,8 +20,7 @@ package org.wso2.siddhi.extension.input.transport.kafka;
 
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.subscription.InputCallback;
 
 
@@ -30,7 +29,7 @@ public class KafkaConsumer implements Runnable {
     private KafkaStream stream;
     private String evento;
     private InputCallback inputCallback;
-    private Log log = LogFactory.getLog(KafkaConsumer.class);
+    private static final Logger log = Logger.getLogger(KafkaConsumer.class);
 
     public KafkaConsumer(KafkaStream inStream, InputCallback inputCallback) {
         stream = inStream;

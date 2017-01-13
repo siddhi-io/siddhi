@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,10 +16,9 @@
  * under the License.
  */
 
-package org.wso2.siddhi.core.subscription;
+package org.wso2.siddhi.extension.input.mapper.wso2event;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
@@ -29,46 +28,37 @@ import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
+import org.wso2.siddhi.core.subscription.InputMapper;
+import org.wso2.siddhi.core.subscription.InputTransport;
 import org.wso2.siddhi.core.util.AttributeConverter;
+import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.io.map.AttributeMapping;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.StringReader;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+// TODO: 1/9/17  
 /**
- * This mapper converts XML string input to {@link ComplexEventChunk}. This extension accepts optional mapping to
- * select specific attributes from the stream.
+ * This mapper converts hashmap input to {@link ComplexEventChunk}.
  */
-public class XmlInputMapper implements InputMapper {
+public class WSO2EventInputMapper implements InputMapper {
 
     /**
      * Logger to log the events.
      */
-    private static final Logger log = Logger.getLogger(XmlInputMapper.class);
-
-    /**
-     * Xpath prefix
-     */
-    private static final String DEFAULT_XPATH_PREFIX = "//h:";
-
-    /**
-     * Output StreamDefinition of the input mapper.
-     */
-    private StreamDefinition outputStreamDefinition;
+    private static final Logger log = Logger.getLogger(WSO2EventInputMapper.class);
 
     /**
      * OutputCallback to which the converted event must be sent.
      */
     private OutputCallback outputCallback;
+
+    /**
+     * Output StreamDefinition of the input mapper.
+     */
+    private StreamDefinition outputStreamDefinition;
 
     /**
      * StreamEventPool used to borrow a new event.
@@ -99,11 +89,11 @@ public class XmlInputMapper implements InputMapper {
      * @param options                additional mapping options
      * @param attributeMappingList   list of attributes mapping
      */
-    @Override // TODO: 1/6/17 static -test
+    @Override
     public void init(StreamDefinition outputStreamDefinition, OutputCallback outputCallback, MetaStreamEvent metaStreamEvent, Map<String, String> options, List<AttributeMapping> attributeMappingList) {
         this.outputStreamDefinition = outputStreamDefinition;
         this.outputCallback = outputCallback;
-        this.outputStreamDefinition = metaStreamEvent.getOutputStreamDefinition(); // TODO: 1/5/17 why assigned twice?
+        this.outputStreamDefinition = metaStreamEvent.getOutputStreamDefinition();
         this.streamEventConverter = new ZeroStreamEventConverter();
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 5);
         this.streamAttributes = this.outputStreamDefinition.getAttributeList();
@@ -137,50 +127,30 @@ public class XmlInputMapper implements InputMapper {
         } else {
             // Use the attribute names of the output stream in order
             for (int i = 0; i < attributesSize; i++) {
-                this.mappingPositions[i] = new MappingPositionData(i, DEFAULT_XPATH_PREFIX + this
+                this.mappingPositions[i] = new MappingPositionData(i, this
                         .outputStreamDefinition.getAttributeList().get(i).getName());
             }
         }
     }
 
     /**
-     * Receive XML string from {@link InputTransport}, convert to {@link ComplexEventChunk} and send to the
-     * {@link OutputCallback}.
+     * Receive {@link Event} or Object[] from {@link InputTransport}, convert to {@link ComplexEventChunk} and send
+     * to the {@link OutputCallback}.
      *
-     * @param eventObject the XML string
+     * @param eventObject the hashmap
      */
     @Override
     public void onEvent(Object eventObject) {
-        synchronized (this) {
-            StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-            try {
-                streamEventConverter.convertEvent(convertToEvent(eventObject), borrowedEvent);
-            } catch (ParserConfigurationException e) {
-                e.printStackTrace();
-            } catch (IOException e) { // TODO: 1/5/17 catch exceptions
-                e.printStackTrace();
-            } catch (SAXException e) {
-                e.printStackTrace();
-            }
-            outputCallback.send(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, true));
-        }
+        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+        streamEventConverter.convertEvent(convertToEvent(eventObject), borrowedEvent);
+        outputCallback.send(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, true));
     }
 
-    /**
-     * Convert the given JSON string to {@link Event}
-     *
-     * @param eventObject JSON string
-     * @return the constructed Event object
-     */
-    private Event convertToEvent(Object eventObject) throws ParserConfigurationException, IOException, SAXException {
-
-        // Validate the event
+    private Event convertToEvent(Object eventObject) {
         if (eventObject == null) {
-            throw new ExecutionPlanRuntimeException("Null object received from the InputTransport to XmlInputMapper");
-        }
-
-        if (!(eventObject instanceof String)) {
-            throw new ExecutionPlanRuntimeException("Invalid XML object received. Expected String, but found " +
+            throw new ExecutionPlanRuntimeException("Null object received from the InputTransport to MapInputMapper");
+        } else if (!(eventObject instanceof HashMap)) {
+            throw new ExecutionPlanRuntimeException("Invalid Map object received. Expected HashMap, but found " +
                     eventObject.getClass()
                             .getCanonicalName());
         }
@@ -188,16 +158,10 @@ public class XmlInputMapper implements InputMapper {
         Event event = new Event(this.outputStreamDefinition.getAttributeList().size());
         Object[] data = event.getData();
 
-        // Parse the XML string and build the data
         for (MappingPositionData mappingPositionData : this.mappingPositions) {
             int position = mappingPositionData.getPosition();
-            Attribute attribute = streamAttributes.get(position);
-            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            InputSource inputSource = new InputSource();
-            inputSource.setCharacterStream(new StringReader(eventObject.toString()));
-            Document parsedXml = documentBuilder.parse(inputSource);
-            data[position] = AttributeConverter.getPropertyValue(parsedXml.getElementsByTagName(mappingPositionData.getMapping()),
-                    attribute.getType());
+            data[position] = AttributeConverter.getPropertyValue(((HashMap) eventObject).get(mappingPositionData.getMapping()),
+                    streamAttributes.get(position).getType());
         }
 
         return event;
@@ -213,7 +177,7 @@ public class XmlInputMapper implements InputMapper {
         private int position;
 
         /**
-         * The XML mapping as defined by the user.
+         * The hashmap mapping as defined by the user.
          */
         private String mapping;
 

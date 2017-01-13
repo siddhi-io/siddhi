@@ -127,7 +127,7 @@ public class KafkaOutputTransport extends OutputTransport {
     public void publish(Object event, Map<String, String> dynamicOptions) throws ConnectionUnavailableException {
         //By default auto.create.topics.enable is true, then no need to create topic explicitly
         String topic = dynamicOptions.get(ADAPTOR_PUBLISH_TOPIC);
-        topic = "test22";
+        topic = "page_visits";
         try {
             threadPoolExecutor.submit(new KafkaSender(topic, event));
         } catch (RejectedExecutionException e) {

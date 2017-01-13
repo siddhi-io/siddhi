@@ -18,26 +18,13 @@
 
 package org.wso2.siddhi.extension.input.transport.kafka;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import kafka.consumer.ConsumerConfig;
-import kafka.consumer.ConsumerIterator;
-import kafka.consumer.KafkaStream;
-import kafka.javaapi.consumer.ConsumerConnector;
-import kafka.producer.ProducerConfig;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.exception.OutputTransportException;
-import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
-import org.wso2.siddhi.core.publisher.OutputTransport;
 import org.wso2.siddhi.core.subscription.InputCallback;
 import org.wso2.siddhi.core.subscription.InputTransport;
-import org.wso2.siddhi.query.api.execution.io.Transport;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.*;
@@ -55,16 +42,11 @@ public class KafkaInputTransport extends InputTransport {
     public final static String ADAPTER_NAME = "adapter.name";
     public static final String EVENTS_DUPLICATED_IN_CLUSTER_NAME = "events.duplicated.in.cluster";
     public static final boolean EVENTS_DUPLICATED_IN_CLUSTER = false;
-    public final static String ADAPTOR_TYPE_KAFKA = "kafka";
     public final static String ADAPTOR_SUSCRIBER_TOPIC = "topic";
     public final static String ADAPTOR_SUSCRIBER_GROUP_ID = "group.id";
-    public final static String ADAPTOR_SUSCRIBER_GROUP_ID_hint = "group.id.hint";
     public final static String ADAPTOR_SUSCRIBER_ZOOKEEPER_CONNECT = "zookeeper.connect";
-    public final static String ADAPTOR_SUSCRIBER_ZOOKEEPER_CONNECT_HINT = "zookeeper.id.hint";
     public final static String ADAPTOR_SUSCRIBER_THREADS = "threads";
-    public final static String ADAPTOR_SUSCRIBER_THREADS_HINT = "threads.hint";
     public final static String ADAPTOR_OPTIONAL_CONFIGURATION_PROPERTIES = "optional.configuration";
-    public final static String ADAPTOR_OPTIONAL_CONFIGURATION_PROPERTIES_HINT = "optional.configuration.hint";
     public static final int AXIS_TIME_INTERVAL_IN_MILLISECONDS = 10000;
 
     private static final Logger log = Logger.getLogger(KafkaInputTransport.class);
