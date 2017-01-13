@@ -25,7 +25,7 @@ import org.wso2.siddhi.core.exception.OutputTransportException;
 import org.wso2.siddhi.core.exception.TestConnectionNotSupportedException;
 import org.wso2.siddhi.core.publisher.MessageType;
 import org.wso2.siddhi.core.publisher.OutputTransport;
-import org.wso2.siddhi.core.util.InMemoryBroker;
+import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 
 import java.util.ArrayList;
