@@ -269,6 +269,16 @@
                 <artifactId>json-path</artifactId>
                 <version>${jsonpath.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.axis2.transport</groupId>
+                <artifactId>axis2-transport-mail</artifactId>
+                <version>${axis2.transport.mail}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -456,6 +466,8 @@
         <jsonassert.version>1.3.0</jsonassert.version>
         <jsonpath.version>0.9.1</jsonpath.version>
         <kafka.version>0.8.1</kafka.version>
+        <axis2.transport.mail>1.1.1-wso2v2</axis2.transport.mail>
+        <httpclient.version>4.3.1.wso2v2</httpclient.version>
     </properties>
 
     <scm>
