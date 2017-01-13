@@ -38,7 +38,7 @@ public class MapInputMapperTestCase {
 
     @Test
     public void subscriptionTest12() throws InterruptedException {
-        log.info("Subscription Test 12: Test an in memory transport with hashmap");
+        log.info("Subscription Test 12: Test an in memory transport with default hashmap mapping");
 
         Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory"));
         subscription.map(Mapping.format("map"));
@@ -49,6 +49,70 @@ public class MapInputMapperTestCase {
                 .attribute("symbol", Attribute.Type.STRING)
                 .attribute("price", Attribute.Type.FLOAT)
                 .attribute("volume", Attribute.Type.INT));
+        executionPlan.addSubscription(subscription);
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("inputtransport:inMemory", InMemoryInputTransport.class);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("FooStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+            }
+        });
+
+        executionPlanRuntime.start();
+
+        Thread.sleep(5000);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void subscriptionTest13() throws InterruptedException {
+        log.info("Subscription Test 13: Test an in memory transport with custom positional hashmap mapping");
+
+        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory"));
+        subscription.map(Mapping.format("map").map("symbol").map("price").map("volume"));
+        subscription.insertInto("FooStream");
+
+        ExecutionPlan executionPlan = ExecutionPlan.executionPlan();
+        executionPlan.defineStream(StreamDefinition.id("FooStream")
+                .attribute("output_symbol", Attribute.Type.STRING)
+                .attribute("price", Attribute.Type.FLOAT)
+                .attribute("volume", Attribute.Type.INT));
+        executionPlan.addSubscription(subscription);
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("inputtransport:inMemory", InMemoryInputTransport.class);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("FooStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+            }
+        });
+
+        executionPlanRuntime.start();
+
+        Thread.sleep(5000);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void subscriptionTest14() throws InterruptedException {
+        log.info("Subscription Test 14:  Test an in memory transport with custom named hashmap mapping");
+
+        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory"));
+        subscription.map(Mapping.format("map").map("output_symbol","symbol").map("output_price","price").map("output_volume","volume"));
+        subscription.insertInto("FooStream");
+
+        ExecutionPlan executionPlan = ExecutionPlan.executionPlan();
+        executionPlan.defineStream(StreamDefinition.id("FooStream")
+                .attribute("output_volume", Attribute.Type.INT)
+                .attribute("output_symbol", Attribute.Type.STRING)
+                .attribute("output_price", Attribute.Type.FLOAT));
         executionPlan.addSubscription(subscription);
 
         SiddhiManager siddhiManager = new SiddhiManager();
