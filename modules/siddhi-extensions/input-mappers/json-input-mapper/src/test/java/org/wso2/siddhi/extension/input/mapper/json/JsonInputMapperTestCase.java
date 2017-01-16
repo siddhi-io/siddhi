@@ -34,6 +34,7 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.execution.Subscription;
 import org.wso2.siddhi.query.api.execution.io.Transport;
 import org.wso2.siddhi.query.api.execution.io.map.Mapping;
+import org.wso2.siddhi.query.compiler.SiddhiCompiler;
 
 public class JsonInputMapperTestCase {
     static final Logger log = Logger.getLogger(JsonInputMapperTestCase.class);
@@ -46,9 +47,10 @@ public class JsonInputMapperTestCase {
     public void subscriptionTest1() throws InterruptedException {
         log.info("Subscription Test 1: Test an in memory transport with default json mapping");
 
-        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory").option("topic","stock"));
-        subscription.map(Mapping.format("json"));
-        subscription.insertInto("FooStream");
+        Subscription subscription = SiddhiCompiler.parseSubscription(
+                "subscribe inMemory options (topic 'stock') " +
+                        "map json " +
+                        "insert into FooStream;");
 
         ExecutionPlan executionPlan = ExecutionPlan.executionPlan();
         executionPlan.defineStream(StreamDefinition.id("FooStream")
@@ -79,10 +81,11 @@ public class JsonInputMapperTestCase {
         log.info("Subscription Test 2: Test an in memory transport with named and positional json mapping - expect " +
                 "exception");
 
-        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory").option("topic","stock"));
-        // First two parameters are based on position and the last one is named paramater
-        subscription.map(Mapping.format("json").map("$.country").map("$.price").map("$.volume", "volume"));
-        subscription.insertInto("FooStream");
+        Subscription subscription = SiddhiCompiler.parseSubscription(
+                "subscribe inMemory options (topic 'stock') " +
+                        "map json '$.country', '$.price', '$.volume' as 'volume' " +
+                        "insert into FooStream;");
+        // First two parameters are based on position and the last one is named parameter
 
         ExecutionPlan executionPlan = ExecutionPlan.executionPlan();
         executionPlan.defineStream(StreamDefinition.id("FooStream")
@@ -110,9 +113,10 @@ public class JsonInputMapperTestCase {
     public void subscriptionTest3() throws InterruptedException {
         log.info("Subscription Test 3: Test an in memory transport with custom positional json mapping");
 
-        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory").option("topic","stock"));
-        subscription.map(Mapping.format("json").map("$.symbol").map("$.price").map("$.volume"));
-        subscription.insertInto("FooStream");
+        Subscription subscription = SiddhiCompiler.parseSubscription(
+                "subscribe inMemory options(topic 'stock') " +
+                        "map json '$.symbol', '$.price', '$.volume' " +
+                        "insert into FooStream;");
 
         ExecutionPlan executionPlan = ExecutionPlan.executionPlan();
         executionPlan.defineStream(StreamDefinition.id("FooStream")
@@ -146,10 +150,10 @@ public class JsonInputMapperTestCase {
     public void subscriptionTest4() throws InterruptedException {
         log.info("Subscription Test 4: Test an in memory transport with custom named json mapping");
 
-        Subscription subscription = Subscription.Subscribe(Transport.transport("inMemory").option("topic","stock"));
-        subscription.map(Mapping.format("json").map("volume", "$.volume").map("symbol", "$.symbol").map("price", "$" +
-                ".price"));
-        subscription.insertInto("FooStream");
+        Subscription subscription = SiddhiCompiler.parseSubscription(
+                "subscribe inMemory options(topic 'stock') " +
+                        "map json '$.volume' as 'volume', '$.symbol' as 'symbol', '$.price' as 'price' " +
+                        "insert into FooStream;");
 
         ExecutionPlan executionPlan = ExecutionPlan.executionPlan();
         executionPlan.defineStream(StreamDefinition.id("FooStream")
