@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.core.util;
+package org.wso2.siddhi.core.util.transport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +28,10 @@ public class InMemoryBroker {
 
     public static void subscribe(Subscriber subscriber) {
         broker.register(subscriber);
+    }
+
+    public static void unsubscribe(Subscriber subscriber) {
+        broker.unregister(subscriber);
     }
 
     public static void publish(String topic, Object message) {
