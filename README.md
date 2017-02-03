@@ -5,11 +5,10 @@ Siddhi Complex Event Processing Engine
 
 |  Branch | Build Status |
 | :------------ |:-------------
-| master      | [![Build Status](https://wso2.org/jenkins/job/siddhi/badge/icon)](https://wso2.org/jenkins/job/siddhi) |
-| master-java8 | [![Build Status](https://wso2.org/jenkins/job/siddhi/badge/icon)]    (https://wso2.org/jenkins/job/siddhi__java8 )|
+| master | [![Build Status](https://wso2.org/jenkins/job/siddhi__java8/badge/icon)](https://wso2.org/jenkins/job/siddhi__java8 )|
 
 ---
-
+##### New version of Siddhi v4.0.0 is built in Java 8.
 ##### Latest Released Version v3.0.5.
 For all releases see https://github.com/wso2/siddhi/releases
 
@@ -18,10 +17,10 @@ Siddhi CEP is a lightweight, easy-to-use Open Source Complex Event Processing En
 This project was initiated as a research project at University of Moratuwa, Sri Lanka, and now being improved by WSO2 Inc.
 
 ####Documentation 
-https://docs.wso2.com/display/CEP400/SiddhiQL+Guide+3.0
+https://docs.wso2.com/display/CEP420/SiddhiQL+Guide+3.1
 
-####Try it with [WSO2 Complex Event Processor 4.0] (http://wso2.com/products/complex-event-processor/)
-https://docs.wso2.com/display/CEP400/Siddhi+Try+It+Tool
+####Try it with [WSO2 Complex Event Processor 4.2] (http://wso2.com/products/complex-event-processor/)
+https://docs.wso2.com/display/CEP420/Siddhi+Try+It+Tool
 
 
 Features Supported
@@ -86,7 +85,7 @@ System Requirements
 * Post your questions on http://stackoverflow.com/ tagging ["siddhi"] (http://stackoverflow.com/search?q=siddhi)
 
 ## How to Contribute
-* Please report issues at [CEP JIRA] (https://wso2.org/jira/browse/CEP)
+* Please report issues at [Siddhi JIRA] (https://wso2.org/jira/browse/SIDDHI)
 * Send your bug fixes pull requests to [master branch] (https://github.com/wso2/carbon-event-processing/tree/master) 
 
 ## Contact us 
