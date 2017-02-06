@@ -45,6 +45,14 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <!--carbon analytics common dependency-->
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.log4j.wso2</groupId>
                 <artifactId>log4j</artifactId>
@@ -453,6 +461,7 @@
 
     <properties>
         <siddhi.version>3.1.2</siddhi.version>
+        <carbon.analytics.common.version>5.1.12</carbon.analytics.common.version>
         <junit.version>4.10</junit.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
         <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
