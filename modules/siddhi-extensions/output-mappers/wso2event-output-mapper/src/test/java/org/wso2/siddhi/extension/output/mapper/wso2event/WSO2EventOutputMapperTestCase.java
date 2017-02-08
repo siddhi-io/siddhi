@@ -15,12 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.output.mapper.map;
+package org.wso2.siddhi.extension.output.mapper.wso2event;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
@@ -37,10 +38,12 @@ import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Variable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MapOutputMapperTestCase {
-    static final Logger log = Logger.getLogger(MapOutputMapperTestCase.class);
+public class WSO2EventOutputMapperTestCase {
+    static final Logger log = Logger.getLogger(WSO2EventOutputMapperTestCase.class);
     private AtomicInteger wso2Count = new AtomicInteger(0);
     private AtomicInteger ibmCount = new AtomicInteger(0);
 
@@ -53,15 +56,17 @@ public class MapOutputMapperTestCase {
     //    from FooStream
     //    select symbol,price,volume
     //    publish inMemory options ("topic", "{{symbol}}")
-    //    map map
+    //    map wso2event
     @Test
     public void testMapOutputMapperWithQueryAPI() throws InterruptedException {
-        log.info("Test default map mapping with Siddhi Query API");
+        log.info("Test default wso2 mapping with Siddhi Query API");
+        List<Object> onMessageList = new ArrayList<Object>();
 
         InMemoryBroker.Subscriber subscriberWSO2 = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object msg) {
                 wso2Count.incrementAndGet();
+                onMessageList.add(msg);
             }
 
             @Override
@@ -74,6 +79,7 @@ public class MapOutputMapperTestCase {
             @Override
             public void onMessage(Object msg) {
                 ibmCount.incrementAndGet();
+                onMessageList.add(msg);
             }
 
             @Override
@@ -87,8 +93,8 @@ public class MapOutputMapperTestCase {
         InMemoryBroker.subscribe(subscriberIBM);
 
         StreamDefinition streamDefinition = StreamDefinition.id("FooStream")
-                .attribute("symbol", Attribute.Type.STRING)
-                .attribute("price", Attribute.Type.FLOAT)
+                .attribute("meta_symbol", Attribute.Type.STRING)
+                .attribute("correlation_price", Attribute.Type.FLOAT)
                 .attribute("volume", Attribute.Type.INT);
 
         Query query = Query.query();
@@ -96,11 +102,11 @@ public class MapOutputMapperTestCase {
                 InputStream.stream("FooStream")
         );
         query.select(
-                Selector.selector().select(new Variable("symbol")).select(new Variable("price")).select(new Variable("volume"))
+                Selector.selector().select(new Variable("meta_symbol")).select(new Variable("correlation_price")).select(new Variable("volume"))
         );
         query.publish(
-                Transport.transport("inMemory").option("topic", "{{symbol}}"), OutputStream.OutputEventType.CURRENT_EVENTS,
-                Mapping.format("map")
+                Transport.transport("inMemory").option("topic", "{{meta_symbol}}"), OutputStream.OutputEventType.CURRENT_EVENTS,
+                Mapping.format("wso2event").option("streamID", "mappedStream:1.0.0")
         );
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -130,15 +136,17 @@ public class MapOutputMapperTestCase {
     //    from FooStream
     //    select symbol,price,volume
     //    publish inMemory options ("topic", "{{symbol}}")
-    //    map map
+    //    map wso2event with options
     @Test
     public void testMapOutputMapperWithSiddhiQL() throws InterruptedException {
-        log.info("Test default map mapping with SiddhiQL");
+        List<Event> onMessageList = new ArrayList<Event>();
+        log.info("Test default wso2 mapping with SiddhiQL using options");
 
         InMemoryBroker.Subscriber subscriberWSO2 = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object msg) {
                 wso2Count.incrementAndGet();
+                onMessageList.add((Event) msg);
             }
 
             @Override
@@ -151,6 +159,7 @@ public class MapOutputMapperTestCase {
             @Override
             public void onMessage(Object msg) {
                 ibmCount.incrementAndGet();
+                onMessageList.add((Event) msg);
             }
 
             @Override
@@ -165,13 +174,13 @@ public class MapOutputMapperTestCase {
 
         String streams = "" +
                 "@Plan:name('TestExecutionPlan')" +
-                "define stream FooStream (symbol string, price float, volume long); ";
+                "define stream FooStream (meta_symbol string, correlation_price float, volume long); ";
 
         String query = "" +
                 "from FooStream " +
-                "select symbol " +
-                "publish inMemory options (topic '{{symbol}}') " +
-                "map map ; ";
+                "select meta_symbol,correlation_price,volume " +
+                "publish inMemory options (topic '{{meta_symbol}}') " +
+                "map wso2event options (streamID 'mappedStream:1.0.0'); ";
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("outputtransport:inMemory", InMemoryOutputTransport.class);
@@ -184,9 +193,34 @@ public class MapOutputMapperTestCase {
         stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
         Thread.sleep(100);
 
+        List<Event> eventList = new ArrayList<>();
+        Event event = new Event();
+        event.setStreamId("mappedStream:1.0.0");
+        event.setMetaData(new Object[]{"WSO2"});
+        event.setCorrelationData(new Object[]{55.6f});
+        event.setPayloadData(new Object[]{100L});
+        eventList.add(event);
+        Event event2 = new Event();
+        event2.setStreamId("mappedStream:1.0.0");
+        event2.setMetaData(new Object[]{"IBM"});
+        event2.setCorrelationData(new Object[]{75.6f});
+        event2.setPayloadData(new Object[]{100L});
+        eventList.add(event2);
+        Event event3 = new Event();
+        event3.setStreamId("mappedStream:1.0.0");
+        event3.setMetaData(new Object[]{"WSO2"});
+        event3.setCorrelationData(new Object[]{57.6f});
+        event3.setPayloadData(new Object[]{100L});
+        eventList.add(event3);
+
         //assert event count
         Assert.assertEquals("Incorrect number of events consumed!", 2, wso2Count.get());
         Assert.assertEquals("Incorrect number of events consumed!", 1, ibmCount.get());
+        //assert event mapping
+        for (Event aEvent : onMessageList) {
+            aEvent.setTimeStamp(0);
+        }
+        Assert.assertEquals("Mapping is incorrect!", onMessageList, eventList);
         executionPlanRuntime.shutdown();
 
         //unsubscribe from "inMemory" broker per topic
@@ -194,4 +228,98 @@ public class MapOutputMapperTestCase {
         InMemoryBroker.unsubscribe(subscriberIBM);
     }
 
+    //    from FooStream
+    //    select symbol,price,volume
+    //    publish inMemory options ("topic", "{{symbol}}")
+    //    map wso2event with dynamic options
+    @Test
+    public void testMapOutputMapperWithSiddhiQLWithDynamicOptions() throws InterruptedException {
+        List<Event> onMessageList = new ArrayList<Event>();
+        log.info("Test default wso2 mapping with SiddhiQL using dynamic options");
+
+        InMemoryBroker.Subscriber subscriberWSO2 = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                wso2Count.incrementAndGet();
+                onMessageList.add((Event) msg);
+            }
+
+            @Override
+            public String getTopic() {
+                return "WSO2";
+            }
+        };
+
+        InMemoryBroker.Subscriber subscriberIBM = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                ibmCount.incrementAndGet();
+                onMessageList.add((Event) msg);
+            }
+
+            @Override
+            public String getTopic() {
+                return "IBM";
+            }
+        };
+
+        //subscribe to "inMemory" broker per topic
+        InMemoryBroker.subscribe(subscriberWSO2);
+        InMemoryBroker.subscribe(subscriberIBM);
+
+        String streams = "" +
+                "@Plan:name('TestExecutionPlan')" +
+                "define stream FooStream (meta_symbol string, correlation_price float, volume long); ";
+
+        String query = "" +
+                "from FooStream " +
+                "select meta_symbol,correlation_price,volume " +
+                "publish inMemory options (topic '{{meta_symbol}}') " +
+                "map wso2event options (streamID '{{meta_symbol}}Stream:1.0.0'); ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("outputtransport:inMemory", InMemoryOutputTransport.class);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+        InputHandler stockStream = executionPlanRuntime.getInputHandler("FooStream");
+
+        executionPlanRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        Thread.sleep(100);
+
+        List<Event> eventList = new ArrayList<>();
+        Event event = new Event();
+        event.setStreamId("WSO2Stream:1.0.0");
+        event.setMetaData(new Object[]{"WSO2"});
+        event.setCorrelationData(new Object[]{55.6f});
+        event.setPayloadData(new Object[]{100L});
+        eventList.add(event);
+        Event event2 = new Event();
+        event2.setStreamId("IBMStream:1.0.0");
+        event2.setMetaData(new Object[]{"IBM"});
+        event2.setCorrelationData(new Object[]{75.6f});
+        event2.setPayloadData(new Object[]{100L});
+        eventList.add(event2);
+        Event event3 = new Event();
+        event3.setStreamId("WSO2Stream:1.0.0");
+        event3.setMetaData(new Object[]{"WSO2"});
+        event3.setCorrelationData(new Object[]{57.6f});
+        event3.setPayloadData(new Object[]{100L});
+        eventList.add(event3);
+
+        //assert event count
+        Assert.assertEquals("Incorrect number of events consumed!", 2, wso2Count.get());
+        Assert.assertEquals("Incorrect number of events consumed!", 1, ibmCount.get());
+        //assert event mapping
+        for (Event aEvent : onMessageList) {
+            aEvent.setTimeStamp(0);
+        }
+        Assert.assertEquals("Mapping is incorrect!", onMessageList, eventList);
+        executionPlanRuntime.shutdown();
+
+        //unsubscribe from "inMemory" broker per topic
+        InMemoryBroker.unsubscribe(subscriberWSO2);
+        InMemoryBroker.unsubscribe(subscriberIBM);
+    }
 }
