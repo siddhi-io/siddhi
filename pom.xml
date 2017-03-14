@@ -36,6 +36,7 @@
 
     <modules>
         <module>modules/siddhi-query-api</module>
+        <module>modules/siddhi-service</module>
         <module>modules/siddhi-query-compiler</module>
         <module>modules/siddhi-core</module>
         <module>modules/siddhi-extensions</module>
@@ -226,6 +227,36 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-http-output-transport</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-test-output-transport</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-kafka-output-transport</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-kafka-input-transport</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-text-output-mapper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-text-input-mapper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-api</artifactId>
                 <version>${axiom-api.version}</version>
@@ -297,6 +328,12 @@
                 <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient.version}</version>
+            </dependency>
+            <!-- Siddhi Service Dependency-->
+            <dependency>
+                <groupId>org.wso2.msf4j</groupId>
+                <artifactId>msf4j-all</artifactId>
+                <version>${msf4j.version}</version>
             </dependency>
 
         </dependencies>
@@ -448,6 +485,12 @@
                 <!--<groupId>org.apache.maven.plugins</groupId>-->
                 <!--<artifactId>maven-javadoc-plugin</artifactId>-->
             <!--</plugin>-->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shadeplugin.version}</version>
+            </plugin>
         </plugins>
     </build>
 
@@ -494,6 +537,8 @@
         <kafka.version>0.9.0.0</kafka.version>
         <axis2.transport.mail>1.1.1-wso2v2</axis2.transport.mail>
         <httpclient.version>4.3.1.wso2v2</httpclient.version>
+        <msf4j.version>2.1.1</msf4j.version>
+        <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
     </properties>
 
     <scm>
