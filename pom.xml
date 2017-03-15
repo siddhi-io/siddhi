@@ -227,36 +227,6 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-http-output-transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-test-output-transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-kafka-output-transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-kafka-input-transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-text-output-mapper</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-text-input-mapper</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-api</artifactId>
                 <version>${axiom-api.version}</version>
@@ -334,6 +304,16 @@
                 <groupId>org.wso2.msf4j</groupId>
                 <artifactId>msf4j-all</artifactId>
                 <version>${msf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>${servlet-api-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-joda</artifactId>
+                <version>${jackson-datatype-joda-version}</version>
             </dependency>
 
         </dependencies>
@@ -539,6 +519,8 @@
         <httpclient.version>4.3.1.wso2v2</httpclient.version>
         <msf4j.version>2.1.1</msf4j.version>
         <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
+        <servlet-api-version>2.5</servlet-api-version>
+        <jackson-datatype-joda-version>2.4.1</jackson-datatype-joda-version>
     </properties>
 
     <scm>
