@@ -18,6 +18,7 @@
 package org.wso2.siddhi.query.compiler.internal;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.api.annotation.Annotation;
@@ -113,6 +114,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         for (SiddhiQLParser.Definition_triggerContext triggerContext : ctx.definition_trigger()) {
             executionPlan.defineTrigger((TriggerDefinition) visit(triggerContext));
         }
+
         return executionPlan;
     }
 
@@ -138,6 +140,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     @Override
     public StreamDefinition visitDefinition_stream(@NotNull SiddhiQLParser.Definition_streamContext ctx) {
         Source source = (Source) visit(ctx.source());
+
         if (source.isInnerStream) {
             throw newSiddhiParserException(ctx, " InnerStreams cannot be defined!");
         }
@@ -148,7 +151,6 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             SiddhiQLParser.Attribute_nameContext attributeNameContext = attribute_names.get(i);
             SiddhiQLParser.Attribute_typeContext attributeTypeContext = attribute_types.get(i);
             streamDefinition.attribute((String) visit(attributeNameContext), (Attribute.Type) visit(attributeTypeContext));
-
         }
         for (SiddhiQLParser.AnnotationContext annotationContext : ctx.annotation()) {
             streamDefinition.annotation((Annotation) visit(annotationContext));
@@ -290,7 +292,6 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             SiddhiQLParser.Attribute_nameContext attributeNameContext = attribute_names.get(i);
             SiddhiQLParser.Attribute_typeContext attributeTypeContext = attribute_types.get(i);
             tableDefinition.attribute((String) visit(attributeNameContext), (Attribute.Type) visit(attributeTypeContext));
-
         }
         for (SiddhiQLParser.AnnotationContext annotationContext : ctx.annotation()) {
             tableDefinition.annotation((Annotation) visit(annotationContext));
@@ -365,6 +366,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         for (SiddhiQLParser.QueryContext queryContext : ctx.query()) {
             partition.addQuery((Query) visit(queryContext));
         }
+
         return partition;
     }
 
@@ -389,6 +391,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             } else {
                 throw newSiddhiParserException(ctx);
             }
+
         } finally {
             activeStreams.clear();
         }
