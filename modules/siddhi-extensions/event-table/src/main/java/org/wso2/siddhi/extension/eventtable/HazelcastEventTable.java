@@ -171,7 +171,8 @@ public class HazelcastEventTable implements EventTable {
                 if (groupPassword != null && !groupPassword.isEmpty()) {
                     clientConfig.getGroupConfig().setPassword(groupPassword);
                 }
-                clientConfig.setNetworkConfig(clientConfig.getNetworkConfig().addAddress(addresses.split(",")));
+                clientConfig.setNetworkConfig(clientConfig.getNetworkConfig().addAddress(addresses.split(","))
+                    .setConnectionAttemptLimit(Integer.MAX_VALUE).setConnectionAttemptPeriod(10000));
                 return HazelcastClient.newHazelcastClient(clientConfig);
             }
         }
