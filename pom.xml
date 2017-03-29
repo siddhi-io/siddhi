@@ -315,7 +315,16 @@
                 <artifactId>jackson-datatype-joda</artifactId>
                 <version>${jackson-datatype-joda-version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${commons-collection-version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -521,6 +530,8 @@
         <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
         <servlet-api-version>2.5</servlet-api-version>
         <jackson-datatype-joda-version>2.4.1</jackson-datatype-joda-version>
+        <netty-version>4.1.0.Final</netty-version>
+        <commons-collection-version>4.0</commons-collection-version>
     </properties>
 
     <scm>
