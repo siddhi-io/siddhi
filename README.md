@@ -5,7 +5,7 @@ Siddhi Complex Event Processing Engine
 
 |  Branch | Build Status |
 | :------------ |:-------------
-| master | [![Build Status](https://wso2.org/jenkins/job/siddhi/badge/icon)](https://wso2.org/jenkins/job/siddhi )|
+| master | [![Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi )|
 
 ---
 ##### New version of Siddhi v4.0.0 is built in Java 8.
