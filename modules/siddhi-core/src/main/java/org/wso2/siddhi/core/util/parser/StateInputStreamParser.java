@@ -116,7 +116,11 @@ public class StateInputStreamParser {
                     withinStates.add(0, new AbstractMap.SimpleEntry<Long, Set<Integer>>(stateElement.getWithin().getValue(), withinStateset));
                 }
 
-                streamPreStateProcessor = new StreamPreStateProcessor(stateType, clonewithinStates(withinStates));
+                if(stateElement instanceof AbsentStreamStateElement) {
+                    streamPreStateProcessor = new AbsentStreamPreStateProcessor(stateType, clonewithinStates(withinStates));
+                } else {
+                    streamPreStateProcessor = new StreamPreStateProcessor(stateType, clonewithinStates(withinStates));
+                }
                 streamPreStateProcessor.init(executionPlanContext, queryName);
 
                 if (stateElement.getWithin() != null) {
@@ -127,7 +131,11 @@ public class StateInputStreamParser {
             streamPreStateProcessor.setNextProcessor(singleStreamRuntime.getProcessorChain());
             singleStreamRuntime.setProcessorChain(streamPreStateProcessor);
             if (streamPostStateProcessor == null) {
-                streamPostStateProcessor = new StreamPostStateProcessor();
+                if(stateElement instanceof AbsentStreamStateElement) {
+                    streamPostStateProcessor = new AbsentStreamPostStateProcessor();
+                } else {
+                    streamPostStateProcessor = new StreamPostStateProcessor();
+                }
             }
             streamPostStateProcessor.setStateId(stateIndex);
             singleStreamRuntime.getProcessorChain().setToLast(streamPostStateProcessor);
@@ -295,7 +303,6 @@ public class StateInputStreamParser {
 
         } else {
             throw new OperationNotSupportedException();
-            //todo support not
         }
 
     }

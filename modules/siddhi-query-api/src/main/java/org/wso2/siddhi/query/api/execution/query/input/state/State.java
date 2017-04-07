@@ -51,6 +51,12 @@ public class State {
         return new LogicalStateElement(streamStateElement1, LogicalStateElement.Type.OR, streamStateElement2, time);
     }
 
+    public static StateElement not(BasicSingleInputStream basicSingleInputStream,
+                                          TimeConstant time) {
+        return new AbsentStreamStateElement(basicSingleInputStream, time);
+    }
+
+    // TODO: 4/6/17 Remove the logicalNot methods if not necessary
     public static StateElement logicalNot(StreamStateElement notStreamStateElement,
                                           TimeConstant time) {
         return new LogicalStateElement(null, LogicalStateElement.Type.NOT, notStreamStateElement, time);

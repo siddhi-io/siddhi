@@ -166,7 +166,8 @@ every_pattern_source_chain
     | EVERY '('pattern_source_chain ')' within_time?   
     | every_pattern_source_chain  '->' every_pattern_source_chain
     | pattern_source_chain
-    | EVERY pattern_source within_time? 
+    | EVERY pattern_source within_time?
+    | EVERY? absent_pattern_source_chain
     ;
 
 pattern_source_chain
@@ -175,14 +176,32 @@ pattern_source_chain
     | pattern_source within_time? 
     ;
 
+absent_pattern_source_chain
+    : absent_pattern_source
+    | logical_absent_stateful_source
+    | absent_pattern_source_chain  '->' absent_pattern_source_chain
+    | absent_pattern_source_chain  '->' pattern_source_chain
+    | pattern_source_chain  '->' absent_pattern_source_chain
+    ;
+
 pattern_source
     :logical_stateful_source|pattern_collection_stateful_source|standard_stateful_source
     ;
 
 logical_stateful_source
-    :NOT standard_stateful_source (AND standard_stateful_source) ?
-    |standard_stateful_source AND standard_stateful_source
+    :standard_stateful_source AND standard_stateful_source
     |standard_stateful_source OR standard_stateful_source
+    ;
+
+logical_absent_stateful_source
+    :standard_stateful_source AND absent_pattern_source
+    |absent_pattern_source AND standard_stateful_source
+    |standard_stateful_source OR absent_pattern_source
+    |absent_pattern_source OR standard_stateful_source
+    ;
+
+absent_pattern_source
+    :NOT basic_source within_time
     ;
 
 pattern_collection_stateful_source
