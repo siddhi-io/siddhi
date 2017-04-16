@@ -22,6 +22,7 @@ import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
+import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.state.*;
 import org.wso2.siddhi.core.query.input.stream.state.receiver.PatternMultiProcessStreamReceiver;
@@ -29,7 +30,9 @@ import org.wso2.siddhi.core.query.input.stream.state.receiver.PatternSingleProce
 import org.wso2.siddhi.core.query.input.stream.state.receiver.SequenceMultiProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.state.receiver.SequenceSingleProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.state.runtime.*;
+import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.table.EventTable;
+import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
@@ -116,8 +119,13 @@ public class StateInputStreamParser {
                     withinStates.add(0, new AbstractMap.SimpleEntry<Long, Set<Integer>>(stateElement.getWithin().getValue(), withinStateset));
                 }
 
-                if(stateElement instanceof AbsentStreamStateElement) {
+                if (stateElement instanceof AbsentStreamStateElement) {
                     streamPreStateProcessor = new AbsentStreamPreStateProcessor(stateType, clonewithinStates(withinStates));
+                    EntryValveProcessor entryValveProcessor = new EntryValveProcessor(executionPlanContext);
+                    // TODO: 4/9/17 Is this correct?
+                    entryValveProcessor.setToLast(streamPreStateProcessor);
+                    Scheduler scheduler = SchedulerParser.parse(executionPlanContext.getScheduledExecutorService(), entryValveProcessor, executionPlanContext);
+                    ((SchedulingProcessor) streamPreStateProcessor).setScheduler(scheduler);
                 } else {
                     streamPreStateProcessor = new StreamPreStateProcessor(stateType, clonewithinStates(withinStates));
                 }
@@ -131,11 +139,7 @@ public class StateInputStreamParser {
             streamPreStateProcessor.setNextProcessor(singleStreamRuntime.getProcessorChain());
             singleStreamRuntime.setProcessorChain(streamPreStateProcessor);
             if (streamPostStateProcessor == null) {
-                if(stateElement instanceof AbsentStreamStateElement) {
-                    streamPostStateProcessor = new AbsentStreamPostStateProcessor();
-                } else {
-                    streamPostStateProcessor = new StreamPostStateProcessor();
-                }
+                streamPostStateProcessor = new StreamPostStateProcessor();
             }
             streamPostStateProcessor.setStateId(stateIndex);
             singleStreamRuntime.getProcessorChain().setToLast(streamPostStateProcessor);
@@ -173,6 +177,18 @@ public class StateInputStreamParser {
             if (stateElement.getWithin() != null) {
                 withinStates.remove(0);
             }
+
+            if (currentElement instanceof AbsentStreamStateElement) {
+                ((AbsentStreamPreStateProcessor) currentInnerStateRuntime.getFirstProcessor()).setFirstInPattern(true);
+                ((StreamPreStateProcessor) nextInnerStateRuntime.getFirstProcessor()).setAbsentPartner(true);
+                ((StreamPreStateProcessor) nextInnerStateRuntime.getFirstProcessor()).setAbsentPartnerTimeout(currentElement.getWithin().value());
+            }
+
+            if (nextElement instanceof AbsentStreamStateElement) {
+                ((StreamPreStateProcessor) currentInnerStateRuntime.getFirstProcessor()).setAbsentPartner(true);
+                ((StreamPreStateProcessor) currentInnerStateRuntime.getFirstProcessor()).setAbsentPartnerTimeout(nextElement.getWithin().value());
+            }
+
 //            currentInnerStateRuntime.getFirstProcessor().getStateId()
             currentInnerStateRuntime.getLastProcessor().setNextStatePreProcessor(nextInnerStateRuntime.getFirstProcessor());
 

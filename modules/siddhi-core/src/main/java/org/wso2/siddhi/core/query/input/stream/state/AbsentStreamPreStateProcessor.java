@@ -18,27 +18,105 @@
 
 package org.wso2.siddhi.core.query.input.stream.state;
 
+import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
+import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
+import org.wso2.siddhi.core.query.selector.QuerySelector;
+import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor {
+public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor implements SchedulingProcessor {
+
+    private Scheduler scheduler;
+    private List<StateEvent> arrivedEventsList = new LinkedList<>();
+    private long time;
+    private boolean isFirstInPattern = false;
+
+
     public AbsentStreamPreStateProcessor(StateInputStream.Type stateType, List<Map.Entry<Long, Set<Integer>>> withinStates) {
-        super(stateType, withinStates);
+        super(stateType, Collections.EMPTY_LIST);
+        // TODO: 4/9/17 Make sure that this implementation is correct
+        time = withinStates.get(0).getKey();
     }
 
+    public boolean isFirstInPattern() {
+        return isFirstInPattern;
+    }
+
+    public void setFirstInPattern(boolean firstInPattern) {
+        isFirstInPattern = firstInPattern;
+    }
+
+    @Override
+    public void addState(StateEvent stateEvent) {
+        super.addState(stateEvent);
+        if (!isFirstInPattern) {
+            arrivedEventsList.add(stateEvent);
+            scheduler.notifyAt(stateEvent.getTimestamp() + time);
+        }
+    }
+
+    @Override
+    public void process(ComplexEventChunk complexEventChunk) {
+        if (isFirstInPattern) {
+            super.process(complexEventChunk);
+        } else {
+            // Called by the scheduler
+            while (complexEventChunk.hasNext()) {
+                ComplexEvent newEvent = complexEventChunk.next();
+                if (newEvent.getType() == ComplexEvent.Type.TIMER) {
+                    long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+                    ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<StateEvent>(false);
+
+                    // Synchronize with processAndReturn method
+                    synchronized (this) {
+                        Iterator<StateEvent> iterator = arrivedEventsList.iterator();
+                        while (iterator.hasNext()) {
+                            StateEvent event = iterator.next();
+                            if (currentTime >= event.getTimestamp() + time) {
+                                iterator.remove();
+                                retEventChunk.add(event);
+                            }
+                        }
+                    }
+
+                    QuerySelector querySelector = (QuerySelector) this.getThisLastProcessor().getNextProcessor();
+                    while (retEventChunk.hasNext()) {
+                        StateEvent stateEvent = retEventChunk.next();
+                        retEventChunk.remove();
+                        querySelector.process(new ComplexEventChunk<StateEvent>(stateEvent, stateEvent, false));
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
-        // TODO: 4/6/17
-        System.out.println("Process " + complexEventChunk + " in AbsentStreamPreStateProcessor");
         ComplexEventChunk<StateEvent> event = super.processAndReturn(complexEventChunk);
-        System.out.println("Return " + event + " in AbsentStreamPreStateProcessor");
-
+        if (!isFirstInPattern) {
+            StateEvent firstEvent = event.getFirst();
+            if (firstEvent != null) {
+                // Synchronize with process method
+                synchronized (this) {
+                    arrivedEventsList.remove(firstEvent);
+                }
+                event = new ComplexEventChunk<StateEvent>(false);
+            }
+        }
         return event;
+    }
+
+    @Override
+    public void setScheduler(Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
+
+    @Override
+    public Scheduler getScheduler() {
+        return this.scheduler;
     }
 }
