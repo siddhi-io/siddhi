@@ -325,6 +325,11 @@
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collection-version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>2.6.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
