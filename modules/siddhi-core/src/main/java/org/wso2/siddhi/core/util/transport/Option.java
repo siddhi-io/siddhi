@@ -2,15 +2,24 @@ package org.wso2.siddhi.core.util.transport;
 
 import org.wso2.siddhi.core.event.Event;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Option {
     private final String key;
-    private final String value;
+    private String value;
     private final TemplateBuilder templateBuilder;
+    private List<String> variableValues = new ArrayList<>();
 
     public Option(String key, String value, TemplateBuilder templateBuilder) {
         this.key = key;
         this.value = value;
         this.templateBuilder = templateBuilder;
+    }
+
+    int addVariableValue(String value){
+        variableValues.add(value);
+        return (variableValues.size() - 1);
     }
 
     public String getKey() {
@@ -26,7 +35,9 @@ public class Option {
     }
 
     public String getValue(DynamicOptions dynamicOptions) {
-        if (value != null) {
+        if (dynamicOptions.getVariableOptionIndex() != -1 && !variableValues.isEmpty()) {
+            return variableValues.get(dynamicOptions.getVariableOptionIndex());
+        } else if (value != null) {
             return value;
         } else if (templateBuilder != null) {
             return templateBuilder.build(dynamicOptions.getEvent());
