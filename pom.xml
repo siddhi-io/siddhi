@@ -355,6 +355,14 @@
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collection-version}</version>
             </dependency>
+
+            <!-- Event Tables -->
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
+                </dependency>
+
             <!-- JMS -->
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
@@ -547,6 +555,7 @@
         <jama.version>1.0.3</jama.version>
         <jdbc-pool.version>7.0.34.wso2v2</jdbc-pool.version>
         <jdbc-pool.imp.pkg.version.range>[1.7.0, 1.8.0)</jdbc-pool.imp.pkg.version.range>
+        <hikari.version>2.6.1</hikari.version>
         <org.jacoco.version>0.7.4.201502262128</org.jacoco.version>
         <org.osgi.core.version>6.0.0</org.osgi.core.version>
         <org.eclipse.osgi.version>3.7.0.v20110613</org.eclipse.osgi.version>
