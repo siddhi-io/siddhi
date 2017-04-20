@@ -227,6 +227,36 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-http-output-transport</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-test-output-transport</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-kafka-output-transport</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-kafka-input-transport</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-text-output-mapper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-text-input-mapper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-api</artifactId>
                 <version>${axiom-api.version}</version>
@@ -324,6 +354,17 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collection-version}</version>
+            </dependency>
+            <!-- JMS -->
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jms_1.1_spec</artifactId>
+                <version>${geronimo-jms.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jta_1.1_spec</artifactId>
+                <version>${geronimo-jta.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -523,7 +564,7 @@
         <commons.logging.version>1.1.1</commons.logging.version>
         <jsonassert.version>1.3.0</jsonassert.version>
         <jsonpath.version>0.9.1</jsonpath.version>
-        <kafka.version>0.9.0.0</kafka.version>
+        <kafka.version>0.9.0.1</kafka.version>
         <axis2.transport.mail>1.1.1-wso2v2</axis2.transport.mail>
         <httpclient.version>4.3.1.wso2v2</httpclient.version>
         <msf4j.version>2.1.1</msf4j.version>
@@ -532,6 +573,8 @@
         <jackson-datatype-joda-version>2.4.1</jackson-datatype-joda-version>
         <netty-version>4.1.0.Final</netty-version>
         <commons-collection-version>4.0</commons-collection-version>
+        <geronimo-jms.version>1.1.1</geronimo-jms.version>
+        <geronimo-jta.version>1.1.1</geronimo-jta.version>
     </properties>
 
     <scm>
