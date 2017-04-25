@@ -699,4 +699,329 @@ public class EveryAbsentPatternTestCase {
 
         executionPlanRuntime.shutdown();
     }
+
+    @Test
+    public void testQueryAbsent9() throws InterruptedException {
+        log.info("Test the query e1 -> e2 -> not e3 with e1, e2 and e3 within 1 sec");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec " +
+                "select e1.symbol as symbol1, e2.symbol as symbol2 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(100);
+        stream2.send(new Object[]{"IBM", 28.7f, 100});
+        Thread.sleep(100);
+        stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
+        Thread.sleep(1100);
+
+        Assert.assertEquals("Number of success events", 0, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertFalse("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent10() throws InterruptedException {
+        log.info("Test the query e1 -> e2 -> not e3 with e1, e2 and e3 which does not meet the condition within 1 sec");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec " +
+                "select e1.symbol as symbol1, e2.symbol as symbol2 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    Assert.assertArrayEquals(new Object[]{"WSO2", "IBM"}, inEvents[0].getData());
+                    inEventCount = inEventCount + inEvents.length;
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(100);
+        stream2.send(new Object[]{"IBM", 28.7f, 100});
+        Thread.sleep(100);
+        stream3.send(new Object[]{"GOOGLE", 25.7f, 100});
+        Thread.sleep(1100);
+
+        Assert.assertEquals("Number of success events", 1, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertTrue("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent11() throws InterruptedException {
+        log.info("Test the query e1 -> e2 -> not e3 with e1, e2 and not e3 within 1 sec");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec " +
+                "select e1.symbol as symbol1, e2.symbol as symbol2 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    Assert.assertArrayEquals(new Object[]{"WSO2", "IBM"}, inEvents[0].getData());
+                    inEventCount = inEventCount + inEvents.length;
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(100);
+        stream2.send(new Object[]{"IBM", 28.7f, 100});
+        Thread.sleep(1100);
+
+        Assert.assertEquals("Number of success events", 1, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertTrue("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+
+    @Test
+    public void testQueryAbsent12() throws InterruptedException {
+        log.info("Test the query e1 -> not e2 within 1 sec -> e3 with e1 and e3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] " +
+                "select e1.symbol as symbol1, e3.symbol as symbol3 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    Assert.assertArrayEquals(new Object[]{"WSO2", "GOOGLE"}, inEvents[0].getData());
+                    inEventCount = inEventCount + inEvents.length;
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(100);
+        Thread.sleep(1100);
+        stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 1, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertTrue("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent13() throws InterruptedException {
+        log.info("Test the query e1 -> not e2 within 1 sec -> e3 with e1, e2(condition failed) e3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] " +
+                "select e1.symbol as symbol1, e3.symbol as symbol3 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    Assert.assertArrayEquals(new Object[]{"WSO2", "GOOGLE"}, inEvents[0].getData());
+                    inEventCount = inEventCount + inEvents.length;
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(100);
+        stream2.send(new Object[]{"IBM", 8.7f, 100});
+        Thread.sleep(1100);
+        stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 1, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertTrue("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent14() throws InterruptedException {
+        log.info("Test the query e1 -> not e2 within 1 sec -> e3 with e1, e2 e3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] " +
+                "select e1.symbol as symbol1, e3.symbol as symbol3 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(100);
+        stream2.send(new Object[]{"IBM", 28.7f, 100});
+        Thread.sleep(100);
+        stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 0, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertFalse("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
 }

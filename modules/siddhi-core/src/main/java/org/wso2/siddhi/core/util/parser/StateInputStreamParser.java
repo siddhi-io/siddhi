@@ -83,6 +83,18 @@ public class StateInputStreamParser {
                 executionPlanContext, variableExpressionExecutors, processStreamReceiverMap, null, null, stateInputStream.getStateType(),
                 new ArrayList<Map.Entry<Long, Set<Integer>>>(), latencyTracker, queryName);
 
+        // If the first processor AbsentStreamPreStateProcessor, set firstInPattern true
+        PreStateProcessor preStateProcessor = innerStateRuntime.getFirstProcessor();
+        if (preStateProcessor instanceof AbsentStreamPreStateProcessor) {
+            ((AbsentStreamPreStateProcessor) preStateProcessor).setFirstInPattern(true);
+            PreStateProcessor nextPre = preStateProcessor.getThisStatePostProcessor().getNextStatePerProcessor();
+            // If the next processor is StreamPreStateProcessor, set it as the partner of absent
+            if (nextPre != null && nextPre instanceof StreamPreStateProcessor) {
+                ((StreamPreStateProcessor) nextPre).setAbsentPartner(true);
+                ((StreamPreStateProcessor) nextPre).setAbsentPartnerTimeout(((AbsentStreamPreStateProcessor) preStateProcessor).getTimeout());
+            }
+        }
+
         stateStreamRuntime.setInnerStateRuntime(innerStateRuntime);
 
         ((StreamPreStateProcessor) innerStateRuntime.getFirstProcessor()).setThisLastProcessor((StreamPostStateProcessor) innerStateRuntime.getLastProcessor());
@@ -139,7 +151,11 @@ public class StateInputStreamParser {
             streamPreStateProcessor.setNextProcessor(singleStreamRuntime.getProcessorChain());
             singleStreamRuntime.setProcessorChain(streamPreStateProcessor);
             if (streamPostStateProcessor == null) {
-                streamPostStateProcessor = new StreamPostStateProcessor();
+                if (stateElement instanceof AbsentStreamStateElement) {
+                    streamPostStateProcessor = new AbsentStreamPostStateProcessor();
+                } else {
+                    streamPostStateProcessor = new StreamPostStateProcessor();
+                }
             }
             streamPostStateProcessor.setStateId(stateIndex);
             singleStreamRuntime.getProcessorChain().setToLast(streamPostStateProcessor);
@@ -178,16 +194,16 @@ public class StateInputStreamParser {
                 withinStates.remove(0);
             }
 
-            if (currentElement instanceof AbsentStreamStateElement) {
-                ((AbsentStreamPreStateProcessor) currentInnerStateRuntime.getFirstProcessor()).setFirstInPattern(true);
-                ((StreamPreStateProcessor) nextInnerStateRuntime.getFirstProcessor()).setAbsentPartner(true);
-                ((StreamPreStateProcessor) nextInnerStateRuntime.getFirstProcessor()).setAbsentPartnerTimeout(currentElement.getWithin().value());
-            }
-
-            if (nextElement instanceof AbsentStreamStateElement) {
-                ((StreamPreStateProcessor) currentInnerStateRuntime.getFirstProcessor()).setAbsentPartner(true);
-                ((StreamPreStateProcessor) currentInnerStateRuntime.getFirstProcessor()).setAbsentPartnerTimeout(nextElement.getWithin().value());
-            }
+//            if (currentElement instanceof AbsentStreamStateElement) {
+//                ((AbsentStreamPreStateProcessor) currentInnerStateRuntime.getFirstProcessor()).setFirstInPattern(true);
+//                ((StreamPreStateProcessor) nextInnerStateRuntime.getFirstProcessor()).setAbsentPartner(true);
+//                ((StreamPreStateProcessor) nextInnerStateRuntime.getFirstProcessor()).setAbsentPartnerTimeout(currentElement.getWithin().value());
+//            }
+//
+//            if (nextElement instanceof AbsentStreamStateElement) {
+//                ((StreamPreStateProcessor) currentInnerStateRuntime.getFirstProcessor()).setAbsentPartner(true);
+//                ((StreamPreStateProcessor) currentInnerStateRuntime.getFirstProcessor()).setAbsentPartnerTimeout(nextElement.getWithin().value());
+//            }
 
 //            currentInnerStateRuntime.getFirstProcessor().getStateId()
             currentInnerStateRuntime.getLastProcessor().setNextStatePreProcessor(nextInnerStateRuntime.getFirstProcessor());

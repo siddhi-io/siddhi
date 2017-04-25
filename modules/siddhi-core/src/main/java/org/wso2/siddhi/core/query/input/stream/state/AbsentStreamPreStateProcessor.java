@@ -32,14 +32,14 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
 
     private Scheduler scheduler;
     private List<StateEvent> arrivedEventsList = new LinkedList<>();
-    private long time;
+    private long timeout;
     private boolean isFirstInPattern = false;
 
 
     public AbsentStreamPreStateProcessor(StateInputStream.Type stateType, List<Map.Entry<Long, Set<Integer>>> withinStates) {
         super(stateType, Collections.EMPTY_LIST);
         // TODO: 4/9/17 Make sure that this implementation is correct
-        time = withinStates.get(0).getKey();
+        timeout = withinStates.get(0).getKey();
     }
 
     public boolean isFirstInPattern() {
@@ -50,17 +50,22 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         isFirstInPattern = firstInPattern;
     }
 
+    public long getTimeout() {
+        return this.timeout;
+    }
+
     @Override
     public void addState(StateEvent stateEvent) {
         super.addState(stateEvent);
         if (!isFirstInPattern) {
             arrivedEventsList.add(stateEvent);
-            scheduler.notifyAt(stateEvent.getTimestamp() + time);
+            scheduler.notifyAt(stateEvent.getTimestamp() + timeout);
         }
     }
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
+
         if (isFirstInPattern) {
             super.process(complexEventChunk);
         } else {
@@ -76,18 +81,28 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
                         Iterator<StateEvent> iterator = arrivedEventsList.iterator();
                         while (iterator.hasNext()) {
                             StateEvent event = iterator.next();
-                            if (currentTime >= event.getTimestamp() + time) {
+                            if (currentTime >= event.getTimestamp() + timeout) {
                                 iterator.remove();
                                 retEventChunk.add(event);
                             }
                         }
                     }
 
-                    QuerySelector querySelector = (QuerySelector) this.getThisLastProcessor().getNextProcessor();
-                    while (retEventChunk.hasNext()) {
-                        StateEvent stateEvent = retEventChunk.next();
-                        retEventChunk.remove();
-                        querySelector.process(new ComplexEventChunk<StateEvent>(stateEvent, stateEvent, false));
+                    if (this.getThisStatePostProcessor().getNextProcessor() != null) {
+                        // Next processor is StreamStatePostProcessor
+                        QuerySelector querySelector = (QuerySelector) this.getThisStatePostProcessor().getNextProcessor();
+                        while (retEventChunk.hasNext()) {
+                            StateEvent stateEvent = retEventChunk.next();
+                            retEventChunk.remove();
+                            querySelector.process(new ComplexEventChunk<StateEvent>(stateEvent, stateEvent, false));
+                        }
+                    } else if (this.getThisStatePostProcessor().getNextStatePerProcessor() != null) {
+                        // No next StreamStatePostProcessor, if this is part of pattern
+                        while (retEventChunk.hasNext()) {
+                            StateEvent stateEvent = retEventChunk.next();
+                            retEventChunk.remove();
+                            this.getThisStatePostProcessor().getNextStatePerProcessor().addState(stateEvent);
+                        }
                     }
                 }
             }
