@@ -438,36 +438,36 @@
                         </execution>
                     </executions>
                 </plugin>
-                <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-source-plugin</artifactId>-->
-                <!--<version>2.1.2</version>-->
-                <!--<executions>-->
-                <!--<execution>-->
-                <!--<id>attach-sources</id>-->
-                <!--<goals>-->
-                <!--<goal>jar</goal>-->
-                <!--</goals>-->
-                <!--</execution>-->
-                <!--</executions>-->
-                <!--</plugin>-->
-                <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-javadoc-plugin</artifactId>-->
-                <!--<version>2.8</version>-->
-                <!--&lt;!&ndash;todo this should be remove after fixing javadoc&ndash;&gt;-->
-                <!--<configuration>-->
-                <!--<additionalparam>-Xdoclint:none</additionalparam>-->
-                <!--</configuration>-->
-                <!--<executions>-->
-                <!--<execution>-->
-                <!--<id>attach-javadocs</id>-->
-                <!--<goals>-->
-                <!--<goal>jar</goal>-->
-                <!--</goals>-->
-                <!--</execution>-->
-                <!--</executions>-->
-                <!--</plugin>-->
+                <!--<plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.1.2</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.8</version>
+                    &lt;!&ndash;todo this should be remove after fixing javadoc&ndash;&gt;
+                    <configuration>
+                        <additionalparam>-Xdoclint:none</additionalparam>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>-->
                 <plugin>
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
@@ -512,14 +512,14 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-source-plugin</artifactId>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-javadoc-plugin</artifactId>-->
-            <!--</plugin>-->
+            <!--<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
