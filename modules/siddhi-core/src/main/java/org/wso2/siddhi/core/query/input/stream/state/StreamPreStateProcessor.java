@@ -281,6 +281,9 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
 
         // If there were no events received by the absent partner
         if (absentPartner && pendingStateEventList.isEmpty()) {
+            // Absent processor did not receive any events before the current event.
+            // Send it to the next pre processor if available.
+            thisStatePostProcessor.setSendToNextPreState(true);
             StateEvent stateEvent = stateEventPool.borrowEvent();
             stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
             process(stateEvent);
@@ -317,6 +320,10 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
 //                    continue;
 //                }
 //            }
+
+            // If this is is next to an absent processor, should not send the event that matched with an event
+            // received by the absence processor within the given time.
+            thisStatePostProcessor.setSendToNextPreState(!absentPartner || (absentPartner && streamEventTimestamp - stateEVentTimestamp > absentPartnerTimeout));
             stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
             process(stateEvent);
             if (this.thisLastProcessor.isEventReturned()) {
