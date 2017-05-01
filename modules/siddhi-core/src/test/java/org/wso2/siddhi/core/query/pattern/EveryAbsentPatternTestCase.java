@@ -162,8 +162,8 @@ public class EveryAbsentPatternTestCase {
 
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not e1=Stream1[price>20] -> not Stream2[price>e1.price] within 2 sec " +
-                "select e1.symbol as symbol, e1.price as price " +
+                "from not Stream1[price>20] -> not Stream2[price>30] within 2 sec " +
+                "select 25.0f as price " +
                 "insert into OutputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
@@ -1180,6 +1180,379 @@ public class EveryAbsentPatternTestCase {
 
         stream1.send(new Object[]{"WSO2", 15.6f, 100});
         Thread.sleep(100);
+        stream2.send(new Object[]{"IBM", 28.7f, 100});
+        Thread.sleep(100);
+        stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
+        Thread.sleep(100);
+        stream4.send(new Object[]{"ORACLE", 44.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 0, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertFalse("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent24() throws InterruptedException {
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e3, and e4");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); " +
+                "define stream Stream4 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "select e3.symbol as symbol3, e4.symbol as symbol4 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1");
+
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+        InputHandler stream4 = executionPlanRuntime.getInputHandler("Stream4");
+
+        executionPlanRuntime.start();
+
+        stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
+        Thread.sleep(100);
+        stream4.send(new Object[]{"ORACLE", 44.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 1, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertTrue("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent25() throws InterruptedException {
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1, e2, e3, and e4 all within 1 sec");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); " +
+                "define stream Stream4 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "select e3.symbol as symbol3, e4.symbol as symbol4 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1");
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+        InputHandler stream4 = executionPlanRuntime.getInputHandler("Stream4");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(100);
+        stream2.send(new Object[]{"IBM", 28.7f, 100});
+        Thread.sleep(100);
+        stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
+        Thread.sleep(100);
+        stream4.send(new Object[]{"ORACLE", 44.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 0, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertFalse("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent26() throws InterruptedException {
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e2, e3, and e4 all within 1 sec");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); " +
+                "define stream Stream4 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "select e3.symbol as symbol3, e4.symbol as symbol4 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1");
+
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+        InputHandler stream4 = executionPlanRuntime.getInputHandler("Stream4");
+
+        executionPlanRuntime.start();
+
+        stream2.send(new Object[]{"IBM", 28.7f, 100});
+        Thread.sleep(100);
+        stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
+        Thread.sleep(100);
+        stream4.send(new Object[]{"ORACLE", 44.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 0, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertFalse("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent27() throws InterruptedException {
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1, e3, and e4 all within 1 sec");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); " +
+                "define stream Stream4 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "select e3.symbol as symbol3, e4.symbol as symbol4 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1");
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+        InputHandler stream4 = executionPlanRuntime.getInputHandler("Stream4");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(100);
+        stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
+        Thread.sleep(100);
+        stream4.send(new Object[]{"ORACLE", 44.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 0, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertFalse("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent28() throws InterruptedException {
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1 and after 1 sec e3, and e4");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); " +
+                "define stream Stream4 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "select e3.symbol as symbol3, e4.symbol as symbol4 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1");
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+        InputHandler stream4 = executionPlanRuntime.getInputHandler("Stream4");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(1100);
+        stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
+        Thread.sleep(100);
+        stream4.send(new Object[]{"ORACLE", 44.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 1, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertTrue("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent29() throws InterruptedException {
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1, e2 and after 1 sec e3, and e4");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); " +
+                "define stream Stream4 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "select e3.symbol as symbol3, e4.symbol as symbol4 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1");
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+        InputHandler stream4 = executionPlanRuntime.getInputHandler("Stream4");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(100);
+        stream2.send(new Object[]{"IBM", 28.7f, 100});
+        Thread.sleep(1100);
+        stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
+        Thread.sleep(100);
+        stream4.send(new Object[]{"ORACLE", 44.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 1, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertTrue("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent30() throws InterruptedException {
+        log.info("Test the query not e1 within 1 sec -> e2 -> not e3 within 1 sec-> e4 with e2 after 1 sec e4");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); " +
+                "define stream Stream4 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec -> e4=Stream4[price>40] " +
+                "select e2.symbol as symbol2, e4.symbol as symbol4 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1");
+
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream4 = executionPlanRuntime.getInputHandler("Stream4");
+
+        executionPlanRuntime.start();
+
+
+        stream2.send(new Object[]{"IBM", 28.7f, 100});
+        Thread.sleep(1100);
+        stream4.send(new Object[]{"ORACLE", 44.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 1, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertTrue("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent31() throws InterruptedException {
+        log.info("Test the query not e1 within 1 sec -> e2 -> not e3 within 1 sec-> e4 with e1, e2, e3 and e4");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); " +
+                "define stream Stream4 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec -> e4=Stream4[price>40] " +
+                "select e2.symbol as symbol2, e4.symbol as symbol4 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1");
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+        InputHandler stream4 = executionPlanRuntime.getInputHandler("Stream4");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2", 15.6f, 100});
+        Thread.sleep(100);
+        stream2.send(new Object[]{"IBM", 28.7f, 100});
+        Thread.sleep(100);
+        stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
+        Thread.sleep(100);
+        stream4.send(new Object[]{"ORACLE", 44.7f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 0, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertFalse("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent32() throws InterruptedException {
+        log.info("Test the query not e1 within 1 sec -> e2 -> not e3 within 1 sec-> e4 with e2, e3 and e4");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); " +
+                "define stream Stream4 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec -> e4=Stream4[price>40] " +
+                "select e2.symbol as symbol2, e4.symbol as symbol4 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1");
+
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+        InputHandler stream4 = executionPlanRuntime.getInputHandler("Stream4");
+
+        executionPlanRuntime.start();
+
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(100);
         stream3.send(new Object[]{"GOOGLE", 38.7f, 100});

@@ -784,7 +784,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             } else {
                 // EVERY pattern_source_chain '->' absent_pattern_source_chain
                 return new NextStateElement(((StateElement) visit(ctx.pattern_source_chain())),
-                        ((StateElement) visit(ctx.absent_pattern_source_chain(1))));
+                        ((StateElement) visit(ctx.absent_pattern_source_chain(0))));
             }
         }
     }

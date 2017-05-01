@@ -35,10 +35,8 @@ public class AbsentStreamPostStateProcessor extends StreamPostStateProcessor {
         complexEventChunk.reset();
         this.isEventReturned = true;
 
-        if (nextStatePerProcessor != null) {
-            if (((AbsentStreamPreStateProcessor) this.getThisStatePreProcessor()).isFirstInPattern()) {
-                nextStatePerProcessor.addState(stateEvent);
-            }
+        if (nextStatePerProcessor != null && isSendToNextPreState()) {
+            nextStatePerProcessor.addState(stateEvent);
         }
         if (nextEveryStatePerProcessor != null) {
             nextEveryStatePerProcessor.addEveryState(stateEvent);

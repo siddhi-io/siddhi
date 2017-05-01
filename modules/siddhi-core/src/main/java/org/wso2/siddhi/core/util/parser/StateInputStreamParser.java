@@ -87,12 +87,22 @@ public class StateInputStreamParser {
         PreStateProcessor preStateProcessor = innerStateRuntime.getFirstProcessor();
         if (preStateProcessor instanceof AbsentStreamPreStateProcessor) {
             ((AbsentStreamPreStateProcessor) preStateProcessor).setFirstInPattern(true);
+            ((AbsentStreamPreStateProcessor) preStateProcessor).setNoPresentBeforeInPattern(true);
+            while (preStateProcessor != null && preStateProcessor instanceof AbsentStreamPreStateProcessor) {
+                ((AbsentStreamPreStateProcessor) preStateProcessor).setNoPresentBeforeInPattern(true);
+                preStateProcessor = preStateProcessor.getThisStatePostProcessor().getNextStatePerProcessor();
+            }
+        }
+
+        preStateProcessor = innerStateRuntime.getFirstProcessor();
+        while (preStateProcessor != null) {
             PreStateProcessor nextPre = preStateProcessor.getThisStatePostProcessor().getNextStatePerProcessor();
-            // If the next processor is StreamPreStateProcessor, set it as the partner of absent
-            if (nextPre != null && nextPre instanceof StreamPreStateProcessor) {
+            if (preStateProcessor instanceof AbsentStreamPreStateProcessor && nextPre != null) {
                 ((StreamPreStateProcessor) nextPre).setAbsentPartner(true);
+                ((StreamPreStateProcessor) nextPre).setAbsentStreamPreStateProcessor((AbsentStreamPreStateProcessor) preStateProcessor);
                 ((StreamPreStateProcessor) nextPre).setAbsentPartnerTimeout(((AbsentStreamPreStateProcessor) preStateProcessor).getTimeout());
             }
+            preStateProcessor = nextPre;
         }
 
         stateStreamRuntime.setInnerStateRuntime(innerStateRuntime);
