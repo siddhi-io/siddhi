@@ -34,8 +34,8 @@ import java.util.Set;
  */
 public class LogicalPreStateProcessor extends StreamPreStateProcessor {
 
-    private LogicalStateElement.Type logicalType;
-    private LogicalPreStateProcessor partnerStatePreProcessor;
+    protected LogicalStateElement.Type logicalType;
+    protected LogicalPreStateProcessor partnerStatePreProcessor;
 
     public LogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType, List<Map.Entry<Long, Set<Integer>>> withinStates) {
         super(stateType, withinStates);

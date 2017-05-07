@@ -70,7 +70,9 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
             if (isAbsentPartner()) {
                 scheduler.notifyAt(stateEvent.getTimestamp() + getAbsentPartnerTimeout());
             } else {
-                arrivedEventsList.add(stateEvent);
+                synchronized (this) {
+                    arrivedEventsList.add(stateEvent);
+                }
                 scheduler.notifyAt(stateEvent.getTimestamp() + timeout);
             }
 

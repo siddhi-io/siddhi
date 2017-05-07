@@ -68,9 +68,9 @@ public class State {
         return new LogicalStateElement(andStreamStateElement, LogicalStateElement.Type.NOT, notStreamStateElement, time);
     }
 
-    public static StateElement logicalNotAnd(StreamStateElement notStreamStateElement,
-                                             StreamStateElement andStreamStateElement) {
-        return new LogicalStateElement(andStreamStateElement, LogicalStateElement.Type.NOT, notStreamStateElement);
+    public static StateElement logicalNotAnd(StreamStateElement presentStreamStateElement,
+                                             StreamStateElement absentStreamStateElement) {
+        return new LogicalStateElement(presentStreamStateElement, LogicalStateElement.Type.AND, absentStreamStateElement);
     }
 
     public static StateElement next(StateElement stateElement,

@@ -31,8 +31,8 @@ import org.wso2.siddhi.core.query.input.stream.state.receiver.SequenceMultiProce
 import org.wso2.siddhi.core.query.input.stream.state.receiver.SequenceSingleProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.state.runtime.*;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
-import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.table.Table;
+import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
@@ -262,11 +262,41 @@ public class StateInputStreamParser {
                 withinStates.add(0, new AbstractMap.SimpleEntry<Long, Set<Integer>>(stateElement.getWithin().getValue(), withinStateset));
             }
 
-            LogicalPreStateProcessor logicalPreStateProcessor1 = new LogicalPreStateProcessor(type, stateType, withinStates);
+            LogicalPreStateProcessor logicalPreStateProcessor1;
+            if (((LogicalStateElement) stateElement).getStreamStateElement1() instanceof AbsentStreamStateElement) {
+                ArrayList<Map.Entry<Long, Set<Integer>>> states = new ArrayList<>();
+                Set<Integer> withinStateset = new HashSet<Integer>();
+                withinStateset.add(SiddhiConstants.ANY);
+                states.add(0, new AbstractMap.SimpleEntry<Long, Set<Integer>>(((LogicalStateElement) stateElement).getStreamStateElement1().getWithin().getValue(), withinStateset));
+                logicalPreStateProcessor1 = new AbsentLogicalPreStateProcessor(type, stateType, states);
+
+                EntryValveProcessor entryValveProcessor = new EntryValveProcessor(executionPlanContext);
+                // TODO: 4/9/17 Is this correct?
+                entryValveProcessor.setToLast(logicalPreStateProcessor1);
+                Scheduler scheduler = SchedulerParser.parse(executionPlanContext.getScheduledExecutorService(), entryValveProcessor, executionPlanContext);
+                ((SchedulingProcessor) logicalPreStateProcessor1).setScheduler(scheduler);
+            } else {
+                logicalPreStateProcessor1 = new LogicalPreStateProcessor(type, stateType, withinStates);
+            }
             logicalPreStateProcessor1.init(executionPlanContext, queryName);
             LogicalPostStateProcessor logicalPostStateProcessor1 = new LogicalPostStateProcessor(type);
 
-            LogicalPreStateProcessor logicalPreStateProcessor2 = new LogicalPreStateProcessor(type, stateType, withinStates);
+            LogicalPreStateProcessor logicalPreStateProcessor2;
+            if (((LogicalStateElement) stateElement).getStreamStateElement2() instanceof AbsentStreamStateElement) {
+                ArrayList<Map.Entry<Long, Set<Integer>>> states = new ArrayList<>();
+                Set<Integer> withinStateset = new HashSet<Integer>();
+                withinStateset.add(SiddhiConstants.ANY);
+                states.add(0, new AbstractMap.SimpleEntry<Long, Set<Integer>>(((LogicalStateElement) stateElement).getStreamStateElement2().getWithin().getValue(), withinStateset));
+                logicalPreStateProcessor2 = new AbsentLogicalPreStateProcessor(type, stateType, states);
+
+                EntryValveProcessor entryValveProcessor = new EntryValveProcessor(executionPlanContext);
+                // TODO: 4/9/17 Is this correct?
+                entryValveProcessor.setToLast(logicalPreStateProcessor2);
+                Scheduler scheduler = SchedulerParser.parse(executionPlanContext.getScheduledExecutorService(), entryValveProcessor, executionPlanContext);
+                ((SchedulingProcessor) logicalPreStateProcessor2).setScheduler(scheduler);
+            } else {
+                logicalPreStateProcessor2 = new LogicalPreStateProcessor(type, stateType, withinStates);
+            }
             logicalPreStateProcessor2.init(executionPlanContext, queryName);
             LogicalPostStateProcessor logicalPostStateProcessor2 = new LogicalPostStateProcessor(type);
 

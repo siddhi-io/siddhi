@@ -835,18 +835,32 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 //    logical_absent_stateful_source
 //    :standard_stateful_source AND absent_pattern_source
 //    |absent_pattern_source AND standard_stateful_source
+//    |absent_pattern_source AND absent_pattern_source
 //    |standard_stateful_source OR absent_pattern_source
 //    |absent_pattern_source OR standard_stateful_source
+//    |absent_pattern_source OR absent_pattern_source
 //    ;
 
         if (ctx.AND() != null) {
-            StreamStateElement streamStateElement1 = (StreamStateElement) visit(ctx.standard_stateful_source());
-            AbsentStreamStateElement streamStateElement2 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source());
-            return State.logicalAnd(streamStateElement1, streamStateElement2);
+            if (ctx.standard_stateful_source() != null) {
+                StreamStateElement presentStreamState = (StreamStateElement) visit(ctx.standard_stateful_source());
+                AbsentStreamStateElement absentStreamState = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(0));
+                return State.logicalNotAnd(presentStreamState, absentStreamState);
+            } else {
+                AbsentStreamStateElement absentStreamState1 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(0));
+                AbsentStreamStateElement absentStreamState2 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(1));
+                return State.logicalNotAnd(absentStreamState1, absentStreamState2);
+            }
         } else if (ctx.OR() != null) {
-            StreamStateElement streamStateElement1 = (StreamStateElement) visit(ctx.standard_stateful_source());
-            AbsentStreamStateElement streamStateElement2 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source());
-            return State.logicalOr(streamStateElement1, streamStateElement2);
+            if (ctx.standard_stateful_source() != null) {
+                StreamStateElement streamStateElement1 = (StreamStateElement) visit(ctx.standard_stateful_source());
+                AbsentStreamStateElement streamStateElement2 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(0));
+                return State.logicalOr(streamStateElement1, streamStateElement2);
+            } else {
+                AbsentStreamStateElement absentStreamState1 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(0));
+                AbsentStreamStateElement absentStreamState2 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(1));
+                return State.logicalOr(absentStreamState1, absentStreamState2);
+            }
         } else {
             throw newSiddhiParserException(ctx);
         }
