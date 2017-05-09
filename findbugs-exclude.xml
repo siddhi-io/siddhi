@@ -39,6 +39,14 @@
     </Match>
     <Match>
         <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
     <Match>
