@@ -131,14 +131,22 @@ public class ExecutionPlanRuntime {
 
     /**
      * Get the stream definition map.
-     * @return Map of {@link StreamDefinition}s.
+     * @return Map of {@link AbstractDefinition}s.
      */
-    public Map<String, StreamDefinition> getStreamDefinitionMap() {
-        return streamDefinitionMap.entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        e -> (StreamDefinition) e.getValue()));
+    public Map<String, AbstractDefinition> getStreamDefinitionMap() {
+        return streamDefinitionMap;
     }
+
+//    /**
+//     * Get the stream definition map.
+//     * @return Map of {@link StreamDefinition}s.
+//     */
+//    public Map<String, StreamDefinition> getStreamDefinitionMap() {
+//        return streamDefinitionMap.entrySet()
+//                .stream()
+//                .collect(Collectors.toMap(Map.Entry::getKey,
+//                        e -> (StreamDefinition) e.getValue()));
+//    }
 
     /**
      * Get the table definition map.
