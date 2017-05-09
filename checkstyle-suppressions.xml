@@ -35,7 +35,11 @@
     <suppress checks="MemberNameCheck" files=".*/internal/SiddhiQLBaseVisitorImpl.java"/>
     <suppress checks="ParameterName" files=".*/internal/SiddhiQLBaseVisitorImpl.java"/>
     <suppress checks="LocalVariableName" files=".*/internal/SiddhiQLBaseVisitorImpl.java"/>
-        <suppress checks="LocalFinalVariableName" files=".*/internal/SiddhiQLBaseVisitorImpl.java"/>
+    <suppress checks="LocalFinalVariableName" files=".*/internal/SiddhiQLBaseVisitorImpl.java"/>
     <suppress checks="Regexp" files=".*/debugger/SiddhiDebuggerClient.java"/>
+    <suppress checks="Regexp" files=".*/siddhi/performance/.*"/>
+    <suppress checks="Javadoc.*" files=".*/siddhi/performance/.*"/>
+    <suppress checks="Regexp" files=".*/siddhi/sample/.*"/>
+    <suppress checks="Javadoc.*" files=".*/siddhi/sample/.*"/>
 
 </suppressions>
