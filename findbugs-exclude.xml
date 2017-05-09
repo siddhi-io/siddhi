@@ -34,4 +34,7 @@
         <Class name="org.wso2.siddhi.query.compiler.SiddhiQLParser$CollectContext"/>
         <Bug pattern="MF_CLASS_MASKS_FIELD"/>
     </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core.*"/>
+    </Match>
 </FindBugsFilter>
