@@ -19,9 +19,9 @@ package org.wso2.siddhi.core.query.processor.stream.window;
 
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.ReturnAttribute;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -41,13 +41,21 @@ import java.util.Map;
         description = "This window returns events processed periodically as the output in time-repeating patterns, " +
                 "triggered based on time passing.",
         parameters = {
-                @Parameter(name = "cronExpression",
+                @Parameter(name = "cron.expression",
                         description = "The cron expression that represents a time schedule.",
                         type = {DataType.STRING})
         },
-        returnAttributes = @ReturnAttribute(
-                description = "Returns current and expired events.",
-                type = {})
+        examples = @Example(
+                syntax = "define window cseEventWindow (symbol string, price float, volume int)" +
+                        "cron('*/5 * * * * ?');\n" +
+                        "@info(name = 'query0')\n" +
+                        "from cseEventStream\n" +
+                        "insert into cseEventWindow;\n" +
+                        "@info(name = 'query1')\n" +
+                        "from cseEventWindow \n" +
+                        "select symbol,price,volume\n" +
+                        "insert into outputStream ;",
+                description = "This will processed events as the output every 5 seconds.")
 )
 public class CronWindowProcessor extends WindowProcessor implements Job {
 
