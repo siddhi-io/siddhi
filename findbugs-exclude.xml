@@ -45,4 +45,10 @@
         <Class name="org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.performance.*"/>
+    </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.sample.*"/>
+    </Match>
 </FindBugsFilter>
