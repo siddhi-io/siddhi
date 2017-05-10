@@ -34,6 +34,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Abstract parent class to represent event mappers. Events mappers will receive {@link Event}s and can convert them
+ * to any desired object type (Ex: XML, JSON). Custom mappers can be implemented as extensions extending this
+ * abstract implementation.
+ */
 public abstract class SinkMapper implements Snapshotable {
     private String type;
     private AtomicLong lastEventId = new AtomicLong(Long.MIN_VALUE);
@@ -54,7 +59,8 @@ public abstract class SinkMapper implements Snapshotable {
         }
         this.elementId = executionPlanContext.getElementIdGenerator().createNewId();
         init(streamDefinition, mapOptionHolder, payloadTemplateBuilder, mapperConfigReader);
-        executionPlanContext.getSnapshotService().addSnapshotable(streamDefinition.getId()+".sink.mapper", this);
+        executionPlanContext.getSnapshotService().addSnapshotable(streamDefinition.getId() + ".sink.mapper",
+                                                                  this);
     }
 
     /**
@@ -118,12 +124,12 @@ public abstract class SinkMapper implements Snapshotable {
 
             for (ArrayList<Event> eventList : eventMap.values()) {
                 mapAndSend(eventList.toArray(new Event[eventList.size()]), optionHolder,
-                        payloadTemplateBuilder, sinkListener, new DynamicOptions(eventList.get(0)));
+                           payloadTemplateBuilder, sinkListener, new DynamicOptions(eventList.get(0)));
 
             }
         } else {
             mapAndSend(events, optionHolder, payloadTemplateBuilder, sinkListener,
-                    new DynamicOptions(events[0]));
+                       new DynamicOptions(events[0]));
         }
     }
 

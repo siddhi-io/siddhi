@@ -32,6 +32,9 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.Map;
 
+/**
+ * Executor class for Minimum function. Function execution logic is implemented in execute here.
+ */
 @Extension(
         name = "minimum",
         namespace = "",
@@ -60,7 +63,8 @@ public class MinimumFunctionExecutor extends FunctionExecutor {
     private Attribute.Type returnType;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        ExecutionPlanContext executionPlanContext) {
         Attribute.Type attributeTypeOne = attributeExpressionExecutors[0].getReturnType();
         if (!((attributeTypeOne == Attribute.Type.DOUBLE) || (attributeTypeOne == Attribute.Type.INT) ||
                 (attributeTypeOne == Attribute.Type.FLOAT) || (attributeTypeOne == Attribute.Type.LONG))) {

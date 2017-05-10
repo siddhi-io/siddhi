@@ -47,6 +47,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implementation of {@link WindowProcessor} which represent a Window operating based on pre-defined length.
+ */
 @Extension(
         name = "timeLength",
         namespace = "",
@@ -102,23 +105,31 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
-                    timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
+                    timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
+                            .getValue();
 
                 } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
-                    timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
+                    timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
+                            .getValue();
                 } else {
-                    throw new ExecutionPlanValidationException("TimeLength window's first parameter attribute should be either int or long, but found " + attributeExpressionExecutors[0].getReturnType());
+                    throw new ExecutionPlanValidationException("TimeLength window's first parameter attribute should " +
+                            "be either int or long, but found " + attributeExpressionExecutors[0].getReturnType());
                 }
             } else {
-                throw new ExecutionPlanValidationException("TimeLength window should have constant parameter attributes but found a dynamic attribute " + attributeExpressionExecutors[0].getClass().getCanonicalName());
+                throw new ExecutionPlanValidationException("TimeLength window should have constant parameter " +
+                        "attributes but found a dynamic attribute " + attributeExpressionExecutors[0].getClass()
+                        .getCanonicalName());
             }
         } else {
-            throw new ExecutionPlanValidationException("TimeLength window should only have two parameters (<int> windowTime,<int> windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
+            throw new ExecutionPlanValidationException("TimeLength window should only have two parameters (<int> " +
+                    "windowTime,<int> windowLength), but found " + attributeExpressionExecutors.length + " input " +
+                    "attributes");
         }
     }
 
     @Override
-    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
+    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
+                           StreamEventCloner streamEventCloner) {
         synchronized (this) {
             long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
 
@@ -174,9 +185,12 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
     }
 
     @Override
-    public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder, ExecutionPlanContext executionPlanContext,
-                                              List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, Table> tableMap, String queryName) {
-        return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder, executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
+    public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                              ExecutionPlanContext executionPlanContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
+        return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
+                executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
     }
 
     @Override

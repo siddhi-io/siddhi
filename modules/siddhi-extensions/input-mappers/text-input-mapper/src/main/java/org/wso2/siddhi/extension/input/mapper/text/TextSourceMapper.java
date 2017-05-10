@@ -83,7 +83,8 @@ public class TextSourceMapper extends SourceMapper {
      * @param configReader
      */
     @Override
-    public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, List<AttributeMapping> attributeMappingList, ConfigReader configReader) {
+    public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, List<AttributeMapping>
+            attributeMappingList, ConfigReader configReader) {
         attributeConverter = new AttributeConverter();
         this.streamDefinition = streamDefinition;
         this.streamAttributes = this.streamDefinition.getAttributeList();

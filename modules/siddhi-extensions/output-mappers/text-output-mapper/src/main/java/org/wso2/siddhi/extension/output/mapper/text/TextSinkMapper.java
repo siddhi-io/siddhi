@@ -21,8 +21,8 @@ package org.wso2.siddhi.extension.output.mapper.text;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.stream.output.sink.SinkMapper;
 import org.wso2.siddhi.core.stream.output.sink.SinkListener;
+import org.wso2.siddhi.core.stream.output.sink.SinkMapper;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.DynamicOptions;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
@@ -54,7 +54,8 @@ public class TextSinkMapper extends SinkMapper {
      * @param mapperConfigReader
      */
     @Override
-    public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, TemplateBuilder payloadTemplateBuilder, ConfigReader mapperConfigReader) {
+    public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, TemplateBuilder
+            payloadTemplateBuilder, ConfigReader mapperConfigReader) {
         this.streamDefinition = streamDefinition;
         this.payloadTemplateBuilder = payloadTemplateBuilder;
     }
@@ -107,7 +108,8 @@ public class TextSinkMapper extends SinkMapper {
 //            // Add arbitrary data key-value to the default template
 //            eventText.append(EVENT_ATTRIBUTE_SEPARATOR);
 //            for (Map.Entry<String, Object> entry : arbitraryDataMap.entrySet()) {
-//                eventText.append("\n" + entry.getKey() + EVENT_ATTRIBUTE_SEPARATOR + entry.getValue() + EVENT_ATTRIBUTE_SEPARATOR);
+//                eventText.append("\n" + entry.getKey() + EVENT_ATTRIBUTE_SEPARATOR + entry.getValue() +
+// EVENT_ATTRIBUTE_SEPARATOR);
 //            }
 //            eventText.deleteCharAt(eventText.lastIndexOf(EVENT_ATTRIBUTE_SEPARATOR));
 //            eventText.deleteCharAt(eventText.lastIndexOf("\n"));

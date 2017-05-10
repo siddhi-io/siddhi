@@ -31,6 +31,9 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.List;
 
+/**
+ * Event Mapper implementation to handle pass-through scenario where user does not need to do any mapping.
+ */
 @Extension(
         name = "passThrough",
         namespace = "sourceMapper",
@@ -46,7 +49,8 @@ public class PassThroughSourceMapper extends SourceMapper {
     private static final Logger log = Logger.getLogger(PassThroughSourceMapper.class);
 
     @Override
-    public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, List<AttributeMapping> attributeMappingList, ConfigReader configReader) {
+    public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, List<AttributeMapping>
+            attributeMappingList, ConfigReader configReader) {
 
     }
 

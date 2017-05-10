@@ -31,13 +31,16 @@ import org.wso2.siddhi.core.util.transport.OptionHolder;
 
 import java.util.Map;
 
+/**
+ * Implementation of {@link Source} to receive events through in-memory transport.
+ */
 @Extension(
         name = "inMemory",
         namespace = "source",
         description = "In-memory source that can communicate with other in-memory sinks within the same JVM, it " +
                 "is assumed that the publisher and subscriber of a topic uses same event schema (stream definition).",
-        parameters = @Parameter(name = "topic", type = DataType.STRING, description = "Subscribes to sent on the given" +
-                " topic."),
+        parameters = @Parameter(name = "topic", type = DataType.STRING, description = "Subscribes to sent on the "
+                + "given topic."),
         examples = @Example(
                 syntax = "@source(type='inMemory', @map(type='passThrough'),\n" +
                         "define stream BarStream (symbol string, price float, volume long)",
@@ -52,7 +55,9 @@ public class InMemorySource extends Source {
     private InMemoryBroker.Subscriber subscriber;
 
     @Override
-    public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder, ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
+    public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder, ConfigReader configReader,
+                     ExecutionPlanContext
+            executionPlanContext) {
         this.sourceEventListener = sourceEventListener;
         String topic = optionHolder.validateAndGetStaticValue(TOPIC_KEY, "input inMemory source");
         this.subscriber = new InMemoryBroker.Subscriber() {

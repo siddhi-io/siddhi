@@ -49,7 +49,8 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 /**
- * This mapper converts XML string input to {@link ComplexEventChunk}. This extension accepts optional xpath expressions to
+ * This mapper converts XML string input to {@link ComplexEventChunk}. This extension accepts optional xpath
+ * expressions to
  * select specific attributes from the stream.
  */
 @Extension(
@@ -129,7 +130,8 @@ public class XmlSourceMapper extends SourceMapper {
                         try {
                             axiomxPath.addNamespace(entry.getKey(), entry.getValue());
                         } catch (JaxenException e) {
-                            throw new ExecutionPlanValidationException("Error occurred when adding namespace: " + entry.getKey()
+                            throw new ExecutionPlanValidationException("Error occurred when adding namespace: " + entry
+                                .getKey()
                                     + ":" + entry.getValue() + " to XPath element: " + attributeMapping.getMapping());
                         }
                     }
@@ -279,7 +281,8 @@ public class XmlSourceMapper extends SourceMapper {
             } else {
                 log.warn("Incoming XML message should adhere to pre-defined format" +
                         "when using default mapping. Root element name should be " + EVENTS_PARENT_ELEMENT + ". But " +
-                        "found " + rootOMElement.getLocalName() + ". Hence dropping XML message : " + rootOMElement.toString());
+                        "found " + rootOMElement.getLocalName() + ". Hence dropping XML message : " + rootOMElement
+                        .toString());
             }
         }
         return eventList.toArray(new Event[0]);
@@ -290,7 +293,8 @@ public class XmlSourceMapper extends SourceMapper {
         for (String ns : namespaces) {
             String[] splits = ns.split("=");
             if (splits.length != 2) {
-                log.warn("Malformed namespace mapping found: " + ns + ". Each namespace has to have format: <prefix>=<uri>");
+                log.warn("Malformed namespace mapping found: " + ns + ". Each namespace has to have format: " +
+                        "<prefix>=<uri>");
             }
             namespaceMap.put(splits[0].trim(), splits[1].trim());
         }
@@ -307,7 +311,8 @@ public class XmlSourceMapper extends SourceMapper {
                 List selectedNodes = axiomXPath.selectNodes(eventOMElement);
                 if (selectedNodes.size() == 0) {
                     if (failOnUnknownAttribute) {
-                        log.warn("Xpath: '" + axiomXPath.toString() + " did not yield any results. Hence dropping the " +
+                        log.warn("Xpath: '" + axiomXPath.toString() + " did not yield any results. Hence dropping the" +
+                                " " +
                                 "event : " + eventOMElement.toString());
                         return null;
                     } else {
@@ -342,7 +347,8 @@ public class XmlSourceMapper extends SourceMapper {
                 } else if (elementObj instanceof OMAttribute) {
                     OMAttribute omAttribute = (OMAttribute) elementObj;
                     try {
-                        data[i] = attributeConverter.getPropertyValue(omAttribute.getAttributeValue(), attribute.getType());
+                        data[i] = attributeConverter.getPropertyValue(omAttribute.getAttributeValue(), attribute
+                                .getType());
                     } catch (ExecutionPlanRuntimeException | NumberFormatException e) {
                         log.warn("Error occurred when extracting attribute value. Cause: " + e.getMessage() +
                                 ". Hence dropping the event: " + eventOMElement.toString());

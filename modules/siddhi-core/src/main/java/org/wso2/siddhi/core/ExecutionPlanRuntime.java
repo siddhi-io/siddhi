@@ -64,6 +64,7 @@ import java.util.stream.Collectors;
  */
 public class ExecutionPlanRuntime {
     private static final Logger log = Logger.getLogger(ExecutionPlanRuntime.class);
+    // Contains event tables.
     private ConcurrentMap<String, AbstractDefinition> streamDefinitionMap = new ConcurrentHashMap<String,
             AbstractDefinition>(); // Contains stream definition.
     private ConcurrentMap<String, AbstractDefinition> tableDefinitionMap = new ConcurrentHashMap<String,
@@ -132,6 +133,7 @@ public class ExecutionPlanRuntime {
 
     /**
      * Get the stream definition map.
+     *
      * @return Map of {@link StreamDefinition}s.
      */
     public Map<String, StreamDefinition> getStreamDefinitionMap() {
@@ -143,6 +145,7 @@ public class ExecutionPlanRuntime {
 
     /**
      * Get the table definition map.
+     *
      * @return Map of {@link TableDefinition}s.
      */
     public Map<String, TableDefinition> getTableDefinitionMap() {
@@ -154,6 +157,7 @@ public class ExecutionPlanRuntime {
 
     /**
      * Get the names of the available queries.
+     *
      * @return {@link Set<String>} of query names.
      */
     public Set<String> getQueryNames() {

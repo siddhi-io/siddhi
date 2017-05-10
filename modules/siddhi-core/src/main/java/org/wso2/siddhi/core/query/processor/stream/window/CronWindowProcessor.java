@@ -17,7 +17,18 @@
  */
 package org.wso2.siddhi.core.query.processor.stream.window;
 
-import org.quartz.*;
+import org.apache.log4j.Logger;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
+import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
@@ -35,6 +46,9 @@ import org.wso2.siddhi.core.util.config.ConfigReader;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Implementation of {@link WindowProcessor} which represent a Window operating based on a cron expression.
+ */
 @Extension(
         name = "cron",
         namespace = "",
@@ -58,7 +72,7 @@ import java.util.Map;
                 description = "This will processed events as the output every 5 seconds.")
 )
 public class CronWindowProcessor extends WindowProcessor implements Job {
-
+    private static final Logger log = Logger.getLogger(CronWindowProcessor.class);
     private final String jobGroup = "CronWindowGroup";
     private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(false);
     private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
@@ -78,7 +92,8 @@ public class CronWindowProcessor extends WindowProcessor implements Job {
     }
 
     @Override
-    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
+    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
+                           StreamEventCloner streamEventCloner) {
         synchronized (this) {
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();

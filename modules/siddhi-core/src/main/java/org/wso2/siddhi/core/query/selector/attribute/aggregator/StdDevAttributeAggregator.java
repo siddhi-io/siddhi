@@ -33,6 +33,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * {@link AttributeAggregator} to calculate standard deviation based on an event attribute.
+ */
 @Extension(
         name = "stdDev",
         namespace = "",
@@ -63,7 +66,8 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
      * @param executionPlanContext         Execution plan runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        ExecutionPlanContext executionPlanContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("stdDev aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
@@ -73,16 +77,16 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
 
         switch (type) {
             case INT:
-                stdDevOutputAttributeAggregator = new stdDevAttributeAggregatorInt();
+                stdDevOutputAttributeAggregator = new StdDevAttributeAggregatorInt();
                 break;
             case LONG:
-                stdDevOutputAttributeAggregator = new stdDevAttributeAggregatorLong();
+                stdDevOutputAttributeAggregator = new StdDevAttributeAggregatorLong();
                 break;
             case FLOAT:
-                stdDevOutputAttributeAggregator = new stdDevAttributeAggregatorFloat();
+                stdDevOutputAttributeAggregator = new StdDevAttributeAggregatorFloat();
                 break;
             case DOUBLE:
-                stdDevOutputAttributeAggregator = new stdDevAttributeAggregatorDouble();
+                stdDevOutputAttributeAggregator = new StdDevAttributeAggregatorDouble();
                 break;
             default:
                 throw new OperationNotSupportedException("stdDev not supported for " + type);
@@ -137,7 +141,10 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
         stdDevOutputAttributeAggregator.restoreState(state);
     }
 
-    private class stdDevAttributeAggregatorDouble extends StdDevAttributeAggregator {
+    /**
+     * Standard deviation aggregator for Double values
+     */
+    private class StdDevAttributeAggregatorDouble extends StdDevAttributeAggregator {
         private final Attribute.Type type = Attribute.Type.DOUBLE;
         private double mean, oldMean, stdDeviation, sum;
         private int count = 0;
@@ -219,7 +226,10 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
         }
     }
 
-    private class stdDevAttributeAggregatorFloat extends StdDevAttributeAggregator {
+    /**
+     * Standard deviation aggregator for Float values
+     */
+    private class StdDevAttributeAggregatorFloat extends StdDevAttributeAggregator {
         private final Attribute.Type type = Attribute.Type.DOUBLE;
         private double mean, oldMean, stdDeviation, sum;
         private int count = 0;
@@ -301,7 +311,10 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
         }
     }
 
-    private class stdDevAttributeAggregatorInt extends StdDevAttributeAggregator {
+    /**
+     * Standard deviation aggregator for Integer values
+     */
+    private class StdDevAttributeAggregatorInt extends StdDevAttributeAggregator {
         private final Attribute.Type type = Attribute.Type.DOUBLE;
         private double mean, oldMean, stdDeviation, sum;
         private int count = 0;
@@ -383,7 +396,10 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
         }
     }
 
-    private class stdDevAttributeAggregatorLong extends StdDevAttributeAggregator {
+    /**
+     * Standard deviation aggregator for Long values
+     */
+    private class StdDevAttributeAggregatorLong extends StdDevAttributeAggregator {
         private final Attribute.Type type = Attribute.Type.DOUBLE;
         private double mean, oldMean, stdDeviation, sum;
         private int count = 0;
