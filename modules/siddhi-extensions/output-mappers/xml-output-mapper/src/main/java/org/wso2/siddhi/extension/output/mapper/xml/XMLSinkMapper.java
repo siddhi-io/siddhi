@@ -18,7 +18,10 @@
 package org.wso2.siddhi.extension.output.mapper.xml;
 
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
+import org.wso2.siddhi.annotation.Parameter;
+import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
@@ -34,6 +37,7 @@ import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -46,7 +50,57 @@ import javax.xml.parsers.ParserConfigurationException;
 @Extension(
         name = "xml",
         namespace = "sinkMapper",
-        description = "Event to XML output mapper"
+        description = "Event to XML output mapper. Transports which publish XML messages can utilize this extension"
+                + "to convert the Siddhi event to XML message. Users can either send a pre-defined XML "
+                + "format or a custom XML message.",
+        parameters = {
+                @Parameter(name = "validate.xml",
+                           description = "This property will enable XML validation for generated XML message. By "
+                                   + "default value of the property will be false. When enabled DAS will validate the "
+                                   + "generated XML message and drop the message if it does not adhere to proper XML "
+                                   + "standards. ",
+                           type = {DataType.BOOL}),
+                @Parameter(name = "enclosing.element",
+                           description =
+                                   "Used to specify the enclosing element in case of sending multiple events in same "
+                                           + "XML message. WSO2 DAS will treat the child element of given enclosing "
+                                           + "element as events"
+                                           + " and execute xpath expressions on child elements. If enclosing.element "
+                                           + "is not provided "
+                                           + "multiple event scenario is disregarded and xpaths will be evaluated "
+                                           + "with respect to "
+                                           + "root element.",
+                           type = {DataType.STRING})
+        },
+        examples = {
+                @Example(
+                        syntax = "@sink(type='inMemory', topic='stock', @map(type='xml'))\n"
+                                + "define stream FooStream (symbol string, price float, volume long);\n",
+                        description = "Above configuration will do a default XML input mapping which will "
+                                + "generate below "
+                                + "output"
+                                + "<events>\n"
+                                + "    <event>\n"
+                                + "        <symbol>WSO2</symbol>\n"
+                                + "        <price>55.6</price>\n"
+                                + "        <volume>100</volume>\n"
+                                + "    </event>\n"
+                                + "</events>\n"),
+                @Example(
+                        syntax = "@sink(type='inMemory', topic='{{symbol}}', @map(type='xml', enclosing"
+                                + ".element='<portfolio>', validate.xml='true', @payload( "
+                                + "\"<StockData><Symbol>{{symbol}}</Symbol><Price>{{price}}</Price></StockData>\")))\n"
+                                + "define stream BarStream (symbol string, price float, volume long);",
+                        description = "Above configuration will perform a custom XML mapping which will "
+                                + "produce below "
+                                + "output MXL message"
+                                + "<portfolio>\n"
+                                + "    <StockData>\n"
+                                + "        <Symbol>WSO2</Symbol>\n"
+                                + "        <Price>55.6</Price>\n"
+                                + "    </StockData>\n"
+                                + "</portfolio>")
+        }
 )
 public class XMLSinkMapper extends SinkMapper {
     private static final Logger log = Logger.getLogger(XMLSinkMapper.class);
@@ -78,8 +132,8 @@ public class XMLSinkMapper extends SinkMapper {
      * @param mapperConfigReader
      */
     @Override
-    public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, TemplateBuilder
-            payloadTemplateBuilder, ConfigReader mapperConfigReader) {
+    public void init(StreamDefinition streamDefinition, OptionHolder optionHolder,
+                     TemplateBuilder payloadTemplateBuilder, ConfigReader mapperConfigReader) {
         this.streamDefinition = streamDefinition;
         enclosingElement = optionHolder.getOrCreateOption(OPTION_ENCLOSING_ELEMENT, null).getValue();
         if (enclosingElement != null) {
@@ -115,7 +169,7 @@ public class XMLSinkMapper extends SinkMapper {
             sb.append(endingElement);
             if (xmlValidationEnabled) {
                 try {
-                    builder.parse(new ByteArrayInputStream(sb.toString().getBytes()));
+                    builder.parse(new ByteArrayInputStream(sb.toString().getBytes(Charset.forName("UTF-8"))));
                 } catch (SAXException e) {
                     log.error("Parse error occurred when validating output XML event. " +
                                       "Reason: " + e.getMessage() + "Dropping event: " + sb.toString());
@@ -167,7 +221,7 @@ public class XMLSinkMapper extends SinkMapper {
             sb.append(endingElement);
             if (xmlValidationEnabled) {
                 try {
-                    builder.parse(new ByteArrayInputStream(sb.toString().getBytes()));
+                    builder.parse(new ByteArrayInputStream(sb.toString().getBytes(Charset.forName("UTF-8"))));
                 } catch (SAXException | IOException e) {
                     log.error("Error occurred when validating output XML event. " +
                                       "Reason: " + e.getMessage() + "Dropping event: " + sb.toString());
