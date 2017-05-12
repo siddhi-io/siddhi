@@ -38,6 +38,7 @@ import org.wso2.siddhi.query.api.execution.query.input.handler.Filter;
 import org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction;
 import org.wso2.siddhi.query.api.execution.query.input.handler.StreamHandler;
 import org.wso2.siddhi.query.api.execution.query.input.handler.Window;
+import org.wso2.siddhi.query.api.execution.query.input.state.AbsentStreamStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.state.CountStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.state.EveryStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.state.NextStateElement;
@@ -850,7 +851,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 //        |standard_stateful_source OR standard_stateful_source
 //        ;
 
-         if (ctx.AND() != null) {
+        if (ctx.AND() != null) {
             StreamStateElement streamStateElement1 = (StreamStateElement) visit(ctx.standard_stateful_source(0));
             StreamStateElement streamStateElement2 = (StreamStateElement) visit(ctx.standard_stateful_source(1));
             return State.logicalAnd(streamStateElement1, streamStateElement2);
@@ -889,21 +890,27 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         if (ctx.AND() != null) {
             if (ctx.standard_stateful_source() != null) {
                 StreamStateElement presentStreamState = (StreamStateElement) visit(ctx.standard_stateful_source());
-                AbsentStreamStateElement absentStreamState = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(0));
+                AbsentStreamStateElement absentStreamState = (AbsentStreamStateElement) visit(ctx
+                        .absent_pattern_source(0));
                 return State.logicalNotAnd(presentStreamState, absentStreamState);
             } else {
-                AbsentStreamStateElement absentStreamState1 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(0));
-                AbsentStreamStateElement absentStreamState2 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(1));
+                AbsentStreamStateElement absentStreamState1 = (AbsentStreamStateElement) visit(ctx
+                        .absent_pattern_source(0));
+                AbsentStreamStateElement absentStreamState2 = (AbsentStreamStateElement) visit(ctx
+                        .absent_pattern_source(1));
                 return State.logicalNotAnd(absentStreamState1, absentStreamState2);
             }
         } else if (ctx.OR() != null) {
             if (ctx.standard_stateful_source() != null) {
                 StreamStateElement streamStateElement1 = (StreamStateElement) visit(ctx.standard_stateful_source());
-                AbsentStreamStateElement streamStateElement2 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(0));
+                AbsentStreamStateElement streamStateElement2 = (AbsentStreamStateElement) visit(ctx
+                        .absent_pattern_source(0));
                 return State.logicalOr(streamStateElement1, streamStateElement2);
             } else {
-                AbsentStreamStateElement absentStreamState1 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(0));
-                AbsentStreamStateElement absentStreamState2 = (AbsentStreamStateElement) visit(ctx.absent_pattern_source(1));
+                AbsentStreamStateElement absentStreamState1 = (AbsentStreamStateElement) visit(ctx
+                        .absent_pattern_source(0));
+                AbsentStreamStateElement absentStreamState2 = (AbsentStreamStateElement) visit(ctx
+                        .absent_pattern_source(1));
                 return State.logicalOr(absentStreamState1, absentStreamState2);
             }
         } else {

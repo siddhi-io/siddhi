@@ -26,8 +26,16 @@ import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * Pre processor of not operator.
+ */
 public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor implements SchedulingProcessor {
 
     private Scheduler scheduler;
@@ -37,7 +45,8 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     private boolean noPresentBeforeInPattern = false;
 
 
-    public AbsentStreamPreStateProcessor(StateInputStream.Type stateType, List<Map.Entry<Long, Set<Integer>>> withinStates) {
+    public AbsentStreamPreStateProcessor(StateInputStream.Type stateType, List<Map.Entry<Long, Set<Integer>>>
+            withinStates) {
         super(stateType, Collections.EMPTY_LIST);
         // TODO: 4/9/17 Make sure that this implementation is correct
         timeout = withinStates.get(0).getKey();
@@ -91,7 +100,8 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
                     iterator.remove();
                 }
             }
-            hasState = !pendingStateEventList.isEmpty() || !this.newAndEveryStateEventList.isEmpty() || getAbsentStreamPreStateProcessor().hasStateEvents();
+            hasState = !pendingStateEventList.isEmpty() || !this.newAndEveryStateEventList.isEmpty() ||
+                    getAbsentStreamPreStateProcessor().hasStateEvents();
         } else {
             hasState = !this.newAndEveryStateEventList.isEmpty();
         }
@@ -140,7 +150,8 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
 
                         if (this.getThisStatePostProcessor().getNextProcessor() != null) {
                             // Next processor is StreamStatePostProcessor
-                            QuerySelector querySelector = (QuerySelector) this.getThisStatePostProcessor().getNextProcessor();
+                            QuerySelector querySelector = (QuerySelector) this.getThisStatePostProcessor()
+                                    .getNextProcessor();
                             while (retEventChunk.hasNext()) {
                                 StateEvent stateEvent = retEventChunk.next();
                                 retEventChunk.remove();
@@ -152,7 +163,8 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
                                 StateEvent stateEvent = retEventChunk.next();
                                 retEventChunk.remove();
                                 // TODO: 5/1/17 Does it casue to any other issues?
-                                ((StreamPreStateProcessor) this.getThisStatePostProcessor().getNextStatePerProcessor()).addAbsent(stateEvent);
+                                ((StreamPreStateProcessor) this.getThisStatePostProcessor().getNextStatePerProcessor
+                                        ()).addAbsent(stateEvent);
 
                             }
                         }

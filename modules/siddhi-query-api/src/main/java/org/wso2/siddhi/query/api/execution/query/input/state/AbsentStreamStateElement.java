@@ -21,7 +21,9 @@ package org.wso2.siddhi.query.api.execution.query.input.state;
 import org.wso2.siddhi.query.api.execution.query.input.stream.BasicSingleInputStream;
 import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
-// TODO: 4/6/17 Comment the class and implement toString, equals and hashCode methods
+/**
+ * Absent state element used in pattern to handle not operations.
+ */
 public class AbsentStreamStateElement extends StreamStateElement {
 
     public AbsentStreamStateElement(BasicSingleInputStream basicSingleInputStream, TimeConstant within) {

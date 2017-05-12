@@ -55,7 +55,7 @@ public class State {
     }
 
     public static StateElement not(BasicSingleInputStream basicSingleInputStream,
-                                          TimeConstant time) {
+                                   TimeConstant time) {
         return new AbsentStreamStateElement(basicSingleInputStream, time);
     }
 
@@ -74,7 +74,8 @@ public class State {
 
     public static StateElement logicalNotAnd(StreamStateElement presentStreamStateElement,
                                              StreamStateElement absentStreamStateElement) {
-        return new LogicalStateElement(presentStreamStateElement, LogicalStateElement.Type.AND, absentStreamStateElement);
+        return new LogicalStateElement(presentStreamStateElement, LogicalStateElement.Type.AND,
+                absentStreamStateElement);
     }
 
     public static StateElement next(StateElement stateElement,

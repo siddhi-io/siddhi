@@ -310,7 +310,8 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
             // If there were no events received by the absent partner
             if (!pendingAbsentStateEventList.isEmpty()) {
                 processAndReturn(returnEventChunk, streamEvent, pendingAbsentStateEventList);
-            } else if (pendingStateEventList.isEmpty() && !(this instanceof AbsentStreamPreStateProcessor) && !absentStreamPreStateProcessor.hasStateEvents()) {
+            } else if (pendingStateEventList.isEmpty() && !(this instanceof AbsentStreamPreStateProcessor) &&
+                    !absentStreamPreStateProcessor.hasStateEvents()) {
                 if (absentStreamPreStateProcessor.isNoPresentBeforeInPattern()) {
                     // Absent processor did not receive any events before the current event.
                     // Send it to the next pre processor if available.
@@ -339,7 +340,8 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         return returnEventChunk;
     }
 
-    private void processAndReturn(ComplexEventChunk<StateEvent> returnEventChunk, StreamEvent streamEvent, List<StateEvent> listToTraverse) {
+    private void processAndReturn(ComplexEventChunk<StateEvent> returnEventChunk, StreamEvent streamEvent,
+                                  List<StateEvent> listToTraverse) {
         for (Iterator<StateEvent> iterator = listToTraverse.iterator(); iterator.hasNext(); ) {
             StateEvent stateEvent = iterator.next();
             // Get the timestamp before process because the timestamp of state event will be updated in post processor

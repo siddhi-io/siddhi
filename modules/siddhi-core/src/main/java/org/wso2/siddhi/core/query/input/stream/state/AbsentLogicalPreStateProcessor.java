@@ -9,8 +9,16 @@ import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * Logical not processor.
+ */
 public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor implements SchedulingProcessor {
 
     private Scheduler scheduler;
@@ -19,7 +27,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     private boolean isFirstInPattern = false;
     private boolean noPresentBeforeInPattern = false;
 
-    public AbsentLogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType, List<Map.Entry<Long, Set<Integer>>> withinStates) {
+    public AbsentLogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType, List<Map
+            .Entry<Long, Set<Integer>>> withinStates) {
         super(type, stateType, Collections.EMPTY_LIST);
         timeout = withinStates.get(0).getKey();
     }
@@ -27,7 +36,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     @Override
     public void addState(StateEvent stateEvent) {
         super.addState(stateEvent);
-        if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor && logicalType == LogicalStateElement.Type.AND) {
+        if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor && logicalType == LogicalStateElement
+                .Type.AND) {
             synchronized (this) {
                 arrivedEventsList.add(stateEvent);
             }
@@ -38,7 +48,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
 
-        if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor && logicalType == LogicalStateElement.Type.AND) {
+        if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor && logicalType == LogicalStateElement
+                .Type.AND) {
 
 
             // Called by the scheduler
@@ -76,7 +87,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
 
                     if (this.getThisStatePostProcessor().getNextProcessor() != null) {
                         // Next processor is StreamStatePostProcessor
-                        QuerySelector querySelector = (QuerySelector) this.getThisStatePostProcessor().getNextProcessor();
+                        QuerySelector querySelector = (QuerySelector) this.getThisStatePostProcessor()
+                                .getNextProcessor();
                         while (retEventChunk.hasNext()) {
                             StateEvent stateEvent = retEventChunk.next();
                             retEventChunk.remove();
@@ -87,7 +99,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                         while (retEventChunk.hasNext()) {
                             StateEvent stateEvent = retEventChunk.next();
                             retEventChunk.remove();
-                            ((StreamPreStateProcessor) this.getThisStatePostProcessor().getNextStatePerProcessor()).addAbsent(stateEvent);
+                            ((StreamPreStateProcessor) this.getThisStatePostProcessor().getNextStatePerProcessor())
+                                    .addAbsent(stateEvent);
 
                         }
                     }
@@ -102,7 +115,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
         ComplexEventChunk<StateEvent> event = super.processAndReturn(complexEventChunk);
-        if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor && logicalType == LogicalStateElement.Type.AND) {
+        if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor && logicalType == LogicalStateElement
+                .Type.AND) {
             StateEvent firstEvent = event.getFirst();
             if (firstEvent != null) {
                 // Synchronize with process method

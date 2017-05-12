@@ -184,7 +184,8 @@ public class EveryAbsentPatternTestCase {
 
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price>20] -> not Stream2[price>e1.price] within 2 sec -> e3=Stream3[symbol==e1.symbol] " +
+                "from e1=Stream1[price>20] -> not Stream2[price>e1.price] within 2 sec -> " +
+                "e3=Stream3[symbol==e1.symbol] " +
                 "select e1.symbol as symbol, e1.price as price " +
                 "insert into OutputStream ;";
 
@@ -206,7 +207,8 @@ public class EveryAbsentPatternTestCase {
 
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price>20] -> e3=Stream3[symbol==e1.symbol] -> not Stream2[price>e1.price] within 2 sec " +
+                "from e1=Stream1[price>20] -> e3=Stream3[symbol==e1.symbol] -> not Stream2[price>e1.price] within 2 " +
+                "sec " +
                 "select e1.symbol as symbol, e3.price as price " +
                 "insert into OutputStream ;";
 
@@ -289,7 +291,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream2 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price > 20] -> not Stream2[price > e1.price] within 2 sec and e3=Stream2['IBM' == symbol] " +
+                "from e1=Stream1[price > 20] -> not Stream2[price > e1.price] within 2 sec and e3=Stream2['IBM' == " +
+                "symbol] " +
                 "select e1.symbol as symbol1, e3.price as price3 " +
                 "insert into OutputStream ;";
 
@@ -900,7 +903,8 @@ public class EveryAbsentPatternTestCase {
 
     @Test
     public void testQueryAbsent17() throws InterruptedException {
-        log.info("Test the query not e1 within 1 sec -> e2 -> e3 with e1 that fails to satisfy the condition, e2 and e3");
+        log.info("Test the query not e1 within 1 sec -> e2 -> e3 with e1 that fails to satisfy the condition, e2 and " +
+                "e3");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -991,7 +995,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> e3=Stream3[price>30] -> not Stream4[price>40] within 1 sec  " +
+                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> e3=Stream3[price>30] -> not Stream4[price>40] " +
+                "within 1 sec  " +
                 "select e1.symbol as symbol1, e2.symbol as symbol2, e3.symbol as symbol3 " +
                 "insert into OutputStream ;";
 
@@ -1033,7 +1038,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> e3=Stream3[price>30] -> not Stream4[price>40] within 1 sec  " +
+                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> e3=Stream3[price>30] -> not Stream4[price>40] " +
+                "within 1 sec  " +
                 "select e1.symbol as symbol1, e2.symbol as symbol2, e3.symbol as symbol3 " +
                 "insert into OutputStream ;";
 
@@ -1077,7 +1083,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec -> e4=Stream4[price>40] " +
+                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec -> " +
+                "e4=Stream4[price>40] " +
                 "select e1.symbol as symbol1, e2.symbol as symbol2, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1119,7 +1126,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec -> e4=Stream4[price>40] " +
+                "from e1=Stream1[price>10] -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec -> " +
+                "e4=Stream4[price>40] " +
                 "select e1.symbol as symbol1, e2.symbol as symbol2, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1163,7 +1171,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> e3=Stream3[price>30] -> " +
+                "e4=Stream4[price>40] " +
                 "select e2.symbol as symbol2, e3.symbol as symbol3, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1207,7 +1216,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> " +
+                "e3=Stream3[price>30] -> e4=Stream4[price>40] " +
                 "select e3.symbol as symbol3, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1234,7 +1244,8 @@ public class EveryAbsentPatternTestCase {
 
     @Test
     public void testQueryAbsent25() throws InterruptedException {
-        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1, e2, e3, and e4 all within 1 sec");
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1, e2, e3, and e4 all " +
+                "within 1 sec");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1245,7 +1256,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> " +
+                "e3=Stream3[price>30] -> e4=Stream4[price>40] " +
                 "select e3.symbol as symbol3, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1278,7 +1290,8 @@ public class EveryAbsentPatternTestCase {
 
     @Test
     public void testQueryAbsent26() throws InterruptedException {
-        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e2, e3, and e4 all within 1 sec");
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e2, e3, and e4 all within" +
+                " 1 sec");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1289,7 +1302,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> " +
+                "e3=Stream3[price>30] -> e4=Stream4[price>40] " +
                 "select e3.symbol as symbol3, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1319,7 +1333,8 @@ public class EveryAbsentPatternTestCase {
 
     @Test
     public void testQueryAbsent27() throws InterruptedException {
-        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1, e3, and e4 all within 1 sec");
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1, e3, and e4 all within" +
+                " 1 sec");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1330,7 +1345,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> " +
+                "e3=Stream3[price>30] -> e4=Stream4[price>40] " +
                 "select e3.symbol as symbol3, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1360,7 +1376,8 @@ public class EveryAbsentPatternTestCase {
 
     @Test
     public void testQueryAbsent28() throws InterruptedException {
-        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1 and after 1 sec e3, and e4");
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1 and after 1 sec e3, " +
+                "and e4");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1371,7 +1388,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> " +
+                "e3=Stream3[price>30] -> e4=Stream4[price>40] " +
                 "select e3.symbol as symbol3, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1401,7 +1419,8 @@ public class EveryAbsentPatternTestCase {
 
     @Test
     public void testQueryAbsent29() throws InterruptedException {
-        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1, e2 and after 1 sec e3, and e4");
+        log.info("Test the query not e1 within 1 sec -> not e2 within 1 sec -> e3-> e4 with e1, e2 and after 1 sec " +
+                "e3, and e4");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1412,7 +1431,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> e3=Stream3[price>30] -> e4=Stream4[price>40] " +
+                "from not Stream1[price>10] within 1 sec -> not Stream2[price>20] within 1 sec -> " +
+                "e3=Stream3[price>30] -> e4=Stream4[price>40] " +
                 "select e3.symbol as symbol3, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1456,7 +1476,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec -> e4=Stream4[price>40] " +
+                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 " +
+                "sec -> e4=Stream4[price>40] " +
                 "select e2.symbol as symbol2, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1495,7 +1516,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec -> e4=Stream4[price>40] " +
+                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 " +
+                "sec -> e4=Stream4[price>40] " +
                 "select e2.symbol as symbol2, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1539,7 +1561,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream4 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 sec -> e4=Stream4[price>40] " +
+                "from not Stream1[price>10] within 1 sec -> e2=Stream2[price>20] -> not Stream3[price>30] within 1 " +
+                "sec -> e4=Stream4[price>40] " +
                 "select e2.symbol as symbol2, e4.symbol as symbol4 " +
                 "insert into OutputStream ;";
 
@@ -1659,7 +1682,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream3 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec and not Stream3[price>30] within 1 sec " +
+                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec and not Stream3[price>30] within 1 " +
+                "sec " +
                 "select e1.symbol as symbol1 " +
                 "insert into OutputStream ;";
 
@@ -1700,7 +1724,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream3 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec and not Stream3[price>30] within 1 sec " +
+                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec and not Stream3[price>30] within 1 " +
+                "sec " +
                 "select e1.symbol as symbol1 " +
                 "insert into OutputStream ;";
 
@@ -1739,7 +1764,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream3 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec and not Stream3[price>30] within 1 sec " +
+                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec and not Stream3[price>30] within 1 " +
+                "sec " +
                 "select e1.symbol as symbol1 " +
                 "insert into OutputStream ;";
 
@@ -1777,7 +1803,8 @@ public class EveryAbsentPatternTestCase {
                 "define stream Stream3 (symbol string, price float, volume int); ";
         String query = "" +
                 "@info(name = 'query1') " +
-                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec and not Stream3[price>30] within 1 sec " +
+                "from e1=Stream1[price>10] -> not Stream2[price>20] within 1 sec and not Stream3[price>30] within 1 " +
+                "sec " +
                 "select e1.symbol as symbol1 " +
                 "insert into OutputStream ;";
 

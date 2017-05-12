@@ -23,6 +23,9 @@ import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 
 
+/**
+ * Post processor of not operator.
+ */
 public class AbsentStreamPostStateProcessor extends StreamPostStateProcessor {
 
 
