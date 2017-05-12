@@ -1,0 +1,589 @@
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="shortcut icon" href="./assets/images/favicon.png">
+      
+      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.6.1">
+    
+    
+      
+        <title>WSO2 Siddhi</title>
+      
+    
+    
+      <script src="./assets/javascripts/modernizr-56ade86843.js"></script>
+    
+    
+      <link rel="stylesheet" href="./assets/stylesheets/application-4d0d3f2fbf.css">
+      
+        <link rel="stylesheet" href="./assets/stylesheets/application-f78e5cb881.palette.css">
+      
+    
+    
+      
+        
+        
+        
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+      <link rel="stylesheet" href="./stylesheets/extra.css">
+    
+    
+  </head>
+  
+  
+  
+  
+    <body data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <a href="." title="WSO2 Siddhi" class="md-logo md-header-nav__button">
+            <img src="./images/siddhi-logo-w.svg" width="24" height="24">
+          </a>
+        
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <span class="md-flex__ellipsis md-header-nav__title">
+          
+            
+              
+            
+            Welcome to WSO2 Siddhi
+          
+        </span>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+          
+<div class="md-search" data-md-component="search">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" required placeholder="Search" accesskey="s" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset">close</button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta" data-md-lang-result-none="No matching documents" data-md-lang-result-one="1 matching document" data-md-lang-result-other="# matching documents">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <div class="md-header-nav__source">
+          
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    
+      <i class="md-logo md-nav__button">
+        <img src="./images/siddhi-logo-w.svg">
+      </i>
+    
+    WSO2 Siddhi
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Welcome to WSO2 Siddhi
+      </label>
+    
+    <a href="." title="Welcome to WSO2 Siddhi" class="md-nav__link md-nav__link--active">
+      Welcome to WSO2 Siddhi
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#current-version-of-siddhi-v40-is-built-with-java-8" title="Current version of Siddhi v4.0 is built with Java 8." class="md-nav__link">
+    Current version of Siddhi v4.0 is built with Java 8.
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features-supported" title="Features Supported" class="md-nav__link">
+    Features Supported
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-requirements" title="System Requirements" class="md-nav__link">
+    System Requirements
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#questions" title="Questions" class="md-nav__link">
+    Questions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-contribute" title="How to Contribute" class="md-nav__link">
+    How to Contribute
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contact-us" title="Contact us" class="md-nav__link">
+    Contact us
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#we-welcome-your-feedback-and-contribution" title="We welcome your feedback and contribution." class="md-nav__link">
+    We welcome your feedback and contribution.
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      Documentation
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        Documentation
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="documentation/siddhi-quckstart-4.0/" title="Quick Start Guide" class="md-nav__link">
+      Quick Start Guide
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="documentation/siddhi-4.0/" title="Siddhi Query Guide" class="md-nav__link">
+      Siddhi Query Guide
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="extensions/" title="Extensions" class="md-nav__link">
+      Extensions
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      About
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        About
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="about/license/" title="License" class="md-nav__link">
+      License
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#current-version-of-siddhi-v40-is-built-with-java-8" title="Current version of Siddhi v4.0 is built with Java 8." class="md-nav__link">
+    Current version of Siddhi v4.0 is built with Java 8.
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features-supported" title="Features Supported" class="md-nav__link">
+    Features Supported
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-requirements" title="System Requirements" class="md-nav__link">
+    System Requirements
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#questions" title="Questions" class="md-nav__link">
+    Questions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-contribute" title="How to Contribute" class="md-nav__link">
+    How to Contribute
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contact-us" title="Contact us" class="md-nav__link">
+    Contact us
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#we-welcome-your-feedback-and-contribution" title="We welcome your feedback and contribution." class="md-nav__link">
+    We welcome your feedback and contribution.
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="welcome-to-wso2-siddhi">Welcome to WSO2 Siddhi</h1>
+<h5 id="current-version-of-siddhi-v40-is-built-with-java-8">Current version of Siddhi v4.0 is built with Java 8.</h5>
+<p>For all releases see https://github.com/wso2/siddhi/releases</p>
+<p>Siddhi CEP is a lightweight, easy-to-use Open Source Complex Event Processing Engine (CEP) released as a Java Library under Apache Software License v2.0. Siddhi CEP processes events which are generated by various event sources, analyses them and notifies appropriate complex events according to the user specified queries.</p>
+<p>This project was initiated as a research project at University of Moratuwa, Sri Lanka, and now being improved by WSO2 Inc.</p>
+<h2 id="features-supported">Features Supported</h2>
+<ul>
+<li>Filter<ul>
+<li>Multiple filter conditions can be defined </li>
+<li>Filters can be applied before and/or after Window operations</li>
+</ul>
+</li>
+<li>Join<ul>
+<li>Supports joining two streams into one based on a condition   </li>
+<li>Match operation triggering can be configured (making "left" or "right" or both streams to trigger)</li>
+<li>Supports Left, Right &amp; Full Outer Joins and Inner Join</li>
+</ul>
+</li>
+<li>Aggregation<ul>
+<li>By default shipped with Avg, Sum , Min, Max, etc</li>
+<li>Supports Custom Aggregations via its pluggable architecture</li>
+</ul>
+</li>
+<li>Group by<ul>
+<li>Supports Group by based on more than one attribute</li>
+<li>Supported for all type of queries</li>
+</ul>
+</li>
+<li>Having<ul>
+<li>Supported for all type of queries</li>
+</ul>
+</li>
+<li>Window<ul>
+<li>Default implementations to Windows are: Time Window, Time Batch Window, Length Window, Unique Window, etc</li>
+<li>Supports Window operators via the pluggable architecture</li>
+</ul>
+</li>
+<li>Conditions and Expressions<ul>
+<li>Supporting condition and expression evaluation</li>
+<li>Conditions supported are: and, or, not, ==,!=, &gt;=, &gt;, &lt;=, &lt;, and arithmetic operations</li>
+<li>Attributes supported are: boolean, string, int, long, float, double, object</li>
+<li>Expressions can be implemented as extensions via Siddhi's pluggable architecture</li>
+</ul>
+</li>
+<li>Pattern processing<ul>
+<li>Identifies pattern occurrences within streams</li>
+<li>Supports "every" conditions</li>
+<li>Can temporally process any amount of events from streams with followed-by (-&gt;) operation</li>
+<li>Can process two stream at the same time via "and" and "or" conditions</li>
+<li>Can collect multiple number of events, with min and max limit, using "count" condition</li>
+</ul>
+</li>
+<li>Sequence processing<ul>
+<li>Identifies continuous sequence of events from streams</li>
+<li>Can process two stream at the same time using "or" conditions on streams </li>
+<li>Supports zero to many, one to many, and zero to one conditions</li>
+</ul>
+</li>
+<li>Event Tables<ul>
+<li>Support for using historical data in realtime processing</li>
+<li>Can process with the in-memory, RDBMS or Hazelcast(In-memory data grid) based data collection</li>
+</ul>
+</li>
+<li>Partitions<ul>
+<li>Supports query partitions based on key words and value ranges </li>
+<li>Multiple queries can be grouped within a partition</li>
+</ul>
+</li>
+<li>Scripting <ul>
+<li>Support JavaScript &amp; Scala Scripts within Siddhi Queries</li>
+</ul>
+</li>
+<li>Query Language<ul>
+<li>SQL like query language </li>
+<li>Implemented on Antlr4</li>
+<li>Supports Query, Stream Definition and Query Plan compilation</li>
+</ul>
+</li>
+</ul>
+<h2 id="system-requirements">System Requirements</h2>
+<ol>
+<li>Minimum memory - 500 MB (based on in-memory data stored for processing)</li>
+<li>Processor      - Pentium 800MHz or equivalent at minimum</li>
+<li>Java SE Development Kit 1.8 or higher</li>
+<li>To build Siddhi CEP from the Source distribution, it is necessary that you have
+   JDK 1.7 version or later and Maven 3.0.4 or later</li>
+</ol>
+<h2 id="questions">Questions</h2>
+<ul>
+<li>Questions are welcomed &amp; we are happy to help you integrate Siddhi to your project :)</li>
+<li>Post your questions on http://stackoverflow.com/ tagging ["siddhi"] (http://stackoverflow.com/search?q=siddhi)</li>
+</ul>
+<h2 id="how-to-contribute">How to Contribute</h2>
+<ul>
+<li>Please report issues at [Siddhi JIRA] (https://wso2.org/jira/browse/SIDDHI)</li>
+<li>Send your bug fixes pull requests to [master branch] (https://github.com/wso2/carbon-event-processing/tree/master) </li>
+</ul>
+<h2 id="contact-us">Contact us</h2>
+<p>Siddhi developers can be contacted via the mailing lists:
+  * Carbon Developers List : dev@wso2.org
+  * Carbon Architecture List : architecture@wso2.org</p>
+<h4 id="we-welcome-your-feedback-and-contribution">We welcome your feedback and contribution.</h4>
+<p>Siddhi CEP Team</p>
+                
+                  
+                
+              
+              
+                
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+        
+          <a href="documentation/siddhi-quckstart-4.0/" title="Quick Start Guide" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Quick Start Guide
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="http://www.mkdocs.org" title="MkDocs">MkDocs</a>
+        and
+        <a href="http://squidfunk.github.io/mkdocs-material/" title="Material for MkDocs">
+          Material for MkDocs</a>
+      </div>
+      
+        
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="./assets/javascripts/application-6b599127bc.js"></script>
+      <script>app.initialize({url:{base:"."}})</script>
+      
+    
+    
+      
+    
+  </body>
+</html>
