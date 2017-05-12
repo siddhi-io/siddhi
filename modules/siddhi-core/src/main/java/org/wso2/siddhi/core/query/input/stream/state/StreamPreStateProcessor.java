@@ -30,7 +30,12 @@ import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created on 12/17/14.
@@ -77,10 +82,6 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         executionPlanContext.getSnapshotService().addSnapshotable(queryName, this);
     }
 
-    public void setThisStatePostProcessor(StreamPostStateProcessor thisStatePostProcessor) {
-        this.thisStatePostProcessor = thisStatePostProcessor;
-    }
-
     public boolean isAbsentPartner() {
         return absentPartner;
     }
@@ -109,6 +110,10 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         return thisStatePostProcessor;
     }
 
+    public void setThisStatePostProcessor(StreamPostStateProcessor thisStatePostProcessor) {
+        this.thisStatePostProcessor = thisStatePostProcessor;
+    }
+
     /**
      * Process the handed StreamEvent
      *
@@ -116,18 +121,21 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
      */
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        throw new IllegalStateException("process method of StreamPreStateProcessor should not be called. processAndReturn method is used for handling event chunks.");
+        throw new IllegalStateException("process method of StreamPreStateProcessor should not be called. " +
+                "processAndReturn method is used for handling event chunks.");
     }
 
     private boolean isExpired(StateEvent pendingStateEvent, StreamEvent incomingStreamEvent) {
         for (Map.Entry<Long, Set<Integer>> withinEntry : withinStates) {
             for (Integer withinStateId : withinEntry.getValue()) {
                 if (withinStateId == SiddhiConstants.ANY) {
-                    if (Math.abs(pendingStateEvent.getTimestamp() - incomingStreamEvent.getTimestamp()) > withinEntry.getKey()) {
+                    if (Math.abs(pendingStateEvent.getTimestamp() - incomingStreamEvent.getTimestamp()) > withinEntry
+                            .getKey()) {
                         return true;
                     }
                 } else {
-                    if (Math.abs(pendingStateEvent.getStreamEvent(withinStateId).getTimestamp() - incomingStreamEvent.getTimestamp()) > withinEntry.getKey()) {
+                    if (Math.abs(pendingStateEvent.getStreamEvent(withinStateId).getTimestamp() - incomingStreamEvent
+                            .getTimestamp()) > withinEntry.getKey()) {
                         return true;
 
                     }
@@ -271,7 +279,8 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     public void resetState() {
         pendingStateEventList.clear();
         if (isStartState && newAndEveryStateEventList.isEmpty()) {
-            //        if (isStartState && stateType == StateInputStream.Type.SEQUENCE && newAndEveryStateEventList.isEmpty()) {
+            //        if (isStartState && stateType == StateInputStream.Type.SEQUENCE && newAndEveryStateEventList
+            // .isEmpty()) {
             init();
         }
     }
@@ -280,10 +289,6 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     public void updateState() {
         pendingStateEventList.addAll(newAndEveryStateEventList);
         newAndEveryStateEventList.clear();
-    }
-
-    public void setStateId(int stateId) {
-        this.stateId = stateId;
     }
 
     @Override
@@ -375,6 +380,10 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     @Override
     public int getStateId() {
         return stateId;
+    }
+
+    public void setStateId(int stateId) {
+        this.stateId = stateId;
     }
 
     @Override

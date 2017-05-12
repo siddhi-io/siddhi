@@ -44,6 +44,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implementation of {@link WindowProcessor} which represent a Window operating based on a pre-defined length.
+ */
 @Extension(
         name = "length",
         namespace = "",
@@ -88,12 +91,14 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
         if (attributeExpressionExecutors.length == 1) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
         } else {
-            throw new ExecutionPlanValidationException("Length window should only have one parameter (<int> windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
+            throw new ExecutionPlanValidationException("Length window should only have one parameter (<int> " +
+                    "windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
         }
     }
 
     @Override
-    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
+    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
+                           StreamEventCloner streamEventCloner) {
         synchronized (this) {
             long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
             while (streamEventChunk.hasNext()) {
@@ -136,9 +141,12 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     }
 
     @Override
-    public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder, ExecutionPlanContext executionPlanContext,
-                                              List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, Table> tableMap, String queryName) {
-        return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder, executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
+    public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                              ExecutionPlanContext executionPlanContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
+        return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
+                executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
     }
 
     @Override

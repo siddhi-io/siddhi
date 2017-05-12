@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.query.processor.stream.window;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -45,6 +46,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Implementation of {@link WindowProcessor} which represent a Window operating based on event frequency.
+ */
 @Extension(
         name = "lossyFrequent",
         namespace = "",
@@ -95,7 +99,7 @@ import java.util.concurrent.ConcurrentHashMap;
         }
 )
 public class LossyFrequentWindowProcessor extends WindowProcessor implements FindableProcessor {
-
+    private static final Logger log = Logger.getLogger(LossyFrequentWindowProcessor.class);
     private ConcurrentHashMap<String, LossyCount> countMap = new ConcurrentHashMap<String, LossyCount>();
     private ConcurrentHashMap<String, StreamEvent> map = new ConcurrentHashMap<String, StreamEvent>();
     private VariableExpressionExecutor[] variableExpressionExecutors;
@@ -109,9 +113,11 @@ public class LossyFrequentWindowProcessor extends WindowProcessor implements Fin
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
             outputExpectsExpiredEvents, ExecutionPlanContext executionPlanContext) {
-        support = Double.parseDouble(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue()));
+        support = Double.parseDouble(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[0])
+                .getValue()));
         if (attributeExpressionExecutors.length > 1) {
-            error = Double.parseDouble(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue()));
+            error = Double.parseDouble(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[1])
+                    .getValue()));
         } else {
             error = support / 10; // recommended error is 10% of 20$ of support value;
         }
@@ -129,7 +135,8 @@ public class LossyFrequentWindowProcessor extends WindowProcessor implements Fin
     }
 
     @Override
-    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor, StreamEventCloner streamEventCloner) {
+    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
+                           StreamEventCloner streamEventCloner) {
 
         synchronized (this) {
             long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
@@ -215,7 +222,8 @@ public class LossyFrequentWindowProcessor extends WindowProcessor implements Fin
         countMap = (ConcurrentHashMap<String, LossyCount>) state.get("CountMap");
     }
 
-    private String generateKey(StreamEvent event) {      // for performance reason if its all attribute we don't do the attribute list check
+    private String generateKey(StreamEvent event) {      // for performance reason if its all attribute we don't do
+        // the attribute list check
         StringBuilder stringBuilder = new StringBuilder();
         if (variableExpressionExecutors.length == 0) {
             for (Object data : event.getOutputData()) {
@@ -235,11 +243,17 @@ public class LossyFrequentWindowProcessor extends WindowProcessor implements Fin
     }
 
     @Override
-    public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder, ExecutionPlanContext executionPlanContext,
-                                              List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, Table> tableMap, String queryName) {
-        return OperatorParser.constructOperator(map.values(), expression, matchingMetaInfoHolder, executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
+    public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                              ExecutionPlanContext executionPlanContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
+        return OperatorParser.constructOperator(map.values(), expression, matchingMetaInfoHolder,
+                executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
     }
 
+    /**
+     * Inner class to keep the lossy count
+     */
     public class LossyCount {
         int count;
         int bucketId;

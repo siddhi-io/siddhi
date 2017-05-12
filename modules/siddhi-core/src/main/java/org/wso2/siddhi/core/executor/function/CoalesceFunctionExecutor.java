@@ -17,7 +17,10 @@
  */
 package org.wso2.siddhi.core.executor.function;
 
-import org.wso2.siddhi.annotation.*;
+import org.wso2.siddhi.annotation.Example;
+import org.wso2.siddhi.annotation.Extension;
+import org.wso2.siddhi.annotation.Parameter;
+import org.wso2.siddhi.annotation.ReturnAttribute;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -27,6 +30,9 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.Map;
 
+/**
+ * Executor class for coalesce function. Returns the value of the first input parameter that is not null.
+ */
 @Extension(
         name = "coalesce",
         namespace = "",
@@ -67,7 +73,8 @@ public class CoalesceFunctionExecutor extends FunctionExecutor {
     private Attribute.Type returnType;
 
     @Override
-    public void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
+    public void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                     ExecutionPlanContext executionPlanContext) {
         if (attributeExpressionExecutors.length == 0) {
             throw new ExecutionPlanValidationException("Coalesce must have at least one parameter");
         }

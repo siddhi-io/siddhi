@@ -54,7 +54,8 @@ public class BroadcastDistributionStrategy extends DistributionStrategy {
      * @param configReader
      */
     @Override
-    public void init(StreamDefinition streamDefinition, OptionHolder transportOptionHolder, OptionHolder distributionOptionHolder, List<OptionHolder> destinationOptionHolders, ConfigReader configReader) {
+    public void init(StreamDefinition streamDefinition, OptionHolder transportOptionHolder, OptionHolder
+            distributionOptionHolder, List<OptionHolder> destinationOptionHolders, ConfigReader configReader) {
 
     }
 

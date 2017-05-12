@@ -28,6 +28,10 @@ import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.siddhi.core.util.transport.TemplateBuilder;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
+/**
+ * Implementation of {@link SinkMapper} representing pass-through scenario where no mapping is done and
+ * {@link Event}s are send directly to transports.
+ */
 @Extension(
         name = "passThrough",
         namespace = "sinkMapper",
@@ -47,21 +51,22 @@ public class PassThroughSinkMapper extends SinkMapper {
     }
 
     @Override
-    public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, TemplateBuilder payloadTemplateBuilder, ConfigReader mapperConfigReader) {
+    public void init(StreamDefinition streamDefinition, OptionHolder optionHolder, TemplateBuilder
+            payloadTemplateBuilder, ConfigReader mapperConfigReader) {
         // do nothing
     }
 
     @Override
     public void mapAndSend(Event[] events, OptionHolder optionHolder, TemplateBuilder payloadTemplateBuilder,
-                           SinkListener sinkListener, DynamicOptions dynamicOptions) throws ConnectionUnavailableException {
-        updateEventIds(events);
+                           SinkListener sinkListener, DynamicOptions dynamicOptions)
+            throws ConnectionUnavailableException {
         sinkListener.publish(events, dynamicOptions);
     }
 
     @Override
     public void mapAndSend(Event event, OptionHolder optionHolder, TemplateBuilder payloadTemplateBuilder,
-                           SinkListener sinkListener, DynamicOptions dynamicOptions) throws ConnectionUnavailableException {
-        updateEventId(event);
+                           SinkListener sinkListener, DynamicOptions dynamicOptions)
+            throws ConnectionUnavailableException {
         sinkListener.publish(event, dynamicOptions);
     }
 }

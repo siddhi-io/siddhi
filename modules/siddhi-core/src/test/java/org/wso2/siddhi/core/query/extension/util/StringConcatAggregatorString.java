@@ -64,7 +64,8 @@ public class StringConcatAggregatorString extends AttributeAggregator {
      * @param executionPlanContext         SiddhiContext
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        ExecutionPlanContext executionPlanContext) {
         appendAbc = Boolean.parseBoolean(configReader.readConfig("append.abc", "false"));
 
     }
@@ -83,7 +84,6 @@ public class StringConcatAggregatorString extends AttributeAggregator {
         } else {
             return aggregatedStringValue;
         }
-
     }
 
     @Override
@@ -149,5 +149,4 @@ public class StringConcatAggregatorString extends AttributeAggregator {
     public void restoreState(Map<String, Object> state) {
         aggregatedStringValue = (String) state.get("AggregatedStringValue");
     }
-
 }

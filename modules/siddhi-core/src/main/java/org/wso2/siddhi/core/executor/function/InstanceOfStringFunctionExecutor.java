@@ -31,6 +31,9 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.Map;
 
+/**
+ * Executor class for instanceOf String function. Function execution logic is implemented in execute here.
+ */
 @Extension(
         name = "instanceOfString",
         namespace = "",
@@ -66,7 +69,8 @@ public class InstanceOfStringFunctionExecutor extends FunctionExecutor {
     Attribute.Type returnType = Attribute.Type.BOOL;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        ExecutionPlanContext executionPlanContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new ExecutionPlanValidationException("Invalid no of arguments passed to instanceOfString() " +
                     "function, required only 1, but found " + attributeExpressionExecutors.length);
@@ -75,7 +79,7 @@ public class InstanceOfStringFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected Object execute(Object[] data) {
-        return null;//Since the instanceOfString function takes in 1 parameter, this method does not get called.
+        return null; //Since the instanceOfString function takes in 1 parameter, this method does not get called.
         // Hence, not implemented.
     }
 

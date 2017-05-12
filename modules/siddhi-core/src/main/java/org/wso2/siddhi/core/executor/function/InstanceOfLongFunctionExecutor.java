@@ -31,6 +31,9 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.Map;
 
+/**
+ * Executor class for instanceOf Long function. Function execution logic is implemented in execute here.
+ */
 @Extension(
         name = "instanceOfLong",
         namespace = "",
@@ -65,7 +68,8 @@ public class InstanceOfLongFunctionExecutor extends FunctionExecutor {
     Attribute.Type returnType = Attribute.Type.BOOL;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        ExecutionPlanContext executionPlanContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new ExecutionPlanValidationException("Invalid no of arguments passed to instanceOfLong() function, " +
                     "required only 1, but found " + attributeExpressionExecutors.length);
@@ -74,7 +78,7 @@ public class InstanceOfLongFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected Object execute(Object[] data) {
-        return null;//Since the instanceOfLong function takes in 1 parameter, this method does not get called. Hence,
+        return null; //Since the instanceOfLong function takes in 1 parameter, this method does not get called. Hence,
         // not implemented.
     }
 

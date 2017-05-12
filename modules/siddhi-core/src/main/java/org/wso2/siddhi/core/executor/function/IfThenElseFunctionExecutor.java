@@ -32,12 +32,15 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.Map;
 
+/**
+ * Executor class for ifThenElse function. Function execution logic is implemented in execute here.
+ */
 @Extension(
         name = "ifThenElse",
         namespace = "",
         description = "Evaluates the 'condition' parameter and returns value of the 'if.expression' parameter " +
-                "if the condition is true, or returns value of the 'else.expression' parameter " +
-                "if the condition is false. Here both 'if.expression' and 'else.expression' should be of the same type.",
+                "if the condition is true, or returns value of the 'else.expression' parameter if the condition is "
+                + "false. Here both 'if.expression' and 'else.expression' should be of the same type.",
         parameters = {
                 @Parameter(name = "condition",
                         description = "This specifies the if then else condition value.",

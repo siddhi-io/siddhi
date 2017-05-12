@@ -30,6 +30,9 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Executor class for UUID function. Function execution logic is implemented in execute here.
+ */
 @Extension(
         name = "UUID",
         namespace = "",
@@ -62,7 +65,8 @@ public class UUIDFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected Object execute(Object[] data) {
-        return null; //Since the e function takes in no parameters, this method does not get called. Hence, not implemented.
+        return null; //Since the e function takes in no parameters, this method does not get called. Hence, not
+        // implemented.
     }
 
     @Override

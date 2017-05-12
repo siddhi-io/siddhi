@@ -6,7 +6,6 @@ import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.stream.output.sink.InMemorySink;
 
-
 @Extension(
         name = "testInMemory",
         namespace = "sink",
