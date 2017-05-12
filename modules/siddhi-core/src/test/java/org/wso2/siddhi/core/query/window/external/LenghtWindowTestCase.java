@@ -1,21 +1,22 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
+ * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.core.query.window;
+
+package org.wso2.siddhi.core.query.window.external;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -45,18 +46,30 @@ public class LenghtWindowTestCase {
     }
 
     @Test
-    public void lengthWindowTest1() throws InterruptedException {
+    public void testLengthWindow0() throws InterruptedException {
+        log.info("Testing length window definition");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String window = "define window EventWindow1(symbol string, price int, volume float) length(5) output all " +
+                "events; " +
+                "define window EventWindow2(symbol string, price int, volume float) length(5);";
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(window);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testLengthWindow1() throws InterruptedException {
         log.info("Testing length window with no of events smaller than window size");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
-        String query = "@info(name = 'query1') from cseEventStream#window.length(4) select symbol,price,volume insert" +
-                " all events into outputStream ;";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define window cseWindow (symbol string, price float, volume int) length(4) output all events; ";
+        String query = "@info(name = 'query1') from cseEventStream select symbol,price,volume insert into cseWindow ;" +
+                "@info(name = 'query2') from cseWindow insert into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        executionPlanRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -80,15 +93,17 @@ public class LenghtWindowTestCase {
     }
 
     @Test
-    public void lengthWindowTest2() throws InterruptedException {
+    public void testLengthWindow2() throws InterruptedException {
         log.info("Testing length window with no of events greater than window size");
 
         final int length = 4;
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
-        String query = "@info(name = 'query1') from cseEventStream#window.length(" + length + ") select symbol,price," +
-                "volume insert all events into outputStream ;";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define window cseWindow (symbol string, price float, volume int) length(" + length + ") output all " +
+                "events; ";
+        String query = "@info(name = 'query1') from cseEventStream select symbol,price,volume insert into cseWindow ;" +
+                "@info(name = 'query2') from cseWindow insert all events into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
@@ -130,19 +145,21 @@ public class LenghtWindowTestCase {
     }
 
     @Test
-    public void lengthWindowTest3() throws InterruptedException {
+    public void testLengthWindow3() throws InterruptedException {
         log.info("Testing length window with no of events greater than window size");
 
         final int length = 4;
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
-        String query = "@info(name = 'query1') from cseEventStream#window.length(" + length + ") select symbol,price," +
-                "volume insert all events into outputStream ;";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define window cseWindow (symbol string, price float, volume int) length(" + length + ") output all " +
+                "events; ";
+        String query = "@info(name = 'query1') from cseEventStream select symbol,price,volume insert into cseWindow ;" +
+                "@info(name = 'query2') from cseWindow insert all events into outputStream ;";
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        executionPlanRuntime.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);

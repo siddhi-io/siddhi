@@ -1299,7 +1299,7 @@ public class PartitionTestCase {
                 + "begin"
                 + "@info(name = 'query') from cseEventStream#window.time(1 sec) " +
                 "select symbol, avg(price) as avgPrice, volume " +
-                "having avgPrice >= 0" +
+                "having avgPrice >= 0 or avgPrice is null " +
                 "insert expired events into OutStockStream ;"
                 + "end ";
 
@@ -1312,7 +1312,7 @@ public class PartitionTestCase {
                 for (Event event : events) {
                     count.incrementAndGet();
                     if (count.get() == 1) {
-                        Assert.assertEquals(0.0, event.getData()[1]);
+                        Assert.assertEquals(null, event.getData()[1]);
                     }
                     eventArrived = true;
                 }

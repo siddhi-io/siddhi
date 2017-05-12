@@ -18,13 +18,11 @@
 
 package org.wso2.siddhi.extension.input.transport.tcp;
 
-import junit.framework.Assert;
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -39,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TCPSourceTestCase {
     static final Logger log = Logger.getLogger(TCPSourceTestCase.class);
     private volatile int count;
@@ -50,6 +47,7 @@ public class TCPSourceTestCase {
         count = 0;
         eventArrived = false;
     }
+
 
     @Test
     public void testTcpSource1() throws InterruptedException {
@@ -171,6 +169,7 @@ public class TCPSourceTestCase {
         Assert.assertEquals(3, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
+
     }
 
     @Test
@@ -399,8 +398,6 @@ public class TCPSourceTestCase {
         arrayList.add(new Event(System.currentTimeMillis(), new Object[]{"test2", 362, 32.0f, 3802l, 232.0, true}));
         TCPNettyClient.send("bar", arrayList.toArray(new Event[3]));
 
-        TCPNettyClient.send("bar1", arrayList.toArray(new Event[3]));
-
         TCPNettyClient.disconnect();
         TCPNettyClient.shutdown();
         Thread.sleep(300);
@@ -548,6 +545,7 @@ public class TCPSourceTestCase {
         tcpNettyClient2.shutdown();
         Thread.sleep(300);
         executionPlanRuntime.shutdown();
+
     }
 
 

@@ -21,3 +21,5 @@ hs_err_pid*
 .settings/
 .cache-tests
 .cache-main
+
+site/
