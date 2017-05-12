@@ -155,7 +155,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
             count++;
             value += (Double) data;
             if (count == 0) {
-                return 0.0;
+                return null;
             }
             return value / count;
         }
@@ -165,7 +165,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
             count--;
             value -= (Double) obj;
             if (count == 0) {
-                return 0.0;
+                return null;
             }
             return value / count;
         }
@@ -174,7 +174,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         public Object reset() {
             value = 0.0;
             count = 0;
-            return 0.0;
+            return null;
         }
 
         @Override
@@ -207,7 +207,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
             count++;
             value += (Float) data;
             if (count == 0) {
-                return 0.0;
+                return null;
             }
             return value / count;
         }
@@ -217,7 +217,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
             count--;
             value -= (Float) obj;
             if (count == 0) {
-                return 0.0;
+                return null;
             }
             return value / count;
         }
@@ -226,7 +226,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         public Object reset() {
             value = 0.0;
             count = 0;
-            return 0.0;
+            return null;
         }
 
         @Override
@@ -259,7 +259,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
             count++;
             value += (Integer) data;
             if (count == 0) {
-                return 0.0;
+                return null;
             }
             return value / count;
         }
@@ -269,7 +269,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
             count--;
             value -= (Integer) obj;
             if (count == 0) {
-                return 0.0;
+                return null;
             }
             return value / count;
         }
@@ -278,7 +278,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         public Object reset() {
             value = 0.0;
             count = 0;
-            return 0.0;
+            return null;
         }
 
         @Override
@@ -312,7 +312,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
             count++;
             value += (Long) data;
             if (count == 0) {
-                return 0.0;
+                return null;
             }
             return value / count;
         }
@@ -322,7 +322,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
             count--;
             value -= (Long) obj;
             if (count == 0) {
-                return 0.0;
+                return null;
             }
             return value / count;
         }
@@ -331,7 +331,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         public Object reset() {
             value = 0.0;
             count = 0;
-            return 0.0;
+            return null;
         }
 
         @Override

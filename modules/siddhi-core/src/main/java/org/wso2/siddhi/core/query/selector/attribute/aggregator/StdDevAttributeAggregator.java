@@ -61,7 +61,8 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
 
     /**
      * The initialization method for FunctionExecutor
-     *  @param attributeExpressionExecutors are the executors of each attributes in the function
+     *
+     * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param configReader
      * @param executionPlanContext         Execution plan runtime context
      */
@@ -70,7 +71,8 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
                         ExecutionPlanContext executionPlanContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("stdDev aggregator has to have exactly 1 parameter, currently " +
-                    attributeExpressionExecutors.length + " parameters provided");
+                    attributeExpressionExecutors.length
+                    + " parameters provided");
         }
 
         Attribute.Type type = attributeExpressionExecutors[0].getReturnType();
@@ -142,9 +144,9 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
     }
 
     /**
-     * Standard deviation aggregator for Double values
+     * Standard deviation abstrct aggregator for Double values
      */
-    private class StdDevAttributeAggregatorDouble extends StdDevAttributeAggregator {
+    private abstract class StdDevAbstractAttributeAggregatorDouble extends StdDevAttributeAggregator {
         private final Attribute.Type type = Attribute.Type.DOUBLE;
         private double mean, oldMean, stdDeviation, sum;
         private int count = 0;
@@ -154,36 +156,30 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
             return type;
         }
 
-        @Override
-        public Object processAdd(Object data) {
+        public Object processAdd(double value) {
             // See here for the algorithm: http://www.johndcook.com/blog/standard_deviation/
             count++;
-            double value = (Double) data;
-
-            if (count == 1) {
+            if (count == 0) {
+                return null;
+            } else if (count == 1) {
                 sum = mean = oldMean = value;
                 stdDeviation = 0.0;
+                return 0.0;
             } else {
                 oldMean = mean;
                 sum += value;
                 mean = sum / count;
                 stdDeviation += (value - oldMean) * (value - mean);
+                return Math.sqrt(stdDeviation / count);
             }
-
-            if (count < 2) {
-                return 0.0;
-            }
-            return Math.sqrt(stdDeviation / count);
         }
 
-        @Override
-        public Object processRemove(Object data) {
+        public Object processRemove(double value) {
             count--;
-            double value = (Double) data;
-
             if (count == 0) {
                 sum = mean = 0.0;
                 stdDeviation = 0.0;
+                return null;
             } else {
                 oldMean = mean;
                 sum -= value;
@@ -191,7 +187,7 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
                 stdDeviation -= (value - oldMean) * (value - mean);
             }
 
-            if (count < 2) {
+            if (count == 1) {
                 return 0.0;
             }
             return Math.sqrt(stdDeviation / count);
@@ -202,7 +198,7 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
             sum = mean = oldMean = 0.0;
             stdDeviation = 0.0;
             count = 0;
-            return 0.0;
+            return null;
         }
 
         @Override
@@ -223,261 +219,66 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
             oldMean = (Long) state.get("OldMean");
             stdDeviation = (Long) state.get("stdDeviation");
             count = (int) state.get("Count");
+        }
+    }
+
+    /**
+     * Standard deviation aggregator for Double values
+     */
+    private class StdDevAttributeAggregatorDouble extends StdDevAbstractAttributeAggregatorDouble {
+        @Override
+        public Object processAdd(Object data) {
+            return processAdd(((Double) data).doubleValue());
+        }
+
+        @Override
+        public Object processRemove(Object data) {
+            return processRemove(((Double) data).doubleValue());
         }
     }
 
     /**
      * Standard deviation aggregator for Float values
      */
-    private class StdDevAttributeAggregatorFloat extends StdDevAttributeAggregator {
-        private final Attribute.Type type = Attribute.Type.DOUBLE;
-        private double mean, oldMean, stdDeviation, sum;
-        private int count = 0;
-
-        @Override
-        public Attribute.Type getReturnType() {
-            return type;
-        }
-
+    private class StdDevAttributeAggregatorFloat extends StdDevAbstractAttributeAggregatorDouble {
         @Override
         public Object processAdd(Object data) {
-            // See here for the algorithm: http://www.johndcook.com/blog/standard_deviation/
-            count++;
-            double value = (Float) data;
-
-            if (count == 1) {
-                sum = mean = oldMean = value;
-                stdDeviation = 0.0;
-            } else {
-                oldMean = mean;
-                sum += value;
-                mean = sum / count;
-                stdDeviation += (value - oldMean) * (value - mean);
-            }
-
-            if (count < 2) {
-                return 0.0;
-            }
-            return Math.sqrt(stdDeviation / count);
+            return processAdd(((Float) data).doubleValue());
         }
 
         @Override
         public Object processRemove(Object data) {
-            count--;
-            double value = (Float) data;
-
-            if (count == 0) {
-                sum = mean = 0.0;
-                stdDeviation = 0.0;
-            } else {
-                oldMean = mean;
-                sum -= value;
-                mean = sum / count;
-                stdDeviation -= (value - oldMean) * (value - mean);
-            }
-
-            if (count < 2) {
-                return 0.0;
-            }
-            return Math.sqrt(stdDeviation / count);
-        }
-
-        @Override
-        public Object reset() {
-            sum = mean = oldMean = 0.0;
-            stdDeviation = 0.0;
-            count = 0;
-            return 0.0;
-        }
-
-        @Override
-        public Map<String, Object> currentState() {
-            Map<String, Object> state = new HashMap<>();
-            state.put("Sum", sum);
-            state.put("Mean", mean);
-            state.put("OldMean", oldMean);
-            state.put("stdDeviation", stdDeviation);
-            state.put("Count", count);
-            return state;
-        }
-
-        @Override
-        public void restoreState(Map<String, Object> state) {
-            sum = (Long) state.get("Sum");
-            mean = (Long) state.get("Mean");
-            oldMean = (Long) state.get("OldMean");
-            stdDeviation = (Long) state.get("stdDeviation");
-            count = (int) state.get("Count");
+            return processRemove(((Float) data).doubleValue());
         }
     }
 
     /**
      * Standard deviation aggregator for Integer values
      */
-    private class StdDevAttributeAggregatorInt extends StdDevAttributeAggregator {
-        private final Attribute.Type type = Attribute.Type.DOUBLE;
-        private double mean, oldMean, stdDeviation, sum;
-        private int count = 0;
-
-        @Override
-        public Attribute.Type getReturnType() {
-            return type;
-        }
-
+    private class StdDevAttributeAggregatorInt extends StdDevAbstractAttributeAggregatorDouble {
         @Override
         public Object processAdd(Object data) {
-            // See here for the algorithm: http://www.johndcook.com/blog/standard_deviation/
-            count++;
-            double value = (Integer) data;
-
-            if (count == 1) {
-                sum = mean = oldMean = value;
-                stdDeviation = 0.0;
-            } else {
-                oldMean = mean;
-                sum += value;
-                mean = sum / count;
-                stdDeviation += (value - oldMean) * (value - mean);
-            }
-
-            if (count < 2) {
-                return 0.0;
-            }
-            return Math.sqrt(stdDeviation / count);
+            return processAdd(((Integer) data).doubleValue());
         }
 
         @Override
         public Object processRemove(Object data) {
-            count--;
-            double value = (Integer) data;
-
-            if (count == 0) {
-                sum = mean = 0.0;
-                stdDeviation = 0.0;
-            } else {
-                oldMean = mean;
-                sum -= value;
-                mean = sum / count;
-                stdDeviation -= (value - oldMean) * (value - mean);
-            }
-
-            if (count < 2) {
-                return 0.0;
-            }
-            return Math.sqrt(stdDeviation / count);
-        }
-
-        @Override
-        public Object reset() {
-            sum = mean = oldMean = 0.0;
-            stdDeviation = 0.0;
-            count = 0;
-            return 0.0;
-        }
-
-        @Override
-        public Map<String, Object> currentState() {
-            Map<String, Object> state = new HashMap<>();
-            state.put("Sum", sum);
-            state.put("Mean", mean);
-            state.put("OldMean", oldMean);
-            state.put("stdDeviation", stdDeviation);
-            state.put("Count", count);
-            return state;
-        }
-
-        @Override
-        public void restoreState(Map<String, Object> state) {
-            sum = (Long) state.get("Sum");
-            mean = (Long) state.get("Mean");
-            oldMean = (Long) state.get("OldMean");
-            stdDeviation = (Long) state.get("stdDeviation");
-            count = (int) state.get("Count");
+            return processRemove(((Integer) data).doubleValue());
         }
     }
 
     /**
      * Standard deviation aggregator for Long values
      */
-    private class StdDevAttributeAggregatorLong extends StdDevAttributeAggregator {
-        private final Attribute.Type type = Attribute.Type.DOUBLE;
-        private double mean, oldMean, stdDeviation, sum;
-        private int count = 0;
-
-        @Override
-        public Attribute.Type getReturnType() {
-            return type;
-        }
-
+    private class StdDevAttributeAggregatorLong extends StdDevAbstractAttributeAggregatorDouble {
         @Override
         public Object processAdd(Object data) {
-            // See here for the algorithm: http://www.johndcook.com/blog/standard_deviation/
-            count++;
-            double value = (Long) data;
-
-            if (count == 1) {
-                sum = mean = oldMean = value;
-                stdDeviation = 0.0;
-            } else {
-                oldMean = mean;
-                sum += value;
-                mean = sum / count;
-                stdDeviation += (value - oldMean) * (value - mean);
-            }
-
-            if (count < 2) {
-                return 0.0;
-            }
-            return Math.sqrt(stdDeviation / count);
+            return processAdd(((Long) data).doubleValue());
         }
 
         @Override
         public Object processRemove(Object data) {
-            count--;
-            double value = (Long) data;
-
-            if (count == 0) {
-                sum = mean = 0.0;
-                stdDeviation = 0.0;
-            } else {
-                oldMean = mean;
-                sum -= value;
-                mean = sum / count;
-                stdDeviation -= (value - oldMean) * (value - mean);
-            }
-
-            if (count < 2) {
-                return 0.0;
-            }
-            return Math.sqrt(stdDeviation / count);
-        }
-
-        @Override
-        public Object reset() {
-            sum = mean = oldMean = 0.0;
-            stdDeviation = 0.0;
-            count = 0;
-            return 0.0;
-        }
-
-        @Override
-        public Map<String, Object> currentState() {
-            Map<String, Object> state = new HashMap<>();
-            state.put("Sum", sum);
-            state.put("Mean", mean);
-            state.put("OldMean", oldMean);
-            state.put("stdDeviation", stdDeviation);
-            state.put("Count", count);
-            return state;
-        }
-
-        @Override
-        public void restoreState(Map<String, Object> state) {
-            sum = (Long) state.get("Sum");
-            mean = (Long) state.get("Mean");
-            oldMean = (Long) state.get("OldMean");
-            stdDeviation = (Long) state.get("stdDeviation");
-            count = (int) state.get("Count");
+            return processRemove(((Long) data).doubleValue());
         }
     }
 }
