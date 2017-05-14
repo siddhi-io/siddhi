@@ -329,8 +329,10 @@ public class StateInputStreamParser {
                 ArrayList<Map.Entry<Long, Set<Integer>>> states = new ArrayList<>();
                 Set<Integer> withinStateset = new HashSet<Integer>();
                 withinStateset.add(SiddhiConstants.ANY);
-                states.add(0, new AbstractMap.SimpleEntry<Long, Set<Integer>>(((LogicalStateElement) stateElement)
-                        .getStreamStateElement1().getWithin().getValue(), withinStateset));
+                if (((LogicalStateElement) stateElement).getStreamStateElement1().getWithin() != null) {
+                    states.add(0, new AbstractMap.SimpleEntry<Long, Set<Integer>>(((LogicalStateElement) stateElement)
+                            .getStreamStateElement1().getWithin().getValue(), withinStateset));
+                }
                 logicalPreStateProcessor1 = new AbsentLogicalPreStateProcessor(type, stateType, states);
 
                 EntryValveProcessor entryValveProcessor = new EntryValveProcessor(executionPlanContext);
@@ -350,8 +352,10 @@ public class StateInputStreamParser {
                 ArrayList<Map.Entry<Long, Set<Integer>>> states = new ArrayList<>();
                 Set<Integer> withinStateset = new HashSet<Integer>();
                 withinStateset.add(SiddhiConstants.ANY);
-                states.add(0, new AbstractMap.SimpleEntry<Long, Set<Integer>>(((LogicalStateElement) stateElement)
-                        .getStreamStateElement2().getWithin().getValue(), withinStateset));
+                if (((LogicalStateElement) stateElement).getStreamStateElement2().getWithin() != null) {
+                    states.add(0, new AbstractMap.SimpleEntry<Long, Set<Integer>>(((LogicalStateElement) stateElement)
+                            .getStreamStateElement2().getWithin().getValue(), withinStateset));
+                }
                 logicalPreStateProcessor2 = new AbsentLogicalPreStateProcessor(type, stateType, states);
 
                 EntryValveProcessor entryValveProcessor = new EntryValveProcessor(executionPlanContext);

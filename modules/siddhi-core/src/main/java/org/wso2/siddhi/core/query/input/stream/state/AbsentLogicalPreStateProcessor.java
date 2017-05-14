@@ -30,7 +30,9 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     public AbsentLogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType, List<Map
             .Entry<Long, Set<Integer>>> withinStates) {
         super(type, stateType, Collections.EMPTY_LIST);
-        timeout = withinStates.get(0).getKey();
+        if (withinStates.size() > 0) {
+            timeout = withinStates.get(0).getKey();
+        }
     }
 
     @Override

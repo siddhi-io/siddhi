@@ -879,38 +879,38 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     @Override
     public Object visitLogical_absent_stateful_source(SiddhiQLParser.Logical_absent_stateful_sourceContext ctx) {
 //    logical_absent_stateful_source
-//    :standard_stateful_source AND absent_pattern_source
-//    |absent_pattern_source AND standard_stateful_source
-//    |absent_pattern_source AND absent_pattern_source
+//    :standard_stateful_source AND NOT basic_source
+//    |NOT basic_source AND standard_stateful_source
+//    |NOT '(' basic_source AND basic_source ')' within_time
 //    |standard_stateful_source OR absent_pattern_source
 //    |absent_pattern_source OR standard_stateful_source
-//    |absent_pattern_source OR absent_pattern_source
+//    |NOT '(' basic_source OR basic_source ')' within_time
 //    ;
 
         if (ctx.AND() != null) {
             if (ctx.standard_stateful_source() != null) {
                 StreamStateElement presentStreamState = (StreamStateElement) visit(ctx.standard_stateful_source());
-                AbsentStreamStateElement absentStreamState = (AbsentStreamStateElement) visit(ctx
-                        .absent_pattern_source(0));
+                AbsentStreamStateElement absentStreamState = (AbsentStreamStateElement) State.not(
+                        (BasicSingleInputStream) visit(ctx.basic_source(0)), null);
                 return State.logicalNotAnd(presentStreamState, absentStreamState);
             } else {
-                AbsentStreamStateElement absentStreamState1 = (AbsentStreamStateElement) visit(ctx
-                        .absent_pattern_source(0));
-                AbsentStreamStateElement absentStreamState2 = (AbsentStreamStateElement) visit(ctx
-                        .absent_pattern_source(1));
+                AbsentStreamStateElement absentStreamState1 = (AbsentStreamStateElement) State.not(
+                        (BasicSingleInputStream) visit(ctx.basic_source(0)), (TimeConstant) visit(ctx.within_time()));
+                AbsentStreamStateElement absentStreamState2 = (AbsentStreamStateElement) State.not(
+                        (BasicSingleInputStream) visit(ctx.basic_source(1)), (TimeConstant) visit(ctx.within_time()));
                 return State.logicalNotAnd(absentStreamState1, absentStreamState2);
             }
         } else if (ctx.OR() != null) {
             if (ctx.standard_stateful_source() != null) {
                 StreamStateElement streamStateElement1 = (StreamStateElement) visit(ctx.standard_stateful_source());
                 AbsentStreamStateElement streamStateElement2 = (AbsentStreamStateElement) visit(ctx
-                        .absent_pattern_source(0));
+                        .absent_pattern_source());
                 return State.logicalOr(streamStateElement1, streamStateElement2);
             } else {
-                AbsentStreamStateElement absentStreamState1 = (AbsentStreamStateElement) visit(ctx
-                        .absent_pattern_source(0));
-                AbsentStreamStateElement absentStreamState2 = (AbsentStreamStateElement) visit(ctx
-                        .absent_pattern_source(1));
+                AbsentStreamStateElement absentStreamState1 = (AbsentStreamStateElement) State.not(
+                        (BasicSingleInputStream) visit(ctx.basic_source(0)), null);
+                AbsentStreamStateElement absentStreamState2 = (AbsentStreamStateElement) State.not(
+                        (BasicSingleInputStream) visit(ctx.basic_source(1)), null);
                 return State.logicalOr(absentStreamState1, absentStreamState2);
             }
         } else {

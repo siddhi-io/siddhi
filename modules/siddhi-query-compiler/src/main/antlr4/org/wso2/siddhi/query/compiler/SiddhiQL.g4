@@ -194,12 +194,12 @@ logical_stateful_source
     ;
 
 logical_absent_stateful_source
-    :standard_stateful_source AND absent_pattern_source
-    |absent_pattern_source AND standard_stateful_source
-    |absent_pattern_source AND absent_pattern_source
+    :standard_stateful_source AND NOT basic_source
+    |NOT basic_source AND standard_stateful_source
+    |NOT '(' basic_source AND basic_source ')' within_time
     |standard_stateful_source OR absent_pattern_source
     |absent_pattern_source OR standard_stateful_source
-    |absent_pattern_source OR absent_pattern_source
+    |NOT '(' basic_source OR basic_source ')' within_time
     ;
 
 absent_pattern_source

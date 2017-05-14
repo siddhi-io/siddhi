@@ -18,34 +18,29 @@
 
 package org.wso2.siddhi.core.query.input.stream.state;
 
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-
-
 /**
  * Post processor of not operator.
  */
 public class AbsentStreamPostStateProcessor extends StreamPostStateProcessor {
 
 
-    protected void process(StateEvent stateEvent, ComplexEventChunk complexEventChunk) {
-        thisStatePreProcessor.stateChanged();
-
-        StreamEvent streamEvent = stateEvent.getStreamEvent(stateId);
-        stateEvent.setTimestamp(streamEvent.getTimestamp());
-
-        complexEventChunk.reset();
-        this.isEventReturned = true;
-
-        if (nextStatePerProcessor != null) {
-            nextStatePerProcessor.addState(stateEvent);
-        }
-        if (nextEveryStatePerProcessor != null) {
-            nextEveryStatePerProcessor.addEveryState(stateEvent);
-        }
-        if (callbackPreStateProcessor != null) {
-            callbackPreStateProcessor.startStateReset();
-        }
-    }
+//    protected void process(StateEvent stateEvent, ComplexEventChunk complexEventChunk) {
+//        thisStatePreProcessor.stateChanged();
+//
+//        StreamEvent streamEvent = stateEvent.getStreamEvent(stateId);
+//        stateEvent.setTimestamp(streamEvent.getTimestamp());
+//
+//        complexEventChunk.reset();
+//        this.isEventReturned = true;
+//
+//        if (nextStatePerProcessor != null) {
+//            nextStatePerProcessor.addState(stateEvent);
+//        }
+//        if (nextEveryStatePerProcessor != null) {
+//            nextEveryStatePerProcessor.addEveryState(stateEvent);
+//        }
+//        if (callbackPreStateProcessor != null) {
+//            callbackPreStateProcessor.startStateReset();
+//        }
+//    }
 }

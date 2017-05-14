@@ -60,19 +60,19 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
 
     @Override
     public void addState(StateEvent stateEvent) {
-        if (stateType == StateInputStream.Type.SEQUENCE) {
+//        if (stateType == StateInputStream.Type.SEQUENCE) {
             if (newAndEveryStateEventList.isEmpty()) {
                 newAndEveryStateEventList.add(stateEvent);
             }
             if (partnerStatePreProcessor != null && partnerStatePreProcessor.newAndEveryStateEventList.isEmpty()) {
                 partnerStatePreProcessor.newAndEveryStateEventList.add(stateEvent);
             }
-        } else {
-            newAndEveryStateEventList.add(stateEvent);
-            if (partnerStatePreProcessor != null && partnerStatePreProcessor.newAndEveryStateEventList.isEmpty()) {
-                partnerStatePreProcessor.newAndEveryStateEventList.add(stateEvent);
-            }
-        }
+//        } else {
+//            newAndEveryStateEventList.add(stateEvent);
+//            if (partnerStatePreProcessor != null && partnerStatePreProcessor.newAndEveryStateEventList.isEmpty()) {
+//                partnerStatePreProcessor.newAndEveryStateEventList.add(stateEvent);
+//            }
+//        }
 
     }
 
