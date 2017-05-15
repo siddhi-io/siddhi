@@ -54,6 +54,26 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
     <Match>
+        <Class name="org.wso2.siddhi.core.query.output.ratelimit.event.AllPerEventOutputRateLimiter"/>
+        <Bug pattern="VO_VOLATILE_INCREMENT"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.partition.PartitionRuntime"/>
+        <Bug pattern="RV_RETURN_VALUE_OF_PUTIFABSENT_IGNORED"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.executor.condition.NotConditionExpressionExecutor"/>
+        <Bug pattern="RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.executor.condition.OrConditionExpressionExecutor"/>
+        <Bug pattern="RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper$2"/>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+    <Match>
         <Package name="~org\.wso2\.siddhi\.performance.*"/>
     </Match>
     <Match>
