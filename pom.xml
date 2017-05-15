@@ -163,6 +163,11 @@
                 <version>${mysql.connector.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.connector.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.tomcat.wso2</groupId>
                 <artifactId>jdbc-pool</artifactId>
                 <version>${jdbc-pool.version}</version>
@@ -606,6 +611,7 @@
         <geocoder.version>0.16_1</geocoder.version>
         <quartz.version>2.1.1.wso2v1</quartz.version>
         <mysql.connector.version>5.1.6</mysql.connector.version>
+        <h2.connector.version>1.4.187</h2.connector.version>
         <hadoop.common.version>2.6.0</hadoop.common.version>
         <commons-lang3.version>3.3.2</commons-lang3.version>
         <commons-math3.version>3.2</commons-math3.version>
