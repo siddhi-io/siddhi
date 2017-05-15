@@ -54,6 +54,26 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
     <Match>
+        <Class name="org.wso2.siddhi.extension.table.rdbms.RDBMSEventTable"/>
+        <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING, NP_LOAD_OF_KNOWN_NULL_VALUE"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.extension.table.rdbms.RDBMSIterator"/>
+        <Bug pattern="PZLA_PREFER_ZERO_LENGTH_ARRAYS"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.extension.table.rdbms.config.RDBMSQueryConfiguration"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.extension.table.rdbms.util.RDBMSTableUtils"/>
+        <Bug pattern="DC_DOUBLECHECK"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.extension.table.rdbms.util.RDBMSTableUtils$RDBMSConfigurationMapper"/>
+        <Bug pattern="DM_CONVERT_CASE"/>
+    </Match>
+    <Match>
         <Package name="~org\.wso2\.siddhi\.performance.*"/>
     </Match>
     <Match>
