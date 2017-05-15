@@ -38,8 +38,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     @Override
     public void addState(StateEvent stateEvent) {
         super.addState(stateEvent);
-        if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor && logicalType == LogicalStateElement
-                .Type.AND) {
+        if (logicalType == LogicalStateElement.Type.OR) {
             synchronized (this) {
                 arrivedEventsList.add(stateEvent);
             }
@@ -50,8 +49,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
 
-        if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor && logicalType == LogicalStateElement
-                .Type.AND) {
+        if (logicalType == LogicalStateElement.Type.OR) {
 
 
             // Called by the scheduler
@@ -117,8 +115,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
         ComplexEventChunk<StateEvent> event = super.processAndReturn(complexEventChunk);
-        if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor && logicalType == LogicalStateElement
-                .Type.AND) {
+        if (logicalType == LogicalStateElement.Type.OR) {
             StateEvent firstEvent = event.getFirst();
             if (firstEvent != null) {
                 // Synchronize with process method
