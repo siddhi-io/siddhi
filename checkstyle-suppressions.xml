@@ -24,6 +24,7 @@
 <suppressions>
 
     <suppress checks="Javadoc.*" files=".*/src/test/java/.*"/>
+    <suppress checks=".*" files=".*/antlr4/org/wso2/siddhi/query/compiler/*" />
 
     <suppress checks="JavadocPackage" files=".*/src/(main|integration)/java/.*"/>
     <suppress checks="JavadocPackage" files=".*/src/.*/internal/.*"/>
