@@ -49,7 +49,7 @@ public abstract class DistributedTransport extends Sink {
      * @param optionHolder           Option holder containing static and dynamic options related to the
      * {@link Sink}
      * @param sinkConfigReader
-     * @param executionPlanContext   Context of the execution plan which this output sink belongs to
+     * @param executionPlanContext   Context of thhe execution plan which this output sink belongs to
      */
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
@@ -63,14 +63,14 @@ public abstract class DistributedTransport extends Sink {
     /**
      * This is method contains the additional parameters which require to initialize distributed transport
      *
-     * @param streamDefinition
-     * @param transportOptionHolder
-     * @param sinkConfigReader
-     * @param mapperConfigReader
-     * @param executionPlanContext
-     * @param destinationOptionHolders
-     * @param sinkAnnotation
-     * @param strategy
+     * @param streamDefinition Definition of the stream this sink instance is publishing to
+     * @param transportOptionHolder Option holder for carrying options for the transport
+     * @param sinkConfigReader this hold the {@link Sink} extensions configuration reader for sinks.
+     * @param mapperConfigReader this hold the {@link Sink} extensions configuration reader for mapppers.
+     * @param executionPlanContext The execution plan context
+     * @param destinationOptionHolders List of option holders containing the options mentioned in @desination
+     * @param sinkAnnotation The annotation of the Sink
+     * @param strategy Publishing strategy to be used by the distributed transport
      */
     public void init(StreamDefinition streamDefinition, String type, OptionHolder transportOptionHolder,
                      ConfigReader sinkConfigReader,
