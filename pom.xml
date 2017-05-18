@@ -237,11 +237,6 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-test-output-transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-extension-kafka-output-transport</artifactId>
                 <version>${project.version}</version>
             </dependency>
