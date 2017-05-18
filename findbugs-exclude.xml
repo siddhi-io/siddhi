@@ -103,4 +103,32 @@
     <Match>
         <Package name="~org\.wso2\.siddhi\.sample.*"/>
     </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core\.query\.output\.ratelimit\.time.*"/>
+        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+    </Match>
+    <Match>
+        <class name="org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor"/>
+        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+    </Match>
+    <Match>
+        <class name="org.wso2.siddhi.core.query.selector.QuerySelector"/>
+        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+    </Match>
+    <Match>
+        <class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator"/>
+        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+    </Match>
+    <Match>
+        <class name="org.wso2.siddhi.core.stream.StreamJunction"/>
+        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+    </Match>
+    <Match>
+        <class name="org.wso2.siddhi.core.util.timestamp.EventTimeBasedMillisTimestampGenerator"/>
+        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+    </Match>
+    <Match>
+        <class name="org.wso2.siddhi.core.event.stream.StreamEvent"/>
+        <Bug pattern="UC_USELESS_OBJECT"/>
+    </Match>
 </FindBugsFilter>
