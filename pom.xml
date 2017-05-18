@@ -485,6 +485,11 @@
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <excludePackageNames>
+                            org.wso2.siddhi.query.compiler.internal:org.wso2.siddhi.query.compiler
+                        </excludePackageNames>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>net.alchim31.maven</groupId>
