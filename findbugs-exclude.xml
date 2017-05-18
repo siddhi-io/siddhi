@@ -131,4 +131,36 @@
         <class name="org.wso2.siddhi.core.event.stream.StreamEvent"/>
         <Bug pattern="UC_USELESS_OBJECT"/>
     </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core\.event.*"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.executor.VariableExpressionExecutor"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.stream.output.sink.distributed.DistributedTransport"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.query.selector.attribute.processor.executor.AbstractAggregationAttributeExecutor"/>
+        <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.util.transport.InMemoryBroker"/>
+        <Bug pattern="DE_MIGHT_IGNORE"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.util.parser.JoinInputStreamParser"/>
+        <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
+    </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core.*"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core.*"/>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC"/>
+    </Match>
 </FindBugsFilter>
