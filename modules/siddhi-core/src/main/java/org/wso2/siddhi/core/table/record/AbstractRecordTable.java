@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.AddingStreamEventExtractor;
@@ -269,10 +270,12 @@ public abstract class AbstractRecordTable implements Table {
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                              String queryName) {
         ConditionBuilder conditionBuilder = new ConditionBuilder(expression, matchingMetaInfoHolder,
                                                                  executionPlanContext, variableExpressionExecutors,
-                                                                 tableMap, queryName);
+                tableMap, variableMap, queryName);
         CompiledCondition compiledCondition = compileCondition(conditionBuilder);
         Map<String, ExpressionExecutor> expressionExecutorMap = conditionBuilder.getVariableExpressionExecutorMap();
         return new RecordStoreCompiledCondition(expressionExecutorMap, compiledCondition);

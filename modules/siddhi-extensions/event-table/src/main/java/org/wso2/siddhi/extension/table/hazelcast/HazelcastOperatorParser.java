@@ -22,6 +22,7 @@ import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
@@ -50,7 +51,9 @@ public class HazelcastOperatorParser {
                                              MatchingMetaInfoHolder matchingMetaInfoHolder,
                                              ExecutionPlanContext executionPlanContext,
                                              List<VariableExpressionExecutor> variableExpressionExecutors,
-                                             Map<String, Table> tableMap, String queryName) {
+                                             Map<String, Table> tableMap,
+                                             Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                             String queryName) {
         if (storeEvents instanceof HazelcastPrimaryKeyEventHolder) {
             if (expression instanceof Compare && ((Compare) expression).getOperator() == Compare.Operator.EQUAL) {
                 Compare compare = (Compare) expression;
@@ -73,24 +76,34 @@ public class HazelcastOperatorParser {
 
                     if (leftSideIndexed && !rightSideIndexed) {
                         ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(compare.getRightExpression(),
-                                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
-                        return new HazelcastPrimaryKeyOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex(), ((HazelcastPrimaryKeyEventHolder) storeEvents).getIndexPosition());
+                                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
+                                tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0,
+                                queryName);
+                        return new HazelcastPrimaryKeyOperator(expressionExecutor, matchingMetaInfoHolder
+                                .getStoreEventIndex(), ((HazelcastPrimaryKeyEventHolder) storeEvents)
+                                .getIndexPosition());
 
                     } else if (!leftSideIndexed && rightSideIndexed) {
                         ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(compare.getLeftExpression(),
-                                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
-                        return new HazelcastPrimaryKeyOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex(), ((HazelcastPrimaryKeyEventHolder) storeEvents).getIndexPosition());
+                                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
+                                tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0,
+                                queryName);
+                        return new HazelcastPrimaryKeyOperator(expressionExecutor, matchingMetaInfoHolder
+                                .getStoreEventIndex(), ((HazelcastPrimaryKeyEventHolder) storeEvents)
+                                .getIndexPosition());
 
                     }
                 }
             }
             //fallback to not using primary key
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
-                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
+                    variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
             return new HazelcastMapOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
         } else if (storeEvents instanceof Collection) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
-                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
+                    variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
             return new HazelcastCollectionOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
         } else {
             throw new OperationNotSupportedException(storeEvents.getClass() + " is not supported by OperatorParser!");

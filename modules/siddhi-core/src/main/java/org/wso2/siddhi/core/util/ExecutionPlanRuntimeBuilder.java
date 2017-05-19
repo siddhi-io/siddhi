@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.util;
 
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
@@ -42,6 +43,7 @@ import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.definition.TriggerDefinition;
+import org.wso2.siddhi.query.api.definition.VariableDefinition;
 import org.wso2.siddhi.query.api.definition.WindowDefinition;
 
 import java.util.Collections;
@@ -61,6 +63,8 @@ public class ExecutionPlanRuntimeBuilder {
             new ConcurrentHashMap<String, AbstractDefinition>(); //contains table definition
     private ConcurrentMap<String, AbstractDefinition> windowDefinitionMap =
             new ConcurrentHashMap<String, AbstractDefinition>(); //contains window definition
+    private ConcurrentMap<String, AbstractDefinition> variableDefinitionMap = new ConcurrentHashMap<String,
+            AbstractDefinition>(); //contains variable definition
     private ConcurrentMap<String, TriggerDefinition> triggerDefinitionMap =
             new ConcurrentHashMap<String, TriggerDefinition>(); //contains trigger definition
     private Map<String, QueryRuntime> queryProcessorMap =
@@ -74,6 +78,8 @@ public class ExecutionPlanRuntimeBuilder {
     private ConcurrentMap<String, Table> tableMap = new ConcurrentHashMap<String, Table>(); //contains event tables
     private ConcurrentMap<String, Window> eventWindowMap =
             new ConcurrentHashMap<String, Window>(); //contains event tables
+    private ConcurrentMap<String, GlobalVariableExpressionExecutor> variableMap =
+            new ConcurrentHashMap<String, GlobalVariableExpressionExecutor>(); //contains global variables
     private ConcurrentMap<String, EventTrigger> eventTriggerMap =
             new ConcurrentHashMap<String, EventTrigger>(); //contains event tables
     private ConcurrentMap<String, PartitionRuntime> partitionMap =
@@ -90,7 +96,7 @@ public class ExecutionPlanRuntimeBuilder {
 
     public void defineStream(StreamDefinition streamDefinition) {
         DefinitionParserHelper.validateDefinition(streamDefinition, streamDefinitionMap, tableDefinitionMap,
-                windowDefinitionMap);
+                windowDefinitionMap, variableDefinitionMap);
         AbstractDefinition currentDefinition = streamDefinitionMap
                 .putIfAbsent(streamDefinition.getId(), streamDefinition);
         if (currentDefinition != null) {
@@ -103,7 +109,7 @@ public class ExecutionPlanRuntimeBuilder {
 
     public void defineTable(TableDefinition tableDefinition) {
         DefinitionParserHelper.validateDefinition(tableDefinition, streamDefinitionMap, tableDefinitionMap,
-                windowDefinitionMap);
+                windowDefinitionMap, variableDefinitionMap);
         AbstractDefinition currentDefinition = tableDefinitionMap.putIfAbsent(tableDefinition.getId(), tableDefinition);
         if (currentDefinition != null) {
             tableDefinition = (TableDefinition) currentDefinition;
@@ -113,7 +119,7 @@ public class ExecutionPlanRuntimeBuilder {
 
     public void defineWindow(WindowDefinition windowDefinition) {
         DefinitionParserHelper.validateDefinition(windowDefinition, streamDefinitionMap, tableDefinitionMap,
-                windowDefinitionMap);
+                windowDefinitionMap, variableDefinitionMap);
         DefinitionParserHelper.addStreamJunction(windowDefinition, streamJunctionMap, executionPlanContext);
         AbstractDefinition currentDefinition = windowDefinitionMap
                 .putIfAbsent(windowDefinition.getId(), windowDefinition);
@@ -190,6 +196,15 @@ public class ExecutionPlanRuntimeBuilder {
         return queryRuntime.getQueryId();
     }
 
+    public void defineVariable(VariableDefinition variableDefinition) {
+        DefinitionParserHelper.validateDefinition(variableDefinition, streamDefinitionMap, tableDefinitionMap,
+                windowDefinitionMap, variableDefinitionMap);
+        if (!variableDefinitionMap.containsKey(variableDefinition.getId())) {
+            windowDefinitionMap.putIfAbsent(variableDefinition.getId(), variableDefinition);
+        }
+        DefinitionParserHelper.addVariable(variableDefinition, variableMap, executionPlanContext);
+    }
+
     public void defineFunction(FunctionDefinition functionDefinition) {
         DefinitionParserHelper.addFunction(executionPlanContext, functionDefinition);
     }
@@ -208,6 +223,10 @@ public class ExecutionPlanRuntimeBuilder {
 
     public ConcurrentMap<String, Window> getEventWindowMap() {
         return eventWindowMap;
+    }
+
+    public ConcurrentMap<String, GlobalVariableExpressionExecutor> getVariableMap() {
+        return variableMap;
     }
 
     public ConcurrentMap<String, AbstractDefinition> getStreamDefinitionMap() {

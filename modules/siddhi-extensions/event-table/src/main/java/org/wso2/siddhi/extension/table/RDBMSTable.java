@@ -31,6 +31,7 @@ import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.exception.CannotLoadConfigurationException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.SiddhiConstants;
@@ -53,13 +54,13 @@ import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.sql.DataSource;
 
 @Extension(
         name = "rdbms",
@@ -332,9 +333,11 @@ public class RDBMSTable implements Table {
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                              String queryName) {
         return RDBMSOperatorParser.parse(dbHandler, expression, matchingMetaInfoHolder, executionPlanContext,
-                variableExpressionExecutors, tableMap, tableDefinition, cachedTable, queryName);
+                variableExpressionExecutors, tableMap, variableMap, tableDefinition, cachedTable, queryName);
     }
 
 

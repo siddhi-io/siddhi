@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.query.processor.Processor;
@@ -116,13 +117,14 @@ public class Window implements FindableProcessor, Snapshotable {
     /**
      * Initialize the WindowEvent table by creating {@link WindowProcessor} to handle the events.
      *
-     * @param tableMap  map of {@link Table}s
+     * @param tableMap       map of {@link Table}s
      * @param eventWindowMap map of EventWindows
      * @param latencyTracker to rack the latency if statistic of underlying {@link WindowProcessor} is required
      * @param queryName name of the query window belongs to.
      */
-    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, LatencyTracker
-            latencyTracker, String queryName) {
+    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, Map<String,
+            GlobalVariableExpressionExecutor> variableMap, LatencyTracker
+                             latencyTracker, String queryName) {
         if (this.windowProcessor != null) {
             return;
         }
@@ -143,7 +145,7 @@ public class Window implements FindableProcessor, Snapshotable {
 
         WindowProcessor internalWindowProcessor = (WindowProcessor) SingleInputStreamParser.generateProcessor
                 (windowDefinition.getWindow(), metaStreamEvent, new ArrayList<VariableExpressionExecutor>(), this
-                        .executionPlanContext, tableMap, false, outputExpectsExpiredEvents, queryName);
+                        .executionPlanContext, tableMap, variableMap, false, outputExpectsExpiredEvents, queryName);
         internalWindowProcessor.setStreamEventCloner(streamEventCloner);
         internalWindowProcessor.constructStreamEventPopulater(metaStreamEvent, 0);
 
@@ -234,10 +236,11 @@ public class Window implements FindableProcessor, Snapshotable {
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, Map<String,
+            GlobalVariableExpressionExecutor> variableMap, String queryName) {
         if (this.internalWindowProcessor instanceof FindableProcessor) {
             return ((FindableProcessor) this.internalWindowProcessor).compileCondition(expression,
-                    matchingMetaInfoHolder, executionPlanContext, variableExpressionExecutors, tableMap,
+                    matchingMetaInfoHolder, executionPlanContext, variableExpressionExecutors, tableMap, variableMap,
                     queryName);
         } else {
             throw new OperationNotSupportedException("Cannot construct finder for the window " + this

@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.table.Table;
@@ -82,9 +83,11 @@ public class WindowWindowProcessor extends WindowProcessor implements FindablePr
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                              String queryName) {
         return window.compileCondition(expression, matchingMetaInfoHolder, executionPlanContext,
-                variableExpressionExecutors, tableMap, queryName);
+                variableExpressionExecutors, tableMap, variableMap, queryName);
     }
 
     @Override

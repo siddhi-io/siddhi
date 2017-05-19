@@ -72,9 +72,23 @@ public class SystemTimeBasedScheduler extends Scheduler {
     @Override
     public Scheduler clone(String key, EntryValveProcessor entryValveProcessor) {
         Scheduler scheduler = new SystemTimeBasedScheduler(scheduledExecutorService, entryValveProcessor,
-                                                           executionPlanContext);
+                executionPlanContext);
         scheduler.elementId = elementId + "-" + key;
         return scheduler;
+    }
+
+    @Override
+    public void reset() {
+        try {
+            mutex.acquire();
+            toNotifyQueue.clear();
+            running = false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Error when scheduling System Time Based Scheduler", e);
+        } finally {
+            mutex.release();
+        }
     }
 
     private class EventCaller implements Runnable {

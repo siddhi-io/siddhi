@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,22 +15,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.query.api.util;
+
+package org.wso2.siddhi.query.api.expression;
+
+
+import org.wso2.siddhi.query.api.util.SiddhiConstants;
 
 /**
- * Siddhi constants
+ * Variable that can be defined in the level of execution plan.
  */
-public class SiddhiConstants {
+public class GlobalVariable extends Expression {
 
-//    public static final String EVENT_TRACE_LOGGER = "EVENT_TRACE_LOGGER";
+    private static final long serialVersionUID = 1L;
 
-    public static final String ANNOTATION_INFO = "info";
-    public static final String ANNOTATION_ELEMENT_NAME = "name";
+    private String name;
 
-    public static final String INNER_STREAM_FLAG = "#";
-    public static final String TRIGGERED_TIME = "triggered_time";
+    public GlobalVariable(String name) {
+        this.name = SiddhiConstants.GLOBAL_VARIABLE_PREFIX + name;
+    }
 
-    public static final String GLOBAL_VARIABLE_PREFIX = "global#";
-
-    public static final int LAST = -2;
+    public String getName() {
+        return name;
+    }
 }

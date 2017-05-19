@@ -25,6 +25,7 @@ import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.definition.TriggerDefinition;
+import org.wso2.siddhi.query.api.definition.VariableDefinition;
 import org.wso2.siddhi.query.api.definition.WindowDefinition;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
@@ -47,6 +48,7 @@ public class ExecutionPlan {
     private Map<String, StreamDefinition> streamDefinitionMap = new HashMap<String, StreamDefinition>();
     private Map<String, TableDefinition> tableDefinitionMap = new HashMap<String, TableDefinition>();
     private Map<String, WindowDefinition> windowDefinitionMap = new HashMap<String, WindowDefinition>();
+    private Map<String, VariableDefinition> variableDefinitionMap = new HashMap<String, VariableDefinition>();
     private Map<String, TriggerDefinition> triggerDefinitionMap = new HashMap<String, TriggerDefinition>();
     private List<ExecutionElement> executionElementList = new ArrayList<ExecutionElement>();
     private List<String> executionElementNameList = new ArrayList<String>();
@@ -225,6 +227,9 @@ public class ExecutionPlan {
         return windowDefinitionMap;
     }
 
+    public Map<String, VariableDefinition> getVariableDefinitionMap() {
+        return variableDefinitionMap;
+    }
 
     @Override
     public String toString() {
@@ -232,6 +237,7 @@ public class ExecutionPlan {
                 "streamDefinitionMap=" + streamDefinitionMap +
                 ", tableDefinitionMap=" + tableDefinitionMap +
                 ", windowDefinitionMap=" + windowDefinitionMap +
+                ", variableDefinitionMap=" + variableDefinitionMap +
                 ", executionElementList=" + executionElementList +
                 ", executionElementNameList=" + executionElementNameList +
                 ", annotations=" + annotations +
@@ -296,6 +302,19 @@ public class ExecutionPlan {
         }
         checkDuplicateFunctionExist(functionDefinition);
         this.functionDefinitionMap.put(functionDefinition.getId(), functionDefinition);
+    }
+
+    public void defineVariable(VariableDefinition variableDefinition) {
+        if (variableDefinition == null) {
+            throw new ExecutionPlanValidationException("Variable Definition should not be null");
+        } else if (variableDefinition.getId() == null) {
+            throw new ExecutionPlanValidationException("Variable Id should not be null for Variable Definition");
+        }
+        if (this.variableDefinitionMap.get(variableDefinition.getId()) != null) {
+            throw new DuplicateDefinitionException("The variable definition with the same id exists " +
+                    variableDefinition.getId());
+        }
+        this.variableDefinitionMap.put(variableDefinition.getId(), variableDefinition);
     }
 
     private void checkDuplicateFunctionExist(FunctionDefinition functionDefinition) {

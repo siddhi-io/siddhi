@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.query.output.callback.DeleteTableCallback;
 import org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback;
 import org.wso2.siddhi.core.query.output.callback.InsertIntoTableCallback;
@@ -33,6 +34,7 @@ import org.wso2.siddhi.core.query.output.callback.InsertIntoWindowCallback;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.query.output.callback.UpdateOrInsertTableCallback;
 import org.wso2.siddhi.core.query.output.callback.UpdateTableCallback;
+import org.wso2.siddhi.core.query.output.callback.UpdateVariableCallback;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.output.ratelimit.PassThroughOutputRateLimiter;
 import org.wso2.siddhi.core.query.output.ratelimit.event.AllPerEventOutputRateLimiter;
@@ -80,14 +82,17 @@ public class OutputParser {
                                                          StreamDefinition outputStreamDefinition,
                                                          Map<String, Table> tableMap,
                                                          Map<String, Window> eventWindowMap,
+                                                         Map<String, GlobalVariableExpressionExecutor> variableMap,
                                                          ExecutionPlanContext executionPlanContext,
                                                          boolean convertToStreamEvent, String queryName) {
         String id = outStream.getId();
         Table table = null;
         Window window = null;
+        GlobalVariableExpressionExecutor variable = null;
         if (id != null) {
             table = tableMap.get(id);
             window = eventWindowMap.get(id);
+            variable = variableMap.get(id);
         }
         StreamEventPool streamEventPool = null;
         StreamEventConverter streamEventConverter = null;
@@ -116,6 +121,8 @@ public class OutputParser {
                 DefinitionParserHelper.validateOutputStream(outputStreamDefinition, table.getTableDefinition());
                 return new InsertIntoTableCallback(table, outputStreamDefinition, convertToStreamEvent,
                         streamEventPool, streamEventConverter);
+            } else if (variable != null) {
+                return new UpdateVariableCallback(variable, outputStreamDefinition);
             } else {
                 return new InsertIntoStreamCallback(outputStreamDefinition, queryName);
             }
@@ -138,7 +145,7 @@ public class OutputParser {
                         MatchingMetaInfoHolder matchingMetaInfoHolder =
                                 MatcherParser.constructMatchingMetaStateHolder(tableMetaStreamEvent, 0, table.getTableDefinition(), 0);
                         CompiledCondition compiledCondition = table.compileCondition((((DeleteStream) outStream).getOnDeleteExpression()),
-                                matchingMetaInfoHolder, executionPlanContext, null, tableMap, queryName);
+                                matchingMetaInfoHolder, executionPlanContext, null, tableMap, variableMap, queryName);
                         StateEventPool stateEventPool = new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 10);
                         return new DeleteTableCallback(table, compiledCondition, matchingMetaInfoHolder.getMatchingStreamEventIndex(),
                                 convertToStreamEvent, stateEventPool, streamEventPool, streamEventConverter);
@@ -151,7 +158,7 @@ public class OutputParser {
                         MatchingMetaInfoHolder matchingMetaInfoHolder =
                                 MatcherParser.constructMatchingMetaStateHolder(tableMetaStreamEvent, 0, table.getTableDefinition(), 0);
                         CompiledCondition compiledCondition = table.compileCondition((((UpdateStream) outStream).getOnUpdateExpression()),
-                                matchingMetaInfoHolder, executionPlanContext, null, tableMap, queryName);
+                                matchingMetaInfoHolder, executionPlanContext, null, tableMap, variableMap, queryName);
                         StateEventPool stateEventPool = new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 10);
                         return new UpdateTableCallback(table, compiledCondition, outputStreamDefinition,
                                 matchingMetaInfoHolder.getMatchingStreamEventIndex(), convertToStreamEvent, stateEventPool,
@@ -167,7 +174,7 @@ public class OutputParser {
                         MatchingMetaInfoHolder matchingMetaInfoHolder =
                                 MatcherParser.constructMatchingMetaStateHolder(tableMetaStreamEvent, 0, table.getTableDefinition(), 0);
                         CompiledCondition compiledCondition  = table.compileCondition((((UpdateOrInsertStream) outStream).getOnUpdateExpression()),
-                                matchingMetaInfoHolder, executionPlanContext, null, tableMap, queryName);
+                                matchingMetaInfoHolder, executionPlanContext, null, tableMap,variableMap, queryName);
                         StateEventPool stateEventPool = new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 10);
                         return new UpdateOrInsertTableCallback(table, compiledCondition, outputStreamDefinition,
                                 matchingMetaInfoHolder.getMatchingStreamEventIndex(), convertToStreamEvent, stateEventPool,

@@ -27,8 +27,9 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
-import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
+import org.wso2.siddhi.core.executor.RuntimeVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.table.Table;
@@ -89,7 +90,15 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
             outputExpectsExpiredEvents, ExecutionPlanContext executionPlanContext) {
         expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 1) {
-            length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
+            length = (Integer) ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[0]).getValue();
+            if (attributeExpressionExecutors[0] instanceof GlobalVariableExpressionExecutor) {
+                ((GlobalVariableExpressionExecutor) attributeExpressionExecutors[0]).addVariableUpdateListener(
+                        (oldValue, newValue) -> {
+                            synchronized (LengthWindowProcessor.this) {
+                                LengthWindowProcessor.this.length = (Integer) newValue;
+                            }
+                        });
+            }
         } else {
             throw new ExecutionPlanValidationException("Length window should only have one parameter (<int> " +
                     "windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
@@ -111,8 +120,16 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
                 } else {
                     StreamEvent firstEvent = this.expiredEventChunk.poll();
                     if (firstEvent != null) {
-                        firstEvent.setTimestamp(currentTime);
-                        streamEventChunk.insertBeforeCurrent(firstEvent);
+                        while (firstEvent != null) {
+                            firstEvent.setTimestamp(currentTime);
+                            streamEventChunk.insertBeforeCurrent(firstEvent);
+                            count--;
+                            if (count < length) {
+                                break;  // Should not call poll again
+                            }
+                            firstEvent = this.expiredEventChunk.poll();
+                        }
+                        count++;
                         this.expiredEventChunk.add(clonedEvent);
                     } else {
                         StreamEvent resetEvent = streamEventCloner.copyStreamEvent(streamEvent);
@@ -144,9 +161,11 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                              String queryName) {
         return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
+                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
     }
 
     @Override

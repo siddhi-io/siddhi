@@ -69,7 +69,8 @@ public class UpdateOrInsertTableCallback extends OutputCallback {
         if (updateOrAddEventChunk.hasNext()) {
             ComplexEventChunk<StateEvent> updateOrAddStateEventChunk = constructMatchingStateEventChunk
                     (updateOrAddEventChunk,
-                    convertToStreamEvent, stateEventPool, matchingStreamIndex, streamEventPool, streamEventConvertor);
+                            convertToStreamEvent, stateEventPool, matchingStreamIndex, streamEventPool,
+                            streamEventConvertor);
             constructMatchingStateEventChunk(updateOrAddEventChunk, convertToStreamEvent, stateEventPool,
                     matchingStreamIndex, streamEventPool, streamEventConvertor);
             table.updateOrAdd(updateOrAddStateEventChunk, compiledCondition, updateAttributeMappers,

@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
@@ -75,7 +76,8 @@ public class RDBMSOperatorParser {
      */
     public static Operator parse(DBHandler dbHandler, Expression expression, MatchingMetaInfoHolder
             matchingMetaInfoHolder, ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor>
-            variableExpressionExecutors, Map<String, Table> tableMap, TableDefinition tableDefinition,
+                                         variableExpressionExecutors, Map<String, Table> tableMap, Map<String,
+            GlobalVariableExpressionExecutor> variableMap, TableDefinition tableDefinition,
                                  CachingTable cachingTable, String queryName) {
 
 
@@ -114,7 +116,8 @@ public class RDBMSOperatorParser {
 
         buildConditionQuery(isTableStreamMap, expression, conditionBuilder, conditionAttributeList,
                 expressionExecutorList, dbHandler, elementMappings, matchingMetaInfoHolder.getMetaStateEvent(),
-                matchingMetaInfoHolder.getMatchingStreamEventIndex(), tableMap, variableExpressionExecutors,
+                matchingMetaInfoHolder.getMatchingStreamEventIndex(), tableMap, variableMap,
+                variableExpressionExecutors,
                 executionPlanContext, executionInfo, queryName);
 
         //Constructing query to delete a table row
@@ -161,7 +164,7 @@ public class RDBMSOperatorParser {
         if (cachingTable != null) {
             inMemoryTableOperator = OperatorParser.constructOperator(cachingTable.getCacheList(), expression,
                     matchingMetaInfoHolder,
-                    executionPlanContext, variableExpressionExecutors, tableMap, queryName);
+                    executionPlanContext, variableExpressionExecutors, tableMap, variableMap, queryName);
         }
         return new RDBMSOperator(executionInfo, expressionExecutorList, dbHandler, inMemoryTableOperator,
                 matchingMetaInfoHolder.getMatchingStreamDefinition().getAttributeList().size());
@@ -214,7 +217,8 @@ public class RDBMSOperatorParser {
                                             List<ExpressionExecutor> expressionExecutorList, DBHandler dbHandler,
                                             Map<String, String> elementMappings, MetaComplexEvent metaStateEvent, int
                                                     matchingStreamIndex,
-                                            Map<String, Table> tableMap, List<VariableExpressionExecutor>
+                                            Map<String, Table> tableMap, Map<String,
+            GlobalVariableExpressionExecutor> variableMap, List<VariableExpressionExecutor>
                                                     variableExpressionExecutors,
                                             ExecutionPlanContext executionPlanContext, ExecutionInfo executionInfo,
                                             String queryName) {
@@ -222,16 +226,28 @@ public class RDBMSOperatorParser {
 
         if (expression instanceof And) {
             Expression leftExpression = ((And) expression).getLeftExpression();
-            buildConditionQuery(isTableStreamMap, leftExpression, conditionBuilder, conditionAttributeList, expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex, tableMap, variableExpressionExecutors, executionPlanContext, executionInfo, queryName);
-            conditionBuilder.append(RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER).append(elementMappings.get(RDBMSTableConstants.EVENT_TABLE_GENERIC_RDBMS_AND)).append(RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER);
+            buildConditionQuery(isTableStreamMap, leftExpression, conditionBuilder, conditionAttributeList,
+                    expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex,
+                    tableMap, variableMap, variableExpressionExecutors, executionPlanContext, executionInfo, queryName);
+            conditionBuilder.append(RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER).append
+                    (elementMappings.get(RDBMSTableConstants.EVENT_TABLE_GENERIC_RDBMS_AND)).append
+                    (RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER);
             Expression rightExpression = ((And) expression).getRightExpression();
-            buildConditionQuery(isTableStreamMap, rightExpression, conditionBuilder, conditionAttributeList, expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex, tableMap, variableExpressionExecutors, executionPlanContext, executionInfo, queryName);
+            buildConditionQuery(isTableStreamMap, rightExpression, conditionBuilder, conditionAttributeList,
+                    expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex,
+                    tableMap, variableMap, variableExpressionExecutors, executionPlanContext, executionInfo, queryName);
         } else if (expression instanceof Or) {
             Expression leftExpression = ((Or) expression).getLeftExpression();
-            buildConditionQuery(isTableStreamMap, leftExpression, conditionBuilder, conditionAttributeList, expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex, tableMap, variableExpressionExecutors, executionPlanContext, executionInfo, queryName);
-            conditionBuilder.append(RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER).append(elementMappings.get(RDBMSTableConstants.EVENT_TABLE_GENERIC_RDBMS_OR)).append(RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER);
+            buildConditionQuery(isTableStreamMap, leftExpression, conditionBuilder, conditionAttributeList,
+                    expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex,
+                    tableMap, variableMap, variableExpressionExecutors, executionPlanContext, executionInfo, queryName);
+            conditionBuilder.append(RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER).append
+                    (elementMappings.get(RDBMSTableConstants.EVENT_TABLE_GENERIC_RDBMS_OR)).append
+                    (RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER);
             Expression rightExpression = ((Or) expression).getRightExpression();
-            buildConditionQuery(isTableStreamMap, rightExpression, conditionBuilder, conditionAttributeList, expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex, tableMap, variableExpressionExecutors, executionPlanContext, executionInfo, queryName);
+            buildConditionQuery(isTableStreamMap, rightExpression, conditionBuilder, conditionAttributeList,
+                    expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex,
+                    tableMap, variableMap, variableExpressionExecutors, executionPlanContext, executionInfo, queryName);
         }  else if (expression instanceof Not) {
             Expression rightExpression = ((Not) expression).getExpression();
             conditionBuilder.append(RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER)
@@ -239,7 +255,7 @@ public class RDBMSOperatorParser {
                     .append(RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER);
             buildConditionQuery(isTableStreamMap, rightExpression, conditionBuilder, conditionAttributeList,
                     expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex,
-                    tableMap, variableExpressionExecutors, executionPlanContext, executionInfo, queryName);
+                    tableMap, variableMap, variableExpressionExecutors, executionPlanContext, executionInfo, queryName);
         } else if (expression instanceof IsNull) {
             Expression leftExpression = ((IsNull) expression).getExpression();
             String streamId = ((Variable) leftExpression).getStreamId();
@@ -274,13 +290,16 @@ public class RDBMSOperatorParser {
                         } else {
                             setExpressionExecutor(rightExpression, leftExpression, conditionBuilder,
                                     conditionAttributeList, expressionExecutorList, dbHandler, elementMappings,
-                                    metaStateEvent, matchingStreamIndex, tableMap, variableExpressionExecutors,
+                                    metaStateEvent, matchingStreamIndex, tableMap, variableMap,
+                                    variableExpressionExecutors,
                                     executionPlanContext, queryName);
                             isLeftExpressionTable = false;
                         }
                     }
                 } else {
-                    setExpressionExecutor(rightExpression, leftExpression, conditionBuilder, conditionAttributeList, expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex, tableMap, variableExpressionExecutors, executionPlanContext, queryName);
+                    setExpressionExecutor(rightExpression, leftExpression, conditionBuilder, conditionAttributeList,
+                            expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex,
+                            tableMap, variableMap, variableExpressionExecutors, executionPlanContext, queryName);
                     isLeftExpressionTable = false;
                 }
             } else if (leftExpression instanceof Constant) {
@@ -311,7 +330,9 @@ public class RDBMSOperatorParser {
 
             if (isLeftExpressionTable) {
                 if (rightExpression instanceof Variable) {
-                    setExpressionExecutor(leftExpression, rightExpression, conditionBuilder, conditionAttributeList, expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex, tableMap, variableExpressionExecutors, executionPlanContext, queryName);
+                    setExpressionExecutor(leftExpression, rightExpression, conditionBuilder, conditionAttributeList,
+                            expressionExecutorList, dbHandler, elementMappings, metaStateEvent, matchingStreamIndex,
+                            tableMap, variableMap, variableExpressionExecutors, executionPlanContext, queryName);
                 } else if (rightExpression instanceof Constant) {
                     setConstantValue(rightExpression, conditionBuilder);
                 }
@@ -331,11 +352,13 @@ public class RDBMSOperatorParser {
             conditionBuilder, List<Attribute> conditionAttributeList, List<ExpressionExecutor>
             expressionExecutorList, DBHandler dbHandler, Map<String, String> elementMappings, MetaComplexEvent
             metaStateEvent, int matchingStreamIndex,
-                                              Map<String, Table> tableMap, List<VariableExpressionExecutor>
+                                              Map<String, Table> tableMap, Map<String,
+            GlobalVariableExpressionExecutor> variableMap, List<VariableExpressionExecutor>
                                                       variableExpressionExecutors,
                                               ExecutionPlanContext executionPlanContext, String queryName) {
         ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
-                metaStateEvent, matchingStreamIndex, tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                metaStateEvent, matchingStreamIndex, tableMap, variableMap, variableExpressionExecutors,
+                executionPlanContext, false, 0, queryName);
         conditionBuilder.append(elementMappings.get(RDBMSTableConstants
                 .EVENT_TABLE_RDBMS_QUESTION_MARK)).append(RDBMSTableConstants.EVENT_TABLE_CONDITION_WHITE_SPACE_CHARACTER);
         String attributeName = ((Variable) tableExpression).getAttributeName();

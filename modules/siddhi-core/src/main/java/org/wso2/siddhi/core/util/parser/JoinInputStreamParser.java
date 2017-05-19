@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.MultiProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
@@ -66,6 +67,7 @@ public class JoinInputStreamParser {
                                                  Map<String, AbstractDefinition> windowDefinitionMap,
                                                  Map<String, Table> tableMap,
                                                  Map<String, Window> eventWindowMap,
+                                                 Map<String, GlobalVariableExpressionExecutor> variableMap,
                                                  List<VariableExpressionExecutor> executors,
                                                  LatencyTracker latencyTracker, boolean outputExpectsExpiredEvents,
                                                  String queryName) {
@@ -131,7 +133,8 @@ public class JoinInputStreamParser {
                 (SingleInputStream) joinInputStream.getLeftInputStream(), executionPlanContext, executors,
                 streamDefinitionMap,
                 !leftMetaStreamEvent.isTableEvent() ? null : tableDefinitionMap, !leftMetaStreamEvent.isWindowEvent()
-                        ? null : windowDefinitionMap, tableMap, leftMetaStreamEvent, leftProcessStreamReceiver,
+                        ? null : windowDefinitionMap, tableMap, variableMap, leftMetaStreamEvent,
+                leftProcessStreamReceiver,
                 true, outputExpectsExpiredEvents, queryName);
 
         for (VariableExpressionExecutor variableExpressionExecutor : executors) {
@@ -143,7 +146,7 @@ public class JoinInputStreamParser {
                 (SingleInputStream) joinInputStream.getRightInputStream(), executionPlanContext, executors,
                 streamDefinitionMap,
                 !rightMetaStreamEvent.isTableEvent() ? null : tableDefinitionMap, !rightMetaStreamEvent.isWindowEvent
-                        () ? null : windowDefinitionMap, tableMap, rightMetaStreamEvent,
+                        () ? null : windowDefinitionMap, tableMap, variableMap, rightMetaStreamEvent,
                 rightProcessStreamReceiver, true, outputExpectsExpiredEvents, queryName);
 
         for (int i = size; i < executors.size(); i++) {
@@ -225,11 +228,11 @@ public class JoinInputStreamParser {
         MatchingMetaInfoHolder rightMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
                 (metaStateEvent, 0, rightMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
         CompiledCondition leftCompiledCondition = rightFindableProcessor.compileCondition(compareCondition,
-                rightMatchingMetaInfoHolder, executionPlanContext, executors, tableMap, queryName);
+                rightMatchingMetaInfoHolder, executionPlanContext, executors, tableMap, variableMap, queryName);
         MatchingMetaInfoHolder leftMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
                 (metaStateEvent, 1, leftMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
         CompiledCondition rightCompiledCondition = leftFindableProcessor.compileCondition(compareCondition,
-                leftMatchingMetaInfoHolder, executionPlanContext, executors, tableMap, queryName);
+                leftMatchingMetaInfoHolder, executionPlanContext, executors, tableMap, variableMap, queryName);
 
         if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT) {
             rightPreJoinProcessor.setTrigger(false);    // Pre JoinProcessor does not process the events

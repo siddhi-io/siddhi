@@ -24,7 +24,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 /**
  * Executor class for Constant Siddhi expressions. Function execution logic is implemented in execute method.
  */
-public class ConstantExpressionExecutor implements ExpressionExecutor {
+public class ConstantExpressionExecutor extends RuntimeVariableExpressionExecutor {
     private Object value;
     private Attribute.Type type;
 
@@ -47,6 +47,7 @@ public class ConstantExpressionExecutor implements ExpressionExecutor {
         return this;
     }
 
+    @Override
     public Object getValue() {
         return value;
     }

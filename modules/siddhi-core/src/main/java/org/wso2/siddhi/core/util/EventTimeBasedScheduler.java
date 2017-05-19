@@ -53,6 +53,11 @@ public class EventTimeBasedScheduler extends Scheduler {
     }
 
     @Override
+    public void reset() {
+        // Do nothing
+    }
+
+    @Override
     public Scheduler clone(String key, EntryValveProcessor entryValveProcessor) {
         Scheduler scheduler = new EventTimeBasedScheduler(entryValveProcessor, executionPlanContext);
         scheduler.elementId = elementId + "-" + key;

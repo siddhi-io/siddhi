@@ -29,6 +29,8 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
+import org.wso2.siddhi.core.executor.RuntimeVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
@@ -116,44 +118,46 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
             this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         }
         if (attributeExpressionExecutors.length == 1) {
-            if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
-                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
-                    timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
-                            .getValue();
-
-                } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
-                    timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
-                            .getValue();
+            if (attributeExpressionExecutors[0] instanceof RuntimeVariableExpressionExecutor) {
+                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT ||
+                        attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
+                    this.timeInMilliSeconds = ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[0])
+                            .getValue(Long.class);
+                    if (attributeExpressionExecutors[0] instanceof GlobalVariableExpressionExecutor) {
+                        ((GlobalVariableExpressionExecutor) attributeExpressionExecutors[0])
+                                .addVariableUpdateListener(this::updateTime);
+                    }
                 } else {
                     throw new ExecutionPlanValidationException("Time window's parameter attribute should be either " +
-                                                                       "int or long, but found " +
-                                                                       attributeExpressionExecutors[0].getReturnType());
+                            "int or long, but found " +
+                            attributeExpressionExecutors[0].getReturnType());
                 }
             } else {
                 throw new ExecutionPlanValidationException("Time window should have constant parameter attribute but " +
-                                                                   "found a dynamic attribute " +
-                                                                   attributeExpressionExecutors[0].getClass().
-                                                                           getCanonicalName());
+                        "found a dynamic attribute " +
+                        attributeExpressionExecutors[0].getClass().
+                                getCanonicalName());
             }
         } else if (attributeExpressionExecutors.length == 2) {
-            if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
-                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
-                    timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
-                            .getValue();
-
-                } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
-                    timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
-                            .getValue();
+            if (attributeExpressionExecutors[0] instanceof RuntimeVariableExpressionExecutor) {
+                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT ||
+                        attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
+                    this.timeInMilliSeconds = ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[0])
+                            .getValue(Long.class);
+                    if (attributeExpressionExecutors[0] instanceof GlobalVariableExpressionExecutor) {
+                        ((GlobalVariableExpressionExecutor) attributeExpressionExecutors[0])
+                                .addVariableUpdateListener(this::updateTime);
+                    }
                 } else {
                     throw new ExecutionPlanValidationException("Time window's parameter attribute should be either " +
-                                                                       "int or long, but found " +
-                                                                       attributeExpressionExecutors[0].getReturnType());
+                            "int or long, but found " +
+                            attributeExpressionExecutors[0].getReturnType());
                 }
             } else {
                 throw new ExecutionPlanValidationException("Time window should have constant parameter attribute but " +
-                                                                   "found a dynamic attribute " +
-                                                                   attributeExpressionExecutors[0].getClass()
-                                                                           .getCanonicalName());
+                        "found a dynamic attribute " +
+                        attributeExpressionExecutors[0].getClass()
+                                .getCanonicalName());
             }
             // start time
             isStartTimeEnabled = true;
@@ -166,12 +170,34 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
             }
         } else {
             throw new ExecutionPlanValidationException("Time window should only have one or two parameters. " +
-                                                               "(<int|long|time> windowTime), but found " +
-                                                               attributeExpressionExecutors.length + " input " +
-                                                               "attributes");
+                    "(<int|long|time> windowTime), but found " +
+                    attributeExpressionExecutors.length + " input " +
+                    "attributes");
         }
     }
 
+    private void updateTime(Object oldTime, Object newTime) {
+
+        synchronized (this) {
+            long oldTimeInMilliSeconds;
+            if (oldTime instanceof Integer) {
+                oldTimeInMilliSeconds = (Integer) oldTime;
+                this.timeInMilliSeconds = (Integer) newTime;
+            } else {
+                oldTimeInMilliSeconds = (Long) oldTime;
+                this.timeInMilliSeconds = (Long) newTime;
+            }
+
+            // nextEmitTime != -1: if the value is updated before receiving any events nothing to do
+            // nextEmitTime > newNextEmitTime: Based on new time, timeout will happen before scheduled next emit
+            long newNextEmitTime = nextEmitTime - oldTimeInMilliSeconds + timeInMilliSeconds;
+            if (nextEmitTime != -1 && nextEmitTime > newNextEmitTime) {
+                nextEmitTime = newNextEmitTime;
+                scheduler.reset();
+                scheduler.notifyAt(nextEmitTime);
+            }
+        }
+    }
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
@@ -300,12 +326,13 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                              String queryName) {
         if (expiredEventChunk == null) {
             expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         }
         return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
-                                                executionPlanContext, variableExpressionExecutors, tableMap,
-                                                this.queryName);
+                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
     }
 }

@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
@@ -82,7 +83,9 @@ public class SingleInputStreamParser {
                                                        Map<String, AbstractDefinition> streamDefinitionMap,
                                                        Map<String, AbstractDefinition> tableDefinitionMap,
                                                        Map<String, AbstractDefinition> windowDefinitionMap,
-                                                       Map<String, Table> tableMap, MetaComplexEvent
+                                                       Map<String, Table> tableMap,
+                                                       Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                                       MetaComplexEvent
                                                                metaComplexEvent,
                                                        ProcessStreamReceiver processStreamReceiver, boolean
                                                                supportsBatchProcessing, boolean
@@ -116,8 +119,8 @@ public class SingleInputStreamParser {
         if (!inputStream.getStreamHandlers().isEmpty()) {
             for (StreamHandler handler : inputStream.getStreamHandlers()) {
                 Processor currentProcessor = generateProcessor(handler, metaComplexEvent,
-                        variableExpressionExecutors, executionPlanContext, tableMap, supportsBatchProcessing,
-                        outputExpectsExpiredEvents, queryName);
+                        variableExpressionExecutors, executionPlanContext, tableMap, variableMap,
+                        supportsBatchProcessing, outputExpectsExpiredEvents, queryName);
                 if (currentProcessor instanceof SchedulingProcessor) {
                     if (entryValveProcessor == null) {
 
@@ -151,7 +154,8 @@ public class SingleInputStreamParser {
     public static Processor generateProcessor(StreamHandler streamHandler, MetaComplexEvent metaEvent,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               ExecutionPlanContext executionPlanContext, Map<String, Table> tableMap,
-                                              boolean supportsBatchProcessing, boolean outputExpectsExpiredEvents,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap, boolean
+                                                      supportsBatchProcessing, boolean outputExpectsExpiredEvents,
                                               String queryName) {
         Expression[] parameters = streamHandler.getParameters();
         MetaStreamEvent metaStreamEvent;
@@ -169,7 +173,7 @@ public class SingleInputStreamParser {
                 attributeExpressionExecutors = new ExpressionExecutor[parameters.length];
                 for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
                     attributeExpressionExecutors[i] = ExpressionParser.parseExpression(parameters[i], metaEvent,
-                            stateIndex, tableMap, variableExpressionExecutors,
+                            stateIndex, tableMap, variableMap, variableExpressionExecutors,
                             executionPlanContext, false, SiddhiConstants.CURRENT, queryName);
                 }
             } else {
@@ -178,7 +182,8 @@ public class SingleInputStreamParser {
                 attributeExpressionExecutors = new ExpressionExecutor[parameterSize];
                 for (int i = 0; i < parameterSize; i++) {
                     attributeExpressionExecutors[i] = ExpressionParser.parseExpression(new Variable(attributeList.get
-                                    (i).getName()), metaEvent, stateIndex, tableMap, variableExpressionExecutors,
+                                    (i).getName()), metaEvent, stateIndex, tableMap, variableMap,
+                            variableExpressionExecutors,
                             executionPlanContext, false, SiddhiConstants.CURRENT, queryName);
                 }
             }

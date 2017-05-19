@@ -81,12 +81,17 @@ public class Attribute implements Serializable {
      * Different Type of Attribute Types
      */
     public enum Type {
-        STRING,
-        INT,
-        LONG,
-        FLOAT,
-        DOUBLE,
-        BOOL,
-        OBJECT
+        STRING(String.class), INT(Integer.class), LONG(Long.class), FLOAT(Float.class),
+        DOUBLE(Double.class), BOOL(Boolean.class), OBJECT(Object.class);
+
+        private Class clazz;
+
+        Type(Class clazz) {
+            this.clazz = clazz;
+        }
+
+        public Class getClazz() {
+            return clazz;
+        }
     }
 }

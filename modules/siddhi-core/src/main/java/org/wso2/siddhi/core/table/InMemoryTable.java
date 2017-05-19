@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.holder.EventHolder;
 import org.wso2.siddhi.core.util.collection.AddingStreamEventExtractor;
@@ -153,9 +154,11 @@ public class InMemoryTable implements Table, Snapshotable {
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                              String queryName) {
         return OperatorParser.constructOperator(eventHolder, expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, tableDefinition.getId());
+                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, tableDefinition.getId());
     }
 
 

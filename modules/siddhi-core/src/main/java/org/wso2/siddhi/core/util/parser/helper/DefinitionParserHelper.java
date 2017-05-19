@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.function.Script;
 import org.wso2.siddhi.core.stream.AttributeMapping;
 import org.wso2.siddhi.core.stream.StreamJunction;
@@ -64,6 +65,7 @@ import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.definition.TriggerDefinition;
+import org.wso2.siddhi.query.api.definition.VariableDefinition;
 import org.wso2.siddhi.query.api.definition.WindowDefinition;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
@@ -86,10 +88,11 @@ import java.util.stream.Collectors;
 public class DefinitionParserHelper {
 
 
-    public static void validateDefinition(AbstractDefinition definition, ConcurrentMap<String, AbstractDefinition>
-            streamDefinitionMap,
+    public static void validateDefinition(AbstractDefinition definition,
+                                          ConcurrentMap<String, AbstractDefinition> streamDefinitionMap,
                                           ConcurrentMap<String, AbstractDefinition> tableDefinitionMap,
-                                          ConcurrentMap<String, AbstractDefinition> windowDefinitionMap) {
+                                          ConcurrentMap<String, AbstractDefinition> windowDefinitionMap,
+                                          ConcurrentMap<String, AbstractDefinition> variableDefinitionMap) {
         AbstractDefinition existingTableDefinition = tableDefinitionMap.get(definition.getId());
         if (existingTableDefinition != null && (!existingTableDefinition.equals(definition) || definition instanceof
                 StreamDefinition)) {
@@ -109,6 +112,13 @@ public class DefinitionParserHelper {
                 instanceof WindowDefinition)) {
             throw new DuplicateDefinitionException("Window Definition with same Window Id '" +
                     definition.getId() + "' already exist : " + existingWindowDefinition +
+                    ", hence cannot add " + definition);
+        }
+        AbstractDefinition existingVariableDefinition = variableDefinitionMap.get(definition.getId());
+        if (existingVariableDefinition != null && (!existingVariableDefinition.equals(definition) || definition
+                instanceof VariableDefinition)) {
+            throw new DuplicateDefinitionException("Variable Definition with same Variable Id '" +
+                    definition.getId() + "' already exist : " + existingVariableDefinition +
                     ", hence cannot add " + definition);
         }
         // TODO: 1/29/17 add source / sink both validation here
@@ -210,6 +220,15 @@ public class DefinitionParserHelper {
         script.setReturnType(functionDefinition.getReturnType());
         script.init(functionDefinition.getId(), functionDefinition.getBody(), configReader);
         executionPlanContext.getScriptFunctionMap().put(functionDefinition.getId(), script);
+    }
+
+    public static void addVariable(VariableDefinition variableDefinition, ConcurrentMap<String,
+            GlobalVariableExpressionExecutor> variableMap, ExecutionPlanContext executionPlanContext) {
+        if (!variableMap.containsKey(variableDefinition.getId())) {
+            GlobalVariableExpressionExecutor globalVariableExpressionExecutor = new GlobalVariableExpressionExecutor
+                    (variableDefinition.getId(), variableDefinition.getType(), variableDefinition.getValue());
+            variableMap.putIfAbsent(variableDefinition.getId(), globalVariableExpressionExecutor);
+        }
     }
 
     public static void validateDefinition(TriggerDefinition triggerDefinition) {

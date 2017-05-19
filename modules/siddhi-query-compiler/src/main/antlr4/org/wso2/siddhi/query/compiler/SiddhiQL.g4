@@ -33,9 +33,9 @@ error
 
 execution_plan
     : (plan_annotation|error)*
-      ( (definition_stream|definition_table|definition_trigger|definition_function|definition_window|error) (';' (definition_stream|definition_table|definition_trigger|definition_function|definition_window|error))* ';'?
+      ( (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_window|error) (';' (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_window|error))* ';'?
       || (execution_element|error) (';' (execution_element|error))* ';'?
-      || (definition_stream|definition_table|definition_trigger|definition_function|definition_window|error) (';' (definition_stream|definition_table|definition_trigger|definition_function|definition_window|error))* (';' (execution_element|error))* ';'? )
+      || (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_window|error) (';' (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_window|error))* (';' (execution_element|error))* ';'? )
     ;
 
 execution_element
@@ -72,6 +72,14 @@ definition_function_final
 
 definition_function
     : DEFINE FUNCTION function_name '[' language_name ']' RETURN attribute_type function_body
+    ;
+
+definition_variable
+    : DEFINE VARIABLE variable_name attribute_type ('=' constant_value )?
+    ;
+
+variable_name
+    : id
     ;
 
 function_name
@@ -257,6 +265,7 @@ query_output
     |DELETE target (FOR output_event_type)? ON expression
     |UPDATE OR INSERT INTO target (FOR output_event_type)? ON expression
     |UPDATE target (FOR output_event_type)? ON expression
+    |UPDATE variable_reference
     |RETURN output_event_type?
     ;
 
@@ -307,6 +316,11 @@ math_operation
     |function_operation                           #basic_math_operation
     |constant_value                               #basic_math_operation
     |attribute_reference                          #basic_math_operation
+    |variable_reference                           #basic_math_operation
+    ;
+
+variable_reference
+    : GLOBAL '#' variable_name
     ;
 
 function_operation
@@ -487,6 +501,7 @@ keyword
     | DOUBLE
     | BOOL
     | OBJECT
+    | GLOBAL
     ;
 
 time_value
@@ -663,6 +678,8 @@ FLOAT:    F L O A T;
 DOUBLE:   D O U B L E;
 BOOL:     B O O L;
 OBJECT:   O B J E C T;
+VARIABLE: V A R I A B L E;
+GLOBAL:     G L O B A L;
 
 ID_QUOTES : '`'[a-zA-Z_] [a-zA-Z_0-9]*'`' {setText(getText().substring(1, getText().length()-1));};
 

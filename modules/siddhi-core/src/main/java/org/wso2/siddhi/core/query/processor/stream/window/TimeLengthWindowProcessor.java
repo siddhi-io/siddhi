@@ -27,8 +27,9 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
-import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
+import org.wso2.siddhi.core.executor.RuntimeVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
@@ -85,6 +86,7 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
     private ComplexEventChunk<StreamEvent> expiredEventChunk;
     private Scheduler scheduler;
     private ExecutionPlanContext executionPlanContext;
+    private volatile long lastTimestamp = Long.MIN_VALUE;
 
     @Override
     public Scheduler getScheduler() {
@@ -102,15 +104,21 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
         this.executionPlanContext = executionPlanContext;
         expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 2) {
-            length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
-            if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
-                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
-                    timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
-                            .getValue();
+            length = (Integer) ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[1]).getValue();
+            if (attributeExpressionExecutors[0] instanceof GlobalVariableExpressionExecutor) {
+                ((GlobalVariableExpressionExecutor) attributeExpressionExecutors[0]).addVariableUpdateListener(
+                        (oldValue, newValue) -> {
+                            synchronized (TimeLengthWindowProcessor.this) {
+                                TimeLengthWindowProcessor.this.length = (Integer) newValue;
+                            }
+                        });
+            }
+            if (attributeExpressionExecutors[0] instanceof RuntimeVariableExpressionExecutor) {
 
-                } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
-                    timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
-                            .getValue();
+                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT ||
+                        attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
+                    timeInMilliSeconds = ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[0])
+                            .getValue(Long.class);
                 } else {
                     throw new ExecutionPlanValidationException("TimeLength window's first parameter attribute should " +
                             "be either int or long, but found " + attributeExpressionExecutors[0].getReturnType());
@@ -124,6 +132,34 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
             throw new ExecutionPlanValidationException("TimeLength window should only have two parameters (<int> " +
                     "windowTime,<int> windowLength), but found " + attributeExpressionExecutors.length + " input " +
                     "attributes");
+        }
+    }
+
+    private void updateTime(Object oldTime, Object newTime) {
+
+        boolean resetScheduler = true;
+        synchronized (this) {
+            long oldTimeInMilliSeconds;
+            if (oldTime instanceof Integer) {
+                oldTimeInMilliSeconds = (Integer) oldTime;
+                this.timeInMilliSeconds = (Integer) newTime;
+            } else {
+                oldTimeInMilliSeconds = (Long) oldTime;
+                this.timeInMilliSeconds = (Long) newTime;
+            }
+            expiredEventChunk.reset();
+            while (expiredEventChunk.hasNext()) {
+                StreamEvent expiredEvent = expiredEventChunk.next();
+                if (lastTimestamp + oldTimeInMilliSeconds > expiredEvent.getTimestamp() + timeInMilliSeconds) {
+                    if (resetScheduler) {
+                        // Reset the scheduler to accept new time lower than the currently scheduled one
+                        scheduler.reset();
+                        resetScheduler = false;
+                    }
+                    scheduler.notifyAt(expiredEvent.getTimestamp() + timeInMilliSeconds);
+                    lastTimestamp = expiredEvent.getTimestamp();
+                }
+            }
         }
     }
 
@@ -161,12 +197,21 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
                     } else {
                         StreamEvent firstEvent = this.expiredEventChunk.poll();
                         if (firstEvent != null) {
-                            firstEvent.setTimestamp(currentTime);
-                            streamEventChunk.insertBeforeCurrent(firstEvent);
+                            while (firstEvent != null) {
+                                firstEvent.setTimestamp(currentTime);
+                                streamEventChunk.insertBeforeCurrent(firstEvent);
+                                count--;
+                                if (count < length) {
+                                    break;  // Should not call poll again
+                                }
+                                firstEvent = this.expiredEventChunk.poll();
+                            }
+                            count++;
                             this.expiredEventChunk.add(clonedEvent);
                         }
                     }
                     scheduler.notifyAt(clonedEvent.getTimestamp() + timeInMilliSeconds);
+                    lastTimestamp = clonedEvent.getTimestamp();
                 } else {
                     streamEventChunk.remove();
                 }
@@ -188,9 +233,11 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                              String queryName) {
         return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
+                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
     }
 
     @Override

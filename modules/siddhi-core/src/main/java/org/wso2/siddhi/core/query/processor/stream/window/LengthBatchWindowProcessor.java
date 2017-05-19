@@ -27,8 +27,9 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
-import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
+import org.wso2.siddhi.core.executor.RuntimeVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.table.Table;
@@ -94,7 +95,15 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
             expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         }
         if (attributeExpressionExecutors.length == 1) {
-            length = (Integer) (((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue());
+            length = (Integer) (((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[0]).getValue());
+            if (attributeExpressionExecutors[0] instanceof GlobalVariableExpressionExecutor) {
+                ((GlobalVariableExpressionExecutor) attributeExpressionExecutors[0]).addVariableUpdateListener(
+                        (Object oldValue, Object newValue) -> {
+                            synchronized (LengthBatchWindowProcessor.this) {
+                                LengthBatchWindowProcessor.this.length = (Integer) newValue;
+                            }
+                        });
+            }
         } else {
             throw new ExecutionPlanValidationException("Length batch window should only have one parameter (<int> " +
                     "windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
@@ -113,7 +122,7 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
                 StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
                 currentEventChunk.add(clonedStreamEvent);
                 count++;
-                if (count == length) {
+                if (count >= length) {
                     if (outputExpectsExpiredEvents) {
                         if (expiredEventChunk.getFirst() != null) {
                             while (expiredEventChunk.hasNext()) {
@@ -204,11 +213,13 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                              String queryName) {
         if (expiredEventChunk == null) {
             expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         }
         return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
+                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
     }
 }

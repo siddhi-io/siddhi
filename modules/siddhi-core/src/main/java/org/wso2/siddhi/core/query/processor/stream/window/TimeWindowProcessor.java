@@ -26,8 +26,9 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
-import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
+import org.wso2.siddhi.core.executor.RuntimeVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
@@ -102,25 +103,47 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
         this.executionPlanContext = executionPlanContext;
         this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 1) {
-            if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
-                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
-                    timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
-                            .getValue();
-
-                } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
-                    timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
-                            .getValue();
+            if (attributeExpressionExecutors[0] instanceof RuntimeVariableExpressionExecutor) {
+                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT ||
+                        attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
+                    this.timeInMilliSeconds = ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[0])
+                            .getValue(Long.class);
+                    if (attributeExpressionExecutors[0] instanceof GlobalVariableExpressionExecutor) {
+                        ((GlobalVariableExpressionExecutor) attributeExpressionExecutors[0])
+                                .addVariableUpdateListener(this::updateTime);
+                    }
                 } else {
                     throw new ExecutionPlanValidationException("Time window's parameter attribute should be either " +
                             "int or long, but found " + attributeExpressionExecutors[0].getReturnType());
                 }
             } else {
-                throw new ExecutionPlanValidationException("Time window should have constant parameter attribute but " +
+                throw new ExecutionPlanValidationException("Time window should have constant or variable parameter " +
+                        "attribute but " +
                         "found a dynamic attribute " + attributeExpressionExecutors[0].getClass().getCanonicalName());
             }
         } else {
             throw new ExecutionPlanValidationException("Time window should only have one parameter (<int|long|time> " +
                     "windowTime), but found " + attributeExpressionExecutors.length + " input attributes");
+        }
+    }
+
+    private void updateTime(Object oldTime, Object newTime) {
+
+        synchronized (this) {
+            long oldTimeInMilliSeconds;
+            if (oldTime instanceof Integer) {
+                oldTimeInMilliSeconds = (Integer) oldTime;
+                this.timeInMilliSeconds = (Integer) newTime;
+            } else {
+                oldTimeInMilliSeconds = (Long) oldTime;
+                this.timeInMilliSeconds = (Long) newTime;
+            }
+
+            if (oldTimeInMilliSeconds > timeInMilliSeconds) {
+                // Reset the scheduler to accept new time lower than the currently scheduled one
+                scheduler.reset();
+                scheduler.notifyAt(lastTimestamp + timeInMilliSeconds);
+            }
         }
     }
 
@@ -174,9 +197,11 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                              String queryName) {
         return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
+                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
     }
 
     @Override

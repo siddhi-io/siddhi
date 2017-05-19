@@ -41,6 +41,7 @@ import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.definition.TriggerDefinition;
+import org.wso2.siddhi.query.api.definition.VariableDefinition;
 import org.wso2.siddhi.query.api.definition.WindowDefinition;
 import org.wso2.siddhi.query.api.exception.DuplicateAnnotationException;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
@@ -195,6 +196,7 @@ public class ExecutionPlanParser {
         defineTableDefinitions(executionPlanRuntimeBuilder, executionPlan.getTableDefinitionMap());
         defineWindowDefinitions(executionPlanRuntimeBuilder, executionPlan.getWindowDefinitionMap());
         defineFunctionDefinitions(executionPlanRuntimeBuilder, executionPlan.getFunctionDefinitionMap());
+        defineVariableDefinitions(executionPlanRuntimeBuilder, executionPlan.getVariableDefinitionMap());
         for (Window window : executionPlanRuntimeBuilder.getEventWindowMap().values()) {
             String metricName =
                     executionPlanContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix() +
@@ -211,7 +213,8 @@ public class ExecutionPlanParser {
                         .createLatencyTracker(metricName, executionPlanContext.getStatisticsManager());
             }
             window.init(executionPlanRuntimeBuilder.getTableMap(), executionPlanRuntimeBuilder
-                    .getEventWindowMap(), latencyTracker, window.getWindowDefinition().getId());
+                    .getEventWindowMap(), executionPlanRuntimeBuilder.getVariableMap(), latencyTracker, window
+                    .getWindowDefinition().getId());
         }
         try {
             for (ExecutionElement executionElement : executionPlan.getExecutionElementList()) {
@@ -222,6 +225,7 @@ public class ExecutionPlanParser {
                                                                   executionPlanRuntimeBuilder.getWindowDefinitionMap(),
                                                                   executionPlanRuntimeBuilder.getTableMap(),
                                                                   executionPlanRuntimeBuilder.getEventWindowMap(),
+                                                                  executionPlanRuntimeBuilder.getVariableMap(),
                                                                   executionPlanRuntimeBuilder.getEventSourceMap(),
                                                                   executionPlanRuntimeBuilder.getEventSinkMap(),
                                                                   executionPlanRuntimeBuilder.getLockSynchronizer());
@@ -257,6 +261,13 @@ public class ExecutionPlanParser {
                                                   Map<String, FunctionDefinition> functionDefinitionMap) {
         for (FunctionDefinition definition : functionDefinitionMap.values()) {
             executionPlanRuntimeBuilder.defineFunction(definition);
+        }
+    }
+
+    private static void defineVariableDefinitions(ExecutionPlanRuntimeBuilder executionPlanRuntimeBuilder,
+                                                  Map<String, VariableDefinition> variableDefinitionMap) {
+        for (VariableDefinition definition : variableDefinitionMap.values()) {
+            executionPlanRuntimeBuilder.defineVariable(definition);
         }
     }
 

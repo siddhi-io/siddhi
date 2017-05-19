@@ -27,6 +27,7 @@ import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.definition.TriggerDefinition;
+import org.wso2.siddhi.query.api.definition.VariableDefinition;
 import org.wso2.siddhi.query.api.definition.WindowDefinition;
 import org.wso2.siddhi.query.api.execution.ExecutionElement;
 import org.wso2.siddhi.query.api.execution.partition.Partition;
@@ -64,6 +65,7 @@ import org.wso2.siddhi.query.api.execution.query.selection.OutputAttribute;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.AttributeFunction;
 import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.GlobalVariable;
 import org.wso2.siddhi.query.api.expression.Variable;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 import org.wso2.siddhi.query.api.expression.constant.BoolConstant;
@@ -127,6 +129,9 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         }
         for (SiddhiQLParser.Definition_windowContext windowContext : ctx.definition_window()) {
             executionPlan.defineWindow((WindowDefinition) visit(windowContext));
+        }
+        for (SiddhiQLParser.Definition_variableContext variableContext : ctx.definition_variable()) {
+            executionPlan.defineVariable((VariableDefinition) visit(variableContext));
         }
         for (SiddhiQLParser.Execution_elementContext executionElementContext : ctx.execution_element()) {
             ExecutionElement executionElement = (ExecutionElement) visit(executionElementContext);
@@ -205,6 +210,17 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         return functionDefinition;
     }
 
+    @Override
+    public Object visitDefinition_variable(SiddhiQLParser.Definition_variableContext ctx) {
+        VariableDefinition variableDefinition = VariableDefinition
+                .name((String) visitVariable_name(ctx.variable_name()))
+                .type((Attribute.Type) visit(ctx.attribute_type()));
+        if (ctx.constant_value() != null) {
+            variableDefinition.value(visitConstant_value(ctx.constant_value()));
+        }
+        return variableDefinition;
+    }
+
     /**
      * {@inheritDoc}
      * <p>The default implementation returns the result of calling
@@ -214,6 +230,11 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitFunction_name(@NotNull SiddhiQLParser.Function_nameContext ctx) {
+        return visitId(ctx.id());
+    }
+
+    @Override
+    public Object visitVariable_name(SiddhiQLParser.Variable_nameContext ctx) {
         return visitId(ctx.id());
     }
 
@@ -1208,6 +1229,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 //        |UPDATE OR INTO INSERT INTO output_event_type? INTO target
 //        |DELETE target (FOR output_event_type)? (ON expression)?
 //        |UPDATE target (FOR output_event_type)? (ON expression)?
+//        |UPDATE variable_reference
 //        |RETURN output_event_type?
 //        ;
 
@@ -1245,16 +1267,21 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
                 return new DeleteStream(source.streamId, (Expression) visit(ctx.expression()));
             }
         } else if (ctx.UPDATE() != null) {
-            Source source = (Source) visit(ctx.target());
-            if (source.isInnerStream) {
-                throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
-            }
-            if (ctx.output_event_type() != null) {
-                return new UpdateStream(source.streamId,
-                        (OutputStream.OutputEventType) visit(ctx.output_event_type()),
-                        (Expression) visit(ctx.expression()));
+            if (ctx.variable_reference() != null) {
+                GlobalVariable variable = (GlobalVariable) visit(ctx.variable_reference());
+                return new InsertIntoStream(variable.getName());
             } else {
-                return new UpdateStream(source.streamId, (Expression) visit(ctx.expression()));
+                Source source = (Source) visit(ctx.target());
+                if (source.isInnerStream) {
+                    throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
+                }
+                if (ctx.output_event_type() != null) {
+                    return new UpdateStream(source.streamId,
+                            (OutputStream.OutputEventType) visit(ctx.output_event_type()),
+                            (Expression) visit(ctx.expression()));
+                } else {
+                    return new UpdateStream(source.streamId, (Expression) visit(ctx.expression()));
+                }
             }
         } else if (ctx.RETURN() != null) {
             if (ctx.output_event_type() != null) {
@@ -1541,9 +1568,16 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             return visit(ctx.null_check());
         } else if (ctx.function_operation() != null) {
             return visit(ctx.function_operation());
+        } else if (ctx.variable_reference() != null) {
+            return visit(ctx.variable_reference());
         } else {
             throw newSiddhiParserException(ctx);
         }
+    }
+
+    @Override
+    public Object visitVariable_reference(SiddhiQLParser.Variable_referenceContext ctx) {
+        return Expression.globalVariable((String) visit(ctx.variable_name()));
     }
 
     /**

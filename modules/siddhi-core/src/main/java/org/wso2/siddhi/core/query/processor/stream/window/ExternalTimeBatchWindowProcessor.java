@@ -30,6 +30,8 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
+import org.wso2.siddhi.core.executor.RuntimeVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
@@ -150,11 +152,23 @@ public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements
             }
             timestampExpressionExecutor = (VariableExpressionExecutor) attributeExpressionExecutors[0];
 
-            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
-                timeToKeep = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
-
-            } else if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
-                timeToKeep = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
+            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT ||
+                    attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
+                timeToKeep = ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[1]).getValue(Long.class);
+                if (attributeExpressionExecutors[1] instanceof GlobalVariableExpressionExecutor) {
+                    ((GlobalVariableExpressionExecutor) attributeExpressionExecutors[1])
+                            .addVariableUpdateListener((x, y) -> {
+                                synchronized (this) {
+                                    if (y instanceof Integer) {
+                                        this.timeToKeep = (Integer) y;
+                                    } else {
+                                        this.timeToKeep = (Long) y;
+                                    }
+                                    // update timestamp, call next processor
+                                    endTime = findEndTime(lastCurrentEventTime, startTime, timeToKeep);
+                                }
+                            });
+                }
             } else {
                 throw new ExecutionPlanValidationException("ExternalTimeBatch window's 2nd parameter windowTime " +
                         "should be either int or long, but found " + attributeExpressionExecutors[1].getReturnType());
@@ -163,12 +177,24 @@ public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements
             if (attributeExpressionExecutors.length >= 3) {
                 isStartTimeEnabled = true;
                 if ((attributeExpressionExecutors[2] instanceof ConstantExpressionExecutor)) {
-                    if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.INT) {
-                        startTime = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
-                                attributeExpressionExecutors[2]).getValue()));
-                    } else if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
-                        startTime = Long.parseLong(String.valueOf(((ConstantExpressionExecutor)
-                                attributeExpressionExecutors[2]).getValue()));
+                    if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.INT ||
+                            attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
+                        startTime = ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[2]).getValue
+                                (Long.class);
+                        if (attributeExpressionExecutors[2] instanceof GlobalVariableExpressionExecutor) {
+                            ((GlobalVariableExpressionExecutor) attributeExpressionExecutors[2])
+                                    .addVariableUpdateListener((x, y) -> {
+                                        synchronized (this) {
+                                            if (y instanceof Integer) {
+                                                this.startTime = (Integer) y;
+                                            } else {
+                                                this.startTime = (Long) y;
+                                            }
+                                            // update timestamp, call next processor
+                                            endTime = findEndTime(lastCurrentEventTime, startTime, timeToKeep);
+                                        }
+                                    });
+                        }
                     } else {
                         throw new ExecutionPlanValidationException("ExternalTimeBatch window's 3rd parameter " +
                                 "startTime should either be a constant (of type int or long) or an attribute (of type" +
@@ -184,12 +210,33 @@ public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements
             }
 
             if (attributeExpressionExecutors.length >= 4) {
-                if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.INT) {
-                    schedulerTimeout = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
-                            attributeExpressionExecutors[3]).getValue()));
-                } else if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.LONG) {
-                    schedulerTimeout = Long.parseLong(String.valueOf(((ConstantExpressionExecutor)
-                            attributeExpressionExecutors[3]).getValue()));
+                if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.INT ||
+                        attributeExpressionExecutors[3].getReturnType() == Attribute.Type.LONG) {
+                    schedulerTimeout = ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[3]).getValue
+                            (Long.class);
+                    if (attributeExpressionExecutors[3] instanceof GlobalVariableExpressionExecutor) {
+                        ((GlobalVariableExpressionExecutor) attributeExpressionExecutors[3])
+                                .addVariableUpdateListener((x, y) -> {
+                                    synchronized (this) {
+                                        long oldTimeInMilliSeconds;
+                                        if (y instanceof Integer) {
+                                            oldTimeInMilliSeconds = (Integer) x;
+                                            this.schedulerTimeout = (Integer) y;
+                                        } else {
+                                            oldTimeInMilliSeconds = (Long) x;
+                                            this.schedulerTimeout = (Long) y;
+                                        }
+
+                                        long newNextEmitTime = lastScheduledTime - oldTimeInMilliSeconds +
+                                                schedulerTimeout;
+                                        if (schedulerTimeout > 0 && schedulerTimeout > newNextEmitTime) {
+                                            schedulerTimeout = newNextEmitTime;
+                                            scheduler.reset();
+                                            scheduler.notifyAt(schedulerTimeout);
+                                        }
+                                    }
+                                });
+                    }
                 } else {
                     throw new ExecutionPlanValidationException("ExternalTimeBatch window's 4th parameter timeout " +
                             "should be either int or long, but found " + attributeExpressionExecutors[3]
@@ -500,13 +547,15 @@ public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               ExecutionPlanContext executionPlanContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap,
+                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
+                                              String queryName) {
         if (expiredEventChunk == null) {
             expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
             storeExpiredEvents = true;
         }
         return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, this.queryName);
+                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
     }
 
     @Override

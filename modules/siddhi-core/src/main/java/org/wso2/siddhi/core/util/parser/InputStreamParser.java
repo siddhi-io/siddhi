@@ -21,6 +21,7 @@ import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
@@ -63,6 +64,7 @@ public class InputStreamParser {
                                       Map<String, AbstractDefinition> tableDefinitionMap,
                                       Map<String, AbstractDefinition> windowDefinitionMap,
                                       Map<String, Table> tableMap, Map<String, Window> eventWindowMap,
+                                      Map<String, GlobalVariableExpressionExecutor> variableMap,
                                       List<VariableExpressionExecutor> executors,
                                       LatencyTracker latencyTracker, boolean outputExpectsExpiredEvents, String
                                               queryName) {
@@ -73,25 +75,26 @@ public class InputStreamParser {
             boolean batchProcessingAllowed = window != null;      // If stream is from window, allow batch
             // processing
             ProcessStreamReceiver processStreamReceiver = new ProcessStreamReceiver(singleInputStream.getStreamId(),
-                                                                                    latencyTracker, queryName);
+                    latencyTracker, queryName);
             processStreamReceiver.setBatchProcessingAllowed(batchProcessingAllowed);
             return SingleInputStreamParser.parseInputStream((SingleInputStream) inputStream,
-                                                            executionPlanContext, executors, streamDefinitionMap,
+                    executionPlanContext, executors, streamDefinitionMap,
                     null, windowDefinitionMap, tableMap,
-                                                            new MetaStreamEvent(), processStreamReceiver,
-                    true, outputExpectsExpiredEvents, queryName);
+                    variableMap, new MetaStreamEvent(), processStreamReceiver,
+                    true, outputExpectsExpiredEvents,
+                    queryName);
         } else if (inputStream instanceof JoinInputStream) {
             return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream), executionPlanContext,
-                                                          streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+                    streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
                     tableMap, eventWindowMap,
-                                                          executors, latencyTracker, outputExpectsExpiredEvents,
+                    variableMap, executors, latencyTracker, outputExpectsExpiredEvents,
                     queryName);
         } else if (inputStream instanceof StateInputStream) {
             MetaStateEvent metaStateEvent = new MetaStateEvent(inputStream.getAllStreamIds().size());
             return StateInputStreamParser.parseInputStream(((StateInputStream) inputStream), executionPlanContext,
-                                                           metaStateEvent, streamDefinitionMap, null,
-                    null, tableMap, executors, latencyTracker,
-                                                           queryName);
+                    metaStateEvent, streamDefinitionMap, null,
+                    null, tableMap, variableMap, executors, latencyTracker,
+                    queryName);
         } else {
             throw new OperationNotSupportedException();
         }

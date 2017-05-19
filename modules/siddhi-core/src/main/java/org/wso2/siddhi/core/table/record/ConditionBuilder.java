@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
@@ -69,18 +70,21 @@ public class ConditionBuilder {
     private final ExecutionPlanContext executionPlanContext;
     private final List<VariableExpressionExecutor> variableExpressionExecutors;
     private final Map<String, Table> tableMap;
+    private final Map<String, GlobalVariableExpressionExecutor> variableMap;
     private final String queryName;
     private Expression expression;
 
     ConditionBuilder(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                      ExecutionPlanContext executionPlanContext,
-                     List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, Table> tableMap,
-                     String queryName) {
+                     List<VariableExpressionExecutor> variableExpressionExecutors,
+                     Map<String, Table> tableMap,
+                     Map<String, GlobalVariableExpressionExecutor> variableMap, String queryName) {
         this.expression = expression;
         this.matchingMetaInfoHolder = matchingMetaInfoHolder;
         this.executionPlanContext = executionPlanContext;
         this.variableExpressionExecutors = variableExpressionExecutors;
         this.tableMap = tableMap;
+        this.variableMap = variableMap;
         this.queryName = queryName;
         this.variableExpressionExecutorMap = new HashMap<String, ExpressionExecutor>();
     }
@@ -379,7 +383,7 @@ public class ConditionBuilder {
         conditionVisitor.beginVisitStreamVariable(id, variable.getStreamId(), variable.getAttributeName(), type);
         if (!variableExpressionExecutorMap.containsKey(id)) {
             ExpressionExecutor variableExpressionExecutor = ExpressionParser.parseExpression(
-                    variable, matchingMetaInfoHolder.getMetaStateEvent(), streamEventChainIndex, tableMap,
+                    variable, matchingMetaInfoHolder.getMetaStateEvent(), streamEventChainIndex, tableMap, variableMap,
                     variableExpressionExecutors, executionPlanContext, false, 0, queryName);
             variableExpressionExecutorMap.put(id, variableExpressionExecutor);
         }

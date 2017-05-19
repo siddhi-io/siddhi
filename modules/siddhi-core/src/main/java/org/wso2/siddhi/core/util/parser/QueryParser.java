@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
@@ -83,6 +84,7 @@ public class QueryParser {
                                      Map<String, AbstractDefinition> windowDefinitionMap,
                                      Map<String, Table> tableMap,
                                      Map<String, Window> eventWindowMap,
+                                     Map<String, GlobalVariableExpressionExecutor> variableMap,
                                      Map<String, List<Source>> eventSourceMap,
                                      Map<String, List<Sink>> eventSinkMap,
                                      LockSynchronizer lockSynchronizer) {
@@ -122,9 +124,10 @@ public class QueryParser {
             }
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
                     executionPlanContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, tableMap,
-                    eventWindowMap, executors, latencyTracker, outputExpectsExpiredEvents, queryName);
+                    eventWindowMap, variableMap, executors, latencyTracker, outputExpectsExpiredEvents, queryName);
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
-                    executionPlanContext, streamRuntime.getMetaComplexEvent(), tableMap, executors, queryName);
+                    executionPlanContext, streamRuntime.getMetaComplexEvent(), tableMap, variableMap, executors,
+                    queryName);
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
             if (!isWindow && query.getInputStream() instanceof SingleInputStream) {
                 for (StreamHandler streamHandler : ((SingleInputStream) query.getInputStream()).getStreamHandlers()) {
@@ -203,7 +206,7 @@ public class QueryParser {
 
             OutputCallback outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(),
                     streamRuntime.getMetaComplexEvent().getOutputStreamDefinition(), tableMap, eventWindowMap,
-                    executionPlanContext, !(streamRuntime instanceof SingleStreamRuntime), queryName);
+                    variableMap, executionPlanContext, !(streamRuntime instanceof SingleStreamRuntime), queryName);
 
             QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);

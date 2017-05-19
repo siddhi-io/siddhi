@@ -21,6 +21,7 @@ import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.table.holder.IndexedEventHolder;
@@ -319,6 +320,7 @@ public class CollectionExpressionParser {
                                                              List<VariableExpressionExecutor>
                                                                      variableExpressionExecutors,
                                                              Map<String, Table> tableMap,
+                                                             Map<String, GlobalVariableExpressionExecutor> variableMap,
                                                              ExecutionPlanContext executionPlanContext,
                                                              boolean isFirst, String queryName) {
         if (collectionExpression instanceof AttributeCollectionExpression) {
@@ -326,20 +328,21 @@ public class CollectionExpressionParser {
             if (isFirst) {
                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                         matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                        tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                        tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
             }
             return new CompareCollectionExecutor(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex(), (
                     (AttributeCollectionExpression) collectionExpression).getAttribute(), Compare.Operator.EQUAL, new
                     ConstantExpressionExecutor(true, Attribute.Type.BOOL));
         } else if (collectionExpression instanceof CompareCollectionExpression) {
             ExpressionExecutor valueExpressionExecutor = ExpressionParser.parseExpression(((CompareCollectionExpression) collectionExpression).getValueCollectionExpression().getExpression(),
-                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
+                    variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
             AttributeCollectionExpression attributeCollectionExpression = ((AttributeCollectionExpression) ((CompareCollectionExpression) collectionExpression).getAttributeCollectionExpression());
             ExpressionExecutor expressionExecutor = null;
             if (isFirst) {
                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                         matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                        tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                        tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
             }
             return new CompareCollectionExecutor(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex(),
                     attributeCollectionExpression.getAttribute(), ((CompareCollectionExpression)
@@ -349,7 +352,7 @@ public class CollectionExpressionParser {
             if (isFirst) {
                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                         matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                        tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                        tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
             }
             return new CompareCollectionExecutor(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex(), (
                     (NullCollectionExpression) collectionExpression).getAttribute(),
@@ -373,7 +376,7 @@ public class CollectionExpressionParser {
                         case NON:
                             expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                            .getCurrentState(), tableMap, variableExpressionExecutors,
+                                            .getCurrentState(), tableMap, variableMap, variableExpressionExecutors,
                                     executionPlanContext, false, 0, queryName);
                             return new NonCollectionExecutor(expressionExecutor);
                         case INDEXED_ATTRIBUTE:
@@ -383,10 +386,10 @@ public class CollectionExpressionParser {
                             expressionExecutor = ExpressionParser.parseExpression(leftCollectionExpression
                                             .getExpression(),
                                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                            .getCurrentState(), tableMap, variableExpressionExecutors,
+                                            .getCurrentState(), tableMap, variableMap, variableExpressionExecutors,
                                     executionPlanContext, false, 0, queryName);
                             aCollectionExecutor = buildCollectionExecutor(rightCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, isFirst, queryName);
                             return new NonAndCollectionExecutor(expressionExecutor, aCollectionExecutor,
                                     rightCollectionExpression.getCollectionScope());
@@ -399,10 +402,10 @@ public class CollectionExpressionParser {
                             expressionExecutor = ExpressionParser.parseExpression(rightCollectionExpression
                                             .getExpression(),
                                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                            .getCurrentState(), tableMap, variableExpressionExecutors,
+                                            .getCurrentState(), tableMap, variableMap, variableExpressionExecutors,
                                     executionPlanContext, false, 0, queryName);
                             aCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, isFirst, queryName);
                             return new NonAndCollectionExecutor(expressionExecutor, aCollectionExecutor,
                                     rightCollectionExpression.getCollectionScope());
@@ -411,28 +414,28 @@ public class CollectionExpressionParser {
                         case OPTIMISED_RESULT_SET:
                             exhaustiveCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser
                                     .parseExpression(collectionExpression.getExpression(),
-                                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                                    .getCurrentState(), tableMap, variableExpressionExecutors,
-                                            executionPlanContext, false, 0, queryName), matchingMetaInfoHolder
-                                    .getStoreEventIndex());
+                                            matchingMetaInfoHolder.getMetaStateEvent(),
+                                            matchingMetaInfoHolder.getCurrentState(), tableMap, variableMap,
+                                            variableExpressionExecutors, executionPlanContext, false, 0, queryName),
+                                    matchingMetaInfoHolder.getStoreEventIndex());
                             leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, false, queryName);
                             rightCollectionExecutor = buildCollectionExecutor(rightCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, false, queryName);
                             return new AnyAndCollectionExecutor(leftCollectionExecutor, rightCollectionExecutor,
                                     exhaustiveCollectionExecutor);
                         case EXHAUSTIVE:
                             leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, isFirst, queryName);
                             if (isFirst || leftCollectionExecutor.getDefaultCost() == CollectionExecutor.Cost
                                     .SINGLE_RETURN_INDEX_MATCHING) {
                                 exhaustiveCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser
                                         .parseExpression(collectionExpression.getExpression(),
-                                        matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                                        .getCurrentState(), tableMap,
+                                                matchingMetaInfoHolder.getMetaStateEvent(),
+                                                matchingMetaInfoHolder.getCurrentState(), tableMap, variableMap,
                                                 variableExpressionExecutors, executionPlanContext, false, 0,
                                                 queryName), matchingMetaInfoHolder.getStoreEventIndex());
                             }
@@ -448,10 +451,10 @@ public class CollectionExpressionParser {
                             expressionExecutor = ExpressionParser.parseExpression(rightCollectionExpression
                                             .getExpression(),
                                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                            .getCurrentState(), tableMap, variableExpressionExecutors,
+                                            .getCurrentState(), tableMap, variableMap, variableExpressionExecutors,
                                     executionPlanContext, false, 0, queryName);
                             aCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, isFirst, queryName);
                             return new NonAndCollectionExecutor(expressionExecutor, aCollectionExecutor,
                                     rightCollectionExpression.getCollectionScope());
@@ -459,15 +462,15 @@ public class CollectionExpressionParser {
                         case INDEXED_ATTRIBUTE:
                             exhaustiveCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser
                                     .parseExpression(collectionExpression.getExpression(),
-                                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                                    .getCurrentState(), tableMap, variableExpressionExecutors,
-                                            executionPlanContext, false, 0, queryName), matchingMetaInfoHolder
-                                    .getStoreEventIndex());
+                                            matchingMetaInfoHolder.getMetaStateEvent(),
+                                            matchingMetaInfoHolder.getCurrentState(), tableMap, variableMap,
+                                            variableExpressionExecutors, executionPlanContext, false, 0, queryName),
+                                    matchingMetaInfoHolder.getStoreEventIndex());
                             leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, false, queryName);
                             rightCollectionExecutor = buildCollectionExecutor(rightCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, false, queryName);
                             return new AnyAndCollectionExecutor(rightCollectionExecutor, leftCollectionExecutor,
                                     exhaustiveCollectionExecutor);
@@ -475,28 +478,28 @@ public class CollectionExpressionParser {
                         case OPTIMISED_RESULT_SET:
                             exhaustiveCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser
                                     .parseExpression(collectionExpression.getExpression(),
-                                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                                    .getCurrentState(), tableMap, variableExpressionExecutors,
-                                            executionPlanContext, false, 0, queryName), matchingMetaInfoHolder
-                                    .getStoreEventIndex());
+                                            matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
+                                                    .getCurrentState(), tableMap, variableMap,
+                                            variableExpressionExecutors, executionPlanContext, false, 0, queryName),
+                                    matchingMetaInfoHolder.getStoreEventIndex());
                             leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, false, queryName);
                             rightCollectionExecutor = buildCollectionExecutor(rightCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, false, queryName);
                             return new AnyAndCollectionExecutor(leftCollectionExecutor, rightCollectionExecutor,
                                     exhaustiveCollectionExecutor);
                         case EXHAUSTIVE:
                             leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, isFirst, queryName);
                             if (isFirst || leftCollectionExecutor.getDefaultCost() == CollectionExecutor.Cost
                                     .SINGLE_RETURN_INDEX_MATCHING) {
                                 exhaustiveCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser
                                         .parseExpression(collectionExpression.getExpression(),
-                                        matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                                        .getCurrentState(), tableMap,
+                                                matchingMetaInfoHolder.getMetaStateEvent(),
+                                                matchingMetaInfoHolder.getCurrentState(), tableMap, variableMap,
                                                 variableExpressionExecutors, executionPlanContext, false, 0,
                                                 queryName), matchingMetaInfoHolder.getStoreEventIndex());
                             }
@@ -511,10 +514,10 @@ public class CollectionExpressionParser {
                             expressionExecutor = ExpressionParser.parseExpression(rightCollectionExpression
                                             .getExpression(),
                                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                            .getCurrentState(), tableMap, variableExpressionExecutors,
+                                            .getCurrentState(), tableMap, variableMap, variableExpressionExecutors,
                                     executionPlanContext, false, 0, queryName);
                             aCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, isFirst, queryName);
                             return new NonAndCollectionExecutor(expressionExecutor, aCollectionExecutor,
                                     rightCollectionExpression.getCollectionScope());
@@ -523,14 +526,14 @@ public class CollectionExpressionParser {
                         case INDEXED_RESULT_SET:
                         case OPTIMISED_RESULT_SET:
                             rightCollectionExecutor = buildCollectionExecutor(rightCollectionExpression,
-                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
                                     executionPlanContext, isFirst, queryName);
                             if (isFirst || rightCollectionExecutor.getDefaultCost() == CollectionExecutor.Cost
                                     .SINGLE_RETURN_INDEX_MATCHING) {
                                 exhaustiveCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser
                                         .parseExpression(collectionExpression.getExpression(),
-                                        matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                                        .getCurrentState(), tableMap,
+                                                matchingMetaInfoHolder.getMetaStateEvent(),
+                                                matchingMetaInfoHolder.getCurrentState(), tableMap, variableMap,
                                                 variableExpressionExecutors, executionPlanContext, false, 0,
                                                 queryName), matchingMetaInfoHolder.getStoreEventIndex());
                             }
@@ -539,11 +542,9 @@ public class CollectionExpressionParser {
                         case EXHAUSTIVE:
                             if (isFirst) {
                                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression
-                                                .getExpression(),
-                                        matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                                .getCurrentState(),
-                                        tableMap, variableExpressionExecutors, executionPlanContext, false, 0,
-                                        queryName);
+                                                .getExpression(), matchingMetaInfoHolder.getMetaStateEvent(),
+                                        matchingMetaInfoHolder.getCurrentState(), tableMap, variableMap,
+                                        variableExpressionExecutors, executionPlanContext, false, 0, queryName);
                             }
                             return new ExhaustiveCollectionExecutor(expressionExecutor, matchingMetaInfoHolder
                                     .getStoreEventIndex());
@@ -563,7 +564,8 @@ public class CollectionExpressionParser {
             if (leftCollectionExpression.getCollectionScope() == CollectionExpression.CollectionScope.NON &&
                     rightCollectionExpression.getCollectionScope() == CollectionExpression.CollectionScope.NON) {
                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
-                        matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                        matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
+                        tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
                 return new NonCollectionExecutor(expressionExecutor);
             } else if (leftCollectionExpression.getCollectionScope() == CollectionExpression.CollectionScope
                     .EXHAUSTIVE ||
@@ -571,19 +573,22 @@ public class CollectionExpressionParser {
                 if (isFirst) {
                     expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                             matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                            tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                            tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0,
+                            queryName);
                 }
                 return new ExhaustiveCollectionExecutor(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex
                         ());
             } else {
                 if (isFirst) {
                     aCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser.parseExpression(collectionExpression.getExpression(),
-                            matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName), matchingMetaInfoHolder.getStoreEventIndex());
+                            matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
+                            tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0,
+                            queryName), matchingMetaInfoHolder.getStoreEventIndex());
                 }
                 leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression, matchingMetaInfoHolder,
-                        variableExpressionExecutors, tableMap, executionPlanContext, isFirst, queryName);
+                        variableExpressionExecutors, tableMap, variableMap, executionPlanContext, isFirst, queryName);
                 rightCollectionExecutor = buildCollectionExecutor(rightCollectionExpression, matchingMetaInfoHolder,
-                        variableExpressionExecutors, tableMap, executionPlanContext, isFirst, queryName);
+                        variableExpressionExecutors, tableMap, variableMap, executionPlanContext, isFirst, queryName);
                 return new OrCollectionExecutor(leftCollectionExecutor, rightCollectionExecutor, aCollectionExecutor);
             }
         } else if (collectionExpression instanceof NotCollectionExpression) {
@@ -592,7 +597,9 @@ public class CollectionExpressionParser {
 
                 case NON:
                     expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
-                            matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                            matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
+                            tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0,
+                            queryName);
                     return new NonCollectionExecutor(expressionExecutor);
                 case INDEXED_ATTRIBUTE:
                 case INDEXED_RESULT_SET:
@@ -600,18 +607,22 @@ public class CollectionExpressionParser {
                     ExhaustiveCollectionExecutor exhaustiveCollectionExecutor = null;
                     if (isFirst) {
                         exhaustiveCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser.parseExpression(collectionExpression.getExpression(),
-                                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName), matchingMetaInfoHolder.getStoreEventIndex());
+                                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
+                                tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0,
+                                queryName), matchingMetaInfoHolder.getStoreEventIndex());
                     }
                     CollectionExecutor notCollectionExecutor = buildCollectionExecutor(((NotCollectionExpression)
                             collectionExpression).getCollectionExpression(), matchingMetaInfoHolder,
-                            variableExpressionExecutors, tableMap, executionPlanContext, isFirst, queryName);
+                            variableExpressionExecutors, tableMap, variableMap, executionPlanContext, isFirst,
+                            queryName);
                     return new NotCollectionExecutor(notCollectionExecutor, exhaustiveCollectionExecutor);
 
                 case EXHAUSTIVE:
                     if (isFirst) {
                         expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                                 matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                                tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                                tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0,
+                                queryName);
                     }
                     return new ExhaustiveCollectionExecutor(expressionExecutor, matchingMetaInfoHolder
                             .getStoreEventIndex());
@@ -622,13 +633,14 @@ public class CollectionExpressionParser {
             if (collectionExpression.getCollectionScope() == CollectionExpression.CollectionScope.NON) {
                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                         matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                        tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                        tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
                 return new NonCollectionExecutor(expressionExecutor);
             } else {// EXHAUSTIVE
                 if (isFirst) {
                     expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                             matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                            tableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                            tableMap, variableMap, variableExpressionExecutors, executionPlanContext, false, 0,
+                            queryName);
                 }
                 return new ExhaustiveCollectionExecutor(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex
                         ());

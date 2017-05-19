@@ -63,6 +63,8 @@ public abstract class Scheduler implements Snapshotable {
 
     public abstract Scheduler clone(String key, EntryValveProcessor entryValveProcessor);
 
+    public abstract void reset();
+
     public void notifyAt(long time) {
         try {
             // Insert the time into the queue

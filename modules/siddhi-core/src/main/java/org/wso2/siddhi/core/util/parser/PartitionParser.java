@@ -57,6 +57,7 @@ public class PartitionParser {
                     executionPlanRuntimeBuilder.getWindowDefinitionMap(),
                     executionPlanRuntimeBuilder.getTableMap(),
                     executionPlanRuntimeBuilder.getEventWindowMap(),
+                    executionPlanRuntimeBuilder.getVariableMap(),
                     executionPlanRuntimeBuilder.getEventSourceMap(),
                     executionPlanRuntimeBuilder.getEventSinkMap(),
                     executionPlanRuntimeBuilder.getLockSynchronizer());
