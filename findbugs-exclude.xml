@@ -35,9 +35,6 @@
         <Bug pattern="MF_CLASS_MASKS_FIELD"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.core.*"/>
-    </Match>
-    <Match>
         <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
@@ -98,12 +95,6 @@
         <Bug pattern="RV_RETURN_VALUE_OF_PUTIFABSENT_IGNORED"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.performance.*"/>
-    </Match>
-    <Match>
-        <Package name="~org\.wso2\.siddhi\.sample.*"/>
-    </Match>
-    <Match>
         <Package name="~org\.wso2\.siddhi\.core\.query\.output\.ratelimit\.time.*"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
@@ -132,10 +123,6 @@
         <Bug pattern="UC_USELESS_OBJECT"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.core\.event.*"/>
-        <Bug pattern="EI_EXPOSE_REP"/>
-    </Match>
-    <Match>
         <Class name="org.wso2.siddhi.core.executor.VariableExpressionExecutor"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
@@ -148,7 +135,7 @@
         <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.transport.InMemoryBroker"/>
+        <Class name="org.wso2.siddhi.core.util.transport.InMemoryBroker$Subscriber"/>
         <Bug pattern="DE_MIGHT_IGNORE"/>
     </Match>
     <Match>
@@ -162,5 +149,15 @@
     <Match>
         <Package name="~org\.wso2\.siddhi\.core.*"/>
         <Bug pattern="SIC_INNER_SHOULD_BE_STATIC"/>
+    </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core\.event.*"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.performance.*"/>
+    </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.sample.*"/>
     </Match>
 </FindBugsFilter>
