@@ -237,11 +237,6 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-test-output-transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-extension-kafka-output-transport</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -472,24 +467,25 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin>-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.8</version>
-                    &lt;!&ndash;todo this should be remove after fixing javadoc&ndash;&gt;
-                    <configuration>
-                        <additionalparam>-Xdoclint:none</additionalparam>
-                    </configuration>
                     <executions>
                         <execution>
-                            <id>attach-javadocs</id>
+                            <id>docs</id>
+                            <phase>compile</phase>
                             <goals>
-                                <goal>jar</goal>
+                                <goal>javadoc</goal>
                             </goals>
                         </execution>
                     </executions>
-                </plugin>-->
+                    <configuration>
+                        <excludePackageNames>
+                            org.wso2.siddhi.query.compiler.internal:org.wso2.siddhi.query.compiler
+                        </excludePackageNames>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
