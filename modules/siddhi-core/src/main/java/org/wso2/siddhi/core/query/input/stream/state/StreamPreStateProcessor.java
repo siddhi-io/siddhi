@@ -56,14 +56,17 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
 
     protected ComplexEventChunk<StateEvent> currentStateEventChunk = new ComplexEventChunk<StateEvent>(false);
     protected LinkedList<StateEvent> pendingStateEventList = new LinkedList<StateEvent>();
+    protected LinkedList<StateEvent> pendingAbsentStateEventList = new LinkedList<StateEvent>();
     protected LinkedList<StateEvent> newAndEveryStateEventList = new LinkedList<StateEvent>();
-
     protected StateEventPool stateEventPool;
     //  private StreamEventPool streamEventPool;
     protected StreamEventCloner streamEventCloner;
     protected StateEventCloner stateEventCloner;
     protected StreamEventPool streamEventPool;
     protected String queryName;
+    private boolean absentPartner;
+    private long absentPartnerTimeout;
+    private AbsentStreamPreStateProcessor absentStreamPreStateProcessor;
 
     public StreamPreStateProcessor(StateInputStream.Type stateType, List<Map.Entry<Long, Set<Integer>>> withinStates) {
         this.stateType = stateType;
@@ -77,6 +80,30 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
             this.elementId = "StreamPreStateProcessor-" + executionPlanContext.getElementIdGenerator().createNewId();
         }
         executionPlanContext.getSnapshotService().addSnapshotable(queryName, this);
+    }
+
+    public boolean isAbsentPartner() {
+        return absentPartner;
+    }
+
+    public void setAbsentPartner(boolean absentPartner) {
+        this.absentPartner = absentPartner;
+    }
+
+    public AbsentStreamPreStateProcessor getAbsentStreamPreStateProcessor() {
+        return absentStreamPreStateProcessor;
+    }
+
+    public void setAbsentStreamPreStateProcessor(AbsentStreamPreStateProcessor absentStreamPreStateProcessor) {
+        this.absentStreamPreStateProcessor = absentStreamPreStateProcessor;
+    }
+
+    public long getAbsentPartnerTimeout() {
+        return absentPartnerTimeout;
+    }
+
+    public void setAbsentPartnerTimeout(long absentPartnerTimeout) {
+        this.absentPartnerTimeout = absentPartnerTimeout;
     }
 
     public StreamPostStateProcessor getThisStatePostProcessor() {
@@ -215,6 +242,10 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         }
     }
 
+    public void addAbsent(StateEvent stateEvent) {
+        pendingAbsentStateEventList.add(stateEvent);
+    }
+
     @Override
     public void addEveryState(StateEvent stateEvent) {
         newAndEveryStateEventList.add(stateEventCloner.copyStateEvent(stateEvent));
@@ -265,31 +296,64 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
-        for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
+
+        if (absentPartner) {
+            // Remove the expired events based on absent partner's timeout
+            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+            for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
+                StateEvent stateEvent = iterator.next();
+                if (currentTime >= stateEvent.getTimestamp() + absentPartnerTimeout) {
+                    iterator.remove();
+                }
+            }
+
+            // If there were no events received by the absent partner
+            if (!pendingAbsentStateEventList.isEmpty()) {
+                processAndReturn(returnEventChunk, streamEvent, pendingAbsentStateEventList);
+            } else if (pendingStateEventList.isEmpty() && !(this instanceof AbsentStreamPreStateProcessor) &&
+                    !absentStreamPreStateProcessor.hasStateEvents()) {
+                if (absentStreamPreStateProcessor.isNoPresentBeforeInPattern()) {
+                    // Absent processor did not receive any events before the current event.
+                    // Send it to the next pre processor if available.
+                    StateEvent stateEvent = stateEventPool.borrowEvent();
+                    stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
+                    process(stateEvent);
+                    if (this.thisLastProcessor.isEventReturned()) {
+                        this.thisLastProcessor.clearProcessedEvent();
+                        returnEventChunk.add(stateEvent);
+                    }
+                }
+            }
+
+            if (this instanceof AbsentStreamPreStateProcessor) {
+                StateEvent stateEvent = stateEventPool.borrowEvent();
+                stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
+                process(stateEvent);
+                if (this.thisLastProcessor.isEventReturned()) {
+                    this.thisLastProcessor.clearProcessedEvent();
+                    returnEventChunk.add(stateEvent);
+                }
+            }
+        } else {
+            processAndReturn(returnEventChunk, streamEvent, pendingStateEventList);
+        }
+        return returnEventChunk;
+    }
+
+    private void processAndReturn(ComplexEventChunk<StateEvent> returnEventChunk, StreamEvent streamEvent,
+                                  List<StateEvent> listToTraverse) {
+        for (Iterator<StateEvent> iterator = listToTraverse.iterator(); iterator.hasNext(); ) {
             StateEvent stateEvent = iterator.next();
+            // Get the timestamp before process because the timestamp of state event will be updated in post processor
             if (withinStates.size() > 0) {
                 if (isExpired(stateEvent, streamEvent)) {
                     iterator.remove();
                     continue;
                 }
             }
-//                if (Math.abs(stateEvent.getTimestamp() - streamEvent.getTimestamp()) > withinStates) {
-//                    iterator.remove();
-////                    switch (stateType) {
-////                        case PATTERN:
-////                            stateEvent.setEvent(stateId, null);
-////                            break;
-////                        case SEQUENCE:
-////                            stateEvent.setEvent(stateId, null);
-////                            iterator.remove();
-////                            if (thisStatePostProcessor.callbackPreStateProcessor != null) {
-////                                thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
-////                            }
-////                            break;
-////                    }
-//                    continue;
-//                }
-//            }
+
+            // If this is is next to an absent processor, should not send the event that matched with an event
+            // received by the absence processor within the given time.
             stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
             process(stateEvent);
             if (this.thisLastProcessor.isEventReturned()) {
@@ -313,7 +377,6 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
                 }
             }
         }
-        return returnEventChunk;
     }
 
     @Override
