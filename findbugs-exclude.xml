@@ -34,9 +34,9 @@
         <Class name="org.wso2.siddhi.query.compiler.SiddhiQLParser$CollectContext"/>
         <Bug pattern="MF_CLASS_MASKS_FIELD"/>
     </Match>
-    <Match>
-        <Package name="~org\.wso2\.siddhi\.core.*"/>
-    </Match>
+    <!--<Match>-->
+        <!--<Package name="~org\.wso2\.siddhi\.core.*"/>-->
+    <!--</Match>-->
     <Match>
         <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
         <Bug pattern="EI_EXPOSE_REP"/>
@@ -148,7 +148,7 @@
         <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.transport.InMemoryBroker"/>
+        <Class name="org.wso2.siddhi.core.util.transport.InMemoryBroker$Subscriber"/>
         <Bug pattern="DE_MIGHT_IGNORE"/>
     </Match>
     <Match>
