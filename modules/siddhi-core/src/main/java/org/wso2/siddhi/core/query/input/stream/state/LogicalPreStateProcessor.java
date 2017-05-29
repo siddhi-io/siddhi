@@ -34,8 +34,8 @@ import java.util.Set;
  */
 public class LogicalPreStateProcessor extends StreamPreStateProcessor {
 
-    private LogicalStateElement.Type logicalType;
-    private LogicalPreStateProcessor partnerStatePreProcessor;
+    protected LogicalStateElement.Type logicalType;
+    protected LogicalPreStateProcessor partnerStatePreProcessor;
 
     public LogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType, List<Map
             .Entry<Long, Set<Integer>>> withinStates) {
@@ -102,14 +102,61 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
     }
 
     @Override
+    public void setAbsentPreStateProcessor(AbsentPreStateProcessor absentPreStateProcessor) {
+        super.setAbsentPreStateProcessor(absentPreStateProcessor);
+        if (partnerStatePreProcessor != null && partnerStatePreProcessor.absentPreStateProcessor == null) {
+            partnerStatePreProcessor.setAbsentPreStateProcessor(absentPreStateProcessor);
+        }
+    }
+
+    @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
-        for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
+
+        if (nextToAbsentProcessor) {
+
+            if (!pendingStateEventList.isEmpty()) {
+                // Absent processor sent the events after timeout
+                processAndReturn(returnEventChunk, streamEvent, pendingStateEventList);
+            } else {
+                // No events were sent by absent processor
+                // If absent is the first one
+                if (absentPreStateProcessor.isWaitingTimePassed() && !(this instanceof
+                        AbsentLogicalPreStateProcessor) && absentPreStateProcessor.isEmpty()) {
+                    // Absent processor did not receive any events before the current event.
+                    // Send it to the next pre processor if available.
+                    StateEvent stateEvent = stateEventPool.borrowEvent();
+                    stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
+                    process(stateEvent);
+                    if (this.thisLastProcessor.isEventReturned()) {
+                        this.thisLastProcessor.clearProcessedEvent();
+                        returnEventChunk.add(stateEvent);
+                    }
+
+                } else if (this instanceof AbsentLogicalPreStateProcessor) {
+                    StateEvent stateEvent = stateEventPool.borrowEvent();
+                    stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
+                    process(stateEvent);
+                    if (this.thisLastProcessor.isEventReturned()) {
+                        this.thisLastProcessor.clearProcessedEvent();
+                        returnEventChunk.add(stateEvent);
+                    }
+                }
+            }
+        } else {
+            processAndReturn(returnEventChunk, streamEvent, pendingStateEventList);
+        }
+        return returnEventChunk;
+    }
+
+    private void processAndReturn(ComplexEventChunk<StateEvent> returnEventChunk, StreamEvent streamEvent,
+                                  List<StateEvent> listToTraverse) {
+        for (Iterator<StateEvent> iterator = listToTraverse.iterator(); iterator.hasNext(); ) {
             StateEvent stateEvent = iterator.next();
             if (logicalType == LogicalStateElement.Type.OR && stateEvent.getStreamEvent(partnerStatePreProcessor
-                    .getStateId()) != null) {
+                    .getStateId()) != null && !(partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor)) {
                 iterator.remove();
                 continue;
             }
@@ -133,7 +180,6 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
                 }
             }
         }
-        return returnEventChunk;
     }
 
     public void setPartnerStatePreProcessor(LogicalPreStateProcessor partnerStatePreProcessor) {

@@ -38,6 +38,7 @@ import org.wso2.siddhi.query.api.execution.query.input.handler.Filter;
 import org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction;
 import org.wso2.siddhi.query.api.execution.query.input.handler.StreamHandler;
 import org.wso2.siddhi.query.api.execution.query.input.handler.Window;
+import org.wso2.siddhi.query.api.execution.query.input.state.AbsentStreamStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.state.CountStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.state.EveryStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.state.NextStateElement;
@@ -697,12 +698,19 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitPattern_stream(@NotNull SiddhiQLParser.Pattern_streamContext ctx) {
-//        pattern_stream
-//        :every_pattern_source_chain
-//        ;
-        StateElement stateElement = ((StateElement) visit(ctx.every_pattern_source_chain()));
-        return new StateInputStream(StateInputStream.Type.PATTERN, stateElement);
+//    pattern_stream
+//    : every_pattern_source_chain
+//    | every_absent_pattern_source_chain
+//    ;
 
+        StateElement stateElement;
+        if (ctx.every_pattern_source_chain() != null) {
+            stateElement = ((StateElement) visit(ctx.every_pattern_source_chain()));
+        } else {
+            stateElement = ((StateElement) visit(ctx.absent_pattern_source_chain()));
+        }
+
+        return new StateInputStream(StateInputStream.Type.PATTERN, stateElement);
     }
 
     /**
@@ -769,11 +777,11 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public Object visitPattern_source_chain(@NotNull SiddhiQLParser.Pattern_source_chainContext ctx) {
-//        pattern_source_chain
-//        : '('pattern_source_chain')' within_time?
-//        | pattern_source_chain  '->' pattern_source_chain
-//        | pattern_source within_time?
-//        ;
+//    pattern_source_chain
+//    : '('pattern_source_chain')' within_time?
+//    | pattern_source_chain  '->' pattern_source_chain
+//    | pattern_source within_time?
+//    ;
 
         if (ctx.pattern_source_chain().size() == 1) {
             StateElement stateElement = ((StateElement) visit(ctx.pattern_source_chain(0)));
@@ -795,6 +803,145 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         }
     }
 
+    @Override
+    public Object visitAbsent_pattern_source_chain(SiddhiQLParser.Absent_pattern_source_chainContext ctx) {
+//    absent_pattern_source_chain
+//    : EVERY? '('absent_pattern_source_chain')' within_time?
+//    | every_absent_pattern_source
+//    | left_absent_pattern_source
+//    | right_absent_pattern_source
+//    ;
+
+        if (ctx.absent_pattern_source_chain() != null) {
+            StateElement stateElement = (StateElement) visit(ctx.absent_pattern_source_chain());
+            if (ctx.EVERY() != null) {
+                stateElement = new EveryStateElement(stateElement);
+            }
+            if (ctx.within_time() != null) {
+                stateElement.setWithin((TimeConstant) visit(ctx.within_time()));
+            }
+            return stateElement;
+        } else {
+            return visit(ctx.getChild(0));
+        }
+    }
+
+    @Override
+    public Object visitLeft_absent_pattern_source(SiddhiQLParser.Left_absent_pattern_sourceContext ctx) {
+//    left_absent_pattern_source
+//    : EVERY? '('left_absent_pattern_source')' within_time?
+//    | every_absent_pattern_source '->' every_pattern_source_chain
+//    | left_absent_pattern_source '->' left_absent_pattern_source
+//    | left_absent_pattern_source '->' every_absent_pattern_source
+//    | every_pattern_source_chain '->' left_absent_pattern_source
+//    ;
+
+        if (ctx.left_absent_pattern_source().size() == 1 && ctx.every_absent_pattern_source() == null &&
+                ctx.every_pattern_source_chain() == null) {
+            // EVERY? '('left_absent_pattern_source')' within_time?
+            StateElement stateElement = (StateElement) visit(ctx.left_absent_pattern_source(0));
+            if (ctx.EVERY() != null) {
+                stateElement = new EveryStateElement(stateElement);
+            }
+            if (ctx.within_time() != null) {
+                stateElement.setWithin((TimeConstant) visit(ctx.within_time()));
+            }
+            return stateElement;
+        } else {
+            return new NextStateElement((StateElement) visit(ctx.getChild(0)), (StateElement) visit(ctx.getChild(2)));
+        }
+    }
+
+    @Override
+    public Object visitRight_absent_pattern_source(SiddhiQLParser.Right_absent_pattern_sourceContext ctx) {
+//    right_absent_pattern_source
+//    : EVERY? '('right_absent_pattern_source')' within_time?
+//    | every_pattern_source_chain '->' every_absent_pattern_source
+//    | right_absent_pattern_source '->' right_absent_pattern_source
+//    | every_absent_pattern_source '->' right_absent_pattern_source
+//    | right_absent_pattern_source '->' every_pattern_source_chain
+//    ;
+        if (ctx.right_absent_pattern_source().size() == 1 && ctx.every_absent_pattern_source() == null &&
+                ctx.every_pattern_source_chain() == null) {
+            // EVERY? '('right_absent_pattern_source')' within_time?
+            StateElement stateElement = (StateElement) visit(ctx.right_absent_pattern_source(0));
+            if (ctx.EVERY() != null) {
+                stateElement = new EveryStateElement(stateElement);
+            }
+            if (ctx.within_time() != null) {
+                stateElement.setWithin((TimeConstant) visit(ctx.within_time()));
+            }
+            return stateElement;
+        } else {
+            return new NextStateElement((StateElement) visit(ctx.getChild(0)), (StateElement) visit(ctx.getChild(2)));
+        }
+    }
+
+    @Override
+    public Object visitEvery_absent_pattern_source(SiddhiQLParser.Every_absent_pattern_sourceContext ctx) {
+//    every_absent_pattern_source
+//    : EVERY? absent_pattern_source
+//    ;
+
+        StateElement stateElement = (StateElement) visit(ctx.absent_pattern_source());
+        if (ctx.EVERY() != null) {
+            stateElement = new EveryStateElement(stateElement);
+        }
+
+        return stateElement;
+    }
+
+    @Override
+    public Object visitFor_time(SiddhiQLParser.For_timeContext ctx) {
+//    for_time
+//    : FOR time_value
+//    ;
+
+        return visit(ctx.time_value());
+    }
+
+    @Override
+    public Object visitAbsent_pattern_source(SiddhiQLParser.Absent_pattern_sourceContext ctx) {
+//    absent_pattern_source
+//    :NOT basic_source for_time
+//    ;
+
+        StateElement stateElement = State.not((BasicSingleInputStream) visit(ctx.basic_source()), null);
+        ((AbsentStreamStateElement) stateElement).setWaitingTime((TimeConstant) visit(ctx.for_time()));
+        return stateElement;
+    }
+
+    @Override
+    public Object visitLogical_absent_stateful_source(SiddhiQLParser.Logical_absent_stateful_sourceContext ctx) {
+//    logical_absent_stateful_source
+//    : standard_stateful_source AND NOT basic_source
+//    | NOT basic_source AND standard_stateful_source
+//    | standard_stateful_source AND absent_pattern_source
+//    | absent_pattern_source AND standard_stateful_source
+//    | standard_stateful_source OR absent_pattern_source
+//    | absent_pattern_source OR standard_stateful_source
+//    ;
+
+        if (ctx.AND() != null) {
+            StreamStateElement presentStreamState = (StreamStateElement) visit(ctx.standard_stateful_source());
+            AbsentStreamStateElement absentStreamState;
+            if (ctx.absent_pattern_source() != null) {
+                absentStreamState = (AbsentStreamStateElement) visit(ctx.absent_pattern_source());
+            } else {
+                absentStreamState = (AbsentStreamStateElement) State.not(
+                        (BasicSingleInputStream) visit(ctx.basic_source()), null);
+            }
+            return State.logicalNotAnd(presentStreamState, absentStreamState);
+        } else if (ctx.OR() != null) {
+            StreamStateElement streamStateElement1 = (StreamStateElement) visit(ctx.standard_stateful_source());
+            AbsentStreamStateElement streamStateElement2 = (AbsentStreamStateElement) visit(ctx
+                    .absent_pattern_source());
+            return State.logicalOr(streamStateElement2, streamStateElement1);
+        } else {
+            throw newSiddhiParserException(ctx);
+        }
+    }
+
     /**
      * {@inheritDoc}
      * <p>The default implementation returns the result of calling
@@ -811,17 +958,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 //        |standard_stateful_source OR standard_stateful_source
 //        ;
 
-        if (ctx.NOT() != null) {
-            if (ctx.AND() != null) {
-                StreamStateElement streamStateElement1 = (StreamStateElement) visit(ctx.standard_stateful_source(0));
-                StreamStateElement streamStateElement2 = (StreamStateElement) visit(ctx.standard_stateful_source(1));
-                return State.logicalNotAnd(streamStateElement1, streamStateElement2);
-            } else {
-                BasicSingleInputStream basicSingleInputStream = (BasicSingleInputStream) visit(ctx
-                        .standard_stateful_source(0));
-                return State.logicalNot(new StreamStateElement(basicSingleInputStream), null);
-            }
-        } else if (ctx.AND() != null) {
+        if (ctx.AND() != null) {
             StreamStateElement streamStateElement1 = (StreamStateElement) visit(ctx.standard_stateful_source(0));
             StreamStateElement streamStateElement2 = (StreamStateElement) visit(ctx.standard_stateful_source(1));
             return State.logicalAnd(streamStateElement1, streamStateElement2);

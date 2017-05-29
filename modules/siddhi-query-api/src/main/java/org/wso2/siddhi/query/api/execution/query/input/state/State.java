@@ -54,6 +54,11 @@ public class State {
         return new LogicalStateElement(streamStateElement1, LogicalStateElement.Type.OR, streamStateElement2, time);
     }
 
+    public static StateElement not(BasicSingleInputStream basicSingleInputStream, TimeConstant time) {
+        return new AbsentStreamStateElement(basicSingleInputStream, time);
+    }
+
+    // TODO: 4/6/17 Remove the logicalNot methods if not necessary
     public static StateElement logicalNot(StreamStateElement notStreamStateElement,
                                           TimeConstant time) {
         return new LogicalStateElement(null, LogicalStateElement.Type.NOT, notStreamStateElement, time);
@@ -66,9 +71,17 @@ public class State {
                 time);
     }
 
-    public static StateElement logicalNotAnd(StreamStateElement notStreamStateElement,
-                                             StreamStateElement andStreamStateElement) {
-        return new LogicalStateElement(andStreamStateElement, LogicalStateElement.Type.NOT, notStreamStateElement);
+    public static StateElement logicalNotAnd(StreamStateElement presentStreamStateElement,
+                                             AbsentStreamStateElement absentStreamStateElement) {
+        if (absentStreamStateElement.getWaitingTime() == null) {
+            // not A and B
+            return new LogicalStateElement(presentStreamStateElement, LogicalStateElement.Type.AND,
+                    absentStreamStateElement);
+        } else {
+            // not A for 1 sec -> B
+            return new LogicalStateElement(absentStreamStateElement, LogicalStateElement.Type.AND,
+                    presentStreamStateElement);
+        }
     }
 
     public static StateElement next(StateElement stateElement,
