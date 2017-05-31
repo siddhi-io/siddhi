@@ -323,7 +323,7 @@ public class StateInputStreamParser {
 
             LogicalPreStateProcessor logicalPreStateProcessor1;
             if (((LogicalStateElement) stateElement).getStreamStateElement1() instanceof AbsentStreamStateElement) {
-                logicalPreStateProcessor1 = new AbsentLogicalPreStateProcessor(type, stateType, withinStates,
+                logicalPreStateProcessor1 = new AbsentLogicalPreStateProcessor(type, stateType, clonewithinStates(withinStates),
                         ((AbsentStreamStateElement) ((LogicalStateElement) stateElement).getStreamStateElement1())
                                 .getWaitingTime());
                 executionPlanContext.addEternalReferencedHolder((AbsentLogicalPreStateProcessor)
@@ -335,14 +335,14 @@ public class StateInputStreamParser {
                         entryValveProcessor, executionPlanContext);
                 ((SchedulingProcessor) logicalPreStateProcessor1).setScheduler(scheduler);
             } else {
-                logicalPreStateProcessor1 = new LogicalPreStateProcessor(type, stateType, withinStates);
+                logicalPreStateProcessor1 = new LogicalPreStateProcessor(type, stateType, clonewithinStates(withinStates));
             }
             logicalPreStateProcessor1.init(executionPlanContext, queryName);
             LogicalPostStateProcessor logicalPostStateProcessor1 = new LogicalPostStateProcessor(type);
 
             LogicalPreStateProcessor logicalPreStateProcessor2;
             if (((LogicalStateElement) stateElement).getStreamStateElement2() instanceof AbsentStreamStateElement) {
-                logicalPreStateProcessor2 = new AbsentLogicalPreStateProcessor(type, stateType, withinStates,
+                logicalPreStateProcessor2 = new AbsentLogicalPreStateProcessor(type, stateType, clonewithinStates(withinStates),
                         ((AbsentStreamStateElement) ((LogicalStateElement) stateElement).getStreamStateElement2())
                                 .getWaitingTime());
                 executionPlanContext.addEternalReferencedHolder((AbsentLogicalPreStateProcessor)
@@ -353,7 +353,7 @@ public class StateInputStreamParser {
                         entryValveProcessor, executionPlanContext);
                 ((SchedulingProcessor) logicalPreStateProcessor2).setScheduler(scheduler);
             } else {
-                logicalPreStateProcessor2 = new LogicalPreStateProcessor(type, stateType, withinStates);
+                logicalPreStateProcessor2 = new LogicalPreStateProcessor(type, stateType, clonewithinStates(withinStates));
             }
             logicalPreStateProcessor2.init(executionPlanContext, queryName);
             LogicalPostStateProcessor logicalPostStateProcessor2 = new LogicalPostStateProcessor(type);

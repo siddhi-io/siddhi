@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.query.input.stream.state;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
@@ -155,6 +156,12 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
                                   List<StateEvent> listToTraverse) {
         for (Iterator<StateEvent> iterator = listToTraverse.iterator(); iterator.hasNext(); ) {
             StateEvent stateEvent = iterator.next();
+            if (withinStates.size() > 0) {
+                if (isExpired(stateEvent, streamEvent)) {
+                    iterator.remove();
+                    continue;
+                }
+            }
             if (logicalType == LogicalStateElement.Type.OR && stateEvent.getStreamEvent(partnerStatePreProcessor
                     .getStateId()) != null && !(partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor)) {
                 iterator.remove();
@@ -180,6 +187,27 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
                 }
             }
         }
+    }
+
+    private boolean isExpired(StateEvent pendingStateEvent, StreamEvent incomingStreamEvent) {
+        for (Map.Entry<Long, Set<Integer>> withinEntry : withinStates) {
+            for (Integer withinStateId : withinEntry.getValue()) {
+                if (withinStateId == SiddhiConstants.ANY) {
+                    if (Math.abs(pendingStateEvent.getTimestamp() - incomingStreamEvent.getTimestamp()) > withinEntry
+                            .getKey()) {
+                        return true;
+                    }
+                } else {
+                    if (Math.abs(pendingStateEvent.getStreamEvent(withinStateId).getTimestamp() - incomingStreamEvent
+                            .getTimestamp()) > withinEntry.getKey()) {
+                        return true;
+
+                    }
+                }
+            }
+        }
+        return false;
+
     }
 
     public void setPartnerStatePreProcessor(LogicalPreStateProcessor partnerStatePreProcessor) {
