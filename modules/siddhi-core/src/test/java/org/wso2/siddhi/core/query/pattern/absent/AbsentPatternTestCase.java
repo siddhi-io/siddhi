@@ -1464,13 +1464,49 @@ public class AbsentPatternTestCase {
 
         addCallback(executionPlanRuntime, "query1", new Object[]{"WSO2", "IBM"});
 
-        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
         InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
 
 
         executionPlanRuntime.start();
 
         Thread.sleep(1100);
+        stream2.send(new Object[]{"WSO2", 35.0f, 100});
+        Thread.sleep(100);
+        stream2.send(new Object[]{"IBM", 45.0f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 1, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertTrue("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent37() throws InterruptedException {
+        log.info("Test the query not e1 for 1 sec -> e2 with e2 only");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] for 1 sec -> e2=Stream2[price>20] " +
+                "select e2.symbol as symbol " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1", new Object[]{"WSO2"});
+
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+
+
+        executionPlanRuntime.start();
+
+        Thread.sleep(2100);
         stream2.send(new Object[]{"WSO2", 35.0f, 100});
         Thread.sleep(100);
         stream2.send(new Object[]{"IBM", 45.0f, 100});

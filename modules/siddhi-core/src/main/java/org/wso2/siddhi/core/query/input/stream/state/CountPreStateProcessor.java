@@ -24,7 +24,6 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +37,6 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
     protected volatile boolean successCondition = false;
     private CountPostStateProcessor countPostStateProcessor;
     private volatile boolean startStateReset = false;
-    private List<StateEvent> emptyStateList = new LinkedList<>();
 
     public CountPreStateProcessor(int minCount, int maxCount, StateInputStream.Type stateType, List<Map.Entry<Long,
             Set<Integer>>> withinStates) {
@@ -61,31 +59,7 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
-
-        if (nextToAbsentProcessor) {
-            if (!pendingStateEventList.isEmpty()) {
-                processAndReturn(returnEventChunk, streamEvent, pendingStateEventList);
-            } else {
-                // No events were sent by absent processor
-                // If absent is the first one
-                if (absentPreStateProcessor.isWaitingTimePassed() && absentPreStateProcessor.isEmpty()) {
-                    // Absent processor did not receive any events before the current event.
-                    // Send it to the next pre processor if available.
-                    if (emptyStateList.isEmpty()) {
-                        emptyStateList.add(stateEventPool.borrowEvent());
-                    }
-                    processAndReturn(returnEventChunk, streamEvent, emptyStateList);
-                }
-            }
-        } else {
-            processAndReturn(returnEventChunk, streamEvent, pendingStateEventList);
-        }
-        return returnEventChunk;
-    }
-
-    private void processAndReturn(ComplexEventChunk<StateEvent> returnEventChunk, StreamEvent streamEvent,
-                                  List<StateEvent> listToTraverse) {
-        for (Iterator<StateEvent> iterator = listToTraverse.iterator(); iterator.hasNext(); ) {
+        for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
             StateEvent stateEvent = iterator.next();
             if (removeIfNextStateProcessed(stateEvent, iterator, stateId + 1)) {
                 continue;
@@ -115,6 +89,7 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
                 }
             }
         }
+        return returnEventChunk;
     }
 
     private boolean removeIfNextStateProcessed(StateEvent stateEvent, Iterator<StateEvent> iterator, int position) {

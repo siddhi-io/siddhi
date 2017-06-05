@@ -63,12 +63,12 @@ public class LogicalPostStateProcessor extends StreamPostStateProcessor {
                 if (partnerPreStateProcessor instanceof AbsentLogicalPreStateProcessor) {
                     AbsentLogicalPreStateProcessor absentProcessor = (AbsentLogicalPreStateProcessor)
                             partnerPreStateProcessor;
-                    if (absentProcessor.getWaitingTime() == -1 &&
-                            stateEvent.getStreamEvent(absentProcessor.getStateId()) == null) {
+                    if (absentProcessor.getWaitingTime() == -1 && stateEvent.getStreamEvent(absentProcessor
+                            .getStateId()) == null) {
                         // for time is not defined and event is not received by absent processor
                         process = true;
-                    } else if (absentProcessor.getWaitingTime() != -1 && absentProcessor.isWaitingTimePassed() &&
-                            stateEvent.getStreamEvent(absentProcessor.getStateId()) == null) {
+                    } else if (absentProcessor.getWaitingTime() != -1 && stateEvent.getStreamEvent(absentProcessor
+                            .getStateId()) != null) {
                         // for time is defined
                         process = true;
                     }

@@ -41,16 +41,11 @@ public interface AbsentPreStateProcessor extends SchedulingProcessor, EternalRef
     boolean isEmpty();
 
     /**
-     * Waiting time has been passed from the system startup time.
-     *
-     * @return true if waitingTime is passed from system startup otherwise false.
-     */
-    boolean isWaitingTimePassed();
-
-    /**
      * Mark that there are no StateProcessors to process <b>events that arrive</b> before this processor.
      *
      * @param value
      */
     void setNoPresentBefore(boolean value);
+
+    boolean isNoPresentBefore();
 }

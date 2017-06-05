@@ -18,7 +18,6 @@
 
 package org.wso2.siddhi.core.query.input.stream.state;
 
-import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.util.Scheduler;
@@ -40,7 +39,6 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     private List<StateEvent> arrivedEventsList = new LinkedList<>();
     private long waitingTime;
     private boolean noPresentBefore = false;
-    private boolean waitingTimePassed = false;
 
 
     public AbsentStreamPreStateProcessor(StateInputStream.Type stateType, List<Map.Entry<Long, Set<Integer>>>
@@ -53,6 +51,11 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     @Override
     public void setNoPresentBefore(boolean noPresentBeforeInPattern) {
         this.noPresentBefore = noPresentBeforeInPattern;
+    }
+
+    @Override
+    public boolean isNoPresentBefore() {
+        return this.noPresentBefore;
     }
 
     @Override
@@ -89,55 +92,59 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     }
 
     @Override
-    public boolean isWaitingTimePassed() {
-        return waitingTimePassed;
-    }
-
-    @Override
     public void process(ComplexEventChunk complexEventChunk) {
 
         // If the process method is called, it is guaranteed that the waitingTime is passed
-        waitingTimePassed = true;
+        if (isStartState) {
+            boolean empty;
+            synchronized (this) {
+                empty = noPresentBefore && this.arrivedEventsList.isEmpty();
+            }
+            if (empty) {
+                // This is the first processor and no events received so far
+                StateEvent stateEvent = stateEventPool.borrowEvent();
+                sendEvent(stateEvent);
+            }
+        } else {
+            // This processor is next to some other processors
 
-        if (!isStartState) {
-            // Called by the scheduler
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent newEvent = complexEventChunk.next();
-                if (newEvent.getType() == ComplexEvent.Type.TIMER) {
-                    long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
-                    ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);
+            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+            ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);
 
-                    // Synchronize with processAndReturn method
-                    synchronized (this) {
-                        Iterator<StateEvent> iterator = arrivedEventsList.iterator();
-                        while (iterator.hasNext()) {
-                            StateEvent event = iterator.next();
-                            if (currentTime >= event.getTimestamp() + waitingTime) {
-                                iterator.remove();
-                                retEventChunk.add(event);
-                            }
-                        }
-                    }
-
-                    while (retEventChunk.hasNext()) {
-                        StateEvent stateEvent = retEventChunk.next();
-                        retEventChunk.remove();
-                        if (thisStatePostProcessor.nextProcessor != null) {
-                            thisStatePostProcessor.nextProcessor.process(new ComplexEventChunk<>(stateEvent,
-                                    stateEvent, false));
-                        }
-                        if (thisStatePostProcessor.nextStatePerProcessor != null) {
-                            thisStatePostProcessor.nextStatePerProcessor.addState(stateEvent);
-                        }
-                        if (thisStatePostProcessor.nextEveryStatePerProcessor != null) {
-                            thisStatePostProcessor.nextEveryStatePerProcessor.addEveryState(stateEvent);
-                        }
-                        if (thisStatePostProcessor.callbackPreStateProcessor != null) {
-                            thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
-                        }
+            // Synchronize with processAndReturn method
+            synchronized (this) {
+                Iterator<StateEvent> iterator = arrivedEventsList.iterator();
+                while (iterator.hasNext()) {
+                    StateEvent event = iterator.next();
+                    if (currentTime >= event.getTimestamp() + waitingTime) {
+                        iterator.remove();
+                        retEventChunk.add(event);
                     }
                 }
             }
+
+            while (retEventChunk.hasNext()) {
+                StateEvent stateEvent = retEventChunk.next();
+                retEventChunk.remove();
+                sendEvent(stateEvent);
+            }
+
+        }
+    }
+
+    private void sendEvent(StateEvent stateEvent) {
+        if (thisStatePostProcessor.nextProcessor != null) {
+            thisStatePostProcessor.nextProcessor.process(new ComplexEventChunk<>(stateEvent,
+                    stateEvent, false));
+        }
+        if (thisStatePostProcessor.nextStatePerProcessor != null) {
+            thisStatePostProcessor.nextStatePerProcessor.addState(stateEvent);
+        }
+        if (thisStatePostProcessor.nextEveryStatePerProcessor != null) {
+            thisStatePostProcessor.nextEveryStatePerProcessor.addEveryState(stateEvent);
+        }
+        if (thisStatePostProcessor.callbackPreStateProcessor != null) {
+            thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
         }
     }
 
@@ -169,7 +176,14 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
 
     @Override
     public void start() {
-        this.scheduler.notifyAt(this.executionPlanContext.getTimestampGenerator().currentTime() + waitingTime);
+        if (isStartState && waitingTime != -1) {
+            synchronized (this) {
+                if (this.arrivedEventsList.isEmpty()) {
+                    this.scheduler.notifyAt(this.executionPlanContext.getTimestampGenerator().currentTime() +
+                            waitingTime);
+                }
+            }
+        }
     }
 
     @Override
