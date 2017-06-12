@@ -42,9 +42,15 @@ public class AbsentStreamPostStateProcessor extends StreamPostStateProcessor {
         StreamEvent streamEvent = stateEvent.getStreamEvent(stateId);
         stateEvent.setTimestamp(streamEvent.getTimestamp());
 
-        if (nextProcessor != null) {
-            complexEventChunk.reset();
-            this.isEventReturned = true;
+        // This is the notification to AbsentStreamPreStateProcessor that this event has been processed
+        this.isEventReturned = true;
+
+        if (nextEveryStatePerProcessor != null && nextEveryStatePerProcessor == thisStatePreProcessor) {
+            nextEveryStatePerProcessor.addEveryState(stateEvent);
+        }
+
+        synchronized (thisStatePreProcessor) {
+            ((AbsentStreamPreStateProcessor) thisStatePreProcessor).updateLastArrivalTime(streamEvent.getTimestamp());
         }
     }
 
