@@ -477,6 +477,48 @@ public class LogicalAbsentPatternTestCase {
     }
 
     @Test
+    public void testQueryAbsent8_2() throws InterruptedException {
+        log.info("Test the query not e1 for 1 sec and e2 -> e3 with e1, e2 after 1 sec and e3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); " +
+                "define stream Stream3 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from not Stream1[price>10] for 1 sec and e2=Stream2[price>20] -> e3=Stream3[price>30] " +
+                "select e2.symbol as symbol2, e3.symbol as symbol3 " +
+                "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        addCallback(executionPlanRuntime, "query1");
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+        InputHandler stream3 = executionPlanRuntime.getInputHandler("Stream3");
+
+
+        executionPlanRuntime.start();
+
+        Thread.sleep(500);
+        stream1.send(new Object[]{"WSO2", 15.0f, 100});
+        Thread.sleep(600);
+        stream2.send(new Object[]{"IBM", 25.0f, 100});
+        Thread.sleep(100);
+        stream3.send(new Object[]{"GOOGLE", 35.0f, 100});
+        Thread.sleep(100);
+
+        Assert.assertEquals("Number of success events", 0, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertFalse("Event arrived", eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
     public void testQueryAbsent9() throws InterruptedException {
         log.info("Test the query not e1 for 1 sec and e2 -> e3 with e2 and e3 within 1 sec");
 

@@ -50,7 +50,7 @@ public class AbsentStreamPostStateProcessor extends StreamPostStateProcessor {
         }
 
         synchronized (thisStatePreProcessor) {
-            ((AbsentStreamPreStateProcessor) thisStatePreProcessor).updateLastArrivalTime(streamEvent.getTimestamp());
+            ((AbsentPreStateProcessor) thisStatePreProcessor).updateLastArrivalTime(streamEvent.getTimestamp());
         }
     }
 

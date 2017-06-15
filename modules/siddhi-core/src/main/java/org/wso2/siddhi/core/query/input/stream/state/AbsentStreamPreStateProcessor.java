@@ -50,6 +50,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         this.waitingTime = waitingTime.value();
     }
 
+    @Override
     public void updateLastArrivalTime(long timestamp) {
         synchronized (this) {
             this.lastArrivalTime = timestamp;

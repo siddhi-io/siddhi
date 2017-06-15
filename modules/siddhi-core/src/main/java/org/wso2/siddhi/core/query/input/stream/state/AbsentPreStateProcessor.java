@@ -48,4 +48,6 @@ public interface AbsentPreStateProcessor extends SchedulingProcessor, EternalRef
     void setNoPresentBefore(boolean value);
 
     boolean isNoPresentBefore();
+
+    void updateLastArrivalTime(long timestamp);
 }

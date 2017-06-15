@@ -89,6 +89,11 @@ public class LogicalPostStateProcessor extends StreamPostStateProcessor {
             case NOT:
                 break;
         }
+
+        if (thisStatePreProcessor instanceof AbsentPreStateProcessor) {
+            ((AbsentPreStateProcessor) thisStatePreProcessor).updateLastArrivalTime(stateEvent.getStreamEvent
+                    (stateId).getTimestamp());
+        }
     }
 
     public void setPartnerPreStateProcessor(LogicalPreStateProcessor partnerPreStateProcessor) {
