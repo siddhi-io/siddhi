@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.query.input.stream.state;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
@@ -34,8 +35,8 @@ import java.util.Set;
  */
 public class LogicalPreStateProcessor extends StreamPreStateProcessor {
 
-    private LogicalStateElement.Type logicalType;
-    private LogicalPreStateProcessor partnerStatePreProcessor;
+    protected LogicalStateElement.Type logicalType;
+    protected LogicalPreStateProcessor partnerStatePreProcessor;
 
     public LogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType, List<Map
             .Entry<Long, Set<Integer>>> withinStates) {
@@ -60,11 +61,18 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
 
     @Override
     public void addState(StateEvent stateEvent) {
-        if (newAndEveryStateEventList.isEmpty()) {
+        if (stateType == StateInputStream.Type.SEQUENCE || isStartState) {
+            if (newAndEveryStateEventList.isEmpty()) {
+                newAndEveryStateEventList.add(stateEvent);
+            }
+            if (partnerStatePreProcessor != null && partnerStatePreProcessor.newAndEveryStateEventList.isEmpty()) {
+                partnerStatePreProcessor.newAndEveryStateEventList.add(stateEvent);
+            }
+        } else {
             newAndEveryStateEventList.add(stateEvent);
-        }
-        if (partnerStatePreProcessor != null && partnerStatePreProcessor.newAndEveryStateEventList.isEmpty()) {
-            partnerStatePreProcessor.newAndEveryStateEventList.add(stateEvent);
+            if (partnerStatePreProcessor != null) {
+                partnerStatePreProcessor.newAndEveryStateEventList.add(stateEvent);
+            }
         }
     }
 
@@ -102,19 +110,50 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
     }
 
     @Override
+    public void setAbsentPreStateProcessor(AbsentPreStateProcessor absentPreStateProcessor) {
+        super.setAbsentPreStateProcessor(absentPreStateProcessor);
+        if (partnerStatePreProcessor != null && partnerStatePreProcessor.absentPreStateProcessor == null) {
+            partnerStatePreProcessor.setAbsentPreStateProcessor(absentPreStateProcessor);
+        }
+    }
+
+    @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
+        if (logicalType == LogicalStateElement.Type.AND && partnerStatePreProcessor instanceof
+                AbsentLogicalPreStateProcessor) {
+            synchronized (partnerStatePreProcessor) {
+                return processEvent(complexEventChunk);
+            }
+        } else {
+            return processEvent(complexEventChunk);
+        }
+    }
+
+    private ComplexEventChunk<StateEvent> processEvent(ComplexEventChunk complexEventChunk) {
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
+
         for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
             StateEvent stateEvent = iterator.next();
+            if (withinStates.size() > 0) {
+                if (isExpired(stateEvent, streamEvent)) {
+                    iterator.remove();
+                    continue;
+                }
+            }
             if (logicalType == LogicalStateElement.Type.OR && stateEvent.getStreamEvent(partnerStatePreProcessor
-                    .getStateId()) != null) {
+                    .getStateId()) != null && !(partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor)) {
+
                 iterator.remove();
                 continue;
             }
             stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
             process(stateEvent);
+            if (this instanceof AbsentLogicalPreStateProcessor && ((AbsentLogicalPreStateProcessor) this)
+                    .getWaitingTime() != -1) {
+                stateEvent.setEvent(stateId, null);
+            }
             if (this.thisLastProcessor.isEventReturned()) {
                 this.thisLastProcessor.clearProcessedEvent();
                 returnEventChunk.add(stateEvent);
@@ -134,6 +173,27 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
             }
         }
         return returnEventChunk;
+    }
+
+    private boolean isExpired(StateEvent pendingStateEvent, StreamEvent incomingStreamEvent) {
+        for (Map.Entry<Long, Set<Integer>> withinEntry : withinStates) {
+            for (Integer withinStateId : withinEntry.getValue()) {
+                if (withinStateId == SiddhiConstants.ANY) {
+                    if (Math.abs(pendingStateEvent.getTimestamp() - incomingStreamEvent.getTimestamp()) > withinEntry
+                            .getKey()) {
+                        return true;
+                    }
+                } else {
+                    if (Math.abs(pendingStateEvent.getStreamEvent(withinStateId).getTimestamp() - incomingStreamEvent
+                            .getTimestamp()) > withinEntry.getKey()) {
+                        return true;
+
+                    }
+                }
+            }
+        }
+        return false;
+
     }
 
     public void setPartnerStatePreProcessor(LogicalPreStateProcessor partnerStatePreProcessor) {

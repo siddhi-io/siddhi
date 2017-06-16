@@ -65,6 +65,19 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     protected StreamEventPool streamEventPool;
     protected String queryName;
 
+    /**
+     * This processor is next to a absent event processor.
+     * This variable is used for readability purposes. Instead of using this variable, one can use
+     * nextToAbsentProcessor != null.
+     */
+    protected boolean nextToAbsentProcessor = false;
+
+    /**
+     * The AbsentPreStateProcessor just before this processor.
+     * It can be null if there are no AbsentPreStateProcessors before this processor.
+     */
+    protected AbsentPreStateProcessor absentPreStateProcessor;
+
     public StreamPreStateProcessor(StateInputStream.Type stateType, List<Map.Entry<Long, Set<Integer>>> withinStates) {
         this.stateType = stateType;
         this.withinStates = withinStates;
@@ -210,8 +223,13 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
                 newAndEveryStateEventList.add(stateEvent);
             }
         } else {
+//            if (nextToAbsentProcessor && absentPreStateProcessor.isNoPresentBefore()) {
+//                if (newAndEveryStateEventList.isEmpty()) {
+//                    newAndEveryStateEventList.add(stateEvent);
+//                }
+//            } else {
             newAndEveryStateEventList.add(stateEvent);
-
+//            }
         }
     }
 
@@ -260,6 +278,15 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         newAndEveryStateEventList.clear();
     }
 
+    public boolean isNextToAbsentProcessor() {
+        return nextToAbsentProcessor;
+    }
+
+    public void setAbsentPreStateProcessor(AbsentPreStateProcessor absentPreStateProcessor) {
+        this.absentPreStateProcessor = absentPreStateProcessor;
+        this.nextToAbsentProcessor = true;
+    }
+
     @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
@@ -298,6 +325,9 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
             }
             if (stateChanged) {
                 iterator.remove();
+                if (nextToAbsentProcessor && absentPreStateProcessor.isNoPresentBefore()) {
+                    absentPreStateProcessor.start();
+                }
             } else {
                 switch (stateType) {
                     case PATTERN:
