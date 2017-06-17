@@ -21,7 +21,6 @@ package org.wso2.siddhi.core.query.input.stream.state;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
@@ -119,21 +118,9 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
 
     @Override
     public ComplexEventChunk<StateEvent> processAndReturn(ComplexEventChunk complexEventChunk) {
-        if (logicalType == LogicalStateElement.Type.AND && partnerStatePreProcessor instanceof
-                AbsentLogicalPreStateProcessor) {
-            synchronized (partnerStatePreProcessor) {
-                return processEvent(complexEventChunk);
-            }
-        } else {
-            return processEvent(complexEventChunk);
-        }
-    }
-
-    private ComplexEventChunk<StateEvent> processEvent(ComplexEventChunk complexEventChunk) {
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
-
         for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
             StateEvent stateEvent = iterator.next();
             if (withinStates.size() > 0) {
@@ -150,10 +137,6 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
             }
             stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
             process(stateEvent);
-            if (this instanceof AbsentLogicalPreStateProcessor && ((AbsentLogicalPreStateProcessor) this)
-                    .getWaitingTime() != -1) {
-                stateEvent.setEvent(stateId, null);
-            }
             if (this.thisLastProcessor.isEventReturned()) {
                 this.thisLastProcessor.clearProcessedEvent();
                 returnEventChunk.add(stateEvent);
@@ -173,27 +156,6 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
             }
         }
         return returnEventChunk;
-    }
-
-    private boolean isExpired(StateEvent pendingStateEvent, StreamEvent incomingStreamEvent) {
-        for (Map.Entry<Long, Set<Integer>> withinEntry : withinStates) {
-            for (Integer withinStateId : withinEntry.getValue()) {
-                if (withinStateId == SiddhiConstants.ANY) {
-                    if (Math.abs(pendingStateEvent.getTimestamp() - incomingStreamEvent.getTimestamp()) > withinEntry
-                            .getKey()) {
-                        return true;
-                    }
-                } else {
-                    if (Math.abs(pendingStateEvent.getStreamEvent(withinStateId).getTimestamp() - incomingStreamEvent
-                            .getTimestamp()) > withinEntry.getKey()) {
-                        return true;
-
-                    }
-                }
-            }
-        }
-        return false;
-
     }
 
     public void setPartnerStatePreProcessor(LogicalPreStateProcessor partnerStatePreProcessor) {

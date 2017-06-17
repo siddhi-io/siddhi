@@ -28,9 +28,9 @@ import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement
  */
 public class LogicalPostStateProcessor extends StreamPostStateProcessor {
 
-    private LogicalStateElement.Type type;
-    private LogicalPreStateProcessor partnerPreStateProcessor;
-    private LogicalPostStateProcessor partnerPostStateProcessor;
+    protected LogicalStateElement.Type type;
+    protected LogicalPreStateProcessor partnerPreStateProcessor;
+    protected LogicalPostStateProcessor partnerPostStateProcessor;
 
     public LogicalPostStateProcessor(LogicalStateElement.Type type) {
 

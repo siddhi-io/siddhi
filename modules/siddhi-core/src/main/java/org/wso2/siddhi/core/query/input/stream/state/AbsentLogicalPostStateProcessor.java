@@ -21,20 +21,20 @@ package org.wso2.siddhi.core.query.input.stream.state;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement;
 
 /**
- * PostStateProcessor to handle not pattern state processors.
+ * Post-state processor of not logical operator.
  */
-public class AbsentStreamPostStateProcessor extends StreamPostStateProcessor {
+public class AbsentLogicalPostStateProcessor extends LogicalPostStateProcessor {
 
-    /**
-     * This method just mark the state changed but does not send the stateEvent to the next processors.
-     *
-     * @param stateEvent        the state event
-     * @param complexEventChunk the ComplexEventChunk
-     */
+
+    public AbsentLogicalPostStateProcessor(LogicalStateElement.Type type) {
+        super(type);
+    }
+
+
     protected void process(StateEvent stateEvent, ComplexEventChunk complexEventChunk) {
-
         // Mark the state changed
         thisStatePreProcessor.stateChanged();
 
@@ -51,6 +51,4 @@ public class AbsentStreamPostStateProcessor extends StreamPostStateProcessor {
 
         ((AbsentPreStateProcessor) thisStatePreProcessor).updateLastArrivalTime(streamEvent.getTimestamp());
     }
-
-
 }

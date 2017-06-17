@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.query.input.stream.state.AbsentLogicalPostStateProcessor;
 import org.wso2.siddhi.core.query.input.stream.state.AbsentLogicalPreStateProcessor;
 import org.wso2.siddhi.core.query.input.stream.state.AbsentPreStateProcessor;
 import org.wso2.siddhi.core.query.input.stream.state.AbsentStreamPostStateProcessor;
@@ -338,7 +339,12 @@ public class StateInputStreamParser {
                 logicalPreStateProcessor1 = new LogicalPreStateProcessor(type, stateType, clonewithinStates(withinStates));
             }
             logicalPreStateProcessor1.init(executionPlanContext, queryName);
-            LogicalPostStateProcessor logicalPostStateProcessor1 = new LogicalPostStateProcessor(type);
+            LogicalPostStateProcessor logicalPostStateProcessor1;
+            if (((LogicalStateElement) stateElement).getStreamStateElement1() instanceof AbsentStreamStateElement) {
+                logicalPostStateProcessor1 = new AbsentLogicalPostStateProcessor(type);
+            } else {
+                logicalPostStateProcessor1 = new LogicalPostStateProcessor(type);
+            }
 
             LogicalPreStateProcessor logicalPreStateProcessor2;
             if (((LogicalStateElement) stateElement).getStreamStateElement2() instanceof AbsentStreamStateElement) {
@@ -356,7 +362,12 @@ public class StateInputStreamParser {
                 logicalPreStateProcessor2 = new LogicalPreStateProcessor(type, stateType, clonewithinStates(withinStates));
             }
             logicalPreStateProcessor2.init(executionPlanContext, queryName);
-            LogicalPostStateProcessor logicalPostStateProcessor2 = new LogicalPostStateProcessor(type);
+            LogicalPostStateProcessor logicalPostStateProcessor2;
+            if (((LogicalStateElement) stateElement).getStreamStateElement2() instanceof AbsentStreamStateElement) {
+                logicalPostStateProcessor2 = new AbsentLogicalPostStateProcessor(type);
+            } else {
+                logicalPostStateProcessor2 = new LogicalPostStateProcessor(type);
+            }
 
             if (stateElement.getWithin() != null) {
                 withinStates.remove(0);

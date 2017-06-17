@@ -111,7 +111,7 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
                 "processAndReturn method is used for handling event chunks.");
     }
 
-    private boolean isExpired(StateEvent pendingStateEvent, StreamEvent incomingStreamEvent) {
+    protected boolean isExpired(StateEvent pendingStateEvent, StreamEvent incomingStreamEvent) {
         for (Map.Entry<Long, Set<Integer>> withinEntry : withinStates) {
             for (Integer withinStateId : withinEntry.getValue()) {
                 if (withinStateId == SiddhiConstants.ANY) {
@@ -223,13 +223,8 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
                 newAndEveryStateEventList.add(stateEvent);
             }
         } else {
-//            if (nextToAbsentProcessor && absentPreStateProcessor.isNoPresentBefore()) {
-//                if (newAndEveryStateEventList.isEmpty()) {
-//                    newAndEveryStateEventList.add(stateEvent);
-//                }
-//            } else {
             newAndEveryStateEventList.add(stateEvent);
-//            }
+
         }
     }
 
