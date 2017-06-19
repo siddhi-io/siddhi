@@ -18,11 +18,11 @@
 
 package org.wso2.siddhi.core.util.parser;
 
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.QueryRuntime;
@@ -67,7 +67,7 @@ public class QueryParser {
      * Parse a query and return corresponding QueryRuntime.
      *
      * @param query                query to be parsed.
-     * @param executionPlanContext associated Execution Plan context.
+     * @param siddhiAppContext associated Siddhi app context.
      * @param streamDefinitionMap  keyvalue containing user given stream definitions.
      * @param tableDefinitionMap   keyvalue containing table definitions.
      * @param windowDefinitionMap  keyvalue containing window definition map.
@@ -78,7 +78,7 @@ public class QueryParser {
      * @param lockSynchronizer     Lock synchronizer for sync the lock across queries.
      * @return queryRuntime
      */
-    public static QueryRuntime parse(Query query, ExecutionPlanContext executionPlanContext,
+    public static QueryRuntime parse(Query query, SiddhiAppContext siddhiAppContext,
                                      Map<String, AbstractDefinition> streamDefinitionMap,
                                      Map<String, AbstractDefinition> tableDefinitionMap,
                                      Map<String, AbstractDefinition> windowDefinitionMap,
@@ -102,19 +102,19 @@ public class QueryParser {
             } else {
                 queryName = "query_" + UUID.randomUUID().toString();
             }
-            if (executionPlanContext.isStatsEnabled() && executionPlanContext.getStatisticsManager() != null) {
+            if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
                 if (nameElement != null) {
                     String metricName =
-                            executionPlanContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix() +
+                            siddhiAppContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix() +
                                     SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_EXECUTION_PLANS +
-                                    SiddhiConstants.METRIC_DELIMITER + executionPlanContext.getName() +
+                                    SiddhiConstants.METRIC_DELIMITER + siddhiAppContext.getName() +
                                     SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_SIDDHI +
                                     SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_QUERIES +
                                     SiddhiConstants.METRIC_DELIMITER + queryName;
-                    latencyTracker = executionPlanContext.getSiddhiContext()
+                    latencyTracker = siddhiAppContext.getSiddhiContext()
                             .getStatisticsConfiguration()
                             .getFactory()
-                            .createLatencyTracker(metricName, executionPlanContext.getStatisticsManager());
+                            .createLatencyTracker(metricName, siddhiAppContext.getStatisticsManager());
                 }
             }
             OutputStream.OutputEventType outputEventType = query.getOutputStream().getOutputEventType();
@@ -123,10 +123,10 @@ public class QueryParser {
                 outputExpectsExpiredEvents = true;
             }
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    executionPlanContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, tableMap,
+                    siddhiAppContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, tableMap,
                     eventWindowMap, variableMap, executors, latencyTracker, outputExpectsExpiredEvents, queryName);
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
-                    executionPlanContext, streamRuntime.getMetaComplexEvent(), tableMap, variableMap, executors,
+                    siddhiAppContext, streamRuntime.getMetaComplexEvent(), tableMap, variableMap, executors,
                     queryName);
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
             if (!isWindow && query.getInputStream() instanceof SingleInputStream) {
@@ -198,15 +198,15 @@ public class QueryParser {
             OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(query.getOutputStream()
                             .getId(),
                     query.getOutputRate(), query.getSelector().getGroupByList().size() != 0, isWindow,
-                    executionPlanContext.getScheduledExecutorService(), executionPlanContext, queryName);
+                    siddhiAppContext.getScheduledExecutorService(), siddhiAppContext, queryName);
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
                 selector.setBatchingEnabled(false);
             }
-            executionPlanContext.addEternalReferencedHolder(outputRateLimiter);
+            siddhiAppContext.addEternalReferencedHolder(outputRateLimiter);
 
             OutputCallback outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(),
                     streamRuntime.getMetaComplexEvent().getOutputStreamDefinition(), tableMap, eventWindowMap,
-                    variableMap, executionPlanContext, !(streamRuntime instanceof SingleStreamRuntime), queryName);
+                    variableMap, siddhiAppContext, !(streamRuntime instanceof SingleStreamRuntime), queryName);
 
             QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
@@ -214,7 +214,7 @@ public class QueryParser {
                     queryName);
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
                     .getMetaComplexEvent()));
-            queryRuntime = new QueryRuntime(query, executionPlanContext, streamRuntime, selector, outputRateLimiter,
+            queryRuntime = new QueryRuntime(query, siddhiAppContext, streamRuntime, selector, outputRateLimiter,
                     outputCallback, streamRuntime.getMetaComplexEvent(), lockWrapper != null);
 
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
@@ -223,7 +223,7 @@ public class QueryParser {
                         .init(streamRuntime.getMetaComplexEvent().getOutputStreamDefinition().getAttributeList().size(),
                                 selector.getAttributeProcessorList(), streamRuntime.getMetaComplexEvent());
             }
-            outputRateLimiter.init(executionPlanContext, lockWrapper, queryName);
+            outputRateLimiter.init(siddhiAppContext, lockWrapper, queryName);
 
         } catch (DuplicateDefinitionException e) {
             if (nameElement != null) {
@@ -234,10 +234,10 @@ public class QueryParser {
             }
         } catch (RuntimeException e) {
             if (nameElement != null) {
-                throw new ExecutionPlanCreationException(e.getMessage() + ", when creating query " + nameElement
+                throw new SiddhiAppCreationException(e.getMessage() + ", when creating query " + nameElement
                         .getValue(), e);
             } else {
-                throw new ExecutionPlanCreationException(e.getMessage(), e);
+                throw new SiddhiAppCreationException(e.getMessage(), e);
             }
         }
         return queryRuntime;

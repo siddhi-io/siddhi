@@ -23,7 +23,7 @@ import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -66,7 +66,8 @@ import java.util.concurrent.ConcurrentHashMap;
                         description = "The attributes to group the events. If no attributes are given, " +
                                 "the concatenation of all the attributes of the event is considered.",
                         type = {DataType.STRING},
-                        optional = true)
+                        optional = true,
+                        defaultValue = "The concatenation of all the attributes of the event is considered.")
         },
         examples = {
                 @Example(
@@ -113,7 +114,7 @@ public class LossyFrequentWindowProcessor extends WindowProcessor implements Fin
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, ExecutionPlanContext executionPlanContext) {
+            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         support = Double.parseDouble(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[0])
                 .getValue()));
         if (attributeExpressionExecutors.length > 1) {
@@ -140,7 +141,7 @@ public class LossyFrequentWindowProcessor extends WindowProcessor implements Fin
                            StreamEventCloner streamEventCloner) {
 
         synchronized (this) {
-            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
 
             StreamEvent streamEvent = streamEventChunk.getFirst();
             streamEventChunk.clear();
@@ -247,13 +248,13 @@ public class LossyFrequentWindowProcessor extends WindowProcessor implements Fin
 
     @Override
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              ExecutionPlanContext executionPlanContext,
+                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap,
                                               Map<String, GlobalVariableExpressionExecutor> variableMap,
                                               String queryName) {
         return OperatorParser.constructOperator(map.values(), expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
+                siddhiAppContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
     }
 
     /**

@@ -17,7 +17,7 @@
  */
 package org.wso2.siddhi.core.query.selector;
 
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -43,7 +43,7 @@ public class GroupByKeyGenerator {
                                Map<String, Table> tableMap,
                                Map<String, GlobalVariableExpressionExecutor> variableMap,
                                List<VariableExpressionExecutor> executors,
-                               ExecutionPlanContext siddhiContext, String queryName) {
+                               SiddhiAppContext siddhiContext, String queryName) {
         if (!groupByList.isEmpty()) {
             groupByExecutors = new VariableExpressionExecutor[groupByList.size()];
             for (int i = 0, expressionsSize = groupByList.size(); i < expressionsSize; i++) {

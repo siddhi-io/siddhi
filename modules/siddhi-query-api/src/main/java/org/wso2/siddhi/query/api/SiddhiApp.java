@@ -28,7 +28,7 @@ import org.wso2.siddhi.query.api.definition.TriggerDefinition;
 import org.wso2.siddhi.query.api.definition.VariableDefinition;
 import org.wso2.siddhi.query.api.definition.WindowDefinition;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.execution.ExecutionElement;
 import org.wso2.siddhi.query.api.execution.partition.Partition;
 import org.wso2.siddhi.query.api.execution.query.Query;
@@ -41,9 +41,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Siddhi execution plan
+ * Siddhi siddhi app
  */
-public class ExecutionPlan {
+public class SiddhiApp {
 
     private Map<String, StreamDefinition> streamDefinitionMap = new HashMap<String, StreamDefinition>();
     private Map<String, TableDefinition> tableDefinitionMap = new HashMap<String, TableDefinition>();
@@ -55,67 +55,67 @@ public class ExecutionPlan {
     private List<Annotation> annotations = new ArrayList<Annotation>();
     private Map<String, FunctionDefinition> functionDefinitionMap = new HashMap<String, FunctionDefinition>();
 
-    public ExecutionPlan(String name) {
+    public SiddhiApp(String name) {
         annotations.add(Annotation.annotation("info").element("name", name));
     }
 
-    public ExecutionPlan(List<Annotation> annotations) {
+    public SiddhiApp(List<Annotation> annotations) {
         this.annotations = annotations;
     }
 
-    public ExecutionPlan() {
+    public SiddhiApp() {
     }
 
-    public static ExecutionPlan executionPlan(String name) {
-        return new ExecutionPlan(name);
+    public static SiddhiApp siddhiApp(String name) {
+        return new SiddhiApp(name);
     }
 
-    public static ExecutionPlan executionPlan() {
-        return new ExecutionPlan();
+    public static SiddhiApp siddhiApp() {
+        return new SiddhiApp();
     }
 
     public Map<String, FunctionDefinition> getFunctionDefinitionMap() {
         return functionDefinitionMap;
     }
 
-    public ExecutionPlan defineStream(StreamDefinition streamDefinition) {
+    public SiddhiApp defineStream(StreamDefinition streamDefinition) {
         if (streamDefinition == null) {
-            throw new ExecutionPlanValidationException("Stream Definition should not be null");
+            throw new SiddhiAppValidationException("Stream Definition should not be null");
         } else if (streamDefinition.getId() == null) {
-            throw new ExecutionPlanValidationException("Stream Id should not be null for Stream Definition");
+            throw new SiddhiAppValidationException("Stream Id should not be null for Stream Definition");
         }
         checkDuplicateDefinition(streamDefinition);
         this.streamDefinitionMap.put(streamDefinition.getId(), streamDefinition);
         return this;
     }
 
-    public ExecutionPlan defineTable(TableDefinition tableDefinition) {
+    public SiddhiApp defineTable(TableDefinition tableDefinition) {
         if (tableDefinition == null) {
-            throw new ExecutionPlanValidationException("Table Definition should not be null");
+            throw new SiddhiAppValidationException("Table Definition should not be null");
         } else if (tableDefinition.getId() == null) {
-            throw new ExecutionPlanValidationException("Table Id should not be null for Table Definition");
+            throw new SiddhiAppValidationException("Table Id should not be null for Table Definition");
         }
         checkDuplicateDefinition(tableDefinition);
         this.tableDefinitionMap.put(tableDefinition.getId(), tableDefinition);
         return this;
     }
 
-    public ExecutionPlan defineWindow(WindowDefinition windowDefinition) {
+    public SiddhiApp defineWindow(WindowDefinition windowDefinition) {
         if (windowDefinition == null) {
-            throw new ExecutionPlanValidationException("Window Definition should not be null");
+            throw new SiddhiAppValidationException("Window Definition should not be null");
         } else if (windowDefinition.getId() == null) {
-            throw new ExecutionPlanValidationException("Window Id should not be null for Window Definition");
+            throw new SiddhiAppValidationException("Window Id should not be null for Window Definition");
         }
         checkDuplicateDefinition(windowDefinition);
         this.windowDefinitionMap.put(windowDefinition.getId(), windowDefinition);
         return this;
     }
 
-    public ExecutionPlan defineTrigger(TriggerDefinition triggerDefinition) {
+    public SiddhiApp defineTrigger(TriggerDefinition triggerDefinition) {
         if (triggerDefinition == null) {
-            throw new ExecutionPlanValidationException("Trigger Definition should not be null");
+            throw new SiddhiAppValidationException("Trigger Definition should not be null");
         } else if (triggerDefinition.getId() == null) {
-            throw new ExecutionPlanValidationException("Trigger Id should not be null for Trigger Definition");
+            throw new SiddhiAppValidationException("Trigger Id should not be null for Trigger Definition");
         }
         StreamDefinition streamDefinition = StreamDefinition.id(triggerDefinition.getId()).attribute(SiddhiConstants
                 .TRIGGERED_TIME, Attribute.Type.LONG);
@@ -160,9 +160,9 @@ public class ExecutionPlan {
         }
     }
 
-    public ExecutionPlan addQuery(Query query) {
+    public SiddhiApp addQuery(Query query) {
         if (query == null) {
-            throw new ExecutionPlanValidationException("Query should not be null");
+            throw new SiddhiAppValidationException("Query should not be null");
         }
         String name = null;
         Element element = AnnotationHelper.getAnnotationElement(SiddhiConstants.ANNOTATION_INFO, SiddhiConstants
@@ -171,7 +171,7 @@ public class ExecutionPlan {
             name = element.getValue();
         }
         if (name != null && executionElementNameList.contains(name)) {
-            throw new ExecutionPlanValidationException("Cannot add Query as another Execution Element already uses " +
+            throw new SiddhiAppValidationException("Cannot add Query as another Execution Element already uses " +
                     "its name=" + name);
         }
         executionElementNameList.add(name);
@@ -179,9 +179,9 @@ public class ExecutionPlan {
         return this;
     }
 
-    public ExecutionPlan addPartition(Partition partition) {
+    public SiddhiApp addPartition(Partition partition) {
         if (partition == null) {
-            throw new ExecutionPlanValidationException("Partition should not be null");
+            throw new SiddhiAppValidationException("Partition should not be null");
         }
         String name = null;
         Element element = AnnotationHelper.getAnnotationElement(SiddhiConstants.ANNOTATION_INFO, SiddhiConstants
@@ -190,7 +190,7 @@ public class ExecutionPlan {
             name = element.getValue();
         }
         if (name != null && executionElementNameList.contains(name)) {
-            throw new ExecutionPlanValidationException("Cannot add Partition as another Execution Element already " +
+            throw new SiddhiAppValidationException("Cannot add Partition as another Execution Element already " +
                     "uses its name=" + name);
         }
         executionElementNameList.add(name);
@@ -198,7 +198,7 @@ public class ExecutionPlan {
         return this;
     }
 
-    public ExecutionPlan annotation(Annotation annotation) {
+    public SiddhiApp annotation(Annotation annotation) {
         annotations.add(annotation);
         return this;
     }
@@ -233,7 +233,7 @@ public class ExecutionPlan {
 
     @Override
     public String toString() {
-        return "ExecutionPlan{" +
+        return "SiddhiApp{" +
                 "streamDefinitionMap=" + streamDefinitionMap +
                 ", tableDefinitionMap=" + tableDefinitionMap +
                 ", windowDefinitionMap=" + windowDefinitionMap +
@@ -249,11 +249,11 @@ public class ExecutionPlan {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ExecutionPlan)) {
+        if (!(o instanceof SiddhiApp)) {
             return false;
         }
 
-        ExecutionPlan that = (ExecutionPlan) o;
+        SiddhiApp that = (SiddhiApp) o;
 
         if (annotations != null ? !annotations.equals(that.annotations) : that.annotations != null) {
             return false;
@@ -290,15 +290,15 @@ public class ExecutionPlan {
 
     public void defineFunction(FunctionDefinition functionDefinition) {
         if (functionDefinition == null) {
-            throw new ExecutionPlanValidationException("Function Definition should not be null");
+            throw new SiddhiAppValidationException("Function Definition should not be null");
         } else if (functionDefinition.getId() == null) {
-            throw new ExecutionPlanValidationException("Function Id should not be null for Function Definition");
+            throw new SiddhiAppValidationException("Function Id should not be null for Function Definition");
         } else if (functionDefinition.getReturnType() == null) {
-            throw new ExecutionPlanValidationException("Return type should not be null for Function Definition");
+            throw new SiddhiAppValidationException("Return type should not be null for Function Definition");
         } else if (functionDefinition.getBody() == null) {
-            throw new ExecutionPlanValidationException("Body should not be null for Function Definition");
+            throw new SiddhiAppValidationException("Body should not be null for Function Definition");
         } else if (functionDefinition.getLanguage() == null) {
-            throw new ExecutionPlanValidationException("Language should not be null for Function Definition");
+            throw new SiddhiAppValidationException("Language should not be null for Function Definition");
         }
         checkDuplicateFunctionExist(functionDefinition);
         this.functionDefinitionMap.put(functionDefinition.getId(), functionDefinition);

@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.util.parser;
 
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
@@ -56,7 +56,7 @@ public class OperatorParser {
 
     public static Operator constructOperator(Object storeEvents, Expression expression,
                                              MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                             ExecutionPlanContext executionPlanContext,
+                                             SiddhiAppContext siddhiAppContext,
                                              List<VariableExpressionExecutor> variableExpressionExecutors,
                                              Map<String, Table> tableMap,
                                              Map<String, GlobalVariableExpressionExecutor> variableMap,
@@ -66,9 +66,9 @@ public class OperatorParser {
                     matchingMetaInfoHolder, (IndexedEventHolder) storeEvents);
             CollectionExecutor collectionExecutor = CollectionExpressionParser.buildCollectionExecutor
                     (collectionExpression,
-                            matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap,
-                            executionPlanContext, true,
-                            queryName);
+                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap, variableMap, siddhiAppContext,
+                            true,
+                     queryName);
             if (collectionExpression instanceof CompareCollectionExpression &&
                     ((CompareCollectionExpression) collectionExpression).getOperator() == Compare.Operator.EQUAL &&
                     collectionExpression.getCollectionScope() == INDEXED_RESULT_SET &&
@@ -84,17 +84,17 @@ public class OperatorParser {
         } else if (storeEvents instanceof ComplexEventChunk) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                    variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                    variableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
             return new EventChunkOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
         } else if (storeEvents instanceof Map) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                    variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                    variableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
             return new MapOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
         } else if (storeEvents instanceof Collection) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                    variableMap, variableExpressionExecutors, executionPlanContext, false, 0, queryName);
+                    variableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
             return new CollectionOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
         } else {
             throw new OperationNotSupportedException(storeEvents.getClass() + " is not supported by OperatorParser!");

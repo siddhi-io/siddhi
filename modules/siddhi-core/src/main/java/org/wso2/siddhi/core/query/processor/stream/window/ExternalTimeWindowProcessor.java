@@ -23,7 +23,7 @@ import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -40,7 +40,7 @@ import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.HashMap;
@@ -83,7 +83,7 @@ public class ExternalTimeWindowProcessor extends WindowProcessor implements Find
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, ExecutionPlanContext executionPlanContext) {
+            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 2) {
             if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
@@ -94,16 +94,16 @@ public class ExternalTimeWindowProcessor extends WindowProcessor implements Find
                         attributeExpressionExecutors[1]).getValue()));
             }
             if (!(attributeExpressionExecutors[0] instanceof VariableExpressionExecutor)) {
-                throw new ExecutionPlanValidationException("ExternalTime window's 1st parameter timeStamp should be a" +
+                throw new SiddhiAppValidationException("ExternalTime window's 1st parameter timeStamp should be a" +
                         " type long stream attribute but found " + attributeExpressionExecutors[0].getClass());
             }
             timeStampVariableExpressionExecutor = ((VariableExpressionExecutor) attributeExpressionExecutors[0]);
             if (timeStampVariableExpressionExecutor.getReturnType() != Attribute.Type.LONG) {
-                throw new ExecutionPlanValidationException("ExternalTime window's 1st parameter timeStamp should be " +
+                throw new SiddhiAppValidationException("ExternalTime window's 1st parameter timeStamp should be " +
                         "type long, but found " + timeStampVariableExpressionExecutor.getReturnType());
             }
         } else {
-            throw new ExecutionPlanValidationException("ExternalTime window should only have two parameter (<long> " +
+            throw new SiddhiAppValidationException("ExternalTime window should only have two parameter (<long> " +
                     "timeStamp, <int|long|time> windowTime), but found " + attributeExpressionExecutors.length + " " +
                     "input attributes");
         }
@@ -177,12 +177,12 @@ public class ExternalTimeWindowProcessor extends WindowProcessor implements Find
 
     @Override
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              ExecutionPlanContext executionPlanContext,
+                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap,
                                               Map<String, GlobalVariableExpressionExecutor> variableMap,
                                               String queryName) {
         return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
+                siddhiAppContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
     }
 }

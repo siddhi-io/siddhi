@@ -21,7 +21,7 @@ import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
@@ -38,7 +38,7 @@ import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.ArrayList;
@@ -82,15 +82,15 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
     private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(false);
     private ComplexEventChunk<StreamEvent> expiredEventChunk = null;
     private boolean outputExpectsExpiredEvents;
-    private ExecutionPlanContext executionPlanContext;
+    private SiddhiAppContext siddhiAppContext;
     private StreamEvent resetEvent = null;
 
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, ExecutionPlanContext executionPlanContext) {
+            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
-        this.executionPlanContext = executionPlanContext;
+        this.siddhiAppContext = siddhiAppContext;
         if (outputExpectsExpiredEvents) {
             expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         }
@@ -105,7 +105,7 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
                         });
             }
         } else {
-            throw new ExecutionPlanValidationException("Length batch window should only have one parameter (<int> " +
+            throw new SiddhiAppValidationException("Length batch window should only have one parameter (<int> " +
                     "windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
         }
     }
@@ -116,7 +116,7 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
         List<ComplexEventChunk<StreamEvent>> streamEventChunks = new ArrayList<ComplexEventChunk<StreamEvent>>();
         synchronized (this) {
             ComplexEventChunk<StreamEvent> outputStreamEventChunk = new ComplexEventChunk<StreamEvent>(true);
-            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
@@ -211,7 +211,7 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
 
     @Override
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              ExecutionPlanContext executionPlanContext,
+                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap,
                                               Map<String, GlobalVariableExpressionExecutor> variableMap,
@@ -220,6 +220,6 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
             expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         }
         return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
+                siddhiAppContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
     }
 }

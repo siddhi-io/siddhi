@@ -22,7 +22,7 @@ import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -41,7 +41,7 @@ import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.HashMap;
@@ -85,7 +85,7 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
     private int count = 0;
     private ComplexEventChunk<StreamEvent> expiredEventChunk;
     private Scheduler scheduler;
-    private ExecutionPlanContext executionPlanContext;
+    private SiddhiAppContext siddhiAppContext;
     private volatile long lastTimestamp = Long.MIN_VALUE;
 
     @Override
@@ -100,8 +100,8 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, ExecutionPlanContext executionPlanContext) {
-        this.executionPlanContext = executionPlanContext;
+            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+        this.siddhiAppContext = siddhiAppContext;
         expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 2) {
             length = (Integer) ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[1]).getValue();
@@ -120,16 +120,16 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
                     timeInMilliSeconds = ((RuntimeVariableExpressionExecutor) attributeExpressionExecutors[0])
                             .getValue(Long.class);
                 } else {
-                    throw new ExecutionPlanValidationException("TimeLength window's first parameter attribute should " +
+                    throw new SiddhiAppValidationException("TimeLength window's first parameter attribute should " +
                             "be either int or long, but found " + attributeExpressionExecutors[0].getReturnType());
                 }
             } else {
-                throw new ExecutionPlanValidationException("TimeLength window should have constant parameter " +
+                throw new SiddhiAppValidationException("TimeLength window should have constant parameter " +
                         "attributes but found a dynamic attribute " + attributeExpressionExecutors[0].getClass()
                         .getCanonicalName());
             }
         } else {
-            throw new ExecutionPlanValidationException("TimeLength window should only have two parameters (<int> " +
+            throw new SiddhiAppValidationException("TimeLength window should only have two parameters (<int> " +
                     "windowTime,<int> windowLength), but found " + attributeExpressionExecutors.length + " input " +
                     "attributes");
         }
@@ -167,7 +167,7 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner) {
         synchronized (this) {
-            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
 
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
@@ -231,13 +231,13 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
 
     @Override
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              ExecutionPlanContext executionPlanContext,
+                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap,
                                               Map<String, GlobalVariableExpressionExecutor> variableMap,
                                               String queryName) {
         return OperatorParser.constructOperator(expiredEventChunk, expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
+                siddhiAppContext, variableExpressionExecutors, tableMap, variableMap, this.queryName);
     }
 
     @Override

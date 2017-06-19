@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.table;
 
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -60,16 +60,16 @@ public class InMemoryTable implements Table, Snapshotable {
     @Override
     public void init(TableDefinition tableDefinition,
                      StreamEventPool storeEventPool, StreamEventCloner storeEventCloner,
-                     ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
+                     ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         this.tableDefinition = tableDefinition;
         this.tableStreamEventCloner = storeEventCloner;
 
         eventHolder = EventHolderPasser.parse(tableDefinition, storeEventPool);
 
         if (elementId == null) {
-            elementId = "InMemoryTable-" + executionPlanContext.getElementIdGenerator().createNewId();
+            elementId = "InMemoryTable-" + siddhiAppContext.getElementIdGenerator().createNewId();
         }
-        executionPlanContext.getSnapshotService().addSnapshotable(tableDefinition.getId(), this);
+        siddhiAppContext.getSnapshotService().addSnapshotable(tableDefinition.getId(), this);
     }
 
     @Override
@@ -152,13 +152,13 @@ public class InMemoryTable implements Table, Snapshotable {
 
     @Override
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              ExecutionPlanContext executionPlanContext,
+                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap,
                                               Map<String, GlobalVariableExpressionExecutor> variableMap,
                                               String queryName) {
         return OperatorParser.constructOperator(eventHolder, expression, matchingMetaInfoHolder,
-                executionPlanContext, variableExpressionExecutors, tableMap, variableMap, tableDefinition.getId());
+                siddhiAppContext, variableExpressionExecutors, tableMap, variableMap, tableDefinition.getId());
     }
 
 
