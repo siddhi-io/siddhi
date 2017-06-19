@@ -22,14 +22,14 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.Random;
 
@@ -56,9 +56,9 @@ public class GlobalVariableTestCase {
         String cseEventStream = "define variable threshold int = 5;" +
                 "define stream threshold (value int); ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream);
 
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
@@ -69,12 +69,12 @@ public class GlobalVariableTestCase {
         String cseEventStream = "define variable threshold int;" +
                 "define stream threshold (value int); ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream);
 
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
-    @Test(expected = ExecutionPlanValidationException.class)
+    @Test(expected = SiddhiAppValidationException.class)
     public void testVariableDefinition3() throws InterruptedException {
         log.info("Testing variable definition 3");
 
@@ -82,9 +82,9 @@ public class GlobalVariableTestCase {
         String cseEventStream = "define variable threshold int = true;" +
                 "define stream threshold (value int); ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream);
 
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
@@ -95,12 +95,12 @@ public class GlobalVariableTestCase {
         String cseEventStream = "define variable threshold object;" +
                 "define stream threshold (value int); ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream);
 
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
-    @Test(expected = ExecutionPlanValidationException.class)
+    @Test(expected = SiddhiAppValidationException.class)
     public void testVariableDefinition5() throws InterruptedException {
         log.info("Testing variable definition 5");
 
@@ -108,9 +108,9 @@ public class GlobalVariableTestCase {
         String cseEventStream = "define variable threshold object = 5;" +
                 "define stream threshold (value int); ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream);
 
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
@@ -128,9 +128,9 @@ public class GlobalVariableTestCase {
                 "insert all events into outputStream; " +
                 "@info(name = 'query2') from ThresholdStream select value update global#threshold; ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -150,8 +150,8 @@ public class GlobalVariableTestCase {
 
         });
 
-        InputHandler cseEventStreamHanlder = executionPlanRuntime.getInputHandler("cseEventStream");
-        InputHandler thresholdStreamHanlder = executionPlanRuntime.getInputHandler("ThresholdStream");
+        InputHandler cseEventStreamHanlder = siddhiAppRuntime.getInputHandler("cseEventStream");
+        InputHandler thresholdStreamHanlder = siddhiAppRuntime.getInputHandler("ThresholdStream");
 
         cseEventStreamHanlder.send(new Object[]{"WSO2", 56.50f, 5});
         thresholdStreamHanlder.send(new Object[]{100});
@@ -159,7 +159,7 @@ public class GlobalVariableTestCase {
 
         Thread.sleep(100);
 
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
 
 
         Assert.assertEquals("Event arrived", true, eventArrived);
@@ -182,9 +182,9 @@ public class GlobalVariableTestCase {
                 "global#threshold as volume insert all events into outputStream; " +
                 "@info(name = 'query2') from ThresholdStream select value update global#threshold; ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -202,8 +202,8 @@ public class GlobalVariableTestCase {
 
         });
 
-        InputHandler cseEventStreamHanlder = executionPlanRuntime.getInputHandler("cseEventStream");
-        InputHandler thresholdStreamHanlder = executionPlanRuntime.getInputHandler("ThresholdStream");
+        InputHandler cseEventStreamHanlder = siddhiAppRuntime.getInputHandler("cseEventStream");
+        InputHandler thresholdStreamHanlder = siddhiAppRuntime.getInputHandler("ThresholdStream");
 
         cseEventStreamHanlder.send(new Object[]{"WSO2", 56.50f, 5});
         thresholdStreamHanlder.send(new Object[]{10});
@@ -211,7 +211,7 @@ public class GlobalVariableTestCase {
 
         Thread.sleep(100);
 
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
 
 
         Assert.assertEquals("Event arrived", true, eventArrived);
@@ -232,9 +232,9 @@ public class GlobalVariableTestCase {
                 "volume insert all events into outputStream; " +
                 "@info(name = 'query2') from lengthStream select value update global#length; ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -249,10 +249,10 @@ public class GlobalVariableTestCase {
 
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
-        InputHandler lengthHandler = executionPlanRuntime.getInputHandler("lengthStream");
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        InputHandler lengthHandler = siddhiAppRuntime.getInputHandler("lengthStream");
 
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
         inputHandler.send(new Object[]{"ORACLE", 80.0f, 2});
@@ -265,7 +265,7 @@ public class GlobalVariableTestCase {
         Assert.assertEquals(4, inEventCount);
         Assert.assertEquals(3, removeEventCount);
         Assert.assertTrue(eventArrived);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
 
     }
 
@@ -284,9 +284,9 @@ public class GlobalVariableTestCase {
                 "@info(name = 'query3') from lengthStream select value update global#length; ";
 
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
 
             @Override
             public void receive(Event[] events) {
@@ -299,10 +299,10 @@ public class GlobalVariableTestCase {
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
-        InputHandler lengthHandler = executionPlanRuntime.getInputHandler("lengthStream");
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        InputHandler lengthHandler = siddhiAppRuntime.getInputHandler("lengthStream");
 
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
         inputHandler.send(new Object[]{"IBM", 700f, 3});
@@ -320,7 +320,7 @@ public class GlobalVariableTestCase {
         Thread.sleep(500);
         Assert.assertEquals("Total event count", 9, count);
         Assert.assertTrue(eventArrived);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
@@ -337,9 +337,9 @@ public class GlobalVariableTestCase {
                 "volume insert all events into outputStream ; " +
                 "@info(name = 'query2') from timeStream select value update global#time; ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -355,9 +355,9 @@ public class GlobalVariableTestCase {
 
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
-        InputHandler timeHandler = executionPlanRuntime.getInputHandler("timeStream");
-        executionPlanRuntime.start();
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        InputHandler timeHandler = siddhiAppRuntime.getInputHandler("timeStream");
+        siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
         Thread.sleep(1100);  // Expires 2 events
@@ -372,7 +372,7 @@ public class GlobalVariableTestCase {
         Assert.assertEquals(6, inEventCount);
         Assert.assertEquals(6, removeEventCount);
         Assert.assertTrue(eventArrived);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
@@ -392,9 +392,9 @@ public class GlobalVariableTestCase {
                 "insert all events into outputStream; " +
                 "@info(name = 'query2') from timeStream select value update global#time; ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -410,10 +410,10 @@ public class GlobalVariableTestCase {
 
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
-        InputHandler timeHandler = executionPlanRuntime.getInputHandler("timeStream");
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        InputHandler timeHandler = siddhiAppRuntime.getInputHandler("timeStream");
 
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 1});
         Thread.sleep(1100);
         inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
@@ -429,7 +429,7 @@ public class GlobalVariableTestCase {
         Assert.assertEquals(3, inEventCount);
         Assert.assertEquals(1, removeEventCount);
         Assert.assertTrue(eventArrived);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
@@ -452,9 +452,9 @@ public class GlobalVariableTestCase {
                 "@info(name = 'query2') from timeStream select value update global#time; " +
                 "" +
                 "@info(name = 'query3') from lengthStream select value update global#length; ";
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(sensorStream + query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(sensorStream + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -469,10 +469,10 @@ public class GlobalVariableTestCase {
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("sensorStream");
-        InputHandler lengthHandler = executionPlanRuntime.getInputHandler("lengthStream");
-        InputHandler timeHandler = executionPlanRuntime.getInputHandler("timeStream");
-        executionPlanRuntime.start();
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("sensorStream");
+        InputHandler lengthHandler = siddhiAppRuntime.getInputHandler("lengthStream");
+        InputHandler timeHandler = siddhiAppRuntime.getInputHandler("timeStream");
+        siddhiAppRuntime.start();
 
         inputHandler.send(new Object[]{"id1", 10d});
         Thread.sleep(100);
@@ -498,7 +498,7 @@ public class GlobalVariableTestCase {
         Assert.assertEquals(8, inEventCount);
         Assert.assertEquals(4, removeEventCount);
         Assert.assertTrue(eventArrived);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
@@ -515,8 +515,8 @@ public class GlobalVariableTestCase {
                 "" +
                 "@info(name = 'query2') from timeStream select value update global#time; ";
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
-        executionPlanRuntime.addCallback("query", new QueryCallback() {
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
+        siddhiAppRuntime.addCallback("query", new QueryCallback() {
             int count = 0;
 
             @Override
@@ -526,9 +526,9 @@ public class GlobalVariableTestCase {
             }
         });
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
-        InputHandler timeHandler = executionPlanRuntime.getInputHandler("timeStream");
-        executionPlanRuntime.start();
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("inputStream");
+        InputHandler timeHandler = siddhiAppRuntime.getInputHandler("timeStream");
+        siddhiAppRuntime.start();
 
         inputHandler.send(new Object[]{10000L, 1});
         Thread.sleep(100);
@@ -586,13 +586,13 @@ public class GlobalVariableTestCase {
                 "@info(name = 'query3') from lengthStream select value update global#length; ";
 
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
-        InputHandler lengthHandler = executionPlanRuntime.getInputHandler("lengthStream");
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        InputHandler lengthHandler = siddhiAppRuntime.getInputHandler("lengthStream");
 
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
 
         long startTime = System.currentTimeMillis();
         int windowLength = 2;
@@ -607,7 +607,7 @@ public class GlobalVariableTestCase {
         long endTime = System.currentTimeMillis();
 
         Thread.sleep(500);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
 
         double avgTime = (double) ((endTime - startTime)) / length;
         System.out.printf("%d, %.8f\n", length, avgTime);

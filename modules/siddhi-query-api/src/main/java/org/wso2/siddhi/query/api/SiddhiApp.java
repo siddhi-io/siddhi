@@ -306,9 +306,9 @@ public class SiddhiApp {
 
     public void defineVariable(VariableDefinition variableDefinition) {
         if (variableDefinition == null) {
-            throw new ExecutionPlanValidationException("Variable Definition should not be null");
+            throw new SiddhiAppValidationException("Variable Definition should not be null");
         } else if (variableDefinition.getId() == null) {
-            throw new ExecutionPlanValidationException("Variable Id should not be null for Variable Definition");
+            throw new SiddhiAppValidationException("Variable Id should not be null for Variable Definition");
         }
         if (this.variableDefinitionMap.get(variableDefinition.getId()) != null) {
             throw new DuplicateDefinitionException("The variable definition with the same id exists " +

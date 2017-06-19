@@ -223,7 +223,7 @@ public class DefinitionParserHelper {
     }
 
     public static void addVariable(VariableDefinition variableDefinition, ConcurrentMap<String,
-            GlobalVariableExpressionExecutor> variableMap, ExecutionPlanContext executionPlanContext) {
+            GlobalVariableExpressionExecutor> variableMap, SiddhiAppContext siddhiAppContext) {
         if (!variableMap.containsKey(variableDefinition.getId())) {
             GlobalVariableExpressionExecutor globalVariableExpressionExecutor = new GlobalVariableExpressionExecutor
                     (variableDefinition.getId(), variableDefinition.getType(), variableDefinition.getValue());

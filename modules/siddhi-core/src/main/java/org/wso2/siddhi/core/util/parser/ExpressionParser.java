@@ -22,8 +22,8 @@ import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
@@ -315,7 +315,8 @@ public class ExpressionParser {
             } else if (((Compare) expression).getOperator() == Compare.Operator.GREATER_THAN) {
                 return parseGreaterThanCompare(
                         parseExpression(((Compare) expression).getLeftExpression(), metaEvent, currentState,
-                                tableMap, variableMap, executorList, siddhiAppContext, groupBy, defaultStreamEventIndex, queryName),
+                                tableMap, variableMap, executorList, siddhiAppContext, groupBy,
+                                defaultStreamEventIndex, queryName),
                         parseExpression(((Compare) expression).getRightExpression(), metaEvent, currentState,
                                 tableMap, variableMap, executorList, siddhiAppContext, groupBy, defaultStreamEventIndex,
                                 queryName));
@@ -328,13 +329,15 @@ public class ExpressionParser {
             } else if (((Compare) expression).getOperator() == Compare.Operator.LESS_THAN) {
                 return parseLessThanCompare(
                         parseExpression(((Compare) expression).getLeftExpression(), metaEvent, currentState,
-                                tableMap, variableMap, executorList, siddhiAppContext, groupBy, defaultStreamEventIndex, queryName),
+                                tableMap, variableMap, executorList, siddhiAppContext, groupBy,
+                                defaultStreamEventIndex, queryName),
                         parseExpression(((Compare) expression).getRightExpression(), metaEvent, currentState,
                                 tableMap, variableMap, executorList, siddhiAppContext, groupBy, defaultStreamEventIndex,
                                 queryName));
             } else if (((Compare) expression).getOperator() == Compare.Operator.LESS_THAN_EQUAL) {
                 return parseLessThanEqualCompare(
-                        parseExpression(((Compare) expression).getLeftExpression(), metaEvent, currentState, tableMap, variableMap, executorList, siddhiAppContext, groupBy, defaultStreamEventIndex, queryName),
+                        parseExpression(((Compare) expression).getLeftExpression(), metaEvent, currentState,
+                                tableMap, variableMap, executorList, siddhiAppContext, groupBy, defaultStreamEventIndex, queryName),
                         parseExpression(((Compare) expression).getRightExpression(), metaEvent, currentState, tableMap, variableMap, executorList, siddhiAppContext, groupBy, defaultStreamEventIndex, queryName));
             }
 
@@ -576,7 +579,7 @@ public class ExpressionParser {
         } else if (expression instanceof GlobalVariable) {
             GlobalVariableExpressionExecutor variable = variableMap.get(((GlobalVariable) expression).getName());
             if (variable == null) {
-                throw new ExecutionPlanCreationException("Variable " + ((GlobalVariable) expression).getName() + " is" +
+                throw new SiddhiAppCreationException("Variable " + ((GlobalVariable) expression).getName() + " is" +
                         " not defined");
             }
             return variable;

@@ -196,7 +196,7 @@ public class SiddhiAppParser {
         defineTableDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getTableDefinitionMap());
         defineWindowDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getWindowDefinitionMap());
         defineFunctionDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getFunctionDefinitionMap());
-        defineVariableDefinitions(executionPlanRuntimeBuilder, executionPlan.getVariableDefinitionMap());
+        defineVariableDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getVariableDefinitionMap());
         for (Window window : siddhiAppRuntimeBuilder.getEventWindowMap().values()) {
             String metricName =
                     siddhiAppContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix() +
@@ -213,7 +213,7 @@ public class SiddhiAppParser {
                         .createLatencyTracker(metricName, siddhiAppContext.getStatisticsManager());
             }
             window.init(siddhiAppRuntimeBuilder.getTableMap(), siddhiAppRuntimeBuilder
-                    .getEventWindowMap(), executionPlanRuntimeBuilder.getVariableMap(), latencyTracker, window
+                    .getEventWindowMap(), siddhiAppRuntimeBuilder.getVariableMap(), latencyTracker, window
                     .getWindowDefinition().getId());
         }
         try {
@@ -264,10 +264,10 @@ public class SiddhiAppParser {
         }
     }
 
-    private static void defineVariableDefinitions(ExecutionPlanRuntimeBuilder executionPlanRuntimeBuilder,
+    private static void defineVariableDefinitions(SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder,
                                                   Map<String, VariableDefinition> variableDefinitionMap) {
         for (VariableDefinition definition : variableDefinitionMap.values()) {
-            executionPlanRuntimeBuilder.defineVariable(definition);
+            siddhiAppRuntimeBuilder.defineVariable(definition);
         }
     }
 

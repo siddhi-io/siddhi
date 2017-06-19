@@ -131,7 +131,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             siddhiApp.defineWindow((WindowDefinition) visit(windowContext));
         }
         for (SiddhiQLParser.Definition_variableContext variableContext : ctx.definition_variable()) {
-            executionPlan.defineVariable((VariableDefinition) visit(variableContext));
+            siddhiApp.defineVariable((VariableDefinition) visit(variableContext));
         }
         for (SiddhiQLParser.Execution_elementContext executionElementContext : ctx.execution_element()) {
             ExecutionElement executionElement = (ExecutionElement) visit(executionElementContext);

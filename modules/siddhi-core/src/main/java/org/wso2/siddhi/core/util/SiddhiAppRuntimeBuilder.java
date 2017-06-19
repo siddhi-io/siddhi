@@ -202,7 +202,7 @@ public class SiddhiAppRuntimeBuilder {
         if (!variableDefinitionMap.containsKey(variableDefinition.getId())) {
             windowDefinitionMap.putIfAbsent(variableDefinition.getId(), variableDefinition);
         }
-        DefinitionParserHelper.addVariable(variableDefinition, variableMap, executionPlanContext);
+        DefinitionParserHelper.addVariable(variableDefinition, variableMap, siddhiAppContext);
     }
 
     public void defineFunction(FunctionDefinition functionDefinition) {

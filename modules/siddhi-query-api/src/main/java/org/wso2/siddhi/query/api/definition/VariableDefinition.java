@@ -19,7 +19,7 @@
 package org.wso2.siddhi.query.api.definition;
 
 
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.constant.BoolConstant;
 import org.wso2.siddhi.query.api.expression.constant.Constant;
 import org.wso2.siddhi.query.api.expression.constant.DoubleConstant;
@@ -53,7 +53,7 @@ public class VariableDefinition extends AbstractDefinition {
     public static void typeMismatchError(String id, Attribute.Type type, Constant constant) {
         id = id.replace(SiddhiConstants.GLOBAL_VARIABLE_PREFIX, "");
         String found = constant.getClass().getSimpleName().toUpperCase(Locale.ENGLISH).replace("CONSTANT", "");
-        throw new ExecutionPlanValidationException("Variable " + id + " requires " + type + " value but found " +
+        throw new SiddhiAppValidationException("Variable " + id + " requires " + type + " value but found " +
                 found);
     }
 
@@ -112,9 +112,9 @@ public class VariableDefinition extends AbstractDefinition {
                 typeMismatchError(id, type, value);
             }
         } else if (type == Attribute.Type.OBJECT) {
-            throw new ExecutionPlanValidationException("Variable " + id + " cannot be initialized with an object");
+            throw new SiddhiAppValidationException("Variable " + id + " cannot be initialized with an object");
         } else {
-            throw new ExecutionPlanValidationException("Variable " + id + " has an unknown type");
+            throw new SiddhiAppValidationException("Variable " + id + " has an unknown type");
         }
         return this;
     }
