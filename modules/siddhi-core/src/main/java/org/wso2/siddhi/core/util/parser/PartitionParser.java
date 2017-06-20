@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -52,14 +53,16 @@ public class PartitionParser {
                     AbstractDefinition>();
             combinedStreamMap.putAll(streamDefinitionMap);
             combinedStreamMap.putAll(partitionRuntime.getLocalStreamDefinitionMap());
-            QueryRuntime queryRuntime = QueryParser.parse(query, siddhiAppContext, combinedStreamMap,
-                    siddhiAppRuntimeBuilder.getTableDefinitionMap(),
-                    siddhiAppRuntimeBuilder.getWindowDefinitionMap(),
-                    siddhiAppRuntimeBuilder.getTableMap(),
-                    siddhiAppRuntimeBuilder.getEventWindowMap(),
-                    siddhiAppRuntimeBuilder.getVariableMap(),
-                    siddhiAppRuntimeBuilder.getEventSourceMap(),
-                    siddhiAppRuntimeBuilder.getEventSinkMap(),
+            QueryRuntime queryRuntime = QueryParser.parse(query, siddhiAppContext,
+                    new ParameterWrapper(
+                            combinedStreamMap,
+                            siddhiAppRuntimeBuilder.getTableDefinitionMap(),
+                            siddhiAppRuntimeBuilder.getWindowDefinitionMap(),
+                            siddhiAppRuntimeBuilder.getTableMap(),
+                            siddhiAppRuntimeBuilder.getEventWindowMap(),
+                            siddhiAppRuntimeBuilder.getVariableMap(),
+                            siddhiAppRuntimeBuilder.getEventSourceMap(),
+                            siddhiAppRuntimeBuilder.getEventSinkMap()),
                     siddhiAppRuntimeBuilder.getLockSynchronizer());
             MetaStateEvent metaStateEvent = createMetaEventForPartitioner(queryRuntime.getMetaComplexEvent());
             partitionRuntime.addQuery(queryRuntime);

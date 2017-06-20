@@ -24,11 +24,9 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
-import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.AttributeNotExistException;
@@ -56,7 +54,6 @@ import org.wso2.siddhi.query.api.expression.math.Multiply;
 import org.wso2.siddhi.query.api.expression.math.Subtract;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
@@ -68,23 +65,17 @@ public class ConditionBuilder {
     private final Map<String, ExpressionExecutor> variableExpressionExecutorMap;
     private final MatchingMetaInfoHolder matchingMetaInfoHolder;
     private final SiddhiAppContext siddhiAppContext;
-    private final List<VariableExpressionExecutor> variableExpressionExecutors;
-    private final Map<String, Table> tableMap;
-    private final Map<String, GlobalVariableExpressionExecutor> variableMap;
+    private final ParameterWrapper parameterWrapper;
     private final String queryName;
     private Expression expression;
 
     ConditionBuilder(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                      SiddhiAppContext siddhiAppContext,
-                     List<VariableExpressionExecutor> variableExpressionExecutors,
-                     Map<String, Table> tableMap,
-                     Map<String, GlobalVariableExpressionExecutor> variableMap, String queryName) {
+                     ParameterWrapper parameterWrapper, String queryName) {
         this.expression = expression;
         this.matchingMetaInfoHolder = matchingMetaInfoHolder;
         this.siddhiAppContext = siddhiAppContext;
-        this.variableExpressionExecutors = variableExpressionExecutors;
-        this.tableMap = tableMap;
-        this.variableMap = variableMap;
+        this.parameterWrapper = parameterWrapper;
         this.queryName = queryName;
         this.variableExpressionExecutorMap = new HashMap<String, ExpressionExecutor>();
     }
@@ -383,8 +374,9 @@ public class ConditionBuilder {
         conditionVisitor.beginVisitStreamVariable(id, variable.getStreamId(), variable.getAttributeName(), type);
         if (!variableExpressionExecutorMap.containsKey(id)) {
             ExpressionExecutor variableExpressionExecutor = ExpressionParser.parseExpression(
-                    variable, matchingMetaInfoHolder.getMetaStateEvent(), streamEventChainIndex, tableMap, variableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                    variable, matchingMetaInfoHolder.getMetaStateEvent(), streamEventChainIndex, parameterWrapper,
+                    siddhiAppContext,
+                    false, 0, queryName);
             variableExpressionExecutorMap.put(id, variableExpressionExecutor);
         }
         conditionVisitor.endVisitStreamVariable(id, variable.getStreamId(), variable.getAttributeName(), type);

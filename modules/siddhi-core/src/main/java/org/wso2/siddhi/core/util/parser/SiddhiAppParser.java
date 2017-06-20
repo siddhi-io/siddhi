@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.ThreadBarrier;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.core.util.persistence.PersistenceService;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
@@ -212,22 +213,23 @@ public class SiddhiAppParser {
                         .getFactory()
                         .createLatencyTracker(metricName, siddhiAppContext.getStatisticsManager());
             }
-            window.init(siddhiAppRuntimeBuilder.getTableMap(), siddhiAppRuntimeBuilder
-                    .getEventWindowMap(), siddhiAppRuntimeBuilder.getVariableMap(), latencyTracker, window
+            window.init(new ParameterWrapper(siddhiAppRuntimeBuilder.getTableMap(), siddhiAppRuntimeBuilder
+                    .getEventWindowMap(), siddhiAppRuntimeBuilder.getVariableMap()), latencyTracker, window
                     .getWindowDefinition().getId());
         }
         try {
             for (ExecutionElement executionElement : siddhiApp.getExecutionElementList()) {
                 if (executionElement instanceof Query) {
                     QueryRuntime queryRuntime = QueryParser.parse((Query) executionElement, siddhiAppContext,
-                                                                  siddhiAppRuntimeBuilder.getStreamDefinitionMap(),
+                            new ParameterWrapper(siddhiAppRuntimeBuilder
+                                    .getStreamDefinitionMap(),
                                                                   siddhiAppRuntimeBuilder.getTableDefinitionMap(),
                                                                   siddhiAppRuntimeBuilder.getWindowDefinitionMap(),
                                                                   siddhiAppRuntimeBuilder.getTableMap(),
                                                                   siddhiAppRuntimeBuilder.getEventWindowMap(),
                                                                   siddhiAppRuntimeBuilder.getVariableMap(),
                                                                   siddhiAppRuntimeBuilder.getEventSourceMap(),
-                                                                  siddhiAppRuntimeBuilder.getEventSinkMap(),
+                                    siddhiAppRuntimeBuilder.getEventSinkMap()),
                                                                   siddhiAppRuntimeBuilder.getLockSynchronizer());
                     siddhiAppRuntimeBuilder.addQuery(queryRuntime);
                 } else {

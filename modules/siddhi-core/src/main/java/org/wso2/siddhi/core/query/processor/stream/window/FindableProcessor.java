@@ -21,15 +21,10 @@ package org.wso2.siddhi.core.query.processor.stream.window;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
-import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.query.api.expression.Expression;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Interface for all processors which holds a collection of events and supports traversing and finding events from
@@ -54,14 +49,11 @@ public interface FindableProcessor {
      * @param expression                  the matching expression
      * @param matchingMetaInfoHolder      the meta structure of the incoming matchingEvent
      * @param siddhiAppContext        current siddhi app context
-     * @param variableExpressionExecutors the list of variable ExpressionExecutors already created
-     * @param tableMap                    map of event tables
+     * @param parameterWrapper        wrapper which contains all the definitions
      * @param queryName                   query name of findable processor belongs to.
      * @return compiled Condition having the capability of matching events against the incoming matchingEvent
      */
     CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                        SiddhiAppContext siddhiAppContext,
-                                       List<VariableExpressionExecutor> variableExpressionExecutors,
-                                       Map<String, Table> tableMap,
-                                       Map<String, GlobalVariableExpressionExecutor> variableMap, String queryName);
+                                       ParameterWrapper parameterWrapper, String queryName);
 }

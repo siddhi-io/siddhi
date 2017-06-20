@@ -78,6 +78,10 @@ public abstract class Expression implements Serializable {
         return new GlobalVariable(varName);
     }
 
+    public static GlobalExpression globalExpression(String expName) {
+        return new GlobalExpression(expName);
+    }
+
     public static Add add(Expression leftValue, Expression rightValue) {
         return new Add(leftValue, rightValue);
     }

@@ -21,11 +21,9 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
@@ -36,7 +34,6 @@ import org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.query.processor.stream.function.StreamFunctionProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;
-import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
 import org.wso2.siddhi.core.util.SiddhiConstants;
@@ -44,6 +41,7 @@ import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.extension.holder.StreamFunctionProcessorExtensionHolder;
 import org.wso2.siddhi.core.util.extension.holder.StreamProcessorExtensionHolder;
 import org.wso2.siddhi.core.util.extension.holder.WindowProcessorExtensionHolder;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.execution.query.input.handler.Filter;
@@ -65,11 +63,7 @@ public class SingleInputStreamParser {
      *
      * @param inputStream                 single input stream to be parsed
      * @param siddhiAppContext        query to be parsed
-     * @param variableExpressionExecutors List to hold VariableExpressionExecutors to update after query parsing
-     * @param streamDefinitionMap         Stream Definition Map
-     * @param tableDefinitionMap          Table Definition Map
-     * @param windowDefinitionMap         window definition map
-     * @param tableMap                    Table Map
+     * @param parameterWrapper        definition wrapper
      * @param metaComplexEvent            MetaComplexEvent
      * @param processStreamReceiver       ProcessStreamReceiver
      * @param supportsBatchProcessing     supports batch processing
@@ -77,19 +71,13 @@ public class SingleInputStreamParser {
      * @param queryName                   query name of single input stream belongs to.
      * @return SingleStreamRuntime
      */
-    public static SingleStreamRuntime parseInputStream(SingleInputStream inputStream, SiddhiAppContext
-            siddhiAppContext,
-                                                       List<VariableExpressionExecutor> variableExpressionExecutors,
-                                                       Map<String, AbstractDefinition> streamDefinitionMap,
-                                                       Map<String, AbstractDefinition> tableDefinitionMap,
-                                                       Map<String, AbstractDefinition> windowDefinitionMap,
-                                                       Map<String, Table> tableMap,
-                                                       Map<String, GlobalVariableExpressionExecutor> variableMap,
-                                                       MetaComplexEvent
-                                                               metaComplexEvent,
-                                                       ProcessStreamReceiver processStreamReceiver, boolean
-                                                               supportsBatchProcessing, boolean
-                                                               outputExpectsExpiredEvents, String queryName) {
+    public static SingleStreamRuntime parseInputStream(SingleInputStream inputStream,
+                                                       SiddhiAppContext siddhiAppContext,
+                                                       ParameterWrapper parameterWrapper,
+                                                       MetaComplexEvent metaComplexEvent,
+                                                       ProcessStreamReceiver processStreamReceiver,
+                                                       boolean supportsBatchProcessing,
+                                                       boolean outputExpectsExpiredEvents, String queryName) {
         Processor processor = null;
         EntryValveProcessor entryValveProcessor = null;
         boolean first = true;
@@ -97,17 +85,20 @@ public class SingleInputStreamParser {
         if (metaComplexEvent instanceof MetaStateEvent) {
             metaStreamEvent = new MetaStreamEvent();
             ((MetaStateEvent) metaComplexEvent).addEvent(metaStreamEvent);
-            initMetaStreamEvent(inputStream, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
-                    metaStreamEvent);
+            initMetaStreamEvent(inputStream, parameterWrapper.getStreamDefinitionMap(), parameterWrapper
+                            .getTableDefinitionMap(),
+                    parameterWrapper.getWindowDefinitionMap(), metaStreamEvent);
         } else {
             metaStreamEvent = (MetaStreamEvent) metaComplexEvent;
-            initMetaStreamEvent(inputStream, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+            initMetaStreamEvent(inputStream, parameterWrapper.getStreamDefinitionMap(), parameterWrapper
+                            .getTableDefinitionMap(),
+                    parameterWrapper.getWindowDefinitionMap(),
                     metaStreamEvent);
         }
 
         // A window cannot be defined for a window stream
-        if (!inputStream.getStreamHandlers().isEmpty() && windowDefinitionMap != null && windowDefinitionMap
-                .containsKey(inputStream.getStreamId())) {
+        if (!inputStream.getStreamHandlers().isEmpty() && parameterWrapper.getWindowDefinitionMap() != null &&
+                parameterWrapper.getWindowDefinitionMap().containsKey(inputStream.getStreamId())) {
             for (StreamHandler handler : inputStream.getStreamHandlers()) {
                 if (handler instanceof Window) {
                     throw new OperationNotSupportedException("Cannot create " + ((Window) handler).getName() + " " +
@@ -119,7 +110,7 @@ public class SingleInputStreamParser {
         if (!inputStream.getStreamHandlers().isEmpty()) {
             for (StreamHandler handler : inputStream.getStreamHandlers()) {
                 Processor currentProcessor = generateProcessor(handler, metaComplexEvent,
-                        variableExpressionExecutors, siddhiAppContext, tableMap, variableMap,
+                        siddhiAppContext, parameterWrapper,
                         supportsBatchProcessing, outputExpectsExpiredEvents, queryName);
                 if (currentProcessor instanceof SchedulingProcessor) {
                     if (entryValveProcessor == null) {
@@ -152,10 +143,9 @@ public class SingleInputStreamParser {
 
 
     public static Processor generateProcessor(StreamHandler streamHandler, MetaComplexEvent metaEvent,
-                                              List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              SiddhiAppContext siddhiAppContext, Map<String, Table> tableMap,
-                                              Map<String, GlobalVariableExpressionExecutor> variableMap, boolean
-                                                      supportsBatchProcessing, boolean outputExpectsExpiredEvents,
+                                              SiddhiAppContext siddhiAppContext,
+                                              ParameterWrapper parameterWrapper,
+                                              boolean supportsBatchProcessing, boolean outputExpectsExpiredEvents,
                                               String queryName) {
         Expression[] parameters = streamHandler.getParameters();
         MetaStreamEvent metaStreamEvent;
@@ -173,7 +163,7 @@ public class SingleInputStreamParser {
                 attributeExpressionExecutors = new ExpressionExecutor[parameters.length];
                 for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
                     attributeExpressionExecutors[i] = ExpressionParser.parseExpression(parameters[i], metaEvent,
-                            stateIndex, tableMap, variableMap, variableExpressionExecutors,
+                            stateIndex, parameterWrapper,
                             siddhiAppContext, false, SiddhiConstants.CURRENT, queryName);
                 }
             } else {
@@ -182,8 +172,7 @@ public class SingleInputStreamParser {
                 attributeExpressionExecutors = new ExpressionExecutor[parameterSize];
                 for (int i = 0; i < parameterSize; i++) {
                     attributeExpressionExecutors[i] = ExpressionParser.parseExpression(new Variable(attributeList.get
-                                    (i).getName()), metaEvent, stateIndex, tableMap, variableMap,
-                            variableExpressionExecutors,
+                                    (i).getName()), metaEvent, stateIndex, parameterWrapper,
                             siddhiAppContext, false, SiddhiConstants.CURRENT, queryName);
                 }
             }

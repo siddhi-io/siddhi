@@ -26,21 +26,19 @@ import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
-import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;
 import org.wso2.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.parser.SchedulerParser;
 import org.wso2.siddhi.core.util.parser.SingleInputStreamParser;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -48,8 +46,6 @@ import org.wso2.siddhi.query.api.definition.WindowDefinition;
 import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 import org.wso2.siddhi.query.api.expression.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -117,13 +113,11 @@ public class Window implements FindableProcessor, Snapshotable {
     /**
      * Initialize the WindowEvent table by creating {@link WindowProcessor} to handle the events.
      *
-     * @param tableMap       map of {@link Table}s
-     * @param eventWindowMap map of EventWindows
+     * @param parameterWrapper
      * @param latencyTracker to rack the latency if statistic of underlying {@link WindowProcessor} is required
      * @param queryName name of the query window belongs to.
      */
-    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, Map<String,
-            GlobalVariableExpressionExecutor> variableMap, LatencyTracker
+    public void init(ParameterWrapper parameterWrapper, LatencyTracker
                              latencyTracker, String queryName) {
         if (this.windowProcessor != null) {
             return;
@@ -144,8 +138,8 @@ public class Window implements FindableProcessor, Snapshotable {
         boolean outputExpectsExpiredEvents = outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS;
 
         WindowProcessor internalWindowProcessor = (WindowProcessor) SingleInputStreamParser.generateProcessor
-                (windowDefinition.getWindow(), metaStreamEvent, new ArrayList<VariableExpressionExecutor>(), this
-                        .siddhiAppContext, tableMap, variableMap, false, outputExpectsExpiredEvents, queryName);
+                (windowDefinition.getWindow(), metaStreamEvent, this
+                        .siddhiAppContext, parameterWrapper, false, outputExpectsExpiredEvents, queryName);
         internalWindowProcessor.setStreamEventCloner(streamEventCloner);
         internalWindowProcessor.constructStreamEventPopulater(metaStreamEvent, 0);
 
@@ -235,13 +229,10 @@ public class Window implements FindableProcessor, Snapshotable {
     @Override
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               SiddhiAppContext siddhiAppContext,
-                                              List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, Map<String,
-            GlobalVariableExpressionExecutor> variableMap, String queryName) {
+                                              ParameterWrapper parameterWrapper, String queryName) {
         if (this.internalWindowProcessor instanceof FindableProcessor) {
             return ((FindableProcessor) this.internalWindowProcessor).compileCondition(expression,
-                    matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, variableMap,
-                    queryName);
+                    matchingMetaInfoHolder, siddhiAppContext, parameterWrapper, queryName);
         } else {
             throw new OperationNotSupportedException("Cannot construct finder for the window " + this
                     .windowDefinition.getWindow());

@@ -51,6 +51,7 @@ import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.lock.LockSynchronizer;
 import org.wso2.siddhi.core.util.parser.QueryParser;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.window.Window;
@@ -298,9 +299,9 @@ public class EventTestCase {
         context.setSiddhiContext(siddhicontext);
         context.setElementIdGenerator(new ElementIdGenerator(context.getName()));
         context.setSnapshotService(new SnapshotService(context));
-        QueryRuntime runtime = QueryParser.parse(query, context, streamDefinitionMap, tableDefinitionMap,
-                windowDefinitionMap, tableMap, eventWindowMap, variableMap, eventSourceMap, eventSinkMap,
-                lockSynchronizer);
+        QueryRuntime runtime = QueryParser.parse(query, context, new ParameterWrapper(streamDefinitionMap,
+                tableDefinitionMap, windowDefinitionMap, tableMap, eventWindowMap, variableMap,
+                eventSourceMap, eventSinkMap), lockSynchronizer);
         Assert.assertNotNull(runtime);
         Assert.assertTrue(runtime.getStreamRuntime() instanceof SingleStreamRuntime);
         Assert.assertNotNull(runtime.getSelector());

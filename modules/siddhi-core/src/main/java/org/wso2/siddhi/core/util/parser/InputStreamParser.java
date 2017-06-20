@@ -21,22 +21,16 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
-import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
-import org.wso2.siddhi.core.table.Table;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.window.Window;
-import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.execution.query.input.stream.BasicSingleInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Class to parse {@link InputStream}
@@ -48,52 +42,37 @@ public class InputStreamParser {
      *
      * @param inputStream                input stream to be parsed
      * @param siddhiAppContext       associated siddhi siddhiAppContext
-     * @param streamDefinitionMap        map containing user given stream definitions
-     * @param tableDefinitionMap         table definition map
-     * @param windowDefinitionMap        window definition map
-     * @param tableMap                   Table Map
-     * @param eventWindowMap             event window map
-     * @param executors                  List to hold VariableExpressionExecutors to update after query parsing
+     * @param parameterWrapper
      * @param latencyTracker             latency tracker
      * @param outputExpectsExpiredEvents is output expects ExpiredEvents
      * @param queryName                  query name of input stream belongs to.
      * @return  StreamRuntime
      */
     public static StreamRuntime parse(InputStream inputStream, SiddhiAppContext siddhiAppContext,
-                                      Map<String, AbstractDefinition> streamDefinitionMap,
-                                      Map<String, AbstractDefinition> tableDefinitionMap,
-                                      Map<String, AbstractDefinition> windowDefinitionMap,
-                                      Map<String, Table> tableMap, Map<String, Window> eventWindowMap,
-                                      Map<String, GlobalVariableExpressionExecutor> variableMap,
-                                      List<VariableExpressionExecutor> executors,
+                                      ParameterWrapper parameterWrapper,
                                       LatencyTracker latencyTracker, boolean outputExpectsExpiredEvents, String
                                               queryName) {
 
         if (inputStream instanceof BasicSingleInputStream || inputStream instanceof SingleInputStream) {
             SingleInputStream singleInputStream = (SingleInputStream) inputStream;
-            Window window = eventWindowMap.get(singleInputStream.getStreamId());
+            Window window = parameterWrapper.getEventWindowMap().get(singleInputStream.getStreamId());
             boolean batchProcessingAllowed = window != null;      // If stream is from window, allow batch
             // processing
             ProcessStreamReceiver processStreamReceiver = new ProcessStreamReceiver(singleInputStream.getStreamId(),
                     latencyTracker, queryName);
             processStreamReceiver.setBatchProcessingAllowed(batchProcessingAllowed);
             return SingleInputStreamParser.parseInputStream((SingleInputStream) inputStream,
-                                                            siddhiAppContext, executors, streamDefinitionMap,
-                    null, windowDefinitionMap, tableMap,
-                    variableMap, new MetaStreamEvent(), processStreamReceiver,
-                    true, outputExpectsExpiredEvents,
-                    queryName);
+                    siddhiAppContext, parameterWrapper.copy().tableDefinitionMap(null),
+                    new MetaStreamEvent(), processStreamReceiver, true, outputExpectsExpiredEvents, queryName);
         } else if (inputStream instanceof JoinInputStream) {
             return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream), siddhiAppContext,
-                    streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
-                    tableMap, eventWindowMap,
-                    variableMap, executors, latencyTracker, outputExpectsExpiredEvents,
+                    parameterWrapper, latencyTracker, outputExpectsExpiredEvents,
                     queryName);
         } else if (inputStream instanceof StateInputStream) {
             MetaStateEvent metaStateEvent = new MetaStateEvent(inputStream.getAllStreamIds().size());
             return StateInputStreamParser.parseInputStream(((StateInputStream) inputStream), siddhiAppContext,
-                    metaStateEvent, streamDefinitionMap, null,
-                    null, tableMap, variableMap, executors, latencyTracker,
+                    metaStateEvent, parameterWrapper.copy().tableDefinitionMap(null).windowDefinitionMap(null),
+                    latencyTracker,
                     queryName);
         } else {
             throw new OperationNotSupportedException();

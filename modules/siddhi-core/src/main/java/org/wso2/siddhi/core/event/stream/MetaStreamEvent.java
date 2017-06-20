@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * Class to hold meta info about StreamEvent.
- * This is also used to update variable positions on executors
+ * This is also used to update variable positions on variableExpressionExecutors
  */
 public class MetaStreamEvent implements MetaComplexEvent {
     private List<Attribute> beforeWindowData = new ArrayList<Attribute>();

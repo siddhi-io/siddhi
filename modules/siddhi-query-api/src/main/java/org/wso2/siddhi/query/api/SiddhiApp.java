@@ -21,6 +21,7 @@ import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.definition.ExpressionDefinition;
 import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -48,7 +49,8 @@ public class SiddhiApp {
     private Map<String, StreamDefinition> streamDefinitionMap = new HashMap<String, StreamDefinition>();
     private Map<String, TableDefinition> tableDefinitionMap = new HashMap<String, TableDefinition>();
     private Map<String, WindowDefinition> windowDefinitionMap = new HashMap<String, WindowDefinition>();
-    private Map<String, VariableDefinition> variableDefinitionMap = new HashMap<String, VariableDefinition>();
+    private Map<String, VariableDefinition> variableDefinitionMap = new HashMap<>();
+    private Map<String, ExpressionDefinition> expressionDefinitionMap = new HashMap<>();
     private Map<String, TriggerDefinition> triggerDefinitionMap = new HashMap<String, TriggerDefinition>();
     private List<ExecutionElement> executionElementList = new ArrayList<ExecutionElement>();
     private List<String> executionElementNameList = new ArrayList<String>();
@@ -315,6 +317,19 @@ public class SiddhiApp {
                     variableDefinition.getId());
         }
         this.variableDefinitionMap.put(variableDefinition.getId(), variableDefinition);
+    }
+
+    public void defineExpression(ExpressionDefinition expressionDefinition) {
+        if (expressionDefinition == null) {
+            throw new SiddhiAppValidationException("Expression Definition should not be null");
+        } else if (expressionDefinition.getId() == null) {
+            throw new SiddhiAppValidationException("Expression Id should not be null for Expression Definition");
+        }
+        if (this.expressionDefinitionMap.get(expressionDefinition.getId()) != null) {
+            throw new DuplicateDefinitionException("The expression definition with the same id exists " +
+                    expressionDefinition.getId());
+        }
+        this.expressionDefinitionMap.put(expressionDefinition.getId(), expressionDefinition);
     }
 
     private void checkDuplicateFunctionExist(FunctionDefinition functionDefinition) {

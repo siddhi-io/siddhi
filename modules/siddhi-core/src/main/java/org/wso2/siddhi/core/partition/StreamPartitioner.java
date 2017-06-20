@@ -21,15 +21,14 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.condition.ConditionExpressionExecutor;
 import org.wso2.siddhi.core.partition.executor.PartitionExecutor;
 import org.wso2.siddhi.core.partition.executor.RangePartitionExecutor;
 import org.wso2.siddhi.core.partition.executor.ValuePartitionExecutor;
-import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.query.api.execution.partition.Partition;
 import org.wso2.siddhi.query.api.execution.partition.PartitionType;
 import org.wso2.siddhi.query.api.execution.partition.RangePartitionType;
@@ -47,7 +46,6 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * create PartitionExecutors to be used to get partitioning key
@@ -70,10 +68,10 @@ public class StreamPartitioner {
         if (inputStream instanceof SingleInputStream) {
             if (metaEvent instanceof MetaStateEvent) {
                 createSingleInputStreamExecutors((SingleInputStream) inputStream, partition, ((MetaStateEvent)
-                        metaEvent).getMetaStreamEvent(0), executors, null, null, siddhiAppContext, queryName);
+                        metaEvent).getMetaStreamEvent(0), new ParameterWrapper(executors), siddhiAppContext, queryName);
             } else {
                 createSingleInputStreamExecutors((SingleInputStream) inputStream, partition, (MetaStreamEvent)
-                        metaEvent, executors, null, null, siddhiAppContext, queryName);
+                        metaEvent, new ParameterWrapper(executors), siddhiAppContext, queryName);
             }
         } else if (inputStream instanceof JoinInputStream) {
             createJoinInputStreamExecutors((JoinInputStream) inputStream, partition, (MetaStateEvent) metaEvent,
@@ -134,8 +132,7 @@ public class StreamPartitioner {
     }
 
     private void createSingleInputStreamExecutors(SingleInputStream inputStream, Partition partition, MetaStreamEvent
-            metaEvent, List<VariableExpressionExecutor> executors, Map<String, Table> tableMap, Map<String,
-            GlobalVariableExpressionExecutor> variableMap, SiddhiAppContext siddhiAppContext, String queryName) {
+            metaEvent, ParameterWrapper parameterWrapper, SiddhiAppContext siddhiAppContext, String queryName) {
         List<PartitionExecutor> executorList = new ArrayList<PartitionExecutor>();
         partitionExecutorLists.add(executorList);
         if (!inputStream.isInnerStream()) {
@@ -144,7 +141,7 @@ public class StreamPartitioner {
                     if (partitionType.getStreamId().equals(inputStream.getStreamId())) {
                         executorList.add(new ValuePartitionExecutor(ExpressionParser.parseExpression((
                                 (ValuePartitionType) partitionType).getExpression(),
-                                metaEvent, SiddhiConstants.UNKNOWN_STATE, tableMap, variableMap, executors,
+                                metaEvent, SiddhiConstants.UNKNOWN_STATE, parameterWrapper,
                                 siddhiAppContext, false, 0, queryName)));
                     }
                 } else {
@@ -153,7 +150,7 @@ public class StreamPartitioner {
                         if (partitionType.getStreamId().equals(inputStream.getStreamId())) {
                             executorList.add(new RangePartitionExecutor((ConditionExpressionExecutor)
                                     ExpressionParser.parseExpression(rangePartitionProperty.getCondition(), metaEvent,
-                                            SiddhiConstants.UNKNOWN_STATE, tableMap, variableMap, executors,
+                                            SiddhiConstants.UNKNOWN_STATE, parameterWrapper,
                                             siddhiAppContext, false, 0, queryName),
                                     rangePartitionProperty.getPartitionKey()));
 

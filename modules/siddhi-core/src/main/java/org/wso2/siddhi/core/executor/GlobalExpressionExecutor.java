@@ -19,32 +19,21 @@
 package org.wso2.siddhi.core.executor;
 
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
-import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
-import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
-import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * {@link GlobalVariableExpressionExecutor} is both an expression and a findable processor to represent the Siddhi
+ * {@link GlobalExpressionExecutor} is both an expression and a findable processor to represent the Siddhi
  * global variables.
  */
-public class GlobalVariableExpressionExecutor extends RuntimeVariableExpressionExecutor implements FindableProcessor,
-        Snapshotable {
+public class GlobalExpressionExecutor implements ExpressionExecutor {
 
     /**
      * LockWrapper to coordinate asynchronous events.
@@ -55,7 +44,7 @@ public class GlobalVariableExpressionExecutor extends RuntimeVariableExpressionE
     private Object value;
     private List<VariableUpdateListener> variableUpdateListeners = new ArrayList<>();
 
-    public GlobalVariableExpressionExecutor(String id, Attribute.Type type, Object value) {
+    public GlobalExpressionExecutor(String id, Attribute.Type type, Object value) {
         this.id = id;
         this.type = type;
         this.lockWrapper = new LockWrapper(id);
@@ -82,35 +71,8 @@ public class GlobalVariableExpressionExecutor extends RuntimeVariableExpressionE
     }
 
     @Override
-    public Map<String, Object> currentState() {
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-
-    }
-
-    @Override
-    public String getElementId() {
-        return this.id;
-    }
-
-    @Override
-    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return null;
-    }
-
-    @Override
-    public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
-                                              ParameterWrapper parameterWrapper, String queryName) {
-        return null;
-    }
-
-    @Override
     public Object execute(ComplexEvent event) {
-        return this.getValue();
+        return null;
     }
 
     public Attribute.Type getReturnType() {
@@ -157,15 +119,6 @@ public class GlobalVariableExpressionExecutor extends RuntimeVariableExpressionE
         }
     }
 
-    @Override
-    public Object getValue() {
-        try {
-            lockWrapper.lock();
-            return value;
-        } finally {
-            lockWrapper.unlock();
-        }
-    }
 
     public void addVariableUpdateListener(VariableUpdateListener listener) {
         if (listener != null) {
@@ -179,7 +132,7 @@ public class GlobalVariableExpressionExecutor extends RuntimeVariableExpressionE
     }
 
     /**
-     * Listener to listen the value updates of {@link GlobalVariableExpressionExecutor}.
+     * Listener to listen the value updates of {@link GlobalExpressionExecutor}.
      */
     public interface VariableUpdateListener {
         void onValueUpdate(Object oldValue, Object newValue);

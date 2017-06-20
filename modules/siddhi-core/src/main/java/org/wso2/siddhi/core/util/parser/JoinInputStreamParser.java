@@ -20,11 +20,10 @@ package org.wso2.siddhi.core.util.parser;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.MultiProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
@@ -38,22 +37,17 @@ import org.wso2.siddhi.core.query.processor.stream.window.LengthWindowProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.TableWindowProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowWindowProcessor;
-import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.config.ConfigReader;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
-import org.wso2.siddhi.core.window.Window;
-import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 
@@ -62,13 +56,7 @@ public class JoinInputStreamParser {
 
     public static StreamRuntime parseInputStream(JoinInputStream joinInputStream,
                                                  SiddhiAppContext siddhiAppContext,
-                                                 Map<String, AbstractDefinition> streamDefinitionMap,
-                                                 Map<String, AbstractDefinition> tableDefinitionMap,
-                                                 Map<String, AbstractDefinition> windowDefinitionMap,
-                                                 Map<String, Table> tableMap,
-                                                 Map<String, Window> eventWindowMap,
-                                                 Map<String, GlobalVariableExpressionExecutor> variableMap,
-                                                 List<VariableExpressionExecutor> executors,
+                                                 ParameterWrapper parameterWrapper,
                                                  LatencyTracker latencyTracker, boolean outputExpectsExpiredEvents,
                                                  String queryName) {
 
@@ -86,18 +74,18 @@ public class JoinInputStreamParser {
 
         if (joinInputStream.getAllStreamIds().size() == 2) {
 
-            if (windowDefinitionMap.containsKey(leftInputStreamId)) {
+            if (parameterWrapper.getWindowDefinitionMap().containsKey(leftInputStreamId)) {
                 leftMetaStreamEvent.setWindowEvent(true);
-            } else if (!streamDefinitionMap.containsKey(leftInputStreamId)) {
-                if (tableDefinitionMap.containsKey(leftInputStreamId)) {
+            } else if (!parameterWrapper.getStreamDefinitionMap().containsKey(leftInputStreamId)) {
+                if (parameterWrapper.getTableDefinitionMap().containsKey(leftInputStreamId)) {
                     leftMetaStreamEvent.setTableEvent(true);
                 }
             }
 
-            if (windowDefinitionMap.containsKey(rightInputStreamId)) {
+            if (parameterWrapper.getWindowDefinitionMap().containsKey(rightInputStreamId)) {
                 rightMetaStreamEvent.setWindowEvent(true);
-            } else if (!streamDefinitionMap.containsKey(rightInputStreamId)) {
-                if (tableDefinitionMap.containsKey(rightInputStreamId)) {
+            } else if (!parameterWrapper.getStreamDefinitionMap().containsKey(rightInputStreamId)) {
+                if (parameterWrapper.getTableDefinitionMap().containsKey(rightInputStreamId)) {
                     rightMetaStreamEvent.setTableEvent(true);
                 }
             }
@@ -112,14 +100,15 @@ public class JoinInputStreamParser {
                         leftInputStreamId + " and " + rightInputStreamId);
             }
         } else {
-            if (windowDefinitionMap.containsKey(joinInputStream.getAllStreamIds().get(0))) {
+            if (parameterWrapper.getWindowDefinitionMap().containsKey(joinInputStream.getAllStreamIds().get(0))) {
                 leftMetaStreamEvent.setWindowEvent(true);
                 rightMetaStreamEvent.setWindowEvent(true);
                 rightProcessStreamReceiver = new MultiProcessStreamReceiver(joinInputStream.getAllStreamIds().get(0),
                         1, latencyTracker, queryName);
                 rightProcessStreamReceiver.setBatchProcessingAllowed(true);
                 leftProcessStreamReceiver = rightProcessStreamReceiver;
-            } else if (streamDefinitionMap.containsKey(joinInputStream.getAllStreamIds().get(0))) {
+            } else if (parameterWrapper.getStreamDefinitionMap().containsKey(joinInputStream.getAllStreamIds().get
+                    (0))) {
                 rightProcessStreamReceiver = new MultiProcessStreamReceiver(joinInputStream.getAllStreamIds().get(0),
                         2, latencyTracker, queryName);
                 leftProcessStreamReceiver = rightProcessStreamReceiver;
@@ -130,51 +119,51 @@ public class JoinInputStreamParser {
         }
 
         SingleStreamRuntime leftStreamRuntime = SingleInputStreamParser.parseInputStream(
-                (SingleInputStream) joinInputStream.getLeftInputStream(), siddhiAppContext, executors,
-                streamDefinitionMap,
-                !leftMetaStreamEvent.isTableEvent() ? null : tableDefinitionMap, !leftMetaStreamEvent.isWindowEvent()
-                        ? null : windowDefinitionMap, tableMap, variableMap, leftMetaStreamEvent,
-                leftProcessStreamReceiver,
-                true, outputExpectsExpiredEvents, queryName);
+                (SingleInputStream) joinInputStream.getLeftInputStream(), siddhiAppContext, parameterWrapper,
+                leftMetaStreamEvent,
+                leftProcessStreamReceiver, true, outputExpectsExpiredEvents, queryName);
 
-        for (VariableExpressionExecutor variableExpressionExecutor : executors) {
+        for (VariableExpressionExecutor variableExpressionExecutor : parameterWrapper.getVariableExpressionExecutors
+                ()) {
             variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX] = 0;
         }
-        int size = executors.size();
+        int size = parameterWrapper.getVariableExpressionExecutors().size();
 
         SingleStreamRuntime rightStreamRuntime = SingleInputStreamParser.parseInputStream(
-                (SingleInputStream) joinInputStream.getRightInputStream(), siddhiAppContext, executors,
-                streamDefinitionMap,
-                !rightMetaStreamEvent.isTableEvent() ? null : tableDefinitionMap, !rightMetaStreamEvent.isWindowEvent
-                        () ? null : windowDefinitionMap, tableMap, variableMap, rightMetaStreamEvent,
+                (SingleInputStream) joinInputStream.getRightInputStream(), siddhiAppContext, parameterWrapper, rightMetaStreamEvent,
                 rightProcessStreamReceiver, true, outputExpectsExpiredEvents, queryName);
 
-        for (int i = size; i < executors.size(); i++) {
-            VariableExpressionExecutor variableExpressionExecutor = executors.get(i);
+        for (int i = size; i < parameterWrapper.getVariableExpressionExecutors().size(); i++) {
+            VariableExpressionExecutor variableExpressionExecutor = parameterWrapper.getVariableExpressionExecutors().get(i);
             variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX] = 1;
         }
 
         if (leftMetaStreamEvent.isTableEvent()) {
-            TableWindowProcessor tableWindowProcessor = new TableWindowProcessor(tableMap.get(leftInputStreamId));
+            TableWindowProcessor tableWindowProcessor = new TableWindowProcessor(parameterWrapper.getTableMap().get
+                    (leftInputStreamId));
             tableWindowProcessor.initProcessor(leftMetaStreamEvent.getLastInputDefinition(), new
                     ExpressionExecutor[0], null, siddhiAppContext, outputExpectsExpiredEvents, queryName);
             leftStreamRuntime.setProcessorChain(tableWindowProcessor);
         } else if (leftMetaStreamEvent.isWindowEvent()) {
-            WindowWindowProcessor windowWindowProcessor = new WindowWindowProcessor(eventWindowMap.get
+            WindowWindowProcessor windowWindowProcessor = new WindowWindowProcessor(parameterWrapper
+                    .getEventWindowMap().get
                     (leftInputStreamId));
-            windowWindowProcessor.initProcessor(leftMetaStreamEvent.getLastInputDefinition(), executors.toArray(new
+            windowWindowProcessor.initProcessor(leftMetaStreamEvent.getLastInputDefinition(), parameterWrapper
+                    .getVariableExpressionExecutors().toArray(new
                     ExpressionExecutor[0]), null, siddhiAppContext, outputExpectsExpiredEvents, queryName);
             leftStreamRuntime.setProcessorChain(windowWindowProcessor);
         }
         if (rightMetaStreamEvent.isTableEvent()) {
-            TableWindowProcessor tableWindowProcessor = new TableWindowProcessor(tableMap.get(rightInputStreamId));
+            TableWindowProcessor tableWindowProcessor = new TableWindowProcessor(parameterWrapper.getTableMap().get(rightInputStreamId));
             tableWindowProcessor.initProcessor(rightMetaStreamEvent.getLastInputDefinition(), new
                     ExpressionExecutor[0], null, siddhiAppContext, outputExpectsExpiredEvents, queryName);
             rightStreamRuntime.setProcessorChain(tableWindowProcessor);
         } else if (rightMetaStreamEvent.isWindowEvent()) {
-            WindowWindowProcessor windowWindowProcessor = new WindowWindowProcessor(eventWindowMap.get
+            WindowWindowProcessor windowWindowProcessor = new WindowWindowProcessor(parameterWrapper
+                    .getEventWindowMap().get
                     (rightInputStreamId));
-            windowWindowProcessor.initProcessor(rightMetaStreamEvent.getLastInputDefinition(), executors.toArray(new
+            windowWindowProcessor.initProcessor(rightMetaStreamEvent.getLastInputDefinition(), parameterWrapper
+                    .getVariableExpressionExecutors().toArray(new
                     ExpressionExecutor[0]), null, siddhiAppContext, outputExpectsExpiredEvents, queryName);
             rightStreamRuntime.setProcessorChain(windowWindowProcessor);
         }
@@ -228,11 +217,11 @@ public class JoinInputStreamParser {
         MatchingMetaInfoHolder rightMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
                 (metaStateEvent, 0, rightMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
         CompiledCondition leftCompiledCondition = rightFindableProcessor.compileCondition(compareCondition,
-                rightMatchingMetaInfoHolder, siddhiAppContext, executors, tableMap, variableMap, queryName);
+                rightMatchingMetaInfoHolder, siddhiAppContext, parameterWrapper, queryName);
         MatchingMetaInfoHolder leftMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
                 (metaStateEvent, 1, leftMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
         CompiledCondition rightCompiledCondition = leftFindableProcessor.compileCondition(compareCondition,
-                leftMatchingMetaInfoHolder, siddhiAppContext, executors, tableMap, variableMap, queryName);
+                leftMatchingMetaInfoHolder, siddhiAppContext, parameterWrapper, queryName);
 
         if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT) {
             rightPreJoinProcessor.setTrigger(false);    // Pre JoinProcessor does not process the events

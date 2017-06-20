@@ -23,14 +23,13 @@ import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEventAttribute;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.condition.ConditionExpressionExecutor;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
-import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
@@ -43,7 +42,6 @@ import org.wso2.siddhi.query.api.expression.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Class to parse {@link QuerySelector}
@@ -57,17 +55,13 @@ public class SelectorParser {
      * @param selector                    selector to be parsed
      * @param outputStream                output stream
      * @param siddhiAppContext        query to be parsed
-     * @param metaComplexEvent            Meta event used to collect execution info of stream associated with query
-     * @param tableMap                    Table Map
-     * @param variableExpressionExecutors variable expression executors
+     * @param parameterWrapper
      * @param queryName                   query name of selector belongs to.
      * @return QuerySelector
      */
     public static QuerySelector parse(Selector selector, OutputStream outputStream, SiddhiAppContext
-            siddhiAppContext,
-                                      MetaComplexEvent metaComplexEvent, Map<String, Table> tableMap, Map<String,
-            GlobalVariableExpressionExecutor> variableMap, List<VariableExpressionExecutor>
-                                              variableExpressionExecutors, String queryName) {
+            siddhiAppContext, MetaComplexEvent metaComplexEvent,
+                                      ParameterWrapper parameterWrapper, String queryName) {
         boolean currentOn = false;
         boolean expiredOn = false;
         String id = null;
@@ -85,17 +79,17 @@ public class SelectorParser {
         containsAggregatorThreadLocal.remove();
         QuerySelector querySelector = new QuerySelector(id, selector, currentOn, expiredOn, siddhiAppContext);
         List<AttributeProcessor> attributeProcessors = getAttributeProcessors(selector, id, siddhiAppContext,
-                metaComplexEvent, tableMap, variableMap, variableExpressionExecutors, queryName);
+                metaComplexEvent, parameterWrapper, queryName);
         querySelector.setAttributeProcessorList(attributeProcessors, "true".equals(containsAggregatorThreadLocal.get
                 ()));
         containsAggregatorThreadLocal.remove();
         ConditionExpressionExecutor havingCondition = generateHavingExecutor(selector.getHavingExpression(),
-                metaComplexEvent, siddhiAppContext, tableMap, variableMap, variableExpressionExecutors, queryName);
+                metaComplexEvent, siddhiAppContext, parameterWrapper, queryName);
         querySelector.setHavingConditionExecutor(havingCondition, "true".equals(containsAggregatorThreadLocal.get()));
         containsAggregatorThreadLocal.remove();
         if (!selector.getGroupByList().isEmpty()) {
             querySelector.setGroupByKeyGenerator(new GroupByKeyGenerator(selector.getGroupByList(), metaComplexEvent,
-                    null, variableMap, variableExpressionExecutors, siddhiAppContext, queryName));
+                    parameterWrapper, siddhiAppContext, queryName));
         }
 
 
@@ -109,16 +103,13 @@ public class SelectorParser {
      * @param id                          stream id
      * @param siddhiAppContext        siddhi app context
      * @param metaComplexEvent            meta ComplexEvent
-     * @param tableMap                    Table Map
-     * @param variableExpressionExecutors list of VariableExpressionExecutors
+     * @param parameterWrapper
      * @return list of AttributeProcessors
      */
     private static List<AttributeProcessor> getAttributeProcessors(Selector selector, String id,
                                                                    SiddhiAppContext siddhiAppContext,
                                                                    MetaComplexEvent metaComplexEvent,
-                                                                   Map<String, Table> tableMap, Map<String,
-            GlobalVariableExpressionExecutor> variableMap, List<VariableExpressionExecutor>
-                                                                           variableExpressionExecutors, String
+                                                                   ParameterWrapper parameterWrapper, String
                                                                            queryName) {
 
         List<AttributeProcessor> attributeProcessorList = new ArrayList<AttributeProcessor>();
@@ -159,7 +150,7 @@ public class SelectorParser {
         for (OutputAttribute outputAttribute : outputAttributes) {
 
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(outputAttribute.getExpression(),
-                    metaComplexEvent, SiddhiConstants.UNKNOWN_STATE, tableMap, variableMap, variableExpressionExecutors,
+                    metaComplexEvent, SiddhiConstants.UNKNOWN_STATE, parameterWrapper,
                     siddhiAppContext,
                     !(selector.getGroupByList().isEmpty()), 0, queryName);
             if (expressionExecutor instanceof VariableExpressionExecutor) {   //for variables we will directly put
@@ -194,14 +185,12 @@ public class SelectorParser {
     private static ConditionExpressionExecutor generateHavingExecutor(Expression expression,
                                                                       MetaComplexEvent metaComplexEvent,
                                                                       SiddhiAppContext siddhiAppContext,
-                                                                      Map<String, Table> tableMap, Map<String,
-            GlobalVariableExpressionExecutor> variableMap, List<VariableExpressionExecutor>
-                                                                              variableExpressionExecutors, String
+                                                                      ParameterWrapper parameterWrapper, String
                                                                               queryName) {
         ConditionExpressionExecutor havingConditionExecutor = null;
         if (expression != null) {
             havingConditionExecutor = (ConditionExpressionExecutor) ExpressionParser.parseExpression(expression,
-                    metaComplexEvent, SiddhiConstants.HAVING_STATE, tableMap, variableMap, variableExpressionExecutors,
+                    metaComplexEvent, SiddhiConstants.HAVING_STATE, parameterWrapper,
                     siddhiAppContext, false, 0, queryName);
 
         }
