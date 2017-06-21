@@ -115,7 +115,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
             currentEvent = nextEvent;
             complexEvents = complexEvents.getNext();
         }
-        process(new ComplexEventChunk<StreamEvent>(firstEvent, currentEvent, this.batchProcessingAllowed));
+        process(new ComplexEventChunk<>(streamId, firstEvent, currentEvent, this.batchProcessingAllowed));
     }
 
     @Override
@@ -126,7 +126,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
             if (siddhiDebugger != null) {
                 siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.IN, borrowedEvent);
             }
-            process(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, this.batchProcessingAllowed));
+            process(new ComplexEventChunk<>(streamId, borrowedEvent, borrowedEvent, this.batchProcessingAllowed));
         }
     }
 
@@ -144,7 +144,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         if (siddhiDebugger != null) {
             siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.IN, firstEvent);
         }
-        process(new ComplexEventChunk<StreamEvent>(firstEvent, currentEvent, this.batchProcessingAllowed));
+        process(new ComplexEventChunk<>(streamId, firstEvent, currentEvent, this.batchProcessingAllowed));
     }
 
 
@@ -176,7 +176,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         if (siddhiDebugger != null) {
             siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.IN, borrowedEvent);
         }
-        process(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, this.batchProcessingAllowed));
+        process(new ComplexEventChunk<>(streamId, borrowedEvent, borrowedEvent, this.batchProcessingAllowed));
     }
 
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {

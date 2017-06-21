@@ -32,9 +32,8 @@ public class StreamEventPool implements Serializable {
     private StreamEvent streamEventList;
 
     public StreamEventPool(MetaStreamEvent metaStreamEvent, int size) {
-        eventFactory = new StreamEventFactory(metaStreamEvent.getBeforeWindowData().size(),
-                metaStreamEvent.getOnAfterWindowData().size(),
-                metaStreamEvent.getOutputData().size());
+        eventFactory = new StreamEventFactory(metaStreamEvent.getStreamId(), metaStreamEvent.getBeforeWindowData()
+                .size(), metaStreamEvent.getOnAfterWindowData().size(), metaStreamEvent.getOutputData().size());
         this.size = size;
     }
 

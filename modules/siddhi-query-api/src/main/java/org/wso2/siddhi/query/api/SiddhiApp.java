@@ -233,6 +233,10 @@ public class SiddhiApp {
         return variableDefinitionMap;
     }
 
+    public Map<String, ExpressionDefinition> getExpressionDefinitionMap() {
+        return expressionDefinitionMap;
+    }
+
     @Override
     public String toString() {
         return "SiddhiApp{" +

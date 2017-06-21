@@ -30,6 +30,7 @@ public class StreamEventFactory implements EventFactory<StreamEvent>, Serializab
     private int beforeWindowDataSize;
     private int onAfterWindowDataSize;
     private int outputDataSize;
+    private String streamId;
 
     /**
      * Initialization of the factory with event data sizes
@@ -44,13 +45,23 @@ public class StreamEventFactory implements EventFactory<StreamEvent>, Serializab
         this.outputDataSize = outputDataSize;
     }
 
+    public StreamEventFactory(String streamId, int beforeWindowDataSize, int onAfterWindowDataSize, int
+            outputDataSize) {
+        this.streamId = streamId;
+        this.beforeWindowDataSize = beforeWindowDataSize;
+        this.onAfterWindowDataSize = onAfterWindowDataSize;
+        this.outputDataSize = outputDataSize;
+    }
+
     /**
      * Constructs new Events
      *
      * @return StreamEvent
      */
     public StreamEvent newInstance() {
-        return new StreamEvent(beforeWindowDataSize, onAfterWindowDataSize, outputDataSize);
+        StreamEvent streamEvent = new StreamEvent(beforeWindowDataSize, onAfterWindowDataSize, outputDataSize);
+        streamEvent.setStreamId(this.streamId);
+        return streamEvent;
     }
 
 }

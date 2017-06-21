@@ -42,7 +42,7 @@ public class ParameterWrapper {
     private Map<String, Table> tableMap;
     private Map<String, Window> eventWindowMap;
     private Map<String, GlobalVariableExpressionExecutor> variableMap;
-    //    private Map<String, GlobalExpressionExecutor> expressionMap;
+        private Map<String, GlobalExpressionExecutor> expressionMap;
     private Map<String, List<Source>> eventSourceMap;
     private Map<String, List<Sink>> eventSinkMap;
     private List<VariableExpressionExecutor> variableExpressionExecutors;
@@ -66,6 +66,7 @@ public class ParameterWrapper {
                             Map<String, Table> tableMap,
                             Map<String, Window> eventWindowMap,
                             Map<String, GlobalVariableExpressionExecutor> variableMap,
+                            Map<String, GlobalExpressionExecutor> expressionMap,
                             Map<String, List<Source>> eventSourceMap,
                             Map<String, List<Sink>> eventSinkMap) {
 
@@ -75,6 +76,7 @@ public class ParameterWrapper {
         this.tableMap = tableMap;
         this.eventWindowMap = eventWindowMap;
         this.variableMap = variableMap;
+        this.expressionMap = expressionMap;
         this.eventSourceMap = eventSourceMap;
         this.eventSinkMap = eventSinkMap;
     }
@@ -84,20 +86,21 @@ public class ParameterWrapper {
                             Map<String, AbstractDefinition> windowDefinitionMap, Map<String, Table> tableMap,
                             Map<String, Window> eventWindowMap,
                             Map<String, GlobalVariableExpressionExecutor> variableMap,
+                            Map<String, GlobalExpressionExecutor> expressionMap,
                             Map<String, List<Source>> eventSourceMap,
                             Map<String, List<Sink>> eventSinkMap,
                             Map<String, ProcessStreamReceiver> processStreamReceiverMap) {
 
         this(streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, tableMap, eventWindowMap, variableMap,
-                eventSourceMap, eventSinkMap);
+                expressionMap, eventSourceMap, eventSinkMap);
         this.processStreamReceiverMap = processStreamReceiverMap;
     }
 
     public ParameterWrapper copy() {
 
         ParameterWrapper parameterWrapper = new ParameterWrapper(this.streamDefinitionMap, this.tableDefinitionMap,
-                this.windowDefinitionMap, this.tableMap, this.eventWindowMap, this.variableMap, this.eventSourceMap,
-                this.eventSinkMap);
+                this.windowDefinitionMap, this.tableMap, this.eventWindowMap, this.variableMap, this.expressionMap,
+                this.eventSourceMap, this.eventSinkMap);
         parameterWrapper.processStreamReceiverMap = this.processStreamReceiverMap;
         parameterWrapper.variableExpressionExecutors = this.variableExpressionExecutors;
         return parameterWrapper;
@@ -160,7 +163,7 @@ public class ParameterWrapper {
     }
 
     public Map<String, GlobalExpressionExecutor> getExpressionMap() {
-        return null;
+        return this.expressionMap;
     }
 
     public Map<String, ProcessStreamReceiver> getProcessStreamReceiverMap() {

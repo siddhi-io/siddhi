@@ -40,6 +40,7 @@ public class MetaStreamEvent implements MetaComplexEvent {
     private StreamDefinition outputStreamDefinition;
     private boolean tableEvent = false;
     private boolean windowEvent = false;
+    private String streamId;
 
     public List<Attribute> getBeforeWindowData() {
         return beforeWindowData;
@@ -111,6 +112,14 @@ public class MetaStreamEvent implements MetaComplexEvent {
 
     public void setInputReferenceId(String inputReferenceId) {
         this.inputReferenceId = inputReferenceId;
+    }
+
+    public String getStreamId() {
+        return streamId;
+    }
+
+    public void setStreamId(String streamId) {
+        this.streamId = streamId;
     }
 
     @Override

@@ -36,6 +36,7 @@ import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.GlobalExpressionExecutor;
 import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.condition.AndConditionExpressionExecutor;
@@ -286,8 +287,8 @@ public class EventTestCase {
         Map<String, AbstractDefinition> windowDefinitionMap = new HashMap<String, AbstractDefinition>();
         Map<String, Table> tableMap = new HashMap<String, Table>();
         Map<String, Window> eventWindowMap = new HashMap<String, Window>();
-        Map<String, GlobalVariableExpressionExecutor> variableMap = new HashMap<String,
-                GlobalVariableExpressionExecutor>();
+        Map<String, GlobalVariableExpressionExecutor> variableMap = new HashMap<>();
+        Map<String, GlobalExpressionExecutor> expressionMap = new HashMap<>();
         Map<String, List<Source>> eventSourceMap = new HashMap<String, List<Source>>();
         Map<String, List<Sink>> eventSinkMap = new HashMap<String, List<Sink>>();
         Map<String, AbstractDefinition> streamDefinitionMap = new HashMap<String, AbstractDefinition>();
@@ -300,7 +301,7 @@ public class EventTestCase {
         context.setElementIdGenerator(new ElementIdGenerator(context.getName()));
         context.setSnapshotService(new SnapshotService(context));
         QueryRuntime runtime = QueryParser.parse(query, context, new ParameterWrapper(streamDefinitionMap,
-                tableDefinitionMap, windowDefinitionMap, tableMap, eventWindowMap, variableMap,
+                tableDefinitionMap, windowDefinitionMap, tableMap, eventWindowMap, variableMap, expressionMap,
                 eventSourceMap, eventSinkMap), lockSynchronizer);
         Assert.assertNotNull(runtime);
         Assert.assertTrue(runtime.getStreamRuntime() instanceof SingleStreamRuntime);

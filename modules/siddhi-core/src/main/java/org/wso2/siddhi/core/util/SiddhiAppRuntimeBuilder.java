@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.util;
 
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
+import org.wso2.siddhi.core.executor.GlobalExpressionExecutor;
 import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
@@ -39,6 +40,7 @@ import org.wso2.siddhi.core.util.lock.LockSynchronizer;
 import org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper;
 import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
+import org.wso2.siddhi.query.api.definition.ExpressionDefinition;
 import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -63,8 +65,10 @@ public class SiddhiAppRuntimeBuilder {
             new ConcurrentHashMap<String, AbstractDefinition>(); //contains table definition
     private ConcurrentMap<String, AbstractDefinition> windowDefinitionMap =
             new ConcurrentHashMap<String, AbstractDefinition>(); //contains window definition
-    private ConcurrentMap<String, AbstractDefinition> variableDefinitionMap = new ConcurrentHashMap<String,
-            AbstractDefinition>(); //contains variable definition
+    private ConcurrentMap<String, AbstractDefinition> variableDefinitionMap =
+            new ConcurrentHashMap<>(); //contains variable definition
+    private ConcurrentMap<String, AbstractDefinition> expressionDefinitionMap =
+            new ConcurrentHashMap<>(); //contains expression definition
     private ConcurrentMap<String, TriggerDefinition> triggerDefinitionMap =
             new ConcurrentHashMap<String, TriggerDefinition>(); //contains trigger definition
     private Map<String, QueryRuntime> queryProcessorMap =
@@ -79,7 +83,9 @@ public class SiddhiAppRuntimeBuilder {
     private ConcurrentMap<String, Window> eventWindowMap =
             new ConcurrentHashMap<String, Window>(); //contains event tables
     private ConcurrentMap<String, GlobalVariableExpressionExecutor> variableMap =
-            new ConcurrentHashMap<String, GlobalVariableExpressionExecutor>(); //contains global variables
+            new ConcurrentHashMap<>(); //contains global variables
+    private ConcurrentMap<String, GlobalExpressionExecutor> expressionMap =
+            new ConcurrentHashMap<>(); //contains global variables
     private ConcurrentMap<String, EventTrigger> eventTriggerMap =
             new ConcurrentHashMap<String, EventTrigger>(); //contains event tables
     private ConcurrentMap<String, PartitionRuntime> partitionMap =
@@ -96,7 +102,7 @@ public class SiddhiAppRuntimeBuilder {
 
     public void defineStream(StreamDefinition streamDefinition) {
         DefinitionParserHelper.validateDefinition(streamDefinition, streamDefinitionMap, tableDefinitionMap,
-                windowDefinitionMap, variableDefinitionMap);
+                windowDefinitionMap, variableDefinitionMap, expressionDefinitionMap);
         AbstractDefinition currentDefinition = streamDefinitionMap
                 .putIfAbsent(streamDefinition.getId(), streamDefinition);
         if (currentDefinition != null) {
@@ -109,7 +115,7 @@ public class SiddhiAppRuntimeBuilder {
 
     public void defineTable(TableDefinition tableDefinition) {
         DefinitionParserHelper.validateDefinition(tableDefinition, streamDefinitionMap, tableDefinitionMap,
-                windowDefinitionMap, variableDefinitionMap);
+                windowDefinitionMap, variableDefinitionMap, expressionDefinitionMap);
         AbstractDefinition currentDefinition = tableDefinitionMap.putIfAbsent(tableDefinition.getId(), tableDefinition);
         if (currentDefinition != null) {
             tableDefinition = (TableDefinition) currentDefinition;
@@ -119,7 +125,7 @@ public class SiddhiAppRuntimeBuilder {
 
     public void defineWindow(WindowDefinition windowDefinition) {
         DefinitionParserHelper.validateDefinition(windowDefinition, streamDefinitionMap, tableDefinitionMap,
-                windowDefinitionMap, variableDefinitionMap);
+                windowDefinitionMap, variableDefinitionMap, expressionDefinitionMap);
         DefinitionParserHelper.addStreamJunction(windowDefinition, streamJunctionMap, siddhiAppContext);
         AbstractDefinition currentDefinition = windowDefinitionMap
                 .putIfAbsent(windowDefinition.getId(), windowDefinition);
@@ -198,11 +204,20 @@ public class SiddhiAppRuntimeBuilder {
 
     public void defineVariable(VariableDefinition variableDefinition) {
         DefinitionParserHelper.validateDefinition(variableDefinition, streamDefinitionMap, tableDefinitionMap,
-                windowDefinitionMap, variableDefinitionMap);
+                windowDefinitionMap, variableDefinitionMap, expressionDefinitionMap);
         if (!variableDefinitionMap.containsKey(variableDefinition.getId())) {
-            windowDefinitionMap.putIfAbsent(variableDefinition.getId(), variableDefinition);
+            variableDefinitionMap.putIfAbsent(variableDefinition.getId(), variableDefinition);
         }
         DefinitionParserHelper.addVariable(variableDefinition, variableMap, siddhiAppContext);
+    }
+
+    public void defineExpression(ExpressionDefinition expressionDefinition) {
+        DefinitionParserHelper.validateDefinition(expressionDefinition, streamDefinitionMap, tableDefinitionMap,
+                windowDefinitionMap, variableDefinitionMap, expressionDefinitionMap);
+        if (!expressionDefinitionMap.containsKey(expressionDefinition.getId())) {
+            expressionDefinitionMap.putIfAbsent(expressionDefinition.getId(), expressionDefinition);
+        }
+        DefinitionParserHelper.addExpression(expressionDefinition, expressionMap, siddhiAppContext);
     }
 
     public void defineFunction(FunctionDefinition functionDefinition) {
@@ -227,6 +242,10 @@ public class SiddhiAppRuntimeBuilder {
 
     public ConcurrentMap<String, GlobalVariableExpressionExecutor> getVariableMap() {
         return variableMap;
+    }
+
+    public ConcurrentMap<String, GlobalExpressionExecutor> getExpressionMap() {
+        return expressionMap;
     }
 
     public ConcurrentMap<String, AbstractDefinition> getStreamDefinitionMap() {

@@ -38,6 +38,7 @@ import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.SiddhiApp;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
+import org.wso2.siddhi.query.api.definition.ExpressionDefinition;
 import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -50,6 +51,7 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.execution.ExecutionElement;
 import org.wso2.siddhi.query.api.execution.partition.Partition;
 import org.wso2.siddhi.query.api.execution.query.Query;
+import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 import org.wso2.siddhi.query.compiler.SiddhiCompiler;
 import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
@@ -198,6 +200,7 @@ public class SiddhiAppParser {
         defineWindowDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getWindowDefinitionMap());
         defineFunctionDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getFunctionDefinitionMap());
         defineVariableDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getVariableDefinitionMap());
+        defineExpressionDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getExpressionDefinitionMap());
         for (Window window : siddhiAppRuntimeBuilder.getEventWindowMap().values()) {
             String metricName =
                     siddhiAppContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix() +
@@ -228,6 +231,7 @@ public class SiddhiAppParser {
                                                                   siddhiAppRuntimeBuilder.getTableMap(),
                                                                   siddhiAppRuntimeBuilder.getEventWindowMap(),
                                                                   siddhiAppRuntimeBuilder.getVariableMap(),
+                                                                  siddhiAppRuntimeBuilder.getExpressionMap(),
                                                                   siddhiAppRuntimeBuilder.getEventSourceMap(),
                                     siddhiAppRuntimeBuilder.getEventSinkMap()),
                                                                   siddhiAppRuntimeBuilder.getLockSynchronizer());
@@ -270,6 +274,13 @@ public class SiddhiAppParser {
                                                   Map<String, VariableDefinition> variableDefinitionMap) {
         for (VariableDefinition definition : variableDefinitionMap.values()) {
             siddhiAppRuntimeBuilder.defineVariable(definition);
+        }
+    }
+
+    private static void defineExpressionDefinitions(SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder,
+                                                    Map<String, ExpressionDefinition> expressionDefinitionMap) {
+        for (ExpressionDefinition definition : expressionDefinitionMap.values()) {
+            siddhiAppRuntimeBuilder.defineExpression(definition);
         }
     }
 

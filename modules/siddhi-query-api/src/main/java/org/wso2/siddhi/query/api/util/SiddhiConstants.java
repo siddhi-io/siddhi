@@ -32,5 +32,7 @@ public class SiddhiConstants {
 
     public static final String GLOBAL_VARIABLE_PREFIX = "global#";
 
+    public static final String GLOBAL_EXPRESSION_PREFIX = "global::";
+
     public static final int LAST = -2;
 }

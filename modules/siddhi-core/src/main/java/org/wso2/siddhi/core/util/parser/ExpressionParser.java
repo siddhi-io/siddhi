@@ -599,6 +599,9 @@ public class ExpressionParser {
             if (expressionExecutor == null) {
                 throw new SiddhiAppCreationException("Expression " + ((GlobalExpression) expression).getName() + " is" +
                         " not defined");
+            } else if (expressionExecutor.getExecutor(metaEvent) == null) {
+                expressionExecutor.addExecutor(metaEvent, currentState, parameterWrapper, siddhiAppContext, groupBy,
+                        defaultStreamEventIndex, queryName);
             }
             return expressionExecutor;
         }

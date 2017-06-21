@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import org.wso2.siddhi.core.executor.GlobalExpressionExecutor;
 import org.wso2.siddhi.core.executor.GlobalVariableExpressionExecutor;
 import org.wso2.siddhi.core.function.Script;
 import org.wso2.siddhi.core.stream.AttributeMapping;
@@ -61,6 +62,7 @@ import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.definition.ExpressionDefinition;
 import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -92,7 +94,8 @@ public class DefinitionParserHelper {
                                           ConcurrentMap<String, AbstractDefinition> streamDefinitionMap,
                                           ConcurrentMap<String, AbstractDefinition> tableDefinitionMap,
                                           ConcurrentMap<String, AbstractDefinition> windowDefinitionMap,
-                                          ConcurrentMap<String, AbstractDefinition> variableDefinitionMap) {
+                                          ConcurrentMap<String, AbstractDefinition> variableDefinitionMap,
+                                          ConcurrentMap<String, AbstractDefinition> expressionDefinitionMap) {
         AbstractDefinition existingTableDefinition = tableDefinitionMap.get(definition.getId());
         if (existingTableDefinition != null && (!existingTableDefinition.equals(definition) || definition instanceof
                 StreamDefinition)) {
@@ -119,6 +122,13 @@ public class DefinitionParserHelper {
                 instanceof VariableDefinition)) {
             throw new DuplicateDefinitionException("Variable Definition with same Variable Id '" +
                     definition.getId() + "' already exist : " + existingVariableDefinition +
+                    ", hence cannot add " + definition);
+        }
+        AbstractDefinition existingExpressionDefinition = expressionDefinitionMap.get(definition.getId());
+        if (existingExpressionDefinition != null && (!existingExpressionDefinition.equals(definition) || definition
+                instanceof ExpressionDefinition)) {
+            throw new DuplicateDefinitionException("Expression Definition with same Variable Id '" +
+                    definition.getId() + "' already exist : " + existingExpressionDefinition +
                     ", hence cannot add " + definition);
         }
         // TODO: 1/29/17 add source / sink both validation here
@@ -228,6 +238,15 @@ public class DefinitionParserHelper {
             GlobalVariableExpressionExecutor globalVariableExpressionExecutor = new GlobalVariableExpressionExecutor
                     (variableDefinition.getId(), variableDefinition.getType(), variableDefinition.getValue());
             variableMap.putIfAbsent(variableDefinition.getId(), globalVariableExpressionExecutor);
+        }
+    }
+
+    public static void addExpression(ExpressionDefinition expressionDefinition, ConcurrentMap<String,
+            GlobalExpressionExecutor> expressionMap, SiddhiAppContext siddhiAppContext) {
+        if (!expressionMap.containsKey(expressionDefinition.getId())) {
+            GlobalExpressionExecutor globalVariableExpressionExecutor = new GlobalExpressionExecutor
+                    (expressionDefinition.getId(), expressionDefinition.getExpression());
+            expressionMap.putIfAbsent(expressionDefinition.getId(), globalVariableExpressionExecutor);
         }
     }
 

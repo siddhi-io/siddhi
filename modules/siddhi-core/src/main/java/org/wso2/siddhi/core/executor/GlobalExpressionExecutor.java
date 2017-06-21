@@ -19,14 +19,22 @@
 package org.wso2.siddhi.core.executor;
 
 
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.MetaComplexEvent;
+import org.wso2.siddhi.core.event.state.MetaStateEvent;
+import org.wso2.siddhi.core.event.state.StateEvent;
+import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
+import org.wso2.siddhi.core.util.parser.ExpressionParser;
+import org.wso2.siddhi.core.util.parser.helper.ParameterWrapper;
 import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
+import org.wso2.siddhi.query.api.expression.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -40,43 +48,40 @@ public class GlobalExpressionExecutor implements ExpressionExecutor {
      */
     private final LockWrapper lockWrapper;
     private String id;
-    private Attribute.Type type;
-    private Object value;
-    private List<VariableUpdateListener> variableUpdateListeners = new ArrayList<>();
+    private Expression expression;
+    private Attribute.Type returnType;
+    private Map<String, ExpressionExecutor> expressionExecutorMap = new ConcurrentHashMap<>();
+    private Map<String, QueryInfo> queryInfoMap = new ConcurrentHashMap<>();
 
-    public GlobalExpressionExecutor(String id, Attribute.Type type, Object value) {
+    public GlobalExpressionExecutor(String id, Expression expression) {
         this.id = id;
-        this.type = type;
+        this.expression = expression;
         this.lockWrapper = new LockWrapper(id);
         this.lockWrapper.setLock(new ReentrantLock());
-
-        if (value == null) {
-            // Assign default value
-            if (type == Attribute.Type.BOOL) {
-                this.value = false;
-            } else if (type == Attribute.Type.INT) {
-                this.value = 0;
-            } else if (type == Attribute.Type.FLOAT) {
-                this.value = 0.0f;
-            } else if (type == Attribute.Type.LONG) {
-                this.value = 0L;
-            } else if (type == Attribute.Type.DOUBLE) {
-                this.value = 0.0d;
-            } else if (type == Attribute.Type.STRING) {
-                this.value = "";
-            }
-        } else {
-            this.value = value;
-        }
     }
 
     @Override
     public Object execute(ComplexEvent event) {
+        String streamId;
+        if (event instanceof StreamEvent) {
+            streamId = ((StreamEvent) event).getStreamId();
+        } else {
+            streamId = ((StateEvent) event).getStreamEvent(0).getStreamId();
+        }
+        ExpressionExecutor executor = expressionExecutorMap.get(streamId);
+        if (executor != null) {
+            return executor.execute(event);
+        }
         return null;
     }
 
+    public Expression getExpression() {
+        return expression;
+    }
+
+    @Override
     public Attribute.Type getReturnType() {
-        return type;
+        return this.returnType;
     }
 
     @Override
@@ -84,57 +89,63 @@ public class GlobalExpressionExecutor implements ExpressionExecutor {
         return this;
     }
 
-    public void update(ComplexEventChunk complexEventChunk) {
-        if (complexEventChunk.getFirst() != null) {
-            if (complexEventChunk.getFirst().getOutputData().length > 0) {
-
-                Object newValue = complexEventChunk.getFirst().getOutputData()[0];
-
-                if (newValue == null) {
-                    throw new RuntimeException("Global variable value cannot be null");
-                } else if (type == Attribute.Type.OBJECT) {
-                    throw new RuntimeException("GlobalVariable does not support object values");
-                } else if (!type.getClazz().equals(newValue.getClass())) {
-                    throw new ClassCastException("Global variable " + this.id + " expects " + type + " but received "
-                            + newValue.getClass().getSimpleName());
-                }
-
-                // Update only if the new value is not null and there is a change
-                if (!Objects.equals(newValue, this.value)) {
-                    try {
-                        lockWrapper.lock();
-
-                        Object oldValue = this.value;
-                        this.value = newValue;
-
-                        // Update all the listeners about the change
-                        for (VariableUpdateListener listener : this.variableUpdateListeners) {
-                            listener.onValueUpdate(oldValue, newValue);
-                        }
-                    } finally {
-                        lockWrapper.unlock();
-                    }
-                }
-            }
+    public void addExecutor(MetaComplexEvent metaEvent,
+                            int currentState, ParameterWrapper parameterWrapper,
+                            SiddhiAppContext siddhiAppContext,
+                            boolean groupBy, int defaultStreamEventIndex, String queryName) {
+        MetaStreamEvent metaStreamEvent;
+        if (metaEvent instanceof MetaStreamEvent) {
+            metaStreamEvent = (MetaStreamEvent) metaEvent;
+        } else {
+            metaStreamEvent = ((MetaStateEvent) metaEvent).getMetaStreamEvents()[0];
         }
+        QueryInfo queryInfo = new QueryInfo(metaEvent, currentState, parameterWrapper, siddhiAppContext, groupBy,
+                defaultStreamEventIndex, queryName);
+        ExpressionExecutor executor = queryInfo.createExecutor();
+        queryInfoMap.putIfAbsent(metaStreamEvent.getStreamId(), queryInfo);
+        if (returnType == null) {
+            returnType = executor.getReturnType();
+        } else if (returnType != executor.getReturnType()) {
+            throw new SiddhiAppValidationException("Expression executor " + id + " is already assigned with " +
+                    returnType);
+        }
+        this.expressionExecutorMap.putIfAbsent(metaStreamEvent.getStreamId(), executor);
     }
 
-
-    public void addVariableUpdateListener(VariableUpdateListener listener) {
-        if (listener != null) {
-            try {
-                lockWrapper.lock();
-                this.variableUpdateListeners.add(listener);
-            } finally {
-                lockWrapper.unlock();
-            }
+    public ExpressionExecutor getExecutor(MetaComplexEvent metaComplexEvent) {
+        MetaStreamEvent metaStreamEvent;
+        if (metaComplexEvent instanceof MetaStreamEvent) {
+            metaStreamEvent = (MetaStreamEvent) metaComplexEvent;
+        } else {
+            metaStreamEvent = ((MetaStateEvent) metaComplexEvent).getMetaStreamEvents()[0];
         }
+        return this.expressionExecutorMap.get(metaStreamEvent.getStreamId());
     }
 
-    /**
-     * Listener to listen the value updates of {@link GlobalExpressionExecutor}.
-     */
-    public interface VariableUpdateListener {
-        void onValueUpdate(Object oldValue, Object newValue);
+    private class QueryInfo {
+        private MetaComplexEvent metaEvent;
+        private int currentState;
+        private ParameterWrapper parameterWrapper;
+        private SiddhiAppContext siddhiAppContext;
+        private boolean groupBy;
+        private int defaultStreamEventIndex;
+        private String queryName;
+
+        public QueryInfo(MetaComplexEvent metaEvent, int currentState, ParameterWrapper
+                parameterWrapper, SiddhiAppContext siddhiAppContext, boolean groupBy, int defaultStreamEventIndex,
+                         String queryName) {
+            this.metaEvent = metaEvent;
+            this.currentState = currentState;
+            this.parameterWrapper = parameterWrapper;
+            this.siddhiAppContext = siddhiAppContext;
+            this.groupBy = groupBy;
+            this.defaultStreamEventIndex = defaultStreamEventIndex;
+            this.queryName = queryName;
+        }
+
+        public ExpressionExecutor createExecutor() {
+            return ExpressionParser.parseExpression(GlobalExpressionExecutor.this.expression, metaEvent,
+                    currentState, parameterWrapper, siddhiAppContext, groupBy, defaultStreamEventIndex, queryName);
+        }
     }
 }

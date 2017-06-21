@@ -50,7 +50,7 @@ public class StateMultiProcessStreamReceiver extends MultiProcessStreamReceiver 
 
     protected void processAndClear(int processIndex, StreamEvent streamEvent) {
         ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<StateEvent>(batchProcessingAllowed);
-        ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<StreamEvent>(streamEvent,
+        ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<>(streamId, streamEvent,
                 streamEvent, batchProcessingAllowed);
 
         ComplexEventChunk<StateEvent> eventChunk = ((StreamPreStateProcessor) nextProcessors[processIndex])
@@ -64,7 +64,7 @@ public class StateMultiProcessStreamReceiver extends MultiProcessStreamReceiver 
             while (retEventChunk.hasNext()) {
                 StateEvent stateEvent = retEventChunk.next();
                 retEventChunk.remove();
-                querySelector.process(new ComplexEventChunk<StateEvent>(stateEvent, stateEvent,
+                querySelector.process(new ComplexEventChunk<>(streamId, stateEvent, stateEvent,
                         batchProcessingAllowed));
             }
         }

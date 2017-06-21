@@ -23,6 +23,7 @@ import org.wso2.siddhi.query.api.SiddhiApp;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
 import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.definition.ExpressionDefinition;
 import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -133,6 +134,9 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         for (SiddhiQLParser.Definition_variableContext variableContext : ctx.definition_variable()) {
             siddhiApp.defineVariable((VariableDefinition) visit(variableContext));
         }
+        for (SiddhiQLParser.Definition_expressionContext expressionContext : ctx.definition_expression()) {
+            siddhiApp.defineExpression((ExpressionDefinition) visit(expressionContext));
+        }
         for (SiddhiQLParser.Execution_elementContext executionElementContext : ctx.execution_element()) {
             ExecutionElement executionElement = (ExecutionElement) visit(executionElementContext);
             if (executionElement instanceof Partition) {
@@ -221,6 +225,15 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         return variableDefinition;
     }
 
+    @Override
+    public Object visitDefinition_expression(SiddhiQLParser.Definition_expressionContext ctx) {
+        ExpressionDefinition expressionDefinition = ExpressionDefinition
+                .name((String) visitExpression_name(ctx.expression_name()))
+                .expression((Expression) visit(ctx.expression()));
+
+        return expressionDefinition;
+    }
+
     /**
      * {@inheritDoc}
      * <p>The default implementation returns the result of calling
@@ -235,6 +248,11 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public Object visitVariable_name(SiddhiQLParser.Variable_nameContext ctx) {
+        return visitId(ctx.id());
+    }
+
+    @Override
+    public Object visitExpression_name(SiddhiQLParser.Expression_nameContext ctx) {
         return visitId(ctx.id());
     }
 
@@ -1570,6 +1588,8 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             return visit(ctx.function_operation());
         } else if (ctx.variable_reference() != null) {
             return visit(ctx.variable_reference());
+        } else if (ctx.expression_reference() != null) {
+            return visit(ctx.expression_reference());
         } else {
             throw newSiddhiParserException(ctx);
         }
@@ -1578,6 +1598,11 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     @Override
     public Object visitVariable_reference(SiddhiQLParser.Variable_referenceContext ctx) {
         return Expression.globalVariable((String) visit(ctx.variable_name()));
+    }
+
+    @Override
+    public Object visitExpression_reference(SiddhiQLParser.Expression_referenceContext ctx) {
+        return Expression.globalExpression((String) visit(ctx.expression_name()));
     }
 
     /**

@@ -60,6 +60,11 @@ public class Window implements FindableProcessor, Snapshotable {
     private final String elementId;
 
     /**
+     * Id of the window which is equivalent to stream id.
+     */
+    private final String windowId;
+
+    /**
      * WindowDefinition used to construct this window.
      */
     private final WindowDefinition windowDefinition;
@@ -105,6 +110,7 @@ public class Window implements FindableProcessor, Snapshotable {
     public Window(WindowDefinition windowDefinition, SiddhiAppContext siddhiAppContext) {
         this.windowDefinition = windowDefinition;
         this.siddhiAppContext = siddhiAppContext;
+        this.windowId = windowDefinition.getId();
         this.elementId = siddhiAppContext.getElementIdGenerator().createNewId();
         this.lockWrapper = new LockWrapper(windowDefinition.getId());
         this.lockWrapper.setLock(new ReentrantLock());
@@ -208,7 +214,8 @@ public class Window implements FindableProcessor, Snapshotable {
             }
 
             // Send to the window windowProcessor
-            windowProcessor.process(new ComplexEventChunk<StreamEvent>(firstEvent, currentEvent, complexEventChunk
+            windowProcessor.process(new ComplexEventChunk<>(windowId, firstEvent, currentEvent,
+                    complexEventChunk
                     .isBatch()));
         } finally {
             this.lockWrapper.unlock();

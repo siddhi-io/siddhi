@@ -44,6 +44,7 @@ public class StreamEvent implements ComplexEvent {
     private Object[] beforeWindowData;          //Attributes before window execution
     private Object[] onAfterWindowData;         //Attributes on and after window execution
     private StreamEvent next;
+    private String streamId;
 
     public StreamEvent(int beforeWindowDataSize, int onAfterWindowDataSize, int outputDataSize) {
         if (beforeWindowDataSize > 0) {
@@ -222,6 +223,14 @@ public class StreamEvent implements ComplexEvent {
         sb.append(", next=").append(next);
         sb.append('}');
         return sb.toString();
+    }
+
+    public void setStreamId(String streamId) {
+        this.streamId = streamId;
+    }
+
+    public String getStreamId() {
+        return streamId;
     }
 
     private void writeObject(ObjectOutputStream stream)

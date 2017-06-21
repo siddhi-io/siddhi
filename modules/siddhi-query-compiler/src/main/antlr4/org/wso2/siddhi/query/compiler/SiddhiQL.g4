@@ -33,9 +33,9 @@ error
 
 siddhi_app
     : (app_annotation|error)*
-      ( (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_window|error) (';' (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_window|error))* ';'?
+      ( (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_expression|definition_window|error) (';' (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_expression|definition_window|error))* ';'?
       || (execution_element|error) (';' (execution_element|error))* ';'?
-      || (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_window|error) (';' (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_window|error))* (';' (execution_element|error))* ';'? )
+      || (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_expression|definition_window|error) (';' (definition_stream|definition_table|definition_trigger|definition_function|definition_variable|definition_expression|definition_window|error))* (';' (execution_element|error))* ';'? )
     ;
 
 execution_element
@@ -76,6 +76,14 @@ definition_function
 
 definition_variable
     : DEFINE VARIABLE variable_name attribute_type ('=' constant_value )?
+    ;
+
+definition_expression
+    : DEFINE EXPRESSION expression_name expression
+    ;
+
+expression_name
+    : id
     ;
 
 variable_name
@@ -266,6 +274,7 @@ query_output
     |UPDATE OR INSERT INTO target (FOR output_event_type)? ON expression
     |UPDATE target (FOR output_event_type)? ON expression
     |UPDATE variable_reference
+    |UPDATE expression_reference
     |RETURN output_event_type?
     ;
 
@@ -317,10 +326,15 @@ math_operation
     |constant_value                               #basic_math_operation
     |attribute_reference                          #basic_math_operation
     |variable_reference                           #basic_math_operation
+    |expression_reference                         #basic_math_operation
     ;
 
 variable_reference
     : GLOBAL '#' variable_name
+    ;
+
+expression_reference
+    : GLOBAL '::' expression_name
     ;
 
 function_operation
@@ -632,6 +646,7 @@ EVENTS:   E V E N T S;
 INTO:     I N T O;
 OUTPUT:   O U T P U T;
 EXPIRED:  E X P I R E D;
+EXPRESSION: E X P R E S S I O N;
 CURRENT:  C U R R E N T;
 SNAPSHOT: S N A P S H O T;
 FOR:      F O R;

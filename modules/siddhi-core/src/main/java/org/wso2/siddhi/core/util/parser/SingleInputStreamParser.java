@@ -261,6 +261,7 @@ public class SingleInputStreamParser {
                     + "' has not been defined");
         }
 
+        metaStreamEvent.setStreamId(streamId);
         if ((inputStream.getStreamReferenceId() != null) &&
                 !(inputStream.getStreamId()).equals(inputStream.getStreamReferenceId())) { //if ref id is provided
             metaStreamEvent.setInputReferenceId(inputStream.getStreamReferenceId());

@@ -33,7 +33,7 @@ public class ExpressionDefinition extends AbstractDefinition {
     private Expression expression;
 
     protected ExpressionDefinition(String name) {
-        this.id = SiddhiConstants.GLOBAL_VARIABLE_PREFIX + name;
+        this.id = SiddhiConstants.GLOBAL_EXPRESSION_PREFIX + name;
     }
 
     public static ExpressionDefinition name(String name) {
@@ -44,7 +44,7 @@ public class ExpressionDefinition extends AbstractDefinition {
         return id;
     }
 
-    public Object getExpression() {
+    public Expression getExpression() {
         return expression;
     }
 

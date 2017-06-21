@@ -31,7 +31,7 @@ public class GlobalExpression extends Expression {
     private String name;
 
     public GlobalExpression(String name) {
-        this.name = SiddhiConstants.GLOBAL_VARIABLE_PREFIX + name;
+        this.name = SiddhiConstants.GLOBAL_EXPRESSION_PREFIX + name;
     }
 
     public String getName() {

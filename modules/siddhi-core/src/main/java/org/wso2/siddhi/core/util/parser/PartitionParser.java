@@ -61,6 +61,7 @@ public class PartitionParser {
                             siddhiAppRuntimeBuilder.getTableMap(),
                             siddhiAppRuntimeBuilder.getEventWindowMap(),
                             siddhiAppRuntimeBuilder.getVariableMap(),
+                            siddhiAppRuntimeBuilder.getExpressionMap(),
                             siddhiAppRuntimeBuilder.getEventSourceMap(),
                             siddhiAppRuntimeBuilder.getEventSinkMap()),
                     siddhiAppRuntimeBuilder.getLockSynchronizer());

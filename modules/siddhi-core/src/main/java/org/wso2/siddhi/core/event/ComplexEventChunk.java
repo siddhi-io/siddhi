@@ -29,6 +29,7 @@ import java.util.NoSuchElementException;
 public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, Serializable {
 
     private static final long serialVersionUID = 3185987841726255019L;
+    protected String streamId;
     protected E first;
     protected E previousToLastReturned;
     protected E lastReturned;
@@ -54,6 +55,13 @@ public class ComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, S
     }
 
     public ComplexEventChunk(E first, E last, boolean isBatch) {
+        this.first = first;
+        this.last = last;
+        this.isBatch = isBatch;
+    }
+
+    public ComplexEventChunk(String streamId, E first, E last, boolean isBatch) {
+        this.streamId = streamId;
         this.first = first;
         this.last = last;
         this.isBatch = isBatch;
