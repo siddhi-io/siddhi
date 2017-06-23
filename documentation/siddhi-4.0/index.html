@@ -201,9 +201,642 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Siddhi Query Guide
+      </label>
+    
     <a href="./" title="Siddhi Query Guide" class="md-nav__link md-nav__link--active">
       Siddhi Query Guide
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#event-streams" title="Event streams" class="md-nav__link">
+    Event streams
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-sources" title="Event sources" class="md-nav__link">
+    Event sources
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-sinks" title="Event sinks" class="md-nav__link">
+    Event sinks
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filters" title="Filters" class="md-nav__link">
+    Filters
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#windows" title="Windows" class="md-nav__link">
+    Windows
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aggregate-functions" title="Aggregate functions" class="md-nav__link">
+    Aggregate functions
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aggregate-function-types" title="Aggregate function types" class="md-nav__link">
+    Aggregate function types
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#group-by" title="Group By" class="md-nav__link">
+    Group By
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#having" title="Having" class="md-nav__link">
+    Having
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inbuilt-aggregate-functions" title="Inbuilt aggregate functions" class="md-nav__link">
+    Inbuilt aggregate functions
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sum" title="Sum" class="md-nav__link">
+    Sum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#average" title="Average" class="md-nav__link">
+    Average
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maximum" title="Maximum" class="md-nav__link">
+    Maximum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minimum" title="Minimum" class="md-nav__link">
+    Minimum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count" title="Count" class="md-nav__link">
+    Count
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standard-deviation" title="Standard Deviation" class="md-nav__link">
+    Standard Deviation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distinct-count" title="Distinct Count" class="md-nav__link">
+    Distinct Count
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forever-maximum" title="Forever Maximum" class="md-nav__link">
+    Forever Maximum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forever-minimum" title="Forever Minimum" class="md-nav__link">
+    Forever Minimum
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inbuilt-windows" title="Inbuilt windows" class="md-nav__link">
+    Inbuilt windows
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#time" title="time" class="md-nav__link">
+    time
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timebatch" title="timeBatch" class="md-nav__link">
+    timeBatch
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#length" title="length" class="md-nav__link">
+    length
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lengthbatch" title="lengthBatch" class="md-nav__link">
+    lengthBatch
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#externaltime" title="externalTime" class="md-nav__link">
+    externalTime
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cron" title="cron" class="md-nav__link">
+    cron
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firstunique" title="firstUnique" class="md-nav__link">
+    firstUnique
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unique" title="unique" class="md-nav__link">
+    unique
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort" title="sort" class="md-nav__link">
+    sort
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frequent" title="frequent" class="md-nav__link">
+    frequent
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lossyfrequent" title="lossyFrequent" class="md-nav__link">
+    lossyFrequent
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#externaltimebatch" title="externalTimeBatch" class="md-nav__link">
+    externalTimeBatch
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timelength" title="timeLength" class="md-nav__link">
+    timeLength
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uniqueexternaltimebatch" title="uniqueExternalTimeBatch" class="md-nav__link">
+    uniqueExternalTimeBatch
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-event-categories" title="Output event categories" class="md-nav__link">
+    Output event categories
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-rate-limiting" title="Output rate limiting" class="md-nav__link">
+    Output rate limiting
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#joins" title="Joins" class="md-nav__link">
+    Joins
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#left-outer-join" title="Left Outer Join" class="md-nav__link">
+    Left Outer Join
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#right-outer-join" title="Right Outer Join" class="md-nav__link">
+    Right Outer Join
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-outer-join" title="Full Outer Join" class="md-nav__link">
+    Full Outer Join
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#patterns-and-sequences" title="Patterns and Sequences" class="md-nav__link">
+    Patterns and Sequences
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#patterns" title="Patterns" class="md-nav__link">
+    Patterns
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#counting-patterns" title="Counting Patterns" class="md-nav__link">
+    Counting Patterns
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logical-patterns" title="Logical Patterns" class="md-nav__link">
+    Logical Patterns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sequences" title="Sequences" class="md-nav__link">
+    Sequences
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#counting-sequences" title="Counting sequences" class="md-nav__link">
+    Counting sequences
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logical-sequences" title="Logical Sequences" class="md-nav__link">
+    Logical Sequences
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#partitions" title="Partitions" class="md-nav__link">
+    Partitions
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variable-partitions" title="Variable Partitions" class="md-nav__link">
+    Variable Partitions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#range-partitions" title="Range Partitions" class="md-nav__link">
+    Range Partitions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-table" title="Event Table" class="md-nav__link">
+    Event Table
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#defining-an-event-table" title="Defining An Event Table" class="md-nav__link">
+    Defining An Event Table
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-table-types" title="Event Table Types" class="md-nav__link">
+    Event Table Types
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#in-memory-event-table" title="In-memory Event Table" class="md-nav__link">
+    In-memory Event Table
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hazlecast-event-table" title="Hazlecast Event Table" class="md-nav__link">
+    Hazlecast Event Table
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rdbms-event-table" title="RDBMS Event Table" class="md-nav__link">
+    RDBMS Event Table
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#caching-events" title="Caching Events" class="md-nav__link">
+    Caching Events
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-bloom-filters" title="Using Bloom filters" class="md-nav__link">
+    Using Bloom filters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-event-table-operators" title="Supported Event Table Operators" class="md-nav__link">
+    Supported Event Table Operators
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#insert-into" title="Insert into" class="md-nav__link">
+    Insert into
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete" title="Delete" class="md-nav__link">
+    Delete
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update" title="Update" class="md-nav__link">
+    Update
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#insert-overwrite" title="Insert Overwrite" class="md-nav__link">
+    Insert Overwrite
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#in" title="In" class="md-nav__link">
+    In
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#join" title="Join" class="md-nav__link">
+    Join
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-window" title="Event Window" class="md-nav__link">
+    Event Window
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-event-window-operators" title="Supported Event Window Operators" class="md-nav__link">
+    Supported Event Window Operators
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#insert-into_1" title="Insert Into" class="md-nav__link">
+    Insert Into
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output" title="Output" class="md-nav__link">
+    Output
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#join_1" title="Join" class="md-nav__link">
+    Join
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-trigger" title="Event Trigger" class="md-nav__link">
+    Event Trigger
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-logger" title="Siddhi Logger" class="md-nav__link">
+    Siddhi Logger
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eval-script" title="Eval Script" class="md-nav__link">
+    Eval Script
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -278,6 +911,626 @@
     
   
   
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#event-streams" title="Event streams" class="md-nav__link">
+    Event streams
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-sources" title="Event sources" class="md-nav__link">
+    Event sources
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-sinks" title="Event sinks" class="md-nav__link">
+    Event sinks
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filters" title="Filters" class="md-nav__link">
+    Filters
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#windows" title="Windows" class="md-nav__link">
+    Windows
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aggregate-functions" title="Aggregate functions" class="md-nav__link">
+    Aggregate functions
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aggregate-function-types" title="Aggregate function types" class="md-nav__link">
+    Aggregate function types
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#group-by" title="Group By" class="md-nav__link">
+    Group By
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#having" title="Having" class="md-nav__link">
+    Having
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inbuilt-aggregate-functions" title="Inbuilt aggregate functions" class="md-nav__link">
+    Inbuilt aggregate functions
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sum" title="Sum" class="md-nav__link">
+    Sum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#average" title="Average" class="md-nav__link">
+    Average
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maximum" title="Maximum" class="md-nav__link">
+    Maximum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minimum" title="Minimum" class="md-nav__link">
+    Minimum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count" title="Count" class="md-nav__link">
+    Count
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standard-deviation" title="Standard Deviation" class="md-nav__link">
+    Standard Deviation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distinct-count" title="Distinct Count" class="md-nav__link">
+    Distinct Count
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forever-maximum" title="Forever Maximum" class="md-nav__link">
+    Forever Maximum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forever-minimum" title="Forever Minimum" class="md-nav__link">
+    Forever Minimum
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inbuilt-windows" title="Inbuilt windows" class="md-nav__link">
+    Inbuilt windows
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#time" title="time" class="md-nav__link">
+    time
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timebatch" title="timeBatch" class="md-nav__link">
+    timeBatch
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#length" title="length" class="md-nav__link">
+    length
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lengthbatch" title="lengthBatch" class="md-nav__link">
+    lengthBatch
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#externaltime" title="externalTime" class="md-nav__link">
+    externalTime
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cron" title="cron" class="md-nav__link">
+    cron
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firstunique" title="firstUnique" class="md-nav__link">
+    firstUnique
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unique" title="unique" class="md-nav__link">
+    unique
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort" title="sort" class="md-nav__link">
+    sort
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frequent" title="frequent" class="md-nav__link">
+    frequent
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lossyfrequent" title="lossyFrequent" class="md-nav__link">
+    lossyFrequent
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#externaltimebatch" title="externalTimeBatch" class="md-nav__link">
+    externalTimeBatch
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timelength" title="timeLength" class="md-nav__link">
+    timeLength
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uniqueexternaltimebatch" title="uniqueExternalTimeBatch" class="md-nav__link">
+    uniqueExternalTimeBatch
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-event-categories" title="Output event categories" class="md-nav__link">
+    Output event categories
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-rate-limiting" title="Output rate limiting" class="md-nav__link">
+    Output rate limiting
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#joins" title="Joins" class="md-nav__link">
+    Joins
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#left-outer-join" title="Left Outer Join" class="md-nav__link">
+    Left Outer Join
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#right-outer-join" title="Right Outer Join" class="md-nav__link">
+    Right Outer Join
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-outer-join" title="Full Outer Join" class="md-nav__link">
+    Full Outer Join
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#patterns-and-sequences" title="Patterns and Sequences" class="md-nav__link">
+    Patterns and Sequences
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#patterns" title="Patterns" class="md-nav__link">
+    Patterns
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#counting-patterns" title="Counting Patterns" class="md-nav__link">
+    Counting Patterns
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logical-patterns" title="Logical Patterns" class="md-nav__link">
+    Logical Patterns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sequences" title="Sequences" class="md-nav__link">
+    Sequences
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#counting-sequences" title="Counting sequences" class="md-nav__link">
+    Counting sequences
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logical-sequences" title="Logical Sequences" class="md-nav__link">
+    Logical Sequences
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#partitions" title="Partitions" class="md-nav__link">
+    Partitions
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variable-partitions" title="Variable Partitions" class="md-nav__link">
+    Variable Partitions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#range-partitions" title="Range Partitions" class="md-nav__link">
+    Range Partitions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-table" title="Event Table" class="md-nav__link">
+    Event Table
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#defining-an-event-table" title="Defining An Event Table" class="md-nav__link">
+    Defining An Event Table
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-table-types" title="Event Table Types" class="md-nav__link">
+    Event Table Types
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#in-memory-event-table" title="In-memory Event Table" class="md-nav__link">
+    In-memory Event Table
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hazlecast-event-table" title="Hazlecast Event Table" class="md-nav__link">
+    Hazlecast Event Table
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rdbms-event-table" title="RDBMS Event Table" class="md-nav__link">
+    RDBMS Event Table
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#caching-events" title="Caching Events" class="md-nav__link">
+    Caching Events
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-bloom-filters" title="Using Bloom filters" class="md-nav__link">
+    Using Bloom filters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-event-table-operators" title="Supported Event Table Operators" class="md-nav__link">
+    Supported Event Table Operators
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#insert-into" title="Insert into" class="md-nav__link">
+    Insert into
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete" title="Delete" class="md-nav__link">
+    Delete
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update" title="Update" class="md-nav__link">
+    Update
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#insert-overwrite" title="Insert Overwrite" class="md-nav__link">
+    Insert Overwrite
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#in" title="In" class="md-nav__link">
+    In
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#join" title="Join" class="md-nav__link">
+    Join
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-window" title="Event Window" class="md-nav__link">
+    Event Window
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-event-window-operators" title="Supported Event Window Operators" class="md-nav__link">
+    Supported Event Window Operators
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#insert-into_1" title="Insert Into" class="md-nav__link">
+    Insert Into
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output" title="Output" class="md-nav__link">
+    Output
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#join_1" title="Join" class="md-nav__link">
+    Join
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event-trigger" title="Event Trigger" class="md-nav__link">
+    Event Trigger
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-logger" title="Siddhi Logger" class="md-nav__link">
+    Siddhi Logger
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eval-script" title="Eval Script" class="md-nav__link">
+    Eval Script
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -290,7 +1543,1993 @@
                 
                 
                 <h1 id="siddhi-query-language-guide-40">Siddhi Query Language Guide 4.0</h1>
-<p>WIP</p>
+<h2 id="event-streams">Event streams</h2>
+<p>The event stream definition defines the event stream schema. An event stream definition contains a unique name and a 
+set of attributes assigned specific types, with uniquely identifiable names within the stream.</p>
+<p><strong>Purpose</strong>
+To define the schema based on which events are selected to be processed in the execution plan to which the event stream
+ is attached.</p>
+<p><strong>Syntax</strong></p>
+<p>The following is the syntax of a query that defines a new event stream.</p>
+<pre><code class="sql">`define stream &lt;stream name&gt; (&lt;attribute name&gt; &lt;attribute type&gt;, &lt;attribute name&gt; &lt;attribute type&gt;, ... );`
+</code></pre>
+
+<p>The following parameters are configured in an event stream definition.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stream name</code></td>
+<td>The name of the event stream to be created.</td>
+</tr>
+<tr>
+<td><code>&lt;attribute name&gt; &lt;attribute type&gt;</code></td>
+<td>The schema of an event stream is defined by adding the name and the type of each attribute as a value pair. <br> <em><code>attribute name</code>: A unique name for the attribute. </br> <br> </em><code>attribute type</code>: The data type of the attribute value. This can be <code>STRING</code>, <code>INT</code>, <code>LONG</code>, <code>DOUBLE</code>, <code>FLOAT</code> or <code>BOOLEAN</code>.</br></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example</strong></p>
+<pre><code class="sql">`define stream TempStream (deviceID long, roomNo int, temp double);`
+The above creates an event stream named TempStream with the following attributes.
+</code></pre>
+
+<ul>
+<li><code>deviceID</code> of the <code>long</code> attribute type</li>
+<li><code>roomNo</code> of the <code>int</code> attribute type</li>
+<li><code>temp</code> of the <code>double</code> attribute type</li>
+</ul>
+<h2 id="event-sources">Event sources</h2>
+<h2 id="event-sinks">Event sinks</h2>
+<h2 id="filters">Filters</h2>
+<p>Filters are included in queries to filter information from input streams based on a specified condition.</p>
+<p><strong>Purpose</strong>
+A filter allows you to separate events that match a specific condition as the output, or for further processing.</p>
+<p><strong>Syntax</strong></p>
+<p>Filter conditions should be defined in square brackets next to the input stream name as shown below.</p>
+<pre><code class="sql">from &lt;input stream name&gt;[&lt;filter condition&gt;]select &lt;attribute name&gt;, &lt;attribute name&gt;, ...
+insert into &lt;output stream name&gt;
+</code></pre>
+
+<p>The following parameters are configured in a filter definition.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input stream name</code></td>
+<td>The event stream from which events should be selected.</td>
+</tr>
+<tr>
+<td><code>filter condition</code></td>
+<td>The condition based on which the events should be filtered to be inserted into the output stream.</td>
+</tr>
+<tr>
+<td><code>attribute name</code></td>
+<td>The specific attributes of which the values should be inserted into the output stream. Multiple</td>
+</tr>
+<tr>
+<td></td>
+<td>attributes can be added as a list of comma-separated values.</td>
+</tr>
+<tr>
+<td><code>output stream name</code></td>
+<td>The event stream to which the filtered events should be inserted.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example</strong></p>
+<p>The following query filters all server rooms of which the temperature is greater than 40 degrees. The filtered events
+are taken from the <code>TempStream</code> input stream and inserted into the <code>HighTempStream</code> output stream.</p>
+<pre><code class="sql">from TempStream [(roomNo &gt;= 100 and roomNo &lt; 110) and temp &gt; 40 ]select roomNo, temp
+insert into HighTempStream;
+</code></pre>
+
+<h2 id="windows">Windows</h2>
+<p>Windows allow you to capture a subset of events based on a specific criterion from an input event stream for calculation. Each input stream can only have maximum of one window.</p>
+<p><strong>Purpose</strong></p>
+<p>To create subsets of events within an event stream based on time or length. Event windows always operate as sliding windows.</p>
+<p>e.g., If you define a filter condition to find the maximum value out of every 10 events, you need to define a length window of 10 events. This window operates as a sliding window where the following 3 subsets can be identified in a list of 12 events received in a sequential order.</p>
+<table>
+<thead>
+<tr>
+<th>Subset</th>
+<th>Event Range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1-10</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2-11</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3-12</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Syntax</strong></p>
+<p>The <code>#window</code> prefix should be inserted next to the relevant event stream in order to add a window.</p>
+<pre><code class="sql">from &lt;input stream name&gt;[&lt;filter condition&gt;]#window.&lt;window name&gt;(&lt;parameter&gt;, &lt;parameter&gt;, ... )select &lt;attribute name&gt;, &lt;attribute name&gt;, ...
+insert into &lt;output stream name&gt;
+</code></pre>
+
+<p>The following parameters are configured in a window definition.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input stream name</code></td>
+<td>The stream to which the window is applied.</td>
+</tr>
+<tr>
+<td><code>filter condition</code></td>
+<td>The filter condition based on which events are filtered from the defined window.</td>
+</tr>
+<tr>
+<td><code>window name</code></td>
+<td><br>The name of the window. The name should include the following information:  <br>The type of the window. The supported inbuilt windows are listed in Inbuilt Windows.</br> <br>The range of the window in terms of the time duration or the number of events.</br> <br>e.g, time(10 min) defines a time window of 10 minutes.</br></td>
+</tr>
+<tr>
+<td><code>parameter</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>attribute name</code></td>
+<td>The attributes of the events selected from the window that should be inserted into the output stream. Multiple attributes can be specified as a comma-separated list.</td>
+</tr>
+<tr>
+<td><code>output stream name</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><code>For details on inbuilt windows supported for Siddhi, see Inbuilt Windows.
+   For details on how to manipulate window output based on event categories, see Output Event Categories.
+   For information on how to perform aggregate calculations within windows, see Aggregate Functions.</code></p>
+<h3 id="aggregate-functions">Aggregate functions</h3>
+<p>Aggregate functions perform aggregate calculations within defined windows.For the complete list of inbuilt aggregate
+functions supported see Inbuilt Aggregate Functions.</p>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">from &lt;input_stream&gt;#window.&lt;window_name&gt;select &lt;aggregate_function&gt;(&lt;attribute_name&gt;) as &lt;attribute_name&gt;, &lt;attribute1_name&gt;, &lt;attribute2_name&gt;, ...
+insert &lt;output_event_category&gt; into &lt;output_stream&gt;;
+</code></pre>
+
+<p>The parameters configured are as follows:</p>
+<p><strong>Example</strong>
+The following query calculates the average for the temp attribute of the <code>TempStream</code> input stream within each time
+window of 10 minutes. Then it emits the events to the <code>AvgTempStream</code> output stream. Each event emitted to the output
+stream has the following.</p>
+<ul>
+<li><code>avgTemp</code> attribute with the average temperature calculated as the value.</li>
+<li><code>roomNo</code> and deviceID attributes with their original values from the input stream.</li>
+</ul>
+<pre><code class="sql">from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo, deviceID
+insert all events into AvgTempStream;
+</code></pre>
+
+<h4 id="aggregate-function-types">Aggregate function types</h4>
+<p>The following aggregate function types are supported</p>
+<h5 id="group-by">Group By</h5>
+<p><strong>Group By</strong> allows you to group the aggregate based on specified attributes.</p>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">from &lt;input_stream&gt;#window.&lt;window_name&gt;select &lt;aggregate_function&gt;(&lt;attribute_name&gt;) as &lt;attribute_name&gt;, &lt;attribute1_name&gt;, &lt;attribute2_name&gt;, ...
+group by &lt;attribute_name&gt;, &lt;attribute1_name&gt;, &lt;attribute2_name&gt;, ...
+insert into &lt;output_stream&gt;;
+</code></pre>
+
+<p>The parameters configured are as follows.</p>
+<p><strong>Example</strong>
+The following query calculates the average temperature (<code>avgTemp</code>) per room number (<code>roomNo</code>) within each sliding time
+window of 10 minutes (<code>#window.time(10min)</code>) in the <code>TempStream</code> input stream, and inserts the output into the
+<code>AvgTempStream</code> output stream.</p>
+<pre><code class="sql">`&lt;br&gt;from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo, deviceID&lt;/br&gt;
+&lt;br&gt;group by roomNo, deviceID&lt;/br&gt;
+insert into AvgTempStream;`
+</code></pre>
+
+<h5 id="having">Having</h5>
+<p>Having allows you to filter events after aggregation and after processing at the selector.</p>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">`&lt;br&gt;from &lt;input_stream&gt;#window.&lt;window_name&gt;select &lt;aggregate_function&gt;(&lt;attribute_name&gt;) as &lt;attribute_name&gt;, 
+&lt;attribute1_name&gt;, &lt;attribute2_name&gt;, ...&lt;/br&gt;
+&lt;br&gt;group by &lt;attribute_name&gt;, &lt;attribute1_name&gt;, &lt;attribute2_name&gt;, ...&lt;/br&gt;
+&lt;br&gt;having &lt;condition&gt;&lt;/br&gt;
+ insert into &lt;output_stream&gt;;
+</code></pre>
+
+<p>The query parameters configured are as follows.</p>
+<p><strong>Example</strong></p>
+<p>The following query calculates the average temperature for the last 10 minutes, and alerts if it exceeds 30 degrees.</p>
+<pre><code class="sql">`&lt;br&gt;from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo&lt;/br&gt;
+&lt;br&gt;group by roomNo&lt;/br&gt;
+&lt;br&gt;having avgTemp &gt; 30&lt;/br&gt;
+ insert into AlertStream;
+</code></pre>
+
+<h5 id="inbuilt-aggregate-functions">Inbuilt aggregate functions</h5>
+<p>Aggregate functions are used to perform operations such as sum on aggregated set of events through a window. Usage of 
+an aggregate function is as follows.</p>
+<pre><code class="sql">@info(name = 'query1')
+from cseEventStream#window.timeBatch(1 sec)
+select symbol, sum(price) as price
+insert into resultStream;
+</code></pre>
+
+<h6 id="sum">Sum</h6>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Syntax</strong></td>
+<td><code>&lt;long|double&gt; sum(&lt;int|long|double|float&gt; arg)</code></td>
+</tr>
+<tr>
+<td><strong>Extension Type</strong></td>
+<td>Aggregate Function</td>
+</tr>
+<tr>
+<td><strong>Description</strong></td>
+<td>Calculates the sum for all the events.</td>
+</tr>
+<tr>
+<td><strong>Parameter</strong></td>
+<td>The value that needs to be summed.</td>
+</tr>
+<tr>
+<td><strong>Return Type</strong></td>
+<td>Returns long if the input parameter type is <code>int</code> or <code>long</code>, and returns double if the input parameter type is <code>float</code> or <code>double</code>.</td>
+</tr>
+<tr>
+<td><strong>Examples</strong></td>
+<td><br><code>sum(20)</code> returns the sum of 20s as a long value for each event arrival and expiry.</br> <code>sum(temp)</code> returns the sum of all temp attributes based on each event arrival and expiry.</td>
+</tr>
+</tbody>
+</table>
+<h6 id="average">Average</h6>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Syntax</strong></td>
+<td><code>&lt;double&gt; avg(&lt;int|long|double|float&gt; arg)</code></td>
+</tr>
+<tr>
+<td><strong>Extension Type</strong></td>
+<td>Aggregate Function</td>
+</tr>
+<tr>
+<td><strong>Description</strong></td>
+<td>Calculates the average for all the events.</td>
+</tr>
+<tr>
+<td><strong>Parameter</strong></td>
+<td><code>arg</code> : The value that need to be averaged.</td>
+</tr>
+<tr>
+<td><strong>Return Type</strong></td>
+<td>Returns the calculated average value as a double.</td>
+</tr>
+<tr>
+<td><strong>Example</strong></td>
+<td><code>avg(temp)</code> returns the average temp value for all the events based on their arrival and expiry.</td>
+</tr>
+</tbody>
+</table>
+<h6 id="maximum">Maximum</h6>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Syntax</strong></td>
+<td><code>&lt;int|long|double|float&gt; min(&lt;int|long|double|float&gt; arg)</code></td>
+</tr>
+<tr>
+<td><strong>Extension Type</strong></td>
+<td>Aggregate Function</td>
+</tr>
+<tr>
+<td><strong>Description</strong></td>
+<td>Returns the minimum value for all the events.</td>
+</tr>
+<tr>
+<td><strong>Parameter</strong>}</td>
+<td><strong><code>arg</code></strong>: The value that needs to be compared to find the minimum value.</td>
+</tr>
+<tr>
+<td><strong>Return Type</strong></td>
+<td>Returns the minimum value in the same type as the input.</td>
+</tr>
+<tr>
+<td><strong>Example</strong></td>
+<td><code>min(temp)</code> returns the minimum temp value recorded for all the events based on their arrival and expiry.</td>
+</tr>
+</tbody>
+</table>
+<h6 id="minimum">Minimum</h6>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Syntax</strong></td>
+<td><code>&lt;int|long|double|float&gt; min(&lt;int|long|double|float&gt; arg)</code></td>
+</tr>
+<tr>
+<td><strong>Extension Type</strong></td>
+<td>Aggregate Function</td>
+</tr>
+<tr>
+<td><strong>Description</strong></td>
+<td>Returns the minimum value for all the events.</td>
+</tr>
+<tr>
+<td><strong>Parameter</strong></td>
+<td><code>arg</code>: The value that needs to be compared to find the minimum value.</td>
+</tr>
+<tr>
+<td><strong>Return Type</strong></td>
+<td>Returns the minimum value in the same type as the input.</td>
+</tr>
+<tr>
+<td><strong>Example</strong></td>
+<td><code>min(temp)</code> returns the minimum temp value recorded for all the events based on their arrival and expiry.</td>
+</tr>
+</tbody>
+</table>
+<h6 id="count">Count</h6>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;long&gt; count()</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Aggregate Function</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>Returns the count of all the events.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns the event count as a long.</td>
+</tr>
+<tr>
+<td><strong><em>Example</em></strong></td>
+<td><code>count()</code> returns the count of all the events.</td>
+</tr>
+</tbody>
+</table>
+<h6 id="standard-deviation">Standard Deviation</h6>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;double&gt; stddev(&lt;int|long|double|float&gt; arg)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension</em></strong></td>
+<td>Aggregate Function</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>Returns the calculated standard deviation for all the events.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>arg</code>:The value that should be used to calculate the standard deviation.</td>
+</tr>
+</tbody>
+</table>
+<h6 id="distinct-count">Distinct Count</h6>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;long&gt; distinctcount(&lt;int|long|double|float|string&gt; arg)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension</em></strong></td>
+<td>Aggregate Function</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>Returns the count of distinct occurrences for a given arg.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>arg</code>: The value that should be counted.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns the count of distinct occurances for a given arg.</td>
+</tr>
+<tr>
+<td><strong><em>Example</em></strong></td>
+<td><br><code>distinctcount(pageID)</code> for the following output returns <code>3</code>.</br> <br>"WEB_PAGE_1"</br><br>"WEB_PAGE_1"</br><br>"WEB_PAGE_2"</br><br>"WEB_PAGE_3"</br><br>"WEB_PAGE_1"</br><br>"WEB_PAGE_2"</br></td>
+</tr>
+</tbody>
+</table>
+<h6 id="forever-maximum">Forever Maximum</h6>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;int|long|double|float&gt; maxForever (&lt;int|long|double|float&gt; arg)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension</em></strong></td>
+<td>Aggregate Function</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>This is the attribute aggregator to store the maximum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>arg</code>: The value that needs to be compared to find the maximum value.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns the maximum value in the same data type as the input.</td>
+</tr>
+<tr>
+<td><strong><em>Example</em></strong></td>
+<td><code>maxForever(temp)</code> returns the maximum temp value recorded for all the events throughout the lifetime of the query.</td>
+</tr>
+</tbody>
+</table>
+<h6 id="forever-minimum">Forever Minimum</h6>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;int|long|double|float&gt; minForever (&lt;int|long|double|float&gt; arg)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension</em></strong></td>
+<td>Aggregate Function</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>This is the attribute aggregator to store the minimum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>arg</code>: The value that needs to be compared to find the minimum value.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns the minimum value in the same data type as the input.</td>
+</tr>
+<tr>
+<td><strong><em>Example</em></strong></td>
+<td><code>minForever(temp)</code> returns the minimum temp value recorded for all the events throughout the lifetime of the query.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="inbuilt-windows">Inbuilt windows</h4>
+<p>WSO2 Siddhi supports the following inbuilt windows.</p>
+<h5 id="time">time</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt; time(&lt;int|long|time&gt; windowTime)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>A sliding time window that holds events that arrived during the last windowTime period at a given time, and gets updated for each event arrival and expiry.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>windowTime</code>: The sliding time period for which the window should hold events.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><br><code>time(20)</code> for processing events that arrived within the last 20 milliseconds.</br><br><code>time(2 min)</code> for processing events that arrived within the last 2 minutes.</br></td>
+</tr>
+</tbody>
+</table>
+<h5 id="timebatch">timeBatch</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt; timeBatch(&lt;int|long|time&gt; windowTime, &lt;int&gt; startTime )</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>A batch (tumbling) <code>time window</code> that holds events that arrive during <code>windowTime</code> periods, and gets updated for each <code>windowTime</code>.</td>
+</tr>
+<tr>
+<td><strong><em>Parameters</em></strong></td>
+<td><br><code>windowTime</code>: The batch time period for which the window should hold events.</br> <br><code>startTime (Optional)</code>: This specifies an offset in milliseconds in order to start the window at a time different to the standard time.</br></td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><br><code>timeBatch(20)</code> processes events that arrive every 20 milliseconds.<br><code>timeBatch(2 min)</code> processes events that arrive every 2 minutes.</br><br><code>timeBatch(10 min, 0)</code> processes events that arrive every 10 minutes starting from the 0th minute. e.g., If you deploy your window at 08:22 and the first event arrives at 08:26, this event occurs within the time window 08.20 - 08.30. Therefore, this event is emitted at 08.30.</br> <br><code>timeBatch(10 min, 1000*60*5)</code>processes events that arrive every 10 minutes starting from 5th minute. e.g., If you deploy your window at 08:22 and the first event arrives at 08:26, this event occurs within the time window 08.25 - 08.35. Therefore, this event is emitted at 08.35.</br></td>
+</tr>
+</tbody>
+</table>
+<h6 id="length">length</h6>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt; length(&lt;int&gt; windowLength)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>A sliding length window that holds the last <code>windowLength</code> events at a given time, and gets updated for each arrival and expiry.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>windowLength</code>: The number of events that should be included in a sliding length window.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong>"</td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><br><code>length(10)</code> for processing the last 10 events.</br><br><code>length(200)</code> for processing the last 200 events.</br></td>
+</tr>
+</tbody>
+</table>
+<h5 id="lengthbatch">lengthBatch</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt; lengthBatch(&lt;int&gt; windowLength)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>A batch (tumbling) length window that holds a number of events specified as the <code>windowLength</code>. The window is updated each time a batch of events that equals the number specified as the <code>windowLength</code>arrives.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>windowLength</code>:The number of events the window should tumble.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><br><code>lengthBatch(10)</code> for processing 10 events as a batch.</br><code>lengthBatch(200)</code> for processing 200 events as a batch.</td>
+</tr>
+</tbody>
+</table>
+<h5 id="externaltime">externalTime</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt; externalTime(&lt;long&gt; timestamp, &lt;int|long|time&gt; windowTime)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>A sliding time window based on external time. It holds events that arrived during the last <code>windowTime</code> period from the external timestamp, and gets updated on every monotonically increasing timestamp.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>windowTime</code>:The sliding time period for which the window should hold events.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><br><code>externalTime(eventTime,20)</code> for processing events arrived within the last 20 milliseconds from the <code>eventTime</code>.<br><code>externalTime(eventTimestamp, 2 min)</code> for processing events arrived within the last 2 minutes from the <code>eventTimestamp</code>.</br></td>
+</tr>
+</tbody>
+</table>
+<h5 id="cron">cron</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt; cron(&lt;string&gt; cronExpression)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>This window returns events processed periodically as the output in time-repeating patterns, triggered based on time passing.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>cronExpression</code>: cron expression that represents a time schedule.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><code>cron('*/5 * * * * ?')</code> returns processed events as the output every 5 seconds.</td>
+</tr>
+</tbody>
+</table>
+<h5 id="firstunique">firstUnique</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt; firstUnique(&lt;string&gt; attribute)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>First unique window processor keeps only the first events that are unique according to the given unique attribute.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong>:<code>attribute</code>: The attribute that should be checked for uniqueness.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><code>firstUnique(ip)</code> returns the first event arriving for each unique ip.</td>
+</tr>
+</tbody>
+</table>
+<h5 id="unique">unique</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt;  unique (&lt;string&gt;  attribute )</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>This window keeps only the latest events that are unique according to the given unique attribute.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>attribute</code>: The attribute that should be checked for uniqueness.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Example</em></strong></td>
+<td><code>unique(ip)</code> returns the latest event that arrives for each unique <code>ip</code>.</td>
+</tr>
+</tbody>
+</table>
+<h5 id="sort">sort</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><br><code>&lt;event&gt; sort(&lt;int&gt; windowLength)</code></br><br><code>&lt;event&gt; sort(&lt;int&gt; windowLength, &lt;string&gt; attribute, &lt;string&gt; order)</code></br><br><code>&lt;event&gt; sort(&lt;int&gt; windowLength, &lt;string&gt; attribute, &lt;string&gt; order, .. , &lt;string&gt; attributeN, &lt;string&gt; orderN)</code></br></td>
+</tr>
+<tr>
+<td><strong><em>Extension</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>This window holds a batch of events that equal the number specified as the windowLength and sorts them in the given order.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>attribute</code>: The attribute that should be checked for the order.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Example</em></strong></td>
+<td><code>sort(5, price, 'asc')</code> keeps the events sorted by <code>price</code> in the ascending order. Therefore, at any given time, the window contains the 5 lowest prices.</td>
+</tr>
+</tbody>
+</table>
+<h5 id="frequent">frequent</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><br><code>&lt;event&gt; frequent(&lt;int&gt; eventCount)</code></br><br><code>&lt;event&gt; frequent(&lt;int&gt; eventCount, &lt;string&gt; attribute, .. , &lt;string&gt; attributeN)</code></br></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>This window returns the latest events with the most frequently occurred value for a given attribute(s). Frequency calculation for this window processor is based on Misra-Gries counting algorithm.</td>
+</tr>
+<tr>
+<td><strong><em>Parameter</em></strong></td>
+<td><code>eventCount</code>: The number of most frequent events to be emitted to the stream.</td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>The number of most frequent events to be emitted to the stream.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><br><code>frequent(2)</code> returns the 2 most frequent events.</br><br><code>frequent(2, cardNo)</code> returns the 2 latest events with the most frequently appeared card numbers.</br></td>
+</tr>
+</tbody>
+</table>
+<h5 id="lossyfrequent">lossyFrequent</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><br><code>&lt;event&gt; lossyFrequent(&lt;double&gt; supportThreshold, &lt;double&gt; errorBound)</code></br><br><code>&lt;event&gt; lossyFrequent(&lt;double&gt; supportThreshold, &lt;double&gt; errorBound, &lt;string&gt; attribute, .. , &lt;string&gt; attributeN)</code></br></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>This window identifies and returns all the events of which the current frequency exceeds the value specified for the <code>supportThreshold</code> parameter.</td>
+</tr>
+<tr>
+<td><strong><em>Parameters</em></strong></td>
+<td><br><code>errorBound</code>: The error bound value.</br><br><code>attribute</code>:The attributes to group the events. If no attributes are given, the concatenation of all the attributes of the event is considered.</br></td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><br><code>lossyFrequent(0.1, 0.01)</code> returns all the events of which the current frequency exceeds <code>0.1</code>, with an error bound of <code>0.01</code>.</br><br>'lossyFrequent(0.3, 0.05, cardNo)<code>returns all the events of which the</code>cardNo<code>attributes frequency exceeds</code>0.3<code>, with an error bound of</code>0.05`.</td>
+</tr>
+</tbody>
+</table>
+<h5 id="externaltimebatch">externalTimeBatch</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt; externalTimeBatch(&lt;long&gt; timestamp, &lt;int|long|time&gt; windowTime, &lt;int|long|time&gt; startTime, &lt;int|long|time&gt; timeout)</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>A batch (tumbling) time window based on external time, that holds events arrived during <code>windowTime</code> periods, and gets updated for every <code>windowTime</code>.</td>
+</tr>
+<tr>
+<td><strong><em>Parameters</em></strong></td>
+<td><br><code>timestamp</code>: The time that the window determines as current time and will act upon. The value of this parameter should be monotonically increasing.</br><br><code>windowTime</code>: The batch time period for which the window should hold events.</br><br><code>startTime</code> (Optional): User defined start time. This could either be a constant (of type int, long or time) or an attribute of the corresponding stream (of type long). If an attribute is provided, initial value of attribute would be considered as <code>startTime</code>. When <code>startTime</code> is not given, initial value of <code>timestamp</code> is used as the default.<br><code>timeout</code>(Optional): Time to wait for arrival of new event, before flushing and giving output for events belonging to a specific batch. If timeout is not provided, system waits till an event from next batch arrives to flush current batch.</br></td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><br><code>externalTimeBatch(eventTime,20)</code> for processing events that arrive every 20 milliseconds from the <code>eventTime</code>.</br><br><code>externalTimeBatch(eventTimestamp, 2 min)</code> for processing events that arrive every 2 minutes from the <code>eventTimestamp</code>.</br><br><code>externalTimeBatch(eventTimestamp, 2 sec, 0)</code> for processing events that arrive every 2 seconds from the <code>eventTimestamp</code>. This starts on 0th millisecond of an hour.</br><br><code>externalTimeBatch(eventTimestamp, 2 sec, eventTimestamp, 100)</code> for processing events that arrive every 2 seconds from the <code>eventTimestamp</code>. This considers the <code>eventTimeStamp</code> of the first event as the start time, and waits 100 milliseconds for the arrival of a new event before flushing the current batch.</br></td>
+</tr>
+</tbody>
+</table>
+<h5 id="timelength">timeLength</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt; timeLength ( &lt; int|long|time &gt;   windowTime,  &lt; int &gt;  windowLength )</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>A sliding time window that, at a given time holds the last windowLength events that arrived during last windowTime period, and gets updated for every event arrival and expiry.</td>
+</tr>
+<tr>
+<td><strong><em>Parameters</em></strong></td>
+<td><br><code>windowTime</code>: The sliding time period for which the window should hold events.</br><br><code>windowLength</code>: The number of events that should be be included in a sliding length window.</br></td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><br><code>timeLength(20 sec, 10)</code> for processing the last 10 events that arrived within the last 20 seconds.</br><br><code>timeLength(2 min, 5)</code> for processing the last 5 events that arrived within the last 2 minutes.</br></td>
+</tr>
+</tbody>
+</table>
+<h5 id="uniqueexternaltimebatch">uniqueExternalTimeBatch</h5>
+<table>
+<thead>
+<tr>
+<th>Detail</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><em>Syntax</em></strong></td>
+<td><code>&lt;event&gt; uniqueExternalTimeBatch(&lt;string&gt; attribute, &lt;long&gt; timestamp, &lt;int|long|time&gt; windowTime, &lt;int|long|time&gt; startTime, &lt;int|long|time&gt; timeout, &lt;bool&gt; replaceTimestampWithBatchEndTime )</code></td>
+</tr>
+<tr>
+<td><strong><em>Extension Type</em></strong></td>
+<td>Window</td>
+</tr>
+<tr>
+<td><strong><em>Description</em></strong></td>
+<td>A batch (tumbling) time window based on external time that holds latest unique events that arrive during the <code>windowTime</code> periods, and gets updated for each <code>windowTime</code>.</td>
+</tr>
+<tr>
+<td><strong><em>Parameters</em></strong></td>
+<td><br><code>attribute</code>:The attribute that should be checked for uniqueness.</br><br><code>timestamp</code>:The time considered as the current time for the window to act upon. The value of this parameter should be monotonically increasing.</br><br><code>windowTime</code>:The batch time period for which the window should hold events.</br><code>startTime</code> (Optional): The user-defined start time. This can either be a constant (of the <code>int</code>, <code>long</code> or <code>time</code> type) or an attribute of the corresponding stream (of the long type). If an attribute is provided, the initial value of this attribute is considered as the <code>startTime</code>. When the <code>startTime</code> is not given, the initial value of the timestamp is used by default.</br><br><code>timeout</code> (Optional): The time duration to wait for the arrival of new event before flushing and giving output for events belonging to a specific batch. If the timeout is not provided, the system waits until an event from next batch arrives to flush the current batch.</br><br><code>replaceTimestampWithBatchEndTime</code> (Optional): Replaces the value for the <code>timestamp</code> parameter with the corresponding batch end time stamp.</br></td>
+</tr>
+<tr>
+<td><strong><em>Return Type</em></strong></td>
+<td>Returns current and expired events.</td>
+</tr>
+<tr>
+<td><strong><em>Examples</em></strong></td>
+<td><br><code>uniqueExternalTimeBatch(ip, eventTime, 20)</code> processes unique events based on the <code>ip</code> attribute that arrives every 20 milliseconds from the  <code>eventTime</code>.</br><br><code>uniqueExternalTimeBatch(ip, eventTimestamp, 2 min)</code> processes unique events based on the <code>ip</code> attribute that arrives every 2 minutes from the <code>eventTimestamp</code>.</br><br><code>uniqueExternalTimeBatch(ip, eventTimestamp, 2 sec, 0)</code> processes unique events based on the <code>ip</code> attribute that arrives every 2 seconds from the <code>eventTimestamp</code>. It starts on 0th millisecond of an hour.</br><br><code>uniqueExternalTimeBatch(ip, eventTimestamp, 2 sec, eventTimestamp, 100)</code> processes unique events based on the <code>ip</code> attribute that arrives every 2 seconds from the <code>eventTimestamp</code>. It considers the <code>eventTimestamp</code> of the first event as the <code>startTime</code>, and waits 100 milliseconds for the arrival of a new event before flushing current batch.</br><br><code>uniqueExternalTimeBatch(ip, eventTimestamp, 2 sec, eventTimestamp, 100, true)</code> processes unique events based on the ip attribute that arrives every 2 seconds from the <code>eventTimestamp</code>. It considers the <code>eventTimestamp</code> of the first event as <code>startTime</code>, and waits 100 milliseconds for the arrival of a new event before flushing current batch. Here, the value for <code>eventTimestamp</code> is replaced with the timestamp of the batch end.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="output-event-categories">Output event categories</h4>
+<p>The output of a window can be current events, expired events or both as specified. Following are the key words to be used to specify the event category that is emitted from a window.</p>
+<table>
+<thead>
+<tr>
+<th>Key Word</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>current events</code></td>
+<td>This emits all the events that arrive to the window. This is the default event category emitted when no particular category is specified.</td>
+</tr>
+<tr>
+<td><code>expired events</code></td>
+<td>This emits all the events that expire from the window.</td>
+</tr>
+<tr>
+<td><code>all events</code></td>
+<td>This emits att the events that arrive to the window as well as all the events that expire from the window.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">from &lt;input_stream&gt;#window.&lt;window_name&gt;select *
+insert &lt;output_event_category&gt; into &lt;output_stream&gt;
+</code></pre>
+
+<p><strong>Example</strong>
+The following selects all the expired events of the <code>TempStream</code> input stream within a time window of 1 minute, and inserts them into the <code>DelayedTempStream</code> output stream.</p>
+<pre><code class="sql">from TempStream#window.time(1 min)select *
+insert expired events into DelayedTempStream
+</code></pre>
+
+<h2 id="output-rate-limiting">Output rate limiting</h2>
+<p>Output rate limiting allows queries to emit events periodically based on the condition specified.</p>
+<p><strong>Purpose</strong></p>
+<p>This allows you to limit the output to what is required in order to avoid viewing unnecessary information.</p>
+<p><strong>Syntax</strong></p>
+<p>The following is the syntax of an output rate limiting configuration.</p>
+<pre><code class="sql">from &lt;input stream name&gt;...select &lt;attribute name&gt;, &lt;attribute name&gt;, ...
+output ({&lt;output-type&gt;} every (&lt;time interval&gt;|&lt;event interval&gt; events) | snapshot every &lt;time interval&gt;)
+insert into &lt;output stream name&gt;
+</code></pre>
+
+<p>The parameters configured for the output rate limiting are described in the following table.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>output-time</code></td>
+<td><br>This specifies which event(s) should be emitted as the output of the query. The possible values are as follows:</br><br><em><code>first</code></em>: Only the first event processed by the query in the specified time interval/sliding window is emitted.</br><br><em><code>last</code></em>: Only the last event processed by the query in the specified time interval/sliding window is emitted.</br><br><em><code>all</code></em>: All the events processed by the query in the specified time interval/sliding window are emitted.</br></td>
+</tr>
+<tr>
+<td><code>time interval</code></td>
+<td>The time interval for the periodic event emission.</td>
+</tr>
+<tr>
+<td><code>event interval</code></td>
+<td>The number of events that defines the interval at which the emission of events take place. e.g., if the event interval is 10, the query emits a result for every 10 events.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples</strong></p>
+<ul>
+<li>Emitting events based on number of events
+<br>Here the events are emitted every time the specified number of events arrive You can also specify whether to to emit only the first event, last event, or all events out of the events that arrived.</br>
+In this example, the last temperature per sensor is emitted for every 10 events.</li>
+</ul>
+<pre><code class="sql">from TempStreamselect temp
+group by deviceID
+output last every 10 events
+insert into LowRateTempStream;
+</code></pre>
+
+<ul>
+<li>Emitting events based on time
+Here, events are emitted for every predefined time interval. You can also specify whether to to emit only the first event, last event, or all events out of the events that arrived during the specified time interval.</li>
+</ul>
+<pre><code class="sql">from TempStreamoutput every 10 sec
+insert into LowRateTempStream;
+</code></pre>
+
+<ul>
+<li>Emitting a periodic snapshot of events
+<br>This method works best with windows. When an input stream is connected to a window, snapshot rate limiting emits all the current events that have arrived and do not have corresponding expired events for every predefined time interval. If the input stream is not connected to a window, only the last current event for each predefined time interval is emitted.</br>
+The following emits a snapshot of the events in a time window of 5 seconds every 1 second. </li>
+</ul>
+<pre><code class="sql">from TempStream#window.time(5 sec)output snapshot every 1 sec
+insert into SnapshotTempStream;
+</code></pre>
+
+<h2 id="joins">Joins</h2>
+<p>Join allows two event streams to be merged based on a condition. In order to carry out a join, each stream should be connected to a window. If no window is specified, a window of zero length (<code>#window.length(0)</code>) is assigned to the input event stream by default. During the joining process each incoming event on each stream is matched against all the events in the other input event stream window based on the given condition. An output event is generated for all the matching event pairs.</p>
+<p><strong>Syntax</strong>
+The syntax for a join is as follows:</p>
+<pre><code class="sql">from &lt;input stream name&gt;[&lt;filter condition&gt;]#window.&lt;window name&gt;(&lt;parameter&gt;, ... ) {unidirectional} {as &lt;reference&gt;}
+         join &lt;input stream name&gt;#window.&lt;window name&gt;(&lt;parameter&gt;,  ... ) {unidirectional} {as &lt;reference&gt;}
+    on &lt;join condition&gt;
+    within &lt;time gap&gt;
+select &lt;attribute name&gt;, &lt;attribute name&gt;, ...
+insert into &lt;output stream name&gt;
+</code></pre>
+
+<p><strong>Example</strong></p>
+<pre><code class="sql">define stream TempStream(deviceID long, roomNo int, temp double);
+define stream RegulatorStream(deviceID long, roomNo int, isOn bool);
+
+from TempStream[temp &gt; 30.0]#window.time(1 min) as T
+  join RegulatorStream[isOn == false]#window.length(1) as R
+  on T.roomNo == R.roomNo
+select T.roomNo, R.deviceID, 'start' as action
+insert into RegulatorActionStream;
+</code></pre>
+
+<p>WSO2 Siddhi currently supports the following types of joins.</p>
+<h3 id="left-outer-join">Left Outer Join</h3>
+<p>Outer join allows two event streams to be merged based on a condition. However, it returns all the events of left stream even if there are no matching events in the right stream. Here each stream should be associated with a window. During the joining process, each incoming event of each stream is matched against all the events in the other input event stream window based on the given condition. Incoming events of the right stream are matched against all events in the left event stream window based on the given condition. An output event is generated for all the matching event pairs. An output event is generated for incoming events of the left stream even if there are no matching events in right stream.</p>
+<p><strong>Example</strong>
+The following query generates output events for all the events in the <code>stockStream</code> stream whether there is a match for the symbol in the <code>twitterStream</code> stream or not.</p>
+<pre><code class="sql">from stockStream#window.length(2) 
+left outer join twitterStream#window.length(1)
+on stockStream.symbol== twitterStream.symbol
+select stockStream.symbol as symbol, twitterStream.tweet, stockStream.price
+insert all events into outputStream ;
+</code></pre>
+
+<h3 id="right-outer-join">Right Outer Join</h3>
+<p>This is similar to left outer join. It returns all the events of the right stream even if there are no matching events in the left stream. Incoming events of the left stream are matched against all events in the right event stream window based on the given condition. An output event is generated for all the matching event pairs. An output event is generated for incoming events of the right stream even if there are no matching events in left stream.</p>
+<p><strong>Example</strong>
+The following generates output events for all the events in the <code>twitterStream</code> stream whether there is a match for the symbol in the <code>stockStream</code> stream or not.</p>
+<pre><code class="sql">from stockStream#window.length(2) 
+right outer join twitterStream#window.length(1)
+on stockStream.symbol== twitterStream.symbol
+select stockStream.symbol as symbol, twitterStream.tweet, stockStream.price
+insert all events into outputStream ;
+</code></pre>
+
+<h3 id="full-outer-join">Full Outer Join</h3>
+<h2 id="patterns-and-sequences">Patterns and Sequences</h2>
+<p>Patterns and sequences allow event streams to be correlated over time and detect event patterns based on the order of event arrival.</p>
+<h3 id="patterns">Patterns</h3>
+<p>Pattern allows event streams to be correlated over time and detect event patterns based on the order of event arrival. With pattern there can be other events in between the events that match the pattern condition. It creates state machines to track the states of the matching process internally. Pattern can correlate events over multiple input streams or over the same input stream. Therefore, each matched input event need to be referenced so that that it can be accessed for future processing and output generation.</p>
+<p><strong>Syntax</strong>
+The following is the syntax for a pattern configuration:</p>
+<pre><code class="sql">from {every} &lt;input event reference&gt;=&lt;input stream name&gt;[&lt;filter condition&gt;] -&gt; {every} &lt;input event reference&gt;=&lt;input stream name&gt;[&lt;filter condition&gt;] -&gt; ...        within &lt;time gap&gt;
+select &lt;input event reference&gt;.&lt;attribute name&gt;, &lt;input event reference&gt;.&lt;attribute name&gt;, ...
+insert into &lt;output stream name&gt;
+</code></pre>
+
+<p><strong>Example</strong></p>
+<p>The following query sends an alert if the temperature of a room increases by 5 degrees within 10 min.</p>
+<pre><code class="sql">from every( e1=TempStream ) -&gt; e2=TempStream[e1.roomNo==roomNo and (e1.temp + 5) &lt;= temp ]
+    within 10 min
+select e1.roomNo, e1.temp as initialTemp, e2.temp as finalTemp
+insert into AlertStream;
+</code></pre>
+
+<p>WSO2 Siddhi supports the following types of patterns:
++ Counting patterns
++ Logical patterns</p>
+<h4 id="counting-patterns">Counting Patterns</h4>
+<p>Counting patterns allow multiple events that may or may not have been received in a sequential order based on the same matching condition.</p>
+<p><strong>Syntax</strong></p>
+<p>The number of events matched can be limited via postfixes as explained below.</p>
+<table>
+<thead>
+<tr>
+<th>Postfix</th>
+<th>Description</th>
+<th>Example</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n1:n2</code></td>
+<td>This matches <code>n1</code> to <code>n2</code> events.</td>
+<td><code>1:4</code> matches 1 to 4 events.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>&lt;n:&gt;</code></td>
+<td>This matches <code>n</code> or more events.</td>
+<td><code>&lt;2:&gt;</code> matches 2 or more events.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>&lt;:n&gt;</code></td>
+<td>This matches up to <code>n</code> events.</td>
+<td><code>&lt;:5&gt;</code> matches up to 5 events.</td>
+<td></td>
+</tr>
+<tr>
+<td><code>&lt;n&gt;</code></td>
+<td>This matches exactly <code>n</code> events.</td>
+<td><code>&lt;5&gt;</code> matches exactly 5 events.</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Specific occurrences of the events that should be matched based on count limits are specified via key words and numeric values within square brackets as explained with the examples given below.</p>
+<ul>
+<li><code>e1[3]</code> refers to the 3rd event.</li>
+<li><code>e1[last]</code> refers to the last event.</li>
+<li><code>e1[last - 1]</code> refers to the event before the last event.</li>
+</ul>
+<p><strong>Example</strong>
+The following query calculates the temperature difference between two regulator events.</p>
+<pre><code class="sql">define stream TempStream(deviceID long, roomNo int, temp double);
+define stream RegulatorStream(deviceID long, roomNo int, tempSet double, isOn bool);
+
+from every( e1=RegulatorStream) -&gt; e2=TempStream[e1.roomNo==roomNo]&lt;1:&gt; -&gt; e3=RegulatorStream[e1.roomNo==roomNo]
+select e1.roomNo, e2[0].temp - e2[last].temp as tempDiff
+insert into TempDiffStream;
+</code></pre>
+
+<h4 id="logical-patterns">Logical Patterns</h4>
+<p>Logical pattern matches events that arrive in temporal order and correlates events with logical relationships.</p>
+<p><strong>Syntax</strong></p>
+<p>Keywords such as and and or can be used instead of -&gt; to illustrate the logical relationship.</p>
+<table>
+<thead>
+<tr>
+<th>Key Word</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>and</code></td>
+<td>This allows two events received in any order to be matched.</td>
+</tr>
+<tr>
+<td><code>or</code></td>
+<td>One event from either event stream can be matched regardless of the order in which the events were received.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example</strong>
+The following query sends an alert when the room temperature reaches the temperature set on the regulator. The pattern matching is reset every time the temperature set on the regulator changes.</p>
+<pre><code class="sql">define stream TempStream(deviceID long, roomNo int, temp double);
+define stream RegulatorStream(deviceID long, roomNo int, tempSet double);
+
+from every( e1=RegulatorStream ) -&gt; e2=TempStream[e1.roomNo==roomNo and e1.tempSet &lt;= temp ] or e3=RegulatorStream[e1.roomNo==roomNo]
+select e1.roomNo, e2.temp as roomTemp
+having e3 is null
+insert into AlertStream;
+</code></pre>
+
+<h3 id="sequences">Sequences</h3>
+<p>Sequence allows event streams to be correlated over time and detect event sequences based on the order of event arrival. With sequence there cannot be other events in between the events that match the sequence condition. It creates state machines to track the states of the matching process internally. Sequence can correlate events over multiple input streams or over the same input stream. Therefore, each matched input event needs to be referenced so that it can be accessed for future processing and output generation.
+<strong>Syntax</strong></p>
+<p>The following is the syntax for a sequence configuration.</p>
+<pre><code class="sql">from {every} &lt;input event reference&gt;=&lt;input stream name&gt;[&lt;filter condition&gt;], &lt;input event reference&gt;=&lt;input stream name&gt;[&lt;filter condition&gt;]{+|*|?}, ...       within &lt;time gap&gt;
+select &lt;input event reference&gt;.&lt;attribute name&gt;, &lt;input event reference&gt;.&lt;attribute name&gt;, ...
+insert into &lt;output stream name&gt;
+</code></pre>
+
+<p><strong>Example</strong></p>
+<p>The following query sends an alert if there is more than 1 degree increase in the temperature between two consecutive temperature events.</p>
+<p>WSO2 Siddhi supports the following types of sequences:</p>
+<ul>
+<li>Counting sequences</li>
+<li>Logical sequences</li>
+</ul>
+<h4 id="counting-sequences">Counting sequences</h4>
+<p>Counting sequence allows us to match multiple consecutive events based on the same matching condition.</p>
+<p><strong>Syntax</strong></p>
+<p>The number of events matched can be limited via postfixes as explained below.</p>
+<table>
+<thead>
+<tr>
+<th>Postfix</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>*</td>
+<td>This matches zero or more events.</td>
+</tr>
+<tr>
+<td>+</td>
+<td>This matches 1 or more events.</td>
+</tr>
+<tr>
+<td>?</td>
+<td>This matches zero events or one event.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example</strong></p>
+<p>The following query identifies peak temperatures.</p>
+<pre><code class="sql">define stream TempStream(deviceID long, roomNo int, temp double);
+define stream RegulatorStream(deviceID long, roomNo int, tempSet double, isOn bool);
+
+from every e1=TempStream, e2=TempStream[e1.temp &lt;= temp]+, e3=TempStream[e2[last].temp &gt; temp]
+select e1.temp as initialTemp, e2[last].temp as peakTemp
+insert into TempDiffStream;
+</code></pre>
+
+<h4 id="logical-sequences">Logical Sequences</h4>
+<p>Logical sequence matches events that arrive in temporal order and correlates events with logical relationships.</p>
+<p><strong>Syntax</strong></p>
+<p>Keywords such as and and or can be used instead of -&gt; to illustrate the logical relationship.</p>
+<table>
+<thead>
+<tr>
+<th>Keyword</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>and</code></td>
+<td>This allows two events received in any order to be matched.</td>
+</tr>
+<tr>
+<td><code>or</code></td>
+<td>One event from either event stream can be matched regardless of the order in which the events were received.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example</strong></p>
+<p>The following query creates a notification when a regulator event is followed by both temperature and humidity events.</p>
+<pre><code class="sql">define stream TempStream(deviceID long, temp double);define stream HumidStream(deviceID long, humid double);
+define stream RegulatorStream(deviceID long, isOn bool);
+
+from every e1=RegulatorStream, e2=TempStream and e3=HumidStream
+select e2.temp, e3.humid
+insert into StateNotificationStream;
+</code></pre>
+
+<h2 id="partitions">Partitions</h2>
+<p>Partitions allow events and queries to be divided in order to process them in parallel and in isolation. Each partition is tagged with a partition key. Only events corresponding to this key are processed for each partition. A partition can contain one or more Siddhi queries.
+Siddhi supports both variable partitions and well as range partitions.</p>
+<h3 id="variable-partitions">Variable Partitions</h3>
+<p>A variable partition is created by defining the partition key using the categorical (string) attribute of the input event stream.</p>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">partition with ( &lt;attribute name&gt; of &lt;stream name&gt;, &lt;attribute name&gt; of &lt;stream name&gt;, ... )begin
+    &lt;query&gt;
+    &lt;query&gt;
+    ...
+end;
+</code></pre>
+
+<p><strong>Example</strong></p>
+<p>The following query calculates the maximum temperature recorded for the last 10 events emitted per sensor.</p>
+<pre><code class="sql">partition with ( deviceID of TempStream )begin
+    from TempStream#window.length(10)
+    select roomNo, deviceID, max(temp) as maxTemp
+    insert into DeviceTempStream
+end;
+</code></pre>
+
+<h3 id="range-partitions">Range Partitions</h3>
+<p>A range partition is created by defining the partition key using the numerical attribute of the input event stream.</p>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">partition with ( &lt;condition&gt; as &lt;partition key&gt; or &lt;condition&gt; as &lt;partition key&gt; or ... of &lt;stream name&gt;, ... )begin
+    &lt;query&gt;
+    &lt;query&gt;
+    ...
+end;
+</code></pre>
+
+<p><strong>Example</strong></p>
+<p>The following query calculates the average temperature for the last 10 minutes per office area.</p>
+<pre><code class="sql">partition with ( roomNo&gt;=1030 as 'serverRoom' or roomNo&lt;1030 and roomNo&gt;=330 as 'officeRoom' or roomNo&lt;330 as 'lobby' of TempStream) )begin
+    from TempStream#window.time(10 min)
+    select roomNo, deviceID, avg(temp) as avgTemp
+    insert into AreaTempStream
+end;
+</code></pre>
+
+<h2 id="event-table">Event Table</h2>
+<p>An event table is a stored version of an event stream or a table of events. It allows Siddhi to work with stored events. Events are stored in-memory by default, and Siddhi also provides an extension to work with data/events stored in RDBMS data stores.</p>
+<h3 id="defining-an-event-table">Defining An Event Table</h3>
+<p>An event table definition defines the table schema. The syntax for an event table definition is as follows.</p>
+<pre><code class="sql">define table &lt;table name&gt; (&lt;attribute name&gt; &lt;attribute type&gt;, &lt;attribute name&gt; &lt;attribute type&gt;, ... );
+</code></pre>
+
+<p><strong>Example</strong></p>
+<p>The following creates a table named <code>RoomTypeTable</code> with the attributes <code>roomNo</code> (an <code>INT</code> attribute) and <code>type</code> (a <code>STRING</code> attribute).</p>
+<pre><code class="sql">define table RoomTypeTable (roomNo int, type string);
+</code></pre>
+
+<h3 id="event-table-types">Event Table Types</h3>
+<p>Siddhi supports the following types of event tables.</p>
+<h4 id="in-memory-event-table">In-memory Event Table</h4>
+<p>In memory event tables are created to store events for later access. Event tables can be configured with primary keys to avoid the duplication of data, and indexes for fast event access.
+Primary keys are configured by including the <code>@PrimaryKey</code> annotation within the event table configuration. Each event table can have only one attribute defined as the primary key, and the value for this attribute should be unique for each entry saved in the table. This ensures that entries in the table are not duplicated
+Indexes are configured by including the <code>@Index</code> annotation within the event table configuration. Each event table configuration can have only one <code>@Index</code> annotation. However, multiple attributes can be specified as index attributes via a single annotation. When the <code>@Index</code> annotation is defined, multiple entries can be stored for a given key in the table. Indexes can be configured together with primary keys. </p>
+<p><strong>Examples</strong></p>
+<ul>
+<li>Configuring primary keys
+The following query creates an event table with the <code>symbol</code> attribute defined as the primary key. Therefore, each entry in this table should have a unique value for the <code>symbol</code> attribute.</li>
+</ul>
+<pre><code class="sql">@PrimaryKey('symbol')
+define table StockTable (symbol string, price float, volume long);
+</code></pre>
+
+<ul>
+<li>Configuring indexes</li>
+</ul>
+<p>The following query creates an indexed event table named <code>RoomTypeTable</code> with the attributes <code>roomNo</code> (as an <code>INT</code> attribute) and <code>type</code> (as a <code>STRIN</code>G attribute). All entries in the table are to be indexed by the <code>roomNo</code> attribute.</p>
+<pre><code class="sql">@Index('roomNo')
+define table RoomTypeTable (roomNo int, type string);
+</code></pre>
+
+<h4 id="hazlecast-event-table">Hazlecast Event Table</h4>
+<p>Event tables allow event data to be persisted in a distributed manner using Hazelcast in-memory data grids. This functionality is enabled using the <code>From</code> annotation. Also, the connection instructions for the Hazelcast cluster can be provided with the <code>From</code> annotation.
+The following is a list of connection instructions that can be provided with the <code>From</code> annotation.</p>
+<ul>
+<li><code>cluster.name : Hazelcast cluster/group name [Optional]  (i.e cluster.name='cluster_a')</code></li>
+<li><code>cluster.password : Hazelcast cluster/group password [Optional]  (i.e cluster.password='pass@cluster_a')</code></li>
+<li><code>cluster.addresses : Hazelcast cluster addresses (ip:port) as a comma separated string [Optional, client mode only] (i.e cluster.addresses='192.168.1.1:5700,192.168.1.2:5700')</code></li>
+<li><code>well.known.addresses : Hazelcast WKAs (ip) as a comma separated string [Optional, server mode only] (i.e well.known.addresses='192.168.1.1,192.168.1.2')</code></li>
+<li><code>collection.name : Hazelcast collection object name [Optional, can be used to share single table between multiple EPs] (i.e collection.name='stockTable')</code></li>
+</ul>
+<p><strong>Examples</strong></p>
+<ul>
+<li>Creating a table backed by a new Hazelcast instance</li>
+</ul>
+<p>The following query creates an event table named <code>RoomTypeTable</code> with the attributes <code>roomNo</code> (an <code>INT</code> attribute) and <code>type</code> (a <code>STRING</code> attribute), backed by a <em>new</em> Hazelcast Instance.</p>
+<pre><code class="sql">@from(eventtable = 'hazelcast')
+define table RoomTypeTable(roomNo int, type string);
+</code></pre>
+
+<ul>
+<li>Creating a table backed by a new Hazelcast instance in a new Hazelcast cluster
+The following query creates an event table named <code>RoomTypeTable</code> with the attributes <code>roomNo</code> (an <code>INT</code> attribute) and <code>type</code> (a <code>STRING</code> attribute), backed by a <em>new</em> Hazelcast Instance in a new Hazelcast cluster.</li>
+</ul>
+<pre><code class="sql">@from(eventtable = 'hazelcast', cluster.name = 'cluster_a', cluster.password = 'pass@cluster_a')
+define table RoomTypeTable(roomNo int, type string);
+</code></pre>
+
+<ul>
+<li>Creating a table backed by an existing Hazelcast instance in an existing Hazelcast cluster
+The following query creates an event table named <code>RoomTypeTable</code> with the attributes <code>roomNo</code> (an <code>INT</code> attribute) and <code>type</code> (a <code>STRING</code> attribute), backed by an existing Hazelcast Instance in an existing Hazelcast Cluster.</li>
+</ul>
+<pre><code class="sql">@from(eventtable = 'hazelcast', cluster.name = 'cluster_a', cluster.password = 'pass@cluster_a', cluster.addresses='192.168.1.1:5700,192.168.1.2.5700')
+define table RoomTypeTable(roomNo int, type string);
+</code></pre>
+
+<h4 id="rdbms-event-table">RDBMS Event Table</h4>
+<p>An event table can be backed with an RDBMS event store using the <code>From</code> annotation. You can also provide the connection instructions to the event table with this annotation. The RDBMS table name can be different from the event table name defined in Siddhi, and Siddhi always refers to the defined event table name. However the defined event table name cannot be same as an already existing stream name because syntactically, both are considered the same in the Siddhi Query Language.</p>
+<p>*The RDBMS event table has been tested with the following databases:</p>
+<ul>
+<li>MySQL</li>
+<li>H2</li>
+<li>Oracle*</li>
+</ul>
+<p><strong>Example</strong></p>
+<ul>
+<li>Creating an event table backed by an RDBMS table</li>
+</ul>
+<p>The following query creates an event table named <code>RoomTypeTable</code> with the attributes <code>roomNo</code> (an <code>INT</code> attribute) and <code>type</code> (a <code>STRING</code> attribute), backed by an RDBMS table named <code>RoomTable</code> from the data source named <code>AnalyticsDataSource</code>.</p>
+<pre><code class="sql">@From(eventtable='rdbms', datasource.name='AnalyticsDataSource', table.name='RoomTable')
+define table RoomTypeTable (roomNo int, type string);
+</code></pre>
+
+<p>The datasource.name given here is injected to the Siddhi engine by the CEP/DAS server. To configure data sources in the CEP/DAS, see WSO2 Administration Guide - Configuring an RDBMS Datasource.
++ Creating an event table backed by a MySQL table
+The following query creates an event table named RoomTypeTable with the attributes roomNo (an INT attribute) and type (a STRING attribute), backed by a MySQL table named <code>RoomTable</code> from the <code>cepdb</code> database located at <code>localhost:3306</code> with <code>root</code> as both the username and the password.</p>
+<h5 id="caching-events">Caching Events</h5>
+<p><br>Several caches can be used with RDBMS backed event tables in order to reduce I/O operations and improve their performance. Currently all cache implementations provide size-based algorithms.</br></p>
+<p>The following elements are added with the Fromannotation to add caches.</p>
+<ul>
+<li>
+<p><code>cache</code>: This specifies the cache implementation to be added. The supported cache implementations are as follows.</p>
+<ul>
+<li>
+<p><code>Basic</code>: Events are cached in a First-In-First-Out manner where the oldest event is dropped when the cache is full.</p>
+</li>
+<li>
+<p><code>LRU</code> (Least Recently Used): The least recently used event is dropped when the cache is full.</p>
+</li>
+<li>
+<p><code>LFU</code> (Least Frequently Used): The least frequently used event is dropped when the cache is full.</p>
+</li>
+</ul>
+<p>If the <code>cache</code> element is not specified, the basic cache is added by default.</p>
+</li>
+<li>
+<p><code>cache.size</code>: This defines the size of the cache. If this element is not added, the default cache size of 4096 is added by default.</p>
+</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>The following query creates an event table named <code>RoomTypeTable</code> with the attributes <code>roomNo</code> (an <code>INT</code> attribute) and <code>type</code> (a <code>STRING</code> attribute), backed by an RDBMS table using the LRU algorithm for caching 3000 events.</p>
+<pre><code class="sql">@From(eventtable='rdbms', datasource.name='AnalyticsDataSource', table.name='RoomTable', cache='LRU', cache.size='3000')define table RoomTypeTable (roomNo int, type string);
+</code></pre>
+
+<h5 id="using-bloom-filters">Using Bloom filters</h5>
+<p>A Bloom Filter is an algorithm or an approach that can be used to perform quick searches. If you apply a Bloom Filter to a data set and carry out an <code>isAvailablecheck</code> on that specific Bloom Filter instance, an accurate answer is returned if the search item is not available. This allows the quick improvement of updates, joins and <code>isAvailable</code> checks.</p>
+<p><strong>Example</strong></p>
+<p>The following example shows how to include Bloom filters in an event table update query.</p>
+<pre><code class="sql">define stream StockStream (symbol string, price float, volume long);define stream CheckStockStream (symbol string, volume long);
+@from(eventtable = 'rdbms' ,datasource.name = 'cepDB' , table.name = 'stockInfo' , bloom.filters = 'enable')
+define table StockTable (symbol string, price float, volume long);
+
+@info(name = 'query1')
+from StockStream
+insert into StockTable ;
+
+@info(name = 'query2')
+from CheckStockStream[(StockTable.symbol==symbol) in StockTable]
+insert into OutStream;
+</code></pre>
+
+<h3 id="supported-event-table-operators">Supported Event Table Operators</h3>
+<p>The following event table operators are supported for Siddhi.</p>
+<h4 id="insert-into">Insert into</h4>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">from &lt;input stream name&gt; 
+select &lt;attribute name&gt;, &lt;attribute name&gt;, ...
+insert into &lt;table name&gt;
+</code></pre>
+
+<p>To insert only the specified output event category, use the <code>current events</code>, <code>expired events</code> or the <code>all events</code> keyword between <code>insert</code> and <code>into</code> keywords. For more information, see Output Event Categories.</p>
+<p><strong>Purpose</strong></p>
+<p>To store filtered events in a specific event table.</p>
+<p><strong>Parameters</strong></p>
+<ul>
+<li>
+<p><code>input stream name</code>: The input stream from which the events are taken to be stored in the event table.</p>
+</li>
+<li>
+<p><code>attribute name</code>: Attributes of the chosen events that are selected to be saved in the event table.</p>
+</li>
+<li>
+<p><code>table name</code>: The name of the event table in which the events should be saved.</p>
+</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>The following query inserts all the temperature events from the <code>TempStream</code> event stream to the <code>TempTable</code> event table.</p>
+<pre><code class="sql">from TempStream
+select *
+insert into TempTable;
+</code></pre>
+
+<h4 id="delete">Delete</h4>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">from &lt;input stream name&gt; 
+select &lt;attribute name&gt;, &lt;attribute name&gt;, ...
+delete &lt;table name&gt;
+    on &lt;condition&gt;
+</code></pre>
+
+<p>The <code>condition</code> element specifies the basis on which events are selected to be deleted. When specifying this condition, the attribute names should be referred to with the table name.
+To delete only the specified output category, use the <code>current events</code>, <code>expired events</code> or the <code>all events</code> keyword. For more information, see Output Event Categories.</p>
+<p><strong>Purpose</strong></p>
+<p>To delete selected events that are stored in a specific event table.</p>
+<p><strong>Parameters</strong></p>
+<ul>
+<li>
+<p><code>input stream name</code>: The input stream that is the source of the events stored in the event table.</p>
+</li>
+<li>
+<p><code>attribute name</code>: Attributes to which the given condition is applied in order to filter the events to be deleted.</p>
+</li>
+<li>
+<p><code>table name</code>: The name of the event table from which the filtered events are deleted.</p>
+</li>
+<li>
+<p><code>condition</code>: The condition based on which the events to be deleted are selected.</p>
+</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>The following query deletes all the entries in the <code>RoomTypeTable</code> event table that have a room number that matches the room number in any event in the <code>DeleteStream</code> event stream.</p>
+<pre><code class="sql">define table RoomTypeTable (roomNo int, type string);
+define stream DeleteStream (roomNumber int);
+
+from DeleteStream
+delete RoomTypeTable
+    on RoomTypeTable.roomNo == roomNumber;
+</code></pre>
+
+<h4 id="update">Update</h4>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">from &lt;input stream name&gt; 
+select &lt;attribute name&gt; as &lt;table attribute name&gt;, &lt;attribute name&gt; as &lt;table attribute name&gt;, ...
+update &lt;table name&gt;
+    on &lt;condition&gt;
+</code></pre>
+
+<p>The <code>condition</code> element specifies the basis on which events are selected to be updated. When specifying this condition, the attribute names should be referred to with the table name.
+To update only the specified output category, use the <code>current events</code>, <code>expired events</code> or the <code>all events</code> keyword. For more information, see Output Event Categories.</p>
+<p><strong>Purpose</strong></p>
+<p>To update selected events in an event table.</p>
+<p><strong>Parameters</strong></p>
+<ul>
+<li>
+<p><code>input stream name</code>: The input stream that is the source of the events stored in the event table.</p>
+</li>
+<li>
+<p><code>attribute name</code>: Attributes to which the given <code>condition</code> is applied in order to filter the events to be updated.</p>
+</li>
+<li>
+<p><code>table name</code>: The name of the event table in which the filtered events should be updated.</p>
+</li>
+<li>
+<p><code>condition</code>: The condition based on which the events to be updated are selected.</p>
+</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>The following query updates room type of all the events in the <code>RoomTypeTable</code> event table that have a room number that matches the room number in any event in the <code>UpdateStream</code> event stream.</p>
+<pre><code class="sql">define table RoomTypeTable (roomNo int, type string);
+define stream UpdateStream (roomNumber int, roomType string);
+
+from UpdateStream
+select roomType as type
+update RoomTypeTable
+    on RoomTypeTable.roomNo == roomNumber;
+</code></pre>
+
+<h4 id="insert-overwrite">Insert Overwrite</h4>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">from &lt;input stream name&gt; 
+select &lt;attribute name&gt; as &lt;table attribute name&gt;, &lt;attribute name&gt; as &lt;table attribute name&gt;, ...
+insert overwrite &lt;table name&gt;
+    on &lt;condition&gt;
+</code></pre>
+
+<p>The <code>condition</code> element specifies the basis on which events are selected to be inserted or overwritten. When specifying this condition, the attribute names should be referred to with the table name.
+When specifying the <code>table attribute</code> name, the attributes should be specified with the same name specified in the event table, allowing Siddhi to identify the attributes that need to be updated/inserted in the event table.</p>
+<p><strong>Purpose</strong></p>
+<p><strong>Parameters</strong></p>
+<ul>
+<li>
+<p><code>input stream name</code>: The input stream that is the source of the events stored in the event table.</p>
+</li>
+<li>
+<p><code>attribute name</code>: Attributes to which the given <code>condition</code> is applied in order to filter the events to be inserted or over-written.</p>
+</li>
+<li>
+<p><code>table name</code>: The name of the event table in which the filtered events should be inserted or over-written.</p>
+</li>
+<li>
+<p><code>condition</code> : The condition based on which the events to be inserted or over-written are selected.</p>
+</li>
+</ul>
+<p><em>Example</em>
+The following query searches for events in the <code>UpdateTable</code> event table that have room numbers that match the same in the <code>UpdateStream</code> stream. When such events are founding the event table, they are updated. When a room number available in the stream is not found in the event table, it is inserted from the stream.
+ ```sql
+ define table RoomTypeTable (roomNo int, type string);
+ define stream UpdateStream (roomNumber int, roomType string);</p>
+<p>from UpdateStream
+ select roomNumber as roomNo, roomType as type
+ insert overwrite RoomTypeTable
+     on RoomTypeTable.roomNo == roomNo;
+ ```</p>
+<h4 id="in">In</h4>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">&lt;condition&gt; in &lt;table name&gt;
+</code></pre>
+
+<p>The <code>condition</code> element specifies the basis on which events are selected to be inserted or overwritten. When specifying this condition, the attribute names should be referred to with the table name.</p>
+<p><strong>Purpose</strong></p>
+<p><strong>Parameters</strong></p>
+<p><strong>Example</strong></p>
+<pre><code class="sql">define table ServerRoomTable (roomNo int);
+define stream TempStream (deviceID long, roomNo int, temp double);
+
+from TempStream[ServerRoomTable.roomNo == roomNo in ServerRoomTable]
+insert into ServerTempStream;
+</code></pre>
+
+<h4 id="join">Join</h4>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">from &lt;input stream name&gt;#window.length(1) join &lt;table_name&gt;
+    on &lt;input stream name&gt;.&lt;attribute name&gt; &lt;condition&gt; &lt;table_name&gt;.&lt;table attribute name&gt;
+select &lt;input stream name&gt;.&lt;attribute name&gt;, &lt;table_name&gt;.&lt;table attribute name&gt;, ...
+insert into &lt;output stream name&gt;
+</code></pre>
+
+<p>At the time of joining, the event table should not be associated with window operations because an event table is not an active construct. Two event tables cannot be joined with each other due to the same reason.</p>
+<p><strong>Purpose</strong>
+To allow a stream to retrieve information from an event table.</p>
+<p><strong>Parameters</strong></p>
+<p><strong>Example</strong></p>
+<p>The following query performs a join to update the room number of the events in the <code>TempStream</code> stream with that of the corresponding events in the <code>RoomTypeTable</code> event table, and then inserts the updated events into the <code>EnhancedTempStream</code> stream.</p>
+<pre><code class="sql">define table RoomTypeTable (roomNo int, type string);
+define stream TempStream (deviceID long, roomNo int, temp double);
+
+from TempStream join RoomTypeTable
+    on RoomTypeTable.roomNo == TempStream.roomNo
+select deviceID, RoomTypeTable.roomNo as roomNo, type, temp
+insert into EnhancedTempStream;
+</code></pre>
+
+<h2 id="event-window">Event Window</h2>
+<p>An event window is a window that can be shared across multiple queries. Events are inserted from one or more streams. The event window publishes current and/or expired events as the output. The time at which these events are published depends on the window type.</p>
+<p><strong>Syntax</strong></p>
+<p>The following is the syntax for an event window.</p>
+<pre><code class="sql">define window &lt;event window name&gt; (&lt;attribute name&gt; &lt;attribute type&gt;, &lt;attribute name&gt; &lt;attribute type&gt;, ... ) &lt;window type&gt;(&lt;parameter&gt;, &lt;parameter&gt;, …) &lt;output event type&gt;;
+</code></pre>
+
+<p><strong>Examples</strong></p>
+<ul>
+<li>Returning all output categories</li>
+</ul>
+<p>In the following query, the window type is not specified in the window definition. Therefore, it emits both current and expired events as the output.</p>
+<pre><code class="sql">define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second);
+</code></pre>
+
+<ul>
+<li>Returning a specified output category</li>
+</ul>
+<p>In the following query, the window type is <code>output all events</code>. Therefore, it emits both current and expired events as the output.</p>
+<pre><code class="sql">define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second) output all events;
+</code></pre>
+
+<h3 id="supported-event-window-operators">Supported Event Window Operators</h3>
+<p>The following operators are supported for event windows.</p>
+<h4 id="insert-into_1">Insert Into</h4>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">from &lt;input stream name&gt; 
+select &lt;attribute name&gt;, &lt;attribute name&gt;, ...
+insert into &lt;window name&gt;
+</code></pre>
+
+<p>To insert only the specified output event category, use the <code>current events</code>, <code>expired events</code> or the <code>all events</code> keyword between <code>insert</code> and <code>into</code> keywords. For more information, see Output Event Categories.</p>
+<p><strong>Purpose</strong></p>
+<p>To insert events from an event stream to a window.</p>
+<p><strong>Parameters</strong></p>
+<ul>
+<li>
+<p><code>input stream name</code>:  The event stream from which events are inserted into the event window.</p>
+</li>
+<li>
+<p><code>attribute name</code>: The name of the attributes with which the events are inserted from the event stream to the event window. Multiple attributes can be specified as a comma separated list.</p>
+</li>
+<li>
+<p><code>window name</code>: The event window to which events are inserted from the event stream.</p>
+</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>The following query inserts both current and expired events from an event stream named <code>sensorStream</code> to an event window named <code>sensorWindow</code>.</p>
+<pre><code class="sql">from SensorStream
+insert into SensorWindow;
+</code></pre>
+
+<h4 id="output">Output</h4>
+<p>An event window can be used as a stream in any query. However, an ordinary window cannot be applied to the output of an event window.</p>
+<p><strong>Syntax</strong></p>
+<pre><code class="sql">from &lt;window name&gt; 
+select &lt;attribute name&gt;, &lt;attribute name&gt;, ...
+insert into &lt;event stream name&gt;
+</code></pre>
+
+<p><strong>Purpose</strong></p>
+<p>To inject the output of an event window into an event stream.</p>
+<p><strong>Parameters</strong></p>
+<ul>
+<li>
+<p><code>window name</code>: The event window of which the output is injected into the specified stream.</p>
+</li>
+<li>
+<p><code>attribute name</code>: The name of the attributes with which the events are inserted from the event stream to the event window. Multiple attributes can be specified as a comma separated list.</p>
+</li>
+<li>
+<p><code>event stream name</code>: The event stream to which the output of the specified event window is injected.</p>
+</li>
+</ul>
+<p><strong>Example</strong>
+The following query selects the name and the maximum values for the <code>value</code> and <code>roomNo</code> attributes from an event window named <code>SensorWindow</code>, and inserts them into an event stream named <code>MaxSensorReadingStream</code>.</p>
+<pre><code class="sql">from SensorWindow
+select name, max(value) as maxValue, roomNo
+insert into MaxSensorReadingStream;
+</code></pre>
+
+<h4 id="join_1">Join</h4>
+<p><strong>Example</strong></p>
+<pre><code class="sql"> define stream TempStream(deviceID long, roomNo int, temp double);
+ define stream RegulatorStream(deviceID long, roomNo int, isOn bool);
+ define window TempWindow(deviceID long, roomNo int, temp double) time(1 min);
+
+ from TempStream[temp &gt; 30.0]
+ insert into TempWindow;
+
+ from TempWindow
+ join RegulatorStream[isOn == false]#window.length(1) as R
+ on TempWindow.roomNo == R.roomNo
+ select TempWindow.roomNo, R.deviceID, 'start' as action
+ insert into RegulatorActionStream;
+</code></pre>
+
+<h2 id="event-trigger">Event Trigger</h2>
+<p>Event triggers allow events to be created periodically based on a specified time interval.</p>
+<p><strong>Syntax</strong></p>
+<p>The following is the syntax for an event trigger definition.</p>
+<pre><code class="sql">define trigger &lt;trigger name&gt; at {'start'| every &lt;time interval&gt;| '&lt;cron expression&gt;'};
+</code></pre>
+
+<p><strong>Examples</strong></p>
+<ul>
+<li>Triggering events regularly at specific time intervals</li>
+</ul>
+<p>The following query triggers events every 5 minutes.</p>
+<pre><code class="sql"> define trigger FiveMinTriggerStream at every 5 min;
+</code></pre>
+
+<ul>
+<li>Triggering events at a specific time on specified days
+The following query triggers an event at 10.15 AM every Monday, Tuesday, Wednesday, Thursday and Friday.</li>
+</ul>
+<pre><code class="sql"> define trigger FiveMinTriggerStream at '0 15 10 ? * MON-FRI';
+
+</code></pre>
+
+<h2 id="siddhi-logger">Siddhi Logger</h2>
+<p>The Siddhi Logger logs events that arrive in different logger priorities such as <code>INFO</code>, <code>DEBUG</code>, <code>WARN</code>, <code>FATAL</code>, <code>ERROR</code>, <code>OFF</code>, and <code>TRACE</code>.</p>
+<p><strong>Syntax</strong></p>
+<p>The following is the syntax for a query with a Siddhi logger.</p>
+<pre><code class="sql">&lt;void&gt; log(&lt;string&gt; priority, &lt;string&gt; logMessage, &lt;bool&gt; isEventLogged)
+</code></pre>
+
+<p>The parameters configured are as follows.</p>
+<ul>
+<li>
+<p><code>prioroty</code>: The logging priority. Possible values are <code>INFO</code>, <code>DEBUG</code>, <code>WARN</code>, <code>FATAL</code>, <code>ERROR</code>, <code>OFF</code>, and <code>TRACE</code>. If no value is specified for this parameter, <code>INFO</code> is printed as the priority by default.</p>
+</li>
+<li>
+<p><code>logMessage</code>: This parameter allows you to specify a message to be printed in the log.</p>
+</li>
+<li>
+<p><code>isEventLogged</code>: This parameter specifies whether the event body should be included in the log. Possible values are <code>true</code> and <code>false</code>. If no value is specified, the event body is not printed in the log by default.</p>
+</li>
+</ul>
+<p><strong>Examples</strong></p>
+<ul>
+<li>The following query logs the event with the <code>INFO</code> logging priority. This is because the priority is not specified.</li>
+</ul>
+<pre><code class="sql">from StockStream#log()
+select *
+insert into OutStream;
+</code></pre>
+
+<ul>
+<li>The following query logs the event with the <code>INFO</code> logging priority (because the priority is not specified) and the <code>test message</code> text.</li>
+</ul>
+<pre><code class="sql">from StockStream#log('test message')
+select *
+insert into OutStream;
+</code></pre>
+
+<ul>
+<li>The following query logs the event with the <code>INFO</code> logging priority because a priority is not specified. The event itself is printed in the log.</li>
+</ul>
+<pre><code class="sql">from StockStream#log(true)
+select *
+insert into OutStream;
+</code></pre>
+
+<ul>
+<li>The following query logs the event with the <code>INFO</code> logging priority (because the priority is not specified) and the <code>test message</code> text. The event itself is printed in the log.</li>
+</ul>
+<pre><code class="sql">from StockStream#log('test message', true)
+select *
+insert into OutStream;
+</code></pre>
+
+<ul>
+<li>The following query logs the event with the <code>WARN</code> logging priority and the <code>test message</code> text.</li>
+</ul>
+<pre><code class="sql">from StockStream#log('warn','test message')
+select *
+insert into OutStream;
+</code></pre>
+
+<ul>
+<li>The following query logs the event with the <code>WARN</code> logging priority and the <code>test message</code> text.  The event itself is printed in the log.</li>
+</ul>
+<pre><code class="sql">from StockStream#log('warn','test message',true)
+select *
+insert into OutStream;
+</code></pre>
+
+<h2 id="eval-script">Eval Script</h2>
+<p>Eval script allows Siddhi to process events using other programming languages by including their functions in the Siddhi queries. Eval script functions can be defined like event tables or streams and referred in the queries as Inbuilt Functions of Siddhi.</p>
+<p><strong>Syntax</strong></p>
+<p>The following is the syntax for a Siddhi query with an Eval Script definition.</p>
+<pre><code class="sql">define function &lt;function name&gt;[&lt;language name&gt;] return &lt;return type&gt; {
+    &lt;operation of the function&gt;
+};
+</code></pre>
+
+<p>The following parameters are configured when defining an eval script.</p>
+<ul>
+<li>
+<p><code>function name</code>:  The name of the function from another programming language that should be included in the Siddhi query.</p>
+</li>
+<li>
+<p><code>language name</code>: The name of the other programming language from which the function included in the Siddhi query is taken. The languages supported are JavaScript, R and Scala.</p>
+</li>
+<li>
+<p><code>return type</code>: The return type of the function defined. The return type can be <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>, <code>string</code>, <code>bool</code> or <code>object</code>. Here the function implementer should be responsible for returning the output on the defined return type for proper functionality. </p>
+</li>
+<li>
+<p><code>operation of the function</code>: Here, the execution logic of the defined logos should be added. This logic should be written in the language specified in the <code>language name</code> parameter, and the return should be of the type specified in the <code>return type</code> parameter.</p>
+</li>
+</ul>
+<p><strong>Examples</strong></p>
+<ul>
+<li>Concatenating a JavaScript function</li>
+</ul>
+<p>The following query performs the concatenating function of the JavaScript language and returns the output as a string.</p>
+<pre><code class="sql">define function concatFn[JavaScript] return string {
+    var str1 = data[0];
+    var str2 = data[1];
+    var str3 = data[2];
+    var responce = str1 + str2 + str3;
+    return responce;
+};
+
+define stream TempStream(deviceID long, roomNo int, temp double);
+
+from TempStream
+select concatFn(roomNo,'-',deviceID) as id, temp 
+insert into DeviceTempStream;
+</code></pre>
+
+<ul>
+<li>Concatenating an R function</li>
+</ul>
+<p>The following query performs the concatenating function of the R language and returns the output as a string.</p>
+<pre><code class="sql">define function concatFn[R] return string {
+    return(paste(data, collapse=&quot;&quot;));
+};
+
+define stream TempStream(deviceID long, roomNo int, temp double);
+
+from TempStream
+select concatFn(roomNo,'-',deviceID) as id, temp
+insert into DeviceTempStream;
+</code></pre>
+
+<ul>
+<li>Concatenating a Scala function</li>
+</ul>
+<p>The following query performs the concatenating function of the Scala language and returns the output as a string.</p>
+<pre><code class="sql">define function concatFn[Scala] return string {
+    var concatenatedString =
+     for(i &lt;- 0 until data.length){
+         concatenatedString += data(i).toString
+     }
+     concatenatedString
+};
+
+define stream TempStream(deviceID long, roomNo int, temp double);
+
+from TempStream
+select concatFn(roomNo,'-',deviceID) as id, temp
+insert into DeviceTempStream;
+</code></pre>
                 
                   
                 
