@@ -160,4 +160,20 @@
     <Match>
         <Package name="~org\.wso2\.siddhi\.sample.*"/>
     </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.doc.gen.commons.ExtensionMetaData"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.doc.gen.commons.ParameterMetaData"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.doc.gen.commons.ReturnAttributeMetaData"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.doc.gen.commons.SystemParameterMetaData"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
 </FindBugsFilter>
