@@ -176,4 +176,8 @@
         <Class name="org.wso2.siddhi.doc.gen.commons.SystemParameterMetaData"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core\.query\.selector\.attribute\.aggregator\.incremental.*"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
 </FindBugsFilter>
