@@ -128,7 +128,9 @@ public class SnapshotService {
             for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
                 snapshotableList = entry.getValue();
                 for (Snapshotable snapshotable : snapshotableList) {
-                    snapshotable.restoreState(snapshots.get(snapshotable.getElementId()));
+                    if (snapshots != null) {
+                        snapshotable.restoreState(snapshots.get(snapshotable.getElementId()));
+                    }
                 }
             }
         } finally {
