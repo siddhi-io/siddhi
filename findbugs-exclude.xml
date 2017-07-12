@@ -143,6 +143,18 @@
         <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
     </Match>
     <Match>
+        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.AvgIncrementalAttributeAggregator"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.CountIncrementalAttributeAggregator"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.SumIncrementalAttributeAggregator"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
         <Package name="~org\.wso2\.siddhi\.core.*"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
@@ -159,22 +171,6 @@
     </Match>
     <Match>
         <Package name="~org\.wso2\.siddhi\.sample.*"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.doc.gen.commons.ExtensionMetaData"/>
-        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.doc.gen.commons.ParameterMetaData"/>
-        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.doc.gen.commons.ReturnAttributeMetaData"/>
-        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.doc.gen.commons.SystemParameterMetaData"/>
-        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
     <Match>
         <Package name="~org\.wso2\.siddhi\.core\.query\.selector\.attribute\.aggregator\.incremental.*"/>
