@@ -58,9 +58,8 @@ public class InMemoryTable extends Table implements Snapshotable {
 
 
     @Override
-    public void init(TableDefinition tableDefinition,
-                     StreamEventPool storeEventPool, StreamEventCloner storeEventCloner,
-                     ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+public void init(TableDefinition tableDefinition, StreamEventPool storeEventPool,
+            StreamEventCloner storeEventCloner, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         this.tableDefinition = tableDefinition;
         this.tableStreamEventCloner = storeEventCloner;
 

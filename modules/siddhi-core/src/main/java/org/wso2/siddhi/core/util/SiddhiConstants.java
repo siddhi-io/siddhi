@@ -63,6 +63,8 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_ELEMENT_IDLE_TIME = "idle.time";
     public static final String ANNOTATION_ELEMENT_INCREMENT = "increment";
     public static final String ANNOTATION_ELEMENT_TYPE = "type";
+    public static final String ANNOTATION_BUFFER_SIZE = "BufferSize";
+
 
     public static final String TRUE = "true";
     public static final String TRIGGER_START = "start";
@@ -80,6 +82,7 @@ public final class SiddhiConstants {
     public static final String METRIC_INFIX_STREAMS = "Streams";
     public static final String METRIC_INFIX_SIDDHI = "Siddhi";
     public static final String METRIC_INFIX_QUERIES = "Queries";
+    public static final String METRIC_INFIX_AGGRIGATIONS = "Aggregations";
     public static final String METRIC_INFIX_WINDOWS = "Windows";
     public static final String METRIC_DELIMITER = ".";
     public static final String METRIC_AGGREGATE_ANNOTATION = "[+]";

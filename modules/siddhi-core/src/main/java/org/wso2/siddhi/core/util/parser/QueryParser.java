@@ -102,21 +102,8 @@ public class QueryParser {
             } else {
                 queryName = "query_" + queryIndex + "_" + UUID.randomUUID().toString();
             }
-            if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
-                if (nameElement != null) {
-                    String metricName =
-                            siddhiAppContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix() +
-                                    SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_EXECUTION_PLANS +
-                                    SiddhiConstants.METRIC_DELIMITER + siddhiAppContext.getName() +
-                                    SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_SIDDHI +
-                                    SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_QUERIES +
-                                    SiddhiConstants.METRIC_DELIMITER + queryName;
-                    latencyTracker = siddhiAppContext.getSiddhiContext()
-                            .getStatisticsConfiguration()
-                            .getFactory()
-                            .createLatencyTracker(metricName, siddhiAppContext.getStatisticsManager());
-                }
-            }
+            latencyTracker = QueryParserHelper.getLatencyTracker(siddhiAppContext, queryName,
+                    SiddhiConstants.METRIC_INFIX_QUERIES);
             OutputStream.OutputEventType outputEventType = query.getOutputStream().getOutputEventType();
             boolean outputExpectsExpiredEvents = false;
             if (outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS) {
@@ -194,9 +181,9 @@ public class QueryParser {
                 }
             }
 
-            OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(query.getOutputStream()
-                            .getId(),
-                    query.getOutputRate(), query.getSelector().getGroupByList().size() != 0, isWindow,
+            OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(
+                    query.getOutputStream().getId(), query.getOutputRate(),
+                    query.getSelector().getGroupByList().size() != 0, isWindow,
                     siddhiAppContext.getScheduledExecutorService(), siddhiAppContext, queryName);
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
                 selector.setBatchingEnabled(false);
@@ -241,4 +228,6 @@ public class QueryParser {
         }
         return queryRuntime;
     }
+
+
 }
