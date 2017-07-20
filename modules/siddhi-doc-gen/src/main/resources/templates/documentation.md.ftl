@@ -54,6 +54,11 @@ ${extension.name}(<#list extension.parameters><#items as parameter><${parameter.
 @PrimaryKey("PRIMARY_KEY")
 @Index("INDEX")
 ```
+
+<#elseif extensionType == "Script">
+```
+define function <function name>[${extension.name}] return <#if extension.returnAttributes??>${returnAttribute.type?join("|", "")}</#if> {"<"operation of the function">"};
+```
 </#if>
 
 <#list extension.parameters>
