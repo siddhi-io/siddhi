@@ -15,4 +15,5 @@ pages:
 - License: license.md
 - API Docs:
   - 4.0.0-M23-SNAPSHOT: api/4.0.0-M23-SNAPSHOT.md
+  - 4.0.0-M24-SNAPSHOT: api/4.0.0-M24-SNAPSHOT.md
 theme: material
