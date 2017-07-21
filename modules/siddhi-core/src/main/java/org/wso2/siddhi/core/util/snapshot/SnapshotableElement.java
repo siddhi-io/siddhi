@@ -30,4 +30,8 @@ public interface SnapshotableElement {
     void onSave(Map<String, Object> state);
 
     String getElementId();
+
+    void freeze();
+
+    void unfreeze();
 }

@@ -21,6 +21,8 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.SnapshotableElementsHolder;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.debugger.QueryState;
+import org.wso2.siddhi.core.util.persistence.PersistenceStore;
+
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -29,14 +31,82 @@ import java.util.List;
 import java.util.Map;
 
 public class SnapshotService {
-    private static final Logger log = Logger.getLogger(SnapshotService.class);
+
     private HashMap<String, List<Snapshotable>> snapshotableMap = new HashMap<String, List<Snapshotable>>();
+    private static final Logger LOGGER = Logger.getLogger(SnapshotService.class);
+    private static final String SNAPSHOTABLE_STATES_KEY = "snapshotable.states";
+    private static final SnapshotableElementsHolder snapshotableElementsHolder = new SnapshotableElementsHolder();
     private ExecutionPlanContext executionPlanContext;
-    private SnapshotableElementsHolder snapshotableElementsHolder;
+    private static PersistenceStore persistenceStore;
 
     public SnapshotService(ExecutionPlanContext executionPlanContext) {
         this.executionPlanContext = executionPlanContext;
-        this.snapshotableElementsHolder = new SnapshotableElementsHolder();
+    }
+
+    public static void persistSnapshotableElements() {
+        if (persistenceStore != null) {
+            HashMap<String, Map<String, Object>> snapshots =
+                    new HashMap<String, Map<String, Object>>(snapshotableElementsHolder.getSnapshotableElements().size());
+            LOGGER.debug("Taking snapshots of snapshotable elements...");
+            try {
+                for (SnapshotableElement snapshotable : snapshotableElementsHolder.getSnapshotableElements()) {
+                    snapshotable.freeze();
+                    snapshots.put(snapshotable.getElementId(), snapshotable.currentState());
+                }
+                byte[] serializedSnapshots = ByteSerializer.OToB(snapshots);
+                LOGGER.debug("Finished taking snapshots of snapshotable elements.");
+                persistenceStore.save(SNAPSHOTABLE_STATES_KEY, String.valueOf(System.currentTimeMillis()), serializedSnapshots);
+                SnapshotService.nofityReceiversOnSave(serializedSnapshots);
+            } finally {
+                for (SnapshotableElement snapshotable : snapshotableElementsHolder.getSnapshotableElements()) {
+                    snapshotable.unfreeze();
+                }
+            }
+        }
+    }
+
+    public static void restoreSnapshotableElements() {
+        if (persistenceStore != null) {
+            String revision = persistenceStore.getLastRevision(SNAPSHOTABLE_STATES_KEY);
+            if (revision != null) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Restoring snapshotable elements revision: " + revision + " ...");
+                }
+                byte[] snapshot = persistenceStore.load(SNAPSHOTABLE_STATES_KEY, revision);
+                HashMap<String, Map<String, Object>> snapshots =
+                        (HashMap<String, Map<String, Object>>) ByteSerializer.BToO(snapshot);
+                if (snapshots != null) {
+                    for (Map.Entry<String, Map<String, Object>> entry : snapshots.entrySet()) {
+                        String elementName = entry.getKey();
+                        Map<String, Object> savedState = entry.getValue();
+                        SnapshotableElement snapshotable = snapshotableElementsHolder.getSnapshotableElement(elementName);
+                        if (snapshotable == null) {
+                            SnapshotableElementsHolder.putExistingState(elementName, savedState);
+                        } else {
+                            try {
+                                snapshotable.freeze();
+                                snapshotable.restoreState(savedState);
+                            } finally {
+                                snapshotable.unfreeze();
+                            }
+                        }
+                    }
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Restored snapshotable elements revision: " + revision);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void nofityReceiversOnSave(byte[] snapshot) {
+        HashMap<String, Map<String, Object>> snapshots =
+                (HashMap<String, Map<String, Object>>) ByteSerializer.BToO(snapshot);
+        for (SnapshotableElement snapshotable : snapshotableElementsHolder.getSnapshotableElements()) {
+            if (snapshots != null && snapshots.get(snapshotable.getElementId()) != null) {
+                snapshotable.onSave(snapshots.get(snapshotable.getElementId()));
+            }
+        }
     }
 
     public synchronized void addSnapshotable(String queryName, Snapshotable snapshotable) {
@@ -57,7 +127,7 @@ public class SnapshotService {
     public byte[] snapshot() {
         HashMap<String, Object[]> snapshots = new HashMap<String, Object[]>(snapshotableMap.size());
         List<Snapshotable> snapshotableList = new ArrayList<Snapshotable>();
-        log.debug("Taking snapshot ...");
+        LOGGER.debug("Taking snapshot ...");
         try {
             executionPlanContext.getThreadBarrier().lock();
             for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
@@ -70,11 +140,11 @@ public class SnapshotService {
         } finally {
             executionPlanContext.getThreadBarrier().unlock();
         }
-        log.info("Snapshot taken of Execution Plan '" + executionPlanContext.getName() + "'");
+        LOGGER.info("Snapshot taken of Execution Plan '" + executionPlanContext.getName() + "'");
 
-        log.debug("Snapshot serialization started ...");
+        LOGGER.debug("Snapshot serialization started ...");
         byte[] serializedSnapshots = ByteSerializer.OToB(snapshots);
-        log.debug("Snapshot serialization finished.");
+        LOGGER.debug("Snapshot serialization finished.");
         return serializedSnapshots;
 
     }
@@ -113,12 +183,11 @@ public class SnapshotService {
         } finally {
             executionPlanContext.getThreadBarrier().unlock();
         }
-        log.debug("Taking snapshot finished.");
+        LOGGER.debug("Taking snapshot finished.");
 
         return queryState;
 
     }
-
 
     public void restore(byte[] snapshot) {
         HashMap<String, Object[]> snapshots = (HashMap<String, Object[]>) ByteSerializer.BToO(snapshot);
@@ -138,56 +207,8 @@ public class SnapshotService {
         }
     }
 
-    public byte[] snapshotReceivers() {
-        HashMap<String, Map<String, Object>> snapshots =
-                new HashMap<String, Map<String, Object>>(snapshotableElementsHolder.getSnapshotableElements().size());
-        log.debug("Taking Event Receiver Snapshots ...");
-        try {
-            executionPlanContext.getThreadBarrier().lock();
-            for (SnapshotableElement snapshotable : snapshotableElementsHolder.getSnapshotableElements()) {
-                snapshots.put(snapshotable.getElementId(), snapshotable.currentState());
-            }
-        } finally {
-            executionPlanContext.getThreadBarrier().unlock();
-        }
-        log.info("Event Receiver Snapshots has been taken ...");
-
-        log.debug("Event Receiver Snapshots serialization started ...");
-        byte[] serializedSnapshots = ByteSerializer.OToB(snapshots);
-        log.debug("Event Receiver Snapshots finished.");
-        return serializedSnapshots;
-    }
-
-    public void restoreReceivers(byte[] snapshot) {
-        HashMap<String, Map<String, Object>> snapshots =
-                (HashMap<String, Map<String, Object>>) ByteSerializer.BToO(snapshot);
-        try {
-            this.executionPlanContext.getThreadBarrier().lock();
-            if (snapshots != null) {
-                for (Map.Entry<String, Map<String, Object>> entry : snapshots.entrySet()) {
-                    String receiverName = entry.getKey();
-                    Map<String, Object> savedState = entry.getValue();
-                    SnapshotableElement snapshotable = snapshotableElementsHolder.getSnapshotableElement(receiverName);
-                    if (snapshotable == null) {
-                        SnapshotableElementsHolder.putExistingState(receiverName, savedState);
-                    } else {
-                        snapshotable.restoreState(savedState);
-                    }
-                }
-            }
-        } finally {
-            executionPlanContext.getThreadBarrier().unlock();
-        }
-    }
-
-    public void nofityReceiversOnSave(byte[] snapshot) {
-        HashMap<String, Map<String, Object>> snapshots =
-                (HashMap<String, Map<String, Object>>) ByteSerializer.BToO(snapshot);
-        for (SnapshotableElement snapshotable : snapshotableElementsHolder.getSnapshotableElements()) {
-            if (snapshots != null && snapshots.get(snapshotable.getElementId()) != null) {
-                snapshotable.onSave(snapshots.get(snapshotable.getElementId()));
-            }
-        }
+    public static void setPersistenceStore(PersistenceStore persistenceStore) {
+        SnapshotService.persistenceStore = persistenceStore;
     }
 
 }

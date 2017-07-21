@@ -19,6 +19,8 @@
 package org.wso2.siddhi.core;
 
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.util.persistence.PersistenceStore;
+import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.snapshot.SnapshotableElement;
 
 import java.util.ArrayList;
@@ -47,14 +49,6 @@ public class SnapshotableElementsHolder {
         LOGGER.info("Snapshotable Element " + element.getElementId() + " registered successfully.");
     }
 
-    public List<SnapshotableElement> getSnapshotableElements() {
-        return new ArrayList<SnapshotableElement>(SNAPSHOTABLE_ELEMENT_MAP.values());
-    }
-
-    public SnapshotableElement getSnapshotableElement(String elementName) {
-        return SNAPSHOTABLE_ELEMENT_MAP.get(elementName);
-    }
-
     public static Map<String, Object> getState(String elementId) {
         Map<String, Object> state;
         if (SNAPSHOTABLE_ELEMENT_MAP.get(elementId) != null) {
@@ -63,5 +57,13 @@ public class SnapshotableElementsHolder {
             state = existingStates.get(elementId);
         }
         return state;
+    }
+
+    public List<SnapshotableElement> getSnapshotableElements() {
+        return new ArrayList<SnapshotableElement>(SNAPSHOTABLE_ELEMENT_MAP.values());
+    }
+
+    public SnapshotableElement getSnapshotableElement(String elementName) {
+        return SNAPSHOTABLE_ELEMENT_MAP.get(elementName);
     }
 }

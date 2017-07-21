@@ -26,7 +26,6 @@ import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 public class PersistenceService {
 
     private static final Logger LOGGER = Logger.getLogger(PersistenceService.class);
-    private static final String SNAPSHOTABLE_STATES_KEY = "snapshotable.states";
     private String executionPlanName;
     private PersistenceStore persistenceStore;
     private SnapshotService snapshotService;
@@ -37,6 +36,7 @@ public class PersistenceService {
         this.persistenceStore = executionPlanContext.getSiddhiContext().getPersistenceStore();
         this.executionPlanName = executionPlanContext.getName();
         this.threadBarrier = executionPlanContext.getThreadBarrier();
+        SnapshotService.restoreSnapshotableElements();
     }
 
     public String persist() {
@@ -45,11 +45,8 @@ public class PersistenceService {
                 LOGGER.debug("Persisting...");
             }
             byte[] snapshot = snapshotService.snapshot();
-            byte[] receiversSnapshot = snapshotService.snapshotReceivers();
             String revision = System.currentTimeMillis() + "_" + executionPlanName;
             persistenceStore.save(executionPlanName, revision, snapshot);
-            persistenceStore.save(SNAPSHOTABLE_STATES_KEY, revision, receiversSnapshot);
-            snapshotService.nofityReceiversOnSave(receiversSnapshot);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Persisted.");
             }
@@ -74,32 +71,13 @@ public class PersistenceService {
         }
     }
 
-    public void restoreReceiversRevision(String revision) {
-        if (persistenceStore != null) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Restoring receivers revision: " + revision + " ...");
-            }
-            byte[] snapshot = persistenceStore.load(SNAPSHOTABLE_STATES_KEY, revision);
-            snapshotService.restoreReceivers(snapshot);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Restored receivers revision: " + revision);
-            }
-        } else {
-            throw new NoPersistenceStoreException("No persistence store assigned for execution plan " + executionPlanName);
-        }
-    }
-
     public void restoreLastRevision() {
         try {
             this.threadBarrier.lock();
             if (persistenceStore != null) {
                 String revision = persistenceStore.getLastRevision(executionPlanName);
-                String receiversRevision = persistenceStore.getLastRevision(SNAPSHOTABLE_STATES_KEY);
                 if (revision != null) {
                     restoreRevision(revision);
-                }
-                if (receiversRevision != null) {
-                    restoreReceiversRevision(receiversRevision);
                 }
             } else {
                 throw new NoPersistenceStoreException("No persistence store assigned for execution plan " + executionPlanName);
