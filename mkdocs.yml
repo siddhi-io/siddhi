@@ -12,15 +12,7 @@ pages:
   - Quick Start Guide: documentation/siddhi-quckstart-4.0.md
   - Siddhi Query Guide: documentation/siddhi-4.0.md
 - Extensions: extensions.md
-- About:
-  - License: about/license.md
-- Api:
-  - 4.0.0-M15-SNAPSHOT: api/4.0.0-M15-SNAPSHOT.md
-  - 4.0.0-M16-SNAPSHOT: api/4.0.0-M16-SNAPSHOT.md
+- License: license.md
 - API Docs:
-  - 4.0.0-M15-SNAPSHOT: api/4.0.0-M15-SNAPSHOT.md
-  - 4.0.0-M16-SNAPSHOT: api/4.0.0-M16-SNAPSHOT.md
-  - 4.0.0-M18-SNAPSHOT: api/4.0.0-M18-SNAPSHOT.md
-  - 4.0.0-M19-SNAPSHOT: api/4.0.0-M19-SNAPSHOT.md
-  - 4.0.0-M21-SNAPSHOT: api/4.0.0-M21-SNAPSHOT.md
+  - 4.0.0-M23-SNAPSHOT: api/4.0.0-M23-SNAPSHOT.md
 theme: material
