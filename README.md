@@ -27,9 +27,9 @@ List of Siddhi releases : [https://github.com/wso2/siddhi/releases](https://gith
 ### Try Siddhi
 Can find latest Siddhi with it's debugger feature at **[WSO2 Stream Processor](https://github.com/wso2/product-sp/releases)** 
 
-**Try latest Stable Siddhi with [WSO2 Data Analytics Server 3.1](http://wso2.com/analytics)** [try-it tool](https://docs.wso2.com/display/DAS310/Siddhi+Try+It+Tool)
+**Try latest Stable Siddhi with [WSO2 Data Analytics Server 3.1](http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17)** [try-it tool](https://docs.wso2.com/display/DAS310/Siddhi+Try+It+Tool)
 
-Siddhi is also used with [WSO2 IoT Server](http://wso2.com/iot) for IoT analytics and as an edge analytics library.
+Siddhi is also used with [WSO2 IoT Server](http://wso2.com/iot?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17) for IoT analytics and as an edge analytics library.
 
 ##Features Supported
 
