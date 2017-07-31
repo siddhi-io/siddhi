@@ -94,6 +94,7 @@
                 <element key="long">NUMERIC(19)</element>
                 <element key="integer">INTEGER</element>
                 <element key="float">FLOAT(16)</element>
+                <element key="bool">BIT</element>
                 <element key="isTableExist">SELECT TOP(1) * FROM $TABLE_NAME</element>
                 <element key="isTableRowExist">SELECT TOP(1) * FROM $TABLE_NAME WHERE $CONDITION</element>
                 <element key="limitSelectRow">SELECT TOP(1) * FROM $TABLE_NAME, $VALUES</element>
