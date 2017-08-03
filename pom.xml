@@ -170,6 +170,11 @@
                 <version>${execution.time.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.extension.siddhi.execution.string</groupId>
+                <artifactId>siddhi-execution-string</artifactId>
+                <version>${execution.string.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.extension.siddhi.store.rdbms</groupId>
                 <artifactId>siddhi-store-rdbms</artifactId>
                 <scope>test</scope>
@@ -486,6 +491,7 @@
         <snakeyaml.version>1.18</snakeyaml.version>
         <rdbms.version>4.0.0-M2</rdbms.version>
         <execution.time.version>4.0.1</execution.time.version>
+        <execution.string.version>4.0.1</execution.string.version>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <mavan.checkstyle.suppression.file>checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
     </properties>
