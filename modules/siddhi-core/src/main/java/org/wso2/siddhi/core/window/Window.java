@@ -35,7 +35,7 @@ import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.Scheduler;
-import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
+import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.parser.SchedulerParser;
@@ -223,20 +223,20 @@ public class Window implements FindableProcessor, Snapshotable {
      * {@inheritDoc}
      */
     @Override
-    public StreamEvent find(StateEvent matchingEvent, CompiledExpression compiledExpression) {
-        return ((FindableProcessor) this.internalWindowProcessor).find(matchingEvent, compiledExpression);
+    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
+        return ((FindableProcessor) this.internalWindowProcessor).find(matchingEvent, compiledCondition);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public CompiledExpression compileExpression(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                                SiddhiAppContext siddhiAppContext,
-                                                List<VariableExpressionExecutor> variableExpressionExecutors,
-                                                Map<String, Table> tableMap, String queryName) {
+    public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                               SiddhiAppContext siddhiAppContext,
+                                               List<VariableExpressionExecutor> variableExpressionExecutors,
+                                               Map<String, Table> tableMap, String queryName) {
         if (this.internalWindowProcessor instanceof FindableProcessor) {
-            return ((FindableProcessor) this.internalWindowProcessor).compileExpression(expression,
+            return ((FindableProcessor) this.internalWindowProcessor).compileCondition(condition,
                     matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap,
                     queryName);
         } else {
