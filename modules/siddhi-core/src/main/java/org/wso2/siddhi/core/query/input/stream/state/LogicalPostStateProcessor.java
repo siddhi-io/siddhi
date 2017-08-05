@@ -59,7 +59,15 @@ public class LogicalPostStateProcessor extends StreamPostStateProcessor {
     protected void process(StateEvent stateEvent, ComplexEventChunk complexEventChunk) {
         switch (type) {
             case AND:
-                if (stateEvent.getStreamEvent(partnerPreStateProcessor.getStateId()) != null) {
+                boolean process = false;
+                if (partnerPreStateProcessor instanceof AbsentLogicalPreStateProcessor) {
+                    process = ((AbsentLogicalPreStateProcessor) partnerPreStateProcessor).partnerCanProceed(stateEvent);
+                } else if (stateEvent.getStreamEvent(partnerPreStateProcessor.getStateId()) != null) {
+                    // Event received from a present processor
+                    process = true;
+                }
+
+                if (process) {
                     super.process(stateEvent, complexEventChunk);
                 } else {
                     thisStatePreProcessor.stateChanged();

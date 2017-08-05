@@ -54,21 +54,28 @@ public class State {
         return new LogicalStateElement(streamStateElement1, LogicalStateElement.Type.OR, streamStateElement2, time);
     }
 
-    public static StateElement logicalNot(StreamStateElement notStreamStateElement,
+    public static StateElement logicalNot(BasicSingleInputStream basicSingleInputStream,
                                           TimeConstant time) {
-        return new LogicalStateElement(null, LogicalStateElement.Type.NOT, notStreamStateElement, time);
+        return new AbsentStreamStateElement(basicSingleInputStream, time);
     }
 
-    public static StateElement logicalNotAnd(StreamStateElement notStreamStateElement,
-                                             StreamStateElement andStreamStateElement,
-                                             TimeConstant time) {
-        return new LogicalStateElement(andStreamStateElement, LogicalStateElement.Type.NOT, notStreamStateElement,
-                time);
-    }
+    public static StateElement logicalNotAnd(StreamStateElement streamStateElement1,
+                                             AbsentStreamStateElement streamStateElement2) {
 
-    public static StateElement logicalNotAnd(StreamStateElement notStreamStateElement,
-                                             StreamStateElement andStreamStateElement) {
-        return new LogicalStateElement(andStreamStateElement, LogicalStateElement.Type.NOT, notStreamStateElement);
+        if (streamStateElement1 instanceof AbsentStreamStateElement) {
+            // not A for 1 sec and not B for 1 sec
+            return new LogicalStateElement(streamStateElement1, LogicalStateElement.Type.AND,
+                    streamStateElement2);
+        }
+        if (streamStateElement2.getWaitingTime() == null) {
+            // not A and B
+            return new LogicalStateElement(streamStateElement1, LogicalStateElement.Type.AND,
+                    streamStateElement2);
+        } else {
+            // not A for 1 sec and B
+            return new LogicalStateElement(streamStateElement2, LogicalStateElement.Type.AND,
+                    streamStateElement1);
+        }
     }
 
     public static StateElement next(StateElement stateElement,
