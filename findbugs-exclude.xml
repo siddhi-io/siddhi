@@ -143,6 +143,18 @@
         <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
     </Match>
     <Match>
+        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.AvgIncrementalAttributeAggregator"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.CountIncrementalAttributeAggregator"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.SumIncrementalAttributeAggregator"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
         <Package name="~org\.wso2\.siddhi\.core.*"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
@@ -159,5 +171,17 @@
     </Match>
     <Match>
         <Package name="~org\.wso2\.siddhi\.sample.*"/>
+    </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core\.query\.selector\.attribute\.aggregator\.incremental.*"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream"/>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream"/>
+        <Bug pattern="SE_BAD_FIELD"/>
     </Match>
 </FindBugsFilter>

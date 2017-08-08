@@ -1,20 +1,19 @@
 site_name: WSO2 Siddhi
 extra_css:
-  - 'stylesheets/extra.css'
+- stylesheets/extra.css
 extra:
-  logo: 'images/siddhi-logo-w.svg'
+  logo: images/siddhi-logo-w.svg
   palette:
-    primary: 'teal'
-    accent: 'teal'
+    primary: teal
+    accent: teal
 pages:
-  - Welcome to WSO2 Siddhi: 'index.md'
-  #  - Releases : 'https://github.com/wso2/siddhi/releases'
-  - Documentation :
-    - Quick Start Guide: 'documentation/siddhi-quckstart-4.0.md'
-    - Siddhi Query Guide: 'documentation/siddhi-4.0.md'
-  - Extensions: 'extensions.md'
-  - About:
-    - License: 'about/license.md'
-theme: 'material'
-
-    
+- Welcome to WSO2 Siddhi: index.md
+- Documentation:
+  - Quick Start Guide: documentation/siddhi-quckstart-4.0.md
+  - Siddhi Query Guide: documentation/siddhi-4.0.md
+- Extensions: extensions.md
+- License: license.md
+- API Docs:
+  - 4.0.0-M25-SNAPSHOT: api/4.0.0-M25-SNAPSHOT.md
+  - 4.0.0-M31-SNAPSHOT: api/4.0.0-M31-SNAPSHOT.md
+theme: material

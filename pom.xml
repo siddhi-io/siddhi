@@ -29,7 +29,7 @@
     <groupId>org.wso2.siddhi</groupId>
     <artifactId>siddhi</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.0-M17-SNAPSHOT</version>
+    <version>4.0.0-M34-SNAPSHOT</version>
     <name>Siddhi</name>
     <description>Siddhi, high performing Complex Event Processing Engine</description>
 
@@ -38,7 +38,6 @@
         <module>modules/siddhi-service</module>
         <module>modules/siddhi-query-compiler</module>
         <module>modules/siddhi-core</module>
-        <module>modules/siddhi-extensions</module>
         <module>modules/siddhi-samples</module>
         <module>modules/siddhi-annotations</module>
         <module>modules/siddhi-doc-gen</module>
@@ -127,94 +126,22 @@
                 <version>${slf4j.version}</version>
             </dependency>
 
-            <!--Eval Script-->
-            <dependency>
-                <groupId>com.googlecode.scalascriptengine</groupId>
-                <artifactId>scalascriptengine_2.11</artifactId>
-                <version>${scalascriptengine.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.scala-lang</groupId>
-                <artifactId>scala-compiler</artifactId>
-                <version>${scala.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.scala-lang</groupId>
-                <artifactId>scala-reflect</artifactId>
-                <version>${scala.version}</version>
-            </dependency>
-
-            <!--Geo-->
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.geocoder-java</artifactId>
-                <version>${geocoder.version}</version>
-            </dependency>
-
-
             <!--Event Table-->
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-common</artifactId>
-                <version>${hadoop.common.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.connector.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>${h2.connector.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.wso2</groupId>
-                <artifactId>jdbc-pool</artifactId>
-                <version>${jdbc-pool.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.osgi</groupId>
-                <artifactId>org.eclipse.osgi</artifactId>
-                <version>${org.eclipse.osgi.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
                 <version>${org.osgi.core.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.eclipse.osgi</groupId>
                 <artifactId>org.eclipse.osgi.services</artifactId>
                 <version>${version.equinox.osgi.services}</version>
             </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.com.hazelcast</groupId>
-                <artifactId>hazelcast</artifactId>
-                <version>${hazelcast.version}</version>
-            </dependency>
 
             <!--Time-->
             <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${commons-lang3.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-query-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-math</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-time</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -232,114 +159,14 @@
                 <artifactId>siddhi-annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-http-output-transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-kafka-output-transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-kafka-input-transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-text-output-mapper</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-text-input-mapper</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ws.commons.axiom</groupId>
-                <artifactId>axiom-api</artifactId>
-                <version>${axiom-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ws.commons.axiom</groupId>
-                <artifactId>axiom-impl</artifactId>
-                <version>${axiom-impl.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons.logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-tcp-transport</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
-            <!-- Time Series -->
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-math3</artifactId>
-                <version>${commons-math3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>gov.nist.math</groupId>
-                <artifactId>jama</artifactId>
-                <version>${jama.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jacoco</groupId>
-                <artifactId>org.jacoco.agent</artifactId>
-                <version>${org.jacoco.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <!-- Map -->
-            <dependency>
-                <groupId>org.json.wso2</groupId>
-                <artifactId>json</artifactId>
-                <version>${org.json.wso2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-string</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.skyscreamer</groupId>
-                <artifactId>jsonassert</artifactId>
-                <scope>test</scope>
-                <version>${jsonassert.version}</version>
-            </dependency>
-
+            <!--&lt;!&ndash; Map &ndash;&gt;-->
             <dependency>
                 <groupId>com.jayway.jsonpath</groupId>
                 <artifactId>json-path</artifactId>
                 <version>${jsonpath.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.kafka</groupId>
-                <artifactId>kafka_2.10</artifactId>
-                <version>${kafka.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.axis2.transport</groupId>
-                <artifactId>axis2-transport-mail</artifactId>
-                <version>${axis2.transport.mail}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
-            </dependency>
+
             <!-- Siddhi Service Dependency-->
             <dependency>
                 <groupId>org.wso2.msf4j</groupId>
@@ -356,16 +183,6 @@
                 <artifactId>jackson-datatype-joda</artifactId>
                 <version>${jackson-datatype-joda-version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>${netty-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-collections4</artifactId>
-                <version>${commons-collection-version}</version>
-            </dependency>
 
             <!-- Event Tables -->
             <dependency>
@@ -373,23 +190,6 @@
                 <artifactId>HikariCP</artifactId>
                 <version>${hikari.version}</version>
                 </dependency>
-
-            <!-- JMS -->
-            <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-jms_1.1_spec</artifactId>
-                <version>${geronimo-jms.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-jta_1.1_spec</artifactId>
-                <version>${geronimo-jta.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.transport</groupId>
-                <artifactId>org.wso2.carbon.transport.jms</artifactId>
-                <version>${carbon.transport.version}</version>
-            </dependency>
 
             <!-- Siddhi Doc Generator -->
             <dependency>
@@ -637,7 +437,6 @@
 
         </plugins>
     </build>
-
     <properties>
         <junit.version>4.12</junit.version>
         <log4j.version>1.2.17.wso2v1</log4j.version>
@@ -648,60 +447,27 @@
         <disruptor.version>3.3.2.wso2v2</disruptor.version>
         <guava.version>19.0</guava.version>
         <gson.version>2.8.0</gson.version>
-        <jackson.version>2.7.4</jackson.version>
-        <scala.version>2.11.0</scala.version>
         <classindex.version>3.4</classindex.version>
-        <scalascriptengine.version>1.3.10</scalascriptengine.version>
-        <geocoder.version>0.16_1</geocoder.version>
         <quartz.version>2.1.1.wso2v1</quartz.version>
-        <mysql.connector.version>5.1.6</mysql.connector.version>
-        <h2.connector.version>1.4.187</h2.connector.version>
-        <hadoop.common.version>2.6.0</hadoop.common.version>
-        <commons-lang3.version>3.3.2</commons-lang3.version>
-        <commons-math3.version>3.2</commons-math3.version>
-        <jama.version>1.0.3</jama.version>
-        <jdbc-pool.version>7.0.34.wso2v2</jdbc-pool.version>
-        <jdbc-pool.imp.pkg.version.range>[1.7.0, 1.8.0)</jdbc-pool.imp.pkg.version.range>
-        <hikari.version>2.6.1</hikari.version>
-        <org.jacoco.version>0.7.4.201502262128</org.jacoco.version>
         <org.osgi.core.version>6.0.0</org.osgi.core.version>
-        <org.eclipse.osgi.version>3.7.0.v20110613</org.eclipse.osgi.version>
         <version.equinox.osgi.services>3.3.100.v20120522-1822</version.equinox.osgi.services>
         <equinox.osgi.services.imp.pkg.version.range>[1.2.0, 1.3.0)
         </equinox.osgi.services.imp.pkg.version.range>
-        <hazelcast.version>3.5.2.wso2v1</hazelcast.version>
         <hazelcast.imp.pkg.version.range>[3.5, 3.6.0)</hazelcast.imp.pkg.version.range>
         <metrics.version>3.1.0</metrics.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.scm.id>scm-server</project.scm.id>
-        <org.json.wso2.version>2.0.0.wso2v1</org.json.wso2.version>
-        <axiom-api.version>1.2.15</axiom-api.version>
-        <axiom-impl.version>1.2.20</axiom-impl.version>
-        <commons.logging.version>1.1.1</commons.logging.version>
-        <jsonassert.version>1.3.0</jsonassert.version>
         <jsonpath.version>2.2.0</jsonpath.version>
-        <kafka.version>0.9.0.1</kafka.version>
-        <axis2.transport.mail>1.1.1-wso2v2</axis2.transport.mail>
-        <httpclient.version>4.3.1.wso2v2</httpclient.version>
         <msf4j.version>2.1.1</msf4j.version>
         <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
         <servlet-api-version>2.5</servlet-api-version>
         <jackson-datatype-joda-version>2.4.1</jackson-datatype-joda-version>
-        <netty-version>4.1.0.Final</netty-version>
-        <commons-collection-version>4.0</commons-collection-version>
-        <geronimo-jms.version>1.1.1</geronimo-jms.version>
-        <geronimo-jta.version>1.1.1</geronimo-jta.version>
-        <carbon.transport.version>4.3.0</carbon.transport.version>
         <maven.core.version>3.3.9</maven.core.version>
         <maven.plugin.api.version>3.0</maven.plugin.api.version>
         <maven.plugin.annotations.version>3.4</maven.plugin.annotations.version>
         <freemarker.version>2.3.25-incubating</freemarker.version>
         <commons.io.version>1.3.2</commons.io.version>
         <snakeyaml.version>1.18</snakeyaml.version>
-
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <mavan.checkstyle.suppression.file>checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
-
     </properties>
 
     <scm>
