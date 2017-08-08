@@ -15,5 +15,6 @@ pages:
 - License: license.md
 - API Docs:
   - 4.0.0-M25-SNAPSHOT: api/4.0.0-M25-SNAPSHOT.md
+  - 4.0.0-M36: api/4.0.0-M36.md
   - 4.0.0-M35: api/4.0.0-M35.md
 theme: material
