@@ -104,7 +104,7 @@ Siddhi developers can be contacted via the mailing lists:
 Siddhi is supported by [WSO2](http://wso2.com/) by the very same engineers who build the technology. We are committed to ensuring that your deployment is completely supported from evaluation to production.
 For more details please contact us by visiting [http://wso2.com/support](http://wso2.com/support).
 
-## API Docs:
+## API Docs
 
 1. <a href="./api/4.0.0-M25-SNAPSHOT">4.0.0-M25-SNAPSHOT</a>
-1. <a href="./api/4.0.0-M31-SNAPSHOT">4.0.0-M31-SNAPSHOT</a>
+1. <a href="./api/4.0.0-M35">4.0.0-M35</a>
