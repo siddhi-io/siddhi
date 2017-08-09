@@ -81,7 +81,7 @@ public class LogicalPostStateProcessor extends StreamPostStateProcessor {
                     partnerPostStateProcessor.isEventReturned = true;
                 }
                 break;
-            case NOT:
+            default:
                 break;
         }
     }

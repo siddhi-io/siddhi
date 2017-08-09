@@ -174,7 +174,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         this.lock.lock();
         boolean notProcessed = true;
         try {
-            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            long currentTime = complexEventChunk.getFirst().getTimestamp();
             if (currentTime >= this.lastArrivalTime + waitingTime) {
 
                 ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);

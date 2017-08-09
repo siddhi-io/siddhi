@@ -253,19 +253,19 @@ logical_absent_stateful_source
     : '(' logical_absent_stateful_source ')'
     | standard_stateful_source AND NOT basic_source
     | NOT basic_source AND standard_stateful_source
-    | standard_stateful_source AND absent_pattern_source
-    | absent_pattern_source AND standard_stateful_source
-    | absent_pattern_source AND absent_pattern_source
-    | standard_stateful_source OR absent_pattern_source
-    | absent_pattern_source OR standard_stateful_source
-    | absent_pattern_source OR absent_pattern_source
+    | standard_stateful_source AND basic_absent_pattern_source
+    | basic_absent_pattern_source AND standard_stateful_source
+    | basic_absent_pattern_source AND basic_absent_pattern_source
+    | standard_stateful_source OR basic_absent_pattern_source
+    | basic_absent_pattern_source OR standard_stateful_source
+    | basic_absent_pattern_source OR basic_absent_pattern_source
     ;
 
 every_absent_pattern_source
-    : EVERY? absent_pattern_source
+    : EVERY? basic_absent_pattern_source
     ;
 
-absent_pattern_source
+basic_absent_pattern_source
     : NOT basic_source for_time
     ;
 
@@ -305,24 +305,24 @@ every_absent_sequence_source_chain
 
 absent_sequence_source_chain
     : '('absent_sequence_source_chain')' within_time?
-    | absent_pattern_source
+    | basic_absent_pattern_source
     | left_absent_sequence_source
     | right_absent_sequence_source
     ;
 
 left_absent_sequence_source
     : '('left_absent_sequence_source')' within_time?
-    | absent_pattern_source ',' sequence_source_chain
+    | basic_absent_pattern_source ',' sequence_source_chain
     | left_absent_sequence_source ',' left_absent_sequence_source
-    | left_absent_sequence_source ',' absent_pattern_source
+    | left_absent_sequence_source ',' basic_absent_pattern_source
     | sequence_source_chain ',' left_absent_sequence_source
     ;
 
 right_absent_sequence_source
     : '('right_absent_sequence_source')' within_time?
-    | sequence_source_chain ',' absent_pattern_source
+    | sequence_source_chain ',' basic_absent_pattern_source
     | right_absent_sequence_source ',' right_absent_sequence_source
-    | absent_pattern_source ',' right_absent_sequence_source
+    | basic_absent_pattern_source ',' right_absent_sequence_source
     | right_absent_sequence_source ',' sequence_source_chain
     ;
 

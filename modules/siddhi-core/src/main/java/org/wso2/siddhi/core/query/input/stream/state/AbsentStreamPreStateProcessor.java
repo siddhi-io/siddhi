@@ -132,7 +132,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
             return;
         }
         boolean notProcessed = true;
-        long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+        long currentTime = complexEventChunk.getFirst().getTimestamp();
         if (currentTime >= this.lastArrivalTime + waitingTime) {
             synchronized (this) {
                 // If the process method is called, it is guaranteed that the waitingTime is passed
