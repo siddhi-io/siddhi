@@ -922,8 +922,10 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 //    :NOT basic_source for_time
 //    ;
 
-        StateElement stateElement = State.logicalNot((BasicSingleInputStream) visit(ctx.basic_source()), null);
-        ((AbsentStreamStateElement) stateElement).setWaitingTime((TimeConstant) visit(ctx.for_time()));
+        AbsentStreamStateElement stateElement = State.logicalNot(new StreamStateElement((BasicSingleInputStream)
+                visit(ctx
+                .basic_source())));
+        stateElement.waitingTime((TimeConstant) visit(ctx.for_time()));
         return stateElement;
     }
 
@@ -952,8 +954,8 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
                 if (!ctx.basic_absent_pattern_source().isEmpty()) {
                     absentStreamState = (AbsentStreamStateElement) visit(ctx.basic_absent_pattern_source(0));
                 } else {
-                    absentStreamState = (AbsentStreamStateElement) State.logicalNot(
-                            (BasicSingleInputStream) visit(ctx.basic_source()), null);
+                    absentStreamState = State.logicalNot(new StreamStateElement((BasicSingleInputStream) visit(ctx
+                            .basic_source())));
                 }
                 return State.logicalNotAnd(presentStreamState, absentStreamState);
             }
@@ -1073,7 +1075,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public Object visitEvery_absent_sequence_source_chain(SiddhiQLParser.Every_absent_sequence_source_chainContext
-                                                                      ctx) {
+                                                                  ctx) {
 //        every_absent_sequence_source_chain
 //        : EVERY? absent_sequence_source_chain  within_time? ',' sequence_source_chain
 //        | EVERY? sequence_source  within_time? ',' absent_sequence_source_chain

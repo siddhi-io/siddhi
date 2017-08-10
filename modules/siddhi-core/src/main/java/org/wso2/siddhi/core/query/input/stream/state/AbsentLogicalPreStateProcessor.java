@@ -268,8 +268,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                     continue;
                 }
                 StreamEvent currentStreamEvent = stateEvent.getStreamEvent(stateId);
-                StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                stateEvent.setEvent(stateId, clonedEvent);
+                stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
                 process(stateEvent);
                 if (waitingTime != -1 || (stateType == StateInputStream.Type.SEQUENCE &&
                         logicalType == LogicalStateElement.Type.AND && thisStatePostProcessor

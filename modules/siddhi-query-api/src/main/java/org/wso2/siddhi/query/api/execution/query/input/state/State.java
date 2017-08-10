@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.query.api.execution.query.input.state;
 
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.execution.query.input.stream.BasicSingleInputStream;
 import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
@@ -54,9 +55,20 @@ public class State {
         return new LogicalStateElement(streamStateElement1, LogicalStateElement.Type.OR, streamStateElement2, time);
     }
 
-    public static StateElement logicalNot(BasicSingleInputStream basicSingleInputStream,
-                                          TimeConstant time) {
-        return new AbsentStreamStateElement(basicSingleInputStream, time);
+    public static AbsentStreamStateElement logicalNot(StreamStateElement streamStateElement) {
+        if (streamStateElement.getBasicSingleInputStream().getStreamReferenceId() != null) {
+            throw new SiddhiAppValidationException("NOT pattern cannot have reference id but found " +
+                    streamStateElement.getBasicSingleInputStream().getStreamReferenceId());
+        }
+        return new AbsentStreamStateElement(streamStateElement.getBasicSingleInputStream());
+    }
+
+    public static AbsentStreamStateElement logicalNot(StreamStateElement streamStateElement, TimeConstant time) {
+        if (streamStateElement.getBasicSingleInputStream().getStreamReferenceId() != null) {
+            throw new SiddhiAppValidationException("NOT pattern cannot have reference id but found " +
+                    streamStateElement.getBasicSingleInputStream().getStreamReferenceId());
+        }
+        return new AbsentStreamStateElement(streamStateElement.getBasicSingleInputStream(), time);
     }
 
     public static StateElement logicalNotAnd(StreamStateElement streamStateElement1,

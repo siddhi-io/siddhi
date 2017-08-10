@@ -28,12 +28,17 @@ public class AbsentStreamStateElement extends StreamStateElement {
 
     private TimeConstant waitingTime;
 
+    public AbsentStreamStateElement(BasicSingleInputStream basicSingleInputStream) {
+        super(basicSingleInputStream);
+    }
+
     public AbsentStreamStateElement(BasicSingleInputStream basicSingleInputStream, TimeConstant within) {
         super(basicSingleInputStream, within);
     }
 
-    public void setWaitingTime(TimeConstant waitingTime) {
+    public AbsentStreamStateElement waitingTime(TimeConstant waitingTime) {
         this.waitingTime = waitingTime;
+        return this;
     }
 
     public TimeConstant getWaitingTime() {
