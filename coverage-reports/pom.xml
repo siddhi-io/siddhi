@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>org.wso2.siddhi</groupId>
+        <artifactId>siddhi</artifactId>
+        <version>4.0.0-M37-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>coverage-reports</artifactId>
+    <name>Siddhi Tests Coverage Report Aggregation</name>
+    <packaging>pom</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-jacoco-dependencies</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <includeTypes>jar</includeTypes>
+                            <includeArtifactIds>org.jacoco.ant</includeArtifactIds>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target xmlns:jacoco="antlib:org.jacoco.ant">
+                                <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+                                    <classpath path="${project.build.directory}"/>
+                                </taskdef>
+                                <jacoco:report>
+                                    <executiondata>
+                                        <fileset dir="${siddhi.core.basedir}/target/coverage-reports">
+                                            <include name="jacoco.exec"/>
+                                        </fileset>
+                                        <fileset dir="${siddhi.query.api.basedir}/target/coverage-reports">
+                                            <include name="jacoco.exec"/>
+                                        </fileset>
+                                        <fileset dir="${siddhi.query.compiler.basedir}/target/coverage-reports">
+                                            <include name="jacoco.exec"/>
+                                        </fileset>
+                                    </executiondata>
+                                    <structure name="Siddhi Tests">
+                                        <classfiles>
+                                            <fileset dir="${siddhi.core.basedir}/target/classes">
+                                                <exclude name="**/*Constants.class"/>
+                                                <exclude name="**/*Exception.class"/>
+                                            </fileset>
+                                            <fileset dir="${siddhi.query.api.basedir}/target/classes">
+                                                <exclude name="**/*Constants.class"/>
+                                                <exclude name="**/*Exception.class"/>
+                                            </fileset>
+                                            <fileset dir="${siddhi.query.compiler.basedir}/target/classes">
+                                                <exclude name="**/*Constants.class"/>
+                                                <exclude name="**/*Exception.class"/>
+                                            </fileset>
+                                        </classfiles>
+                                        <sourcefiles encoding="UTF-8">
+                                            <fileset dir="${siddhi.core.basedir}/src/main/java"/>
+                                            <fileset dir="${siddhi.query.api.basedir}/src/main/java"/>
+                                            <fileset dir="${siddhi.query.compiler.basedir}/src/main/java"/>
+                                        </sourcefiles>
+                                    </structure>
+                                    <html destdir="${project.build.directory}/coverage-reports"/>
+                                </jacoco:report>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>org.jacoco.ant</artifactId>
+                        <version>0.7.8</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+    <properties>
+        <siddhi.core.basedir>../modules/siddhi-core</siddhi.core.basedir>
+        <siddhi.query.compiler.basedir>../modules/siddhi-query-compiler</siddhi.query.compiler.basedir>
+        <siddhi.query.api.basedir>../modules/siddhi-query-api</siddhi.query.api.basedir>
+    </properties>
+</project>
