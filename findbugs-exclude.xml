@@ -176,4 +176,12 @@
         <Package name="~org\.wso2\.siddhi\.core\.query\.selector\.attribute\.aggregator\.incremental.*"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream"/>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream"/>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
 </FindBugsFilter>
