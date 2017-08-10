@@ -17,7 +17,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -42,6 +43,7 @@
         <module>modules/siddhi-annotations</module>
         <module>modules/siddhi-doc-gen</module>
         <module>modules/siddhi-core/siddhi-core-doc-gen</module>
+        <module>coverage-reports</module>
     </modules>
 
     <dependencyManagement>
@@ -189,7 +191,7 @@
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
                 <version>${hikari.version}</version>
-                </dependency>
+            </dependency>
 
             <!-- Siddhi Doc Generator -->
             <dependency>
@@ -258,23 +260,23 @@
                         <reportFormat>brief</reportFormat>
                         <useFile>false</useFile>
                         <forkMode>once</forkMode>
-                        <argLine>-ea -Xmx512m</argLine>
+                        <argLine>${surefireArgLine} -ea -Xmx512m</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.8</version>
-                    <configuration>
-                        <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
-                        <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
-                    </configuration>
+                    <version>${jacoco.maven.version}</version>
                     <executions>
                         <execution>
                             <id>jacoco-initialize</id>
                             <goals>
                                 <goal>prepare-agent</goal>
                             </goals>
+                            <configuration>
+                                <destFile>${basedir}/target/coverage-reports/jacoco.exec</destFile>
+                                <propertyName>surefireArgLine</propertyName>
+                            </configuration>
                         </execution>
                         <execution>
                             <id>jacoco-site</id>
@@ -283,8 +285,8 @@
                                 <goal>report</goal>
                             </goals>
                             <configuration>
-                                <outputDirectory>${basedir}/target/coverage-reports/
-                                </outputDirectory>
+                                <dataFile>${basedir}/target/coverage-reports/jacoco.exec</dataFile>
+                                <outputDirectory>${basedir}/target/coverage-reports/</outputDirectory>
                             </configuration>
                         </execution>
                     </executions>
@@ -466,6 +468,8 @@
         <freemarker.version>2.3.25-incubating</freemarker.version>
         <commons.io.version>1.3.2</commons.io.version>
         <snakeyaml.version>1.18</snakeyaml.version>
+        <jacoco.maven.version>0.7.8</jacoco.maven.version>
+        <jacoco.ant.version>0.7.8</jacoco.ant.version>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <mavan.checkstyle.suppression.file>checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
     </properties>
