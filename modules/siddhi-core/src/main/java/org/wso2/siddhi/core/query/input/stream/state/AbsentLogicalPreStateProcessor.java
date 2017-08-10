@@ -27,7 +27,6 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,11 +41,6 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
      * Scheduler to trigger events after the waitingTime.
      */
     private Scheduler scheduler;
-
-    /**
-     * List of events processed by previous patterns.
-     */
-    private List<StateEvent> arrivedEventsList = new LinkedList<>();
 
     /**
      * The time defined by 'for' in an absence pattern.
@@ -95,28 +89,21 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         if (!this.active) {
             return;
         }
-        super.addState(stateEvent);
-        if (!isStartState) {
-            if (waitingTime != -1) {
-                this.lock.lock();
-                try {
-                    arrivedEventsList.add(stateEvent);
-                } finally {
-                    this.lock.unlock();
-                }
-                scheduler.notifyAt(stateEvent.getTimestamp() + waitingTime);
-                if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor) {
-                    this.lock.lock();
-                    try {
-                        ((AbsentLogicalPreStateProcessor) partnerStatePreProcessor).arrivedEventsList.add(stateEvent);
+        this.lock.lock();
+        try {
+            super.addState(stateEvent);
+            if (!isStartState) {
+                if (waitingTime != -1) {
+                    scheduler.notifyAt(stateEvent.getTimestamp() + waitingTime);
+                    if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor) {
                         ((AbsentLogicalPreStateProcessor) partnerStatePreProcessor).scheduler.notifyAt(stateEvent
                                 .getTimestamp() + ((AbsentLogicalPreStateProcessor) partnerStatePreProcessor)
                                 .waitingTime);
-                    } finally {
-                        this.lock.unlock();
                     }
                 }
             }
+        } finally {
+            this.lock.unlock();
         }
     }
 
@@ -130,39 +117,9 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         }
         clonedEvent.setEvent(stateId, null);
         clonedEvent.setEvent(partnerStatePreProcessor.stateId, null);
-        if (isStartState) {
-            // Start state takes events from newAndEveryStateEventList
-            newAndEveryStateEventList.add(clonedEvent);
-        } else {
-            arrivedEventsList.add(clonedEvent);
-        }
-        if (!isStartState && partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor) {
-            ((AbsentLogicalPreStateProcessor) partnerStatePreProcessor).arrivedEventsList.add(clonedEvent);
-        } else {
-            partnerStatePreProcessor.newAndEveryStateEventList.add(clonedEvent);
-        }
-    }
-
-    @Override
-    public void resetState() {
-
-        if (logicalType == LogicalStateElement.Type.OR || pendingStateEventList.size() ==
-                partnerStatePreProcessor.pendingStateEventList.size()) {
-            pendingStateEventList.clear();
-            partnerStatePreProcessor.pendingStateEventList.clear();
-            arrivedEventsList.clear();
-            if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor) {
-                ((AbsentLogicalPreStateProcessor) partnerStatePreProcessor).arrivedEventsList.clear();
-            }
-            if (isStartState && arrivedEventsList.isEmpty()) {
-                if (stateType == StateInputStream.Type.SEQUENCE && thisStatePostProcessor.nextEveryStatePerProcessor ==
-                        null && !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePerProcessor)
-                        .pendingStateEventList.isEmpty()) {
-                    return;
-                }
-                init();
-            }
-        }
+        // Start state takes events from newAndEveryStateEventList
+        newAndEveryStateEventList.add(clonedEvent);
+        partnerStatePreProcessor.newAndEveryStateEventList.add(clonedEvent);
     }
 
     @Override
@@ -180,19 +137,17 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                 ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);
 
                 Iterator<StateEvent> iterator;
-                if (isStartState) {
-                    // Logical processor may need to share the event to the partner as well.
-                    // Just getting a new event from stateEventPool as in AbsentStreamPreStateProcessor does not work.
-                    if (stateType == StateInputStream.Type.SEQUENCE && this.pendingStateEventList.isEmpty()) {
-                        this.resetState();
-                        iterator = newAndEveryStateEventList.iterator();
-                    } else {
-                        this.updateState();
-                        iterator = pendingStateEventList.iterator();
-                    }
-                } else {
-                    iterator = arrivedEventsList.iterator();
+                if (isStartState && stateType == StateInputStream.Type.SEQUENCE && newAndEveryStateEventList.isEmpty()
+                        && pendingStateEventList.isEmpty()) {
+
+                    StateEvent stateEvent = stateEventPool.borrowEvent();
+                    addState(stateEvent);
+                } else if (stateType == StateInputStream.Type.SEQUENCE && !newAndEveryStateEventList.isEmpty()) {
+                    this.resetState();
                 }
+
+                this.updateState();
+                iterator = pendingStateEventList.iterator();
 
                 while (iterator.hasNext()) {
                     StateEvent stateEvent = iterator.next();
@@ -201,7 +156,6 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                     if (withinStates.size() > 0) {
                         if (isExpired(stateEvent, currentTime)) {
                             iterator.remove();
-                            pendingStateEventList.remove(stateEvent);
                             continue;
                         }
                     }
@@ -210,7 +164,6 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                     if (waitingTimePassed(currentTime, stateEvent)) {
 
                         iterator.remove();
-                        pendingStateEventList.remove(stateEvent);
 
                         if (logicalType == LogicalStateElement.Type.OR && stateEvent.getStreamEvent
                                 (partnerStatePreProcessor.getStateId()) == null) {
@@ -278,6 +231,10 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
             thisStatePostProcessor.nextEveryStatePerProcessor.addEveryState(stateEvent);
         } else if (isStartState) {
             this.active = false;
+            if (logicalType == LogicalStateElement.Type.OR &&
+                    partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor) {
+                ((AbsentLogicalPreStateProcessor) partnerStatePreProcessor).active = false;
+            }
         }
         if (thisStatePostProcessor.callbackPreStateProcessor != null) {
             thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
@@ -305,13 +262,14 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                         continue;
                     }
                 }
-                if (logicalType == LogicalStateElement.Type.OR && stateEvent.getStreamEvent(partnerStatePreProcessor
-                        .getStateId()) != null) {
+                if (logicalType == LogicalStateElement.Type.OR &&
+                        stateEvent.getStreamEvent(partnerStatePreProcessor.getStateId()) != null) {
                     iterator.remove();
                     continue;
                 }
                 StreamEvent currentStreamEvent = stateEvent.getStreamEvent(stateId);
-                stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
+                StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                stateEvent.setEvent(stateId, clonedEvent);
                 process(stateEvent);
                 if (waitingTime != -1 || (stateType == StateInputStream.Type.SEQUENCE &&
                         logicalType == LogicalStateElement.Type.AND && thisStatePostProcessor
@@ -322,7 +280,10 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                 if (this.thisLastProcessor.isEventReturned()) {
                     this.thisLastProcessor.clearProcessedEvent();
                     // The event has passed the filter condition. So remove from being an absent candidate.
-                    arrivedEventsList.remove(stateEvent);
+                    iterator.remove();
+                    if (stateType == StateInputStream.Type.SEQUENCE) {
+                        partnerStatePreProcessor.pendingStateEventList.remove(stateEvent);
+                    }
                 }
                 if (!stateChanged) {
                     switch (stateType) {
@@ -357,10 +318,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         if (isStartState && waitingTime != -1 && active) {
             this.lock.lock();
             try {
-                if (this.arrivedEventsList.isEmpty()) {
-                    this.scheduler.notifyAt(this.siddhiAppContext.getTimestampGenerator().currentTime() +
-                            waitingTime);
-                }
+                this.scheduler.notifyAt(this.siddhiAppContext.getTimestampGenerator().currentTime() +
+                        waitingTime);
             } finally {
                 this.lock.unlock();
             }

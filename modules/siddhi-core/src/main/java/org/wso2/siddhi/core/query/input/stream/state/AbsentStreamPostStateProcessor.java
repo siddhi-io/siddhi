@@ -45,9 +45,11 @@ public class AbsentStreamPostStateProcessor extends StreamPostStateProcessor {
         // This is the notification to AbsentStreamPreStateProcessor that this event has been processed
         this.isEventReturned = true;
 
-        if (nextEveryStatePerProcessor != null && nextEveryStatePerProcessor == thisStatePreProcessor) {
-            // nextEveryStatePerProcessor refers the AbsentStreamPreStateProcessor
-            nextEveryStatePerProcessor.addEveryState(stateEvent);
+        if (thisStatePreProcessor.isStartState) {
+            if (nextEveryStatePerProcessor != null && nextEveryStatePerProcessor == thisStatePreProcessor) {
+                // nextEveryStatePerProcessor refers the AbsentStreamPreStateProcessor
+                nextEveryStatePerProcessor.addEveryState(stateEvent);
+            }
         }
 
         ((AbsentPreStateProcessor) thisStatePreProcessor).updateLastArrivalTime(streamEvent.getTimestamp());

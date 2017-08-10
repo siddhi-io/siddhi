@@ -1544,7 +1544,6 @@ public class EveryAbsentPatternTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    //
     @Test
     public void testQueryAbsent36() throws InterruptedException {
         log.info("Test the query e1 -> every not e2 for 1 sec -> e3 or e4 without e2");
