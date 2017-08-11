@@ -32,8 +32,48 @@ The above creates an event stream named TempStream with the following attributes
 + `temp` of the `double` attribute type
 
 ## Event sources
+Event sources allow you to receive events to WSO2 SP via a selected transport and in a selected format. For a list of supported source types, see [Configuring Transport Types for Receiving Events](https://docs.wso2.com/display/SP400/Configuring+Transport+Types+for+Receiving+Events).
 
+**Syntax**
+To add an event source configuration to a Siddhi application, add the `@source` annotation and enter the required values for parameters. The source syntax is as follows:
+```sql
+@source(type='source_type', static_option_key='static_option_value', dynamic_option_key='{{dynamic_option_value}}',
+    @map(type='map_type', static_option_key='static_option_value', dynamic_option_key='{{dynamic_option_value}}',
+        @attributes( 'attribute_mapping_1', 'attribute_mapping_N')
+    )
+)
+define stream stream_name (attribute1 Type1, attributeN TypeN);
+```
+In the `type` parameter, enter the transport via which the source recives events. The other parameters to be configured depends on the transport selected. For detailed information about the parameters to be configured for each transport, see [Configuring Transport Types for Receiving Events](https://docs.wso2.com/display/SP400/Configuring+Transport+Types+for+Receiving+Events).
+
+## Example
+The following query receives events via the HTTP transport, and processes them in the `InputStream` stream. The events are received in the `text` format, and basic authentication is carried out for each event.
+```sql
+@source(type='http', @map(type='text'),
+receiver.url='http://localhost:8080/streamName', is.basic.auth.enabled='true')
+define stream inputStream (name string, age int, country string);
+```
 ## Event sinks
+Event sinks allow you to publish events from WSO2 SP via a selected transport and in a selected format. For a list of supported sink types, see [Configuring Transports for Publishing Events] (https://docs.wso2.com/display/SP400/Configuring+Transports+for+Publishing+Events).
+**Syntax**
+To add an event source configuration to a Siddhi application, add the `@sink` annotation and enter the required values for parameters. The sink syntax is as follows:
+```sql
+@sink(type='sink_type', static_option_key='static_option_value', dynamic_option_key='{{dynamic_option_value}}',
+    @map(type='map_type', static_option_key='static_option_value', dynamic_option_key='{{dynamic_option_value}}',
+        @payload( 'payload_mapping')
+    )
+)
+define stream stream_name (attribute1 Type1, attributeN TypeN);
+```
+In the `type` parameter, enter the transport via which the sink publishes events. The other parameters to be configured depends on the transport selected. For detailed information about the parameters to be configured for each transport, see [Configuring Transports for Publishing Events] (https://docs.wso2.com/display/SP400/Configuring+Transports+for+Publishing+Events).
+
+**Example**
+The event sink configured below publishes events from an event stream named `outputstream` to the `http://localhost:8005/endpoint/receiverName` URL with the `Accept` header. Basic authentication is enabled and `admin` is used as both the username and the password.
+```sql
+@sink(type='http', @map(type='text'),
+publisher.url='http://localhost:8005/endpoint/receiverName',method='POST',headers='Accept-Date:20/02/2017',basic.auth.username='admin',basic.auth.password='admin',basic.auth.enabled='true')
+define stream outputstream (name string,ang int, country string);
+```
 
 ## Filters
 Filters are included in queries to filter information from input streams based on a specified condition.
@@ -50,7 +90,7 @@ from <input stream name>[<filter condition>]select <attribute name>, <attribute 
 insert into <output stream name>
 ```
 
-The following parameters are configured in a filter definition.
+The following parameters are configured in a filter definition:
 
 | Parameter                   | Description                                                               |
 |-----------------------------|---------------------------------------------------------------------------|
