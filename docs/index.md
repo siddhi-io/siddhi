@@ -107,6 +107,7 @@ For more details please contact us by visiting [http://wso2.com/support](http://
 ## API Docs
 
 1. <a href="./api/4.0.0-M25-SNAPSHOT">4.0.0-M25-SNAPSHOT</a>
+1. <a href="./api/4.0.0-M40">4.0.0-M40</a>
 1. <a href="./api/4.0.0-M37">4.0.0-M37</a>
 1. <a href="./api/4.0.0-M36">4.0.0-M36</a>
 1. <a href="./api/4.0.0-M35">4.0.0-M35</a>
