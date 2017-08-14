@@ -14,7 +14,7 @@ pages:
 - Extensions: extensions.md
 - License: license.md
 - API Docs:
-  - 4.0.0-M25-SNAPSHOT: api/4.0.0-M25-SNAPSHOT.md
+  - 4.0.0-M41: api/4.0.0-M41.md
   - 4.0.0-M40: api/4.0.0-M40.md
   - 4.0.0-M37: api/4.0.0-M37.md
   - 4.0.0-M36: api/4.0.0-M36.md
