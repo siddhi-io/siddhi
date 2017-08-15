@@ -46,7 +46,7 @@ define stream stream_name (attribute1 Type1, attributeN TypeN);
 ```
 In the `type` parameter, enter the transport via which the source recives events. The other parameters to be configured depends on the transport selected. For detailed information about the parameters to be configured for each transport, see [Configuring Transport Types for Receiving Events](https://docs.wso2.com/display/SP400/Configuring+Transport+Types+for+Receiving+Events).
 
-## Example
+**Example**
 The following query receives events via the HTTP transport, and processes them in the `InputStream` stream. The events are received in the `text` format, and basic authentication is carried out for each event.
 ```sql
 @source(type='http', @map(type='text'),
