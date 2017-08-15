@@ -1,8 +1,8 @@
 # Siddhi Query Language Guide 4.0
 
 
-## Event streams
-The event stream definition defines the event stream schema. An event stream definition contains a unique name and a 
+## Streams
+The stream definition defines the event stream schema. An event stream definition contains a unique name and a 
 set of attributes assigned specific types, with uniquely identifiable names within the stream.
 
 **Purpose**
@@ -31,7 +31,7 @@ The above creates an event stream named TempStream with the following attributes
 + `roomNo` of the `int` attribute type
 + `temp` of the `double` attribute type
 
-## Event sources
+## Sources
 Event sources allow you to receive events to WSO2 SP via a selected transport and in a selected format. For a list of supported source types, see [Configuring Transport Types for Receiving Events](https://docs.wso2.com/display/SP400/Configuring+Transport+Types+for+Receiving+Events).
 
 **Syntax**
@@ -46,15 +46,15 @@ define stream stream_name (attribute1 Type1, attributeN TypeN);
 ```
 In the `type` parameter, enter the transport via which the source recives events. The other parameters to be configured depends on the transport selected. For detailed information about the parameters to be configured for each transport, see [Configuring Transport Types for Receiving Events](https://docs.wso2.com/display/SP400/Configuring+Transport+Types+for+Receiving+Events).
 
-## Example
+**Example**
 The following query receives events via the HTTP transport, and processes them in the `InputStream` stream. The events are received in the `text` format, and basic authentication is carried out for each event.
 ```sql
 @source(type='http', @map(type='text'),
 receiver.url='http://localhost:8080/streamName', is.basic.auth.enabled='true')
 define stream inputStream (name string, age int, country string);
 ```
-## Event sinks
-Event sinks allow you to publish events from WSO2 SP via a selected transport and in a selected format. For a list of supported sink types, see [Configuring Transports for Publishing Events] (https://docs.wso2.com/display/SP400/Configuring+Transports+for+Publishing+Events).
+## Sinks
+Sinks allow you to publish events from WSO2 SP via a selected transport and in a selected format. For a list of supported sink types, see [Configuring Transports for Publishing Events] (https://docs.wso2.com/display/SP400/Configuring+Transports+for+Publishing+Events).
 **Syntax**
 To add an event source configuration to a Siddhi application, add the `@sink` annotation and enter the required values for parameters. The sink syntax is as follows:
 ```sql
