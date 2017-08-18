@@ -57,7 +57,7 @@ ${extension.name}(<#list extension.parameters><#items as parameter><${parameter.
 
 <#elseif extensionType == "Script">
 ```
-define function <function name>[${extension.name}] return <#if extension.returnAttributes??>${returnAttribute.type?join("|", "")}</#if> {"<"operation of the function">"};
+define function <function name>[${extension.name}] return <#if extension.returnAttributes??><#list extension.returnAttributes><<#items as returnAttribute>${returnAttribute.type?join("|", "")}</#items>> </#list></#if> {"<"operation of the function">"};
 ```
 </#if>
 
