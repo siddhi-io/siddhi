@@ -66,6 +66,18 @@ definition_window
     : annotation* DEFINE WINDOW source '(' attribute_name attribute_type (',' attribute_name attribute_type )* ')' function_operation ( OUTPUT output_event_type )?
     ;
 
+store_query_final
+    : store_query ';'? EOF
+    ;
+
+store_query
+    : FROM store_input query_section?
+    ;
+
+store_input
+    : source_id (AS alias)? (ON expression)? (within_time_range per)?
+    ;
+
 definition_function_final
     : definition_function ';'? EOF
     ;
@@ -183,11 +195,12 @@ join_stream
     ;
 
 join_source
-    :source basic_source_stream_handlers? window? (AS stream_alias)?
+    :source basic_source_stream_handlers? window? (AS alias)?
     ;
 
 pattern_stream
-    :every_pattern_source_chain
+    : every_pattern_source_chain
+    | absent_pattern_source_chain
     ;
 
 every_pattern_source_chain
@@ -199,19 +212,61 @@ every_pattern_source_chain
     ;
 
 pattern_source_chain
-    : '('pattern_source_chain')' within_time? 
+    : '('pattern_source_chain')' within_time?
     | pattern_source_chain  '->' pattern_source_chain
-    | pattern_source within_time? 
+    | pattern_source within_time?
+    ;
+
+absent_pattern_source_chain
+    : EVERY? '('absent_pattern_source_chain')' within_time?
+    | every_absent_pattern_source
+    | left_absent_pattern_source
+    | right_absent_pattern_source
+    ;
+
+left_absent_pattern_source
+    : EVERY? '('left_absent_pattern_source')' within_time?
+    | every_absent_pattern_source '->' every_pattern_source_chain
+    | left_absent_pattern_source '->' left_absent_pattern_source
+    | left_absent_pattern_source '->' every_absent_pattern_source
+    | every_pattern_source_chain '->' left_absent_pattern_source
+    ;
+
+right_absent_pattern_source
+    : EVERY? '('right_absent_pattern_source')' within_time?
+    | every_pattern_source_chain '->' every_absent_pattern_source
+    | right_absent_pattern_source '->' right_absent_pattern_source
+    | every_absent_pattern_source '->' right_absent_pattern_source
+    | right_absent_pattern_source '->' every_pattern_source_chain
     ;
 
 pattern_source
-    :logical_stateful_source|pattern_collection_stateful_source|standard_stateful_source
+    :logical_stateful_source|pattern_collection_stateful_source|standard_stateful_source|logical_absent_stateful_source
     ;
 
 logical_stateful_source
-    :NOT standard_stateful_source (AND standard_stateful_source) ?
-    |standard_stateful_source AND standard_stateful_source
+    :standard_stateful_source AND standard_stateful_source
     |standard_stateful_source OR standard_stateful_source
+    ;
+
+logical_absent_stateful_source
+    : '(' logical_absent_stateful_source ')'
+    | standard_stateful_source AND NOT basic_source
+    | NOT basic_source AND standard_stateful_source
+    | standard_stateful_source AND basic_absent_pattern_source
+    | basic_absent_pattern_source AND standard_stateful_source
+    | basic_absent_pattern_source AND basic_absent_pattern_source
+    | standard_stateful_source OR basic_absent_pattern_source
+    | basic_absent_pattern_source OR standard_stateful_source
+    | basic_absent_pattern_source OR basic_absent_pattern_source
+    ;
+
+every_absent_pattern_source
+    : EVERY? basic_absent_pattern_source
+    ;
+
+basic_absent_pattern_source
+    : NOT basic_source for_time
     ;
 
 pattern_collection_stateful_source
@@ -235,7 +290,40 @@ basic_source_stream_handler
     ;
 
 sequence_stream
-    :EVERY? sequence_source  within_time?  ',' sequence_source_chain
+    :every_sequence_source_chain
+    |every_absent_sequence_source_chain
+    ;
+
+every_sequence_source_chain
+    : EVERY? sequence_source  within_time?  ',' sequence_source_chain
+    ;
+
+every_absent_sequence_source_chain
+    : EVERY? absent_sequence_source_chain  within_time? ',' sequence_source_chain
+    | EVERY? sequence_source  within_time? ',' absent_sequence_source_chain
+    ;
+
+absent_sequence_source_chain
+    : '('absent_sequence_source_chain')' within_time?
+    | basic_absent_pattern_source
+    | left_absent_sequence_source
+    | right_absent_sequence_source
+    ;
+
+left_absent_sequence_source
+    : '('left_absent_sequence_source')' within_time?
+    | basic_absent_pattern_source ',' sequence_source_chain
+    | left_absent_sequence_source ',' left_absent_sequence_source
+    | left_absent_sequence_source ',' basic_absent_pattern_source
+    | sequence_source_chain ',' left_absent_sequence_source
+    ;
+
+right_absent_sequence_source
+    : '('right_absent_sequence_source')' within_time?
+    | sequence_source_chain ',' basic_absent_pattern_source
+    | right_absent_sequence_source ',' right_absent_sequence_source
+    | basic_absent_pattern_source ',' right_absent_sequence_source
+    | right_absent_sequence_source ',' sequence_source_chain
     ;
 
 sequence_source_chain
@@ -245,7 +333,7 @@ sequence_source_chain
     ;
 
 sequence_source
-    :logical_stateful_source|sequence_collection_stateful_source|standard_stateful_source
+    :logical_stateful_source|sequence_collection_stateful_source|standard_stateful_source|logical_absent_stateful_source
     ;
 
 sequence_collection_stateful_source
@@ -288,9 +376,17 @@ having
 query_output
     :INSERT output_event_type? INTO target
     |DELETE target (FOR output_event_type)? ON expression
-    |UPDATE OR INSERT INTO target (FOR output_event_type)? ON expression
-    |UPDATE target (FOR output_event_type)? ON expression
+    |UPDATE OR INSERT INTO target (FOR output_event_type)? set_clause? ON expression
+    |UPDATE target (FOR output_event_type)? set_clause? ON expression
     |RETURN output_event_type?
+    ;
+
+set_clause
+    : SET set_assignment (',' set_assignment)*
+    ;
+
+set_assignment
+    : attribute_reference '=' expression
     ;
 
 output_event_type
@@ -306,6 +402,10 @@ output_rate_type
     : ALL
     | LAST
     | FIRST
+    ;
+
+for_time
+    : FOR time_value
     ;
 
 within_time
@@ -386,7 +486,11 @@ stream_id
     :name
     ;
 
-stream_alias
+source_id
+    :name
+    ;
+
+alias
     :name
     ;
 
@@ -653,6 +757,7 @@ HAVING:   H A V I N G;
 INSERT:   I N S E R T;
 DELETE:   D E L E T E;
 UPDATE:   U P D A T E;
+SET:      S E T;
 RETURN:   R E T U R N;
 EVENTS:   E V E N T S;
 INTO:     I N T O;
