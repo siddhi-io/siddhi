@@ -61,11 +61,6 @@ define function <FunctionName>[${extension.name}] return <type> {
     // Script code
 };
 ```
-
-<#--<#elseif extensionType == "Script">-->
-    <#--```-->
-    <#--define function <function name>[${extension.name}] return <#if extension.returnAttributes??><#list extension.returnAttributes><<#items as returnAttribute>${returnAttribute.type?join("|", "")}</#items>> </#list></#if> {"<"operation of the function">"};-->
-    <#--```-->
 </#if>
 <#list extension.parameters>
 
