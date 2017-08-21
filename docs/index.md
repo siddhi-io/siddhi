@@ -13,19 +13,19 @@ This project was initiated as a research project at University of Moratuwa, Sri 
 | master         | [![Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi )|
 
 
-### Documentation
-Siddhi Query Guide: [https://wso2.github.io/siddhi/documentation/siddhi-4.0/](https://wso2.github.io/siddhi/documentation/siddhi-4.0/)
+### Documentation 
+Siddhi Query Guide: [https://wso2.github.io/siddhi/documentation/siddhi-4.0/](https://wso2.github.io/siddhi/documentation/siddhi-4.0/) 
 
-Siddhi Extensions:  [https://github.com/wso2-extensions?q=siddhi](https://github.com/wso2-extensions?q=siddhi)
+Siddhi Extensions:  [https://github.com/wso2-extensions?q=siddhi](https://github.com/wso2-extensions?q=siddhi) 
 
 
-### Siddhi Releases
+### Siddhi Releases 
 **Latest Stable Release : v3.0.5**
 
 List of Siddhi releases : [https://github.com/wso2/siddhi/releases](https://github.com/wso2/siddhi/releases)
 
 ### Try Siddhi
-Can find latest Siddhi with it's debugger feature at **[WSO2 Stream Processor](https://github.com/wso2/product-sp/releases)**
+Can find latest Siddhi with it's debugger feature at **[WSO2 Stream Processor](https://github.com/wso2/product-sp/releases)** 
 
 **Try latest Stable Siddhi with [WSO2 Data Analytics Server 3.1](http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17)** [try-it tool](https://docs.wso2.com/display/DAS310/Siddhi+Try+It+Tool)
 
