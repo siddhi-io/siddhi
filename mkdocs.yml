@@ -27,5 +27,5 @@ pages:
   - 4.0.0-M45: api/4.0.0-M45.md
   - 4.0.0-M46: api/4.0.0-M46.md
   - 4.0.0-M47: api/4.0.0-M47.md
-  - 4.0.0-M48-SNAPSHOT: api/4.0.0-M48-SNAPSHOT.md
+  - 4.0.0-M48: api/4.0.0-M48.md
 theme: material
