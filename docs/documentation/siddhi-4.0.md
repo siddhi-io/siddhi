@@ -32,7 +32,16 @@ The above creates an event stream named TempStream with the following attributes
 + `temp` of the `double` attribute type
 
 ## Sources
-Event sources allow you to receive events to WSO2 SP via a selected transport and in a selected format. For a list of supported source types, see [Configuring Transport Types for Receiving Events](https://docs.wso2.com/display/SP400/Configuring+Transport+Types+for+Receiving+Events).
+Event sources allow you to receive events to WSO2 SP via a selected transport and in a selected format.
+WSO2 SP currently supports the following source types:
+* File
+* HTTP
+* JMS
+* Kafka
+* MQTT
+* RabbitMQ
+* TCP
+* WSO2Event
 
 **Syntax**
 To add an event source configuration to a Siddhi application, add the `@source` annotation and enter the required values for parameters. The source syntax is as follows:
@@ -54,7 +63,17 @@ receiver.url='http://localhost:8080/streamName', is.basic.auth.enabled='true')
 define stream inputStream (name string, age int, country string);
 ```
 ## Sinks
-Sinks allow you to publish events from WSO2 SP via a selected transport and in a selected format. For a list of supported sink types, see [Configuring Transports for Publishing Events] (https://docs.wso2.com/display/SP400/Configuring+Transports+for+Publishing+Events).
+Sinks allow you to publish events from WSO2 SP via a selected transport and in a selected format.
+WSO2 SP currently supports the following source types:
+* File
+* HTTP
+* JMS
+* Kafka
+* MQTT
+* RabbitMQ
+* TCP
+* WSO2Event
+
 **Syntax**
 To add an event source configuration to a Siddhi application, add the `@sink` annotation and enter the required values for parameters. The sink syntax is as follows:
 ```sql
@@ -197,8 +216,8 @@ window of 10 minutes (`#window.time(10min)`) in the `TempStream` input stream, a
 `AvgTempStream` output stream.
 
 ```sql
-`<br>from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo, deviceID</br>
-<br>group by roomNo, deviceID</br>
+from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo, deviceID
+group by roomNo, deviceID
 insert into AvgTempStream;`
 ```
 
@@ -207,11 +226,11 @@ Having allows you to filter events after aggregation and after processing at the
 
 **Syntax**
 ```sql
-`<br>from <input_stream>#window.<window_name>select <aggregate_function>(<attribute_name>) as <attribute_name>, 
-<attribute1_name>, <attribute2_name>, ...</br>
-<br>group by <attribute_name>, <attribute1_name>, <attribute2_name>, ...</br>
-<br>having <condition></br>
- insert into <output_stream>;
+from <input_stream>#window.<window_name>select <aggregate_function>(<attribute_name>) as <attribute_name>, 
+<attribute1_name>, <attribute2_name>, ...
+group by <attribute_name>, <attribute1_name>, <attribute2_name>, ...<
+having <condition>
+insert into <output_stream>;
 ```
 
 The query parameters configured are as follows.
@@ -220,10 +239,10 @@ The query parameters configured are as follows.
 
 The following query calculates the average temperature for the last 10 minutes, and alerts if it exceeds 30 degrees.
 ```sql
-`<br>from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo</br>
-<br>group by roomNo</br>
-<br>having avgTemp > 30</br>
- insert into AlertStream;
+from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo
+group by roomNo
+having avgTemp > 30
+insert into AlertStream;
 ```
 ##### Inbuilt aggregate functions
 Aggregate functions are used to perform operations such as sum on aggregated set of events through a window. Usage of 
