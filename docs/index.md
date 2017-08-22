@@ -24,7 +24,7 @@ Find some useful links below:
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-M50-SNAPSHOT">4.0.0-M50-SNAPSHOT</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-M51-SNAPSHOT">4.0.0-M51-SNAPSHOT</a>.
 
 ## Jenkins Build Status
 
@@ -69,7 +69,8 @@ Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.
 
 ```
 
-Siddhi is also used with [WSO2 IoT Server](http://wso2.com/iot?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17) for IoT analytics and as an edge analytics library.
+* Siddhi is also used with [WSO2 IoT Server](http://wso2.com/iot?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17) for IoT analytics and as an edge analytics library.
+
 
 ##Features Supported
 
