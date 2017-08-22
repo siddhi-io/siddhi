@@ -6,13 +6,15 @@ extra:
   palette:
     primary: teal
     accent: teal
+google_analytics:
+- UA-103065-28
+- auto
 pages:
 - Welcome to WSO2 Siddhi: index.md
 - Documentation:
   - Quick Start Guide: documentation/siddhi-quckstart-4.0.md
   - Siddhi Query Guide: documentation/siddhi-4.0.md
 - Extensions: extensions.md
-- License: license.md
 - API Docs:
   - 4.0.0-M35: api/4.0.0-M35.md
   - 4.0.0-M36: api/4.0.0-M36.md
@@ -30,4 +32,5 @@ pages:
   - 4.0.0-M48: api/4.0.0-M48.md
   - 4.0.0-M49: api/4.0.0-M49.md
   - 4.0.0-M50: api/4.0.0-M50.md
+- License: license.md
 theme: material
