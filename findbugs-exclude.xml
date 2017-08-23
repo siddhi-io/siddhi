@@ -177,6 +177,10 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
+        <Class name="org.wso2.siddhi.core.table.holder.IndexEventHolder"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
         <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream"/>
         <Bug pattern="SE_BAD_FIELD"/>
     </Match>
