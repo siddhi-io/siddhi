@@ -72,7 +72,7 @@ Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.
 * Siddhi is also used with [WSO2 IoT Server](http://wso2.com/iot?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17) for IoT analytics and as an edge analytics library.
 
 
-##Features Supported
+## Features Supported
 
  - Retrieving Events 
     - From various data sources supporting various message formats

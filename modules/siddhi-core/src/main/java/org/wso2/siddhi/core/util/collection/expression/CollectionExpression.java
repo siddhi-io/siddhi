@@ -20,22 +20,31 @@ package org.wso2.siddhi.core.util.collection.expression;
 
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.Set;
+
 /**
  * Interface for expressions related to collection of events. These will be used by in-memory table implementation.
  */
 public interface CollectionExpression {
+
     Expression getExpression();
 
     CollectionScope getCollectionScope();
+
+    Set<String> getMultiPrimaryKeys();
 
     /**
      * Enums to hold collection expression scopes.
      */
     enum CollectionScope {
         NON,
+        PRIMARY_KEY_ATTRIBUTE,
+        PRIMARY_KEY_RESULT_SET,
         INDEXED_ATTRIBUTE,
         INDEXED_RESULT_SET,
-        OPTIMISED_RESULT_SET,
+        PARTIAL_PRIMARY_KEY_ATTRIBUTE,
+        PARTIAL_PRIMARY_KEY_RESULT_SET,
+        OPTIMISED_PRIMARY_KEY_OR_INDEXED_RESULT_SET,
         EXHAUSTIVE
     }
 

@@ -47,10 +47,9 @@ public interface IndexedEventHolder extends EventHolder {
 
     void overwrite(StreamEvent streamEvent);
 
-    Set<Object> getAllPrimaryKeys();
+    Set<Object> getAllPrimaryKeyValues();
 
-    int getPrimaryKeyAttributePosition();
+    PrimaryKeyReferenceHolder[] getPrimaryKeyReferenceHolders();
 
-    String getPrimaryKeyAttribute();
-
+    boolean isMultiPrimaryKeyAttribute(String attributeName);
 }
