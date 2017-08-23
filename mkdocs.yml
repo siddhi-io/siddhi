@@ -6,14 +6,31 @@ extra:
   palette:
     primary: teal
     accent: teal
+google_analytics:
+- UA-103065-28
+- auto
 pages:
 - Welcome to WSO2 Siddhi: index.md
 - Documentation:
   - Quick Start Guide: documentation/siddhi-quckstart-4.0.md
   - Siddhi Query Guide: documentation/siddhi-4.0.md
 - Extensions: extensions.md
-- License: license.md
 - API Docs:
-  - 4.0.0-M25-SNAPSHOT: api/4.0.0-M25-SNAPSHOT.md
-  - 4.0.0-M31-SNAPSHOT: api/4.0.0-M31-SNAPSHOT.md
+  - 4.0.0-M35: api/4.0.0-M35.md
+  - 4.0.0-M36: api/4.0.0-M36.md
+  - 4.0.0-M37: api/4.0.0-M37.md
+  - 4.0.0-M38: api/4.0.0-M38.md
+  - 4.0.0-M39: api/4.0.0-M39.md
+  - 4.0.0-M40: api/4.0.0-M40.md
+  - 4.0.0-M41: api/4.0.0-M41.md
+  - 4.0.0-M42: api/4.0.0-M42.md
+  - 4.0.0-M43: api/4.0.0-M43.md
+  - 4.0.0-M44: api/4.0.0-M44.md
+  - 4.0.0-M45: api/4.0.0-M45.md
+  - 4.0.0-M46: api/4.0.0-M46.md
+  - 4.0.0-M47: api/4.0.0-M47.md
+  - 4.0.0-M48: api/4.0.0-M48.md
+  - 4.0.0-M49: api/4.0.0-M49.md
+  - 4.0.0-M50: api/4.0.0-M50.md
+- License: license.md
 theme: material
