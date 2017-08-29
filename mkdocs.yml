@@ -16,7 +16,6 @@ pages:
   - Siddhi Query Guide: documentation/siddhi-4.0.md
 - Extensions: extensions.md
 - API Docs:
-  - 4.0.0-M29-SNAPSHOT: api/4.0.0-M29-SNAPSHOT.md
   - 4.0.0-M35: api/4.0.0-M35.md
   - 4.0.0-M36: api/4.0.0-M36.md
   - 4.0.0-M37: api/4.0.0-M37.md
@@ -36,6 +35,5 @@ pages:
   - 4.0.0-M51: api/4.0.0-M51.md
   - 4.0.0-M52: api/4.0.0-M52.md
   - 4.0.0-M53: api/4.0.0-M53.md
-  - 4.0.0-M54-SNAPSHOT: api/4.0.0-M54-SNAPSHOT.md
 - License: license.md
 theme: material
