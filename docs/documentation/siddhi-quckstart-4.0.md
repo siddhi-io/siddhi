@@ -8,7 +8,7 @@ For instructions to write and deploy a Siddhi application in WSO2 SP, see the [W
 
 To use Siddhi as a library by embedding it in a Java project, follow the steps below:
 
-## Step 1: Creating a Java Project
+### Step 1: Creating a Java Project
 
 * Create a Java project using Maven and include the following dependencies in its pom.xml file.
   ```xml
@@ -55,7 +55,7 @@ To use Siddhi as a library by embedding it in a Java project, follow the steps b
   ```
   This Siddhi query stores incoming events for 500 milliseconds, groups them by symbol and calculates the sum for price and volume. Then it inserts the results into a stream named `outputStream`.
   
-## Step 2: Creating an Execution Plan Runtime
+### Step 2: Creating an Execution Plan Runtime
 An execution plan is a self contained, valid set of stream definitions and queries. This step involves creating a runtime representation of an execution plan by combining the stream definition and the Siddhi query you created in Step 1.
 ```java
 
@@ -65,7 +65,7 @@ ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRun
 ```
 In the above example, `definition + query` forms the execution plan.  The Siddhi Manager parses the execution plan and provides you with an execution plan runtime. This execution plan runtime is used to add callbacks and input handlers to the execution plan.
 
-## Step 3: Registering a Callback
+### Step 3: Registering a Callback
 You can register a callback to the execution plan runtime in order to receive the results once the events are processed. There are two types of callbacks:
 
 + **Query callback**: This subscribes to a query.
@@ -82,7 +82,7 @@ executionPlanRuntime.addCallback("query1", new QueryCallback() {
 ```
 Here, a new query callback is added to a query named query1. Once the results are generated, they are sent to the receive method of this callback. An event printer is added inside this callback to print the incoming events for demonstration purposes.
 
-## Step 4: Sending Events
+### Step 4: Sending Events
 In order to send events from the event stream to the query, you need to obtain an input handler as follows:
 ```java
 InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
