@@ -6,7 +6,7 @@ The Siddhi Query Language can be used as a library by embedding it in a Java pro
 
 ### Creating Siddhi Applications via WSO2 SP
 
-For instructions to write and deploy a Siddhi application in WSO2 SP, see the [WSO2 SP Quick Start Guide](https://docs.wso2.com/display/SP400/Quick+Start+Guide)
+For instructions to write and deploy a Siddhi application in WSO2 SP, see the [WSO2 SP Quick Start Guide](https://docs.wso2.com/display/SP400/Quick+Start+Guide).
 
 ### Using Siddhi as an External Library
 
@@ -16,38 +16,38 @@ To use Siddhi as a library by embedding it in a Java project, follow the steps b
 
 * Create a Java project using Maven and include the following dependencies in its `pom.xml` file.
   ```xml
-  <dependency>
+   <dependency>
      <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-core</artifactId>
-     <version>3.x.x</version>
-  </dependency>
-  <dependency>
+     <version>4.x.x</version>
+   </dependency>
+   <dependency>
      <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-query-api</artifactId>
-     <version>3.x.x</version>
-  </dependency>
-  <dependency>
-              <groupId>org.wso2.siddhi</groupId>
-              <artifactId>siddhi-query-compiler</artifactId>
-              <version>3.x.x</version>
-  </dependency>
+     <version>4.x.x</version>
+   </dependency>
+   <dependency>
+     <groupId>org.wso2.siddhi</groupId>
+     <artifactId>siddhi-query-compiler</artifactId>
+     <version>4.x.x</version>
+   </dependency>
   ```
   Add the following repository configuration to the same file.
   ```xml
-  <repositories>
-          <repository>
-              <id>wso2.releases</id>
-              <name>WSO2 internal Repository</name>
-              <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
-              <releases>
-                  <enabled>true</enabled>
-                  <updatePolicy>daily</updatePolicy>
-                  <checksumPolicy>ignore</checksumPolicy>
-              </releases>
-          </repository>
-  </repositories>
+   <repositories>
+     <repository>
+         <id>wso2.releases</id>
+         <name>WSO2 internal Repository</name>
+         <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
+         <releases>
+             <enabled>true</enabled>
+             <updatePolicy>daily</updatePolicy>
+             <checksumPolicy>ignore</checksumPolicy>
+         </releases>
+     </repository>
+   </repositories>
   ```
-  **Note**: You can create the Java project using any method you prefer. The required dependencies can be downloaded from[here](http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/).
+  **Note**: You can create the Java project using any method you prefer. The required dependencies can be downloaded from [here](http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/).
 * Create a new Java class in the Maven project.
 * Define a stream definition as follows. The stream definition defines the format of the incoming events.
   ```java
@@ -109,4 +109,4 @@ executionPlanRuntime.shutdown();
 ```
 When the events are sent, they are printed by the event printer.
 
-For code examples, see [quick start samples for Siddhi] (https://github.com/wso2/siddhi/tree/master/modules/siddhi-samples/quick-start-samples).
+For code examples, see [quick start samples for Siddhi](https://github.com/wso2/siddhi/tree/master/modules/siddhi-samples/quick-start-samples).
