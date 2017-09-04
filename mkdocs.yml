@@ -38,5 +38,6 @@ pages:
   - 4.0.0-M54: api/4.0.0-M54.md
   - 4.0.0-M55: api/4.0.0-M55.md
   - 4.0.0-M56: api/4.0.0-M56.md
+  - 4.0.0-M57-SNAPSHOT: api/4.0.0-M57-SNAPSHOT.md
 - License: license.md
 theme: material
