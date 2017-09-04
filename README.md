@@ -24,7 +24,7 @@ Find some useful links below:
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-M57-SNAPSHOT">4.0.0-M57-SNAPSHOT</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-M56">4.0.0-M56</a>.
 
 ## Jenkins Build Status
 
