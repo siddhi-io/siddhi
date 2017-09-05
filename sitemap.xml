@@ -144,12 +144,6 @@
     </url>
         
     <url>
-     <loc>/api/4.0.0-M53-SNAPSHOT/</loc>
-     <lastmod>2017-09-05</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
      <loc>/api/4.0.0-M53/</loc>
      <lastmod>2017-09-05</lastmod>
      <changefreq>daily</changefreq>
@@ -175,12 +169,6 @@
         
     <url>
      <loc>/api/4.0.0-M57/</loc>
-     <lastmod>2017-09-05</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>/api/4.0.0-M58-SNAPSHOT/</loc>
      <lastmod>2017-09-05</lastmod>
      <changefreq>daily</changefreq>
     </url>
