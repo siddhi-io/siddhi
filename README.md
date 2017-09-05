@@ -5,7 +5,15 @@ Siddhi CEP is a lightweight, easy-to-use Open Source Streaming Complex Event Pro
 Library under Apache Software License v2.0. Siddhi can receive events from external sources, analyze them according to 
 user specified **SQL-Like queries** and notifies appropriate complex events via multiple transports and data formats.
 
-This project was initiated as a research project at University of Moratuwa, Sri Lanka, and now being improved by [WSO2 Inc](http://wso2.com/). 
+Siddhi is developed and managed by [WSO2 Inc](http://wso2.com?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17) 
+ and heavily used in their products such as
+ [WSO2 Data Analytics Server](http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17) and
+ [WSO2 Stream Processor](https://github.com/wso2/product-sp) to provide stream processing capabilities.
+ Siddhi is also the core of [WSO2 API Manager](http://wso2.com/api-management?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17)'s 
+ throttling, and the core of [WSO2 products](http://wso2.com/platform?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17)' analytics.
+ [UBER](http://wso2.com/library/conference/2017/2/wso2con-usa-2017-scalable-real-time-complex-event-processing-at-uber?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17)
+ and [Apache Eagle](http://eagle.apache.org/docs/index.html) also use Siddhi by embedding it with their systems. Siddhi 
+ was initiated as a research project from University of Moratuwa, Sri Lanka. 
 
 * **Active development version of Siddhi** : **v4.0.0**  _built on Java 8._ 
  
