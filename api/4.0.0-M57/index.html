@@ -1,0 +1,3144 @@
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      
+      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.6.1">
+    
+    
+      
+        <title>4.0.0-M57 - WSO2 Siddhi</title>
+      
+    
+    
+      <script src="../../assets/javascripts/modernizr-56ade86843.js"></script>
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/application-4d0d3f2fbf.css">
+      
+        <link rel="stylesheet" href="../../assets/stylesheets/application-f78e5cb881.palette.css">
+      
+    
+    
+      
+        
+        
+        
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    
+  </head>
+  
+  
+  
+  
+    <body data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <a href="../.." title="WSO2 Siddhi" class="md-logo md-header-nav__button">
+            <img src="../../images/siddhi-logo-w.svg" width="24" height="24">
+          </a>
+        
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <span class="md-flex__ellipsis md-header-nav__title">
+          
+            
+              
+                <span class="md-header-nav__parent">
+                  API Docs
+                </span>
+              
+            
+            4.0.0-M57
+          
+        </span>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+          
+<div class="md-search" data-md-component="search">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" required placeholder="Search" accesskey="s" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset">close</button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta" data-md-lang-result-none="No matching documents" data-md-lang-result-one="1 matching document" data-md-lang-result-other="# matching documents">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <div class="md-header-nav__source">
+          
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    
+      <i class="md-logo md-nav__button">
+        <img src="../../images/siddhi-logo-w.svg">
+      </i>
+    
+    WSO2 Siddhi
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." title="Welcome to WSO2 Siddhi" class="md-nav__link">
+      Welcome to WSO2 Siddhi
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      Documentation
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        Documentation
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../documentation/siddhi-quckstart-4.0/" title="Quick Start Guide" class="md-nav__link">
+      Quick Start Guide
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../documentation/siddhi-4.0/" title="Siddhi Query Guide" class="md-nav__link">
+      Siddhi Query Guide
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../extensions/" title="Extensions" class="md-nav__link">
+      Extensions
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+    
+    <label class="md-nav__link" for="nav-4">
+      API Docs
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        API Docs
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M35/" title="4.0.0-M35" class="md-nav__link">
+      4.0.0-M35
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M36/" title="4.0.0-M36" class="md-nav__link">
+      4.0.0-M36
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M37/" title="4.0.0-M37" class="md-nav__link">
+      4.0.0-M37
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M38/" title="4.0.0-M38" class="md-nav__link">
+      4.0.0-M38
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M39/" title="4.0.0-M39" class="md-nav__link">
+      4.0.0-M39
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M40/" title="4.0.0-M40" class="md-nav__link">
+      4.0.0-M40
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M41/" title="4.0.0-M41" class="md-nav__link">
+      4.0.0-M41
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M42/" title="4.0.0-M42" class="md-nav__link">
+      4.0.0-M42
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M43/" title="4.0.0-M43" class="md-nav__link">
+      4.0.0-M43
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M44/" title="4.0.0-M44" class="md-nav__link">
+      4.0.0-M44
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M45/" title="4.0.0-M45" class="md-nav__link">
+      4.0.0-M45
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M46/" title="4.0.0-M46" class="md-nav__link">
+      4.0.0-M46
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M47/" title="4.0.0-M47" class="md-nav__link">
+      4.0.0-M47
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M48/" title="4.0.0-M48" class="md-nav__link">
+      4.0.0-M48
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M49/" title="4.0.0-M49" class="md-nav__link">
+      4.0.0-M49
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M50/" title="4.0.0-M50" class="md-nav__link">
+      4.0.0-M50
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M51/" title="4.0.0-M51" class="md-nav__link">
+      4.0.0-M51
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M52/" title="4.0.0-M52" class="md-nav__link">
+      4.0.0-M52
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M53-SNAPSHOT/" title="4.0.0-M53-SNAPSHOT" class="md-nav__link">
+      4.0.0-M53-SNAPSHOT
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M53/" title="4.0.0-M53" class="md-nav__link">
+      4.0.0-M53
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M54/" title="4.0.0-M54" class="md-nav__link">
+      4.0.0-M54
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M55/" title="4.0.0-M55" class="md-nav__link">
+      4.0.0-M55
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M56/" title="4.0.0-M56" class="md-nav__link">
+      4.0.0-M56
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        4.0.0-M57
+      </label>
+    
+    <a href="./" title="4.0.0-M57" class="md-nav__link md-nav__link--active">
+      4.0.0-M57
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#source" title="Source" class="md-nav__link">
+    Source
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inmemory-source" title="inMemory (Source" class="md-nav__link">
+    inMemory (Source
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sourcemapper" title="Sourcemapper" class="md-nav__link">
+    Sourcemapper
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#passthrough-source-mapper" title="passThrough (Source Mapper" class="md-nav__link">
+    passThrough (Source Mapper
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sink" title="Sink" class="md-nav__link">
+    Sink
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inmemory-sink" title="inMemory (Sink" class="md-nav__link">
+    inMemory (Sink
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sinkmapper" title="Sinkmapper" class="md-nav__link">
+    Sinkmapper
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#passthrough-sink-mapper" title="passThrough (Sink Mapper" class="md-nav__link">
+    passThrough (Sink Mapper
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core" title="Core" class="md-nav__link">
+    Core
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cron-window" title="cron (Window" class="md-nav__link">
+    cron (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timebatch-window" title="timeBatch (Window" class="md-nav__link">
+    timeBatch (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#length-window" title="length (Window" class="md-nav__link">
+    length (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-window" title="sort (Window" class="md-nav__link">
+    sort (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#externaltime-window" title="externalTime (Window" class="md-nav__link">
+    externalTime (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frequent-window" title="frequent (Window" class="md-nav__link">
+    frequent (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lossyfrequent-window" title="lossyFrequent (Window" class="md-nav__link">
+    lossyFrequent (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#externaltimebatch-window" title="externalTimeBatch (Window" class="md-nav__link">
+    externalTimeBatch (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lengthbatch-window" title="lengthBatch (Window" class="md-nav__link">
+    lengthBatch (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#time-window" title="time (Window" class="md-nav__link">
+    time (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timelength-window" title="timeLength (Window" class="md-nav__link">
+    timeLength (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coalesce-function" title="coalesce (Function" class="md-nav__link">
+    coalesce (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceoffloat-function" title="instanceOfFloat (Function" class="md-nav__link">
+    instanceOfFloat (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceofboolean-function" title="instanceOfBoolean (Function" class="md-nav__link">
+    instanceOfBoolean (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minimum-function" title="minimum (Function" class="md-nav__link">
+    minimum (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#convert-function" title="convert (Function" class="md-nav__link">
+    convert (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uuid-function" title="UUID (Function" class="md-nav__link">
+    UUID (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceoflong-function" title="instanceOfLong (Function" class="md-nav__link">
+    instanceOfLong (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eventtimestamp-function" title="eventTimestamp (Function" class="md-nav__link">
+    eventTimestamp (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ifthenelse-function" title="ifThenElse (Function" class="md-nav__link">
+    ifThenElse (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-function" title="default (Function" class="md-nav__link">
+    default (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceofinteger-function" title="instanceOfInteger (Function" class="md-nav__link">
+    instanceOfInteger (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceofstring-function" title="instanceOfString (Function" class="md-nav__link">
+    instanceOfString (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cast-function" title="cast (Function" class="md-nav__link">
+    cast (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maximum-function" title="maximum (Function" class="md-nav__link">
+    maximum (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#currenttimemillis-function" title="currentTimeMillis (Function" class="md-nav__link">
+    currentTimeMillis (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceofdouble-function" title="instanceOfDouble (Function" class="md-nav__link">
+    instanceOfDouble (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-stream-processor" title="log (Stream Processor" class="md-nav__link">
+    log (Stream Processor
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minforever-aggregate-function" title="minForever (Aggregate Function" class="md-nav__link">
+    minForever (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maxforever-aggregate-function" title="maxForever (Aggregate Function" class="md-nav__link">
+    maxForever (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-aggregate-function" title="max (Aggregate Function" class="md-nav__link">
+    max (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count-aggregate-function" title="count (Aggregate Function" class="md-nav__link">
+    count (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sum-aggregate-function" title="sum (Aggregate Function" class="md-nav__link">
+    sum (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stddev-aggregate-function" title="stdDev (Aggregate Function" class="md-nav__link">
+    stdDev (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#avg-aggregate-function" title="avg (Aggregate Function" class="md-nav__link">
+    avg (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distinctcount-aggregate-function" title="distinctCount (Aggregate Function" class="md-nav__link">
+    distinctCount (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#min-aggregate-function" title="min (Aggregate Function" class="md-nav__link">
+    min (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pol2cart-stream-function" title="pol2Cart (Stream Function" class="md-nav__link">
+    pol2Cart (Stream Function
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../4.0.0-M58-SNAPSHOT/" title="4.0.0-M58-SNAPSHOT" class="md-nav__link">
+      4.0.0-M58-SNAPSHOT
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../license/" title="License" class="md-nav__link">
+      License
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#source" title="Source" class="md-nav__link">
+    Source
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inmemory-source" title="inMemory (Source" class="md-nav__link">
+    inMemory (Source
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sourcemapper" title="Sourcemapper" class="md-nav__link">
+    Sourcemapper
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#passthrough-source-mapper" title="passThrough (Source Mapper" class="md-nav__link">
+    passThrough (Source Mapper
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sink" title="Sink" class="md-nav__link">
+    Sink
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inmemory-sink" title="inMemory (Sink" class="md-nav__link">
+    inMemory (Sink
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sinkmapper" title="Sinkmapper" class="md-nav__link">
+    Sinkmapper
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#passthrough-sink-mapper" title="passThrough (Sink Mapper" class="md-nav__link">
+    passThrough (Sink Mapper
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core" title="Core" class="md-nav__link">
+    Core
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cron-window" title="cron (Window" class="md-nav__link">
+    cron (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timebatch-window" title="timeBatch (Window" class="md-nav__link">
+    timeBatch (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#length-window" title="length (Window" class="md-nav__link">
+    length (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-window" title="sort (Window" class="md-nav__link">
+    sort (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#externaltime-window" title="externalTime (Window" class="md-nav__link">
+    externalTime (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frequent-window" title="frequent (Window" class="md-nav__link">
+    frequent (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lossyfrequent-window" title="lossyFrequent (Window" class="md-nav__link">
+    lossyFrequent (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#externaltimebatch-window" title="externalTimeBatch (Window" class="md-nav__link">
+    externalTimeBatch (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lengthbatch-window" title="lengthBatch (Window" class="md-nav__link">
+    lengthBatch (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#time-window" title="time (Window" class="md-nav__link">
+    time (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timelength-window" title="timeLength (Window" class="md-nav__link">
+    timeLength (Window
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coalesce-function" title="coalesce (Function" class="md-nav__link">
+    coalesce (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceoffloat-function" title="instanceOfFloat (Function" class="md-nav__link">
+    instanceOfFloat (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceofboolean-function" title="instanceOfBoolean (Function" class="md-nav__link">
+    instanceOfBoolean (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minimum-function" title="minimum (Function" class="md-nav__link">
+    minimum (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#convert-function" title="convert (Function" class="md-nav__link">
+    convert (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uuid-function" title="UUID (Function" class="md-nav__link">
+    UUID (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceoflong-function" title="instanceOfLong (Function" class="md-nav__link">
+    instanceOfLong (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eventtimestamp-function" title="eventTimestamp (Function" class="md-nav__link">
+    eventTimestamp (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ifthenelse-function" title="ifThenElse (Function" class="md-nav__link">
+    ifThenElse (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-function" title="default (Function" class="md-nav__link">
+    default (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceofinteger-function" title="instanceOfInteger (Function" class="md-nav__link">
+    instanceOfInteger (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceofstring-function" title="instanceOfString (Function" class="md-nav__link">
+    instanceOfString (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cast-function" title="cast (Function" class="md-nav__link">
+    cast (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maximum-function" title="maximum (Function" class="md-nav__link">
+    maximum (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#currenttimemillis-function" title="currentTimeMillis (Function" class="md-nav__link">
+    currentTimeMillis (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanceofdouble-function" title="instanceOfDouble (Function" class="md-nav__link">
+    instanceOfDouble (Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-stream-processor" title="log (Stream Processor" class="md-nav__link">
+    log (Stream Processor
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minforever-aggregate-function" title="minForever (Aggregate Function" class="md-nav__link">
+    minForever (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maxforever-aggregate-function" title="maxForever (Aggregate Function" class="md-nav__link">
+    maxForever (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-aggregate-function" title="max (Aggregate Function" class="md-nav__link">
+    max (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count-aggregate-function" title="count (Aggregate Function" class="md-nav__link">
+    count (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sum-aggregate-function" title="sum (Aggregate Function" class="md-nav__link">
+    sum (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stddev-aggregate-function" title="stdDev (Aggregate Function" class="md-nav__link">
+    stdDev (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#avg-aggregate-function" title="avg (Aggregate Function" class="md-nav__link">
+    avg (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distinctcount-aggregate-function" title="distinctCount (Aggregate Function" class="md-nav__link">
+    distinctCount (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#min-aggregate-function" title="min (Aggregate Function" class="md-nav__link">
+    min (Aggregate Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pol2cart-stream-function" title="pol2Cart (Stream Function" class="md-nav__link">
+    pol2Cart (Stream Function
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="api-docs">API Docs</h1>
+<h2 id="source">Source</h2>
+<h3 id="inmemory-source">inMemory <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sources">Source</a>)</em></h3>
+<p style="word-wrap: break-word">In-memory source that can communicate with other in-memory sinks within the same JVM, it is assumed that the publisher and subscriber of a topic uses same event schema (stream definition).</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>@source(type=&quot;inMemory&quot;, topic=&quot;&lt;STRING&gt;&quot;, @map(...)))
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">topic</td>
+        <td style="vertical-align: top; word-wrap: break-word">Subscribes to sent on the given topic.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@source(type='inMemory', @map(type='passThrough'),
+define stream BarStream (symbol string, price float, volume long)
+</code></pre>
+
+<p style="word-wrap: break-word">In this example BarStream uses inMemory transport which passes the received event internally without using external transport.</p>
+
+<h2 id="sourcemapper">Sourcemapper</h2>
+<h3 id="passthrough-source-mapper">passThrough <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source-mappers">Source Mapper</a>)</em></h3>
+<p style="word-wrap: break-word">Pass-through mapper passed events (Event[]) through without any mapping or modifications.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>@source(..., @map(type=&quot;passThrough&quot;)
+</code></pre>
+
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@source(type='tcp', @map(type='passThrough'),
+define stream BarStream (symbol string, price float, volume long);
+</code></pre>
+
+<p style="word-wrap: break-word">In this example BarStream uses passThrough inputmapper which passes the received Siddhi event directly without any transformation into source.</p>
+
+<h2 id="sink">Sink</h2>
+<h3 id="inmemory-sink">inMemory <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sinks">Sink</a>)</em></h3>
+<p style="word-wrap: break-word">In-memory transport that can communicate with other in-memory transports within the same JVM, itis assumed that the publisher and subscriber of a topic uses same event schema (stream definition).</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>@sink(type=&quot;inMemory&quot;, topic=&quot;&lt;STRING&gt;&quot;, @map(...)))
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">topic</td>
+        <td style="vertical-align: top; word-wrap: break-word">Event will be delivered to allthe subscribers of the same topic</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@sink(type='inMemory', @map(type='passThrough'),
+define stream BarStream (symbol string, price float, volume long)
+</code></pre>
+
+<p style="word-wrap: break-word">In this example BarStream uses inMemory transport which emit the Siddhi events internally without using external transport and transformation.</p>
+
+<h2 id="sinkmapper">Sinkmapper</h2>
+<h3 id="passthrough-sink-mapper">passThrough <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink-mappers">Sink Mapper</a>)</em></h3>
+<p style="word-wrap: break-word">Pass-through mapper passed events (Event[]) through without any mapping or modifications.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>@sink(..., @map(type=&quot;passThrough&quot;)
+</code></pre>
+
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@sink(type='inMemory', @map(type='passThrough'),
+define stream BarStream (symbol string, price float, volume long);
+</code></pre>
+
+<p style="word-wrap: break-word">In the following example BarStream uses passThrough outputmapper which emit Siddhi event directly without any transformation into sink.</p>
+
+<h2 id="core">Core</h2>
+<h3 id="cron-window">cron <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">This window returns events processed periodically as the output in time-repeating patterns, triggered based on time passing.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>cron(&lt;STRING&gt; cron.expression)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">cron.expression</td>
+        <td style="vertical-align: top; word-wrap: break-word">The cron expression that represents a time schedule.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>define window cseEventWindow (symbol string, price float, volume int)cron('*/5 * * * * ?');
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow 
+select symbol,price,volume
+insert into outputStream ;
+</code></pre>
+
+<p style="word-wrap: break-word">This will processed events as the output every 5 seconds.</p>
+
+<h3 id="timebatch-window">timeBatch <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">A batch (tumbling) time window that holds events that arrive during window.time periods, and gets updated for each window.time.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>timeBatch(&lt;INT|LONG|TIME&gt; window.time, &lt;INT&gt; start.time)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">The batch time period for which the window should hold events.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">start.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">This specifies an offset in milliseconds in order to start the window at a time different to the standard time.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>define window cseEventWindow (symbol string, price float, volume int) timeBatch(20) output all events;
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select symbol, sum(price) as price
+insert all events into outputStream ;
+</code></pre>
+
+<p style="word-wrap: break-word">This will processing events arrived every 20 milliseconds as a batch and out put all events.</p>
+
+<h3 id="length-window">length <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">A sliding length window that holds the last windowLength events at a given time, and gets updated for each arrival and expiry.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>length(&lt;INT&gt; window.length)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.length</td>
+        <td style="vertical-align: top; word-wrap: break-word">The number of events that should be included in a sliding length window.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>define window cseEventWindow (symbol string, price float, volume int) length(10) output all events;
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select symbol, sum(price) as price
+insert all events into outputStream ;
+</code></pre>
+
+<p style="word-wrap: break-word">This will processing 10 events and out put all events.</p>
+
+<h3 id="sort-window">sort <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">This window holds a batch of events that equal the number specified as the windowLength and sorts them in the given order.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>sort(&lt;INT&gt; window.length, &lt;STRING&gt; attribute, &lt;STRING&gt; order)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.length</td>
+        <td style="vertical-align: top; word-wrap: break-word">The size of the window length.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">attribute</td>
+        <td style="vertical-align: top; word-wrap: break-word">The attribute that should be checked for the order.</td>
+        <td style="vertical-align: top">The concatenation of all the attributes of the event is considered.</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">order</td>
+        <td style="vertical-align: top; word-wrap: break-word">The order define as "asc" or "desc".</td>
+        <td style="vertical-align: top">asc</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>define stream cseEventStream (symbol string, price float, volume long);
+define window cseEventWindow (symbol string, price float, volume long) sort(2,volume, 'asc');
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select volume
+insert all events into outputStream ;
+</code></pre>
+
+<p style="word-wrap: break-word">sort(5, price, 'asc') keeps the events sorted by price in the ascending order. Therefore, at any given time, the window contains the 5 lowest prices.</p>
+
+<h3 id="externaltime-window">externalTime <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">A sliding time window based on external time. It holds events that arrived during the last windowTime period from the external timestamp, and gets updated on every monotonically increasing timestamp.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>externalTime(&lt;INT|LONG|TIME&gt; window.time)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">The sliding time period for which the window should hold events.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>define window cseEventWindow (symbol string, price float, volume int) externalTime(eventTime, 20 sec) output expired events;
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select symbol, sum(price) as price
+insert expired events into outputStream ;
+</code></pre>
+
+<p style="word-wrap: break-word">processing events arrived within the last 20 seconds from the eventTime and output expired events.</p>
+
+<h3 id="frequent-window">frequent <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">This window returns the latest events with the most frequently occurred value for a given attribute(s). Frequency calculation for this window processor is based on Misra-Gries counting algorithm.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>frequent(&lt;INT&gt; event.count, &lt;STRING&gt; attribute)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">event.count</td>
+        <td style="vertical-align: top; word-wrap: break-word">The number of most frequent events to be emitted to the stream.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">attribute</td>
+        <td style="vertical-align: top; word-wrap: break-word">The attributes to group the events. If no attributes are given, the concatenation of all the attributes of the event is considered.</td>
+        <td style="vertical-align: top">The concatenation of all the attributes of the event is considered.</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@info(name = 'query1')
+from purchase[price &gt;= 30]#window.frequent(2)
+select cardNo, price
+insert all events into PotentialFraud;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns the 2 most frequent events.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>@info(name = 'query1')
+from purchase[price &gt;= 30]#window.frequent(2, cardNo)
+select cardNo, price
+insert all events into PotentialFraud;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns the 2 latest events with the most frequently appeared card numbers.</p>
+
+<h3 id="lossyfrequent-window">lossyFrequent <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">This window identifies and returns all the events of which the current frequency exceeds the value specified for the supportThreshold parameter.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>lossyFrequent(&lt;DOUBLE&gt; support.threshold, &lt;DOUBLE&gt; error.bound, &lt;STRING&gt; attribute)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">support.threshold</td>
+        <td style="vertical-align: top; word-wrap: break-word">The support threshold value.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">DOUBLE</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">error.bound</td>
+        <td style="vertical-align: top; word-wrap: break-word">The error bound value.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">DOUBLE</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">attribute</td>
+        <td style="vertical-align: top; word-wrap: break-word">The attributes to group the events. If no attributes are given, the concatenation of all the attributes of the event is considered.</td>
+        <td style="vertical-align: top">The concatenation of all the attributes of the event is considered.</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>define stream purchase (cardNo string, price float);
+define window purchaseWindow (cardNo string, price float) lossyFrequent(0.1, 0.01);
+@info(name = 'query0')
+from purchase[price &gt;= 30]
+insert into purchaseWindow;
+@info(name = 'query1')
+from purchaseWindow
+select cardNo, price
+insert all events into PotentialFraud;
+</code></pre>
+
+<p style="word-wrap: break-word">lossyFrequent(0.1, 0.01) returns all the events of which the current frequency exceeds 0.1, with an error bound of 0.01.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>define stream purchase (cardNo string, price float);
+define window purchaseWindow (cardNo string, price float) lossyFrequent(0.3, 0.05, cardNo);
+@info(name = 'query0')
+from purchase[price &gt;= 30]
+insert into purchaseWindow;
+@info(name = 'query1')
+from purchaseWindow
+select cardNo, price
+insert all events into PotentialFraud;
+</code></pre>
+
+<p style="word-wrap: break-word">lossyFrequent(0.3, 0.05, cardNo) returns all the events of which the cardNo attributes frequency exceeds 0.3, with an error bound of 0.05.</p>
+
+<h3 id="externaltimebatch-window">externalTimeBatch <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">A batch (tumbling) time window based on external time, that holds events arrived during windowTime periods, and gets updated for every windowTime.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>externalTimeBatch(&lt;LONG&gt; timestamp, &lt;INT|LONG|TIME&gt; window.time, &lt;INT|LONG|TIME&gt; start.time, &lt;INT|LONG|TIME&gt; timeout)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">timestamp</td>
+        <td style="vertical-align: top; word-wrap: break-word">The time which the window determines as current time and will act upon. The value of this parameter should be monotonically increasing.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">LONG</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">The batch time period for which the window should hold events.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">start.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">User defined start time. This could either be a constant (of type int, long or time) or an attribute of the corresponding stream (of type long). If an attribute is provided, initial value of attribute would be considered as startTime. When startTime is not given, initial value of timestamp is used as the default.</td>
+        <td style="vertical-align: top">0</td>
+        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">Time to wait for arrival of new event, before flushing and giving output for events belonging to a specific batch. If timeout is not provided, system waits till an event from next batch arrives to flush current batch.</td>
+        <td style="vertical-align: top">0</td>
+        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>define window cseEventWindow (symbol string, price float, volume int) externalTimeBatch(eventTime, 1 sec) output expired events;
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select symbol, sum(price) as price
+insert expired events into outputStream ;
+</code></pre>
+
+<p style="word-wrap: break-word">This will processing events that arrive every 1 seconds from the eventTime.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>define window cseEventWindow (symbol string, price float, volume int) externalTimeBatch(eventTime, 20 sec, 0) output expired events;
+</code></pre>
+
+<p style="word-wrap: break-word">This will processing events that arrive every 1 seconds from the eventTime. Starts on 0th millisecond of an hour.</p>
+
+<p><span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span></p>
+<pre><code>define window cseEventWindow (symbol string, price float, volume int) externalTimeBatch(eventTime, 2 sec, eventTimestamp, 100) output expired events;
+</code></pre>
+
+<p style="word-wrap: break-word">This will processing events that arrive every 2 seconds from the eventTim. Considers the first event's eventTimestamp value as startTime. Waits 100 milliseconds for the arrival of a new event before flushing current batch.</p>
+
+<h3 id="lengthbatch-window">lengthBatch <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">A batch (tumbling) length window that holds a number of events specified as the windowLength. The window is updated each time a batch of events that equals the number specified as the windowLength arrives.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>lengthBatch(&lt;INT&gt; window.length)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.length</td>
+        <td style="vertical-align: top; word-wrap: break-word">The number of events the window should tumble.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>define window cseEventWindow (symbol string, price float, volume int) lengthBatch(10) output all events;
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select symbol, sum(price) as price
+insert all events into outputStream ;
+</code></pre>
+
+<p style="word-wrap: break-word">This will processing 10 events as a batch and out put all events.</p>
+
+<h3 id="time-window">time <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">A sliding time window that holds events that arrived during the last windowTime period at a given time, and gets updated for each event arrival and expiry.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>time(&lt;INT|LONG|TIME&gt; window.time)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">The sliding time period for which the window should hold events.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>define window cseEventWindow (symbol string, price float, volume int) time(20) output all events;
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select symbol, sum(price) as price
+insert all events into outputStream ;
+</code></pre>
+
+<p style="word-wrap: break-word">This will processing events that arrived within the last 20 milliseconds.</p>
+
+<h3 id="timelength-window">timeLength <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)</em></h3>
+<p style="word-wrap: break-word">A sliding time window that, at a given time holds the last window.length events that arrived during last window.time period, and gets updated for every event arrival and expiry.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>timeLength(&lt;INT|LONG|TIME&gt; window.time, &lt;INT&gt; window.length)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">The sliding time period for which the window should hold events.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.length</td>
+        <td style="vertical-align: top; word-wrap: break-word">The number of events that should be be included in a sliding length window..</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>define stream cseEventStream (symbol string, price float, volume int);
+define window cseEventWindow (symbol string, price float, volume int) timeLength(2 sec, 10);
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow select symbol, price, volume
+insert all events into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">window.timeLength(2 sec, 10) holds the last 10 events that arrived during last 2 seconds and gets updated for every event arrival and expiry.</p>
+
+<h3 id="coalesce-function">coalesce <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the value of the first input parameter that is not null, and all input parameters have to be on the same type.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; coalesce(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; args)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">args</td>
+        <td style="vertical-align: top; word-wrap: break-word">This function accepts one or more parameters. They can belong to any one of the available types. All the specified parameters should be of the same type.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select coalesce('123', null, '789') as value
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns first null value 123.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>from fooStream
+select coalesce(null, 76, 567) as value
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns first null value 76.</p>
+
+<p><span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span></p>
+<pre><code>from fooStream
+select coalesce(null, null, null) as value
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns null as there are no notnull values.</p>
+
+<h3 id="instanceoffloat-function">instanceOfFloat <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Checks whether the parameter is an instance of Float or not.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;BOOL&gt; instanceOfFloat(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select instanceOfFloat(value) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will return true if the value field format is float ex : 56.45f.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>from fooStream
+select instanceOfFloat(switchState) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a float.</p>
+
+<h3 id="instanceofboolean-function">instanceOfBoolean <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Checks whether the parameter is an instance of Boolean or not.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;BOOL&gt; instanceOfBoolean(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select instanceOfBoolean(switchState) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will return true if the value of switchState is true.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>from fooStream
+select instanceOfBoolean(value) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">if the value = 32 then this will returns false as the value is not an instance of the boolean.</p>
+
+<h3 id="minimum-function">minimum <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the minimum value of the input parameters.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT&gt; minimum(&lt;INT|LONG|DOUBLE|FLOAT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">This function accepts one or more parameters. They can belong to any one of the available types. All the specified parameters should be of the same type.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@info(name = 'query1') from inputStream
+select maximum(price1, price2, price3) as max
+insert into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns the minimum value of the input parameters price1, price2, price3.</p>
+
+<h3 id="convert-function">convert <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Converts the first input parameter according to the convertedTo parameter.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL&gt; convert(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL&gt; to.be.converted, &lt;STRING&gt; converted.to)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">to.be.converted</td>
+        <td style="vertical-align: top; word-wrap: break-word">This specifies the value to be converted.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">converted.to</td>
+        <td style="vertical-align: top; word-wrap: break-word">A string constant parameter to which type the attribute need to be converted  using one of the following strings values: 'int', 'long', 'float', 'double', 'string', 'bool'.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select convert(temp, 'double') as temp
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will convert fooStream temp value into 'double'.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>from fooStream
+select convert(temp, 'int') as temp
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will convert fooStream temp value into 'int' (value = "convert(45.9, 'int') returns 46").</p>
+
+<h3 id="uuid-function">UUID <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Generates a UUID (Universally Unique Identifier).</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;STRING&gt; UUID()
+</code></pre>
+
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from TempStream
+select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID
+insert into RoomTempStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will converts a room number to string, introducing a message ID to each event asUUID() returns a34eec40-32c2-44fe-8075-7f4fde2e2dd8<br><br>from TempStream<br>select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID<br>insert into RoomTempStream;</p>
+
+<h3 id="instanceoflong-function">instanceOfLong <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Checks whether the parameter is an instance of Long or not.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;BOOL&gt; instanceOfLong(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select instanceOfLong(value) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will return true if the value field format is long ex : 56456l.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>from fooStream
+select instanceOfLong(switchState) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a long.</p>
+
+<h3 id="eventtimestamp-function">eventTimestamp <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the timestamp of the processed event.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;LONG&gt; eventTimestamp()
+</code></pre>
+
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select symbol as name, eventTimestamp() as eventTimestamp 
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will extract current events timestamp.</p>
+
+<h3 id="ifthenelse-function">ifThenElse <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Evaluates the 'condition' parameter and returns value of the 'if.expression' parameter if the condition is true, or returns value of the 'else.expression' parameter if the condition is false. Here both 'if.expression' and 'else.expression' should be of the same type.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; ifThenElse(&lt;BOOL&gt; condition, &lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; if.expression, &lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; else.expression)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">condition</td>
+        <td style="vertical-align: top; word-wrap: break-word">This specifies the if then else condition value.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">if.expression</td>
+        <td style="vertical-align: top; word-wrap: break-word">This specifies the value to be returned if the value of the condition parameter is true.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">else.expression</td>
+        <td style="vertical-align: top; word-wrap: break-word">This specifies the value to be returned if the value of the condition parameter is false.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@info(name = 'query1')
+from sensorEventStream
+select sensorValue, ifThenElse(sensorValue&gt;35,'High','Low') as status
+insert into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns High if sensorValue = 50.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>@info(name = 'query1')
+from sensorEventStream
+select sensorValue, ifThenElse(voltage &lt; 5, 0, 1) as status
+insert into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns 1 if voltage= 12.</p>
+
+<p><span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span></p>
+<pre><code>@info(name = 'query1')
+from userEventStream
+select userName, ifThenElse(password == 'admin', true, false) as passwordState
+insert into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns  passwordState as true if password = admin.</p>
+
+<h3 id="default-function">default <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Checks if the 'attribute' parameter is null and if so returns the value of the 'default' parameter</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; default(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; attribute, &lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; default)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">attribute</td>
+        <td style="vertical-align: top; word-wrap: break-word">The attribute that could be null.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">default</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default value that will be used when 'attribute' parameter is null</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from TempStream
+select default(temp, 0.0) as temp, roomNum
+insert into StandardTempStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will replace TempStream's temp attribute with default value if the temp is null.</p>
+
+<h3 id="instanceofinteger-function">instanceOfInteger <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Checks whether the parameter is an instance of Integer or not.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;BOOL&gt; instanceOfInteger(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select instanceOfInteger(value) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will return true if the value field format is integer.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>from fooStream
+select instanceOfInteger(switchState) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a long.</p>
+
+<h3 id="instanceofstring-function">instanceOfString <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Checks whether the parameter is an instance of String or not.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;BOOL&gt; instanceOfString(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select instanceOfString(value) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will return true if the value field format is string ex : 'test'.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>from fooStream
+select instanceOfString(switchState) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a string.</p>
+
+<h3 id="cast-function">cast <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Converts the first parameter according to the cast.to parameter. Incompatible arguments cause Class Cast exceptions if further processed. This function is used with map extension that returns attributes of the object type. You can use this function to cast the object to an accurate and concrete type.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; cast(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; to.be.caster, &lt;STRING&gt; cast.to)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">to.be.caster</td>
+        <td style="vertical-align: top; word-wrap: break-word">This specifies the attribute to be casted.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">cast.to</td>
+        <td style="vertical-align: top; word-wrap: break-word">A string constant parameter expressing the cast to type using one of the following strings values: int, long, float, double, string, bool.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select symbol as name, cast(temp, 'double') as temp
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will cast the fooStream temp field value into 'double' format.</p>
+
+<h3 id="maximum-function">maximum <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the maximum value of the input parameters.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT&gt; maximum(&lt;INT|LONG|DOUBLE|FLOAT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">This function accepts one or more parameters. They can belong to any one of the available types. All the specified parameters should be of the same type.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@info(name = 'query1') from inputStream
+select maximum(price1, price2, price3) as max
+insert into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns the maximum value of the input parameters price1, price2, price3.</p>
+
+<h3 id="currenttimemillis-function">currentTimeMillis <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the current timestamp of siddhi application in milliseconds.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;LONG&gt; currentTimeMillis()
+</code></pre>
+
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select symbol as name, currentTimeMillis() as eventTimestamp 
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will extract current siddhi application timestamp.</p>
+
+<h3 id="instanceofdouble-function">instanceOfDouble <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)</em></h3>
+<p style="word-wrap: break-word">Checks whether the parameter is an instance of Double or not.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;BOOL&gt; instanceOfDouble(&lt;INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select instanceOfDouble(value) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will return true if the value field format is double ex : 56.45.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>from fooStream
+select instanceOfDouble(switchState) as state
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is not an instance of the double.</p>
+
+<h3 id="log-stream-processor">log <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#stream-processors">Stream Processor</a>)</em></h3>
+<p style="word-wrap: break-word">The logger stream processor logs the message with or without event for the given log priority.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>log(&lt;STRING&gt; priority, &lt;STRING&gt; log.message, &lt;BOOL&gt; is.event.logged)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">priority</td>
+        <td style="vertical-align: top; word-wrap: break-word">The priority/type of this log message.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">log.message</td>
+        <td style="vertical-align: top; word-wrap: break-word">This submit the log message.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">is.event.logged</td>
+        <td style="vertical-align: top; word-wrap: break-word">Use this command to enable the logging of one or more events.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream#log(&quot;INFO&quot;, &quot;Sample Event :&quot;, true)
+select *
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will log as INFO with the message "Sample Event :" + fooStream:events.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>from fooStream#log(&quot;Sample Event :&quot;, true)
+select *
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will logs with default log level as INFO.</p>
+
+<p><span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span></p>
+<pre><code>from fooStream#log(&quot;Sample Event :&quot;, fasle)
+select *
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will only log message.</p>
+
+<p><span id="example-4" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 4</span></p>
+<pre><code>from fooStream#log(true)
+select *
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will only log fooStream:events.</p>
+
+<p><span id="example-5" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 5</span></p>
+<pre><code>from fooStream#log(&quot;Sample Event :&quot;)
+select *
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will log message and fooStream:events.</p>
+
+<h3 id="minforever-aggregate-function">minForever <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)</em></h3>
+<p style="word-wrap: break-word">This is the attribute aggregator to store the minimum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT&gt; minForever(&lt;INT|LONG|DOUBLE|FLOAT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be compared to find the minimum value.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from inputStream
+select minForever(temp) as max
+insert into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">minForever(temp) returns the minimum temp value recorded for all the events throughoutthe lifetime of the query.</p>
+
+<h3 id="maxforever-aggregate-function">maxForever <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)</em></h3>
+<p style="word-wrap: break-word">This is the attribute aggregator to store the maximum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT&gt; maxForever(&lt;INT|LONG|DOUBLE|FLOAT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be compared to find the maximum value.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from inputStream
+select maxForever(temp) as max
+insert into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">maxForever(temp) returns the maximum temp value recorded for all the events throughout the lifetime of the query.</p>
+
+<h3 id="max-aggregate-function">max <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the maximum value for all the events.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT&gt; max(&lt;INT|LONG|DOUBLE|FLOAT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be compared to find the maximum value.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream#window.timeBatch(10 sec)
+select max(temp) as maxTemp
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">max(temp) returns the maximum temp value recorded for all the events based on their arrival and expiry.</p>
+
+<h3 id="count-aggregate-function">count <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the count of all the events.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;LONG&gt; count()
+</code></pre>
+
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream#window.timeBatch(10 sec)
+select count() as count
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will return the count of all the events for time batch in 10 seconds.</p>
+
+<h3 id="sum-aggregate-function">sum <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the sum for all the events.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;LONG|DOUBLE&gt; sum(&lt;INT|LONG|DOUBLE|FLOAT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be summed.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from inputStream
+select sum(volume) as sumOfVolume
+insert into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">This will returns the sum of volume values as a long value for each event arrival and expiry.</p>
+
+<h3 id="stddev-aggregate-function">stdDev <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the calculated standard deviation for all the events.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;DOUBLE&gt; stdDev(&lt;INT|LONG|DOUBLE|FLOAT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that should be used to calculate the standard deviation.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from inputStream
+select stddev(temp) as stdTemp
+insert into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">stddev(temp) returns the calculated standard deviation of temp for all the events based on their arrival and expiry.</p>
+
+<h3 id="avg-aggregate-function">avg <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)</em></h3>
+<p style="word-wrap: break-word">Calculates the average for all the events.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;DOUBLE&gt; avg(&lt;INT|LONG|DOUBLE|FLOAT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that need to be averaged.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream#window.timeBatch
+ select avg(temp) as avgTemp
+ insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">avg(temp) returns the average temp value for all the events based on their arrival and expiry.</p>
+
+<h3 id="distinctcount-aggregate-function">distinctCount <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the count of distinct occurrences for a given arg.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;LONG&gt; distinctCount(&lt;INT|LONG|DOUBLE|FLOAT|STRING&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that should be counted.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from fooStream
+select distinctcount(pageID) as count
+insert into barStream;
+</code></pre>
+
+<p style="word-wrap: break-word">distinctcount(pageID) for the following output returns 3.<br>&nbsp;"WEB_PAGE_1"<br>&nbsp;"WEB_PAGE_1"<br>&nbsp;"WEB_PAGE_2"<br>&nbsp;"WEB_PAGE_3"<br>&nbsp;"WEB_PAGE_1"<br>&nbsp;"WEB_PAGE_2"</p>
+
+<h3 id="min-aggregate-function">min <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)</em></h3>
+<p style="word-wrap: break-word">Returns the minimum value for all the events.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>&lt;INT|LONG|DOUBLE|FLOAT&gt; min(&lt;INT|LONG|DOUBLE|FLOAT&gt; arg)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be compared to find the minimum value.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from inputStream
+select min(temp) as minTemp
+insert into outputStream;
+</code></pre>
+
+<p style="word-wrap: break-word">min(temp) returns the minimum temp value recorded for all the events based on their arrival and expiry.</p>
+
+<h3 id="pol2cart-stream-function">pol2Cart <em>(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#stream-functions">Stream Function</a>)</em></h3>
+<p style="word-wrap: break-word">The pol2Cart function calculating the cartesian coordinates x & y for the given theta, rho coordinates and adding them as new attributes to the existing events.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>pol2Cart(&lt;DOUBLE&gt; theta, &lt;DOUBLE&gt; rho, &lt;DOUBLE&gt; z)
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">theta</td>
+        <td style="vertical-align: top; word-wrap: break-word">The theta value of the coordinates.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">DOUBLE</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">rho</td>
+        <td style="vertical-align: top; word-wrap: break-word">The rho value of the coordinates.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">DOUBLE</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">z</td>
+        <td style="vertical-align: top; word-wrap: break-word">z value of the cartesian coordinates.</td>
+        <td style="vertical-align: top">If z value is not given, drop the third parameter of the output.</td>
+        <td style="vertical-align: top">DOUBLE</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>from PolarStream#pol2Cart(theta, rho)
+select x, y 
+insert into outputStream ;
+</code></pre>
+
+<p style="word-wrap: break-word">This will return cartesian coordinates (4.99953024681082, 0.06853693328228748) for theta: 0.7854 and rho: 5.</p>
+
+<p><span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span></p>
+<pre><code>from PolarStream#pol2Cart(theta, rho, 3.4)
+select x, y, z 
+insert into outputStream ;
+</code></pre>
+
+<p style="word-wrap: break-word">This will return cartesian coordinates (4.99953024681082, 0.06853693328228748, 3.4)for theta: 0.7854 and rho: 5 and z: 3.4.</p>
+                
+                  
+                
+              
+              
+                
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../4.0.0-M56/" title="4.0.0-M56" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                4.0.0-M56
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../4.0.0-M58-SNAPSHOT/" title="4.0.0-M58-SNAPSHOT" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                4.0.0-M58-SNAPSHOT
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="http://www.mkdocs.org" title="MkDocs">MkDocs</a>
+        and
+        <a href="http://squidfunk.github.io/mkdocs-material/" title="Material for MkDocs">
+          Material for MkDocs</a>
+      </div>
+      
+        
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/application-6b599127bc.js"></script>
+      <script>app.initialize({url:{base:"../.."}})</script>
+      
+    
+    
+      
+      <script>!function(e,t,a,n,o,c,i){e.GoogleAnalyticsObject=o,e[o]=e[o]||function(){(e[o].q=e[o].q||[]).push(arguments)},e[o].l=1*new Date,c=t.createElement(a),i=t.getElementsByTagName(a)[0],c.async=1,c.src=n,i.parentNode.insertBefore(c,i)}(window,document,"script","https://www.google-analytics.com/analytics.js","ga"),ga("create","UA-103065-28","auto"),ga("set","anonymizeIp",!0),ga("send","pageview");var links=document.getElementsByTagName("a");Array.prototype.map.call(links,function(e){e.host!=document.location.host&&e.addEventListener("click",function(){var t=e.getAttribute("data-md-action")||"follow";ga("send","event","outbound",t,e.href)})});var query=document.forms.search.query;query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})</script>
+      
+    
+  </body>
+</html>
