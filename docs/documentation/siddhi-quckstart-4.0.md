@@ -70,9 +70,7 @@ To use Siddhi as a library by embedding it in a Java project, follow the steps b
 #### Step 2: Creating Siddhi Application Runtime
 A Siddhi application is a self contained, valid set of stream definitions and queries. This step involves creating a runtime representation of a Siddhi application by combining the stream definition and the Siddhi query you created in Step 1.
 ```java
-
 SiddhiManager siddhiManager = new SiddhiManager();
- 
 SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(definition + query);
 ```
 In the above example, `definition + query` forms the Siddhi application.  The Siddhi Manager parses the Siddhi application and provides you with an Siddhi application runtime. This Siddhi application runtime is used to add callbacks and input handlers to the Siddhi application.
