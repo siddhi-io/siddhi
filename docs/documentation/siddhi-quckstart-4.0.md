@@ -15,7 +15,8 @@ To use Siddhi as a library by embedding it in a Java project, follow the steps b
 #### Step 1: Creating a Java Project
 
 * Create a Java project using Maven and include the following dependencies in its `pom.xml` file.
-  ```xml
+
+```xml
    <dependency>
      <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-core</artifactId>
@@ -31,9 +32,11 @@ To use Siddhi as a library by embedding it in a Java project, follow the steps b
      <artifactId>siddhi-query-compiler</artifactId>
      <version>4.x.x</version>
    </dependency>
-  ```
+```
+  
   Add the following repository configuration to the same file.
-  ```xml
+  
+```xml
    <repositories>
      <repository>
          <id>wso2.releases</id>
@@ -46,25 +49,28 @@ To use Siddhi as a library by embedding it in a Java project, follow the steps b
          </releases>
      </repository>
    </repositories>
-  ```
+```
+  
   **Note**: You can create the Java project using any method you prefer. The required dependencies can be downloaded from [here](http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/).
 * Create a new Java class in the Maven project.
 * Define a stream definition as follows. The stream definition defines the format of the incoming events.
-  ```java
-  String definition = "@config(async = 'true') define stream cseEventStream (symbol string, price float, volume long);";
-  ```
+```java
+  String definition = "define stream cseEventStream (symbol string, price float, volume long);";
+```
 * Define a Siddhi query as follows.
-  ```java
-  String query = "@info(name = 'query1') from cseEventStream#window.timeBatch(500)  select symbol, sum(price) as price, sum(volume) as volume group by symbol insert into outputStream ;";
-  ```
+```java
+  String query = "@info(name = 'query1') " +
+                 "from cseEventStream#window.timeBatch(500)  " +
+                 "select symbol, sum(price) as price, sum(volume) as volume " +
+                 "group by symbol " +
+                 "insert into outputStream ;";
+```
   This Siddhi query stores incoming events for 500 milliseconds, groups them by symbol and calculates the sum for price and volume. Then it inserts the results into a stream named `outputStream`.
   
 #### Step 2: Creating Siddhi Application Runtime
 A Siddhi application is a self contained, valid set of stream definitions and queries. This step involves creating a runtime representation of a Siddhi application by combining the stream definition and the Siddhi query you created in Step 1.
 ```java
-
 SiddhiManager siddhiManager = new SiddhiManager();
- 
 SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(definition + query);
 ```
 In the above example, `definition + query` forms the Siddhi application.  The Siddhi Manager parses the Siddhi application and provides you with an Siddhi application runtime. This Siddhi application runtime is used to add callbacks and input handlers to the Siddhi application.
