@@ -745,9 +745,13 @@ Key Word|Description
 ---------|---------
 `and`|This allows two events received in any order to be matched.
 `or`|One event from either event stream can be matched regardless of the order in which the events were received.
+`not`|When this precedes a condition in a Siddhi query, it indicates that the condition is not met.
+
+
 
 **Example**
-The following query sends an alert when the room temperature reaches the temperature set on the regulator. The pattern matching is reset every time the temperature set on the regulator changes.
+
+**Example 1: Identifying the occurence of an expected event**
 ```sql
 define stream TempStream(deviceID long, roomNo int, temp double);
 define stream RegulatorStream(deviceID long, roomNo int, tempSet double);
@@ -757,6 +761,87 @@ select e1.roomNo, e2.temp as roomTemp
 having e3 is null
 insert into AlertStream;
 ```
+This query sends an alert when the room temperature reaches the temperature set on the regulator. The pattern matching is reset every time the temperature set on the regulator changes.
+
+**Example 2: Identifying the non-occurence of an expected event**
+ ```sql
+ define stream CustomerStream (customerId string, timestamp long);
+ 
+ from every not CustomerStream for 7 days
+ select *
+ insert into OutputStream;
+ ```
+This query receives information about existing customers of the store from the `CustomerStream` stream. It identifies customers that have not visited the store for the last seven days, and outputs that information to the `OutputStream` stream. A message is generated from the `OutputStream` stream with information for those customers about the discounts currently offered at the store.
+
+**Example 3: Detecting the non-occurence of an expected event following another event**
+```sql
+define stream LocationStream (username string, latitude double, longitude double);
+define stream SpeedStream (username string, speed double);
+from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 15 minutes and e1=SpeedStream[speed >= 60.0]
+select e1.username as username
+insert into AlertStream;
+```
+This query receives information about the location oftaxis from the `LocationStream` stream, and information about the average speed of taxis from the `SpeedStream` stream. If a taxi (i.e., a username) with an average speed greater than 60 that has not reached location at `latitude == 43.0096 and longitude == 81.2737` in 15 minutes is identified, the event is output to the `AlertStream` in order send an alert that indicates that the taxi has taken the wrong route.
+
+**Example 4: Detecting the non-occurence of multiple events**
+```sql
+define stream LocationStream (username string, latitude double, longitude double);
+define stream StateStream (username string, state string);
+from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 30 minutes and not StateStream[state == ‘finished’] for 30 minutes
+select ‘Danger’ as message
+insert into AlertStream;
+```
+This query receives information about the location oftaxis from the `LocationStream` stream, and information about the status of the passenger from the `StateStream` stream. If the passenger (i.e., username) does not arrive at the location at `latitude == 43.0096 and longitude == 81.2737` in 30 minutes, and at the same time, if he/she has not marked the journey as `finished`, the event is created and output to the `AlertStream` stream to generate an alert with `Danger` as the message.
+
+**Example 5: Detecting the non-occurence of either of two mutually exclusive events**
+```sql
+define stream LocationStream (username string, latitude double, longitude double);
+
+from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 15 minutes or not LocationStream[latitude == 44.0096 and longitude == 81.2735] for 15 minutes
+select ‘Unexpected Delay’ as message
+insert into AlertStream;
+```
+This query receives information about the location of taxis from the `LocationStream` stream. If a taxi has not reached either the location at `latitude == 43.0096 and longitude == 81.2737`, or the one at `latitude == 44.0096 and longitude == 81.2735` in 15 minutes, and event is created and output into the `AlertStream` stream to generate an alert with the message `Unexpected Delay`.
+
+**Example 6: Detecting the non-occurence of one event or the occurence of another**
+```sql
+define stream LocationStream (username string, latitude double, longitude double);
+define stream DangerStream (username string);
+from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 30 minutes or e1=DangerStream
+select e1.username as username
+insert into AlertStream;
+```
+This query receives information about the location of taxis from the `LocationStream` stream, and information aboutwhether the passenger is in danger from the `DangerStream` stream. After 30 minutes, it checkes whether the passenger has reached the location at `latitude == 43.0096 and longitude == 81.2737`, or marked to indicate that he/she is in danger. If the passenger has not reached the location, or if he/she has indicated that he/she is in danger, an event is output to the `AlertStream` stream in order to generate an alert to indicate that the passenger is in danger.
+
+**Example 7: Identifying the occurence of an unexpected event within a specified time interval**
+```sql
+define stream TemperatureStream (temp float, timestamp long);
+define stream FireAlarmStream (active boolean);
+from not TemperatureStream[temp > 60] for 5 sec -> e1=FireAlarmStream
+select e1.id as alarmId
+insert into AlertStream;
+```
+This query receives information about the temperature from the `TemperatureStream` stream, and information about the state of the fire alarm from the `FireAlarmStream` stream. If the state of the fire alarm is `active` within a period of 5 seconds during which the temperature is less than 60 degrees, an event is output to the `AlertStream` stream in order to indicate that the fire alarm generates false alerts.
+
+**Example 8: Identifying the non-occurence of an expected event within a specified time period**
+```sql
+define stream TemperatureStream (temp float, timestamp long);
+define stream FireAlarmStream (active boolean);
+from TemperatureStream[temp > 60] -> not FireAlarmStream[active == true] for 5 sec
+select 'Fire alarm not working' as message
+insert into AlertStream;
+```
+This query receives information about the temperature from the `TemperatureStream` stream, and information about the state of the fire alarm from the `FireAlarmStream` stream. If the event that indicates an active fire alarm does not arrive within five seconds after an event that indicates that the temperature has risen above 60 degrees, an output event is sent to the AlertStream stream with `Fire alarm not working` as the message.
+
+**Example 9: Identifying the occurence of an even that is not preceded by another expected event**
+```sql
+define stream LocationStream (locationId string, customerId string);
+
+from not LocationStream[locationId == 'zoneA'] and e1=LocationStream[locationId ==  'billingCounter']
+select e1.customerId as customerId, 'Great deals are waiting for you at zone A' as message
+insert into NotificationStream;
+```
+This query receives information about the location of customers from the `LocationStream` stream. If an event indicates that a customer has reached the `bilingCounter` location, and it is not preceded by an event that indicates that the same customer has been to the `zoneA` location, an output event is sent to the `NotificationStream` stream in order to generate a notification with `Great deals are waiting for you at zone A` as the message.
 
 ### Sequences
 
