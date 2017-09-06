@@ -781,7 +781,7 @@ from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 15 min
 select e1.username as username
 insert into AlertStream;
 ```
-This query receives information about the location oftaxis from the `LocationStream` stream, and information about the average speed of taxis from the `SpeedStream` stream. If a taxi (i.e., a username) with an average speed greater than 60 that has not reached location at `latitude == 43.0096 and longitude == 81.2737` in 15 minutes is identified, the event is output to the `AlertStream` in order send an alert that indicates that the taxi has taken the wrong route.
+This query receives information about the location of taxis from the `LocationStream` stream, and information about the average speed of taxis from the `SpeedStream` stream. If a taxi (i.e., a username) with an average speed greater than 60 that has not reached location at `latitude == 43.0096 and longitude == 81.2737` in 15 minutes is identified, the event is output to the `AlertStream` in order send an alert that indicates that the taxi has taken the wrong route.
 
 **Example 4: Detecting the non-occurence of multiple events**
 ```sql
