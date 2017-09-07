@@ -763,6 +763,81 @@ insert into AlertStream;
 ```
 This query sends an alert when the room temperature reaches the temperature set on the regulator. The pattern matching is reset every time the temperature set on the regulator changes.
 
+
+### Sequences
+
+Sequence allows event streams to be correlated over time and detect event sequences based on the order of event arrival. With sequence there cannot be other events in between the events that match the sequence condition. It creates state machines to track the states of the matching process internally. Sequence can correlate events over multiple input streams or over the same input stream. Therefore, each matched input event needs to be referenced so that it can be accessed for future processing and output generation.
+**Syntax**
+
+The following is the syntax for a sequence configuration.
+
+```sql
+from {every} <input event reference>=<input stream name>[<filter condition>], <input event reference>=<input stream name>[<filter condition>]{+|*|?}, ...       within <time gap>
+select <input event reference>.<attribute name>, <input event reference>.<attribute name>, ...
+insert into <output stream name>
+```
+**Example**
+
+The following query sends an alert if there is more than 1 degree increase in the temperature between two consecutive temperature events.
+
+WSO2 Siddhi supports the following types of sequences:
+
++ Counting sequences
++ Logical sequences
+
+#### Counting sequences
+
+Counting sequence allows us to match multiple consecutive events based on the same matching condition.
+
+**Syntax**
+
+The number of events matched can be limited via postfixes as explained below.
+
+Postfix|Description
+---------|---------
+*|This matches zero or more events.
++|This matches 1 or more events.
+?|This matches zero events or one event.
+
+**Example**
+
+The following query identifies peak temperatures.
+
+```sql
+define stream TempStream(deviceID long, roomNo int, temp double);
+define stream RegulatorStream(deviceID long, roomNo int, tempSet double, isOn bool);
+  
+from every e1=TempStream, e2=TempStream[e1.temp <= temp]+, e3=TempStream[e2[last].temp > temp]
+select e1.temp as initialTemp, e2[last].temp as peakTemp
+insert into TempDiffStream;
+```
+
+#### Logical Sequences
+
+Logical sequence matches events that arrive in temporal order and correlates events with logical relationships.
+
+**Syntax**
+
+Keywords such as and and or can be used instead of -> to illustrate the logical relationship.
+
+Keyword|Description
+---------|---------
+`and`|This allows two events received in any order to be matched.
+`or`|One event from either event stream can be matched regardless of the order in which the events were received.
+
+**Example 1: Identifying the occurence of an event**
+
+
+```sql
+define stream TempStream(deviceID long, temp double);define stream HumidStream(deviceID long, humid double);
+define stream RegulatorStream(deviceID long, isOn bool);
+  
+from every e1=RegulatorStream, e2=TempStream and e3=HumidStream
+select e2.temp, e3.humid
+insert into StateNotificationStream;
+```
+This query creates a notification when a regulator event is followed by both temperature and humidity events.
+
 **Example 2: Identifying the non-occurence of an expected event**
  ```sql
  define stream CustomerStream (customerId string, timestamp long);
@@ -843,79 +918,6 @@ insert into NotificationStream;
 ```
 This query receives information about the location of customers from the `LocationStream` stream. If an event indicates that a customer has reached the `bilingCounter` location, and it is not preceded by an event that indicates that the same customer has been to the `zoneA` location, an event is output to the `NotificationStream` stream in order to generate a notification with `Great deals are waiting for you at zone A` as the message.
 
-### Sequences
-
-Sequence allows event streams to be correlated over time and detect event sequences based on the order of event arrival. With sequence there cannot be other events in between the events that match the sequence condition. It creates state machines to track the states of the matching process internally. Sequence can correlate events over multiple input streams or over the same input stream. Therefore, each matched input event needs to be referenced so that it can be accessed for future processing and output generation.
-**Syntax**
-
-The following is the syntax for a sequence configuration.
-
-```sql
-from {every} <input event reference>=<input stream name>[<filter condition>], <input event reference>=<input stream name>[<filter condition>]{+|*|?}, ...       within <time gap>
-select <input event reference>.<attribute name>, <input event reference>.<attribute name>, ...
-insert into <output stream name>
-```
-**Example**
-
-The following query sends an alert if there is more than 1 degree increase in the temperature between two consecutive temperature events.
-
-WSO2 Siddhi supports the following types of sequences:
-
-+ Counting sequences
-+ Logical sequences
-
-#### Counting sequences
-
-Counting sequence allows us to match multiple consecutive events based on the same matching condition.
-
-**Syntax**
-
-The number of events matched can be limited via postfixes as explained below.
-
-Postfix|Description
----------|---------
-*|This matches zero or more events.
-+|This matches 1 or more events.
-?|This matches zero events or one event.
-
-**Example**
-
-The following query identifies peak temperatures.
-
-```sql
-define stream TempStream(deviceID long, roomNo int, temp double);
-define stream RegulatorStream(deviceID long, roomNo int, tempSet double, isOn bool);
-  
-from every e1=TempStream, e2=TempStream[e1.temp <= temp]+, e3=TempStream[e2[last].temp > temp]
-select e1.temp as initialTemp, e2[last].temp as peakTemp
-insert into TempDiffStream;
-```
-
-#### Logical Sequences
-
-Logical sequence matches events that arrive in temporal order and correlates events with logical relationships.
-
-**Syntax**
-
-Keywords such as and and or can be used instead of -> to illustrate the logical relationship.
-
-Keyword|Description
----------|---------
-`and`|This allows two events received in any order to be matched.
-`or`|One event from either event stream can be matched regardless of the order in which the events were received.
-
-**Example**
-
-The following query creates a notification when a regulator event is followed by both temperature and humidity events.
-
-```sql
-define stream TempStream(deviceID long, temp double);define stream HumidStream(deviceID long, humid double);
-define stream RegulatorStream(deviceID long, isOn bool);
-  
-from every e1=RegulatorStream, e2=TempStream and e3=HumidStream
-select e2.temp, e3.humid
-insert into StateNotificationStream;
-```
 ## Partitions
 
 Partitions allow events and queries to be divided in order to process them in parallel and in isolation. Each partition is tagged with a partition key. Only events corresponding to this key are processed for each partition. A partition can contain one or more Siddhi queries.
