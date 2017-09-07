@@ -771,7 +771,7 @@ This query sends an alert when the room temperature reaches the temperature set 
  select *
  insert into OutputStream;
  ```
-This query receives information about existing customers of the store from the `CustomerStream` stream. It identifies customers that have not visited the store for the last seven days, and outputs that information to the `OutputStream` stream. A message is generated from the `OutputStream` stream with information for those customers about the discounts currently offered at the store.
+This query receives information about existing customers of the store from the `CustomerStream` stream. It identifies customers that have not visited the store for the last seven days, and outputs that information to the `OutputStream` stream. A message is generated from the `OutputStream` stream with information for those customers about the discounts that are currently offered at the store.
 
 **Example 3: Detecting the non-occurence of an expected event following another event**
 ```sql
@@ -781,7 +781,7 @@ from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 15 min
 select e1.username as username
 insert into AlertStream;
 ```
-This query receives information about the location of taxis from the `LocationStream` stream, and information about the average speed of taxis from the `SpeedStream` stream. If a taxi (i.e., a username) with an average speed greater than 60 that has not reached location at `latitude == 43.0096 and longitude == 81.2737` in 15 minutes is identified, the event is output to the `AlertStream` in order send an alert that indicates that the taxi has taken the wrong route.
+This query receives information about the location of taxis from the `LocationStream` stream, and information about the average speed of taxis from the `SpeedStream` stream. If a taxi (i.e., a username) with an average speed greater than 60 that has not reached location at `latitude == 43.0096 and longitude == 81.2737` in 15 minutes is identified, an event is output to the `AlertStream` in order send an alert that indicates that the taxi has taken the wrong route.
 
 **Example 4: Detecting the non-occurence of multiple events**
 ```sql
@@ -791,7 +791,7 @@ from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 30 min
 select ‘Danger’ as message
 insert into AlertStream;
 ```
-This query receives information about the location oftaxis from the `LocationStream` stream, and information about the status of the passenger from the `StateStream` stream. If the passenger (i.e., username) does not arrive at the location at `latitude == 43.0096 and longitude == 81.2737` in 30 minutes, and at the same time, if he/she has not marked the journey as `finished`, an output event is created in the `AlertStream` stream to generate an alert with `Danger` as the message.
+This query receives information about the location of taxis from the `LocationStream` stream, and information about the status of the passenger from the `StateStream` stream. If the passenger (i.e., username) does not arrive at the location at `latitude == 43.0096 and longitude == 81.2737` in 30 minutes, and at the same time, if he/she has not marked the journey as `finished`, an event is output to the `AlertStream` stream to generate an alert with `Danger` as the message.
 
 **Example 5: Detecting the non-occurence of either of two mutually exclusive events**
 ```sql
@@ -801,7 +801,7 @@ from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 15 min
 select ‘Unexpected Delay’ as message
 insert into AlertStream;
 ```
-This query receives information about the location of taxis from the `LocationStream` stream. If a taxi has not reached either the location at `latitude == 43.0096 and longitude == 81.2737`, or the one at `latitude == 44.0096 and longitude == 81.2735` in 15 minutes, an event is created and output into the `AlertStream` stream to generate an alert with the message `Unexpected Delay`.
+This query receives information about the location of taxis from the `LocationStream` stream. If a taxi has not reached either the location at `latitude == 43.0096 and longitude == 81.2737`, or the one at `latitude == 44.0096 and longitude == 81.2735` in 15 minutes, an event is output to the `AlertStream` stream to generate an alert with `Unexpected Delay` as the message.
 
 **Example 6: Detecting the non-occurence of one event or the occurence of another**
 ```sql
@@ -831,7 +831,7 @@ from TemperatureStream[temp > 60] -> not FireAlarmStream[active == true] for 5 s
 select 'Fire alarm not working' as message
 insert into AlertStream;
 ```
-This query receives information about the temperature from the `TemperatureStream` stream, and information about the state of the fire alarm from the `FireAlarmStream` stream. If an event that indicates an active fire alarm does not arrive within five seconds after an event that indicates that the temperature has risen above 60 degrees, an output event is created in the `AlertStream` stream with `Fire alarm not working` as the message.
+This query receives information about the temperature from the `TemperatureStream` stream, and information about the state of the fire alarm from the `FireAlarmStream` stream. If an event where the state of the fire alarm is `active` does not arrive within five seconds after an event that indicates that the temperature has risen above 60 degrees, an event is output to the `AlertStream` stream with `Fire alarm not working` as the message.
 
 **Example 9: Identifying the occurence of an even that is not preceded by another expected event**
 ```sql
@@ -841,7 +841,7 @@ from not LocationStream[locationId == 'zoneA'] and e1=LocationStream[locationId 
 select e1.customerId as customerId, 'Great deals are waiting for you at zone A' as message
 insert into NotificationStream;
 ```
-This query receives information about the location of customers from the `LocationStream` stream. If an event indicates that a customer has reached the `bilingCounter` location, and it is not preceded by an event that indicates that the same customer has been to the `zoneA` location, an output event is created in the `NotificationStream` stream in order to generate a notification with `Great deals are waiting for you at zone A` as the message.
+This query receives information about the location of customers from the `LocationStream` stream. If an event indicates that a customer has reached the `bilingCounter` location, and it is not preceded by an event that indicates that the same customer has been to the `zoneA` location, an event is output to the `NotificationStream` stream in order to generate a notification with `Great deals are waiting for you at zone A` as the message.
 
 ### Sequences
 
