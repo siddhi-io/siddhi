@@ -745,7 +745,6 @@ Key Word|Description
 ---------|---------
 `and`|This allows two events received in any order to be matched.
 `or`|One event from either event stream can be matched regardless of the order in which the events were received.
-`not`|When this precedes a condition in a Siddhi query, it indicates that the condition is not met.
 
 
 
@@ -824,6 +823,7 @@ Keyword|Description
 ---------|---------
 `and`|This allows two events received in any order to be matched.
 `or`|One event from either event stream can be matched regardless of the order in which the events were received.
+`not`|When this precedes a condition in a Siddhi query, it indicates that the condition is not met.
 
 **Example 1: Identifying the occurence of an event**
 
