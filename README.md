@@ -29,6 +29,7 @@ Find some useful links below:
 * <a target="_blank" href="https://github.com/wso2/siddhi/releases">Releases</a>
 * <a target="_blank" href="https://github.com/wso2/siddhi/issues">Issue tracker</a>
 * <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">Siddhi Extensions</a>
+* <a target="_blank" href="https://wso2.github.io/siddhi/#support">Support</a>
 
 ## Latest API Docs 
 
