@@ -824,6 +824,7 @@ Keyword|Description
 `and`|This allows two events received in any order to be matched.
 `or`|One event from either event stream can be matched regardless of the order in which the events were received.
 `not`|When this precedes a condition in a Siddhi query, it indicates that the condition is not met.
+`for`| This is used to define a time period within which an event should arrive. e.g., `from not TemperatureStream[temp > 60] for 5 sec -> e1=FireAlarmStream` defines a condition for n event to arrive at the `FireAlarmStream` stream within 5 seconds after an event with a value greater than 60 for temperature arrives in the `TemperatureStream` stream. 
 
 **Example 1: Identifying the occurence of an event**
 
