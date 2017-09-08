@@ -363,7 +363,7 @@ Item|Description
 `@store`|This annotation is used to refer to the data source where the events for which aggregate values are to be calculated are stored.
 `define aggregation`|This specifies a unique name for the aggregation
 `group by`|The attribute by which the calculated aggregate values are grouped. Specifying an attribute to group by is optional. When an attribute is specified, the aggregate values are calculated for the required time periods per value for the specified attribute. If no attribute is specified, all the events are aggregated together.
-`aggregate by timestamp`|The time period for which the aggregate values are calculated.
+`aggregate by timestamp`|The time period for which the aggregate values are calculated. This is an optional parameter. If the time period is determined by an external timestamp (i.e., the timestamp specified as the value for the `_timestamp` attribute in the event), specific timestamps must be specified in the query with the `within` operator using supported formats (i.e., `<yyyy>-<MM>-<dd>`, `<HH>:<mm>:<ss>`, `<Z>` (if time is not in GMT), and `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` (if time is in GMT). If the time period is to be determined based on the system time, you can specify the time duration for which the aggregate values should be calculated (e.g., `aggregate every sec...year` calculates aggregate values for the last second, minute, hour, day, month and year in a sliding manner.).
 
 
 **Example**
@@ -390,6 +390,12 @@ per "<TIME_PERIOD>"
 select a.<attributeName>, a.<attributeName>, a.<attributeName> 
 insert into fooBar;
 ```
+The above syntax includes the following:
+Item|Description
+---------|---------
+`within "<START_TIME>", "<END_TIME>"`|This allows you to specify the time interval for which the aggregate values need to be retrieved by specifying the timestamps for the start time and the end time.
+`per "<TIME_PERIOD>"`|This specifies the time period by which the aggregate values must be grouped. e.g., If you specify `days`, the retrieved aggregate vlaues are displayed for each day within the selected time interval.
+
 **Example**
 ```sql
 define stream barStream (symbol string, value int);
