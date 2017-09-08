@@ -372,6 +372,8 @@ public class DefinitionParserHelper {
                                     .generateConfigReader(sourceExtension.getNamespace(), sourceExtension.getName()),
                             streamDefinition, siddhiAppContext);
 
+                    siddhiAppContext.getSnapshotService().addSnapshotable(source.getStreamDefinition().getId(), source);
+
                     List<Source> eventSources = eventSourceMap.get(streamDefinition.getId());
                     if (eventSources == null) {
                         eventSources = new ArrayList<>();
@@ -536,6 +538,8 @@ public class DefinitionParserHelper {
                         if (groupDeterminer != null) {
                             sink.getMapper().setGroupDeterminer(groupDeterminer);
                         }
+
+                        siddhiAppContext.getSnapshotService().addSnapshotable(sink.getStreamDefinition().getId(), sink);
 
                         List<Sink> eventSinks = eventSinkMap.get(streamDefinition.getId());
                         if (eventSinks == null) {
