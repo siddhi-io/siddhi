@@ -35,5 +35,14 @@ pages:
   - 4.0.0-M51: api/4.0.0-M51.md
   - 4.0.0-M52: api/4.0.0-M52.md
   - 4.0.0-M53: api/4.0.0-M53.md
+  - 4.0.0-M54: api/4.0.0-M54.md
+  - 4.0.0-M55: api/4.0.0-M55.md
+  - 4.0.0-M56: api/4.0.0-M56.md
+  - 4.0.0-M57: api/4.0.0-M57.md
+  - 4.0.0-M58: api/4.0.0-M58.md
+  - 4.0.0-M59: api/4.0.0-M59.md
+  - 4.0.0-M60: api/4.0.0-M60.md
+  - 4.0.0-M61: api/4.0.0-M61.md
+  - 4.0.0-M62: api/4.0.0-M62.md
 - License: license.md
 theme: material

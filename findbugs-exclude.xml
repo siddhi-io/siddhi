@@ -18,6 +18,38 @@
   -->
 
 <FindBugsFilter>
+    <!--api-->
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream"/>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream"/>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.query\.api.*"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!--compiler-->
     <Match>
         <Class name="org.wso2.siddhi.query.compiler.internal.SiddhiQLBaseVisitorImpl"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
@@ -35,41 +67,11 @@
         <Bug pattern="MF_CLASS_MASKS_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
-        <Bug pattern="EI_EXPOSE_REP"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
-        <Bug pattern="EI_EXPOSE_REP"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
-        <Bug pattern="EI_EXPOSE_REP2"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
-        <Bug pattern="EI_EXPOSE_REP2"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.extension.table.rdbms.RDBMSEventTable"/>
-        <Bug pattern="SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING, NP_LOAD_OF_KNOWN_NULL_VALUE"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.extension.table.rdbms.RDBMSIterator"/>
-        <Bug pattern="PZLA_PREFER_ZERO_LENGTH_ARRAYS"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.extension.table.rdbms.config.RDBMSQueryConfiguration"/>
+        <Class name="org.wso2.siddhi.query.compiler.exception.SiddhiParserException"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.extension.table.rdbms.util.RDBMSTableUtils"/>
-        <Bug pattern="DC_DOUBLECHECK"/>
-    </Match>
-    <Match>
-        <Class name="org.wso2.siddhi.extension.table.rdbms.util.RDBMSTableUtils$RDBMSConfigurationMapper"/>
-        <Bug pattern="DM_CONVERT_CASE"/>
-    </Match>
+
+    <!--core-->
     <Match>
         <Class name="org.wso2.siddhi.core.query.output.ratelimit.event.AllPerEventOutputRateLimiter"/>
         <Bug pattern="VO_VOLATILE_INCREMENT"/>
@@ -93,10 +95,6 @@
     <Match>
         <Class name="org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder"/>
         <Bug pattern="RV_RETURN_VALUE_OF_PUTIFABSENT_IGNORED"/>
-    </Match>
-    <Match>
-        <Package name="~org\.wso2\.siddhi\.core\.query\.output\.ratelimit\.time.*"/>
-        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
         <class name="org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor"/>
@@ -155,37 +153,41 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.core.*"/>
-        <Bug pattern="EI_EXPOSE_REP2"/>
-    </Match>
-    <Match>
-        <Package name="~org\.wso2\.siddhi\.core.*"/>
-        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC"/>
-    </Match>
-    <Match>
-        <Package name="~org\.wso2\.siddhi\.core\.event.*"/>
+        <Class name="org.wso2.siddhi.core.exception.SiddhiAppCreationException"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.performance.*"/>
-    </Match>
-    <Match>
-        <Package name="~org\.wso2\.siddhi\.sample.*"/>
-    </Match>
-    <Match>
-        <Package name="~org\.wso2\.siddhi\.core\.query\.selector\.attribute\.aggregator\.incremental.*"/>
+        <Class name="org.wso2.siddhi.core.exception.StoreQueryCreationException"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
         <Class name="org.wso2.siddhi.core.table.holder.IndexEventHolder"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
+
     <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream"/>
-        <Bug pattern="SE_BAD_FIELD"/>
+        <Package name="~org\.wso2\.siddhi\.core\.query\.output\.ratelimit\.time.*"/>
+        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream"/>
-        <Bug pattern="SE_BAD_FIELD"/>
+        <Package name="~org\.wso2\.siddhi\.core.*"/>
+        <Bug pattern="EI_EXPOSE_REP2, SIC_INNER_SHOULD_BE_STATIC"/>
     </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core\.event.*"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core\.query\.selector\.attribute\.aggregator\.incremental.*"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <!--other-->
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.performance.*"/>
+    </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.sample.*"/>
+    </Match>
+
 </FindBugsFilter>

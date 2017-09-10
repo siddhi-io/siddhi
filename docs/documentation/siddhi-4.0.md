@@ -342,6 +342,66 @@ Detail|Value
 ***Return Type***|Returns the minimum value in the same data type as the input.
 ***Example***|`minForever(temp)` returns the minimum temp value recorded for all the events throughout the lifetime of the query.
 
+#### Time based aggregation
+Time-based aggregation involves obtaining aggregate attribute values (i.e., sum, average, min, max etc.) for a specified time period.
+
+##### Calculating and storing time-based aggregated values
+This section explains how to write Siddhi queries to calculate aggregate values for specific time periods as required.
+
+**Syntax**
+```sql
+@store(type="<DATABASE_TYPE>")
+define aggregation <aggregatorName>
+from <InputStreamName>
+select <attributeName>, <aggregate_function>(attributeName) as <attributeName>, <aggregate_function>(attributeName) as <attributeName> ...
+    group by <attributeName>
+    aggregate by timestamp every <time_period>;
+```
+The above syntax includes the following:
+Item|Description
+---------|---------
+`@store`|This annotation is used to refer to the data source where the events for which aggregate values are to be calculated are stored.
+`define aggregation`|This specifies a unique name for the aggregation
+`group by`|The attribute by which the calculated aggregate values are grouped. Specifying an attribute to group by is optional. When an attribute is specified, the aggregate values are calculated for the required time periods per value for the specified attribute. If no attribute is specified, all the events are aggregated together.
+`aggregate by timestamp`|The time period for which the aggregate values are calculated.
+
+
+**Example**
+```sql
+@store(type="rdbms")
+define aggregation testAggregator
+from tradesStream
+select symbol, avg(price) as avgPrice, sum(price) as total
+    group by symbol
+    aggregate by timestamp every sec...year;
+```
+In this query, an aggregator named `testAggregator`calculates the average price and the sum of prices of the events that arrive at the `tradesStream` stream every second. These average and total are calculated per symbol, and in each second, the average and sum relevant for the last second, minute, hour, day, month, and year are output, and stored in the RDBMS database.
+
+##### Retrieving aggregate values
+This section explain how to retrieve aggregate values that are already calculated and persisted in the system.
+**Syntax**
+```sql
+define stream `InputStreamName` (<attributeName> <ATTRIBUTE_TYPE>, <attributeName> <ATTRIBUTE_TYPE> ...);
+
+from InputStreamName as b join <AGGREGATION_NAME> as a
+on a.symbol == b.symbol 
+within "<START_TIME>", "<END_TIME>" 
+per "<TIME_PERIOD>" 
+select a.<attributeName>, a.<attributeName>, a.<attributeName> 
+insert into fooBar;
+```
+**Example**
+```sql
+define stream barStream (symbol string, value int);
+
+from barStream as b join testAggregator as a
+on a.symbol == b.symbol 
+within "2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30" 
+per "days" 
+select a.symbol, a.total, a.avgPrice 
+insert into fooBar;
+```
+This query performs a join to match events arriving at the `barStream` stream with the events calculated and persisted by the `testAggregator` aggregator. If the value for the `symbol` attribute of an event that arrives in an input stream is the same as that of an event persisted by the aggregator, the aggregated values already calculated for it for the time period between `2014-02-15 00:00:00 +05:30` and `2014-03-16 00:00:00 +05:30` are retrieved. The aggregate values (i.e., average and the total in this scenario) for the last day is retrieved. The output events are inserted into the `FooBar` output stream.
 #### Inbuilt windows
 WSO2 Siddhi supports the following inbuilt windows.
 
