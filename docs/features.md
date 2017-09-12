@@ -1,0 +1,43 @@
+#Features
+
+- Retrieving Events 
+    - From various data sources supporting various message formats
+ - Mapping Events
+    - Mapping events with various data formats to Stream for processing
+    - Mapping streams to multiple data formats for publishing
+ - Processing Streams
+    - Filter 
+        - Filtering stream based on conditions
+    - Window
+        - Support for sliding and batch (tumbling) and many other type of windows  
+    - Aggregation 
+        - For long running aggregations and aggregation over windows 
+        - Supporting `Avg`, `Sum`, `Min`, `Max`, etc
+        - Ability aggregate processing with `Group by` and filter aggrigated data with `Having` conditions
+    - Incremental summarisation
+        - Support for processing and retrieving long running summarisations
+    - Table 
+        - For storing events for future processing and retrieving them on demand
+        - Supporting storage in in-memory, RDBMs, Solr, mongoDb, etc 
+    - Join
+        - Joining two streams based on conditions 
+        - Joining a streams with table or incremental summarisation based on conditions  
+        - Supports Left, Right & Full Outer Joins and Inner Joins
+    - Pattern 
+        - Identifies event occurrence patterns among streams
+        - Identify non occurrence of events
+        - Supports repetitive matches of event pattern occurrences with logical conditions and time bound
+    - Sequence processing
+        - Identifies continuous sequence of events from streams
+        - Supports zero to many, one to many, and zero to one condition
+    - Partitions
+        - Grouping queries and based on keywords and value ranges for isolated parallel processing
+    - Scripting 
+        - Support writing scripts like JavaScript, Scala and R within Siddhi Queries
+    - Process Based on event time
+        - Whole execution driven by the event time  
+ - Publishing Events 
+    - To various data sources with various message formats
+    - Supporting load balancing and failover data publishing 
+ - Snapshot and restore
+    - Support for periodic state persistence and restore capabilities for long running execution
