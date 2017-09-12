@@ -76,7 +76,7 @@ A Siddhi application is a self contained execution entity that defines how data 
                      "insert into AggregateStockStream ;";
 ```
   This Siddhi query groups the events by symbol and calculates aggregates such as the sum for price and sum of volume 
-  for the last 5 seconds time window. Then it inserts the results into a stream named `AggregateStockStream`. Aggregate 
+  for the last 5 seconds time window. Then it inserts the results into a stream named `AggregateStockStream`. 
   
 #### Step 3: Creating Siddhi Application Runtime
 This step involves creating a runtime representation of a Siddhi application.
