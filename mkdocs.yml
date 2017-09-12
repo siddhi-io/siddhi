@@ -6,6 +6,7 @@ extra:
   palette:
     primary: teal
     accent: teal
+site_favicon: images/favicon.ico
 google_analytics:
 - UA-103065-28
 - auto
