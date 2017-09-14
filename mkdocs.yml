@@ -24,5 +24,6 @@ pages:
   - 4.0.0-M62: api/4.0.0-M62.md
   - 4.0.0-M69: api/4.0.0-M69.md
   - 4.0.0-M70: api/4.0.0-M70.md
+  - 4.0.0-M71: api/4.0.0-M71.md
 - License: license.md
 theme: material
