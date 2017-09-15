@@ -1,16 +1,22 @@
 # Siddhi Streaming SQL Guide 4.0
 
-## Introduction to Siddhi Streaming SQL
+## Introduction
 
-Siddhi Streaming SQL is designed to process event streams in streaming manner and to detect complex event occurrences 
-and notify them in real-time. The following table provides definitions of a few terms in the Siddhi Streaming SQL Language.
+Siddhi Streaming SQL is designed to process event streams in streaming manner, detect complex event occurrences, 
+and notify them in real-time. 
+
+The flowing diagram depicts how **event flows** within the some of the key Siddhi Streaming SQL elements.
+
+![Event Flow](../images/event-flow.png?raw=true "Event Flow")
+
+Below table provides brief description of a few key elements in the Siddhi Streaming SQL Language.
 
 | Elements     | Description |
 | ------------- |-------------|
-| Stream    | A logical series of events ordered in time with a uniquely identifiable name and set of defined typed attributes defining its schema |
+| Stream    | A logical series of events ordered in time with a uniquely identifiable name and set of defined typed attributes defining it's schema |
 | Event     | An event is associated with only one stream, and all events of that stream have an identical set of attributes assigned specific types (or the same schema). An event contains a timestamp and the attribute values according to the schema.|
 | Table     | A structured representation of stored data with defined schema, allowing stored data backed by `In-Memory`, `RDBMs`, etc to be accessed and manipulated at runtime.
-| Query	    | A logical construct that generates events to streams or tables by combining existing streams and/or tables. A query consumes one or more input streams and zero or one table, to process events in a streaming manner, processed output events publishes them to stream or tables for further processing or notifications. 
+| Query	    | A logical construct that process events in a streaming manner by combining existing streams and/or tables, and generates events to output stream or table. A query consumes one or more input streams and zero or one table, to process events in a streaming manner, processed output events publishes them to stream or tables for further processing or notifications. 
 | Source | A contracts that consumes data from external sources (such as `TCP`, `Kafka`, `HTTP`, etc), converts it's data format (such as `XML`, `JSON`, `binary`, etc) to Siddhi event, and passes that to a Stream for processing.
 | Sink | A contracts that takes events arriving at a Stream, map them to a predefined data format (such as `XML`, `JSON`, `binary`, etc), and publish them to external endpoints (such as `E-mail`, `TCP`, `Kafka`, `HTTP`, etc).
 | Input Handler | A mechanism to programmatically inject events in to Streams. |
@@ -18,55 +24,65 @@ and notify them in real-time. The following table provides definitions of a few 
 | Partition	| A logical container that processes a queries based on a pre-defined rule of separation. Here for each partition key a separate instance of queries will be generated to achieve isolation. 
 | Inner Stream | A positionable stream that connects portioned queries to preserve partition isolation.  
 
-The flowing diagram depicts how **event flows** within the Siddhi Streaming SQL elements.
-
-![Event Flow](../images/event-flow.png?raw=true "Event Flow")
-
 
 ## Streams
-The stream definition defines the event stream schema. An event stream definition contains a unique name and a 
-set of attributes assigned specific types, with uniquely identifiable names within the stream.
+Streams is a logical series of events ordered in time. It's schema is defined via the **stream definition**.
+A stream definition contains a unique name and a set of attributes with specific types and uniquely identifiable names within the stream.
+All events of a particular Stream will have the same schema (i.e. have the same attributes in the same order). 
 
 **Purpose**
-To define the schema based on which events are selected to be processed in the execution plan to which the event stream
- is attached.
+
+By defining a schema it unifies common types of events together. This enables them to be processed at queries using their defined attributes in a streaming manner, and let sinks and sources to map events to and from various data formats.
 
 **Syntax**
 
-The following is the syntax of a query that defines a new event stream.
+The following is the syntax for defining a new stream.
 ```sql
-`define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );`
+define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
 ```
-The following parameters are configured in an event stream definition.
+The following parameters are configured in a stream definition.
 
 | Parameter     | Description |
 | ------------- |-------------|
-| `stream name`      | The name of the event stream to be created. |
-| ```<attribute name> <attribute type>```     | The schema of an event stream is defined by adding the name and the type of each attribute as a value pair. <br> *`attribute name`: A unique name for the attribute. </br> <br> *`attribute type`: The data type of the attribute value. This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT` or `BOOLEAN`.</br>     |
+| `stream name`      | The name of the stream created. (as a convention `PascalCase` is used for stream name) |
+| `attribute name`   | The schema of an stream is defined by its attributes by uniquely identifiable attribute names (as a convention `camalCase` is used for attribute names)|    |
+| `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 **Example**
 ```sql
-`define stream TempStream (deviceID long, roomNo int, temp double);`
-The above creates an event stream named TempStream with the following attributes.
+define stream TempStream (deviceID long, roomNo int, temp double);
 ```
-+ `deviceID` of the `long` attribute type
-+ `roomNo` of the `int` attribute type
-+ `temp` of the `double` attribute type
+The above creates a stream named `TempStream` with the following attributes.
+
++ `deviceID` of type `long`
++ `roomNo` of type `int` 
++ `temp` of type `double` 
 
 ## Sources
-Event sources allow you to receive events to WSO2 SP via a selected transport and in a selected format.
-WSO2 SP currently supports the following source types:
-* File
-* HTTP
-* JMS
-* Kafka
-* MQTT
-* RabbitMQ
-* TCP
-* WSO2Event
+Sources allow you to receive events with various data formats via multiple transports into streams for processing.
+
+Source let you define a mapping to convert the incoming event from its native data format (such as `JSON`, `TEXT`, `XML`, etc) 
+to Siddhi Event, when such mapping is not customised it assumes that the arriving events adhere to a predefined format.
+
+**Purpose**
+
+Source provides a way to Siddhi consume events from external systems and map the events to adhere to the associated stream. 
 
 **Syntax**
-To add an event source configuration to a Siddhi application, add the `@source` annotation and enter the required values for parameters. The source syntax is as follows:
+
+To configure a stream to consume events via a source, add the source configuration to a stream definition by adding the `@source()` annotation and the required parameter values. 
+The source syntax is as follows:
+```sql
+@source(type='source_type', static.option.key1='static_option_value1', static.option.keyN='static_option_valueN',
+    @map(type='map_type', static.option_key1='static_option_value1', static.option.keyN='static_option_valueN',
+        @attributes( attributeN='attribute_mapping_N', attribute1='attribute_mapping_1')
+    )
+)
+define stream stream_name (attribute1 Type1, attributeN TypeN);
+```
+
+or 
+
 ```sql
 @source(type='source_type', static_option_key='static_option_value', dynamic_option_key='{{dynamic_option_value}}',
     @map(type='map_type', static_option_key='static_option_value', dynamic_option_key='{{dynamic_option_value}}',
@@ -75,13 +91,59 @@ To add an event source configuration to a Siddhi application, add the `@source` 
 )
 define stream stream_name (attribute1 Type1, attributeN TypeN);
 ```
-In the `type` parameter, enter the transport via which the source recives events. The other parameters to be configured depends on the transport selected. For detailed information about the parameters to be configured for each transport, see [Configuring Transport Types for Receiving Events](https://docs.wso2.com/display/SP400/Configuring+Transport+Types+for+Receiving+Events).
+
+**Source**
+
+The `type` parameter of `@source` defines the source type that receives events. The other parameters to be configured depends on the source selected, some of those can also be optional values. For detailed information about the parameters refer the appropriate source documentation.
+
+Some of the supports source types are:
+
+* TCP
+* Kafka
+* MQTT
+* RabbitMQ
+* In-Memory
+* File
+* HTTP
+* JMS
+* WSO2Event
+
+**Map**
+
+Each `@source` will have a mapping denoted by `@map` that converts the incoming message format to Siddhi event.
+
+The `type` parameter of `@map` defines the map type that's responsible of mapping the data. The other parameters to be configured depends on the mapper selected, some of those can also be optional values. For detailed information about the parameters refer the appropriate mapper documentation.
+
+**When `@map` is not provided `@map(type='passThrough')` will be used as default**. This can be used when source consumes Siddhi events and when it does not need any mappings.
+
+**Map Attributes**
+
+`@attributes` is an optional parameter of `@map` to define custom mapping. When `@attributes` is not provided each mapper
+assumes that the incoming events will be adhere to it's own expected default data format. By defining `@attributes` you 
+can configure mappers to extract data from the incoming message selectively and assign then to attributes. 
+
+There are two ways you can configure `@attributes`. 
+
+1. By defining attributes as keys and mapping content as value in the following format: <br/>
+```@attributes( attributeN='mapping_N', attribute1='mapping_1')``` 
+2. By defining all attributes' mapping content in the same order as how the attributes are defined in the stream definition, such as: <br/>
+```@attributes( 'mapping_1', 'mapping_N')``` 
+
+Some of the supports source mappings are:
+
+* JSON
+* XML
+* Binary
+* Text
 
 **Example**
-The following query receives events via the HTTP transport, and processes them in the `InputStream` stream. The events are received in the `text` format, and basic authentication is carried out for each event.
+
+The following query receives events via the HTTP source on JSON data format, and passes them in the `InputStream` stream for processing. 
+Here the HTTP source is configured to receive events on all network interfaces on port `8080` on the context `foo`, and 
+its protected by basic authentication.
 ```sql
-@source(type='http', @map(type='text'),
-receiver.url='http://localhost:8080/streamName', is.basic.auth.enabled='true')
+@source(type='http', receiver.url='http://0.0.0.0:8080/foo', is.basic.auth.enabled='true', 
+  @map(type='json'))
 define stream inputStream (name string, age int, country string);
 ```
 ## Sinks
