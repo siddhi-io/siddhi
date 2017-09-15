@@ -1,4 +1,26 @@
-# Siddhi Query Language Guide 4.0
+# Siddhi Streaming SQL Guide 4.0
+
+## Introduction to Siddhi Streaming SQL
+
+Siddhi Streaming SQL is designed to process event streams in streaming manner and to detect complex event occurrences 
+and notify them in real-time. The following table provides definitions of a few terms in the Siddhi Streaming SQL Language.
+
+| Elements     | Description |
+| ------------- |-------------|
+| Stream    | A logical series of events ordered in time with a uniquely identifiable name and set of defined typed attributes defining its schema |
+| Event     | An event is associated with only one stream, and all events of that stream have an identical set of attributes assigned specific types (or the same schema). An event contains a timestamp and the attribute values according to the schema.|
+| Table     | A structured representation of stored data with defined schema, allowing stored data backed by `In-Memory`, `RDBMs`, etc to be accessed and manipulated at runtime.
+| Query	    | A logical construct that generates events to streams or tables by combining existing streams and/or tables. A query consumes one or more input streams and zero or one table, to process events in a streaming manner, processed output events publishes them to stream or tables for further processing or notifications. 
+| Source | A contracts that consumes data from external sources (such as `TCP`, `Kafka`, `HTTP`, etc), converts it's data format (such as `XML`, `JSON`, `binary`, etc) to Siddhi event, and passes that to a Stream for processing.
+| Sink | A contracts that takes events arriving at a Stream, map them to a predefined data format (such as `XML`, `JSON`, `binary`, etc), and publish them to external endpoints (such as `E-mail`, `TCP`, `Kafka`, `HTTP`, etc).
+| Input Handler | A mechanism to programmatically inject events in to Streams. |
+| Stream/Query Callback | A mechanism to programmatically consumes output events at Streams and Queries. |
+| Partition	| A logical container that processes a queries based on a pre-defined rule of separation. Here for each partition key a separate instance of queries will be generated to achieve isolation. 
+| Inner Stream | A positionable stream that connects portioned queries to preserve partition isolation.  
+
+The flowing diagram depicts how **event flows** within the Siddhi Streaming SQL elements.
+
+![Event Flow](../images/event-flow.png?raw=true "Event Flow")
 
 
 ## Streams
