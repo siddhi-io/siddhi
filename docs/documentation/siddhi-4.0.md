@@ -232,6 +232,37 @@ The following query publishes events from `OutputStream` via the HTTP Sink. Here
 define stream OutputStream (name string, ang int, country string);
 ```
 
+## Query
+
+Each Siddhi query can consume one or more streams with zero or one table, process the events in streaming fashion and generate a output event to a stream or modifies a table.
+
+**Purpose**
+
+Query enables you to perform Complex Event Processing and Stream Processing operations by processing incoming events one by one in order. 
+
+**Syntax**
+
+Query contain an input section and an output section. Some also contain a projection section. A simple query with all three sections is as follows.
+
+```sql
+from <input stream> 
+select <attribute name>, <attribute name>, ...
+insert into <output stream/table>
+```
+**Example**
+
+Following simple query derives only the room temperature from the defined TempStream stream.
+
+```sql
+define stream TempStream (deviceID long, roomNo int, temp double);
+
+from TempStream 
+select roomNo, temp
+insert into RoomTempStream;
+```
+
+**Inferred Stream**: Here the RoomTempStream is an inferred Stream, i.e.  RoomTempStream can be used as any other defined stream without explicitly defining its Stream Definition.  
+
 ## Filters
 Filters are included in queries to filter information from input streams based on a specified condition.
 
