@@ -5,6 +5,11 @@ Siddhi is a java library that listens to events from data streams, detect comple
  SQL language**, and trigger actions. It can be used to do both **_Stream Processing_** and 
  **_Complex Event Processing_**.  
 
+## Overview 
+
+![](images/siddhi-overview.png?raw=true "Overview")
+![](docs/images/siddhi-overview.png?raw=true "Overview")
+
 It can be used for;
  
 * Data preprocessing

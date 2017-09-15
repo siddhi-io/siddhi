@@ -1,16 +1,15 @@
-## Siddhi Quick Start Guide
-
 Siddhi Application can be written in a Streaming SQL language to process event streams and identify complex event occurrences.
 
 Siddhi Application can run 
+
 * By embedding Siddhi as a Java library in your project
 * Or with WSO2 Stream Processor
 
-### Creating Siddhi Applications via WSO2 Stream Processor
+## Creating Siddhi Applications via WSO2 Stream Processor
 
 For instructions to write and deploy a Siddhi application in WSO2 Stream Processor, see the [WSO2 SP Quick Start Guide](https://docs.wso2.com/display/SP400/Quick+Start+Guide).
 
-### Using Siddhi as an Java Library
+## Using Siddhi as an Java Library
 
 To use Siddhi as a library by embedding it in a Java project, follow the steps below:
 
@@ -47,7 +46,7 @@ Add the following repository configuration to the same file.
    <repositories>
      <repository>
          <id>wso2.releases</id>
-         <name>WSO2 internal Repository</name>
+         <name>WSO2 Repository</name>
          <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
          <releases>
              <enabled>true</enabled>
