@@ -7,7 +7,8 @@ Siddhi is a java library that listens to events from data streams, detect comple
 
 ## Overview 
 
-![Siddhi Overview](images/siddhi-overview.png?raw=true "Overview")
+![](images/siddhi-overview.png?raw=true "Overview")
+![](docs/images/siddhi-overview.png?raw=true "Overview")
 
 It can be used for;
  
