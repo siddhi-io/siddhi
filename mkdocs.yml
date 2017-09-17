@@ -30,5 +30,6 @@ pages:
   - 4.0.0-M74: api/4.0.0-M74.md
   - 4.0.0-M75: api/4.0.0-M75.md
   - 4.0.0-M76: api/4.0.0-M76.md
+  - 4.0.0-M77: api/4.0.0-M77.md
 - License: license.md
 theme: material
