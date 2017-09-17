@@ -22,6 +22,7 @@ Following are some prewritten extensions that are supported with Siddhi;
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-sentiment">execution sentiment</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-stats">execution stats</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-geo">execution geo</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-kalmanfilter">execution kalmanfilter</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http">io http</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka">io kafka</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp">io tcp</a>
@@ -36,6 +37,7 @@ Following are some prewritten extensions that are supported with Siddhi;
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary">map binary</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text">map text</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event">map wso2event</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue">map keyvalue</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-rdbms">store rdbms</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr">store solr</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb">store mongodb</a>
