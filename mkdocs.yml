@@ -6,43 +6,29 @@ extra:
   palette:
     primary: teal
     accent: teal
+site_favicon: images/favicon.ico
 google_analytics:
 - UA-103065-28
 - auto
 pages:
 - Welcome to WSO2 Siddhi: index.md
+- Features: features.md
+- Quick Start Guide: documentation/siddhi-quckstart-4.0.md
 - Documentation:
-  - Quick Start Guide: documentation/siddhi-quckstart-4.0.md
+  - User Guide: documentation/user-guide.md
   - Siddhi Query Guide: documentation/siddhi-4.0.md
 - Extensions: extensions.md
 - API Docs:
-  - 4.0.0-M35: api/4.0.0-M35.md
-  - 4.0.0-M36: api/4.0.0-M36.md
-  - 4.0.0-M37: api/4.0.0-M37.md
-  - 4.0.0-M38: api/4.0.0-M38.md
-  - 4.0.0-M39: api/4.0.0-M39.md
-  - 4.0.0-M40: api/4.0.0-M40.md
-  - 4.0.0-M41: api/4.0.0-M41.md
-  - 4.0.0-M42: api/4.0.0-M42.md
-  - 4.0.0-M43: api/4.0.0-M43.md
-  - 4.0.0-M44: api/4.0.0-M44.md
-  - 4.0.0-M45: api/4.0.0-M45.md
-  - 4.0.0-M46: api/4.0.0-M46.md
-  - 4.0.0-M47: api/4.0.0-M47.md
-  - 4.0.0-M48: api/4.0.0-M48.md
-  - 4.0.0-M49: api/4.0.0-M49.md
-  - 4.0.0-M50: api/4.0.0-M50.md
-  - 4.0.0-M51: api/4.0.0-M51.md
-  - 4.0.0-M52: api/4.0.0-M52.md
-  - 4.0.0-M53: api/4.0.0-M53.md
-  - 4.0.0-M54: api/4.0.0-M54.md
-  - 4.0.0-M55: api/4.0.0-M55.md
-  - 4.0.0-M56: api/4.0.0-M56.md
-  - 4.0.0-M57: api/4.0.0-M57.md
-  - 4.0.0-M58: api/4.0.0-M58.md
-  - 4.0.0-M59: api/4.0.0-M59.md
   - 4.0.0-M60: api/4.0.0-M60.md
   - 4.0.0-M61: api/4.0.0-M61.md
   - 4.0.0-M62: api/4.0.0-M62.md
+  - 4.0.0-M69: api/4.0.0-M69.md
+  - 4.0.0-M70: api/4.0.0-M70.md
+  - 4.0.0-M71: api/4.0.0-M71.md
+  - 4.0.0-M72: api/4.0.0-M72.md
+  - 4.0.0-M73: api/4.0.0-M73.md
+  - 4.0.0-M74: api/4.0.0-M74.md
+  - 4.0.0-M75: api/4.0.0-M75.md
+  - 4.0.0-M76: api/4.0.0-M76.md
 - License: license.md
 theme: material
