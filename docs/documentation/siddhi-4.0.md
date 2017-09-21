@@ -24,6 +24,14 @@ Below table provides brief description of a few key elements in the Siddhi Strea
 | Partition	| A logical container that processes a queries based on a pre-defined rule of separation. Here for each partition key a separate instance of queries will be generated to achieve isolation. 
 | Inner Stream | A positionable stream that connects portioned queries to preserve partition isolation.  
 
+Siddhi has the following language constructs:
+
++ Event Stream Definitions
++ Event Table Definitions
++ Partitions
++ Queries
+
+The execution logic of Siddhi can be composed together as an execution plan, and all the above language constructs can be written as script in an execution plan. Each construct should be separated by a semicolon ( ; ). 
 ## Streams
 Streams is a logical series of events ordered in time. It's schema is defined via the **stream definition**.
 A stream definition contains a unique name and a set of attributes with specific types and uniquely identifiable names within the stream.
@@ -263,10 +271,295 @@ insert into RoomTempStream;
 
 **Inferred Stream**: Here the RoomTempStream is an inferred Stream, i.e.  RoomTempStream can be used as any other defined stream without explicitly defining its Stream Definition.  
 
+**Query Projection**
+
+SiddhiQL supports the following for query projection.
+<table style="width:100%">
+    <tr>
+        <th>Action</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>Selecting required objects for projection</td>
+        <td>This involves selecting only some of the attributes in an input stream to be inserted into an output stream.
+            <br><br>
+            e.g., The following query selects only the  roomNo and temp attributes from the TempStream stream.
+            <pre style="align:left">from TempStream<br>select roomNo, temp<br>insert into RoomTempStream;</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Selecting all attributes for projection</td>
+        <td>This involves selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using the asterisk sign ( * ) or by omitting the select statement.
+            <br><br>
+            e.g., Use one of the following queries to select all the attributes in the TempStream stream.
+            <pre>from TempStream<br>select *<br>insert into NewTempStream;</pre>
+            or
+            <pre>from TempStream<br>insert into NewTempStream;</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Renaming attributes</td>
+        <td>This involves selecting attributes from the input streams and inserting them into the output stream with different names.
+            <br><br>
+            e.g., The following query renames roomNo to roomNumber and temp to temperature .
+            <pre>from TempStream <br>select roomNo as roomNumber, temp as temperature<br>insert into RoomTempStream;</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Introducing the default value</td>
+        <td>This involves adding a default value and assigning it to an attribute using as.
+            <br></br>
+            e.g.,
+            <pre>from TempStream<br>select roomNo, temp, 'C' as scale<br>insert into RoomTempStream;</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Using mathematical and logical expressions</td>
+        <td>This involves using attributes with mathematical and logical expressions to the precedence order given below, and assigning them to the output attribute using as .
+            <br><br>
+            <b>Operator precedence</b><br>
+            <table style="width:100%">
+                <tr>
+                    <th>Operator</th>
+                    <th>Distribution</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td>
+                        ()
+                    </td>
+                    <td>
+                        Scope
+                    </td>
+                    <td>
+                        <pre>(cost + tax) * 0.05</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                         IS NULL
+                    </td>
+                    <td>
+                        Null check
+                    </td>
+                    <td>
+                        <pre>deviceID is null</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        NOT
+                    </td>
+                    <td>
+                        Logical NOT
+                    </td>
+                    <td>
+                        <pre>not (price > 10)</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                         *   /   %  
+                    </td>
+                    <td>
+                        Multiplication, division, modulo
+                    </td>
+                    <td>
+                        <pre>temp * 9/5 + 32</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        +   -  
+                    </td>
+                    <td>
+                        Addition, substraction
+                    </td>
+                    <td>
+                        <pre>temp * 9/5 + 32</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <   <=   >   >=
+                    </td>
+                    <td>
+                        Comparisons: less-than, greater-than-equal, greater-than, less-than-equ
+                    </td>
+                    <td>
+                        <pre>totalCost >= price * quantity</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        ==   !=  
+                    </td>
+                    <td>
+                        Comparisons: equal, not equal
+                    </td>
+                    <td>
+                        <pre>totalCost >= price * quantity</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        IN
+                    </td>
+                    <td>
+                        Contains in table
+                    </td>
+                    <td>
+                        <pre>roomNo in ServerRoomsTable</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        AND
+                    </td>
+                    <td>
+                        Logical AND
+                    </td>
+                    <td>
+                        <pre>temp < 40 and (humidity < 40 or humidity >= 60)</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        OR
+                    </td>
+                    <td>
+                        Logical OR
+                    </td>
+                    <td>
+                        <pre>temp < 40 and (humidity < 40 or humidity >= 60)</pre>
+                    </td>
+                </tr>
+            </table>
+            e.g., Converting Celsius to Fahrenheit and identifying server rooms
+            <pre>from TempStream<br>select roomNo, temp * 9/5 + 32 as temp, 'F' as scale, roomNo >= 100 and roomNo < 110 as isServerRoom<br>insert into RoomTempStream;</pre>       
+    </tr>
+    
+</table>
+
+##Functions
+A function consumes zero, one or more function parameters and produces a result value.
+
+**Function Parameters**
+
+Functions parameters can be attributes (  int , long, float, double, string, bool, object ), results of other functions, results of mathematical or logical expressions or time parameters. 
+
+Time is a special parameter that can we defined using the time value as int and its unit type as <int> <unit>. Following are the supported unit types, Time upon execution will return its expression in the scale of milliseconds as a long value. 
+
+<table style="width:100%">
+    <tr>
+        <th>
+            Unit  
+        </th>
+        <th>
+            Syntax
+        </th>
+    </tr>
+    <tr>
+        <td>
+            Year
+        </td>
+        <td>
+            year | years
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Month
+        </td>
+        <td>
+            month | months
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Week
+        </td>
+        <td>
+            week | weeks
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Day
+        </td>
+        <td>
+            day | days
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Hour
+        </td>
+        <td>
+           hour | hours
+        </td>
+    </tr>
+    <tr>
+        <td>
+           Minutes
+        </td>
+        <td>
+           minute | minutes | min
+        </td>
+    </tr>
+    <tr>
+        <td>
+           Seconds
+        </td>
+        <td>
+           second | seconds | sec
+        </td>
+    </tr>
+    <tr>
+        <td>
+           Milliseconds
+        </td>
+        <td>
+           millisecond | milliseconds
+        </td>
+    </tr>
+</table>
+
+E.g. Passing 1 hour and 25 minutes to test function.
+
+<pre>test(1 hour 25 min)</pre>
+Functions, mathematical expressions, and logical expressions can be used in a nested manner.
+
+**Inbuilt Functions**
+
+Siddhi supports the following inbuilt functions.
+<br>
++ coalesce
++ convert
++ instanceOfBoolean
++ instanceOfDouble
++ instanceOfFloat
++ instanceOfInteger
++ instanceOfLong
++ instanceOfString
++ UUID
++ cast
++ ifThenElse
+
+e.g., The following configuration converts the room number to string and adds a message ID to each event using convert and UUID functions.
+
+<pre>from TempStream<br>select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID<br>insert into RoomTempStream;</pre>
+
+ 
+
+
+
+
 ## Filters
 Filters are included in queries to filter information from input streams based on a specified condition.
 
 **Purpose**
+
 A filter allows you to separate events that match a specific condition as the output, or for further processing.
 
 **Syntax**
@@ -284,8 +577,8 @@ The following parameters are configured in a filter definition:
 |-----------------------------|---------------------------------------------------------------------------|
 |`input stream name`|The event stream from which events should be selected.|
 |`filter condition`| The condition based on which the events should be filtered to be inserted into the output stream.|
-|`attribute name`| The specific attributes of which the values should be inserted into the output stream. Multiple
-||attributes can be added as a list of comma-separated values.|
+|`attribute name`| The specific attributes of which the values should be inserted into the output stream.
+||Multiple attributes can be added as a list of comma-separated values.|
 |`output stream name`|The event stream to which the filtered events should be inserted.|
 
 **Example**
@@ -362,6 +655,7 @@ stream has the following.
 from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo, deviceID
 insert all events into AvgTempStream;
 ```
+
 
 #### Aggregate function types
 The following aggregate function types are supported
@@ -447,12 +741,12 @@ Detail|Value
 ###### Maximum
 Detail|Value
 ---------|---------
-**Syntax**|`<int|long|double|float> min(<int|long|double|float> arg)`
+**Syntax**|`<int|long|double|float> max(<int|long|double|float> arg)`
 **Extension Type**|Aggregate Function
 **Description**|Returns the minimum value for all the events.
 **Parameter**}|**`arg`**: The value that needs to be compared to find the minimum value.
 **Return Type**|Returns the minimum value in the same type as the input.
-**Example**|`min(temp)` returns the minimum temp value recorded for all the events based on their arrival and expiry.
+**Example**|`max(temp)` returns the minimum temp value recorded for all the events based on their arrival and expiry.
 
 ###### Minimum
 Detail|Value
@@ -846,6 +1140,13 @@ insert all events into outputStream ;
 
 ### Full Outer Join
 
+The full outer join combines the results of left outer join and right outer join. An output event is generated for each incoming event even if there are no matching events in the other stream.
+
+e.g., The following generates output events for all the incoming events of each stream whether there is a match for the symbol in the other stream or not.
+
+<pre>from stockStream#window.length(2)<br>full outer join twitterStream#window.length(1)<br>on stockStream.symbol== twitterStream.symbol<br>select stockStream.symbol as symbol, twitterStream.tweet, stockStream.price<br>insert all events into outputStream ;</pre>
+
+
 ## Patterns and Sequences
 
 Patterns and sequences allow event streams to be correlated over time and detect event patterns based on the order of event arrival.
@@ -861,6 +1162,7 @@ from {every} <input event reference>=<input stream name>[<filter condition>] -> 
 select <input event reference>.<attribute name>, <input event reference>.<attribute name>, ...
 insert into <output stream name>
 ```
+
 **Example**
 
 The following query sends an alert if the temperature of a room increases by 5 degrees within 10 min.
@@ -873,6 +1175,7 @@ insert into AlertStream;
 ```
 
 WSO2 Siddhi supports the following types of patterns:
+
 + Counting patterns
 + Logical patterns
 
@@ -923,9 +1226,9 @@ Key Word|Description
 
 
 
-**Example**
 
-**Example 1: Identifying the occurence of an expected event**
+
+**Example: Identifying the occurence of an expected event**
 ```sql
 define stream TempStream(deviceID long, roomNo int, temp double);
 define stream RegulatorStream(deviceID long, roomNo int, tempSet double);
@@ -953,6 +1256,12 @@ insert into <output stream name>
 **Example**
 
 The following query sends an alert if there is more than 1 degree increase in the temperature between two consecutive temperature events.
+
+```sql
+from every e1=TempStream, e2=TempStream[e1.temp + 1 < temp ]
+select e1.temp as initialTemp, e2.temp as finalTemp
+insert into AlertStream;
+```
 
 WSO2 Siddhi supports the following types of sequences:
 
@@ -1149,6 +1458,26 @@ partition with ( roomNo>=1030 as 'serverRoom' or roomNo<1030 and roomNo>=330 as 
     insert into AreaTempStream
 end;
 ```
+###Inner Streams 
+
+Inner streams can be used for query instances of a partition to communicate between other query instances of the same partition. Inner Streams are denoted by a "#" in front of them, and these streams cannot be accessed outside of the partition block. 
+
+**Example**
+
+Per sensor, calculate the maximum temperature over last 10 temperature events when the sensor is having an average temperature greater than 20 over the last minute.
+
+<pre>
+partition with ( deviceID of TempStream )
+begin
+    from TempStream#window.time(1 min)
+    select roomNo, deviceID, temp, avg(temp) as avgTemp
+    insert into #AvgTempStream
+  
+    from #AvgTempStream[avgTemp > 20]#window.length(10)
+    select roomNo, deviceID, max(temp) as maxTemp
+    insert into deviceTempStream
+end;
+</pre>
 
 ## Event Table
 
@@ -1452,8 +1781,10 @@ When specifying the `table attribute` name, the attributes should be specified w
 
 + `condition` : The condition based on which the events to be inserted or over-written are selected.
 
-*Example*
+**Example**
+
 The following query searches for events in the `UpdateTable` event table that have room numbers that match the same in the `UpdateStream` stream. When such events are founding the event table, they are updated. When a room number available in the stream is not found in the event table, it is inserted from the stream.
+ 
  ```sql
  define table RoomTypeTable (roomNo int, type string);
  define stream UpdateStream (roomNumber int, roomType string);
@@ -1489,6 +1820,8 @@ insert into ServerTempStream;
 
 #### Join
 
+
+
 **Syntax**
 
 ```sql
@@ -1501,6 +1834,7 @@ insert into <output stream name>
 At the time of joining, the event table should not be associated with window operations because an event table is not an active construct. Two event tables cannot be joined with each other due to the same reason.
  
 **Purpose**
+
 To allow a stream to retrieve information from an event table.
  
 **Parameters**
@@ -1797,5 +2131,103 @@ define stream TempStream(deviceID long, roomNo int, temp double);
 from TempStream
 select concatFn(roomNo,'-',deviceID) as id, temp
 insert into DeviceTempStream;
+```
+##Siddhi extensions
+
+Siddhi supports an extension architecture to support custom code and functions to be incorporated with Siddhi in a seamless manner. Extension will follow the following syntax;
+
+```sql
+<namespace>:<function name>(<parameter1>, <parameter2>, ... )
+```
+
+Here the namespace will allow Siddhi to identify the function as an extension and its extension group, the function name will denote the extension function within the given group, and the parameters will be the inputs that can be passed to the extension for evaluation and/or configuration.  
+
+E.g. A window extension created with namespace foo and function name unique can be referred as follows:
+
+```sql
+from StockExchangeStream[price >= 20]#window.foo:unique(symbol)
+select symbol, price
+insert into StockQuote
+```
+**Extension types**
+
+Siddhi supports following five type of extensions:
+
+**1.Function Extension**
+
+For each event it consumes zero or more parameters and output a single attribute as an output. This could be used to manipulate event attributes to generate new attribute like Function operator. Implemented by extending "org.wso2.siddhi.core.executor.function.FunctionExecutor".
+
+E.g. "math:sin(x)" here the sin function of math extension will return the sin value its parameter x.
+  
+**2.Aggregate Function Extension**
+
+For each event it consumes zero or more parameters and output a single attribute having an aggregated results based in the input parameters as an output. This could be used with conjunction with a window in order to find the aggregated results based on the given window like Aggregate Function operator. Implemented by extending "org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator".
+
+E.g. "custom:std(x)" here the std aggregate function of custom extension will return the standard deviation of value x based on the assigned window to its query. 
+
+**3.Window Extension**
+
+Allows events to be collected and expired without altering the event format based on the given input parameters like the Window operator. Implemented by extending "org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor".
+
+E.g. "custom:unique(key)" here the unique window of custom extension will return all events as current events upon arrival as current events and when events arrive with the same value based on the "key" parameter the corresponding to a previous event arrived the previously arrived event will be emitted as expired event.
+
+**4.Stream Function Extension**
+
+Allows events to be altered by adding one or more attributes to it. Here events could be outputted upon each event arrival. Implemented by extending "org.wso2.siddhi.core.query.processor.stream.function.StreamFunctionProcessor".
+    
+E.g. "custom:pol2cart(theta,rho)" here the pol2cart function of custom extension will return all events by calculating the cartesian coordinates x & y and adding them as new attributes to the existing events.
+
+**5.Stream Processor Extension**
+    
+Allows events to be collected and expired with altering the event format based on the given input parameters. Implemented by extending "oorg.wso2.siddhi.core.query.processor.stream.StreamProcessor".
+    
+E.g. "custom:perMinResults(arg1, arg2, ...)" here the perMinResults function of custom extension will return all events by adding one or more attributes the events based on the conversion logic and emitted as current events upon arrival as current events and when at expiration expired events could be emitted appropriate expiring events attribute values for matching the current events attributes counts and types.
+
+**Available Extentions**
+
+Siddhi currently have several prewritten extensions as follows; 
+
+Extensions released under Apache License v2 : 
+
++ **math**:   Supporting mathematical operations 
++  **str**:Supporting String operations 
++ **geo**: Supporting geocode operations
++ **regex**: Supporting regular expression operations
++ **time**: Supporting time expression operations
++ **ml**: Supporting Machine Learning expression operations
++ **timeseries**: Supporting Time Series operations
++  **kf** (Kalman Filter): Supporting filtering capabilities by detecting outliers of the data.
++ **map**: Supporting to send a map object inside Siddhi stream definitions and use it inside queries.
++ **reorder**: Supporting for reordering events from an unordered event stream using Kslack algorithm. 
+
+Extensions released under GNU/GPL License v3 : 
+
+  + **geo**: Supporting geographical processing operations   
+  + **r**: Supporting R executions
+  + **nlp**: Supporting Natural Language Processing expression operations
+  + **pmml**: Supporting Predictive Model Markup Language expression operations
+  
+  
+**Writing Custom Extensions**
+
+Custom extensions can be written in order to cater usecase specific logics that are not out of the box available in Siddhi or as an extension. 
+
+To create custom extensions two things need to be done.
+
+1.Implementing the extension logic by extending well defined Siddhi interfaces. E.g implementing a UniqueWindowProcessor by extending org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor.
+
+```sql
+package org.wso2.test;
+  
+public class UniqueWindowProcessor extends WindowProcessor {
+   ...
+}
+```
+
+2.Add an extension mapping file to map the written extension class with the extension function name and namespace. Here extension mapping file should be named as "<namespace>.siddhiext". E.g Mapping the written UniqueWindowProcessor extension with function name "unique" and namespace "foo", to do so the mapping file should be named as foo.siddhiext and the context of the file should as below; 
+
+```sql
+# function name to class mapping of 'foo' extension
+unique=org.wso2.test.UniqueWindowProcessor
 ```
 
