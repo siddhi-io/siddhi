@@ -5,7 +5,17 @@
 Siddhi Streaming SQL is designed to process event streams in streaming manner, detect complex event occurrences, 
 and notify them in real-time. 
 
-The flowing diagram depicts how **event flows** within the some of the key Siddhi Streaming SQL elements.
+## Siddhi Application
+Streaming processing and Complex Event Processing rules can be written is Siddhi Streaming SQL and they can be put 
+together as `SiddhiApp` in one file. 
+
+**Purpose**
+
+Each Siddhi Application is an isolated processing unit that let you deploy and 
+execute queries independent of other SiddhiApps in the system.
+
+The flowing diagram depicts how **event flows** within some of the key Siddhi Streaming SQL elements 
+of the Siddhi Application.
 
 ![Event Flow](../images/event-flow.png?raw=true "Event Flow")
 
@@ -14,15 +24,29 @@ Below table provides brief description of a few key elements in the Siddhi Strea
 | Elements     | Description |
 | ------------- |-------------|
 | Stream    | A logical series of events ordered in time with a uniquely identifiable name and set of defined typed attributes defining it's schema |
-| Event     | An event is associated with only one stream, and all events of that stream have an identical set of attributes assigned specific types (or the same schema). An event contains a timestamp and the attribute values according to the schema.|
-| Table     | A structured representation of stored data with defined schema, allowing stored data backed by `In-Memory`, `RDBMs`, etc to be accessed and manipulated at runtime.
-| Query	    | A logical construct that process events in a streaming manner by combining existing streams and/or tables, and generates events to output stream or table. A query consumes one or more input streams and zero or one table, to process events in a streaming manner, processed output events publishes them to stream or tables for further processing or notifications. 
-| Source | A contracts that consumes data from external sources (such as `TCP`, `Kafka`, `HTTP`, etc), converts it's data format (such as `XML`, `JSON`, `binary`, etc) to Siddhi event, and passes that to a Stream for processing.
-| Sink | A contracts that takes events arriving at a Stream, map them to a predefined data format (such as `XML`, `JSON`, `binary`, etc), and publish them to external endpoints (such as `E-mail`, `TCP`, `Kafka`, `HTTP`, etc).
-| Input Handler | A mechanism to programmatically inject events in to Streams. |
-| Stream/Query Callback | A mechanism to programmatically consumes output events at Streams and Queries. |
-| Partition	| A logical container that processes a queries based on a pre-defined rule of separation. Here for each partition key a separate instance of queries will be generated to achieve isolation. 
-| Inner Stream | A positionable stream that connects portioned queries to preserve partition isolation.  
+| Event     | An event is associated with only one stream, and all events of that stream have an identical set of attributes assigned specific types (or the same schema). An event contains a timestamp and set of attribute values according to the schema.|
+| Table     | A structured representation of stored data with a defined schema. Stored data can be backed by `In-Memory`, `RDBMs`, `MongoDB`, etc to be accessed and manipulated at runtime.
+| Query	    | A logical construct that process events in streaming manner by combining existing streams and/or tables, and generates events to output stream or table. A query consumes one or more input streams and zero or one table, process those events in a streaming manner, publishes the output events to stream or tables for further processing or notifications. 
+| Source    | A contract that consumes data from external sources (such as `TCP`, `Kafka`, `HTTP`, etc), converts it's data format (such as `XML`, `JSON`, `binary`, etc) to Siddhi event, and passes that to a Stream for processing.
+| Sink      | A contract that takes events arriving at a Stream, map them to a predefined data format (such as `XML`, `JSON`, `binary`, etc), and publish them to external endpoints (such as `E-mail`, `TCP`, `Kafka`, `HTTP`, etc).
+| Input Handler | A mechanism to programmatically inject events into Streams. |
+| Stream/Query Callback | A mechanism to programmatically consumes output events from Streams and Queries. |
+| Partition	| A logical container that isolates processing of queries based on partition keys. Here separate instance of queries will be generated for each partition key to achieve isolation. 
+| Inner Stream | A positionable stream that connects portioned queries within their partitions preserving isolation.  
+
+**Grammar**
+
+The element of Siddhi SQL can be composed together as a script in Siddhi App, Here each construct should be separated 
+by a semicolon ( ; ). 
+
+```
+<siddhi app>  : 
+        <app annotation> * 
+        ( <stream definition> | <table definition> | ... ) + 
+        ( <query> | <partition> ) +
+        ;
+```
+
 
 ## Streams
 Streams is a logical series of events ordered in time. It's schema is defined via the **stream definition**.
@@ -31,7 +55,7 @@ All events of a particular Stream will have the same schema (i.e. have the same 
 
 **Purpose**
 
-By defining a schema it unifies common types of events together. This enables them to be processed at queries using their defined attributes in a streaming manner, and let sinks and sources to map events to and from various data formats.
+By defining a schema it unifies common types of events together. This enables them to be processed at queries using their defined attributes in a streaming manner, and let sinks and sources to map events to/from various data formats.
 
 **Syntax**
 
@@ -58,10 +82,11 @@ The above creates a stream named `TempStream` with the following attributes.
 + `temp` of type `double` 
 
 ## Sources
-Sources allow you to receive events with various data formats via multiple transports into streams for processing.
+Sources allow you to receive events via multiple transports and with various data formats into streams for processing.
 
 Source let you define a mapping to convert the incoming event from its native data format (such as `JSON`, `TEXT`, `XML`, etc) 
-to Siddhi Event, when such mapping is not customised it assumes that the arriving events adhere to a predefined format.
+to Siddhi Event, when customization to such mappings is not provided Siddhi assumes that the arriving event adhere to a 
+predefined format based on the stream definition and the selected message format.
 
 **Purpose**
 
@@ -69,7 +94,7 @@ Source provides a way to Siddhi consume events from external systems and map the
 
 **Syntax**
 
-To configure a stream to consume events via a source, add the source configuration to a stream definition by adding the `@source` annotation and the required parameter values. 
+To configure a stream to consume events via a source, add the source configuration to a stream definition by adding the `@source` annotation with the required parameter values. 
 The source syntax is as follows:
 ```sql
 @source(type='source_type', static.option.key1='static_option_value1', static.option.keyN='static_option_valueN',
@@ -82,29 +107,34 @@ define stream stream_name (attribute1 Type1, attributeN TypeN);
 
 **Source**
 
-The `type` parameter of `@source` defines the source type that receives events. The other parameters to be configured depends on the source selected, some of those can also be optional values. For detailed information about the parameters refer the appropriate source documentation.
+The `type` parameter of `@source` defines the source type that receives events. The other parameters to be configured 
+depends on the source selected, some of those can also be optional values. 
+For detailed information about the parameters refer the appropriate source documentation.
 
 Some of the supports source types are:
 
-* TCP
-* Kafka
-* MQTT
-* RabbitMQ
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a> 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> _(Only works in WSO2 Stream Processor)_ 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a> 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a> 
 * In-Memory
-* File
-* HTTP
-* JMS
-* E-mail
-* WSO2Event
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> _(Only works in WSO2 Stream Processor)_ 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> _(Only works in WSO2 Stream Processor)_  
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">E-mail</a>  _(Only works in WSO2 Stream Processor)_ 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">WSO2-Event</a> _(Only works in WSO2 Stream Processor)_ 
 
 **Source Mapper**
 
 Each `@source` will have a mapping denoted by `@map` that converts the incoming message format to Siddhi event.
 
-The `type` parameter of `@map` defines the map type that's responsible of mapping the data. The other parameters to be configured depends on the mapper selected, some of those can also be optional values. For detailed information about the parameters refer the appropriate mapper documentation.
+The `type` parameter of `@map` defines the map type that's responsible of mapping the data. The other parameters to be 
+configured depends on the mapper selected, some of those can also be optional values. 
+For detailed information about the parameters refer the appropriate mapper documentation.
 
-**When `@map` is not provided `@map(type='passThrough')` will be used as default**. This can be used when source consumes Siddhi events and when it does not need any mappings.
-
+!!! tip 
+    When `@map` is not provided `@map(type='passThrough')` will be used as default. This can be used when source consumes Siddhi events and when it does not need any mappings.
+    
 **Map Attributes**
 
 `@attributes` is an optional parameter of `@map` to define custom mapping. When `@attributes` is not provided each mapper
@@ -113,23 +143,25 @@ can configure mappers to extract data from the incoming message selectively and 
 
 There are two ways you can configure `@attributes`. 
 
-1. By defining attributes as keys and mapping content as value in the following format: <br/>
+1. Defining attributes as keys and mapping content as value in the following format: <br/>
 ```@attributes( attributeN='mapping_N', attribute1='mapping_1')``` 
-2. By defining all attributes' mapping content in the same order as how the attributes are defined in the stream definition, such as: <br/>
+2. Defining all attributes' mapping content in the same order as how the attributes are defined in stream definition: <br/>
 ```@attributes( 'mapping_1', 'mapping_N')``` 
 
 Some of the supports source mappings are:
 
-* JSON
-* XML
-* Binary
-* Text
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml/">XML</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text/">Text</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key-Value</a>
 
 **Example**
 
-The following query receives events via the HTTP source on JSON data format, and passes them in the `InputStream` stream for processing. 
+The following query receives events via the `HTTP` source on `JSON` data format, and passes them in the `InputStream` stream for processing. 
 Here the HTTP source is configured to receive events on all network interfaces on port `8080` on the context `foo`, and 
 its protected by basic authentication.
+
 ```sql
 @source(type='http', receiver.url='http://0.0.0.0:8080/foo', is.basic.auth.enabled='true', 
   @map(type='json'))
@@ -137,20 +169,20 @@ define stream InputStream (name string, age int, country string);
 ```
 ## Sinks
 
-Sources allow you to publish events that flow through streams with various data formats and via multiple transports to external endpoints.
+Sinks allow you to publish events from the streams via multiple transports to external endpoints with various data formats.
 
 Sink let you define a mapping to convert the Siddhi event to appropriate output data format (such as `JSON`, `TEXT`, `XML`, etc), 
-when such mapping is not customised it converts the events to its default data format and publishes the event.
+when customization to such mappings is not provided Siddhi converts events to its default format based on the stream definition and 
+the selected data format and publish the events.
 
 **Purpose**
 
-Sink provides a way to consume events generated by Siddhi by external systems in their prefixed data format. 
+Sink provides a way to publish Siddhi events to external systems in their preferred data format. 
 
 **Syntax**
 
-To configure a stream to publish events via a sink, add the sink configuration to a stream definition by adding the `@sink` 
-annotation and the required parameter values. 
-The sink syntax is as follows:
+To configure a stream to publish events via a Sink, add the sink configuration to a stream definition by adding the `@sink` 
+annotation with the required parameter values. The sink syntax is as follows:
 
 ```sql
 @sink(type='sink_type', static_option_key1='static_option_value1', dynamic_option_key1='{{dynamic_option_value1}}',
@@ -161,69 +193,73 @@ The sink syntax is as follows:
 define stream stream_name (attribute1 Type1, attributeN TypeN);
 ```
 
-The Sink and Sink mapper properties that are categorised as `dynamic` have the ability to absorb attributes values from the Stream they are associated with. 
-This can be done by incorporating the attribute names in double curly braces as `{{...}}` when configuring the property value. 
-`'{{attribute1}}'`, `'This is {{attribute1}}'` and `{{attribute1}} > {{attributeN}}` are some valid property values that dynamic properties can be configured with. 
- Here the attribute names in the double curly braces will be replaced with event values during execution. 
+!!! Note "Dynamic Properties" 
+    The Sink and Sink mapper properties that are categorised as `dynamic` have the ability to absorb attributes values 
+    from their associated Streams. This can be done by using the attribute names in double curly braces as `{{...}}` when configuring the property value. 
+    
+    Some valid dynamic properties values are: 
+    
+    * `'{{attribute1}}'`
+    * `'This is {{attribute1}}'` 
+    * `{{attribute1}} > {{attributeN}}`  
+    
+    Here the attribute names in the double curly braces will be replaced with event values during execution. 
+
 
 **Sink**
 
-The `type` parameter of `@sink` defines the sink type that publishes the events. The other parameters to be configured depends on the sink selected, some of those can also be optional and some can be dynamic values. For detailed information about the parameters refer the appropriate sink documentation.
+The `type` parameter of `@sink` defines the sink type that publishes the events. The other parameters to be configured 
+depends on the sink selected, some of those can also be optional and some can be dynamic values. 
+For detailed information about the parameters refer the appropriate sink documentation.
 
 Some of the supports sink types are:
 
-* TCP
-* Kafka
-* E-mail
-* MQTT
-* RabbitMQ
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a> 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">E-mail</a>  _(Only works in WSO2 Stream Processor)_ 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a> 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a> 
 * In-Memory
-* File
-* HTTP
-* JMS
-* WSO2Event
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> _(Only works in WSO2 Stream Processor)_ 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> _(Only works in WSO2 Stream Processor)_ 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> _(Only works in WSO2 Stream Processor)_  
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">WSO2-Event</a> _(Only works in WSO2 Stream Processor)_ 
 
 **Sink Mapper**
 
 Each `@sink` will have a mapping denoted by `@map` that converts the Siddhi event to an outgoing message format.
 
-The `type` parameter of `@map` defines the map type that's responsible of mapping the data. The other parameters to be configured depends on the mapper selected, some of those can also be optional or dynamic values. For detailed information about the parameters refer the appropriate mapper documentation.
+The `type` parameter of `@map` defines the map type that's responsible of mapping the event. The other parameters to be configured depends on the mapper selected, some of those can also be optional or dynamic values. 
+For detailed information about the parameters refer the appropriate mapper documentation.
 
-**When `@map` is not provided `@map(type='passThrough')` will be used as default**. This can be used when sink publishes Siddhi events and when it does not need any mappings.
+!!! tip 
+    When `@map` is not provided `@map(type='passThrough')` will be used as default. This can be used when Sink can publish Siddhi events and when it does not need any mappings.
 
 **Map Payload**
 
-`@payload` is an optional parameter of `@map` to define custom mapping. When `@payload` is not provided each mapper
+`@payload` is an optional parameter of `@map` to define a custom mapping. When `@payload` is not provided each mapper
 maps the outgoing events to it's own default data format. By defining `@payload` you 
-can configure mappers to produce the output payload as of your choice using dynamic properties by selectively assigning the attributes on your preferred format. 
+can configure mappers to produce the output payload as of your choice using dynamic properties by selectively assigning 
+the attributes on your preferred format. 
 
 There are two ways you can configure `@payload`. 
 
 1. Some mappers such as `XML`, `JSON`, and `Test` accepts only one output payload using the following format: <br/>
 ```@payload( 'This is a test message from {{user}}.' )``` 
 2. Some mappers such `key-value` accepts series of mapping values defined as: <br/>
-```@attributes( key1='mapping_1', key2='user : {{user}}')``` 
+```@payload( key1='mapping_1', key2='user : {{user}}')``` 
 
-Some of the supports source mappings are:
+Some of the supports sink mappings are:
 
-* JSON
-* XML
-* Binary
-* Text
-* Key-value
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml/">XML</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text/">Text</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key-Value</a>
 
 **Example**
 
-The following query receives events via the HTTP source on JSON data format, and passes them in the `InputStream` stream for processing. 
-Here the HTTP source is configured to receive events on all network interfaces on port `8080` on the context `foo`, and 
-its protected by basic authentication.
-```sql
-@source(type='http', receiver.url='http://0.0.0.0:8080/foo', is.basic.auth.enabled='true', 
-  @map(type='json'))
-define stream inputStream (name string, age int, country string);
-```
-
-The following query publishes events from `OutputStream` via the HTTP Sink. Here the events mapped as default JSON payloads are sent to `http://localhost:8005/endpoint`
+The following query publishes events from `OutputStream` via the `HTTP` Sink. Here the events are mapped to default `JSON` payloads and sent to `http://localhost:8005/endpoint`
  using `POST` method, `Accept` header, and basic authentication having `admin` as both the username and the password.
 ```sql
 @sink(type='http', publisher.url='http://localhost:8005/endpoint', method='POST', headers='Accept-Date:20/02/2017', 
@@ -234,15 +270,16 @@ define stream OutputStream (name string, ang int, country string);
 
 ## Query
 
-Each Siddhi query can consume one or more streams with zero or one table, process the events in streaming fashion and generate a output event to a stream or modifies a table.
+Each Siddhi query can consume one/more streams and zero/one table, process the events in streaming manner and generate a
+ output event to a stream or performs CRUD operation to a table.
 
 **Purpose**
 
-Query enables you to perform Complex Event Processing and Stream Processing operations by processing incoming events one by one in order. 
+Query enables you to perform Complex Event Processing and Stream Processing operations by processing incoming events one by one in the arrival order. 
 
 **Syntax**
 
-Query contain an input section and an output section. Some also contain a projection section. A simple query with all three sections is as follows.
+All queries contain an input and output section, some also contain a projection section. A simple query with all three sections is as follows.
 
 ```sql
 from <input stream> 
@@ -251,7 +288,7 @@ insert into <output stream/table>
 ```
 **Example**
 
-Following simple query derives only the room temperature from the defined TempStream stream.
+Following simple query in the Siddhi App consumes events from defined `TempStream` stream and output the room temperature and room number to `RoomTempStream` stream.
 
 ```sql
 define stream TempStream (deviceID long, roomNo int, temp double);
@@ -260,13 +297,17 @@ from TempStream
 select roomNo, temp
 insert into RoomTempStream;
 ```
-
-**Inferred Stream**: Here the RoomTempStream is an inferred Stream, i.e.  RoomTempStream can be used as any other defined stream without explicitly defining its Stream Definition.  
+!!! tip "Inferred Stream"
+    Here the `RoomTempStream` is an inferred Stream, i.e. `RoomTempStream` can be used as any other defined stream 
+    without explicitly defining its Stream Definition and the definition of the `RoomTempStream` will be inferred from the 
+    first query that produces the Stream.  
 
 ## Filters
+
 Filters are included in queries to filter information from input streams based on a specified condition.
 
 **Purpose**
+
 A filter allows you to separate events that match a specific condition as the output, or for further processing.
 
 **Syntax**
@@ -274,38 +315,49 @@ A filter allows you to separate events that match a specific condition as the ou
 Filter conditions should be defined in square brackets next to the input stream name as shown below.
 
 ```sql
-from <input stream name>[<filter condition>]select <attribute name>, <attribute name>, ...
-insert into <output stream name>
+from <input stream>[<filter condition>]
+select <attribute name>, <attribute name>, ...
+insert into <output stream>
 ```
-
-The following parameters are configured in a filter definition:
-
-| Parameter                   | Description                                                               |
-|-----------------------------|---------------------------------------------------------------------------|
-|`input stream name`|The event stream from which events should be selected.|
-|`filter condition`| The condition based on which the events should be filtered to be inserted into the output stream.|
-|`attribute name`| The specific attributes of which the values should be inserted into the output stream. Multiple
-||attributes can be added as a list of comma-separated values.|
-|`output stream name`|The event stream to which the filtered events should be inserted.|
 
 **Example**
 
-The following query filters all server rooms of which the temperature is greater than 40 degrees. The filtered events
-are taken from the `TempStream` input stream and inserted into the `HighTempStream` output stream.
+The following query filters all server rooms within the range of 100 and 210, and having temperature greater than 40 degrees 
+from the `TempStream` stream, and inserts the results into the `HighTempStream` stream.
 
 ```sql
-from TempStream [(roomNo >= 100 and roomNo < 110) and temp > 40 ]select roomNo, temp
+from TempStream[(roomNo >= 100 and roomNo < 210) and temp > 40]
+select roomNo, temp
 insert into HighTempStream;
 ```
 
 ## Windows
-Windows allow you to capture a subset of events based on a specific criterion from an input event stream for calculation. Each input stream can only have maximum of one window.
+
+Windows allow you to capture a subset of events based on a specific criterion from an input stream for calculation. 
+Each input stream can only have maximum of one window.
 
 **Purpose**
 
-To create subsets of events within an event stream based on time or length. Event windows always operate as sliding windows.
+To create subsets of events within a stream based on time duration, number of events, etc for processing. 
+Window can operate on sliding or tumbling (batch) manner.
 
-e.g., If you define a filter condition to find the maximum value out of every 10 events, you need to define a length window of 10 events. This window operates as a sliding window where the following 3 subsets can be identified in a list of 12 events received in a sequential order.
+
+**Syntax**
+
+The `#window` prefix should be inserted next to the relevant stream in order to use a window.
+
+```sql
+from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
+select <attribute name>, <attribute name>, ...
+insert into <output stream>
+```
+!!! note 
+    Filter condition can be applied both before and/or after the window
+    
+**Example**
+
+If you want to identify the maximum temperature out of last 10 events, you need to define a `length` window of 10 events.
+ This window operates as a sliding mode where the following 3 subsets will be calculated when a list of 12 events are received in a sequential order.
 
 |Subset|Event Range|
 |------|-----------|
@@ -313,39 +365,61 @@ e.g., If you define a filter condition to find the maximum value out of every 10
 | 2 | 2-11 |
 |3| 3-12 |
 
-**Syntax**
-
-The `#window` prefix should be inserted next to the relevant event stream in order to add a window.
+The following query finds the maximum temperature out of **last 10 events** from the `TempStream` stream, 
+and inserts the results into the `MaxTempStream` stream.
 
 ```sql
-from <input stream name>[<filter condition>]#window.<window name>(<parameter>, <parameter>, ... )select <attribute name>, <attribute name>, ...
-insert into <output stream name>
+from TempStream#window.length(10)
+select max(temp) as maxTemp
+insert into MaxTempStream;
 ```
-The following parameters are configured in a window definition.
 
-| Parameter | Description |
-|-----------|-------------|
-| `input stream name` | The stream to which the window is applied. |
-| `filter condition` | The filter condition based on which events are filtered from the defined window. |
-| `window name` | <br>The name of the window. The name should include the following information:  <br>The type of the window. The supported inbuilt windows are listed in Inbuilt Windows.</br> <br>The range of the window in terms of the time duration or the number of events.</br> <br>e.g, time(10 min) defines a time window of 10 minutes.</br>|
-|`parameter`    | |
-| `attribute name` | The attributes of the events selected from the window that should be inserted into the output stream. Multiple attributes can be specified as a comma-separated list.|
-| `output stream name` | |
+If you define the maximum temperature reading out of every 10 events, you need to define a `lengthBatch` window of 10 events.
+ Where this window operates as a batch/tumbling mode where the following 3 subsets will be calculated when a list of 30 events are received in a sequential order.
 
+|Subset|Event Range|
+|------|-----------|
+| 1 | 1-10 |
+| 2 | 11-20 |
+|3| 21-30 |
 
-   `For details on inbuilt windows supported for Siddhi, see Inbuilt Windows.
-   For details on how to manipulate window output based on event categories, see Output Event Categories.
-   For information on how to perform aggregate calculations within windows, see Aggregate Functions.`
+The following query finds the maximum temperature out of **every 10 events** from the `TempStream` stream, 
+and inserts the results into the `MaxTempStream` stream.
 
+```sql
+from TempStream#window.lengthBatch(10)
+select max(temp) as maxTemp
+insert into MaxTempStream;
+```
+
+!!! note
+    Similar operations can also be done time with `time` window and `timeBatch` window and for others. 
+    Code segments such as `#window.time(10 min)` will consider events in last 10 minutes in a sliding manner and `#window.timeBatch(2 min)` will consider events every 2 minutes in a tumbling manner. 
+
+Following are some inbuilt windows shipped with Siddhi, for more window types refer execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
+
+* time
+* timeBatch
+* length
+* lengthBatch
+* sort
+* frequent
+* lossyFrequent
+* cron
+* externalTime
+* externalTimeBatch
 
 ### Aggregate functions
-Aggregate functions perform aggregate calculations within defined windows.For the complete list of inbuilt aggregate
-functions supported see Inbuilt Aggregate Functions.
+
+Aggregate functions perform aggregate calculations in the query. 
+When a window is defined the aggregation will get restricted within that window and if no window is provided they will aggregate from the start of the Siddhi application.
 
 **Syntax**
+
 ```sql
-from <input_stream>#window.<window_name>select <aggregate_function>(<attribute_name>) as <attribute_name>, <attribute1_name>, <attribute2_name>, ...
-insert <output_event_category> into <output_stream>;
+from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
+select <aggregate function>(<parameter>, <parameter>, ... ) as <attribute name>, <attribute2 name>, ...
+insert into <output stream>;
 ```
 
 The parameters configured are as follows:
@@ -362,6 +436,11 @@ stream has the following.
 from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo, deviceID
 insert all events into AvgTempStream;
 ```
+Following are some inbuilt aggregation functions shipped with Siddhi, for more aggregation functions refer execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
+
+* time
+* timeBatch
+* length
 
 #### Aggregate function types
 The following aggregate function types are supported
