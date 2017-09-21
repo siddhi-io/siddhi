@@ -826,54 +826,348 @@ insert into AlertStream;
 ```
 
 ### Output rate limiting
+
 Output rate limiting allows queries to emit events periodically based on the condition specified.
 
 **Purpose**
 
-This allows you to limit the output to what is required in order to avoid viewing unnecessary information.
+This allows you to limit the output to avoid overloading following executions and to remove unnecessary information.
 
 **Syntax**
 
 The following is the syntax of an output rate limiting configuration.
 
 ```sql
-from <input stream name>...select <attribute name>, <attribute name>, ...
-output ({<output-type>} every (<time interval>|<event interval> events) | snapshot every <time interval>)
-insert into <output stream name>
+from <input stream> ...
+select <attribute name>, <attribute name>, ...
+output <rate limiting configuration>
+insert into <output stream>
 ```
-The parameters configured for the output rate limiting are described in the following table.
+Three type of output rate limiting configuration are available, such as 
 
-Parameter|Description
----------|---------
-`output-time`|<br>This specifies which event(s) should be emitted as the output of the query. The possible values are as follows:</br><br>*`first`*: Only the first event processed by the query in the specified time interval/sliding window is emitted.</br><br>*`last`*: Only the last event processed by the query in the specified time interval/sliding window is emitted.</br><br>*`all`*: All the events processed by the query in the specified time interval/sliding window are emitted.</br>
-`time interval`|The time interval for the periodic event emission.
-`event interval`|The number of events that defines the interval at which the emission of events take place. e.g., if the event interval is 10, the query emits a result for every 10 events.
+Rate limiting configuration|Syntax| Description
+---------|---------|--------
+Based on time | `<output event> every <time interval>` | Output `<output event>` for every given `<time interval>` time interval.
+Based on number of events | `<output event> every <event interval> events` | Output `<output event>` for every `<event interval>` number of events.
+Snapshot based output | `snapshot every <time interval>`| Output all events in the window (or the last event if no window is defined in the query) for every given `<time interval>` time interval.
+
+Here the `<output event>` specifies which event(s) should be emitted as the output of the query. 
+The possible values are as follows:
+* `first` : Only the first event processed by the query in the specified time interval/sliding window is emitted.
+* `last` : Only the last event processed by the query in the specified time interval/sliding window is emitted.
+* `all` : All the events processed by the query in the specified time interval/sliding window are emitted. **When no `<output event>` is defined `all` will be used as default.**
 
 **Examples**
 
 + Emitting events based on number of events
-<br>Here the events are emitted every time the specified number of events arrive You can also specify whether to to emit only the first event, last event, or all events out of the events that arrived.</br>
-In this example, the last temperature per sensor is emitted for every 10 events.
+
+    Here the events are emitted every time the specified number of events arrive. You can also specify whether to emit only the first event, last event, or all events out of the events that arrived.
+    
+    In this example, the last temperature per sensor is emitted for every 10 events.
+    
 ```sql
-from TempStreamselect temp
+from TempStreamselect 
+select temp, deviceID
 group by deviceID
 output last every 10 events
 insert into LowRateTempStream;
 ```
-+ Emitting events based on time
-Here, events are emitted for every predefined time interval. You can also specify whether to to emit only the first event, last event, or all events out of the events that arrived during the specified time interval.
 
++ Emitting events based on time
+
+    Here events are emitted for every predefined time interval. You can also specify whether to to emit only the first event, last event, or all events out of the events that arrived during the specified time interval.
+
+    In this example, emits all temperature events every 10 seconds    
 ```sql
-from TempStreamoutput every 10 sec
+from TempStreamoutput 
+output every 10 sec
 insert into LowRateTempStream;
 ```
+
 + Emitting a periodic snapshot of events
-<br>This method works best with windows. When an input stream is connected to a window, snapshot rate limiting emits all the current events that have arrived and do not have corresponding expired events for every predefined time interval. If the input stream is not connected to a window, only the last current event for each predefined time interval is emitted.</br>
-The following emits a snapshot of the events in a time window of 5 seconds every 1 second. 
+
+    This method works best with windows. When an input stream is connected to a window, snapshot rate limiting emits all the current events that have arrived and do not have corresponding expired events for every predefined time interval. 
+    If the input stream is not connected to a window, only the last current event for each predefined time interval is emitted.
+    
+    The following query emits snapshot of the events in a time window of 5 seconds every 1 second. 
 
 ```sql
-from TempStream#window.time(5 sec)output snapshot every 1 sec
+from TempStream#window.time(5 sec)
+output snapshot every 1 sec
 insert into SnapshotTempStream;
+```
+
+## Tables
+
+A table is a stored version of an stream or a table of events. It's schema is defined via the **table definition** thats
+quite similar to a stream definition. These events are by default stored 
+`in-memory` but Siddhi also provides store extension to work with data/events stored in various data stores through the 
+table abstraction.
+
+**Purpose**
+
+Tables allow Siddhi to work with stored events. By defining a schema to table Siddhi enables them to be processed at queries using their defined attributes with the streaming data, and also interactively query the state of the stored events in the table.
+
+**Syntax**
+
+The following is the syntax for defining a new table.
+
+```sql
+define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
+```
+
+**Example**
+
+The following creates a table named `RoomTypeTable` with the attributes `roomNo` with `int` type, `type` with `string` type.
+
+```sql
+define table RoomTypeTable ( roomNo int, type string );
+```
+
+**Primary Keys and Indexes**
+
+Event tables can be configured with primary keys to avoid the duplication of data, and indexes for fast event access.
+
+Primary keys are configured by including the `@PrimaryKey` annotation to the table configuration. The combined value of the primary key attribute should be unique for each entry saved in the table. This ensures that entries in the table are not duplicated.
+
+Indexes are configured by including the `@Index` annotation within the event table configuration. Each event table configuration can have only one `@Index` annotation. However, multiple attributes can be specified as index attributes via a single annotation. When the `@Index` annotation is defined, multiple entries can be stored for a given key in the table. Indexes can be configured together with primary keys. 
+
+
+**Examples**
+
++ Configuring primary keys
+The following query creates an event table with the `symbol` attribute defined as the primary key. Therefore, each entry in this table should have a unique value for the `symbol` attribute.
+
+```sql
+@PrimaryKey('symbol')
+define table StockTable (symbol string, price float, volume long);
+```
+
++ Configuring indexes
+
+The following query creates an indexed event table named `RoomTypeTable` with the attributes `roomNo` (as an `INT` attribute) and `type` (as a `STRIN`G attribute). All entries in the table are to be indexed by the `roomNo` attribute.
+
+```sql
+@Index('roomNo')
+define table RoomTypeTable (roomNo int, type string);
+```
+
+
+
+#### Join
+
+
+
+**Syntax**
+
+```sql
+from <input stream name>#window.length(1) join <table_name>
+    on <input stream name>.<attribute name> <condition> <table_name>.<table attribute name>
+select <input stream name>.<attribute name>, <table_name>.<table attribute name>, ...
+insert into <output stream name>
+```
+
+At the time of joining, the event table should not be associated with window operations because an event table is not an active construct. Two event tables cannot be joined with each other due to the same reason.
+ 
+**Purpose**
+
+To allow a stream to retrieve information from an event table.
+ 
+**Parameters**
+
+**Example**
+
+The following query performs a join to update the room number of the events in the `TempStream` stream with that of the corresponding events in the `RoomTypeTable` event table, and then inserts the updated events into the `EnhancedTempStream` stream.
+```sql
+define table RoomTypeTable (roomNo int, type string);
+define stream TempStream (deviceID long, roomNo int, temp double);
+   
+from TempStream join RoomTypeTable
+    on RoomTypeTable.roomNo == TempStream.roomNo
+select deviceID, RoomTypeTable.roomNo as roomNo, type, temp
+insert into EnhancedTempStream;
+```
+
+### Supported Event Table Operators
+
+The following event table operators are supported for Siddhi.
+
+#### Insert into
+
+**Syntax**
+
+```sql
+from <input stream name> 
+select <attribute name>, <attribute name>, ...
+insert into <table name>
+```
+To insert only the specified output event category, use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords. For more information, see Output Event Categories.
+
+**Purpose**
+
+To store filtered events in a specific event table.
+
+**Parameters**
+
++ `input stream name`: The input stream from which the events are taken to be stored in the event table.
+
++ `attribute name`: Attributes of the chosen events that are selected to be saved in the event table.
+
++ `table name`: The name of the event table in which the events should be saved.
+
+**Example**
+
+The following query inserts all the temperature events from the `TempStream` event stream to the `TempTable` event table.
+
+```sql
+from TempStream
+select *
+insert into TempTable;
+```
+#### Delete
+
+**Syntax**
+
+```sql
+from <input stream name> 
+select <attribute name>, <attribute name>, ...
+delete <table name>
+    on <condition>
+```
+
+The `condition` element specifies the basis on which events are selected to be deleted. When specifying this condition, the attribute names should be referred to with the table name.
+To delete only the specified output category, use the `current events`, `expired events` or the `all events` keyword. For more information, see Output Event Categories.
+
+**Purpose**
+
+To delete selected events that are stored in a specific event table.
+
+**Parameters**
+
++ `input stream name`: The input stream that is the source of the events stored in the event table.
+
++ `attribute name`: Attributes to which the given condition is applied in order to filter the events to be deleted.
+
++ `table name`: The name of the event table from which the filtered events are deleted.
+
++ `condition`: The condition based on which the events to be deleted are selected.
+
+**Example**
+
+The following query deletes all the entries in the `RoomTypeTable` event table that have a room number that matches the room number in any event in the `DeleteStream` event stream.
+
+```sql
+define table RoomTypeTable (roomNo int, type string);
+define stream DeleteStream (roomNumber int);
+  
+from DeleteStream
+delete RoomTypeTable
+    on RoomTypeTable.roomNo == roomNumber;
+```
+
+#### Update
+
+**Syntax**
+
+```sql
+from <input stream name> 
+select <attribute name> as <table attribute name>, <attribute name> as <table attribute name>, ...
+update <table name>
+    on <condition>
+```
+
+The `condition` element specifies the basis on which events are selected to be updated. When specifying this condition, the attribute names should be referred to with the table name.
+To update only the specified output category, use the `current events`, `expired events` or the `all events` keyword. For more information, see Output Event Categories.
+
+**Purpose**
+
+To update selected events in an event table.
+
+**Parameters**
+
++ `input stream name`: The input stream that is the source of the events stored in the event table.
+
++ `attribute name`: Attributes to which the given `condition` is applied in order to filter the events to be updated.
+
++ `table name`: The name of the event table in which the filtered events should be updated.
+
++ `condition`: The condition based on which the events to be updated are selected.
+
+**Example**
+
+The following query updates room type of all the events in the `RoomTypeTable` event table that have a room number that matches the room number in any event in the `UpdateStream` event stream.
+
+```sql
+define table RoomTypeTable (roomNo int, type string);
+define stream UpdateStream (roomNumber int, roomType string);
+  
+from UpdateStream
+select roomType as type
+update RoomTypeTable
+    on RoomTypeTable.roomNo == roomNumber;
+```
+
+#### Insert Overwrite
+
+**Syntax**
+
+```sql
+from <input stream name> 
+select <attribute name> as <table attribute name>, <attribute name> as <table attribute name>, ...
+insert overwrite <table name>
+    on <condition>
+```
+
+The `condition` element specifies the basis on which events are selected to be inserted or overwritten. When specifying this condition, the attribute names should be referred to with the table name.
+When specifying the `table attribute` name, the attributes should be specified with the same name specified in the event table, allowing Siddhi to identify the attributes that need to be updated/inserted in the event table.
+
+**Purpose**
+
+**Parameters**
+
++ `input stream name`: The input stream that is the source of the events stored in the event table.
+
++ `attribute name`: Attributes to which the given `condition` is applied in order to filter the events to be inserted or over-written.
+
++ `table name`: The name of the event table in which the filtered events should be inserted or over-written.
+
++ `condition` : The condition based on which the events to be inserted or over-written are selected.
+
+**Example**
+
+The following query searches for events in the `UpdateTable` event table that have room numbers that match the same in the `UpdateStream` stream. When such events are founding the event table, they are updated. When a room number available in the stream is not found in the event table, it is inserted from the stream.
+ 
+ ```sql
+ define table RoomTypeTable (roomNo int, type string);
+ define stream UpdateStream (roomNumber int, roomType string);
+   
+ from UpdateStream
+ select roomNumber as roomNo, roomType as type
+ insert overwrite RoomTypeTable
+     on RoomTypeTable.roomNo == roomNo;
+ ```
+#### In
+ 
+**Syntax**
+
+```sql
+<condition> in <table name>
+```
+
+The `condition` element specifies the basis on which events are selected to be inserted or overwritten. When specifying this condition, the attribute names should be referred to with the table name.
+
+**Purpose**
+ 
+**Parameters**
+
+**Example**
+
+```sql
+define table ServerRoomTable (roomNo int);
+define stream TempStream (deviceID long, roomNo int, temp double);
+   
+from TempStream[ServerRoomTable.roomNo == roomNo in ServerRoomTable]
+insert into ServerTempStream;
 ```
 
 ## Time based aggregation
@@ -1347,390 +1641,8 @@ E.g. Per sensor, calculate the maximum temperature over last 10 temperature even
 define table RoomTypeTable (roomNo int, type string);
 ```
 
-## Event Table
+## (Defined) Windows 
 
-An event table is a stored version of an event stream or a table of events. It allows Siddhi to work with stored events. Events are stored in-memory by default, and Siddhi also provides an extension to work with data/events stored in RDBMS data stores.
-
-### Defining An Event Table
-
-An event table definition defines the table schema. The syntax for an event table definition is as follows.
-```sql
-define table <table name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
-```
-
-**Example**
-
-The following creates a table named `RoomTypeTable` with the attributes `roomNo` (an `INT` attribute) and `type` (a `STRING` attribute).
-
-```sql
-partition with ( deviceID of TempStream )
-begin
-    from TempStream#window.time(1 min)
-    select roomNo, deviceID, temp, avg(temp) as avgTemp
-    insert into #AvgTempStream
-  
-    from #AvgTempStream[avgTemp > 20]#window.length(10)
-    select roomNo, deviceID, max(temp) as maxTemp
-    insert into deviceTempStream
-end;
-```
-
-### Event Table Types
-
-Siddhi supports the following types of event tables.
-
-#### In-memory Event Table
-
-In memory event tables are created to store events for later access. Event tables can be configured with primary keys to avoid the duplication of data, and indexes for fast event access.
-Primary keys are configured by including the `@PrimaryKey` annotation within the event table configuration. Each event table can have only one attribute defined as the primary key, and the value for this attribute should be unique for each entry saved in the table. This ensures that entries in the table are not duplicated
-Indexes are configured by including the `@Index` annotation within the event table configuration. Each event table configuration can have only one `@Index` annotation. However, multiple attributes can be specified as index attributes via a single annotation. When the `@Index` annotation is defined, multiple entries can be stored for a given key in the table. Indexes can be configured together with primary keys. 
-
-
-
-**Examples**
-
-+ Configuring primary keys
-The following query creates an event table with the `symbol` attribute defined as the primary key. Therefore, each entry in this table should have a unique value for the `symbol` attribute.
-
-```sql
-@PrimaryKey('symbol')
-define table StockTable (symbol string, price float, volume long);
-```
-
-+ Configuring indexes
-
-The following query creates an indexed event table named `RoomTypeTable` with the attributes `roomNo` (as an `INT` attribute) and `type` (as a `STRIN`G attribute). All entries in the table are to be indexed by the `roomNo` attribute.
-
-```sql
-@Index('roomNo')
-define table RoomTypeTable (roomNo int, type string);
-```
-
-#### Hazlecast Event Table
-
-Event tables allow event data to be persisted in a distributed manner using Hazelcast in-memory data grids. This functionality is enabled using the `From` annotation. Also, the connection instructions for the Hazelcast cluster can be provided with the `From` annotation.
-The following is a list of connection instructions that can be provided with the `From` annotation.
-
-+ `cluster.name : Hazelcast cluster/group name [Optional]  (i.e cluster.name='cluster_a')`
-+ `cluster.password : Hazelcast cluster/group password [Optional]  (i.e cluster.password='pass@cluster_a')`
-+ `cluster.addresses : Hazelcast cluster addresses (ip:port) as a comma separated string [Optional, client mode only] (i.e cluster.addresses='192.168.1.1:5700,192.168.1.2:5700')`
-+ `well.known.addresses : Hazelcast WKAs (ip) as a comma separated string [Optional, server mode only] (i.e well.known.addresses='192.168.1.1,192.168.1.2')`
-+ `collection.name : Hazelcast collection object name [Optional, can be used to share single table between multiple EPs] (i.e collection.name='stockTable')`
-
-**Examples**
-
-+ Creating a table backed by a new Hazelcast instance
-
-The following query creates an event table named `RoomTypeTable` with the attributes `roomNo` (an `INT` attribute) and `type` (a `STRING` attribute), backed by a *new* Hazelcast Instance.
- 
-```sql
-@from(eventtable = 'hazelcast')
-define table RoomTypeTable(roomNo int, type string);
-```
-
-+ Creating a table backed by a new Hazelcast instance in a new Hazelcast cluster
-The following query creates an event table named `RoomTypeTable` with the attributes `roomNo` (an `INT` attribute) and `type` (a `STRING` attribute), backed by a *new* Hazelcast Instance in a new Hazelcast cluster.
-
-```sql
-@from(eventtable = 'hazelcast', cluster.name = 'cluster_a', cluster.password = 'pass@cluster_a')
-define table RoomTypeTable(roomNo int, type string);
-```
-
-+ Creating a table backed by an existing Hazelcast instance in an existing Hazelcast cluster
-The following query creates an event table named `RoomTypeTable` with the attributes `roomNo` (an `INT` attribute) and `type` (a `STRING` attribute), backed by an existing Hazelcast Instance in an existing Hazelcast Cluster.
-
-```sql
-@from(eventtable = 'hazelcast', cluster.name = 'cluster_a', cluster.password = 'pass@cluster_a', cluster.addresses='192.168.1.1:5700,192.168.1.2.5700')
-define table RoomTypeTable(roomNo int, type string);
-```
-
-#### RDBMS Event Table
-
-An event table can be backed with an RDBMS event store using the `From` annotation. You can also provide the connection instructions to the event table with this annotation. The RDBMS table name can be different from the event table name defined in Siddhi, and Siddhi always refers to the defined event table name. However the defined event table name cannot be same as an already existing stream name because syntactically, both are considered the same in the Siddhi Query Language.
-
-*The RDBMS event table has been tested with the following databases:
-
-+ MySQL
-+ H2
-+ Oracle*
-
-**Example**
-
-+ Creating an event table backed by an RDBMS table
-
-The following query creates an event table named `RoomTypeTable` with the attributes `roomNo` (an `INT` attribute) and `type` (a `STRING` attribute), backed by an RDBMS table named `RoomTable` from the data source named `AnalyticsDataSource`.
-```sql
-@From(eventtable='rdbms', datasource.name='AnalyticsDataSource', table.name='RoomTable')
-define table RoomTypeTable (roomNo int, type string);
-```
-
-The datasource.name given here is injected to the Siddhi engine by the CEP/DAS server. To configure data sources in the CEP/DAS, see WSO2 Administration Guide - Configuring an RDBMS Datasource.
-+ Creating an event table backed by a MySQL table
-The following query creates an event table named RoomTypeTable with the attributes roomNo (an INT attribute) and type (a STRING attribute), backed by a MySQL table named `RoomTable` from the `cepdb` database located at `localhost:3306` with `root` as both the username and the password.
-
-##### Caching Events
-<br>Several caches can be used with RDBMS backed event tables in order to reduce I/O operations and improve their performance. Currently all cache implementations provide size-based algorithms.</br>
-
-The following elements are added with the Fromannotation to add caches.
-
-+ `cache`: This specifies the cache implementation to be added. The supported cache implementations are as follows.
-
-    * `Basic`: Events are cached in a First-In-First-Out manner where the oldest event is dropped when the cache is full.
-    
-    * `LRU` (Least Recently Used): The least recently used event is dropped when the cache is full.
-    
-    * `LFU` (Least Frequently Used): The least frequently used event is dropped when the cache is full.
-    
-    If the `cache` element is not specified, the basic cache is added by default.
-
-+ `cache.size`: This defines the size of the cache. If this element is not added, the default cache size of 4096 is added by default.
-
-
-**Example**
-
-The following query creates an event table named `RoomTypeTable` with the attributes `roomNo` (an `INT` attribute) and `type` (a `STRING` attribute), backed by an RDBMS table using the LRU algorithm for caching 3000 events.
-
-```sql
-@From(eventtable='rdbms', datasource.name='AnalyticsDataSource', table.name='RoomTable', cache='LRU', cache.size='3000')define table RoomTypeTable (roomNo int, type string);
-```
-
-##### Using Bloom filters
-
-A Bloom Filter is an algorithm or an approach that can be used to perform quick searches. If you apply a Bloom Filter to a data set and carry out an `isAvailablecheck` on that specific Bloom Filter instance, an accurate answer is returned if the search item is not available. This allows the quick improvement of updates, joins and `isAvailable` checks.
-
-**Example**
-
-The following example shows how to include Bloom filters in an event table update query.
-
-```sql
-define stream StockStream (symbol string, price float, volume long);define stream CheckStockStream (symbol string, volume long);
-@from(eventtable = 'rdbms' ,datasource.name = 'cepDB' , table.name = 'stockInfo' , bloom.filters = 'enable')
-define table StockTable (symbol string, price float, volume long);
-   
-@info(name = 'query1')
-from StockStream
-insert into StockTable ;
-   
-@info(name = 'query2')
-from CheckStockStream[(StockTable.symbol==symbol) in StockTable]
-insert into OutStream;
-```
-### Supported Event Table Operators
-
-The following event table operators are supported for Siddhi.
-
-#### Insert into
-
-**Syntax**
-
-```sql
-from <input stream name> 
-select <attribute name>, <attribute name>, ...
-insert into <table name>
-```
-To insert only the specified output event category, use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords. For more information, see Output Event Categories.
-
-**Purpose**
-
-To store filtered events in a specific event table.
-
-**Parameters**
-
-+ `input stream name`: The input stream from which the events are taken to be stored in the event table.
-
-+ `attribute name`: Attributes of the chosen events that are selected to be saved in the event table.
-
-+ `table name`: The name of the event table in which the events should be saved.
-
-**Example**
-
-The following query inserts all the temperature events from the `TempStream` event stream to the `TempTable` event table.
-
-```sql
-from TempStream
-select *
-insert into TempTable;
-```
-#### Delete
-
-**Syntax**
-
-```sql
-from <input stream name> 
-select <attribute name>, <attribute name>, ...
-delete <table name>
-    on <condition>
-```
-
-The `condition` element specifies the basis on which events are selected to be deleted. When specifying this condition, the attribute names should be referred to with the table name.
-To delete only the specified output category, use the `current events`, `expired events` or the `all events` keyword. For more information, see Output Event Categories.
-
-**Purpose**
-
-To delete selected events that are stored in a specific event table.
-
-**Parameters**
-
-+ `input stream name`: The input stream that is the source of the events stored in the event table.
-
-+ `attribute name`: Attributes to which the given condition is applied in order to filter the events to be deleted.
-
-+ `table name`: The name of the event table from which the filtered events are deleted.
-
-+ `condition`: The condition based on which the events to be deleted are selected.
-
-**Example**
-
-The following query deletes all the entries in the `RoomTypeTable` event table that have a room number that matches the room number in any event in the `DeleteStream` event stream.
-
-```sql
-define table RoomTypeTable (roomNo int, type string);
-define stream DeleteStream (roomNumber int);
-  
-from DeleteStream
-delete RoomTypeTable
-    on RoomTypeTable.roomNo == roomNumber;
-```
-
-#### Update
-
-**Syntax**
-
-```sql
-from <input stream name> 
-select <attribute name> as <table attribute name>, <attribute name> as <table attribute name>, ...
-update <table name>
-    on <condition>
-```
-
-The `condition` element specifies the basis on which events are selected to be updated. When specifying this condition, the attribute names should be referred to with the table name.
-To update only the specified output category, use the `current events`, `expired events` or the `all events` keyword. For more information, see Output Event Categories.
-
-**Purpose**
-
-To update selected events in an event table.
-
-**Parameters**
-
-+ `input stream name`: The input stream that is the source of the events stored in the event table.
-
-+ `attribute name`: Attributes to which the given `condition` is applied in order to filter the events to be updated.
-
-+ `table name`: The name of the event table in which the filtered events should be updated.
-
-+ `condition`: The condition based on which the events to be updated are selected.
-
-**Example**
-
-The following query updates room type of all the events in the `RoomTypeTable` event table that have a room number that matches the room number in any event in the `UpdateStream` event stream.
-
-```sql
-define table RoomTypeTable (roomNo int, type string);
-define stream UpdateStream (roomNumber int, roomType string);
-  
-from UpdateStream
-select roomType as type
-update RoomTypeTable
-    on RoomTypeTable.roomNo == roomNumber;
-```
-
-#### Insert Overwrite
-
-**Syntax**
-
-```sql
-from <input stream name> 
-select <attribute name> as <table attribute name>, <attribute name> as <table attribute name>, ...
-insert overwrite <table name>
-    on <condition>
-```
-
-The `condition` element specifies the basis on which events are selected to be inserted or overwritten. When specifying this condition, the attribute names should be referred to with the table name.
-When specifying the `table attribute` name, the attributes should be specified with the same name specified in the event table, allowing Siddhi to identify the attributes that need to be updated/inserted in the event table.
-
-**Purpose**
-
-**Parameters**
-
-+ `input stream name`: The input stream that is the source of the events stored in the event table.
-
-+ `attribute name`: Attributes to which the given `condition` is applied in order to filter the events to be inserted or over-written.
-
-+ `table name`: The name of the event table in which the filtered events should be inserted or over-written.
-
-+ `condition` : The condition based on which the events to be inserted or over-written are selected.
-
-**Example**
-
-The following query searches for events in the `UpdateTable` event table that have room numbers that match the same in the `UpdateStream` stream. When such events are founding the event table, they are updated. When a room number available in the stream is not found in the event table, it is inserted from the stream.
- 
- ```sql
- define table RoomTypeTable (roomNo int, type string);
- define stream UpdateStream (roomNumber int, roomType string);
-   
- from UpdateStream
- select roomNumber as roomNo, roomType as type
- insert overwrite RoomTypeTable
-     on RoomTypeTable.roomNo == roomNo;
- ```
-#### In
- 
-**Syntax**
-
-```sql
-<condition> in <table name>
-```
-
-The `condition` element specifies the basis on which events are selected to be inserted or overwritten. When specifying this condition, the attribute names should be referred to with the table name.
-
-**Purpose**
- 
-**Parameters**
-
-**Example**
-
-```sql
-define table ServerRoomTable (roomNo int);
-define stream TempStream (deviceID long, roomNo int, temp double);
-   
-from TempStream[ServerRoomTable.roomNo == roomNo in ServerRoomTable]
-insert into ServerTempStream;
-```
-
-#### Join
-
-
-
-**Syntax**
-
-```sql
-from <input stream name>#window.length(1) join <table_name>
-    on <input stream name>.<attribute name> <condition> <table_name>.<table attribute name>
-select <input stream name>.<attribute name>, <table_name>.<table attribute name>, ...
-insert into <output stream name>
-```
-
-At the time of joining, the event table should not be associated with window operations because an event table is not an active construct. Two event tables cannot be joined with each other due to the same reason.
- 
-**Purpose**
-
-To allow a stream to retrieve information from an event table.
- 
-**Parameters**
-
-**Example**
-
-The following query performs a join to update the room number of the events in the `TempStream` stream with that of the corresponding events in the `RoomTypeTable` event table, and then inserts the updated events into the `EnhancedTempStream` stream.
-```sql
-define table RoomTypeTable (roomNo int, type string);
-define stream TempStream (deviceID long, roomNo int, temp double);
-   
-from TempStream join RoomTypeTable
-    on RoomTypeTable.roomNo == TempStream.roomNo
-select deviceID, RoomTypeTable.roomNo as roomNo, type, temp
-insert into EnhancedTempStream;
-```
-## Event Window
 An event window is a window that can be shared across multiple queries. Events are inserted from one or more streams. The event window publishes current and/or expired events as the output. The time at which these events are published depends on the window type.
  
 **Syntax**
@@ -1841,7 +1753,7 @@ insert into MaxSensorReadingStream;
  select TempWindow.roomNo, R.deviceID, 'start' as action
  insert into RegulatorActionStream;
 ```
-## Event Trigger
+## Triggers
 Event triggers allow events to be created periodically based on a specified time interval.
 
 **Syntax**
@@ -1930,7 +1842,7 @@ select *
 insert into OutStream;
 ```
 
-## Eval Script
+## Scripts
 
 Eval script allows Siddhi to process events using other programming languages by including their functions in the Siddhi queries. Eval script functions can be defined like event tables or streams and referred in the queries as Inbuilt Functions of Siddhi.
 
