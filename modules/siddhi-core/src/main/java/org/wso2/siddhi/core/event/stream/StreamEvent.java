@@ -211,17 +211,22 @@ public class StreamEvent implements ComplexEvent {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("StreamEvent{");
-        sb.append("timestamp=").append(timestamp);
-        sb.append(", beforeWindowData=").append(beforeWindowData == null ? "null" : Arrays.asList(beforeWindowData)
-                .toString());
-        sb.append(", onAfterWindowData=").append(onAfterWindowData == null ? "null" : Arrays.asList
-                (onAfterWindowData).toString());
-        sb.append(", outputData=").append(outputData == null ? "null" : Arrays.asList(outputData).toString());
-        sb.append(", type=").append(type);
-        sb.append(", next=").append(next);
-        sb.append('}');
-        return sb.toString();
+        return toString(100);
+    }
+
+    public String toString(long maxNoOfEventsToPrint) {
+        if (maxNoOfEventsToPrint == 0) {
+            return "...";
+        }
+        return "StreamEvent{ timestamp=" + timestamp +
+                ", beforeWindowData=" + (beforeWindowData == null ? "null" : Arrays.asList(beforeWindowData)
+                .toString()) +
+                ", onAfterWindowData=" + (onAfterWindowData == null ? "null" : Arrays.asList
+                (onAfterWindowData).toString()) +
+                ", outputData=" + (outputData == null ? "null" : Arrays.asList(outputData).toString()) +
+                ", type=" + type +
+                ", next=" + (next != null ? next.toString(maxNoOfEventsToPrint - 1) : "null") +
+                '}';
     }
 
     private void writeObject(ObjectOutputStream stream)
