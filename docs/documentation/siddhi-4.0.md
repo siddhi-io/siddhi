@@ -81,7 +81,7 @@ The above creates a stream named `TempStream` with the following attributes.
 + `roomNo` of type `int` 
 + `temp` of type `double` 
 
-## Sources
+### Sources
 Sources allow you to receive events via multiple transports and with various data formats into streams for processing.
 
 Source let you define a mapping to convert the incoming event from its native data format (such as `JSON`, `TEXT`, `XML`, etc) 
@@ -167,7 +167,7 @@ its protected by basic authentication.
   @map(type='json'))
 define stream InputStream (name string, age int, country string);
 ```
-## Sinks
+### Sinks
 
 Sinks allow you to publish events from the streams via multiple transports to external endpoints with various data formats.
 
@@ -302,162 +302,10 @@ insert into RoomTempStream;
     without explicitly defining its Stream Definition and the definition of the `RoomTempStream` will be inferred from the 
     first query that produces the Stream.  
 
-**Query projection**
+###Query Projection
 
-SiddhiQL supports the following for query projection.
+Siddhi queries supports the following for query projections.
 
-<table style="width:100%">
-  <tr>
-    <th>Action</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>Selecting required objects for projection</td>
-    <td>
-    This involves adding a default value and assigning it to an attribute using as. <br>
-    e.g.,
-    <pre align="left">
-        from TempStream
-        select roomNo, temp, 'C' as scale
-        insert into RoomTempStream;
-    </pre>
-    </td>
-  </tr>
-  <tr>
-      <td>Renaming attributes</td>
-      <td>	
-      This involves selecting attributes from the input streams and inserting them into the output stream with different names. <br>
-      e.g.,
-      The following query renames roomNo to roomNumber and temp to temperature . 
-      <pre align="left">
-          from TempStream 
-          select roomNo as roomNumber, temp as temperature
-          insert into RoomTempStream;
-      </pre>
-      </td>
-   </tr>
-   <tr>
-         <td>Selecting all attributes for projection</td>
-         <td>	
-         This involves selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using the asterisk sign ( * ) or by omitting the select statement. <br>
-         e.g., Use one of the following queries to select all the attributes in the TempStream stream.
-         The following query renames roomNo to roomNumber and temp to temperature . 
-         <pre align="left">
-             from TempStream 
-             select *
-             insert into NewTempStream;
-         </pre>
-         or
-         <pre>
-         from TempStream
-         insert into NewTempStream;
-         </pre>
-         </td>
-   </tr>
-   <tr>
-         <td>Selecting required objects for projection</td>
-         <td>	
-         This involves selecting only some of the attributes in an input stream to be inserted into an output stream. <br>
-         e.g., The following query selects only the  roomNo and temp attributes from the TempStream stream. 
-         <pre align="left">
-             from TempStream 
-             select roomNo, temp
-             insert into RoomTempStream;
-         </pre>
-         </td>
-   </tr>
-   <tr>
-         <td>Using mathematical and logical expressions</td>
-         <td>	
-         This involves using attributes with mathematical and logical expressions to the precedence order given below, and assigning them to the output attribute using as . <br>
-         <b>Operator Precendence</b>
-         <br><br>
-         <table style="width:100%">
-           <tr>
-             <th>Operator</th>
-             <th>Distribution</th> 
-             <th>Example</th>
-           </tr>
-           <tr>
-             <td>()</td>
-             <td>Scope</td> 
-             <td>
-             <pre align="left">(cost + tax) * 0.05</pre>
-             </td>
-           </tr>
-           <tr>
-             <td>IS NULL</td>
-             <td>Null check</td> 
-             <td><pre>deviceID is null</pre>
-             </td>
-           </tr>
-           <tr>
-             <td>NOT</td>
-             <td>Logical NOT</td> 
-             <td><pre>not (price > 10)</pre>
-             </td>
-           </tr>
-           <tr>
-             <td>*/%</td>
-             <td>Multiplication, division, modulo</td> 
-             <td><pre>temp * 9/5 + 32</pre>
-              </td>
-           </tr>   
-           <tr>
-             <td>*/%</td>
-             <td>Multiplication, division, modulo</td> 
-             <td><pre>temp * 9/5 + 32</pre>
-             </td>
-           </tr>
-           <tr>
-              <td>+ -</td>
-              <td>Addition, substraction</td> 
-              <td><pre>temp * 9/5 + 32</pre>
-              </td>
-           </tr>
-           <tr>
-              <td>==   != </td>
-              <td>Comparisons: equal, not equal</td> 
-              <td><pre>totalCost >= price * quantity</pre>
-              </td>
-           </tr>
-           <tr>
-              <td>IN</td>
-              <td>Contains in table</td> 
-              <td><pre>roomNo in ServerRoomsTable</pre>
-           </td>
-           </tr>
-           <tr>
-              <td>AND</td>
-              <td>Logical AND</td> 
-              <td><pre>temp < 40 and (humidity < 40 or humidity >= 60)</pre>
-             </td>
-           </tr>
-           <tr>
-              <td>OR</td>
-               <td>Logical OR</td> 
-               <td><pre>temp < 40 and (humidity < 40 or humidity >= 60)</pre>
-              </td> 
-           </tr>
-         </table>
-         
-   </tr>
-</table>
-
-**Example**
-The following query filters all server rooms of which the temperature is greater than 40 degrees. The filtered events are taken from the TempStream input stream and inserted into the HighTempStream output stream.
-
-```sql
-define stream TempStream (deviceID long, roomNo int, temp double);
-from TempStream [(roomNo >= 100 and roomNo < 110) and temp > 40 ]select roomNo, temp
-insert into HighTempStream;
-```
-
-**Inferred Stream**: Here the RoomTempStream is an inferred Stream, i.e.  RoomTempStream can be used as any other defined stream without explicitly defining its Stream Definition.  
-
-**Query Projection**
-
-SiddhiQL supports the following for query projection.
 <table style="width:100%">
     <tr>
         <th>Action</th>
@@ -465,17 +313,17 @@ SiddhiQL supports the following for query projection.
     </tr>
     <tr>
         <td>Selecting required objects for projection</td>
-        <td>This involves selecting only some of the attributes in an input stream to be inserted into an output stream.
+        <td>This involves selecting only some of the attributes from the input stream to be inserted into an output stream.
             <br><br>
-            e.g., The following query selects only the  roomNo and temp attributes from the TempStream stream.
+            E.g., The following query selects only the `roomNo` and `temp` attributes from the `TempStream` stream.
             <pre style="align:left">from TempStream<br>select roomNo, temp<br>insert into RoomTempStream;</pre>
         </td>
     </tr>
     <tr>
         <td>Selecting all attributes for projection</td>
-        <td>This involves selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using the asterisk sign ( * ) or by omitting the select statement.
+        <td>Selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using asterisk ( * ) or by omitting the `select` statement.
             <br><br>
-            e.g., Use one of the following queries to select all the attributes in the TempStream stream.
+            E.g., Use one of the following queries to select all the attributes in the `NewTempStream` stream.
             <pre>from TempStream<br>select *<br>insert into NewTempStream;</pre>
             or
             <pre>from TempStream<br>insert into NewTempStream;</pre>
@@ -483,23 +331,23 @@ SiddhiQL supports the following for query projection.
     </tr>
     <tr>
         <td>Renaming attributes</td>
-        <td>This involves selecting attributes from the input streams and inserting them into the output stream with different names.
+        <td>This selects attributes from the input streams and inserting them into the output stream with different names.
             <br><br>
-            e.g., The following query renames roomNo to roomNumber and temp to temperature .
+            E.g., The following query renames `roomNo` to `roomNumber` and `temp` to `temperature`.
             <pre>from TempStream <br>select roomNo as roomNumber, temp as temperature<br>insert into RoomTempStream;</pre>
         </td>
     </tr>
     <tr>
-        <td>Introducing the default value</td>
-        <td>This involves adding a default value and assigning it to an attribute using as.
+        <td>Introducing the constant value</td>
+        <td>This adds constant values by assigning it to an attribute using `as`.
             <br></br>
-            e.g.,
+            E.g., Using 'C' as the constant value for `scale` attribute. 
             <pre>from TempStream<br>select roomNo, temp, 'C' as scale<br>insert into RoomTempStream;</pre>
         </td>
     </tr>
     <tr>
         <td>Using mathematical and logical expressions</td>
-        <td>This involves using attributes with mathematical and logical expressions to the precedence order given below, and assigning them to the output attribute using as .
+        <td>This uses attributes with mathematical and logical expressions in the precedence order given below, and assign them to the output attribute using `as`.
             <br><br>
             <b>Operator precedence</b><br>
             <table style="width:100%">
@@ -560,7 +408,7 @@ SiddhiQL supports the following for query projection.
                         Addition, substraction
                     </td>
                     <td>
-                        <pre>temp * 9/5 + 32</pre>
+                        <pre>temp * 9/5 - 32</pre>
                     </td>
                 </tr>
                 <tr>
@@ -568,7 +416,7 @@ SiddhiQL supports the following for query projection.
                         <   <=   >   >=
                     </td>
                     <td>
-                        Comparisons: less-than, greater-than-equal, greater-than, less-than-equ
+                        Comparators: less-than, greater-than-equal, greater-than, less-than-equal
                     </td>
                     <td>
                         <pre>totalCost >= price * quantity</pre>
@@ -582,7 +430,7 @@ SiddhiQL supports the following for query projection.
                         Comparisons: equal, not equal
                     </td>
                     <td>
-                        <pre>totalCost >= price * quantity</pre>
+                        <pre>totalCost !=  price * quantity</pre>
                     </td>
                 </tr>
                 <tr>
@@ -615,24 +463,32 @@ SiddhiQL supports the following for query projection.
                         Logical OR
                     </td>
                     <td>
-                        <pre>temp < 40 and (humidity < 40 or humidity >= 60)</pre>
+                        <pre>temp < 40 or (humidity < 40 and humidity >= 60)</pre>
                     </td>
                 </tr>
             </table>
-            e.g., Converting Celsius to Fahrenheit and identifying server rooms
-            <pre>from TempStream<br>select roomNo, temp * 9/5 + 32 as temp, 'F' as scale, roomNo >= 100 and roomNo < 110 as isServerRoom<br>insert into RoomTempStream;</pre>       
+            E.g., Converting Celsius to Fahrenheit and identifying rooms with room number between 10 and 15 as server rooms.
+            <pre>from TempStream<br>select roomNo, temp * 9/5 + 32 as temp, 'F' as scale, roomNo > 10 and roomNo < 15 as isServerRoom<br>insert into RoomTempStream;</pre>       
     </tr>
     
 </table>
 
-##Functions
-A function consumes zero, one or more function parameters and produces a result value.
+###Functions
+
+A function consumes zero, one or more parameters and always produces a result value. It can be used any location where
+ an attribute can be used. 
+
+**Purpose**
+
+Functions encapsulates complex making the Siddhi application simple and easy to understand. 
 
 **Function Parameters**
 
-Functions parameters can be attributes (  int , long, float, double, string, bool, object ), results of other functions, results of mathematical or logical expressions or time parameters. 
+Functions parameters can be attributes, constant values, results of other functions, results of mathematical or logical expressions or time parameters. 
+Function parameters depending on the function being called.
 
-Time is a special parameter that can we defined using the time value as int and its unit type as <int> <unit>. Following are the supported unit types, Time upon execution will return its expression in the scale of milliseconds as a long value. 
+Time is a special parameter that can we defined using the integer time value followed by its unit as `<int> <unit>`. 
+Following are the supported unit types. Upon execution time returns the value in the scale of milliseconds as a long value. 
 
 <table style="width:100%">
     <tr>
@@ -709,37 +565,42 @@ Time is a special parameter that can we defined using the time value as int and 
     </tr>
 </table>
 
-E.g. Passing 1 hour and 25 minutes to test function.
+E.g. Passing 1 hour and 25 minutes to `test()` function.
 
 <pre>test(1 hour 25 min)</pre>
-Functions, mathematical expressions, and logical expressions can be used in a nested manner.
 
-**Inbuilt Functions**
+!!! note
+    Functions, mathematical expressions, and logical expressions can be used in a nested manner.
 
-Siddhi supports the following inbuilt functions.
-<br>
-+ coalesce
+Following are some inbuilt functions shipped with Siddhi, for more functions refer execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>.
+
++ eventTimestamp
++ log
++ UUID
++ default
++ cast
 + convert
++ ifThenElse
++ minimum
++ maximum
++ coalesce
 + instanceOfBoolean
 + instanceOfDouble
 + instanceOfFloat
 + instanceOfInteger
 + instanceOfLong
 + instanceOfString
-+ UUID
-+ cast
-+ ifThenElse
 
-e.g., The following configuration converts the room number to string and adds a message ID to each event using convert and UUID functions.
+**Example**
 
-<pre>from TempStream<br>select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID<br>insert into RoomTempStream;</pre>
+The following configuration converts the `roomNo` to `string` and adds a `messageID` to each event using the `convert` and `UUID` functions.
+```sql
+from TempStream
+select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID
+insert into RoomTempStream;
+```
 
- 
-
-
-
-
-## Filters
+### Filters
 
 Filters are included in queries to filter information from input streams based on a specified condition.
 
@@ -768,7 +629,7 @@ select roomNo, temp
 insert into HighTempStream;
 ```
 
-## Windows
+### Windows
 
 Windows allow you to capture a subset of events based on a specific criterion from an input stream for calculation. 
 Each input stream can only have maximum of one window.
@@ -778,7 +639,6 @@ Each input stream can only have maximum of one window.
 To create subsets of events within a stream based on time duration, number of events, etc for processing. 
 Window can operate on sliding or tumbling (batch) manner.
 
-
 **Syntax**
 
 The `#window` prefix should be inserted next to the relevant stream in order to use a window.
@@ -786,7 +646,7 @@ The `#window` prefix should be inserted next to the relevant stream in order to 
 ```sql
 from <input stream>#window.<window name>(<parameter>, <parameter>, ... )
 select <attribute name>, <attribute name>, ...
-insert into <output stream>
+insert <event type> into <output stream>
 ```
 !!! note 
     Filter condition can be applied both before and/or after the window
@@ -816,9 +676,9 @@ If you define the maximum temperature reading out of every 10 events, you need t
 
 |Subset|Event Range|
 |------|-----------|
-| 1 | 1-10 |
-| 2 | 11-20 |
-|3| 21-30 |
+| 1    | 1-10      |
+| 2    | 11-20     |
+| 3    | 21-30     |
 
 The following query finds the maximum temperature out of **every 10 events** from the `TempStream` stream, 
 and inserts the results into the `MaxTempStream` stream.
@@ -846,67 +706,35 @@ Following are some inbuilt windows shipped with Siddhi, for more window types re
 * externalTime
 * externalTimeBatch
 
+**Output event type**
 
-**Output event categories**
+Projection of the query depends on the output event types such as, `current` and `expired` event types.
+ By default all queries produce `current` events and only queries with windows produce `expired` events 
+ when events expire from the window.
+ By controlling the event types outputted you will be able to manipulate the output of the query. 
+ 
+ **Note!** Controlling the output event types will not alter the execution within the query and will not affect the correctness of the query execution.  
+ 
+ The following keywords can be used with the output stream to manipulate output. 
+ 
+| Output event types | Description |
+|-------------------|-------------|
+| `current events` | Output events when incoming events arrives to the query. </br> This is the default functionality of no output event types is specified.|
+| `expired events` | Output events when events expires from the window. |
+| `all events` | Output events when incoming events arrives to the query and </br> when events expires from the window. |
 
-Window output can be manipulated based event categories, i.e. current and expired events, use the following keywords with output stream to manipulate the output. 
-* current events : Will emit all the events that arrives to the window. This is the default functionality is no event category is specified.
-* expired events : Will emit all the events that expires from the window. 
-* expired events : Will emit all the events that expires from the window. 
+The output event type keyword can be used between `insert` and `into` as given in the following example.
 
-For using with insert into statement use the above keywords between 'insert' and 'into' as given in the example below.<br>
-E.g. Delay all events in a stream by 1 minute.  
+**Example**
+
+Delay all events in a stream by 1 minute.  
+
 ```sql
 from TempStream#window.time(1 min)
 select *
 insert expired events into DelayedTempStream
 ```
 
-## Functions
-A function consumes zero, one or more function parameters and produces a result value.
-
-**Function parameters**
-
-Functions parameters can be attributes (  int , long, float, double, string, bool, object ), results of other functions, results of mathematical or logical expressions or time parameters. 
-Time is a special parameter that can we defined using the time value as int and its unit type as <int> <unit>. Following are the supported unit types, Time upon execution will return its expression in the scale of milliseconds as a long value. 
-
-
-| Unit | Syntax |
-|-----------|-------------|
-| `Year` | The stream to which the window is applied. |
-| `Month` | The filter condition based on which events are filtered from the defined window. |
-| `Week` | <br>The name of the window. The name should include the following information:  <br>The type of the window. The supported inbuilt windows are listed in Inbuilt Windows.</br> <br>The range of the window in terms of the time duration or the number of events.</br> <br>e.g, time(10 min) defines a time window of 10 minutes.</br>|
-|`Day`    | |
-| `Hour` | The attributes of the events selected from the window that should be inserted into the output stream. Multiple attributes can be specified as a comma-separated list.|
-| `Minutes` | minute | minutes | min|
-| `Seconds` | The attributes of the events selected from the window that should be inserted into the output stream. Multiple attributes can be specified as a comma-separated list.|
-| `Milliseconds` | The attributes of the events selected from the window that should be inserted into the output stream. Multiple attributes can be specified as a comma-separated list.|
-
-E.g. Passing 1 hour and 25 minutes to test function. 
-<pre>test(1 hour 25 min)</pre>
-Functions, mathematical expressions, and logical expressions can be used in a nested manner. 
-
-**In built functions**
-
-Siddhi supports the following inbuilt functions.
-* coalesce
-* convert
-* instanceOfBoolean
-* instanceOfDouble
-* instanceOfFloat
-* instanceOfInteger
-* instanceOfLong
-* instanceOfString
-* UUID
-* cast
-* ifThenElse
-
-e.g., The following configuration converts the room number to string and adds a message ID to each event using convert and UUID functions.
-from TempStream
-```sql
-select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID
-insert into RoomTempStream;
-```
 ### Aggregate functions
 
 Aggregate functions perform aggregate calculations in the query. 
@@ -920,409 +748,84 @@ select <aggregate function>(<parameter>, <parameter>, ... ) as <attribute name>,
 insert into <output stream>;
 ```
 
-The parameters configured are as follows:
+**Aggregate Parameters**
+
+Aggregate parameters can be attributes, constant values, results of other functions or aggregates, results of mathematical or logical expressions or time parameters. 
+Aggregate parameters depending on the Aggregation being called.
 
 **Example**
-The following query calculates the average for the temp attribute of the `TempStream` input stream within each time
-window of 10 minutes. Then it emits the events to the `AvgTempStream` output stream. Each event emitted to the output
-stream has the following.
 
-* `avgTemp` attribute with the average temperature calculated as the value.
-* `roomNo` and deviceID attributes with their original values from the input stream.
+The following query calculates the average of `temp` attribute of `TempStream` stream for the last 
+10 minutes and emit it as `avgTemp``.
 
 ```sql
-from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo, deviceID
-insert all events into AvgTempStream;
+from TempStream#window.time(10 min)
+select avg(temp) as avgTemp, roomNo, deviceID
+insert into AvgTempStream;
 ```
 Following are some inbuilt aggregation functions shipped with Siddhi, for more aggregation functions refer execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
 
+* avg
+* sum
 * max
 * min
-* sum
 * count
+* distinctCount
+* maxForever
+* minForever
+* stdDev
 
+### Group By
 
-
-#### Aggregate function types
-The following aggregate function types are supported
-
-##### Group By
-**Group By** allows you to group the aggregate based on specified attributes.
+Group By allows you to group the aggregate based on specified attributes.
 
 **Syntax**
 
 ```sql
-from <input_stream>#window.<window_name>select <aggregate_function>(<attribute_name>) as <attribute_name>, <attribute1_name>, <attribute2_name>, ...
-group by <attribute_name>, <attribute1_name>, <attribute2_name>, ...
-insert into <output_stream>;
+from <input stream>#window.<window name>(...)
+select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
+group by <attribute1 name>, <attribute2 name> ...
+insert into <output stream>;
 ```
 
-The parameters configured are as follows.
-
 **Example**
-The following query calculates the average temperature (`avgTemp`) per room number (`roomNo`) within each sliding time
-window of 10 minutes (`#window.time(10min)`) in the `TempStream` input stream, and inserts the output into the
-`AvgTempStream` output stream.
+The following query calculates the average temperature per `roomNo` and `deviceID` combination 
+for sliding 10 minutes time from the `TempStream` stream.
 
 ```sql
-from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo, deviceID
+from TempStream#window.time(10 min)
+select avg(temp) as avgTemp, roomNo, deviceID
 group by roomNo, deviceID
-insert into AvgTempStream;`
+insert into AvgTempStream;
 ```
 
-##### Having
-Having allows you to filter events after aggregation and after processing at the selector.
+### Having
+
+Having allows you to filter events after processing the `select` statement,
+ this will be helpful to filter the aggregation output.
 
 **Syntax**
-```sql
-from <input_stream>#window.<window_name>select <aggregate_function>(<attribute_name>) as <attribute_name>, 
-<attribute1_name>, <attribute2_name>, ...
-group by <attribute_name>, <attribute1_name>, <attribute2_name>, ...<
-having <condition>
-insert into <output_stream>;
-```
 
-The query parameters configured are as follows.
+```sql
+from <input stream>#window.<window name>( ... )
+select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
+group by <attribute1 name>, <attribute2 name> ...
+having <condition>
+insert into <output stream>;
+```
 
 **Example**
 
-The following query calculates the average temperature for the last 10 minutes, and alerts if it exceeds 30 degrees.
+The following query calculates the average temperature per room for the last 10 minutes, and alerts if it exceeds 30 degrees.
 ```sql
-from TempStream#window.time(10 min)select avg(temp) as avgTemp, roomNo
+from TempStream#window.time(10 min)
+select avg(temp) as avgTemp, roomNo
 group by roomNo
 having avgTemp > 30
 insert into AlertStream;
 ```
-##### Inbuilt aggregate functions
-Aggregate functions are used to perform operations such as sum on aggregated set of events through a window. Usage of 
-an aggregate function is as follows.
 
-```sql
-@info(name = 'query1')
-from cseEventStream#window.timeBatch(1 sec)
-select symbol, sum(price) as price
-insert into resultStream;
-```
-
-###### Sum
-Detail|Value
-----------|----------
-**Syntax**|`<long|double> sum(<int|long|double|float> arg)`
-**Extension Type**|Aggregate Function
-**Description**|Calculates the sum for all the events.
-**Parameter**|The value that needs to be summed.|
-**Return Type** |Returns long if the input parameter type is `int` or `long`, and returns double if the input parameter type is `float` or `double`.
-**Examples**|<br>`sum(20)` returns the sum of 20s as a long value for each event arrival and expiry.</br> `sum(temp)` returns the sum of all temp attributes based on each event arrival and expiry.
-
-###### Average
-Detail|Value
----------|---------
-**Syntax**|`<double> avg(<int|long|double|float> arg)`
-**Extension Type**| Aggregate Function
-**Description**| Calculates the average for all the events.
-**Parameter**|`arg` : The value that need to be averaged.
-**Return Type**| Returns the calculated average value as a double.
-**Example**| `avg(temp)` returns the average temp value for all the events based on their arrival and expiry.
-
-###### Maximum
-Detail|Value
----------|---------
-**Syntax**|`<int|long|double|float> max(<int|long|double|float> arg)`
-**Extension Type**|Aggregate Function
-**Description**|Returns the minimum value for all the events.
-**Parameter**}|**`arg`**: The value that needs to be compared to find the minimum value.
-**Return Type**|Returns the minimum value in the same type as the input.
-**Example**|`max(temp)` returns the minimum temp value recorded for all the events based on their arrival and expiry.
-
-###### Minimum
-Detail|Value
----------|---------
-**Syntax**|`<int|long|double|float> min(<int|long|double|float> arg)`
-**Extension Type**|Aggregate Function
-**Description**|Returns the minimum value for all the events.
-**Parameter**|`arg`: The value that needs to be compared to find the minimum value.
-**Return Type**|Returns the minimum value in the same type as the input.
-**Example**|`min(temp)` returns the minimum temp value recorded for all the events based on their arrival and expiry.
-
-###### Count
-Detail|Value
----------|---------
-***Syntax***|`<long> count()`
-***Extension Type***|Aggregate Function
-***Description***|Returns the count of all the events.
-***Return Type***|Returns the event count as a long.
-***Example***|`count()` returns the count of all the events.
-
-###### Standard Deviation
-Detail|Value
----------|---------
-***Syntax***|`<double> stddev(<int|long|double|float> arg)`
-***Extension***|Aggregate Function
-***Description***|Returns the calculated standard deviation for all the events.
-***Parameter***|`arg`:The value that should be used to calculate the standard deviation.
-***Example***|`stddev(temp)` returns the calculated standard deviation of temp for all the events based on their arrival and expiry.
-
-###### Distinct Count
-Detail|Value
----------|---------
-***Syntax***|`<long> distinctcount(<int|long|double|float|string> arg)`
-***Extension***|Aggregate Function
-***Description***|Returns the count of distinct occurrences for a given arg.
-***Parameter***|`arg`: The value that should be counted.
-***Return Type***|Returns the count of distinct occurances for a given arg.
-***Example***|<br>`distinctcount(pageID)` for the following output returns `3`.</br> <br>"WEB_PAGE_1"</br><br>"WEB_PAGE_1"</br><br>"WEB_PAGE_2"</br><br>"WEB_PAGE_3"</br><br>"WEB_PAGE_1"</br><br>"WEB_PAGE_2"</br>
-
-###### Forever Maximum
-Detail|Value
----------|---------
-***Syntax***|`<int|long|double|float> maxForever (<int|long|double|float> arg)`
-***Extension***|Aggregate Function
-***Description***|This is the attribute aggregator to store the maximum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.
-***Parameter***|`arg`: The value that needs to be compared to find the maximum value.
-***Return Type***|Returns the maximum value in the same data type as the input.
-***Example***|`maxForever(temp)` returns the maximum temp value recorded for all the events throughout the lifetime of the query.
-
-###### Forever Minimum
-Detail|Value
----------|---------
-***Syntax***|`<int|long|double|float> minForever (<int|long|double|float> arg)`
-***Extension***| Aggregate Function
-***Description***| This is the attribute aggregator to store the minimum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.
-***Parameter***|`arg`: The value that needs to be compared to find the minimum value.
-***Return Type***|Returns the minimum value in the same data type as the input.
-***Example***|`minForever(temp)` returns the minimum temp value recorded for all the events throughout the lifetime of the query.
-
-#### Time based aggregation
-Time-based aggregation involves obtaining aggregate attribute values (i.e., sum, average, min, max etc.) for a specified time period.
-
-##### Calculating and storing time-based aggregated values
-This section explains how to write Siddhi queries to calculate aggregate values for specific time periods as required.
-
-**Syntax**
-```sql
-@store(type="<DATABASE_TYPE>")
-define aggregation <aggregatorName>
-from <InputStreamName>
-select <attributeName>, <aggregate_function>(attributeName) as <attributeName>, <aggregate_function>(attributeName) as <attributeName> ...
-    group by <attributeName>
-    aggregate by timestamp every <time_period>;
-```
-The above syntax includes the following:
-Item|Description
----------|---------
-`@store`|This annotation is used to refer to the data source where the events for which aggregate values are to be calculated are stored.
-`define aggregation`|This specifies a unique name for the aggregation
-`group by`|The attribute by which the calculated aggregate values are grouped. Specifying an attribute to group by is optional. When an attribute is specified, the aggregate values are calculated for the required time periods per value for the specified attribute. If no attribute is specified, all the events are aggregated together.
-`aggregate by timestamp`|The time period for which the aggregate values are calculated. This is an optional parameter. If the time period is determined by an external timestamp (i.e., the timestamp specified as the value for the `_timestamp` attribute in the event), specific timestamps must be specified in the query with the `within` operator using supported formats (i.e., `<yyyy>-<MM>-<dd>`, `<HH>:<mm>:<ss>`, `<Z>` (if time is not in GMT), and `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` (if time is in GMT). If the time period is to be determined based on the system time, you can specify the time duration for which the aggregate values should be calculated (e.g., `aggregate every sec...year` calculates aggregate values for the last second, minute, hour, day, month and year in a sliding manner.).
-
-
-**Example**
-```sql
-@store(type="rdbms")
-define aggregation testAggregator
-from tradesStream
-select symbol, avg(price) as avgPrice, sum(price) as total
-    group by symbol
-    aggregate by timestamp every sec...year;
-```
-In this query, an aggregator named `testAggregator`calculates the average price and the sum of prices of the events that arrive at the `tradesStream` stream every second. These average and total are calculated per symbol, and in each second, the average and sum relevant for the last second, minute, hour, day, month, and year are output, and stored in the RDBMS database.
-
-##### Retrieving aggregate values
-This section explain how to retrieve aggregate values that are already calculated and persisted in the system.
-**Syntax**
-```sql
-define stream `InputStreamName` (<attributeName> <ATTRIBUTE_TYPE>, <attributeName> <ATTRIBUTE_TYPE> ...);
-
-from InputStreamName as b join <AGGREGATION_NAME> as a
-on a.symbol == b.symbol 
-within "<START_TIME>", "<END_TIME>" 
-per "<TIME_PERIOD>" 
-select a.<attributeName>, a.<attributeName>, a.<attributeName> 
-insert into fooBar;
-```
-The above syntax includes the following:
-Item|Description
----------|---------
-`within "<START_TIME>", "<END_TIME>"`|This allows you to specify the time interval for which the aggregate values need to be retrieved by specifying the timestamps for the start time and the end time.
-`per "<TIME_PERIOD>"`|This specifies the time period by which the aggregate values must be grouped. e.g., If you specify `days`, the retrieved aggregate vlaues are displayed for each day within the selected time interval.
-
-**Example**
-```sql
-define stream barStream (symbol string, value int);
-
-from barStream as b join testAggregator as a
-on a.symbol == b.symbol 
-within "2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30" 
-per "days" 
-select a.symbol, a.total, a.avgPrice 
-insert into fooBar;
-```
-This query performs a join to match events arriving at the `barStream` stream with the events calculated and persisted by the `testAggregator` aggregator. If the value for the `symbol` attribute of an event that arrives in an input stream is the same as that of an event persisted by the aggregator, the aggregated values already calculated for it for the time period between `2014-02-15 00:00:00 +05:30` and `2014-03-16 00:00:00 +05:30` are retrieved. The aggregate values (i.e., average and the total in this scenario) for the last day is retrieved. The output events are inserted into the `FooBar` output stream.
-#### Inbuilt windows
-WSO2 Siddhi supports the following inbuilt windows.
-
-##### time
-Detail|Value
----------|---------
-***Syntax***|`<event> time(<int|long|time> windowTime)`
-***Extension Type***|Window
-***Description***|A sliding time window that holds events that arrived during the last windowTime period at a given time, and gets updated for each event arrival and expiry.
-***Parameter***|`windowTime`: The sliding time period for which the window should hold events.
-***Return Type***|Returns current and expired events.
-***Examples***|<br>`time(20)` for processing events that arrived within the last 20 milliseconds.</br><br>`time(2 min)` for processing events that arrived within the last 2 minutes.</br>
-
-##### timeBatch
-Detail|Value
----------|---------
-***Syntax***|`<event> timeBatch(<int|long|time> windowTime, <int> startTime )`
-***Extension***|Window
-***Description***|A batch (tumbling) `time window` that holds events that arrive during `windowTime` periods, and gets updated for each `windowTime`.
-***Parameters***|<br>`windowTime`: The batch time period for which the window should hold events.</br> <br>`startTime (Optional)`: This specifies an offset in milliseconds in order to start the window at a time different to the standard time.</br>
-***Return Type***|Returns current and expired events.
-***Examples***|<br>`timeBatch(20)` processes events that arrive every 20 milliseconds.<br>`timeBatch(2 min)` processes events that arrive every 2 minutes.</br><br>`timeBatch(10 min, 0)` processes events that arrive every 10 minutes starting from the 0th minute. e.g., If you deploy your window at 08:22 and the first event arrives at 08:26, this event occurs within the time window 08.20 - 08.30. Therefore, this event is emitted at 08.30.</br> <br>`timeBatch(10 min, 1000*60*5)`processes events that arrive every 10 minutes starting from 5th minute. e.g., If you deploy your window at 08:22 and the first event arrives at 08:26, this event occurs within the time window 08.25 - 08.35. Therefore, this event is emitted at 08.35.</br>
-
-###### length
-Detail|Value
----------|---------
-***Syntax***|`<event> length(<int> windowLength)`
-***Extension Type***|Window
-***Description***|A sliding length window that holds the last `windowLength` events at a given time, and gets updated for each arrival and expiry.
-***Parameter***|`windowLength`: The number of events that should be included in a sliding length window.
-***Return Type***"|Returns current and expired events.
-***Examples***|<br>`length(10)` for processing the last 10 events.</br><br>`length(200)` for processing the last 200 events.</br>
-
-##### lengthBatch
-Detail|Value
----------|---------
-***Syntax***|`<event> lengthBatch(<int> windowLength)`
-***Extension Type***|Window
-***Description***|A batch (tumbling) length window that holds a number of events specified as the `windowLength`. The window is updated each time a batch of events that equals the number specified as the `windowLength`arrives.
-***Parameter***|`windowLength`:The number of events the window should tumble.
-***Return Type***|Returns current and expired events.
-***Examples***|<br>`lengthBatch(10)` for processing 10 events as a batch.</br>`lengthBatch(200)` for processing 200 events as a batch.
-
-##### externalTime
-Detail|Value
----------|---------
-***Syntax***|`<event> externalTime(<long> timestamp, <int|long|time> windowTime)`
-***Extension Type***| Window
-***Description***|A sliding time window based on external time. It holds events that arrived during the last `windowTime` period from the external timestamp, and gets updated on every monotonically increasing timestamp.
-***Parameter***| `windowTime`:The sliding time period for which the window should hold events.
-***Return Type***| Returns current and expired events.
-***Examples***|<br>`externalTime(eventTime,20)` for processing events arrived within the last 20 milliseconds from the `eventTime`.<br>`externalTime(eventTimestamp, 2 min)` for processing events arrived within the last 2 minutes from the `eventTimestamp`.</br>
-
-##### cron
-Detail|Value
----------|---------
-***Syntax***|`<event> cron(<string> cronExpression)`
-***Extension Type***|Window
-***Description***|This window returns events processed periodically as the output in time-repeating patterns, triggered based on time passing.
-***Parameter***|`cronExpression`: cron expression that represents a time schedule.
-***Return Type***|Returns current and expired events.
-***Examples***|`cron('*/5 * * * * ?')` returns processed events as the output every 5 seconds.
-
-##### firstUnique
-Detail|Value
----------|---------
-***Syntax***|`<event> firstUnique(<string> attribute)`
-***Extension***|Window
-***Description***|First unique window processor keeps only the first events that are unique according to the given unique attribute.
-***Parameter***:`attribute`: The attribute that should be checked for uniqueness.
-***Return Type***|Returns current and expired events.
-***Examples***|`firstUnique(ip)` returns the first event arriving for each unique ip.
-
-##### unique
-Detail|Value
----------|---------
-***Syntax***|`<event>  unique (<string>  attribute )`
-***Extension***|Window
-***Description***|This window keeps only the latest events that are unique according to the given unique attribute.
-***Parameter***|`attribute`: The attribute that should be checked for uniqueness.
-***Return Type***|Returns current and expired events.
-***Example***|`unique(ip)` returns the latest event that arrives for each unique `ip`.
-
-##### sort
-Detail|Value
----------|---------
-***Syntax***|<br>`<event> sort(<int> windowLength)`</br><br>`<event> sort(<int> windowLength, <string> attribute, <string> order)`</br><br>`<event> sort(<int> windowLength, <string> attribute, <string> order, .. , <string> attributeN, <string> orderN)`</br>
-***Extension***|Window
-***Description***|This window holds a batch of events that equal the number specified as the windowLength and sorts them in the given order.
-***Parameter***|`attribute`: The attribute that should be checked for the order.
-***Return Type***|Returns current and expired events.
-***Example***|`sort(5, price, 'asc')` keeps the events sorted by `price` in the ascending order. Therefore, at any given time, the window contains the 5 lowest prices.
-
-##### frequent
-Detail|Value
----------|---------
-***Syntax***|<br>`<event> frequent(<int> eventCount)`</br><br>`<event> frequent(<int> eventCount, <string> attribute, .. , <string> attributeN)`</br>
-***Extension Type***|Window
-***Description***|This window returns the latest events with the most frequently occurred value for a given attribute(s). Frequency calculation for this window processor is based on Misra-Gries counting algorithm.
-***Parameter***|`eventCount`: The number of most frequent events to be emitted to the stream.
-***Return Type***|The number of most frequent events to be emitted to the stream.
-***Examples***|<br>`frequent(2)` returns the 2 most frequent events.</br><br>`frequent(2, cardNo)` returns the 2 latest events with the most frequently appeared card numbers.</br>
-
-##### lossyFrequent
-Detail|Value
----------|---------
-***Syntax***|<br>`<event> lossyFrequent(<double> supportThreshold, <double> errorBound)`</br><br>`<event> lossyFrequent(<double> supportThreshold, <double> errorBound, <string> attribute, .. , <string> attributeN)`</br>
-***Extension Type***|Window
-***Description***|This window identifies and returns all the events of which the current frequency exceeds the value specified for the `supportThreshold` parameter.
-***Parameters***|<br>`errorBound`: The error bound value.</br><br>`attribute`:The attributes to group the events. If no attributes are given, the concatenation of all the attributes of the event is considered.</br>
-***Return Type***|Returns current and expired events.
-***Examples***|<br>`lossyFrequent(0.1, 0.01)` returns all the events of which the current frequency exceeds `0.1`, with an error bound of `0.01`.</br><br>'lossyFrequent(0.3, 0.05, cardNo)` returns all the events of which the `cardNo` attributes frequency exceeds `0.3`, with an error bound of `0.05`.
-
-##### externalTimeBatch
-Detail|Value
----------|---------
-***Syntax***|`<event> externalTimeBatch(<long> timestamp, <int|long|time> windowTime, <int|long|time> startTime, <int|long|time> timeout)`
-***Extension Type***|Window
-***Description***|A batch (tumbling) time window based on external time, that holds events arrived during `windowTime` periods, and gets updated for every `windowTime`.
-***Parameters***|<br>`timestamp`: The time that the window determines as current time and will act upon. The value of this parameter should be monotonically increasing.</br><br>`windowTime`: The batch time period for which the window should hold events.</br><br>`startTime` (Optional): User defined start time. This could either be a constant (of type int, long or time) or an attribute of the corresponding stream (of type long). If an attribute is provided, initial value of attribute would be considered as `startTime`. When `startTime` is not given, initial value of `timestamp` is used as the default.<br>`timeout`(Optional): Time to wait for arrival of new event, before flushing and giving output for events belonging to a specific batch. If timeout is not provided, system waits till an event from next batch arrives to flush current batch.</br>
-***Return Type***|Returns current and expired events.
-***Examples***| <br>`externalTimeBatch(eventTime,20)` for processing events that arrive every 20 milliseconds from the `eventTime`.</br><br>`externalTimeBatch(eventTimestamp, 2 min)` for processing events that arrive every 2 minutes from the `eventTimestamp`.</br><br>`externalTimeBatch(eventTimestamp, 2 sec, 0)` for processing events that arrive every 2 seconds from the `eventTimestamp`. This starts on 0th millisecond of an hour.</br><br>`externalTimeBatch(eventTimestamp, 2 sec, eventTimestamp, 100)` for processing events that arrive every 2 seconds from the `eventTimestamp`. This considers the `eventTimeStamp` of the first event as the start time, and waits 100 milliseconds for the arrival of a new event before flushing the current batch.</br>
-
-##### timeLength
-Detail|Value
----------|---------
-***Syntax***|`<event> timeLength ( < int|long|time >   windowTime,  < int >  windowLength ) `
-***Extension Type***|Window
-***Description***|A sliding time window that, at a given time holds the last windowLength events that arrived during last windowTime period, and gets updated for every event arrival and expiry.
-***Parameters***|<br>`windowTime`: The sliding time period for which the window should hold events.</br><br>`windowLength`: The number of events that should be be included in a sliding length window.</br>
-***Return Type***|Returns current and expired events.
-***Examples***|<br>`timeLength(20 sec, 10)` for processing the last 10 events that arrived within the last 20 seconds.</br><br>`timeLength(2 min, 5)` for processing the last 5 events that arrived within the last 2 minutes.</br>
- 
-##### uniqueExternalTimeBatch
-Detail|Value
- ---------|---------
-***Syntax***|`<event> uniqueExternalTimeBatch(<string> attribute, <long> timestamp, <int|long|time> windowTime, <int|long|time> startTime, <int|long|time> timeout, <bool> replaceTimestampWithBatchEndTime )`
-***Extension Type***|Window
-***Description***|A batch (tumbling) time window based on external time that holds latest unique events that arrive during the `windowTime` periods, and gets updated for each `windowTime`.
-***Parameters***|<br>`attribute`:The attribute that should be checked for uniqueness.</br><br>`timestamp`:The time considered as the current time for the window to act upon. The value of this parameter should be monotonically increasing.</br><br>`windowTime`:The batch time period for which the window should hold events.</br>`startTime` (Optional): The user-defined start time. This can either be a constant (of the `int`, `long` or `time` type) or an attribute of the corresponding stream (of the long type). If an attribute is provided, the initial value of this attribute is considered as the `startTime`. When the `startTime` is not given, the initial value of the timestamp is used by default.</br><br>`timeout` (Optional): The time duration to wait for the arrival of new event before flushing and giving output for events belonging to a specific batch. If the timeout is not provided, the system waits until an event from next batch arrives to flush the current batch.</br><br>`replaceTimestampWithBatchEndTime` (Optional): Replaces the value for the `timestamp` parameter with the corresponding batch end time stamp.</br>
-***Return Type***|Returns current and expired events.
-***Examples***|<br>`uniqueExternalTimeBatch(ip, eventTime, 20)` processes unique events based on the `ip` attribute that arrives every 20 milliseconds from the  `eventTime`.</br><br>`uniqueExternalTimeBatch(ip, eventTimestamp, 2 min)` processes unique events based on the `ip` attribute that arrives every 2 minutes from the `eventTimestamp`.</br><br>`uniqueExternalTimeBatch(ip, eventTimestamp, 2 sec, 0)` processes unique events based on the `ip` attribute that arrives every 2 seconds from the `eventTimestamp`. It starts on 0th millisecond of an hour.</br><br>`uniqueExternalTimeBatch(ip, eventTimestamp, 2 sec, eventTimestamp, 100)` processes unique events based on the `ip` attribute that arrives every 2 seconds from the `eventTimestamp`. It considers the `eventTimestamp` of the first event as the `startTime`, and waits 100 milliseconds for the arrival of a new event before flushing current batch.</br><br>`uniqueExternalTimeBatch(ip, eventTimestamp, 2 sec, eventTimestamp, 100, true)` processes unique events based on the ip attribute that arrives every 2 seconds from the `eventTimestamp`. It considers the `eventTimestamp` of the first event as `startTime`, and waits 100 milliseconds for the arrival of a new event before flushing current batch. Here, the value for `eventTimestamp` is replaced with the timestamp of the batch end.
- 
-#### Output event categories
-The output of a window can be current events, expired events or both as specified. Following are the key words to be used to specify the event category that is emitted from a window.
- 
-Key Word|Outcome
----------|---------
-`current events`|This emits all the events that arrive to the window. This is the default event category emitted when no particular category is specified.
-`expired events`|This emits all the events that expire from the window.
-`all events`|This emits att the events that arrive to the window as well as all the events that expire from the window.
- 
-**Syntax**
-```sql
-from <input_stream>#window.<window_name>select *
-insert <output_event_category> into <output_stream>
-```
-**Example**
-The following selects all the expired events of the `TempStream` input stream within a time window of 1 minute, and inserts them into the `DelayedTempStream` output stream.
-```sql
-from TempStream#window.time(1 min)select *
-insert expired events into DelayedTempStream
-```
- 
-## Output rate limiting
+### Output rate limiting
 Output rate limiting allows queries to emit events periodically based on the condition specified.
 
 **Purpose**
@@ -1372,6 +875,73 @@ The following emits a snapshot of the events in a time window of 5 seconds every
 from TempStream#window.time(5 sec)output snapshot every 1 sec
 insert into SnapshotTempStream;
 ```
+
+## Time based aggregation
+Time-based aggregation involves obtaining aggregate attribute values (i.e., sum, average, min, max etc.) for a specified time period.
+
+### Calculating and storing time-based aggregated values
+This section explains how to write Siddhi queries to calculate aggregate values for specific time periods as required.
+
+**Syntax**
+```sql
+@store(type="<DATABASE_TYPE>")
+define aggregation <aggregatorName>
+from <InputStreamName>
+select <attributeName>, <aggregate_function>(attributeName) as <attributeName>, <aggregate_function>(attributeName) as <attributeName> ...
+    group by <attributeName>
+    aggregate by timestamp every <time_period>;
+```
+The above syntax includes the following:
+Item|Description
+---------|---------
+`@store`|This annotation is used to refer to the data source where the events for which aggregate values are to be calculated are stored.
+`define aggregation`|This specifies a unique name for the aggregation
+`group by`|The attribute by which the calculated aggregate values are grouped. Specifying an attribute to group by is optional. When an attribute is specified, the aggregate values are calculated for the required time periods per value for the specified attribute. If no attribute is specified, all the events are aggregated together.
+`aggregate by timestamp`|The time period for which the aggregate values are calculated. This is an optional parameter. If the time period is determined by an external timestamp (i.e., the timestamp specified as the value for the `_timestamp` attribute in the event), specific timestamps must be specified in the query with the `within` operator using supported formats (i.e., `<yyyy>-<MM>-<dd>`, `<HH>:<mm>:<ss>`, `<Z>` (if time is not in GMT), and `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` (if time is in GMT). If the time period is to be determined based on the system time, you can specify the time duration for which the aggregate values should be calculated (e.g., `aggregate every sec...year` calculates aggregate values for the last second, minute, hour, day, month and year in a sliding manner.).
+
+
+**Example**
+```sql
+@store(type="rdbms")
+define aggregation testAggregator
+from tradesStream
+select symbol, avg(price) as avgPrice, sum(price) as total
+    group by symbol
+    aggregate by timestamp every sec...year;
+```
+In this query, an aggregator named `testAggregator`calculates the average price and the sum of prices of the events that arrive at the `tradesStream` stream every second. These average and total are calculated per symbol, and in each second, the average and sum relevant for the last second, minute, hour, day, month, and year are output, and stored in the RDBMS database.
+
+### Retrieving aggregate values
+This section explain how to retrieve aggregate values that are already calculated and persisted in the system.
+**Syntax**
+```sql
+define stream `InputStreamName` (<attributeName> <ATTRIBUTE_TYPE>, <attributeName> <ATTRIBUTE_TYPE> ...);
+
+from InputStreamName as b join <AGGREGATION_NAME> as a
+on a.symbol == b.symbol 
+within "<START_TIME>", "<END_TIME>" 
+per "<TIME_PERIOD>" 
+select a.<attributeName>, a.<attributeName>, a.<attributeName> 
+insert into fooBar;
+```
+The above syntax includes the following:
+Item|Description
+---------|---------
+`within "<START_TIME>", "<END_TIME>"`|This allows you to specify the time interval for which the aggregate values need to be retrieved by specifying the timestamps for the start time and the end time.
+`per "<TIME_PERIOD>"`|This specifies the time period by which the aggregate values must be grouped. e.g., If you specify `days`, the retrieved aggregate vlaues are displayed for each day within the selected time interval.
+
+**Example**
+```sql
+define stream barStream (symbol string, value int);
+
+from barStream as b join testAggregator as a
+on a.symbol == b.symbol 
+within "2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30" 
+per "days" 
+select a.symbol, a.total, a.avgPrice 
+insert into fooBar;
+```
+This query performs a join to match events arriving at the `barStream` stream with the events calculated and persisted by the `testAggregator` aggregator. If the value for the `symbol` attribute of an event that arrives in an input stream is the same as that of an event persisted by the aggregator, the aggregated values already calculated for it for the time period between `2014-02-15 00:00:00 +05:30` and `2014-03-16 00:00:00 +05:30` are retrieved. The aggregate values (i.e., average and the total in this scenario) for the last day is retrieved. The output events are inserted into the `FooBar` output stream.
 
 ## Joins
 Join allows two event streams to be merged based on a condition. In order to carry out a join, each stream should be connected to a window. If no window is specified, a window of zero length (`#window.length(0)`) is assigned to the input event stream by default. During the joining process each incoming event on each stream is matched against all the events in the other input event stream window based on the given condition. An output event is generated for all the matching event pairs.
