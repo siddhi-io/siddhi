@@ -77,6 +77,11 @@ public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements
             }
             timestampExpressionExecutor = (VariableExpressionExecutor) attributeExpressionExecutors[0];
 
+            if (!(attributeExpressionExecutors[1] instanceof ConstantExpressionExecutor)) {
+                throw new ExecutionPlanValidationException("ExternalTime window's 2nd parameter should be a "
+                                                                   + "constant, but found " +
+                                                                   attributeExpressionExecutors[1].getClass());
+            }
             if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
                 timeToKeep = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
 
@@ -104,6 +109,11 @@ public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements
             }
 
             if (attributeExpressionExecutors.length >= 4) {
+                if (!(attributeExpressionExecutors[3] instanceof ConstantExpressionExecutor)) {
+                    throw new ExecutionPlanValidationException("ExternalTime window's 4th parameter should be a "
+                                                                       + "constant, but found " +
+                                                                       attributeExpressionExecutors[3].getClass());
+                }
                 if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.INT) {
                     schedulerTimeout = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[3]).getValue()));
                 } else if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.LONG) {
@@ -114,6 +124,11 @@ public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements
             }
 
             if (attributeExpressionExecutors.length == 5) {
+                if (!(attributeExpressionExecutors[4] instanceof ConstantExpressionExecutor)) {
+                    throw new ExecutionPlanValidationException("ExternalTime window's 5th parameter should be a "
+                                                                       + "constant, but found " +
+                                                                       attributeExpressionExecutors[4].getClass());
+                }
                 if (attributeExpressionExecutors[4].getReturnType() == Attribute.Type.BOOL) {
                     replaceTimestampWithBatchEndTime = Boolean.parseBoolean(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[4]).getValue()));
                 } else {
@@ -363,7 +378,7 @@ public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements
         currentEventChunk.clear();
         Map.Entry<String, Object> stateEntry = (Map.Entry<String, Object>) state[0];
         currentEventChunk.add((StreamEvent) stateEntry.getValue());
-        if (state[1] != null) {
+        if (((Map.Entry<String, Object>)state[1]).getValue() != null) {
             expiredEventChunk.clear();
             Map.Entry<String, Object> stateEntry2 = (Map.Entry<String, Object>) state[1];
             expiredEventChunk.add((StreamEvent) stateEntry2.getValue());
