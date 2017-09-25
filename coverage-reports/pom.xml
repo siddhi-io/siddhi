@@ -87,6 +87,42 @@
                                                 <fileset dir="${siddhi.query.compiler.basedir}/target/coverage-reports">
                                                     <include name="jacoco.exec"/>
                                                 </fileset>
+                                                <fileset dir="${siddhi.ext.evalscript.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.eventtable.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.geo.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.kalman.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.map.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.markov.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.math.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.regex.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.reorder.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.string.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.time.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
+                                                <fileset dir="${siddhi.ext.timeseries.basedir}/target/coverage-reports">
+                                                    <include name="jacoco.exec"/>
+                                                </fileset>
                                             </executiondata>
                                             <structure name="Siddhi Tests">
                                                 <classfiles>
@@ -99,6 +135,54 @@
                                                         <exclude name="**/*Exception.class"/>
                                                     </fileset>
                                                     <fileset dir="${siddhi.query.compiler.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.evalscript.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.eventtable.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.geo.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.kalman.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.map.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.markov.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.math.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.regex.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.reorder.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.string.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.time.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                    <fileset dir="${siddhi.ext.timeseries.basedir}/target/classes">
                                                         <exclude name="**/*Constants.class"/>
                                                         <exclude name="**/*Exception.class"/>
                                                     </fileset>
