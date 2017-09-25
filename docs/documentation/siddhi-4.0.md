@@ -706,7 +706,7 @@ Following are some inbuilt windows shipped with Siddhi, for more window types re
 * externalTime
 * externalTimeBatch
 
-**Output event type**
+**Output event type**<a id="output-event-types" class='anchor' aria-hidden='true'></a> 
 
 Projection of the query depends on the output event types such as, `current` and `expired` event types.
  By default all queries produce `current` events and only queries with windows produce `expired` events 
@@ -825,432 +825,52 @@ having avgTemp > 30
 insert into AlertStream;
 ```
 
-### Output rate limiting
-
-Output rate limiting allows queries to emit events periodically based on the condition specified.
+### Joins (Stream) 
 
 **Purpose**
 
-This allows you to limit the output to avoid overloading following executions and to remove unnecessary information.
+Join let you get a combined results from two streams in real time based on a condition. 
+
+As streams are stateless to join two streams they need to be connected to a window such that 
+there will be a pool of events that can be used for joining. Join also accepts a condition to 
+join appropriate events from each streams. 
+ 
+During the joining process each incoming event of each stream is matched against all the events in the other 
+stream's window on the given condition, and the output events are generated for all the matching event pairs.
+
+!!! Note
+    Join can also be performed with [sored data](#join-table), [aggregation](#join-aggregation) or externally [defined windows](#join-window).
 
 **Syntax**
 
-The following is the syntax of an output rate limiting configuration.
+The syntax for a join is as follows:
 
 ```sql
-from <input stream> ...
+from <input stream>#window.<window name>(<parameter>, ... ) {unidirectional} {as <reference>}
+         join <input stream>#window.<window name>(<parameter>,  ... ) {unidirectional} {as <reference>}
+    on <join condition>
 select <attribute name>, <attribute name>, ...
-output <rate limiting configuration>
 insert into <output stream>
 ```
-Three type of output rate limiting configuration are available, such as 
+Here the `<join condition>` let you match the attributes from both the streams. 
 
-Rate limiting configuration|Syntax| Description
----------|---------|--------
-Based on time | `<output event> every <time interval>` | Output `<output event>` for every given `<time interval>` time interval.
-Based on number of events | `<output event> every <event interval> events` | Output `<output event>` for every `<event interval>` number of events.
-Snapshot based output | `snapshot every <time interval>`| Output all events in the window (or the last event if no window is defined in the query) for every given `<time interval>` time interval.
+**unidirectional join operation**
 
-Here the `<output event>` specifies which event(s) should be emitted as the output of the query. 
-The possible values are as follows:
-* `first` : Only the first event processed by the query in the specified time interval/sliding window is emitted.
-* `last` : Only the last event processed by the query in the specified time interval/sliding window is emitted.
-* `all` : All the events processed by the query in the specified time interval/sliding window are emitted. **When no `<output event>` is defined `all` will be used as default.**
-
-**Examples**
-
-+ Emitting events based on number of events
-
-    Here the events are emitted every time the specified number of events arrive. You can also specify whether to emit only the first event, last event, or all events out of the events that arrived.
-    
-    In this example, the last temperature per sensor is emitted for every 10 events.
-    
-```sql
-from TempStreamselect 
-select temp, deviceID
-group by deviceID
-output last every 10 events
-insert into LowRateTempStream;
-```
-
-+ Emitting events based on time
-
-    Here events are emitted for every predefined time interval. You can also specify whether to to emit only the first event, last event, or all events out of the events that arrived during the specified time interval.
-
-    In this example, emits all temperature events every 10 seconds    
-```sql
-from TempStreamoutput 
-output every 10 sec
-insert into LowRateTempStream;
-```
-
-+ Emitting a periodic snapshot of events
-
-    This method works best with windows. When an input stream is connected to a window, snapshot rate limiting emits all the current events that have arrived and do not have corresponding expired events for every predefined time interval. 
-    If the input stream is not connected to a window, only the last current event for each predefined time interval is emitted.
-    
-    The following query emits snapshot of the events in a time window of 5 seconds every 1 second. 
-
-```sql
-from TempStream#window.time(5 sec)
-output snapshot every 1 sec
-insert into SnapshotTempStream;
-```
-
-## Tables
-
-A table is a stored version of an stream or a table of events. It's schema is defined via the **table definition** thats
-quite similar to a stream definition. These events are by default stored 
-`in-memory` but Siddhi also provides store extension to work with data/events stored in various data stores through the 
-table abstraction.
-
-**Purpose**
-
-Tables allow Siddhi to work with stored events. By defining a schema to table Siddhi enables them to be processed at queries using their defined attributes with the streaming data, and also interactively query the state of the stored events in the table.
-
-**Syntax**
-
-The following is the syntax for defining a new table.
-
-```sql
-define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
-```
-
-**Example**
-
-The following creates a table named `RoomTypeTable` with the attributes `roomNo` with `int` type, `type` with `string` type.
-
-```sql
-define table RoomTypeTable ( roomNo int, type string );
-```
-
-**Primary Keys and Indexes**
-
-Event tables can be configured with primary keys to avoid the duplication of data, and indexes for fast event access.
-
-Primary keys are configured by including the `@PrimaryKey` annotation to the table configuration. The combined value of the primary key attribute should be unique for each entry saved in the table. This ensures that entries in the table are not duplicated.
-
-Indexes are configured by including the `@Index` annotation within the event table configuration. Each event table configuration can have only one `@Index` annotation. However, multiple attributes can be specified as index attributes via a single annotation. When the `@Index` annotation is defined, multiple entries can be stored for a given key in the table. Indexes can be configured together with primary keys. 
-
-
-**Examples**
-
-+ Configuring primary keys
-The following query creates an event table with the `symbol` attribute defined as the primary key. Therefore, each entry in this table should have a unique value for the `symbol` attribute.
-
-```sql
-@PrimaryKey('symbol')
-define table StockTable (symbol string, price float, volume long);
-```
-
-+ Configuring indexes
-
-The following query creates an indexed event table named `RoomTypeTable` with the attributes `roomNo` (as an `INT` attribute) and `type` (as a `STRIN`G attribute). All entries in the table are to be indexed by the `roomNo` attribute.
-
-```sql
-@Index('roomNo')
-define table RoomTypeTable (roomNo int, type string);
-```
-
-
-
-#### Join
-
-
-
-**Syntax**
-
-```sql
-from <input stream name>#window.length(1) join <table_name>
-    on <input stream name>.<attribute name> <condition> <table_name>.<table attribute name>
-select <input stream name>.<attribute name>, <table_name>.<table attribute name>, ...
-insert into <output stream name>
-```
-
-At the time of joining, the event table should not be associated with window operations because an event table is not an active construct. Two event tables cannot be joined with each other due to the same reason.
+By default events arriving on either stream can trigger the joining process, but if you want to control the 
+join execution you can add the `unidirectional` keyword next to a stream in the join definition as depicted in the 
+syntax to only enable that stream to trigger the join operation. Here events arriving on other stream only updates its 
+ window and it will not trigger the join operation.
  
-**Purpose**
-
-To allow a stream to retrieve information from an event table.
- 
-**Parameters**
+!!! note
+    We cannot use `unidirectional` keyword for both the input streams (as that's equal to the default behaviour, which 
+    is not using the unidirectional keyword at all).
 
 **Example**
 
-The following query performs a join to update the room number of the events in the `TempStream` stream with that of the corresponding events in the `RoomTypeTable` event table, and then inserts the updated events into the `EnhancedTempStream` stream.
-```sql
-define table RoomTypeTable (roomNo int, type string);
-define stream TempStream (deviceID long, roomNo int, temp double);
-   
-from TempStream join RoomTypeTable
-    on RoomTypeTable.roomNo == TempStream.roomNo
-select deviceID, RoomTypeTable.roomNo as roomNo, type, temp
-insert into EnhancedTempStream;
-```
+Assuming that the temperature of regulators are updated every minute. 
+Following is a Siddhi App the controls the temperature regulators if they are not already 'on' for all the rooms that 
+have a room temperature greater than 30 degrees.  
 
-### Supported Event Table Operators
-
-The following event table operators are supported for Siddhi.
-
-#### Insert into
-
-**Syntax**
-
-```sql
-from <input stream name> 
-select <attribute name>, <attribute name>, ...
-insert into <table name>
-```
-To insert only the specified output event category, use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords. For more information, see Output Event Categories.
-
-**Purpose**
-
-To store filtered events in a specific event table.
-
-**Parameters**
-
-+ `input stream name`: The input stream from which the events are taken to be stored in the event table.
-
-+ `attribute name`: Attributes of the chosen events that are selected to be saved in the event table.
-
-+ `table name`: The name of the event table in which the events should be saved.
-
-**Example**
-
-The following query inserts all the temperature events from the `TempStream` event stream to the `TempTable` event table.
-
-```sql
-from TempStream
-select *
-insert into TempTable;
-```
-#### Delete
-
-**Syntax**
-
-```sql
-from <input stream name> 
-select <attribute name>, <attribute name>, ...
-delete <table name>
-    on <condition>
-```
-
-The `condition` element specifies the basis on which events are selected to be deleted. When specifying this condition, the attribute names should be referred to with the table name.
-To delete only the specified output category, use the `current events`, `expired events` or the `all events` keyword. For more information, see Output Event Categories.
-
-**Purpose**
-
-To delete selected events that are stored in a specific event table.
-
-**Parameters**
-
-+ `input stream name`: The input stream that is the source of the events stored in the event table.
-
-+ `attribute name`: Attributes to which the given condition is applied in order to filter the events to be deleted.
-
-+ `table name`: The name of the event table from which the filtered events are deleted.
-
-+ `condition`: The condition based on which the events to be deleted are selected.
-
-**Example**
-
-The following query deletes all the entries in the `RoomTypeTable` event table that have a room number that matches the room number in any event in the `DeleteStream` event stream.
-
-```sql
-define table RoomTypeTable (roomNo int, type string);
-define stream DeleteStream (roomNumber int);
-  
-from DeleteStream
-delete RoomTypeTable
-    on RoomTypeTable.roomNo == roomNumber;
-```
-
-#### Update
-
-**Syntax**
-
-```sql
-from <input stream name> 
-select <attribute name> as <table attribute name>, <attribute name> as <table attribute name>, ...
-update <table name>
-    on <condition>
-```
-
-The `condition` element specifies the basis on which events are selected to be updated. When specifying this condition, the attribute names should be referred to with the table name.
-To update only the specified output category, use the `current events`, `expired events` or the `all events` keyword. For more information, see Output Event Categories.
-
-**Purpose**
-
-To update selected events in an event table.
-
-**Parameters**
-
-+ `input stream name`: The input stream that is the source of the events stored in the event table.
-
-+ `attribute name`: Attributes to which the given `condition` is applied in order to filter the events to be updated.
-
-+ `table name`: The name of the event table in which the filtered events should be updated.
-
-+ `condition`: The condition based on which the events to be updated are selected.
-
-**Example**
-
-The following query updates room type of all the events in the `RoomTypeTable` event table that have a room number that matches the room number in any event in the `UpdateStream` event stream.
-
-```sql
-define table RoomTypeTable (roomNo int, type string);
-define stream UpdateStream (roomNumber int, roomType string);
-  
-from UpdateStream
-select roomType as type
-update RoomTypeTable
-    on RoomTypeTable.roomNo == roomNumber;
-```
-
-#### Insert Overwrite
-
-**Syntax**
-
-```sql
-from <input stream name> 
-select <attribute name> as <table attribute name>, <attribute name> as <table attribute name>, ...
-insert overwrite <table name>
-    on <condition>
-```
-
-The `condition` element specifies the basis on which events are selected to be inserted or overwritten. When specifying this condition, the attribute names should be referred to with the table name.
-When specifying the `table attribute` name, the attributes should be specified with the same name specified in the event table, allowing Siddhi to identify the attributes that need to be updated/inserted in the event table.
-
-**Purpose**
-
-**Parameters**
-
-+ `input stream name`: The input stream that is the source of the events stored in the event table.
-
-+ `attribute name`: Attributes to which the given `condition` is applied in order to filter the events to be inserted or over-written.
-
-+ `table name`: The name of the event table in which the filtered events should be inserted or over-written.
-
-+ `condition` : The condition based on which the events to be inserted or over-written are selected.
-
-**Example**
-
-The following query searches for events in the `UpdateTable` event table that have room numbers that match the same in the `UpdateStream` stream. When such events are founding the event table, they are updated. When a room number available in the stream is not found in the event table, it is inserted from the stream.
- 
- ```sql
- define table RoomTypeTable (roomNo int, type string);
- define stream UpdateStream (roomNumber int, roomType string);
-   
- from UpdateStream
- select roomNumber as roomNo, roomType as type
- insert overwrite RoomTypeTable
-     on RoomTypeTable.roomNo == roomNo;
- ```
-#### In
- 
-**Syntax**
-
-```sql
-<condition> in <table name>
-```
-
-The `condition` element specifies the basis on which events are selected to be inserted or overwritten. When specifying this condition, the attribute names should be referred to with the table name.
-
-**Purpose**
- 
-**Parameters**
-
-**Example**
-
-```sql
-define table ServerRoomTable (roomNo int);
-define stream TempStream (deviceID long, roomNo int, temp double);
-   
-from TempStream[ServerRoomTable.roomNo == roomNo in ServerRoomTable]
-insert into ServerTempStream;
-```
-
-## Time based aggregation
-Time-based aggregation involves obtaining aggregate attribute values (i.e., sum, average, min, max etc.) for a specified time period.
-
-### Calculating and storing time-based aggregated values
-This section explains how to write Siddhi queries to calculate aggregate values for specific time periods as required.
-
-**Syntax**
-```sql
-@store(type="<DATABASE_TYPE>")
-define aggregation <aggregatorName>
-from <InputStreamName>
-select <attributeName>, <aggregate_function>(attributeName) as <attributeName>, <aggregate_function>(attributeName) as <attributeName> ...
-    group by <attributeName>
-    aggregate by timestamp every <time_period>;
-```
-The above syntax includes the following:
-Item|Description
----------|---------
-`@store`|This annotation is used to refer to the data source where the events for which aggregate values are to be calculated are stored.
-`define aggregation`|This specifies a unique name for the aggregation
-`group by`|The attribute by which the calculated aggregate values are grouped. Specifying an attribute to group by is optional. When an attribute is specified, the aggregate values are calculated for the required time periods per value for the specified attribute. If no attribute is specified, all the events are aggregated together.
-`aggregate by timestamp`|The time period for which the aggregate values are calculated. This is an optional parameter. If the time period is determined by an external timestamp (i.e., the timestamp specified as the value for the `_timestamp` attribute in the event), specific timestamps must be specified in the query with the `within` operator using supported formats (i.e., `<yyyy>-<MM>-<dd>`, `<HH>:<mm>:<ss>`, `<Z>` (if time is not in GMT), and `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` (if time is in GMT). If the time period is to be determined based on the system time, you can specify the time duration for which the aggregate values should be calculated (e.g., `aggregate every sec...year` calculates aggregate values for the last second, minute, hour, day, month and year in a sliding manner.).
-
-
-**Example**
-```sql
-@store(type="rdbms")
-define aggregation testAggregator
-from tradesStream
-select symbol, avg(price) as avgPrice, sum(price) as total
-    group by symbol
-    aggregate by timestamp every sec...year;
-```
-In this query, an aggregator named `testAggregator`calculates the average price and the sum of prices of the events that arrive at the `tradesStream` stream every second. These average and total are calculated per symbol, and in each second, the average and sum relevant for the last second, minute, hour, day, month, and year are output, and stored in the RDBMS database.
-
-### Retrieving aggregate values
-This section explain how to retrieve aggregate values that are already calculated and persisted in the system.
-**Syntax**
-```sql
-define stream `InputStreamName` (<attributeName> <ATTRIBUTE_TYPE>, <attributeName> <ATTRIBUTE_TYPE> ...);
-
-from InputStreamName as b join <AGGREGATION_NAME> as a
-on a.symbol == b.symbol 
-within "<START_TIME>", "<END_TIME>" 
-per "<TIME_PERIOD>" 
-select a.<attributeName>, a.<attributeName>, a.<attributeName> 
-insert into fooBar;
-```
-The above syntax includes the following:
-Item|Description
----------|---------
-`within "<START_TIME>", "<END_TIME>"`|This allows you to specify the time interval for which the aggregate values need to be retrieved by specifying the timestamps for the start time and the end time.
-`per "<TIME_PERIOD>"`|This specifies the time period by which the aggregate values must be grouped. e.g., If you specify `days`, the retrieved aggregate vlaues are displayed for each day within the selected time interval.
-
-**Example**
-```sql
-define stream barStream (symbol string, value int);
-
-from barStream as b join testAggregator as a
-on a.symbol == b.symbol 
-within "2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30" 
-per "days" 
-select a.symbol, a.total, a.avgPrice 
-insert into fooBar;
-```
-This query performs a join to match events arriving at the `barStream` stream with the events calculated and persisted by the `testAggregator` aggregator. If the value for the `symbol` attribute of an event that arrives in an input stream is the same as that of an event persisted by the aggregator, the aggregated values already calculated for it for the time period between `2014-02-15 00:00:00 +05:30` and `2014-03-16 00:00:00 +05:30` are retrieved. The aggregate values (i.e., average and the total in this scenario) for the last day is retrieved. The output events are inserted into the `FooBar` output stream.
-
-## Joins
-Join allows two event streams to be merged based on a condition. In order to carry out a join, each stream should be connected to a window. If no window is specified, a window of zero length (`#window.length(0)`) is assigned to the input event stream by default. During the joining process each incoming event on each stream is matched against all the events in the other input event stream window based on the given condition. An output event is generated for all the matching event pairs.
-
-**Syntax**
-The syntax for a join is as follows:
-```sql
-from <input stream name>[<filter condition>]#window.<window name>(<parameter>, ... ) {unidirectional} {as <reference>}
-         join <input stream name>#window.<window name>(<parameter>,  ... ) {unidirectional} {as <reference>}
-    on <join condition>
-    within <time gap>
-select <attribute name>, <attribute name>, ...
-insert into <output stream name>
-```
-**Example**
 ```sql
 define stream TempStream(deviceID long, roomNo int, temp double);
 define stream RegulatorStream(deviceID long, roomNo int, isOn bool);
@@ -1261,78 +881,105 @@ from TempStream[temp > 30.0]#window.time(1 min) as T
 select T.roomNo, R.deviceID, 'start' as action
 insert into RegulatorActionStream;
 ```
-WSO2 Siddhi currently supports the following types of joins.
 
-### Left Outer Join
-Outer join allows two event streams to be merged based on a condition. However, it returns all the events of left stream even if there are no matching events in the right stream. Here each stream should be associated with a window. During the joining process, each incoming event of each stream is matched against all the events in the other input event stream window based on the given condition. Incoming events of the right stream are matched against all events in the left event stream window based on the given condition. An output event is generated for all the matching event pairs. An output event is generated for incoming events of the left stream even if there are no matching events in right stream.
+**Supported join types** 
 
-**Example**
-The following query generates output events for all the events in the `stockStream` stream whether there is a match for the symbol in the `twitterStream` stream or not.
-```sql
-from stockStream#window.length(2) 
-left outer join twitterStream#window.length(1)
-on stockStream.symbol== twitterStream.symbol
-select stockStream.symbol as symbol, twitterStream.tweet, stockStream.price
-insert all events into outputStream ;
-```
+Following are the supported operations of join clause.
 
-### Right Outer Join
-This is similar to left outer join. It returns all the events of the right stream even if there are no matching events in the left stream. Incoming events of the left stream are matched against all events in the right event stream window based on the given condition. An output event is generated for all the matching event pairs. An output event is generated for incoming events of the right stream even if there are no matching events in left stream.
+ *  **Inner join (join)** 
 
-e.g., The following generates output events for all the incoming events of each stream whether there is a match for the symbol in the other stream or not.
-### Full Outer Join
+    The default behaviour of join, use `join` as the keyword to join both the streams. The output is generated only if there is 
+    a matching event in both the streams.
 
-The full outer join combines the results of left outer join and right outer join. An output event is generated for each incoming event even if there are no matching events in the other stream.<br>
-e.g., The following generates output events for all the incoming events of each stream whether there is a match for the symbol in the other stream or not.
-```sql
-from stockStream#window.length(2)
-full outer join twitterStream#window.length(1)
-on stockStream.symbol== twitterStream.symbol
-select stockStream.symbol as symbol, twitterStream.tweet, stockStream.price
-insert all events into outputStream ;
-```
+ *  **Left outer join** 
 
-### Full Outer Join
+    Left outer join let you join two streams to be merged based on a condition. Use `left outer join` as the keyword to join both the streams.
+    Here it returns all the events of left stream even if there are no matching events in the right stream by 
+    having the right stream attribute values as nulls.
 
-The full outer join combines the results of left outer join and right outer join. An output event is generated for each incoming event even if there are no matching events in the other stream.
+     **Example**
 
-e.g., The following generates output events for all the incoming events of each stream whether there is a match for the symbol in the other stream or not.
+    The following query generates output events for all events from `StockStream` stream regardless of a matching 
+    symbol being present in the `TwitterStream` stream.
 
-<pre>from stockStream#window.length(2)<br>full outer join twitterStream#window.length(1)<br>on stockStream.symbol== twitterStream.symbol<br>select stockStream.symbol as symbol, twitterStream.tweet, stockStream.price<br>insert all events into outputStream ;</pre>
+    <pre>
+    from StockStream#window.time(1 min) as S
+      left outer join TwitterStream#window.length(1) as T
+      on S.symbol== T.symbol
+    select S.symbol as symbol, T.tweet, S.price
+    insert into outputStream ;    </pre>
 
-## Patterns and Sequences
+ *  **Right outer join** 
 
-Patterns and sequences allow event streams to be correlated over time and detect event patterns based on the order of event arrival.
+    This is similar to left outer join. Use `Right outer join` as the keyword to join both the streams.
+    It returns all the events of the right stream even if there are no matching events in the left stream. 
+
+ *  **Full outer join** 
+
+    The full outer join combines the results of left outer join and right outer join. Use `full outer join` as the keyword to join both the streams.
+    Here, output event are generated for each incoming event even if there are no matching events in the other stream.
+
+    **Example**
+
+    The following query generates output events for all the incoming events of each stream regardless of whether there is a 
+    match for the `symbol` in the other stream or not.
+
+    <pre>
+    from StockStream#window.time(1 min) as S
+      full outer join TwitterStream#window.length(1) as T
+      on S.symbol== T.symbol
+    select S.symbol as symbol, T.tweet, S.price
+    insert into outputStream ;    </pre>
+
+
 
 ### Patterns
 
-Pattern allows event streams to be correlated over time and detect event patterns based on the order of event arrival. With pattern there can be other events in between the events that match the pattern condition. It creates state machines to track the states of the matching process internally. Pattern can correlate events over multiple input streams or over the same input stream. Therefore, each matched input event need to be referenced so that that it can be accessed for future processing and output generation.
+Patterns is a statemachine implmentation that allow you to detect event occurrence patterns over time. 
+These can correlate events within and between multiple streams. 
+
+**Purpose** 
+
+Let you detect a specified event occurrence pattern over a time period. 
 
 **Syntax**
+
 The following is the syntax for a pattern configuration:
+
 ```sql
-from {every} <input event reference>=<input stream name>[<filter condition>] -> {every} <input event reference>=<input stream name>[<filter condition>] -> ...        within <time gap>
-select <input event reference>.<attribute name>, <input event reference>.<attribute name>, ...
-insert into <output stream name>
+from (every)? <event reference>=<input stream>[<filter condition>] -> 
+    (every)? <event reference>=<input stream [<filter condition>] -> 
+    ... 
+    (within <time gap>)?     
+select <event reference>.<attribute name>, <event reference>.<attribute name>, ...
+insert into <output stream>
 ```
+| Items | Description |
+|-------------------|-------------|
+| `<event reference>` | Let you add a reference to the the matching event such that it can be accessed later for further processing. |
+| `(within <time gap>)?` | `within` clause is optional, It defines the the duration within all the matching events should occur |
+| `every` | `every` is an optional keyword. This defines weather the event matching should be triggered for every event arrival of the specified stream with the matching condition. <br/> When this keyword is not used the matching happens only ones. |
+
+Siddhi also support pattern matching with counting events and matching events in a logical order. Those are discussed in detail later.
 
 **Example**
 
 The following query sends an alert if the temperature of a room increases by 5 degrees within 10 min.
 
 ```sql
-from every( e1=TempStream ) -> e2=TempStream[e1.roomNo==roomNo and (e1.temp + 5) <= temp ]
+from every( e1=TempStream ) -> e2=TempStream[ e1.roomNo == roomNo and (e1.temp + 5) <= temp ]
     within 10 min
 select e1.roomNo, e1.temp as initialTemp, e2.temp as finalTemp
 insert into AlertStream;
 ```
 
+Here for each events in TempStream the matching process begins (as `every( e1=TempStream )` is used), and if there is an event
+with `temp` attribute greater then or equal to `e1.temp + 5` latter in time but within 10 minutes of the event e1, an output is 
+generated via the AlertStream.
+
 WSO2 Siddhi supports the following types of patterns:
 
-+ Counting patterns
-+ Logical patterns
-
-#### Counting Patterns
+**Counting Patterns**
 
 Counting patterns allow multiple events that may or may not have been received in a sequential order based on the same matching condition.
 
@@ -1364,7 +1011,7 @@ from every( e1=RegulatorStream) -> e2=TempStream[e1.roomNo==roomNo]<1:> -> e3=Re
 select e1.roomNo, e2[0].temp - e2[last].temp as tempDiff
 insert into TempDiffStream;
 ```
-#### Logical Patterns
+**Logical Patterns**
 
 Logical pattern matches events that arrive in temporal order and correlates events with logical relationships.
 
@@ -1376,9 +1023,6 @@ Key Word|Description
 ---------|---------
 `and`|This allows two events received in any order to be matched.
 `or`|One event from either event stream can be matched regardless of the order in which the events were received.
-
-
-
 
 
 **Example: Identifying the occurence of an expected event**
@@ -1421,7 +1065,7 @@ WSO2 Siddhi supports the following types of sequences:
 + Counting sequences
 + Logical sequences
 
-#### Counting sequences
+**Counting sequences**
 
 Counting sequence allows us to match multiple consecutive events based on the same matching condition.
 
@@ -1448,7 +1092,7 @@ select e1.temp as initialTemp, e2[last].temp as peakTemp
 insert into TempDiffStream;
 ```
 
-#### Logical Sequences
+**Logical Sequences**
 
 Logical sequence matches events that arrive in temporal order and correlates events with logical relationships.
 
@@ -1555,6 +1199,494 @@ select e1.customerId as customerId, 'Great deals are waiting for you at zone A' 
 insert into NotificationStream;
 ```
 This query receives information about the location of customers from the `LocationStream` stream. If an event indicates that a customer has reached the `bilingCounter` location, and it is not preceded by an event that indicates that the same customer has been to the `zoneA` location, an event is output to the `NotificationStream` stream in order to generate a notification with `Great deals are waiting for you at zone A` as the message.
+
+### Output rate limiting
+
+Output rate limiting allows queries to emit events periodically based on the condition specified.
+
+**Purpose**
+
+This allows you to limit the output to avoid overloading following executions and to remove unnecessary information.
+
+**Syntax**
+
+The following is the syntax of an output rate limiting configuration.
+
+```sql
+from <input stream> ...
+select <attribute name>, <attribute name>, ...
+output <rate limiting configuration>
+insert into <output stream>
+```
+Three type of output rate limiting configuration are available, such as 
+
+Rate limiting configuration|Syntax| Description
+---------|---------|--------
+Based on time | `<output event> every <time interval>` | Output `<output event>` for every given `<time interval>` time interval.
+Based on number of events | `<output event> every <event interval> events` | Output `<output event>` for every `<event interval>` number of events.
+Snapshot based output | `snapshot every <time interval>`| Output all events in the window (or the last event if no window is defined in the query) for every given `<time interval>` time interval.
+
+Here the `<output event>` specifies which event(s) should be emitted as the output of the query. 
+The possible values are as follows:
+* `first` : Only the first event processed by the query in the specified time interval/sliding window is emitted.
+* `last` : Only the last event processed by the query in the specified time interval/sliding window is emitted.
+* `all` : All the events processed by the query in the specified time interval/sliding window are emitted. **When no `<output event>` is defined `all` will be used as default.**
+
+**Examples**
+
++ Emitting events based on number of events
+
+    Here the events are emitted every time the specified number of events arrive. You can also specify whether to emit only the first event, last event, or all events out of the events that arrived.
+    
+    In this example, the last temperature per sensor is emitted for every 10 events.
+    
+    <pre>
+    from TempStreamselect 
+    select temp, deviceID
+    group by deviceID
+    output last every 10 events
+    insert into LowRateTempStream;    </pre>
+
++ Emitting events based on time
+
+    Here events are emitted for every predefined time interval. You can also specify whether to to emit only the first event, last event, or all events out of the events that arrived during the specified time interval.
+
+    In this example, emits all temperature events every 10 seconds  
+      
+    <pre>
+    from TempStreamoutput 
+    output every 10 sec
+    insert into LowRateTempStream;    </pre>
+
++ Emitting a periodic snapshot of events
+
+    This method works best with windows. When an input stream is connected to a window, snapshot rate limiting emits all the current events that have arrived and do not have corresponding expired events for every predefined time interval. 
+    If the input stream is not connected to a window, only the last current event for each predefined time interval is emitted.
+    
+    The following query emits snapshot of the events in a time window of 5 seconds every 1 second. 
+
+    <pre>
+    from TempStream#window.time(5 sec)
+    output snapshot every 1 sec
+    insert into SnapshotTempStream;    </pre>
+
+## Tables
+
+A table is a stored version of an stream or a table of events. It's schema is defined via the **table definition** thats
+quite similar to a stream definition. These events are by default stored 
+`in-memory` but Siddhi also provides store extension to work with data/events stored in various data stores through the 
+table abstraction.
+
+**Purpose**
+
+Tables allow Siddhi to work with stored events. By defining a schema to table Siddhi enables them to be processed at queries using their defined attributes with the streaming data, and also interactively query the state of the stored events in the table.
+
+**Syntax**
+
+The following is the syntax for defining a new table.
+
+```sql
+define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
+```
+The following parameters are configured in a table definition.
+
+| Parameter     | Description |
+| ------------- |-------------|
+| `table name`      | The name of the table defined. (as a convention `PascalCase` is used for table name) |
+| `attribute name`   | The schema of an stream is defined by its attributes by uniquely identifiable attribute names (as a convention `camalCase` is used for attribute names)|    |
+| `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
+
+
+**Example**
+
+Defining a table named `RoomTypeTable` with the attributes `roomNo` with type `int`, and `type` with type `string`.
+
+```sql
+define table RoomTypeTable ( roomNo int, type string );
+```
+
+**Primary Keys**
+
+Tables can be configured with primary keys to avoid the duplication of data. 
+
+Primary keys are configured by including the `@PrimaryKey( 'key1', 'key2' )` annotation to the table definition. 
+Each event table configuration can have only one `@PrimaryKey` annotation. 
+The number of attributes supported differ based on the table implementations and when more then one attribute 
+ is used for primary key the combination of the keys will be used to grantee uniqueness among the events saved in the table.
+
+**Examples**
+
+The following query creates an event table with the `symbol` attribute as the primary key. 
+Therefore each entry in this table will have a unique value for `symbol` attribute.
+
+```sql
+@PrimaryKey('symbol')
+define table StockTable (symbol string, price float, volume long);
+```
+
+**Indexes**
+ 
+Indexes let tables to searched/modified much faster. 
+
+Indexes are configured by including the `@Index( 'key1', 'key2' )` annotation to the table definition.
+ Each event table configuration can have at most only one `@Index` annotation. 
+ Support for `@Index` annotation and the number of attributes supported differ based on the table implementations. 
+ When more then one attribute used for index each of them will be used to index the table for fast access of the data. 
+ Indexes can be configured together with primary keys. 
+
+**Examples**
+
+The following query creates an indexed event table named `RoomTypeTable` using attribute `roomNo` as the index key.
+
+```sql
+@Index('roomNo')
+define table RoomTypeTable (roomNo int, type string);
+```
+
+**Operators on Table**
+
+The following operators can be performed on tables.
+
+
+### Insert
+
+This allows events to be inserted in to tables. This is similar to inserting events into streams. 
+
+!!! warning
+    If the table is defined with primary keys, and if you insert duplicate data primary key constrain violation can occur. 
+    In such cases use the `update or insert` operation. 
+    
+**Syntax**
+
+```sql
+from <input stream> 
+select <attribute name>, <attribute name>, ...
+insert into <table>
+```
+
+Like in streams to insert only the specific output event types, use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords. 
+For more information refer [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types) section.
+
+**Example**
+
+The following query inserts all events from the `TempStream` stream to the `TempTable` table.
+
+```sql
+from TempStream
+select *
+insert into TempTable;
+```
+
+### Join (Table)
+
+To allow a stream to retrieve information from a table in a streaming manner.
+
+!!! Note
+    Join can also be performed with [two streams](#join-stream), [aggregation](#join-aggregation) or against externally [defined windows](#join-window).
+
+**Syntax**
+
+```sql
+from <input stream> join <table>
+    on <condition>
+select (<input stream>|<table>).<attribute name>, (<input stream>|<table>).<attribute name>, ...
+insert into <output stream>
+```
+
+!!! Note 
+    Table can only be joint with a stream, and two tables cannot be joined because there should be at least one active 
+    entity to trigger the join operation.
+
+**Example**
+
+The following Siddhi App performs a join to retrieve the room type from `RoomTypeTable` table based on the room number, such that it can filter the events related to `server-room`s.
+
+```sql
+define table RoomTypeTable (roomNo int, type string);
+define stream TempStream (deviceID long, roomNo int, temp double);
+   
+from TempStream join RoomTypeTable
+    on RoomTypeTable.roomNo == TempStream.roomNo
+select deviceID, RoomTypeTable.type as roomType, type, temp
+    having roomType == 'server-room'
+insert into ServerRoomTempStream;
+```
+
+
+### Delete
+
+To delete selected events that are stored in a table.
+
+**Syntax**
+
+```sql
+from <input stream> 
+select <attribute name>, <attribute name>, ...
+delete <table> (for <output event type>)?
+    on <condition>
+```
+
+The `condition` element specifies the basis on which events are selected to be deleted. 
+When specifying the condition, table attributes should be referred to with the table name.
+ 
+To execute delete for specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
+in the syntax. To understand more refer [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types) section.
+
+!!! note 
+    Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
+    
+**Example**
+
+The following script deletes entries from the `RoomTypeTable` table, 
+that have room number equal to the `roomNumber` attribute of the events in `DeleteStream` stream.
+
+```sql
+define table RoomTypeTable (roomNo int, type string);
+
+define stream DeleteStream (roomNumber int);
+  
+from DeleteStream
+delete RoomTypeTable
+    on RoomTypeTable.roomNo == roomNumber;
+```
+
+### Update
+
+Update selected event attributes stored in a table based on a condition. 
+
+**Syntax**
+
+```sql
+from <input stream> 
+select <attribute name>, <attribute name>, ...
+update <table> (for <output event type>)? 
+    set <table>.<attribute name> = <attribute name>, <table>.<attribute name> = <attribute name>, ...
+    on <condition>
+```
+
+The `condition` element specifies the basis on which events are selected for update.
+When specifying the `condition`, table attributes should be referred to with the table name.
+
+Use `set` keyword to update selected attributes from the table. Here for each assignment the left hand side 
+ attribute should be a table attribute and the right hand side attribute can be stream/table attribute, mathematical 
+ operations or other. When `set` clause is not provided all attributes in the table will be updated.  
+ 
+To execute update upon specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
+in the syntax. To understand more refer [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types) section.
+
+!!! note 
+    Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
+
+**Example**
+
+Siddhi app updating room occupancy in the `RoomOccupancyTable` table for each room number based on new arrival and exit from the `UpdateStream` stream.
+
+```sql
+define table RoomOccupancyTable (roomNo int, people int);
+define stream UpdateStream (roomNumber int, arrival int, exit int);
+  
+from UpdateStream
+select *
+update RoomTypeTable
+    set RoomTypeTable.people = RoomTypeTable.people + arrival - exit
+    on RoomTypeTable.roomNo == roomNumber;
+```
+
+### Update or Insert
+
+Let you update if the event attributes already exist in the table based on a condition, or 
+else insert the entry as a new attribute.
+
+**Syntax**
+
+```sql
+from <input stream> 
+select <attribute name>, <attribute name>, ...
+update or insert <table> (for <output event type>)? 
+    set <table>.<attribute name> = <attribute name>, <table>.<attribute name> = <attribute name>, ...
+    on <condition>
+```
+The `condition` element specifies the basis on which events are selected for update.
+When specifying the `condition`, table attributes should be referred to with the table name. 
+Here if no stored event matches for the given condition then the arriving event will be inserting into 
+the table.
+
+The `set` clause is only used when the update operation is performed and it will during the insert operation. 
+When ing the `set` clause assignments their the left hand side attribute should be always a table attribute and 
+the right hand side attribute can be stream/table attribute, mathematical 
+ operations or other. When `set` clause is not provided all attributes in the table will be updated.  
+ 
+To execute update upon specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
+in the syntax. To understand more refer [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types) section.
+
+!!! note 
+    Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
+
+**Example**
+
+The following query update for events in the `UpdateTable` event table that have room numbers that match the same in the `UpdateStream` stream. When such events are founding the event table, they are updated. When a room number available in the stream is not found in the event table, it is inserted from the stream.
+ 
+```sql
+define table RoomAssigneeTable (roomNo int, type string, assignee string);
+define stream RoomAssigneeStream (roomNumber int, type string, assignee string);
+   
+from RoomAssigneeStream
+select roomNumber as roomNo, type, assignee
+update or insert RoomAssigneeTable
+    set RoomAssigneeTable.assignee = assignee
+    on RoomAssigneeTable.roomNo == roomNo;
+```
+
+### In
+ 
+Let the stream check if the expected value exist in the table as part of a conditional operation.
+
+**Syntax**
+
+```sql
+from <input stream>[<condition> in <table>]
+select <attribute name>, <attribute name>, ...
+insert into <output stream>
+```
+
+The `condition` element specifies the basis on which events are selected to be compared. 
+When constructing the `condition`, the table attribute should be always referred to with the table name as 
+`<table>.<attibute name>`.
+
+**Example**
+
+The Siddhi App to filter only room numbers that are listed in the `ServerRoomTable` table.
+
+```sql
+define table ServerRoomTable (roomNo int);
+define stream TempStream (deviceID long, roomNo int, temp double);
+   
+from TempStream[ServerRoomTable.roomNo == roomNo in ServerRoomTable]
+insert into ServerRoomTempStream;
+```
+
+## Incremental Aggregations
+
+Incremental aggregation let you obtaining aggregates in an incremental manner for a specified set of time periods.
+
+This not only let you calculate aggregations with varies time granularity but also let you access them in an interactive
+ manner for reports, dashboards, and for further processing. It's schema is defined via the **aggregation definition**.
+
+**Purpose**
+
+Incremental aggregation allows you to retrieve the aggregate value for different time durations. 
+That is, it allows you to obtain aggregates such as `sum`, `count`, `avg`, `min`, `max`, and `count`) 
+of stream attributes for durations such as `sec`, `min`, `hour`, etc. 
+
+This is of considerable importance in many analytics scenarios since aggregate values are often needed for several time periods. 
+Furthermore, this ensures that the aggregations are not lost due to unexpected system failures, as the aggregates can be stored in different persistence `stores`.
+
+**Syntax**
+
+```sql
+@store(type="<store type>", ...)
+define aggregation <aggregator name>
+from <input stream>
+select <attribute name>, <aggregate function>(<attribute name>) as <attribute name>, ...
+    group by <attribute name>
+    aggregate by <timestamp attribute> every <time periods> ;
+```
+The above syntax includes the following:
+
+|Item                |Description
+---------------      |---------
+|`@store`            |This annotation is used to refer to the data store where the calculated <br/>aggregate results will be stored. This annotation is optional and when <br/>no annotation is provided the data will be sored in the `in-memory` store.
+|`<aggregator name>` | Specifies a unique name for the aggregation such that it can be referred <br/>when accessing aggregate results. 
+|`<input stream>`    |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
+|`group by <attribute name>`|The `group by` clause is optional. If it's given the aggregate values <br/>would be calculated, per each `group by` attribute, and otherwise all the<br/> events would be aggregated together. 
+|`by <timestamp attribute>`| This clause is optional. This defined the attribute that should be used as<br/> the timestamp if this is not provided the event time will be used by default.<br/> The timestamp could be given as either a string or long value. If it's a `long`,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it's <br/>a `string` the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` <br/>(ex. `+05:30`, `-11:00`).
+|`<time periods>`    |This depicts the aggregation period. This can be defined either as a range <br/>such as `evey sec ... year` defining that it should process all time <br/>granularities form second to year, or as comma separated values such as <br/> `every sec, hour, month`. Aggregation supports `second`, `minute`, `hour`, <br/>`day`, `month` and `year` as its time granularity levels. 
+
+**Example**
+
+Siddhi App defining `TradeAggregation` to calculate  average and sum of `price` from `TradeStream` stream every second to year time granularities.
+
+```sql
+define stream TradeStream (symbol string, price double, volume long, timestamp long);
+
+define aggregation TradeAggregation
+  from TradeStream
+  select symbol, avg(price) as avgPrice, sum(price) as total
+    group by symbol
+    aggregate by timestamp every sec ... year;
+```
+
+### Join (Aggregation)
+
+Join allow a stream to retrieve calculated aggregate values from the aggregation. 
+
+!!! Note
+    Join can also be performed with [two streams](#join-stream), with [table](#join-table) or against externally [defined windows](#join-window).
+
+
+**Syntax**
+
+Join with aggregation is similer to the join with [table](#join-table), but with additional `within` and `per` clauses. 
+
+```sql
+from <input stream> join <aggrigation> 
+  on <join condition> 
+  within <time range> 
+  per <time granularity>
+select <attribute name>, <attribute name>, ...
+insert into <output stream>;
+```
+Apart for constructs of [table](#join-table) this includes the following :
+
+Item|Description
+---------|---------
+`within  <time range>`| This allows you to specify the time interval for which the aggregate values need to be retrieved. This can be specified by providing the start and end time separated by comma as `string` or `long` values or by using wildcard `string` specifying the data range. For details refer examples.            
+`per <time granularity>`|This specifies the time granularity by which the aggregate values must be grouped and returned. E.g., If you specify `days`, the retrieved aggregate values are grouped for each day within the selected time interval.
+
+`within` and `par` clauses also accept attribute values from the stream.
+
+**Example**
+
+Retrieving all aggregation per day within the time range `"2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30"` 
+
+```sql
+define stream StockStream (symbol string, value int);
+
+from StockStream as S join TradeAggregation as T
+  on S.symbol == T.symbol 
+  within "2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30" 
+  per "days" 
+select S.symbol, T.total, T.avgPrice 
+insert into AggregateStockStream;
+```
+
+
+Retrieving all aggregation per hour within the day `2014-02-15`  
+
+```sql
+define stream StockStream (symbol string, value int);
+
+from StockStream as S join TradeAggregation as T
+  on S.symbol == T.symbol 
+  within "2014-02-15 **:**:** +05:30"
+  per "hours" 
+select S.symbol, T.total, T.avgPrice 
+insert into AggregateStockStream;
+```
+
+Retrieving all aggregation per an attribute value from the stream and within timestamps `1490918400` and `1490922000`  
+
+```sql
+define stream StockStream (symbol string, value int, perValue string);
+
+from StockStream as S join TradeAggregation as T
+  on S.symbol == T.symbol 
+  within 1490918400, 1490922000  
+  per S.perValue
+select S.symbol, T.total, T.avgPrice 
+insert into AggregateStockStream;
+```
+
 
 ## Partitions
 
