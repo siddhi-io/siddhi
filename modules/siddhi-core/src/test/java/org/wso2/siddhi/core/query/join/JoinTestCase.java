@@ -20,7 +20,6 @@ package org.wso2.siddhi.core.query.join;
 import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -731,6 +730,55 @@ public class JoinTestCase {
             orderStream.send(new Object[]{"bill1", "cust1", "item1", "dow1", 12323232l});
             Thread.sleep(100);
             Assert.assertEquals("Event Arrived", true, eventArrived);
+        } finally {
+            executionPlanRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void joinTest18() throws InterruptedException {
+        log.info("Join test18");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeLength(1 sec, 10) join twitterStream#window.time(1 sec) " +
+                "on cseEventStream.symbol== twitterStream.company " +
+                "select cseEventStream.symbol as symbol, twitterStream.tweet, cseEventStream.price " +
+                "insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+        try {
+            executionPlanRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        inEventCount.addAndGet(inEvents.length);
+                    }
+                    if (removeEvents != null) {
+                        removeEventCount.addAndGet(removeEvents.length);
+                    }
+                    eventArrived = true;
+                }
+            });
+            InputHandler cseEventStreamHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+            InputHandler twitterStreamHandler = executionPlanRuntime.getInputHandler("twitterStream");
+            executionPlanRuntime.start();
+            cseEventStreamHandler.send(new Object[]{"WSO2", 55.6f, 100});
+            twitterStreamHandler.send(new Object[]{"User1", "Hello World", "WSO2"});
+            cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, 100});
+            Thread.sleep(500);
+            cseEventStreamHandler.send(new Object[]{"WSO2", 57.6f, 100});
+
+            SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 6000);
+            SiddhiTestHelper.waitForEvents(100, 2, removeEventCount, 6000);
+            Assert.assertEquals(2, inEventCount.get());
+            Assert.assertEquals(2, removeEventCount.get());
+            Assert.assertTrue(eventArrived);
         } finally {
             executionPlanRuntime.shutdown();
         }

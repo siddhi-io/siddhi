@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class TimeLengthWindowTestCase {
     private static final Logger log = Logger.getLogger(TimeLengthWindowTestCase.class);
@@ -442,5 +443,44 @@ public class TimeLengthWindowTestCase {
         Assert.assertEquals("Remove event count", 3, removeEventCount);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void timeLengthWindowTest11() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "@info(name = 'query1') from cseEventStream#window.timeLength(10 sec, 5, volume)" +
+                " select symbol,volume" +
+                " insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void timeLengthWindowTest12() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "@info(name = 'query1') from cseEventStream#window.timeLength(volume, 5)" +
+                " select symbol,volume" +
+                " insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void timeLengthWindowTest13() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "@info(name = 'query1') from cseEventStream#window.timeLength(10.1, 5)" +
+                " select symbol,volume" +
+                " insert all events into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
     }
 }
