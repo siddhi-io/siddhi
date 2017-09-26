@@ -1294,7 +1294,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery32() throws InterruptedException {
+    public void testPartitionQuery24() throws InterruptedException {
         log.info("Partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1377,7 +1377,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery29() throws InterruptedException {
+    public void testPartitionQuery26() throws InterruptedException {
         log.info("Partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1513,7 +1513,7 @@ public class PartitionTestCase {
     }*/
 
     @Test
-    public void testPartitionQuery31() throws InterruptedException {
+    public void testPartitionQuery27() throws InterruptedException {
         log.info("Partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1562,7 +1562,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery24() throws InterruptedException {
+    public void testPartitionQuery28() throws InterruptedException {
         log.info("Partition test24");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1596,7 +1596,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery33() throws InterruptedException {
+    public void testPartitionQuery29() throws InterruptedException {
         log.info("Partition test25");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1634,7 +1634,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery26() throws InterruptedException {
+    public void testPartitionQuery30() throws InterruptedException {
         log.info("Partition test26");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1673,7 +1673,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery30() throws InterruptedException {
+    public void testPartitionQuery31() throws InterruptedException {
         log.info("Partition test30");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1711,7 +1711,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery41() throws InterruptedException {
+    public void testPartitionQuery32() throws InterruptedException {
         log.info("Partition test31");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1749,7 +1749,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery42() throws InterruptedException {
+    public void testPartitionQuery33() throws InterruptedException {
         log.info("Partition test32");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1787,7 +1787,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery43() throws InterruptedException {
+    public void testPartitionQuery34() throws InterruptedException {
         log.info("Partition test33");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1825,7 +1825,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery44() throws InterruptedException {
+    public void testPartitionQuery35() throws InterruptedException {
         log.info("Partition test34");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1863,7 +1863,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery45() throws InterruptedException {
+    public void testPartitionQuery36() throws InterruptedException {
         log.info("Partition test35");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1898,7 +1898,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery46() throws InterruptedException {
+    public void testPartitionQuery37() throws InterruptedException {
         log.info("Partition test36");
         SiddhiManager siddhiManager = new SiddhiManager();
 
