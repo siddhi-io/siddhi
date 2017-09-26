@@ -1711,7 +1711,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery31() throws InterruptedException {
+    public void testPartitionQuery41() throws InterruptedException {
         log.info("Partition test31");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1749,7 +1749,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery32() throws InterruptedException {
+    public void testPartitionQuery42() throws InterruptedException {
         log.info("Partition test32");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1787,7 +1787,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery33() throws InterruptedException {
+    public void testPartitionQuery43() throws InterruptedException {
         log.info("Partition test33");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1825,7 +1825,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery34() throws InterruptedException {
+    public void testPartitionQuery44() throws InterruptedException {
         log.info("Partition test34");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1863,7 +1863,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery35() throws InterruptedException {
+    public void testPartitionQuery45() throws InterruptedException {
         log.info("Partition test35");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1898,7 +1898,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery36() throws InterruptedException {
+    public void testPartitionQuery46() throws InterruptedException {
         log.info("Partition test36");
         SiddhiManager siddhiManager = new SiddhiManager();
 
