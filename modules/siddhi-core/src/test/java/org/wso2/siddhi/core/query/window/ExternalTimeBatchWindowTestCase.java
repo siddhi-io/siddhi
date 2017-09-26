@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -1355,5 +1356,162 @@ public class ExternalTimeBatchWindowTestCase {
 
 
     }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterSize() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(currentTime) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterType1() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(\"10\",5 sec) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterType2() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(value,5 sec) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterType3() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(currentTime, currentTime) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterType4() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(currentTime, 15.6) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test
+    public void testInputParameterType5() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(currentTime, 5 sec, 10L) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterType6() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(currentTime, 5 sec, 10.5) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterType7() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(currentTime, 5 sec, value) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterType8() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(currentTime, 5 sec, 10, value) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterType9() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(currentTime, 5 sec, 10, 10.5) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterType10() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(currentTime, 5 sec, 10, 10, value) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInputParameterType11() throws InterruptedException {
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream inputStream(currentTime long, value int); ";
+        String query = " " +
+                "@info(name='query') " +
+                "from inputStream#window.externalTimeBatch(currentTime, 5 sec, 10, 10, 10) " +
+                "select value " +
+                "insert into outputStream; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream + query);
+    }
+
 
 }

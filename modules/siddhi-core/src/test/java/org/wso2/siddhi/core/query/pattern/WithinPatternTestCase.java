@@ -208,6 +208,61 @@ public class WithinPatternTestCase {
         executionPlanRuntime.shutdown();
     }
 
+    @Test
+    public void testQuery4() throws InterruptedException {
+        log.info("testPatternWithin4 - OUT 1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                         "define stream Stream1 (symbol string, price float, volume int, threshold double); " +
+                         "define stream Stream2 (symbol string, price float, volume int, threshold double); ";
+        String query = "" +
+                       "@info(name = 'query1') " +
+                       "from (every e1=Stream1[price>20]-> e2=Stream2[price>e1.price and threshold != " +
+                       "e1.volume]) " +
+                       "within 1 sec " +
+                       "select e1.symbol as symbol1, e2.symbol as symbol2, e2.threshold as threshold " +
+                       "insert into OutputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                    Assert.assertArrayEquals(new Object[]{"GOOG", "IBM",150.0}, inEvents[0].getData());
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler stream1 = executionPlanRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = executionPlanRuntime.getInputHandler("Stream2");
+
+        executionPlanRuntime.start();
+
+        stream1.send(new Object[]{"WSO2",55.6f, 100, 55.0});
+        Thread.sleep(1500);
+        stream1.send(new Object[]{"GOOG",55.8f, 100, 100.0});
+        Thread.sleep(500);
+        stream2.send(new Object[]{"IBM",55.9f, 100, 150.0});
+        Thread.sleep(500);
+
+        Assert.assertEquals("Number of success events", 1, inEventCount);
+        Assert.assertEquals("Number of remove events", 0, removeEventCount);
+        Assert.assertEquals("Event arrived", true, eventArrived);
+
+        executionPlanRuntime.shutdown();
+    }
+
 
 
 }
