@@ -1408,18 +1408,9 @@ public class PartitionTestCase {
         inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"IBM", 700}));
         inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
         inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
-        byte[] snapshot = executionPlanRuntime.snapshot();
-        executionPlanRuntime.shutdown();
-        Thread.sleep(1000);
-        executionPlanRuntime.restore(snapshot);
-        executionPlanRuntime.start();
-
-        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"IBM", 700}));
-        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
-        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
-        SiddhiTestHelper.waitForEvents(100, 6, count, 60000);
+        SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
         Assert.assertTrue(eventArrived);
-        Assert.assertEquals(6, count.get());
+        Assert.assertEquals(3, count.get());
         executionPlanRuntime.shutdown();
     }
 
