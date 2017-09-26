@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.core.query.output.callback;
 
+import org.wso2.siddhi.core.debugger.SiddhiDebugger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -27,6 +28,7 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 public class InsertIntoTableCallback extends OutputCallback {
     private EventTable eventTable;
+    private SiddhiDebugger siddhiDebugger;
     private StreamDefinition outputStreamDefinition;
     private boolean convertToStreamEvent;
     private StreamEventPool streamEventPool;
@@ -44,6 +46,9 @@ public class InsertIntoTableCallback extends OutputCallback {
 
     @Override
     public void send(ComplexEventChunk complexEventChunk) {
+        if (siddhiDebugger != null) {
+            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.OUT, complexEventChunk.getFirst());
+        }
         if (convertToStreamEvent) {
             ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<StreamEvent>(complexEventChunk.isBatch());
             complexEventChunk.reset();
@@ -68,6 +73,11 @@ public class InsertIntoTableCallback extends OutputCallback {
             }
             eventTable.add((ComplexEventChunk<StreamEvent>) complexEventChunk);
         }
+    }
+
+    @Override
+    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
+        this.siddhiDebugger = siddhiDebugger;
     }
 
     public StreamDefinition getOutputStreamDefinition() {

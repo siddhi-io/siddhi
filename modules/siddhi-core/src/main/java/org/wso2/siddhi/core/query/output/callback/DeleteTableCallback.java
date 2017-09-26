@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.query.output.callback;
 
+import org.wso2.siddhi.core.debugger.SiddhiDebugger;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.state.StateEventPool;
@@ -34,6 +35,7 @@ public class DeleteTableCallback extends OutputCallback {
     private StateEventPool stateEventPool;
     private StreamEventPool streamEventPool;
     private StreamEventConverter streamEventConvertor;
+    private SiddhiDebugger siddhiDebugger;
 
     public DeleteTableCallback(EventTable eventTable, Operator operator, int matchingStreamIndex,
                                boolean convertToStreamEvent, StateEventPool stateEventPool,
@@ -49,6 +51,9 @@ public class DeleteTableCallback extends OutputCallback {
 
     @Override
     public synchronized void send(ComplexEventChunk deletingEventChunk) {
+        if (siddhiDebugger != null) {
+            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.OUT, deletingEventChunk.getFirst());
+        }
         deletingEventChunk.reset();
         if (deletingEventChunk.hasNext()) {
             ComplexEventChunk<StateEvent> deletingStateEventChunk = constructMatchingStateEventChunk(deletingEventChunk,
@@ -57,4 +62,8 @@ public class DeleteTableCallback extends OutputCallback {
         }
     }
 
+    @Override
+    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
+        this.siddhiDebugger = siddhiDebugger;
+    }
 }

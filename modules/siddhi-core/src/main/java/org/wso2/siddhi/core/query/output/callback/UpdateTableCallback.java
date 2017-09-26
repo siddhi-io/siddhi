@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.query.output.callback;
 
+import org.wso2.siddhi.core.debugger.SiddhiDebugger;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.state.StateEventPool;
@@ -34,6 +35,7 @@ public class UpdateTableCallback extends OutputCallback {
     private final UpdateAttributeMapper[] updateAttributeMappers;
     private EventTable eventTable;
     private Operator operator;
+    private SiddhiDebugger siddhiDebugger;
     private boolean convertToStreamEvent;
     private StateEventPool stateEventPool;
     private StreamEventPool streamEventPool;
@@ -55,12 +57,20 @@ public class UpdateTableCallback extends OutputCallback {
 
     @Override
     public synchronized void send(ComplexEventChunk updatingEventChunk) {
+        if (siddhiDebugger != null) {
+            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.OUT, updatingEventChunk.getFirst());
+        }
         updatingEventChunk.reset();
         if (updatingEventChunk.hasNext()) {
             ComplexEventChunk<StateEvent> updatingStateEventChunk = constructMatchingStateEventChunk(updatingEventChunk,
                     convertToStreamEvent, stateEventPool, matchingStreamIndex, streamEventPool, streamEventConvertor);
             eventTable.update(updatingStateEventChunk, operator, updateAttributeMappers);
         }
+    }
+
+    @Override
+    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
+        this.siddhiDebugger = siddhiDebugger;
     }
 
 }
