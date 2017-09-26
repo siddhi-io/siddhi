@@ -1934,7 +1934,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery34() throws InterruptedException {
+    public void testPartitionQuery38() throws InterruptedException {
         log.info("Partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1995,7 +1995,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery35() throws InterruptedException {
+    public void testPartitionQuery39() throws InterruptedException {
         log.info("Partition test");
         ExecutionPlan executionPlan = ExecutionPlan.executionPlan("Test")
                 .defineStream(
@@ -2041,7 +2041,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery36() throws InterruptedException {
+    public void testPartitionQuery40() throws InterruptedException {
         log.info("Partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -2082,7 +2082,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery37() throws InterruptedException {
+    public void testPartitionQuery41() throws InterruptedException {
         log.info("Partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
 
