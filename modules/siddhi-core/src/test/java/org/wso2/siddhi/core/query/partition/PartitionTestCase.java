@@ -1423,6 +1423,7 @@ public class PartitionTestCase {
         executionPlanRuntime.shutdown();
     }
 
+    // TODO: 26/9/17 Verify the behaviour when partition executors are empty
     /*@Test
     public void testPartitionQuery27() throws InterruptedException {
         log.info("Partition test");
