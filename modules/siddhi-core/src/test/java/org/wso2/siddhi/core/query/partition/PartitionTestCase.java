@@ -1294,6 +1294,274 @@ public class PartitionTestCase {
     }
 
     @Test
+    public void testPartitionQuery32() throws InterruptedException {
+        log.info("Partition test");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "@plan:name('PartitionTest') " +
+                "define stream streamA (symbol string, price int);" +
+                "partition with (symbol of streamA) " +
+                "begin " +
+                "@info(name = 'query1') " +
+                "from streamA  " +
+                "select symbol,price insert into StockQuote ;  " +
+                "end ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                Assert.assertTrue("IBM".equals(events[0].getData(0)) || "WSO2".equals(events[0].getData(0)));
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        };
+        executionPlanRuntime.addCallback("StockQuote", streamCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("streamA");
+        executionPlanRuntime.start();
+        Event[] events = {
+                new Event(System.currentTimeMillis(),new Object[]{"IBM", 700}),
+                new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}),
+                new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60})
+        };
+        inputHandler.send(events);
+        SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
+        Assert.assertTrue(eventArrived);
+        Assert.assertEquals(3, count.get());
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testPartitionQuery25() throws InterruptedException {
+        log.info("Partition test");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "@plan:name('PartitionTest') " +
+                "define stream streamA (symbol string, price int);" +
+                "" +
+                "from streamA#window.lengthBatch(3) " +
+                "insert into streamB;" +
+                "" +
+                "partition with (symbol of streamB) " +
+                "begin " +
+                "@info(name = 'query1') " +
+                "from streamB  " +
+                "select symbol,price insert into StockQuote ;  " +
+                "end ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                Assert.assertTrue("IBM".equals(events[0].getData(0)) || "WSO2".equals(events[0].getData(0)));
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        };
+        executionPlanRuntime.addCallback("StockQuote", streamCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("streamA");
+        executionPlanRuntime.start();
+        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"IBM", 700}));
+        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
+        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
+        SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
+        Assert.assertTrue(eventArrived);
+        Assert.assertEquals(3, count.get());
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testPartitionQuery29() throws InterruptedException {
+        log.info("Partition test");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "@plan:name('PartitionTest') " +
+                "define stream streamA (symbol string, price int);" +
+                "partition with (symbol of streamA) " +
+                "begin " +
+                "@info(name = 'query1') " +
+                "from streamA  " +
+                "select symbol,price insert into StockQuote ;  " +
+                "end ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                Assert.assertTrue("IBM".equals(events[0].getData(0)) || "WSO2".equals(events[0].getData(0)));
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        };
+        executionPlanRuntime.addCallback("StockQuote", streamCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("streamA");
+        executionPlanRuntime.start();
+        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"IBM", 700}));
+        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
+        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
+        SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
+        Assert.assertTrue(eventArrived);
+        Assert.assertEquals(3, count.get());
+        executionPlanRuntime.shutdown();
+    }
+
+    // TODO: 26/9/17 Verify the behaviour when partition executors are empty
+    /*@Test
+    public void testPartitionQuery27() throws InterruptedException {
+        log.info("Partition test");
+        ExecutionPlan executionPlan = ExecutionPlan.executionPlan("Test")
+                .defineStream(
+                        StreamDefinition.id("streamA")
+                                .attribute("symbol", Attribute.Type.STRING)
+                                .attribute("price", Attribute.Type.INT)
+                )
+                .defineStream(
+                        StreamDefinition.id("StockQuote")
+                                .attribute("symbol", Attribute.Type.STRING)
+                                .attribute("price", Attribute.Type.INT)
+                );;
+        Query query = Query.query();
+
+        query.from(
+                InputStream.stream("streamA")
+        ).select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price"))).insertInto("StockQuote");
+        Partition partition = Partition.partition();
+        partition.addQuery(query);
+        executionPlan.addPartition(partition);
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                Assert.assertTrue("IBM".equals(events[0].getData(0)) || "WSO2".equals(events[0].getData(0)));
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        };
+        executionPlanRuntime.addCallback("StockQuote", streamCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("streamA");
+        executionPlanRuntime.start();
+        Event[] events = {
+                new Event(System.currentTimeMillis(),new Object[]{"IBM", 700}),
+                new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}),
+                new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60})
+        };
+        inputHandler.send(events);
+        Thread.sleep(1000);
+        Assert.assertEquals(0, count.get());
+        executionPlanRuntime.shutdown();
+    }*/
+
+    /*@Test
+    public void testPartitionQuery28() throws InterruptedException {
+        log.info("Partition test");
+        ExecutionPlan executionPlan = ExecutionPlan.executionPlan("Test")
+                .defineStream(
+                        StreamDefinition.id("streamA")
+                                .attribute("symbol", Attribute.Type.STRING)
+                                .attribute("price", Attribute.Type.INT)
+                );
+        Query query = Query.query();
+        query.from(
+                InputStream.stream("streamA")
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("price", Expression.variable("price")));
+        query.insertInto("StockQuote");
+        Partition partition = Partition.partition();
+        partition.addQuery(query);
+        executionPlan.addPartition(partition);
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                Assert.assertTrue("IBM".equals(events[0].getData(0)) || "WSO2".equals(events[0].getData(0)));
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        };
+        executionPlanRuntime.addCallback("StockQuote", streamCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("streamA");
+        executionPlanRuntime.start();
+        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"IBM", 700}));
+        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
+        inputHandler.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
+        Thread.sleep(1000);
+        Assert.assertEquals(0, count.get());
+        executionPlanRuntime.shutdown();
+    }*/
+
+    @Test
+    public void testPartitionQuery31() throws InterruptedException {
+        log.info("Partition test");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "" +
+                "@plan:async " +
+                "@plan:name('PartitionTest') " +
+                "define stream streamA (symbol string, price int); " +
+                "define stream streamB (symbol string, price int); " +
+                "partition with (symbol of streamA, symbol of streamB) " +
+                "begin " +
+                "@info(name = 'query1') " +
+                "from streamA  " +
+                "select symbol,price insert into StockQuote ;  " +
+                "@info(name = 'query2') " +
+                "from streamB  " +
+                "select symbol,price insert into StockQuote ;  " +
+                "end ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                Assert.assertTrue("IBM".equals(events[0].getData(0)) || "WSO2".equals(events[0].getData(0)));
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        };
+        executionPlanRuntime.addCallback("StockQuote", streamCallback);
+
+        InputHandler inputHandlerA = executionPlanRuntime.getInputHandler("streamA");
+        InputHandler inputHandlerB = executionPlanRuntime.getInputHandler("streamB");
+
+        executionPlanRuntime.start();
+        inputHandlerA.send(new Event(System.currentTimeMillis(),new Object[]{"IBM", 700}));
+        inputHandlerA.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
+        inputHandlerA.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
+        inputHandlerB.send(new Event(System.currentTimeMillis(),new Object[]{"IBM", 700}));
+        inputHandlerB.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
+        inputHandlerB.send(new Event(System.currentTimeMillis(),new Object[]{"WSO2", 60}));
+        SiddhiTestHelper.waitForEvents(100, 6, count, 60000);
+        Assert.assertTrue(eventArrived);
+        Assert.assertEquals(6, count.get());
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
     public void testPartitionQuery24() throws InterruptedException {
         log.info("Partition test24");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1328,7 +1596,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery25() throws InterruptedException {
+    public void testPartitionQuery33() throws InterruptedException {
         log.info("Partition test25");
         SiddhiManager siddhiManager = new SiddhiManager();
 
