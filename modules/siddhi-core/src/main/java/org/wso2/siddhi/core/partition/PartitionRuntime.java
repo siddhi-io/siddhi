@@ -67,14 +67,12 @@ public class PartitionRuntime implements Snapshotable {
 
     public PartitionRuntime(ConcurrentMap<String, AbstractDefinition> streamDefinitionMap, ConcurrentMap<String, StreamJunction> streamJunctionMap, Partition partition, ExecutionPlanContext executionPlanContext) {
         this.executionPlanContext = executionPlanContext;
-        try {
-            Element element = AnnotationHelper.getAnnotationElement("info", "name", partition.getAnnotations());
-            if (element != null) {
-                this.partitionId = element.getValue();
-            }
-        } catch (DuplicateAnnotationException e) {
-            throw new DuplicateAnnotationException(e.getMessage() + " for the same Query " + partition.toString());
+
+        Element element = AnnotationHelper.getAnnotationElement("info", "name", partition.getAnnotations());
+        if (element != null) {
+            this.partitionId = element.getValue();
         }
+
         if (partitionId == null) {
             this.partitionId = UUID.randomUUID().toString();
         }
@@ -235,6 +233,7 @@ public class PartitionRuntime implements Snapshotable {
         for (PartitionStreamReceiver partitionStreamReceiver : partitionStreamReceivers.values()) {
             partitionStreamReceiver.init();
         }
+        executionPlanContext.getSnapshotService().addSnapshotable(partitionId, this);
     }
 
     public String getPartitionId() {
