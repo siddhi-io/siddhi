@@ -1377,7 +1377,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery26() throws InterruptedException {
+    public void testPartitionQuery29() throws InterruptedException {
         log.info("Partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -1521,7 +1521,7 @@ public class PartitionTestCase {
     }
 
     @Test
-    public void testPartitionQuery29() throws InterruptedException {
+    public void testPartitionQuery31() throws InterruptedException {
         log.info("Partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
 
