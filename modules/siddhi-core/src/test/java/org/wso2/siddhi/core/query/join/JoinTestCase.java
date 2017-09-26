@@ -17,7 +17,6 @@
  */
 package org.wso2.siddhi.core.query.join;
 
-import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,11 +25,14 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
+
+import junit.framework.Assert;
 
 public class JoinTestCase {
     private static final Logger log = Logger.getLogger(JoinTestCase.class);
@@ -738,6 +740,138 @@ public class JoinTestCase {
     @Test
     public void joinTest18() throws InterruptedException {
         log.info("Join test18");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@plan:statistics('true')" +
+                "" +
+                "define stream streamA (id int, name string); " +
+                "define stream streamB (id int, name string); ";
+
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from streamA#window.lengthBatch(2) " +
+                "insert into batchA; " +
+                "" +
+                "@info(name = 'query3') " +
+                "from streamB#window.length(0) as b1 join streamB as b2 " +
+                "select b1.id as aId, b2.id as bId " +
+                "insert into batchB; " +
+                "" +
+                "@info(name = 'query4') " +
+                "from batchA#window.length(2) as a1 join batchA as a2 " +
+                "select a1.id as aId, a2.id as bId " +
+                "insert into batchC; " +
+                "";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+        try {
+            InputHandler streamA = executionPlanRuntime.getInputHandler("streamA");
+            InputHandler streamB = executionPlanRuntime.getInputHandler("streamB");
+            executionPlanRuntime.addCallback("query4", new QueryCallback() {
+                @Override
+                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
+                    eventArrived = true;
+                }
+            });
+            executionPlanRuntime.start();
+            Thread.sleep(100);
+            streamA.send(new Object[]{1, "sam"});
+            streamA.send(new Object[]{2, "dean"});
+            Thread.sleep(100);
+            streamB.send(new Event(123, new Object[]{1, "sam"}));
+            streamB.send(new Event[]{new Event(123, new Object[]{1, "sam"})});
+            Assert.assertEquals("Event Arrived", true, eventArrived);
+        } finally {
+            executionPlanRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void joinTest19() throws InterruptedException {
+        log.info("Join test19");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@plan:async " +
+                "define stream streamB (id int, name string); ";
+
+        String query = "" +
+                "@info(name = 'query3') " +
+                "from streamB#window.length(1) as b1 join streamB as b2 " +
+                "select b1.id as aId, b2.id as bId " +
+                "insert into batchB; ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+        try {
+            InputHandler streamB = executionPlanRuntime.getInputHandler("streamB");
+            executionPlanRuntime.addCallback("query3", new QueryCallback() {
+                @Override
+                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
+                    eventArrived = true;
+                }
+            });
+            executionPlanRuntime.start();
+            Thread.sleep(100);
+            streamB.send(new Event(123, new Object[]{1, "sam"}));
+            streamB.send(new Event[]{new Event(123, new Object[]{1, "sam"})});
+            Thread.sleep(100);
+            Assert.assertEquals("Event Arrived", true, eventArrived);
+        } finally {
+            executionPlanRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void joinTest20() throws InterruptedException {
+        log.info("Join test20");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream streamA (id int, name string, timestamp long); " +
+                "define stream streamB (id int, name string); ";
+
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from streamA#window.externalTimeBatch(timestamp, 1 sec, timestamp, 1) as b1 " +
+                "   left outer join streamB#window.lengthBatch(1) as b2 " +
+                "select b1.id as aId, b2.id as bId " +
+                "insert all events into batchB;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from streamB#window.lengthBatch(1) as b1 " +
+                "   right outer join streamA#window.externalTimeBatch(timestamp, 1 sec, timestamp, 1) as b2 " +
+                "select b1.id as aId, b2.id as bId " +
+                "insert all events into batchB;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+        try {
+            InputHandler streamA = executionPlanRuntime.getInputHandler("streamA");
+            InputHandler streamB = executionPlanRuntime.getInputHandler("streamB");
+            executionPlanRuntime.addCallback("batchB", new StreamCallback() {
+                @Override
+                public void receive(Event[] events) {
+                    EventPrinter.print(events);
+                    eventArrived = true;
+                }
+            });
+            executionPlanRuntime.start();
+            Thread.sleep(100);
+            streamA.send(new Object[]{1, "sam", 1506408219L});
+            streamB.send(new Object[]{2, "dean"});
+            Thread.sleep(200);
+            streamA.send(new Object[]{1, "sam", 1506408221L});
+            Assert.assertEquals("Event Arrived", true, eventArrived);
+        } finally {
+            executionPlanRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void joinTest21() throws InterruptedException {
+        log.info("Join test21");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +

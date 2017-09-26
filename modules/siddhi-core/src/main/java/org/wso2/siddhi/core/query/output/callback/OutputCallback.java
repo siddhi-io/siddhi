@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.query.output.callback;
 
+import org.wso2.siddhi.core.debugger.SiddhiDebugger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
@@ -28,7 +29,15 @@ import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
 
 public abstract class OutputCallback {
 
+    String queryName;
+
     public abstract void send(ComplexEventChunk complexEventChunk);
+
+    public abstract void setSiddhiDebugger(SiddhiDebugger siddhiDebugger);
+
+    public void setQueryName(String queryName) {
+        this.queryName = queryName;
+    }
 
     protected ComplexEventChunk<StateEvent> constructMatchingStateEventChunk(ComplexEventChunk matchingComplexEventChunk,
                                                                              boolean convertToStreamEvent, StateEventPool stateEventPool,

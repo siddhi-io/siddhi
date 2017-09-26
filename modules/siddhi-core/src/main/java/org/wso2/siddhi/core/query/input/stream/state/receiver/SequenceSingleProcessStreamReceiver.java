@@ -44,29 +44,4 @@ public class SequenceSingleProcessStreamReceiver extends SingleProcessStreamRece
     protected void stabilizeStates() {
         stateStreamRuntime.resetAndUpdate();
     }
-
-    @Override
-    public void receive(ComplexEvent complexEvent) {
-        super.receive(complexEvent);
-    }
-
-    @Override
-    public void receive(Event event) {
-        super.receive(event);
-    }
-
-    @Override
-    public void receive(Event[] events) {
-        super.receive(events);
-    }
-
-    @Override
-    public void receive(Event event, boolean endOfBatch) {
-        super.receive(event, endOfBatch);
-    }
-
-    @Override
-    public void receive(long timeStamp, Object[] data) {
-        super.receive(timeStamp, data);
-    }
 }

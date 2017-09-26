@@ -298,4 +298,173 @@ public class ConvertFunctionTestCase {
         Assert.assertEquals(0, count);
         executionPlanRuntime.shutdown();
     }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void convertFunctionExceptionTest7() throws InterruptedException {
+        log.info("convert function test 7");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream typeStream (typeS string, typeF float, typeD double, typeI int, typeL " +
+                                "long, typeB bool, typeN double) ;";
+        String query = "" +
+                       "@info(name = 'query1') " +
+                       "from typeStream " +
+                       "select convert(typeS,'234') as valueS, convert(typeF,'float') as valueF, convert(typeD," +
+                       "'double') as valueD , convert(typeI,'int') as valueI , convert(typeL,'long') as valueL , " +
+                       "convert(typeB,'bool') as valueB, convert(typeN,'string') as valueN " +
+                       "insert into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    Assert.assertTrue(inEvent.getData(0) instanceof String);
+                    Assert.assertTrue(inEvent.getData(1) instanceof Float);
+                    Assert.assertTrue(inEvent.getData(2) instanceof Double);
+                    Assert.assertTrue(inEvent.getData(3) instanceof Integer);
+                    Assert.assertTrue(inEvent.getData(4) instanceof Long);
+                    Assert.assertTrue(inEvent.getData(5) instanceof Boolean);
+                    Assert.assertTrue(inEvent.getData(6) == null);
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("typeStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"WSO2", 2f, 3d, 4, 5L, true, null});
+        Thread.sleep(100);
+        Assert.assertEquals(1, count);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void convertFunctionExceptionTest8() throws InterruptedException {
+        log.info("convert function test 8");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream typeStream (typeS string, typeF float, typeD double, typeI int, typeL " +
+                                "long, typeB bool, typeN double) ;";
+        String query = "" +
+                       "@info(name = 'query1') " +
+                       "from typeStream " +
+                       "select convert(typeS,123) as valueS, convert(typeF,'float') as valueF, convert(typeD," +
+                       "'double') as valueD , convert(typeI,'int') as valueI , convert(typeL,'long') as valueL , " +
+                       "convert(typeB,'bool') as valueB, convert(typeN,'string') as valueN " +
+                       "insert into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    Assert.assertTrue(inEvent.getData(0) instanceof String);
+                    Assert.assertTrue(inEvent.getData(1) instanceof Float);
+                    Assert.assertTrue(inEvent.getData(2) instanceof Double);
+                    Assert.assertTrue(inEvent.getData(3) instanceof Integer);
+                    Assert.assertTrue(inEvent.getData(4) instanceof Long);
+                    Assert.assertTrue(inEvent.getData(5) instanceof Boolean);
+                    Assert.assertTrue(inEvent.getData(6) == null);
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("typeStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"WSO2", 2f, 3d, 4, 5L, true, null});
+        Thread.sleep(100);
+        Assert.assertEquals(1, count);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void convertFunctionExceptionTest9() throws InterruptedException {
+        log.info("convert function test 9");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream typeStream (typeS object, typeF float, typeD double, typeI int, typeL " +
+                                "long, typeB bool, typeN double) ;";
+        String query = "" +
+                       "@info(name = 'query1') " +
+                       "from typeStream " +
+                       "select convert(typeS,typeS) as valueS, convert(typeF,'float') as valueF, convert(typeD," +
+                       "'double') as valueD , convert(typeI,'int') as valueI , convert(typeL,'long') as valueL , " +
+                       "convert(typeB,'bool') as valueB, convert(typeN,'string') as valueN " +
+                       "insert into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    Assert.assertTrue(inEvent.getData(0) instanceof String);
+                    Assert.assertTrue(inEvent.getData(1) instanceof Float);
+                    Assert.assertTrue(inEvent.getData(2) instanceof Double);
+                    Assert.assertTrue(inEvent.getData(3) instanceof Integer);
+                    Assert.assertTrue(inEvent.getData(4) instanceof Long);
+                    Assert.assertTrue(inEvent.getData(5) instanceof Boolean);
+                    Assert.assertTrue(inEvent.getData(6) == null);
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("typeStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"WSO2", 2f, 3d, 4, 5L, true, null});
+        Thread.sleep(100);
+        Assert.assertEquals(1, count);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void convertFunctionExceptionTest10() throws InterruptedException {
+        log.info("convert function test 10");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream typeStream (typeS string, typeF float, typeD double, typeI int, typeL " +
+                                "long, typeB bool, typeN double) ;";
+        String query = "" +
+                       "@info(name = 'query1') " +
+                       "from typeStream " +
+                       "select convert(typeS,'invalidType') as valueS, convert(typeF,'float') as valueF, convert" +
+                       "(typeD," +
+                       "'double') as valueD , convert(typeI,'int') as valueI , convert(typeL,'long') as valueL , " +
+                       "convert(typeB,'bool') as valueB, convert(typeN,'string') as valueN " +
+                       "insert into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    Assert.assertTrue(inEvent.getData(0) instanceof String);
+                    Assert.assertTrue(inEvent.getData(1) instanceof Float);
+                    Assert.assertTrue(inEvent.getData(2) instanceof Double);
+                    Assert.assertTrue(inEvent.getData(3) instanceof Integer);
+                    Assert.assertTrue(inEvent.getData(4) instanceof Long);
+                    Assert.assertTrue(inEvent.getData(5) instanceof Boolean);
+                    Assert.assertTrue(inEvent.getData(6) == null);
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("typeStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"WSO2", 2f, 3d, 4, 5L, true, null});
+        Thread.sleep(100);
+        Assert.assertEquals(1, count);
+        executionPlanRuntime.shutdown();
+    }
 }
