@@ -1673,6 +1673,267 @@ public class PartitionTestCase {
     }
 
     @Test
+    public void testPartitionQuery30() throws InterruptedException {
+        log.info("Partition test30");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "@plan:name('PartitionTest30') " +
+                               "define stream cseEventStream (atr1 string, atr2 float,atr3 int,atr4 double," +
+                               "atr5 long, atr6 long, atr7 double, atr8 float ,atr9 bool,atr10 bool, atr11 int);"
+                               + "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                               "cseEventStream[700>atr5 OR atr4 == atr7 OR atr6 == atr8 OR atr3 " +
+                               "== atr7 OR atr5 == atr6 OR atr7 == atr3 OR atr8 == atr7 OR atr11 == atr6 OR atr8" +
+                               "== atr6 OR atr7 == atr5 OR atr6 == atr7 OR atr3 == atr2 OR atr2 == atr8 OR atr4 " +
+                               "== atr8 OR atr6 == atr3 OR atr2 == atr3 OR atr3 == atr11 OR atr10 == atr9] select" +
+                               " atr1 as symbol,sum(atr2) as price" + " insert into " + "OutStockStream ;  end ";
+
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        executionRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100,101.0, 500l,200l,102.0,75.7f,false,true,105});
+        inputHandler.send(new Object[]{"WSO2", 75.6f, 100,101.0, 501l,201l,103.0,76.7f,false,true,106});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100,102.0, 502l,202l,104.0,77.7f,false,true,107});
+        inputHandler.send(new Object[]{"ORACLE", 75.6f, 100,101.0, 502l,202l,104.0,77.7f,false,true,108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        Assert.assertEquals(4, count.get());
+        executionRuntime.shutdown();
+    }
+
+    @Test
+    public void testPartitionQuery41() throws InterruptedException {
+        log.info("Partition test31");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "@plan:name('PartitionTest31') " +
+                               "define stream cseEventStream (atr1 string, atr2 float,atr3 int,atr4 double," +
+                               "atr5 long, atr6 long, atr7 double, atr8 float ,atr9 bool,atr10 bool, atr11 int);"
+                               + "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                               "cseEventStream[700>atr5 OR atr8< atr3 OR atr6 < atr2 OR atr4 " +
+                               "< atr6 OR atr2 < atr7 OR atr3 < atr4 OR atr4 < atr3 OR atr6 < atr3 OR atr3" +
+                               "< atr2 OR atr8 < atr5 OR atr6 < atr4 OR atr3 < atr6 OR atr7 < atr8 OR atr7 " +
+                               "< atr4 OR atr6 < atr5 OR atr11 < atr3 OR atr8 < atr2] select" +
+                               " atr1 as symbol,sum(atr2) as price" + " insert into " + "OutStockStream ;  end ";
+
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        executionRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100,101.0, 500l,200l,102.0,75.7f,false,true,105});
+        inputHandler.send(new Object[]{"WSO2", 75.6f, 100,101.0, 501l,201l,103.0,76.7f,false,true,106});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100,102.0, 502l,202l,104.0,77.7f,false,true,107});
+        inputHandler.send(new Object[]{"ORACLE", 75.6f, 100,101.0, 502l,202l,104.0,77.7f,false,true,108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        Assert.assertEquals(4, count.get());
+        executionRuntime.shutdown();
+    }
+
+    @Test
+    public void testPartitionQuery42() throws InterruptedException {
+        log.info("Partition test32");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "@plan:name('PartitionTest32') " +
+                               "define stream cseEventStream (atr1 string, atr2 float,atr3 int,atr4 double," +
+                               "atr5 long, atr6 long, atr7 double, atr8 float ,atr9 bool,atr10 bool, atr11 int);"
+                               + "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                               "cseEventStream[700>atr5 OR atr8 <= atr3 OR atr6 <= atr2 OR atr4 " +
+                               "<= atr6 OR atr2 <= atr7 OR atr3 <= atr4 OR atr4 <= atr3 OR atr6 <= atr3 OR atr3" +
+                               "<= atr2 OR atr8 <= atr5 OR atr6 <= atr4 OR atr3 <= atr6 OR atr7 <= atr8 OR atr7 " +
+                               "<= atr4 OR atr6 <= atr5 OR atr11 <= atr3 OR atr8 <= atr2] select" +
+                               " atr1 as symbol,sum(atr2) as price" + " insert into " + "OutStockStream ;  end ";
+
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        executionRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100,101.0, 500l,200l,102.0,75.7f,false,true,105});
+        inputHandler.send(new Object[]{"WSO2", 75.6f, 100,101.0, 501l,201l,103.0,76.7f,false,true,106});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100,102.0, 502l,202l,104.0,77.7f,false,true,107});
+        inputHandler.send(new Object[]{"ORACLE", 75.6f, 100,101.0, 502l,202l,104.0,77.7f,false,true,108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        Assert.assertEquals(4, count.get());
+        executionRuntime.shutdown();
+    }
+
+    @Test
+    public void testPartitionQuery43() throws InterruptedException {
+        log.info("Partition test33");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "@plan:name('PartitionTest33') " +
+                               "define stream cseEventStream (atr1 string, atr2 float,atr3 int,atr4 double," +
+                               "atr5 long, atr6 long, atr7 double, atr8 float ,atr9 bool,atr10 bool, atr11 int);"
+                               + "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                               "cseEventStream[700>atr5 OR atr8 >= atr3 OR atr6 >= atr2 OR atr4 " +
+                               ">= atr6 OR atr2 >= atr7 OR atr3 >= atr4 OR atr4 >= atr3 OR atr6 >= atr3 OR atr3" +
+                               ">= atr2 OR atr8 >= atr5 OR atr6 >= atr4 OR atr3 >= atr6 OR atr7 >= atr8 OR atr7 " +
+                               ">= atr4 OR atr6 >= atr5 OR atr11 >= atr3 OR atr8 >= atr2] select" +
+                               " atr1 as symbol,sum(atr2) as price" + " insert into " + "OutStockStream ;  end ";
+
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        executionRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100,101.0, 500l,200l,102.0,75.7f,false,true,105});
+        inputHandler.send(new Object[]{"WSO2", 75.6f, 100,101.0, 501l,201l,103.0,76.7f,false,true,106});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100,102.0, 502l,202l,104.0,77.7f,false,true,107});
+        inputHandler.send(new Object[]{"ORACLE", 75.6f, 100,101.0, 502l,202l,104.0,77.7f,false,true,108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        Assert.assertEquals(4, count.get());
+        executionRuntime.shutdown();
+    }
+
+    @Test
+    public void testPartitionQuery44() throws InterruptedException {
+        log.info("Partition test34");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "@plan:name('PartitionTest34') " +
+                               "define stream cseEventStream (atr1 string, atr2 float,atr3 int,atr4 double," +
+                               "atr5 long, atr6 long, atr7 double, atr8 float ,atr9 bool,atr10 bool, atr11 int);"
+                               + "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                               "cseEventStream[700>atr5 OR atr8 > atr3 OR atr6 > atr2 OR atr4 " +
+                               "> atr6 OR atr2 > atr7 OR atr3 > atr4 OR atr4 > atr3 OR atr6 > atr3 OR atr3" +
+                               "> atr2 OR atr8 > atr5 OR atr6 > atr4 OR atr3 > atr6 OR atr7 > atr8 OR atr7 " +
+                               "> atr4 OR atr6 > atr5 OR atr11 > atr3 OR atr8 > atr2] select" +
+                               " atr1 as symbol,sum(atr2) as price" + " insert into " + "OutStockStream ;  end ";
+
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        executionRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100,101.0, 500l,200l,102.0,75.7f,false,true,105});
+        inputHandler.send(new Object[]{"WSO2", 75.6f, 100,101.0, 501l,201l,103.0,76.7f,false,true,106});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 100,102.0, 502l,202l,104.0,77.7f,false,true,107});
+        inputHandler.send(new Object[]{"ORACLE", 75.6f, 100,101.0, 502l,202l,104.0,77.7f,false,true,108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        Assert.assertEquals(4, count.get());
+        executionRuntime.shutdown();
+    }
+
+    @Test
+    public void testPartitionQuery45() throws InterruptedException {
+        log.info("Partition test35");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "@plan:name('PartitionTest35') " +
+                               "define stream cseEventStream (atr1 string, atr2 object,atr3 int,atr4 double," +
+                               "atr5 long, atr6 long, atr7 double, atr8 float ,atr9 bool,atr10 bool, atr11 int);" +
+                               "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                               "cseEventStream select atr5 as threshold, atr1 as symbol,cast(atr2, 'double') as " +
+                               "priceInDouble, sum(atr7) as summedValue insert into OutStockStream ; end ";
+
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        executionRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 75.6, 100,101.0, 500l,200l,102.0,75.7f,false,true,105});
+        inputHandler.send(new Object[]{"WSO2", 75.6, 100,101.0, 501l,201l,103.0,76.7f,false,true,106});
+        inputHandler.send(new Object[]{"IBM", 75.6, 100,102.0, 502l,202l,104.0,77.7f,false,true,107});
+        inputHandler.send(new Object[]{"ORACLE", 75.6, 100,101.0, 502l,202l,104.0,77.7f,false,true,108});
+        SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
+        Assert.assertEquals(4, count.get());
+        executionRuntime.shutdown();
+    }
+
+    @Test
+    public void testPartitionQuery46() throws InterruptedException {
+        log.info("Partition test36");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String executionPlan = "@plan:name('PartitionTest36') " +
+                               "define stream cseEventStream (atr1 string, atr2 object,atr3 int,atr4 double," +
+                               "atr5 long, atr6 long, atr7 double, atr8 float ,atr9 bool,atr10 bool, atr11 int);" +
+                               "partition with (atr1 of cseEventStream) begin @info(name = 'query1') from " +
+                               "cseEventStream[atr5 < 700 AND atr10] select atr5 as threshold, atr1 as symbol,cast" +
+                               "(atr2, 'double') as priceInDouble, sum(atr7) as summedValue insert into " +
+                               "OutStockStream ; end ";
+
+
+        ExecutionPlanRuntime executionRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+
+        executionRuntime.addCallback("OutStockStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = executionRuntime.getInputHandler("cseEventStream");
+        executionRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 75.6, 100,101.0, 500l,200l,102.0,75.7f,false,true,105});
+        inputHandler.send(new Object[]{"WSO2", 75.6, 100,101.0, 501l,201l,103.0,76.7f,false,true,106});
+        inputHandler.send(new Object[]{"IBM", 75.6, 100,102.0, 502l,202l,104.0,77.7f,false,true,107});
+        inputHandler.send(new Object[]{"ORACLE", 75.6, 100,101.0, 502l,202l,104.0,77.7f,false,false,108});
+        SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
+        Assert.assertEquals(3, count.get());
+        executionRuntime.shutdown();
+    }
+
+    @Test
     public void testPartitionQuery34() throws InterruptedException {
         log.info("Partition test");
         SiddhiManager siddhiManager = new SiddhiManager();
