@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.core.query.join;
 
+import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,8 +32,6 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
-import junit.framework.Assert;
 
 public class JoinTestCase {
     private static final Logger log = Logger.getLogger(JoinTestCase.class);
