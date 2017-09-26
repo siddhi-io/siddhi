@@ -935,8 +935,8 @@ Following are the supported operations of join clause.
 
 ### Patterns
 
-Patterns is a statemachine implmentation that allow you to detect event occurrence patterns over time. 
-These can correlate events within and between multiple streams. 
+Patterns is a state machine implementation that allow you to detect event occurrence patterns over time. 
+This can correlate events within a single stream or between multiple streams. 
 
 **Purpose** 
 
@@ -944,7 +944,7 @@ Let you detect a specified event occurrence pattern over a time period.
 
 **Syntax**
 
-The following is the syntax for a pattern configuration:
+The following is the syntax for a pattern query:
 
 ```sql
 from (every)? <event reference>=<input stream>[<filter condition>] -> 
@@ -956,11 +956,12 @@ insert into <output stream>
 ```
 | Items | Description |
 |-------------------|-------------|
+| `->` | This represent followed by, i.e. After a event matching the first condition the next event matching the next condition arriving sometime after the first event (not necessarily need to be immediately after the previous event event) |
 | `<event reference>` | Let you add a reference to the the matching event such that it can be accessed later for further processing. |
 | `(within <time gap>)?` | `within` clause is optional, It defines the the duration within all the matching events should occur |
-| `every` | `every` is an optional keyword. This defines weather the event matching should be triggered for every event arrival of the specified stream with the matching condition. <br/> When this keyword is not used the matching happens only ones. |
+| `every` | `every` is an optional keyword. This defines weather the event matching should be triggered for every event arrival for the specified stream with the matching condition. <br/> When this keyword is not used the matching happens only ones. |
 
-Siddhi also support pattern matching with counting events and matching events in a logical order. Those are discussed in detail later.
+Siddhi also support pattern matching with counting events and matching events in a logical order such as (`and`, `or`, and `not`). Those are discussed in detail later.
 
 **Example**
 
@@ -973,39 +974,50 @@ select e1.roomNo, e1.temp as initialTemp, e2.temp as finalTemp
 insert into AlertStream;
 ```
 
-Here for each events in TempStream the matching process begins (as `every( e1=TempStream )` is used), and if there is an event
-with `temp` attribute greater then or equal to `e1.temp + 5` latter in time but within 10 minutes of the event e1, an output is 
-generated via the AlertStream.
+Here for each events in `TempStream`, the matching process begins (because `every` is used with `e1=TempStream`), 
+and if there is another event arrives within 10 minutes, having `temp` attribute greater then or equal to `e1.temp + 5` 
+of the event e1, an output is generated via the `AlertStream`.
 
-WSO2 Siddhi supports the following types of patterns:
+**Counting Pattern**
 
-**Counting Patterns**
-
-Counting patterns allow multiple events that may or may not have been received in a sequential order based on the same matching condition.
+Counting pattern allows matching multiple events that may have been received for the same matching condition.
+The number of events matched per condition can be limited via condition postfixes.
 
 **Syntax**
 
-The number of events matched can be limited via postfixes as explained below.
+Each matching condition can contain a collection of events with the minimum and maximum number of events to be matched as bellow. 
+
+```sql
+from (every)? <event reference>=<input stream>[<filter condition>] (<<min count>:<max count>>)? ->  
+    ... 
+    (within <time gap>)?     
+select <event reference>([event index])?.<attribute name>, ...
+insert into <output stream>
+```
 
 Postfix|Description|Example
 ---------|---------|---------|
-`n1:n2`|This matches `n1` to `n2` events.|`1:4` matches 1 to 4 events.
-`<n:>`|This matches `n` or more events.|`<2:>` matches 2 or more events.
-`<:n>`|This matches up to `n` events.|`<:5>` matches up to 5 events.
+`<n1:n2>`|This matches `n1` to `n2` events (including `n1` and excluding `n2`).|`1:4` matches 1 to 4 events.
+`<n:>`|This matches `n` or more events (including `n`).|`<2:>` matches 2 or more events.
+`<:n>`|This matches up to `n` events (excluding `n`).|`<:5>` matches up to 5 events.
 `<n>`|This matches exactly `n` events.|`<5>` matches exactly 5 events.
 
-Specific occurrences of the events that should be matched based on count limits are specified via key words and numeric values within square brackets as explained with the examples given below.
+Specific occurrences of the event in a collection can be retrieved by using event index along with its reference,
+ square brackets can be used to indicate the event index where `1` can be used as the index of the first event and `last` can be used as the index
+ for the `last` available event in the event collection. If you provided a index grater then the last event index
+ the system returns `null`. Some valid examples are bellow.
 
 + `e1[3]` refers to the 3rd event.
 + `e1[last]` refers to the last event.
 + `e1[last - 1]` refers to the event before the last event.
 
 **Example**
-The following query calculates the temperature difference between two regulator events.
+
+The following Siddhi App calculates temperature difference between two regulator events.
 
 ```sql
-define stream TempStream(deviceID long, roomNo int, temp double);
-define stream RegulatorStream(deviceID long, roomNo int, tempSet double, isOn bool);
+define stream TempStream (deviceID long, roomNo int, temp double);
+define stream RegulatorStream (deviceID long, roomNo int, tempSet double, isOn bool);
   
 from every( e1=RegulatorStream) -> e2=TempStream[e1.roomNo==roomNo]<1:> -> e3=RegulatorStream[e1.roomNo==roomNo]
 select e1.roomNo, e2[0].temp - e2[last].temp as tempDiff
@@ -1013,192 +1025,177 @@ insert into TempDiffStream;
 ```
 **Logical Patterns**
 
-Logical pattern matches events that arrive in temporal order and correlates events with logical relationships.
+Logical pattern matches events that arrive in temporal order and correlates them with logical relationships such as `and`, 
+`or` and `not`. 
 
 **Syntax**
 
-Keywords such as and and or can be used instead of -> to illustrate the logical relationship.
+```sql
+from (every)? (not)? <event reference>=<input stream>[<filter condition>] 
+          ((and|or) <event reference>=<input stream>[<filter condition>])? (within <time gap>)? ->  
+    ... 
+select <event reference>([event index])?.<attribute name>, ...
+insert into <output stream>
+```
+
+Keywords such as `and`, `or`, or `not` can used to illustrate the logical relationship.
 
 Key Word|Description
 ---------|---------
-`and`|This allows two events received in any order to be matched.
-`or`|One event from either event stream can be matched regardless of the order in which the events were received.
+`and`|This allows both conditions of `and` to be matched by two events in any order.
+`or`|The state will succeed if either condition of `or` is satisfied. Here the event reference of the other condition will be `null`.
+`not <condition1> and <condition2>`| When `not` with `and` is present, it let you identify an event matching `<condition2>` before any event match the `<condition1>`. 
+`not <condition> for <time period>`| When `not` is present with `for`, it let you identify no event occurring that matches `<condition1>` for the given time  `<condition1>`.  is used to define a time period. E.g.`from not TemperatureStream[temp > 60] for 5 sec`. 
 
+**Example**
 
-**Example: Identifying the occurence of an expected event**
+Following Siddhi App, sends `stop` control action to regulator, when the key is removed from the hotel room. 
 ```sql
-define stream TempStream(deviceID long, roomNo int, temp double);
-define stream RegulatorStream(deviceID long, roomNo int, tempSet double);
+define stream RegulatorStateChangeStream(deviceID long, roomNo int, tempSet double, action string);
+define stream RoomKeyStream(deviceID long, roomNo int, action string);
+
   
-from every( e1=RegulatorStream ) -> e2=TempStream[e1.roomNo==roomNo and e1.tempSet <= temp ] or e3=RegulatorStream[e1.roomNo==roomNo]
-select e1.roomNo, e2.temp as roomTemp
-having e3 is null
+from every( e1=RegulatorStateChangeStream[ action == 'on' ] ) -> 
+      e2=RoomKeyStream[ e1.roomNo == roomNo and action == 'removed' ] or e3=RegulatorStateChangeStream[ e1.roomNo == roomNo and action == 'off']
+select e1.roomNo, ifThenElse( e2 is null, 'none', 'stop' ) as action
+having action != 'none'
+insert into RegulatorActionStream;
+```
+
+Following Siddhi App, alerts if we have switch off the regulator before temperature reaches 12 degrees.  
+
+```sql
+define stream RegulatorStateChangeStream(deviceID long, roomNo int, tempSet double, action string);
+define stream TempStream (deviceID long, roomNo int, temp double);
+
+from e1=RegulatorStateChangeStream[action == 'start'] -> not TempStream[e1.roomNo == roomNo and temp < 12] and e2=RegulatorStateChangeStream[action == 'off']
+select e1.roomNo as roomNo
 insert into AlertStream;
 ```
-This query sends an alert when the room temperature reaches the temperature set on the regulator. The pattern matching is reset every time the temperature set on the regulator changes.
+
+Following Siddhi App, alerts if the temperature did not reduce 12 degrees within 5 minutes of switching on the regulator.  
+
+```sql
+define stream RegulatorStateChangeStream(deviceID long, roomNo int, tempSet double, action string);
+define stream TempStream (deviceID long, roomNo int, temp double);
+
+from e1=RegulatorStateChangeStream[action == 'start'] -> not TempStream[e1.roomNo == roomNo and temp < 12] for '5 min'
+select e1.roomNo as roomNo
+insert into AlertStream;
+```
 
 
 ### Sequences
 
-Sequence allows event streams to be correlated over time and detect event sequences based on the order of event arrival. With sequence there cannot be other events in between the events that match the sequence condition. It creates state machines to track the states of the matching process internally. Sequence can correlate events over multiple input streams or over the same input stream. Therefore, each matched input event needs to be referenced so that it can be accessed for future processing and output generation.
+Sequence is a state machine implementation that allow you to detect sequence of event occurrences over time. 
+Here **all matching events need to arrive conservatively** to match the sequence condition,
+ and there cannot be any non matching events arrived withing a matching sequence of events.
+This can correlate events within a single stream or between multiple streams. 
+
+**Purpose** 
+
+Let you detect a specified event sequence over a time period. 
+
 **Syntax**
 
-The following is the syntax for a sequence configuration.
+The following is the syntax for a sequence query:
 
 ```sql
-from {every} <input event reference>=<input stream name>[<filter condition>], <input event reference>=<input stream name>[<filter condition>]{+|*|?}, ...       within <time gap>
-select <input event reference>.<attribute name>, <input event reference>.<attribute name>, ...
-insert into <output stream name>
+from (every)? <event reference>=<input stream>[<filter condition>], 
+    <event reference>=<input stream [<filter condition>], 
+    ... 
+    (within <time gap>)?     
+select <event reference>.<attribute name>, <event reference>.<attribute name>, ...
+insert into <output stream>
 ```
+
+| Items | Description |
+|-------------------|-------------|
+| `,` | This represent immediate next event, i.e. After a event matching the first condition the immediate next conservative event must match the next condition. |
+| `<event reference>` | Let you add a reference to the the matching event such that it can be accessed later for further processing. |
+| `(within <time gap>)?` | `within` clause is optional, It defines the the duration within all the matching events should occur |
+| `every` | `every` is an optional keyword. This defines weather the event matching should be triggered for every event arrival for the specified stream with the matching condition. <br/> When this keyword is not used the matching happens only ones. |
+
+
 **Example**
 
 The following query sends an alert if there is more than 1 degree increase in the temperature between two consecutive temperature events.
 
 ```sql
-from every e1=TempStream, e2=TempStream[e1.temp + 1 < temp ]
+from every e1=TempStream, e2=TempStream[e1.temp + 1 < temp]
 select e1.temp as initialTemp, e2.temp as finalTemp
 insert into AlertStream;
 ```
 
-WSO2 Siddhi supports the following types of sequences:
+**Counting Sequence**
 
-+ Counting sequences
-+ Logical sequences
+Counting Sequence allows matching multiple events for the same matching condition.
+The number of events matched per condition can be limited via condition postfixes as **Counting Patterns** or by using the 
+`*`, `+` and `?` operators.
 
-**Counting sequences**
-
-Counting sequence allows us to match multiple consecutive events based on the same matching condition.
+The matching events can also be retrieved using event indexes like in  **Counting Patterns**
 
 **Syntax**
 
-The number of events matched can be limited via postfixes as explained below.
+Each matching condition in a sequence can contain a collection of events as mentioned bellow. 
 
-Postfix|Description
----------|---------
-*|This matches zero or more events.
-+|This matches 1 or more events.
-?|This matches zero events or one event.
+```sql
+from (every)? <event reference>=<input stream>[<filter condition>](+|*|?)?, 
+    <event reference>=<input stream [<filter condition>](+|*|?)?, 
+    ... 
+    (within <time gap>)?     
+select <event reference>.<attribute name>, <event reference>.<attribute name>, ...
+insert into <output stream>
+```
+
+|Postfix symbol|Description|
+|---------|---------|
+| `+` | Its optional, that machines **one or more** event occurrences of the for the given condition. |
+| `*` | Its optional, that machines **zero or more** event occurrences of the for the given condition. |
+| `?` | Its optional, that machines **zero or one** event occurrences of the for the given condition. |
+
 
 **Example**
 
-The following query identifies peak temperatures.
+The following Siddhi App identifies temperature peeks.
 
 ```sql
 define stream TempStream(deviceID long, roomNo int, temp double);
-define stream RegulatorStream(deviceID long, roomNo int, tempSet double, isOn bool);
   
 from every e1=TempStream, e2=TempStream[e1.temp <= temp]+, e3=TempStream[e2[last].temp > temp]
 select e1.temp as initialTemp, e2[last].temp as peakTemp
-insert into TempDiffStream;
+insert into PeekTempStream;
 ```
 
-**Logical Sequences**
+**Logical Sequence**
 
-Logical sequence matches events that arrive in temporal order and correlates events with logical relationships.
+Logical sequence identifies logical relationships using `and`, `or` and `not` on consecutively arriving events.
 
 **Syntax**
 
-Keywords such as and and or can be used instead of -> to illustrate the logical relationship.
+```sql
+from (every)? (not)? <event reference>=<input stream>[<filter condition>] 
+          ((and|or) <event reference>=<input stream>[<filter condition>])? (within <time gap>)?, 
+    ... 
+select <event reference>([event index])?.<attribute name>, ...
+insert into <output stream>
+```
 
-Keyword|Description
----------|---------
-`and`|This allows two events received in any order to be matched.
-`or`|One event from either event stream can be matched regardless of the order in which the events were received.
-`not`|When this precedes a condition in a Siddhi query, it indicates that the condition is not met.
-`for`| This is used to define a time period within which an event should arrive. e.g., `from not TemperatureStream[temp > 60] for 5 sec -> e1=FireAlarmStream` defines a condition for an event to arrive at the `FireAlarmStream` stream within 5 seconds after an event with a value greater than 60 for temperature arrives in the `TemperatureStream` stream. 
+Keywords such as `and`, `or`, or `not` can used to illustrate the logical relationship same as in **Logical Patterns**. 
 
-**Example 1: Identifying the occurence of an event**
+**Example**
 
+Following Siddhi App notifies the state when a regulator event is immediately followed by both the temperature and humidity events. 
 
 ```sql
-define stream TempStream(deviceID long, temp double);define stream HumidStream(deviceID long, humid double);
+define stream TempStream(deviceID long, temp double);
+define stream HumidStream(deviceID long, humid double);
 define stream RegulatorStream(deviceID long, isOn bool);
   
 from every e1=RegulatorStream, e2=TempStream and e3=HumidStream
 select e2.temp, e3.humid
 insert into StateNotificationStream;
 ```
-This query creates a notification when a regulator event is followed by both temperature and humidity events.
-
-**Example 2: Identifying the non-occurence of an expected event**
- ```sql
- define stream CustomerStream (customerId string, timestamp long);
- 
- from every not CustomerStream for 7 days
- select *
- insert into OutputStream;
- ```
-This query receives information about existing customers of the store from the `CustomerStream` stream. It identifies customers that have not visited the store for the last seven days, and outputs that information to the `OutputStream` stream. A message is generated from the `OutputStream` stream with information for those customers about the discounts that are currently offered at the store.
-
-**Example 3: Detecting the non-occurence of an expected event following another event**
-```sql
-define stream LocationStream (username string, latitude double, longitude double);
-define stream SpeedStream (username string, speed double);
-from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 15 minutes and e1=SpeedStream[speed >= 60.0]
-select e1.username as username
-insert into AlertStream;
-```
-This query receives information about the location of taxis from the `LocationStream` stream, and information about the average speed of taxis from the `SpeedStream` stream. If a taxi (i.e., a username) with an average speed greater than 60 that has not reached location at `latitude == 43.0096 and longitude == 81.2737` in 15 minutes is identified, an event is output to the `AlertStream` in order send an alert that indicates that the taxi has taken the wrong route.
-
-**Example 4: Detecting the non-occurence of multiple events**
-```sql
-define stream LocationStream (username string, latitude double, longitude double);
-define stream StateStream (username string, state string);
-from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 30 minutes and not StateStream[state == ‘finished’] for 30 minutes
-select ‘Danger’ as message
-insert into AlertStream;
-```
-This query receives information about the location of taxis from the `LocationStream` stream, and information about the status of the passenger from the `StateStream` stream. If the passenger (i.e., username) does not arrive at the location at `latitude == 43.0096 and longitude == 81.2737` in 30 minutes, and at the same time, if he/she has not marked the journey as `finished`, an event is output to the `AlertStream` stream to generate an alert with `Danger` as the message.
-
-**Example 5: Detecting the non-occurence of either of two mutually exclusive events**
-```sql
-define stream LocationStream (username string, latitude double, longitude double);
-
-from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 15 minutes or not LocationStream[latitude == 44.0096 and longitude == 81.2735] for 15 minutes
-select ‘Unexpected Delay’ as message
-insert into AlertStream;
-```
-This query receives information about the location of taxis from the `LocationStream` stream. If a taxi has not reached either the location at `latitude == 43.0096 and longitude == 81.2737`, or the one at `latitude == 44.0096 and longitude == 81.2735` in 15 minutes, an event is output to the `AlertStream` stream to generate an alert with `Unexpected Delay` as the message.
-
-**Example 6: Detecting the non-occurence of one event or the occurence of another**
-```sql
-define stream LocationStream (username string, latitude double, longitude double);
-define stream DangerStream (username string);
-from not LocationStream[latitude == 43.0096 and longitude == 81.2737] for 30 minutes or e1=DangerStream
-select e1.username as username
-insert into AlertStream;
-```
-This query receives information about the location of taxis from the `LocationStream` stream, and information about whether the passenger is in danger from the `DangerStream` stream. After 30 minutes, it checkes whether the passenger has reached the location at `latitude == 43.0096 and longitude == 81.2737`, or marked to indicate that he/she is in danger. If the passenger has not reached the location, or if he/she has indicated that he/she is in danger, an event is output to the `AlertStream` stream in order to generate an alert to indicate that the passenger is in danger.
-
-**Example 7: Identifying the occurence of an unexpected event within a specified time interval**
-```sql
-define stream TemperatureStream (temp float, timestamp long);
-define stream FireAlarmStream (active boolean);
-from not TemperatureStream[temp > 60] for 5 sec -> e1=FireAlarmStream
-select e1.id as alarmId
-insert into AlertStream;
-```
-This query receives information about the temperature from the `TemperatureStream` stream, and information about the state of the fire alarm from the `FireAlarmStream` stream. If the state of the fire alarm is `active` within a period of 5 seconds during which the temperature is less than 60 degrees, an event is output to the `AlertStream` stream in order to indicate that the fire alarm generates false alerts.
-
-**Example 8: Identifying the non-occurence of an expected event within a specified time period**
-```sql
-define stream TemperatureStream (temp float, timestamp long);
-define stream FireAlarmStream (active boolean);
-from TemperatureStream[temp > 60] -> not FireAlarmStream[active == true] for 5 sec
-select 'Fire alarm not working' as message
-insert into AlertStream;
-```
-This query receives information about the temperature from the `TemperatureStream` stream, and information about the state of the fire alarm from the `FireAlarmStream` stream. If an event where the state of the fire alarm is `active` does not arrive within five seconds after an event that indicates that the temperature has risen above 60 degrees, an event is output to the `AlertStream` stream with `Fire alarm not working` as the message.
-
-**Example 9: Identifying the occurence of an even that is not preceded by another expected event**
-```sql
-define stream LocationStream (locationId string, customerId string);
-
-from not LocationStream[locationId == 'zoneA'] and e1=LocationStream[locationId ==  'billingCounter']
-select e1.customerId as customerId, 'Great deals are waiting for you at zone A' as message
-insert into NotificationStream;
-```
-This query receives information about the location of customers from the `LocationStream` stream. If an event indicates that a customer has reached the `bilingCounter` location, and it is not preceded by an event that indicates that the same customer has been to the `zoneA` location, an event is output to the `NotificationStream` stream in order to generate a notification with `Great deals are waiting for you at zone A` as the message.
 
 ### Output rate limiting
 
@@ -1687,11 +1684,14 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-
 ## Partitions
 
-Partitions allow events and queries to be divided in order to process them in parallel and in isolation. Each partition is tagged with a partition key. Only events corresponding to this key are processed for each partition. A partition can contain one or more Siddhi queries.
-Siddhi supports both variable partitions and well as range partitions.
+Partitions divides streams and queries into isolated groups to process them in parallel and in isolation. 
+A partition can contain one or more queries and there will be multiple instances of the same queries and streams replicated for each partition. 
+Each partition is tagged with a partition key those partitions only process the events that matches the corresponding partition key. 
+
+**Purpose** 
+Partition let you process the events groups in isolation such that per group analytis can be performed using the same set of queries. 
 
 ### Variable Partitions
 
