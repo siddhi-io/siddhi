@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.query.output.callback;
 
+import org.wso2.siddhi.core.debugger.SiddhiDebugger;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.state.StateEventPool;
@@ -36,6 +37,7 @@ public class InsertOverwriteTableCallback extends OutputCallback {
     private final OverwritingStreamEventExtractor overwritingStreamEventExtractor;
     private EventTable eventTable;
     private Operator operator;
+    private SiddhiDebugger siddhiDebugger;
     private boolean convertToStreamEvent;
     private StateEventPool stateEventPool;
     private StreamEventPool streamEventPool;
@@ -58,6 +60,9 @@ public class InsertOverwriteTableCallback extends OutputCallback {
 
     @Override
     public void send(ComplexEventChunk overwriteOrAddEventChunk) {
+        if (siddhiDebugger != null) {
+            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.OUT, overwriteOrAddEventChunk.getFirst());
+        }
         overwriteOrAddEventChunk.reset();
         if (overwriteOrAddEventChunk.hasNext()) {
             ComplexEventChunk<StateEvent> overwriteOrAddStateEventChunk = constructMatchingStateEventChunk(overwriteOrAddEventChunk,
@@ -65,6 +70,11 @@ public class InsertOverwriteTableCallback extends OutputCallback {
             constructMatchingStateEventChunk(overwriteOrAddEventChunk, convertToStreamEvent, stateEventPool, matchingStreamIndex, streamEventPool, streamEventConvertor);
             eventTable.overwriteOrAdd(overwriteOrAddStateEventChunk, operator, updateAttributeMappers, overwritingStreamEventExtractor);
         }
+    }
+
+    @Override
+    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
+        this.siddhiDebugger = siddhiDebugger;
     }
 
 }

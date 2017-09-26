@@ -27,19 +27,14 @@ public class InsertIntoStreamCallback extends OutputCallback {
     private StreamDefinition outputStreamDefinition;
     private StreamJunction.Publisher publisher;
     private SiddhiDebugger siddhiDebugger;
-    private String queryName;
 
     public InsertIntoStreamCallback(StreamDefinition outputStreamDefinition, String queryName) {
         this.outputStreamDefinition = outputStreamDefinition;
-        this.queryName = queryName;
+        super.queryName = queryName;
     }
 
     public void init(StreamJunction outputStreamJunction) {
         this.publisher = outputStreamJunction.constructPublisher();
-    }
-
-    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
-        this.siddhiDebugger = siddhiDebugger;
     }
 
     @Override
@@ -55,6 +50,11 @@ public class InsertIntoStreamCallback extends OutputCallback {
             }
         }
         publisher.send(complexEventChunk.getFirst());
+    }
+
+    @Override
+    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
+        this.siddhiDebugger = siddhiDebugger;
     }
 
     public StreamDefinition getOutputStreamDefinition() {
