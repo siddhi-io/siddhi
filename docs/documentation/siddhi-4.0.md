@@ -1266,6 +1266,107 @@ The possible values are as follows:
     from TempStream#window.time(5 sec)
     output snapshot every 1 sec
     insert into SnapshotTempStream;    </pre>
+    
+
+## Partitions
+
+Partitions divides streams and queries into isolated groups to process them in parallel and in isolation. 
+A partition can contain one or more queries and there will be multiple instances of the same queries and streams replicated for each partition. 
+Each partition is tagged with a partition key those partitions only process the events that matches the corresponding partition key. 
+
+**Purpose** 
+
+Partition let you process the events groups in isolation such that event processing can be performed using the same set of queries for each group. 
+
+**Partition key generation**
+
+Partition key can be generation in two ways. 
+
+* Partition by value
+  
+    This is created by using an attribute value of the input stream.
+
+    **Syntax**
+    
+    <pre>
+    partition with ( &lt;attribute name> of &lt;stream name>, &lt;attribute name> of &lt;stream name>, ... )
+    begin
+        &lt;query>
+        &lt;query>
+        ...
+    end; </pre>
+    
+    **Example**
+    
+    The following query calculates the maximum temperature recorded within the last 10 events per `deviceID`.
+    
+    <pre>
+    partition with ( deviceID of TempStream )
+    begin
+        from TempStream#window.length(10)
+        select roomNo, deviceID, max(temp) as maxTemp
+        insert into DeviceTempStream;
+    end;
+    </pre>
+
+* Partition by range
+
+    This is created by mapping each partition key to a range condition of the input stream's numerical attribute.
+
+    **Syntax**
+    
+    <pre>
+    partition with ( &lt;condition> as &lt;partition key> or &lt;condition> as &lt;partition key> or ... of &lt;stream name>, ... )
+    begin
+        &lt;query>
+        &lt;query>
+        ...
+    end;
+    </pre>
+
+    **Example**
+    
+    The following query calculates the average temperature for the last 10 minutes per office area.
+    
+    <pre>
+    partition with ( roomNo >= 1030 as 'serverRoom' or 
+                     roomNo < 1030 and roomNo >= 330 as 'officeRoom' or 
+                     roomNo < 330 as 'lobby' of TempStream)
+    begin
+        from TempStream#window.time(10 min)
+        select roomNo, deviceID, avg(temp) as avgTemp
+        insert into AreaTempStream
+    end;
+    </pre>  
+
+### Inner Streams 
+
+Queries inside a partition block can use inner streams to communicate between each other while preserving partition isolation.
+Inner streams are denoted by a "#" in front of them, and these streams cannot be accessed outside of the partition block. 
+
+**Purpose**
+  
+Inner streams let you connect queries within the partition block such that output of a query will only feed to a query 
+that's in the same partition. With this you don't need to repartition the streams if they are communicating within the partition.
+
+**Example**
+
+For each sensor, following partition calculates the average temperature over every 10 events
+and produces output to `DeviceTempIncreasingStream` is the consecutive average temperature values are increasing more then 
+5 degrees.
+
+<pre>
+partition with ( deviceID of TempStream )
+begin
+    from TempStream#window.lengthBatch(10)
+    select roomNo, deviceID, avg(temp) as avgTemp
+    insert into #AvgTempStream
+  
+    from every (e1=#AvgTempStream),e2=#AvgTempStream[e1.avgTemp + 5 < avgTemp]
+    select e1.deviceID, e1.avgTemp as initialAvgTemp, e2.avgTemp as finalAvgTemp
+    insert into DeviceTempIncreasingStream
+end;
+</pre>
 
 ## Tables
 
@@ -1290,7 +1391,7 @@ The following parameters are configured in a table definition.
 | Parameter     | Description |
 | ------------- |-------------|
 | `table name`      | The name of the table defined. (as a convention `PascalCase` is used for table name) |
-| `attribute name`   | The schema of an stream is defined by its attributes by uniquely identifiable attribute names (as a convention `camalCase` is used for attribute names)|    |
+| `attribute name`   | The schema of the table is defined by its attributes by uniquely identifiable attribute names (as a convention `camalCase` is used for attribute names)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 
@@ -1408,7 +1509,6 @@ select deviceID, RoomTypeTable.type as roomType, type, temp
     having roomType == 'server-room'
 insert into ServerRoomTempStream;
 ```
-
 
 ### Delete
 
@@ -1657,7 +1757,6 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-
 Retrieving all aggregation per hour within the day `2014-02-15`  
 
 ```sql
@@ -1684,303 +1783,204 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-## Partitions
+## _(Defined)_ Windows 
 
-Partitions divides streams and queries into isolated groups to process them in parallel and in isolation. 
-A partition can contain one or more queries and there will be multiple instances of the same queries and streams replicated for each partition. 
-Each partition is tagged with a partition key those partitions only process the events that matches the corresponding partition key. 
-
-**Purpose** 
-Partition let you process the events groups in isolation such that per group analytis can be performed using the same set of queries. 
-
-### Variable Partitions
-
-A variable partition is created by defining the partition key using the categorical (string) attribute of the input event stream.
-
-**Syntax**
-
-```sql
-partition with ( <attribute name> of <stream name>, <attribute name> of <stream name>, ... )begin
-    <query>
-    <query>
-    ...
-end;
-```
-**Example**
-
-The following query calculates the maximum temperature recorded for the last 10 events emitted per sensor.
-
-```sql
-partition with ( deviceID of TempStream )begin
-    from TempStream#window.length(10)
-    select roomNo, deviceID, max(temp) as maxTemp
-    insert into DeviceTempStream
-end;
-```
-
-### Range Partitions
-
-A range partition is created by defining the partition key using the numerical attribute of the input event stream.
-
-**Syntax**
-
-```sql
-partition with ( <condition> as <partition key> or <condition> as <partition key> or ... of <stream name>, ... )begin
-    <query>
-    <query>
-    ...
-end;
-```
-
-**Example**
-
-The following query calculates the average temperature for the last 10 minutes per office area.
-
-```sql
-partition with ( roomNo>=1030 as 'serverRoom' or roomNo<1030 and roomNo>=330 as 'officeRoom' or roomNo<330 as 'lobby' of TempStream) )begin
-    from TempStream#window.time(10 min)
-    select roomNo, deviceID, avg(temp) as avgTemp
-    insert into AreaTempStream
-end;
-```
-###Inner Streams 
-
-Inner streams can be used for query instances of a partition to communicate between other query instances of the same partition. Inner Streams are denoted by a "#" in front of them, and these streams cannot be accessed outside of the partition block. 
-
-**Example**
-
-Per sensor, calculate the maximum temperature over last 10 temperature events when the sensor is having an average temperature greater than 20 over the last minute.
-
-<pre>
-partition with ( deviceID of TempStream )
-begin
-    from TempStream#window.time(1 min)
-    select roomNo, deviceID, temp, avg(temp) as avgTemp
-    insert into #AvgTempStream
-  
-    from #AvgTempStream[avgTemp > 20]#window.length(10)
-    select roomNo, deviceID, max(temp) as maxTemp
-    insert into deviceTempStream
-end;
-</pre>
-
-## Inner streams 
-Inner streams can be used for query instances of a partition to communicate between other query instances of the same partition. Inner Streams are denoted by a "#" in front of them, and these streams cannot be accessed outside of the partition block. 
-Inner streams can be used for query instances of a partition to communicate between other query instances of the same partition. Inner Streams are denoted by a "#" in front of them, and these streams cannot be accessed outside of the partition block. <br>
-E.g. Per sensor, calculate the maximum temperature over last 10 temperature events when the sensor is having an average temperature greater than 20 over the last minute.<br>
-
-```sql
-define table RoomTypeTable (roomNo int, type string);
-```
-
-## (Defined) Windows 
-
-An event window is a window that can be shared across multiple queries. Events are inserted from one or more streams. The event window publishes current and/or expired events as the output. The time at which these events are published depends on the window type.
+A defined window is a window that can be shared across multiple queries. 
+Events can be inserted to a defined window from one or more queries and it can produce output events based on the defined window type.
  
 **Syntax**
 
-The following is the syntax for an event window.
+The following is the syntax for a defined window.
+
 ```sql
-define window <event window name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... ) <window type>(<parameter>, <parameter>, …) <output event type>;
+define window <window name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... ) <window type>(<parameter>, <parameter>, …) <output event type>;
 ```
+
+The following parameters are configured in a table definition.
+
+| Parameter     | Description |
+| ------------- |-------------|
+| `window name`      | The name of the window defined. (as a convention `PascalCase` is used for window name) |
+| `attribute name`   | The schema of the window is defined by its attributes by uniquely identifiable attribute names (as a convention `camalCase` is used for attribute names)|    |
+| `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
+| `<window type>(<parameter>, ...)`   | The window type associated with the window and its parameters.     |
+| `output <output event type>` | This is optional, Keywords like `current events`, `expired events` and `all events` (the default) can be used to manipulate when the window output should be exposed. For information refer section Output event types. 
+
 **Examples**
  
-+ Returning all output categories
++ Returning all output when event arrives and when events expire from the window.
 
-In the following query, the window type is not specified in the window definition. Therefore, it emits both current and expired events as the output.
-```sql
-define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second);
-```
+    In the following query, output event type is not specified therefore, it emits both current and expired events as the output.
+    
+    <pre>
+    define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second); </pre>
 
-+ Returning a specified output category
++ Returning a only when events  expire from the window.
 
-In the following query, the window type is `output all events`. Therefore, it emits both current and expired events as the output.
+    In the following query, the window's output event type is `all events`. Therefore, it emits only the window expiry events as output.
+    
+    <pre>
+    define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second) output expired events; </pre>
+     
 
-```sql
-define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second) output all events;
-```
- 
-### Supported Event Window Operators
-The following operators are supported for event windows.
+**Operators on Defined Windows**
 
-#### Insert Into
+The following operators can be performed on defined windows.
 
-**Syntax**
+### Insert
 
-```sql
-from <input stream name> 
-select <attribute name>, <attribute name>, ...
-insert into <window name>
-```
-
-To insert only the specified output event category, use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords. For more information, see Output Event Categories.
- 
-**Purpose**
-
-To insert events from an event stream to a window.
- 
-**Parameters**
-
-+ `input stream name`:  The event stream from which events are inserted into the event window.
-
-+ `attribute name`: The name of the attributes with which the events are inserted from the event stream to the event window. Multiple attributes can be specified as a comma separated list.
-
-+ `window name`: The event window to which events are inserted from the event stream.
- 
-**Example**
-
-The following query inserts both current and expired events from an event stream named `sensorStream` to an event window named `sensorWindow`.
-
-```sql
-from SensorStream
-insert into SensorWindow;
-```
- 
-#### Output
-An event window can be used as a stream in any query. However, an ordinary window cannot be applied to the output of an event window.
+This allows events to be inserted in to windows. This is similar to inserting events into streams. 
 
 **Syntax**
 
 ```sql
-from <window name> 
+from <input stream> 
 select <attribute name>, <attribute name>, ...
-insert into <event stream name>
+insert into <window>
 ```
-**Purpose**
 
-To inject the output of an event window into an event stream.
+Like in streams to insert only the specific output event types, use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords. 
+For more information refer [output event type](#output-event-types) section.
 
-**Parameters**
-
-+ `window name`: The event window of which the output is injected into the specified stream.
-
-+ `attribute name`: The name of the attributes with which the events are inserted from the event stream to the event window. Multiple attributes can be specified as a comma separated list.
-
-+ `event stream name`: The event stream to which the output of the specified event window is injected.
- 
 **Example**
-The following query selects the name and the maximum values for the `value` and `roomNo` attributes from an event window named `SensorWindow`, and inserts them into an event stream named `MaxSensorReadingStream`.
+
+The following query inserts all events from the `TempStream` stream to the `OneMinTempWindow` window.
 
 ```sql
-from SensorWindow
+from TempStream
+select *
+insert into OneMinTempWindow;
+```
+
+### Join (Window)
+
+To allow a stream to retrieve information from a window based on a condition.
+
+!!! Note
+    Join can also be performed with [two streams](#join-stream), [aggregation](#join-aggregation) or with tables [tables](#join-table).
+
+**Syntax**
+
+```sql
+from <input stream> join <window>
+    on <condition>
+select (<input stream>|<window>).<attribute name>, (<input stream>|<window>).<attribute name>, ...
+insert into <output stream>
+```
+
+**Example**
+
+The following Siddhi App performs a join count the number of temperature events having more then 40 degrees 
+ within the last 2 minutes. 
+
+```sql
+define window TwoMinTempWindow (roomNo int, temp double) time('2 min');
+define stream CheckStream (requestId string);
+   
+from CheckStream as C join TwoMinTempWindow as T
+    on T.temp > 40
+select requestId, count(T.temp) as count
+insert into HighTempCountStream;
+```
+
+### From
+
+A window can be also be used as input to any query like streams. 
+
+Note !!!
+     When window is used as input to a query, another window cannot be applied on top of this.
+
+**Syntax**
+
+```sql
+from <window> 
+select <attribute name>, <attribute name>, ...
+insert into <output stream>
+```
+
+**Example**
+The following Siddhi App calculates the maximum temperature within last 5 minutes.
+
+```sql
+define window FiveMinTempWindow (roomNo int, temp double) time('5 min');
+
+
+from FiveMinTempWindow
 select name, max(value) as maxValue, roomNo
 insert into MaxSensorReadingStream;
 ```
 
-#### Join
-
-**Example**
-
-```sql
- define stream TempStream(deviceID long, roomNo int, temp double);
- define stream RegulatorStream(deviceID long, roomNo int, isOn bool);
- define window TempWindow(deviceID long, roomNo int, temp double) time(1 min);
-   
- from TempStream[temp > 30.0]
- insert into TempWindow;
-   
- from TempWindow
- join RegulatorStream[isOn == false]#window.length(1) as R
- on TempWindow.roomNo == R.roomNo
- select TempWindow.roomNo, R.deviceID, 'start' as action
- insert into RegulatorActionStream;
-```
 ## Triggers
-Event triggers allow events to be created periodically based on a specified time interval.
+
+Triggers allow events to be periodically generated. **Trigger definition** can be used to define a trigger. 
+Trigger also works like a stream with a predefined schema.
+
+**Purpose**
+
+For some use cases the system should be able to periodically generated events based on specified time interval to perform 
+some periodic executions. 
+
+Trigger can be performed during three times such as `'start'`, for a given `<time interval>` or for a given `'<cron expression>'`, 
+
 
 **Syntax**
 
-The following is the syntax for an event trigger definition.
+The following is the syntax for an trigger definition.
+
 ```sql
-define trigger <trigger name> at {'start'| every <time interval>| '<cron expression>'};
+define trigger <trigger name> at ('start'| every <time interval>| '<cron expression>');
 ```
+
+Triggers can be used as inputs like streams and they adhere to the following stream definition, and produces `triggered_time` attribute with type `long`
+
+```sql
+define stream <trigger name> (triggered_time long);
+```
+
+Types of triggers supported as following
+
+|Trigger type| Description|
+|-------------|-----------|
+|`'start'`| An event will be trigger at Siddhi start.|
+|`every <time interval>`| an event will be triggered periodically on the given time interval.
+|`'<cron expression>'`| an event will be triggered periodically based on the given cron expression, refer  <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-06">quartz-scheduler</a> for config details.
+ 
 
 **Examples**
 
 + Triggering events regularly at specific time intervals
 
-The following query triggers events every 5 minutes.
-```sql
- define trigger FiveMinTriggerStream at every 5 min;
-```
+    The following query triggers events every 5 minutes.
+    
+    ```sql
+     define trigger FiveMinTriggerStream at every 5 min;
+    ```
 
 + Triggering events at a specific time on specified days
-The following query triggers an event at 10.15 AM every Monday, Tuesday, Wednesday, Thursday and Friday.
-```sql
- define trigger FiveMinTriggerStream at '0 15 10 ? * MON-FRI';
- 
-```
-## Siddhi Logger
 
-The Siddhi Logger logs events that arrive in different logger priorities such as `INFO`, `DEBUG`, `WARN`, `FATAL`, `ERROR`, `OFF`, and `TRACE`.
-
-**Syntax**
-
-The following is the syntax for a query with a Siddhi logger.
-
-```sql
-<void> log(<string> priority, <string> logMessage, <bool> isEventLogged)
-```
-
-The parameters configured are as follows.
-
-+ `prioroty`: The logging priority. Possible values are `INFO`, `DEBUG`, `WARN`, `FATAL`, `ERROR`, `OFF`, and `TRACE`. If no value is specified for this parameter, `INFO` is printed as the priority by default.
-
-+ `logMessage`: This parameter allows you to specify a message to be printed in the log.
-
-+ `isEventLogged`: This parameter specifies whether the event body should be included in the log. Possible values are `true` and `false`. If no value is specified, the event body is not printed in the log by default.
-
-**Examples**
-
-+ The following query logs the event with the `INFO` logging priority. This is because the priority is not specified.
-```sql
-from StockStream#log()
-select *
-insert into OutStream;
-```
-
-+ The following query logs the event with the `INFO` logging priority (because the priority is not specified) and the `test message` text.
-```sql
-from StockStream#log('test message')
-select *
-insert into OutStream;
-```
-
-+ The following query logs the event with the `INFO` logging priority because a priority is not specified. The event itself is printed in the log.
-```sql
-from StockStream#log(true)
-select *
-insert into OutStream;
-```
-
-+ The following query logs the event with the `INFO` logging priority (because the priority is not specified) and the `test message` text. The event itself is printed in the log.
-```sql
-from StockStream#log('test message', true)
-select *
-insert into OutStream;
-```
-
-+ The following query logs the event with the `WARN` logging priority and the `test message` text.
-```sql
-from StockStream#log('warn','test message')
-select *
-insert into OutStream;
-```
-
-+ The following query logs the event with the `WARN` logging priority and the `test message` text.  The event itself is printed in the log.
-```sql
-from StockStream#log('warn','test message',true)
-select *
-insert into OutStream;
-```
+    The following query triggers an event at 10.15 AM on every weekdays.
+    
+    ```sql
+     define trigger FiveMinTriggerStream at '0 15 10 ? * MON-FRI';
+     
+    ```
 
 ## Scripts
 
-Eval script allows Siddhi to process events using other programming languages by including their functions in the Siddhi queries. Eval script functions can be defined like event tables or streams and referred in the queries as Inbuilt Functions of Siddhi.
+Script allows you to write functions in other programming languages and execute them within queries. 
+Functions defined via script can be accessed in queries just like any other inbuilt functions. 
+**Function definitions** can be used to define these scripts.
+
+Function parameters are passed as `Object[]` with the name `data` into the function logic. 
+
+**Purpose**
+
+Scripts let you define a function operation that not provided in Siddhi core or it's extension and let you define 
+the function logic without focusing you to write an extension.
 
 **Syntax**
 
-The following is the syntax for a Siddhi query with an Eval Script definition.
+The following is the syntax for a Script definition.
 
 ```sql
 define function <function name>[<language name>] return <return type> {
@@ -1988,24 +1988,21 @@ define function <function name>[<language name>] return <return type> {
 };
 ```
 
-The following parameters are configured when defining an eval script.
+The following parameters are configured when defining a script.
 
-+ `function name`: 	The name of the function from another programming language that should be included in the Siddhi query.
-
-+ `language name`: The name of the other programming language from which the function included in the Siddhi query is taken. The languages supported are JavaScript, R and Scala.
-
-+ `return type`: The return type of the function defined. The return type can be `int`, `long`, `float`, `double`, `string`, `bool` or `object`. Here the function implementer should be responsible for returning the output on the defined return type for proper functionality. 
-
-+ `operation of the function`: Here, the execution logic of the defined logos should be added. This logic should be written in the language specified in the `language name` parameter, and the return should be of the type specified in the `return type` parameter.
+| Parameter     | Description |
+| ------------- |-------------|
+| `function name`| 	The name of the function (as a convention `camalCase` is used for function name).|
+|`language name`| The name of the programming language used to define the script, such as `javascript`, `r` and `scala`.|
+| `return type`| The return attribute type of the the function. It can be `int`, `long`, `float`, `double`, `string`, `bool` or `object`. Here the function implementer should be responsible for returning the output attribute on the defined return type for proper functionality. 
+|`operation of the function`| Here, the execution logic of the function is added. This logic should be written in the language specified under the `language name`, and it should return the output on the specified `return type` parameter.
 
 **Examples**
 
-+ Concatenating a JavaScript function
-
-The following query performs the concatenating function of the JavaScript language and returns the output as a string.
+The following query performs concatenation using JavaScript and returns the output as a string.
 
 ```sql
-define function concatFn[JavaScript] return string {
+define function concatFn[javascript] return string {
     var str1 = data[0];
     var str2 = data[1];
     var str3 = data[2];
@@ -2020,136 +2017,114 @@ select concatFn(roomNo,'-',deviceID) as id, temp
 insert into DeviceTempStream;
 ```
 
-+ Concatenating an R function
+## Extensions
 
-The following query performs the concatenating function of the R language and returns the output as a string.
+Siddhi supports an extension architecture to enhance its functionality by incorporating other libraries in a seamless manner. 
 
-```sql
-define function concatFn[R] return string {
-    return(paste(data, collapse=""));
-};
-  
-define stream TempStream(deviceID long, roomNo int, temp double);
-  
-from TempStream
-select concatFn(roomNo,'-',deviceID) as id, temp
-insert into DeviceTempStream;
-```
+**Purpose**
 
-+ Concatenating a Scala function
+Extensions are supported because, Siddhi core cannot have all the functionality that's needed for all the use cases, mostly use cases require 
+different type of functionality, and for come cases there can be gaps and you need to write the functionality by yourself.
 
-The following query performs the concatenating function of the Scala language and returns the output as a string.
+All extensions have a namespace. This is used to identify the relevant extensions together, and to let you specifically call the extension.
+
+**Syntax**
+
+Extensions follow the following syntax;
 
 ```sql
-define function concatFn[Scala] return string {
-    var concatenatedString =
-     for(i <- 0 until data.length){
-         concatenatedString += data(i).toString
-     }
-     concatenatedString
-};
-  
-define stream TempStream(deviceID long, roomNo int, temp double);
-  
-from TempStream
-select concatFn(roomNo,'-',deviceID) as id, temp
-insert into DeviceTempStream;
-```
-##Siddhi extensions
-
-Siddhi supports an extension architecture to support custom code and functions to be incorporated with Siddhi in a seamless manner. Extension will follow the following syntax;
-
-```sql
-<namespace>:<function name>(<parameter1>, <parameter2>, ... )
+<namespace>:<function name>(<parameter>, <parameter>, ... )
 ```
 
-Here the namespace will allow Siddhi to identify the function as an extension and its extension group, the function name will denote the extension function within the given group, and the parameters will be the inputs that can be passed to the extension for evaluation and/or configuration.  
+The following parameters are configured when referring a script function.
 
-E.g. A window extension created with namespace foo and function name unique can be referred as follows:
+| Parameter     | Description |
+| ------------- |-------------|
+|`namespace` | Allows Siddhi to identify the extension without conflict|
+| `function name`| 	The name of the function referred.|
+| `parameter`| 	The function input parameter for function execution.|
+
+**Extension types**
+
+Siddhi supports following extension types:
+
+* **Function**
+
+    For each event, it consumes zero or more parameters as input parameters, and outputs a single attribute. This could be used to manipulate existing event attributes to generate new attributes like any Function operation.
+    
+    This is implemented by extending `org.wso2.siddhi.core.executor.function.FunctionExecutor`.
+    
+    Example : 
+    
+    `math:sin(x)` here the `sin` function of `math` extension will return the sin value for parameter `x`.
+    
+* **Aggregate Function**
+
+    For each event, it consumes zero or more parameters as input parameters, and outputs a single attribute having an aggregated results. This could be used with conjunction with a window in order to find the aggregated results based on the given window like any Aggregate Function operation. 
+    
+     This is implemented by extending `org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator`.
+
+    Example : 
+    
+    `custom:std(x)` here the `std` aggregate function of `custom` extension will return the standard deviation of value `x` based on it's assigned window query. 
+
+* **Window** 
+
+    Allows events to be **collected, generated, dropped and expired anytime** **without altering** the event format based on the given input parameters, like any other Window operator. 
+    
+    This is implemented by extending `org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor`.
+
+    Example : 
+    
+    `custom:unique(key)` here the `unique` window of `custom` extension will retain one event for each unique `key` parameter.
+
+* **Stream Function**
+
+    Allows events to be  **generated or dropped only during event arrival** and **altered** by adding one or more attributes to it. 
+    
+    This is implemented by extending  `org.wso2.siddhi.core.query.processor.stream.function.StreamFunctionProcessor`.
+    
+    Example :  
+    
+    `custom:pol2cart(theta,rho)` here the `pol2cart` function of `custom` extension will return all events by calculating the cartesian coordinates `x` & `y` and adding them as new attributes to the events.
+
+* **Stream Processor**
+    
+    Allows events to be **collected, generated, dropped and expired anytime** with **altering** the event format by adding one or more attributes to it based on the given input parameters. 
+    
+    Implemented by extending "oorg.wso2.siddhi.core.query.processor.stream.StreamProcessor".
+    
+    Example :  
+    
+    `custom:perMinResults(<parameter>, <parameter>, ...)` here the `perMinResults` function of `custom` extension will return all events by adding one or more attributes the events based on the conversion logic and emit output every minute despite of event arrivals.
+
+* **Sink**
+
+* **Source**
+
+* **Store**
+
+* **Script**
+
+**Example**
+
+A window extension created with namespace `foo` and function name `unique` can be referred as follows:
 
 ```sql
 from StockExchangeStream[price >= 20]#window.foo:unique(symbol)
 select symbol, price
 insert into StockQuote
 ```
-**Extension types**
 
-Siddhi supports following five type of extensions:
+**Available Extensions**
 
-**1.Function Extension**
+Siddhi currently have several pre written extensions <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">here</a>
+ 
+_We value your contribution on improving Siddhi and its extensions further._
 
-For each event it consumes zero or more parameters and output a single attribute as an output. This could be used to manipulate event attributes to generate new attribute like Function operator. Implemented by extending "org.wso2.siddhi.core.executor.function.FunctionExecutor".
 
-E.g. "math:sin(x)" here the sin function of math extension will return the sin value its parameter x.
-  
-**2.Aggregate Function Extension**
-
-For each event it consumes zero or more parameters and output a single attribute having an aggregated results based in the input parameters as an output. This could be used with conjunction with a window in order to find the aggregated results based on the given window like Aggregate Function operator. Implemented by extending "org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator".
-
-E.g. "custom:std(x)" here the std aggregate function of custom extension will return the standard deviation of value x based on the assigned window to its query. 
-
-**3.Window Extension**
-
-Allows events to be collected and expired without altering the event format based on the given input parameters like the Window operator. Implemented by extending "org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor".
-
-E.g. "custom:unique(key)" here the unique window of custom extension will return all events as current events upon arrival as current events and when events arrive with the same value based on the "key" parameter the corresponding to a previous event arrived the previously arrived event will be emitted as expired event.
-
-**4.Stream Function Extension**
-
-Allows events to be altered by adding one or more attributes to it. Here events could be outputted upon each event arrival. Implemented by extending "org.wso2.siddhi.core.query.processor.stream.function.StreamFunctionProcessor".
-    
-E.g. "custom:pol2cart(theta,rho)" here the pol2cart function of custom extension will return all events by calculating the cartesian coordinates x & y and adding them as new attributes to the existing events.
-
-**5.Stream Processor Extension**
-    
-Allows events to be collected and expired with altering the event format based on the given input parameters. Implemented by extending "oorg.wso2.siddhi.core.query.processor.stream.StreamProcessor".
-    
-E.g. "custom:perMinResults(arg1, arg2, ...)" here the perMinResults function of custom extension will return all events by adding one or more attributes the events based on the conversion logic and emitted as current events upon arrival as current events and when at expiration expired events could be emitted appropriate expiring events attribute values for matching the current events attributes counts and types.
-
-**Available Extentions**
-
-Siddhi currently have several prewritten extensions as follows; 
-
-Extensions released under Apache License v2 : 
-
-+ **math**:   Supporting mathematical operations 
-+  **str**:Supporting String operations 
-+ **geo**: Supporting geocode operations
-+ **regex**: Supporting regular expression operations
-+ **time**: Supporting time expression operations
-+ **ml**: Supporting Machine Learning expression operations
-+ **timeseries**: Supporting Time Series operations
-+  **kf** (Kalman Filter): Supporting filtering capabilities by detecting outliers of the data.
-+ **map**: Supporting to send a map object inside Siddhi stream definitions and use it inside queries.
-+ **reorder**: Supporting for reordering events from an unordered event stream using Kslack algorithm. 
-
-Extensions released under GNU/GPL License v3 : 
-
-  + **geo**: Supporting geographical processing operations   
-  + **r**: Supporting R executions
-  + **nlp**: Supporting Natural Language Processing expression operations
-  + **pmml**: Supporting Predictive Model Markup Language expression operations
-  
-  
 **Writing Custom Extensions**
 
-Custom extensions can be written in order to cater usecase specific logics that are not out of the box available in Siddhi or as an extension. 
+Custom extensions can be written in order to cater use case specific logic that are not out of the box available in Siddhi or as an existing extension. 
 
-To create custom extensions two things need to be done.
-
-1.Implementing the extension logic by extending well defined Siddhi interfaces. E.g implementing a UniqueWindowProcessor by extending org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor.
-
-```sql
-package org.wso2.test;
-  
-public class UniqueWindowProcessor extends WindowProcessor {
-   ...
-}
-```
-
-2.Add an extension mapping file to map the written extension class with the extension function name and namespace. Here extension mapping file should be named as "<namespace>.siddhiext". E.g Mapping the written UniqueWindowProcessor extension with function name "unique" and namespace "foo", to do so the mapping file should be named as foo.siddhiext and the context of the file should as below; 
-
-```sql
-# function name to class mapping of 'foo' extension
-unique=org.wso2.test.UniqueWindowProcessor
-```
+More information on this will be available soon.
