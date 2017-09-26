@@ -1423,7 +1423,7 @@ public class PartitionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test
+    /*@Test
     public void testPartitionQuery27() throws InterruptedException {
         log.info("Partition test");
         ExecutionPlan executionPlan = ExecutionPlan.executionPlan("Test")
@@ -1473,9 +1473,9 @@ public class PartitionTestCase {
         Thread.sleep(1000);
         Assert.assertEquals(0, count.get());
         executionPlanRuntime.shutdown();
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void testPartitionQuery28() throws InterruptedException {
         log.info("Partition test");
         ExecutionPlan executionPlan = ExecutionPlan.executionPlan("Test")
@@ -1518,7 +1518,7 @@ public class PartitionTestCase {
         Thread.sleep(1000);
         Assert.assertEquals(0, count.get());
         executionPlanRuntime.shutdown();
-    }
+    }*/
 
     @Test
     public void testPartitionQuery31() throws InterruptedException {
