@@ -24,18 +24,21 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
+import org.wso2.siddhi.core.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.EventPrinter;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CronEventWindowTestCase {
     private static final Logger log = Logger.getLogger(CronEventWindowTestCase.class);
-    private int inEventCount;
-    private int removeEventCount;
+    private AtomicInteger inEventCount;
+    private AtomicInteger removeEventCount;
     private boolean eventArrived;
 
     @Before
     public void init() {
-        inEventCount = 0;
-        removeEventCount = 0;
+        inEventCount = new AtomicInteger(0);
+        removeEventCount = new AtomicInteger(0);
         eventArrived = false;
     }
 
@@ -65,9 +68,9 @@ public class CronEventWindowTestCase {
                 EventPrinter.print(events);
                 for (Event event : events) {
                     if (event.isExpired()) {
-                        removeEventCount++;
+                        removeEventCount.incrementAndGet();
                     } else {
-                        inEventCount++;
+                        inEventCount.incrementAndGet();
                     }
                 }
                 eventArrived = true;
@@ -79,14 +82,14 @@ public class CronEventWindowTestCase {
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
-        Thread.sleep(7000);
+        Thread.sleep(6000);
         inputHandler.send(new Object[]{"IBM1", 700f, 0});
         inputHandler.send(new Object[]{"WSO22", 60.5f, 1});
-        Thread.sleep(7000);
+        Thread.sleep(6000);
         inputHandler.send(new Object[]{"IBM43", 700f, 0});
         inputHandler.send(new Object[]{"WSO4343", 60.5f, 1});
-        Thread.sleep(7000);
-        Assert.assertEquals(6, inEventCount);
+        SiddhiTestHelper.waitForEvents(1000, 6, inEventCount, 10000);
+        Assert.assertEquals(6, inEventCount.intValue());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
 
@@ -118,7 +121,7 @@ public class CronEventWindowTestCase {
             public void receive(Event[] events) {
                 EventPrinter.print(events);
                 for (Event event : events) {
-                        removeEventCount++;
+                        removeEventCount.incrementAndGet();
                 }
                 eventArrived = true;
             }
@@ -134,8 +137,8 @@ public class CronEventWindowTestCase {
         Thread.sleep(7000);
         inputHandler.send(new Object[]{"IBM43", 700f, 0});
         inputHandler.send(new Object[]{"WSO4343", 60.5f, 1});
-        Thread.sleep(7000);
-        Assert.assertEquals(4, removeEventCount);
+        SiddhiTestHelper.waitForEvents(1000, 4, removeEventCount, 10000);
+        Assert.assertEquals(4, removeEventCount.intValue());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
 
