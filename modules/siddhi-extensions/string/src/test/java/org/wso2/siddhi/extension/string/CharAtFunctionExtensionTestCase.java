@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.string.test.util.SiddhiTestHelper;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -129,4 +130,99 @@ public class CharAtFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testCharAtFunctionExtensionWithInvalidNoOfArguments() throws InterruptedException {
+        log.info("CharAtFunctionExtension TestCase ,with invalid number of arguments");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , str:charAt(symbol,1,2) as charAt " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testCharAtFunctionExtensionWithInvalidDataType() throws InterruptedException {
+        log.info("CharAtFunctionExtension TestCase with invalid data type");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , str:charAt(price,1) as charAt " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testCharAtFunctionExtensionWithInvalidDataType1() throws InterruptedException {
+        log.info("CharAtFunctionExtension TestCase with invalid data type");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , str:charAt(symbol,price) as charAt " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testCharAtFunctionExtensionWithNullValues() throws InterruptedException {
+        log.info("CharAtFunctionExtension TestCase with null value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , str:charAt(symbol,1) as charAt " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{null, 700f, 100l, 1});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testCharAtFunctionExtensionWithNullValues1() throws InterruptedException {
+        log.info("CharAtFunctionExtension TestCase with null value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long, time int);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , str:charAt(symbol,time) as charAt " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 100l, null});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testCharAtFunctionExtensionForIndexOutOfBoundException() throws InterruptedException {
+        log.info("CharAtFunctionExtension TestCase for IndexoutOfBoundException case");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , str:charAt(symbol,3) as charAt " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 100l, 1});
+        executionPlanRuntime.shutdown();
+    }
+
+
 }

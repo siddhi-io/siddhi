@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.string.test.util.SiddhiTestHelper;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -73,6 +74,58 @@ public class HexFunctionExtensionTestCase {
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"MySQL"});
         SiddhiTestHelper.waitForEvents(1000, 1, count, 60000);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test (expected = ExecutionPlanValidationException.class)
+    public void testWithZeroArguments() throws Exception {
+        logger.info("HexFunctionExtension TestCase with zero arguments");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue string);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                + "select str:hex() as hexString "
+                + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test (expected = ExecutionPlanValidationException.class)
+    public void testWithInvalidDatatype() throws Exception {
+        logger.info("HexFunctionExtension TestCase with invalid data type");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue int);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                + "select str:hex(inValue) as hexString "
+                + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testWithNullValue() throws Exception {
+        logger.info("HexFunctionExtension TestCase with null value");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue string);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                + "select str:hex(inValue) as hexString "
+                + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+
+        executionPlanRuntime.start();
+        InputHandler inputHandler = executionPlanRuntime
+                .getInputHandler("InValueStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{null});
         executionPlanRuntime.shutdown();
     }
 }
