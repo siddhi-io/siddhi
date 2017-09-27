@@ -92,11 +92,11 @@ public class CreateFromJSONFunctionExtensionTestCase {
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
 
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select " + "map:createFromJSON(str:concat('{symbol "
-        + ",symbol,', price :',price,', volume :',volume,'}')) as hashMap insert into outputStream;");
+        String query = ("@info(name = 'query1') from inputStream select "
+                + "map:createFromJSON(str:concat('{symbol :',symbol,', price :',price,', volume :',volume,'}')) "
+                + "as hashMap insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                                                                                                     query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
