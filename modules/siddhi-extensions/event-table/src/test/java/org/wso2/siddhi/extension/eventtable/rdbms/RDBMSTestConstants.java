@@ -33,4 +33,5 @@ public interface RDBMSTestConstants {
     public static final String ORACLEUSERNAME = "Mohan100";
     public static final String H2PASSWORD = "wso2carbon";
     public static final String ORACLEPASSWORD = "Mohan100";
+    public static final String TABLE_WTTH_PK = "table_with_pk";
 }

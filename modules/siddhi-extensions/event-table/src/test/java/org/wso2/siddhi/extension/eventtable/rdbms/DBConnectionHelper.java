@@ -59,6 +59,46 @@ public class DBConnectionHelper {
         }
     }
 
+    public void createTestDatabaseTable(DataSource dataSource, String tableName) {
+        PreparedStatement stmt = null;
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+            con.setAutoCommit(false);
+            stmt = con.prepareStatement("CREATE TABLE " + tableName + "( " +
+                    "SYMBOL varchar(255) PRIMARY KEY," +
+                    "PRICE float," +
+                    "VOLUME bigint(20)" +
+                    ");");
+            stmt.executeUpdate();
+            con.commit();
+
+        } catch (SQLException e) {
+            log.error("Error while creating the event", e);
+        } finally {
+            clearConnections(stmt, con);
+        }
+    }
+
+    public boolean isTableExist(DataSource dataSource, String tableName) {
+        PreparedStatement stmt = null;
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+            con.setAutoCommit(false);
+            stmt = con.prepareStatement("SELECT 1 FROM " +
+                    tableName +
+                    " LIMIT 1;");
+            con.commit();
+            return stmt.execute();
+        } catch (SQLException e) {
+            log.error("Error while creating the event", e);
+            return false;
+        } finally {
+            clearConnections(stmt, con);
+        }
+    }
+
     public long getRowsInTable(DataSource dataSource) {
 
         PreparedStatement stmt = null;
