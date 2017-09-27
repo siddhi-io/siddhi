@@ -38,6 +38,7 @@ import java.util.Map;
 public class ToJSONFunctionExtension extends FunctionExecutor {
     private Attribute.Type returnType = Attribute.Type.STRING;
 
+
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
         if ((attributeExpressionExecutors.length) != 1) {

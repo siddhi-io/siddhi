@@ -30,6 +30,7 @@ import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.map.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.extension.string.ConcatFunctionExtension;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -52,10 +53,11 @@ public class CreateFromJSONFunctionExtensionTestCase {
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
 
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select "
-                + "map:createFromJSON(\"{'symbol':'IBM','price':100,'volume':100 }\") as hashMap insert into outputStream;");
+        String query = ("@info(name = 'query1') from inputStream select " + "map:createFromJSON(\"{'symbol':'IBM',"
+                + "'price':100, 'volume':100 }\") as hashMap insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -90,10 +92,11 @@ public class CreateFromJSONFunctionExtensionTestCase {
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
 
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select "
-                + "map:createFromJSON(str:concat('{symbol :',symbol,', price :',price,', volume :',volume,'}')) as hashMap insert into outputStream;");
+        String query = ("@info(name = 'query1') from inputStream select " + "map:createFromJSON(str:concat('{symbol "
+        + ",symbol,', price :',price,', volume :',volume,'}')) as hashMap insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -126,6 +129,83 @@ public class CreateFromJSONFunctionExtensionTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
         Assert.assertEquals(3, count.get());
         Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testCreateFromJSONFunctionExtension3() throws InterruptedException {
+        log.info("CreateFromJSONFunctionExtension TestCase with test attributeExpressionExecutors length");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select " + "map:createFromJSON(\"{'symbol':'IBM',"
+        +" 'price':100,'volume':100 }\"," + "\"{'symbol':'WSO@','price':100,'volume':100 }\") as hashMap insert into "
+            + "outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testCreateFromJSONFunctionExtension4() throws InterruptedException {
+        log.info("CreateFromJSONFunctionExtension TestCase with test attributeExpressionExecutors length");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select " + "map:createFromJSON(\"'symbol':'IBM',"
+        + "'price':100,'volume':100 \") as hashMap insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
+                                                                                                     + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 100, 100l});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testCreateFromJSONFunctionExtension5() throws InterruptedException {
+        log.info("CreateFromJSONFunctionExtension TestCase with test data should be a string");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select " + "map:createFromJSON(12) as hashMap insert"
+                + " into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 100, 100l});
+        inputHandler.send(new Object[]{"WSO2", 200, 200l});
+        inputHandler.send(new Object[]{"XYZ", 300, 200l});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testCreateFromJSONFunctionExtension6() throws InterruptedException {
+        log.info("CreateFromJSONFunctionExtension TestCase with test data has valid json string");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select " + "map:createFromJSON(\"'symbol':'IBM',"
+                + " 'price':100,,'volume':100 \") as hashMap insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 100, 100l});
         executionPlanRuntime.shutdown();
     }
 }
