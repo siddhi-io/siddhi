@@ -56,12 +56,14 @@ public class ToJSONFunctionExtensionTestCase {
 
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select "
-                + "map:createFromJSON(\"{'symbol':'WSO2','price':100,'volume':100,'last5val':{'price':150,'volume':200}}\") as hashMap insert into outputStream;" +
-                "from outputStream " +
-                "select map:toJSON(hashMap) as jsonString " +
-                "insert into outputStream2");
+                + "map:createFromJSON(\"{'symbol':'WSO2','price':100,'volume':100,'last5val':{'price':150,'volume'"
+                + ":200}}\") as hashMap insert into outputStream;"
+                + "from outputStream "
+                + "select map:toJSON(hashMap) as jsonString "
+                + "insert into outputStream2");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream2", new StreamCallback() {
             @Override
@@ -72,7 +74,9 @@ public class ToJSONFunctionExtensionTestCase {
                     if (count.get() == 1) {
                         Assert.assertEquals(event.getData(0) instanceof String, true);
                         try {
-                            JSONAssert.assertEquals(new JSONObject("{\"volume\":100,\"symbol\":\"WSO2\",\"price\":100,\"last5val\":{\"volume\":200,\"price\":150}}"),
+                            JSONAssert.assertEquals(new JSONObject("{\"volume\":100,\"symbol\":\"WSO2\","
+                                                                           + "\"price\":100,\"last5val\":{ "
+                                                                           + "\"volume\":200,\"price\":150}}"),
                                     new JSONObject((String) event.getData(0)), false);
                         } catch (JSONException e) {
                             log.error(e);
@@ -103,7 +107,8 @@ public class ToJSONFunctionExtensionTestCase {
 
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select "
-                + "map:createFromJSON(str:concat('{symbol :',symbol,', price :',price,', volume :',volume,'}')) as hashMap insert into outputStream;" +
+                + "map:createFromJSON(str:concat('{symbol :',symbol,', price :',price,', volume :',volume,'}'))" +
+                "as hashMap insert into outputStream;" +
                 "from outputStream " +
                 "select map:toJSON(hashMap) as jsonString " +
                 "insert into outputStream2");
@@ -119,7 +124,8 @@ public class ToJSONFunctionExtensionTestCase {
                     if (count.get() == 1) {
                         Assert.assertEquals(event.getData(0) instanceof String, true);
                         try {
-                            JSONAssert.assertEquals(new JSONObject("{\"volume\":100,\"symbol\":\"IBM\",\"price\":100}"),
+                            JSONAssert.assertEquals(new JSONObject("{\"volume\":100,\"symbol\":"
+                                                                           + "\"IBM\",\"price\":100}"),
                                     new JSONObject((String) event.getData(0)), false);
                         } catch (JSONException e) {
                             log.error(e);
@@ -130,7 +136,8 @@ public class ToJSONFunctionExtensionTestCase {
                     if (count.get() == 2) {
                         Assert.assertEquals(event.getData(0) instanceof String, true);
                         try {
-                            JSONAssert.assertEquals(new JSONObject("{\"volume\":200,\"symbol\":\"WSO2\",\"price\":200}"),
+                            JSONAssert.assertEquals(new JSONObject("{\"volume\":200,\"symbol\":\"WSO2\""
+                                                                           + ",\"price\":200}"),
                                     new JSONObject((String) event.getData(0)), false);
                         } catch (JSONException e) {
                             log.error(e);
@@ -141,7 +148,8 @@ public class ToJSONFunctionExtensionTestCase {
                     if (count.get() == 3) {
                         Assert.assertEquals(event.getData(0) instanceof String, true);
                         try {
-                            JSONAssert.assertEquals(new JSONObject("{\"volume\":200,\"symbol\":\"XYZ\",\"price\":300}"),
+                            JSONAssert.assertEquals(new JSONObject("{\"volume\":200,\"symbol\":\"XYZ\","
+                                                                           + "\"price\":300}"),
                                     new JSONObject((String) event.getData(0)), false);
                         } catch (JSONException e) {
                             log.error(e);
@@ -172,15 +180,15 @@ public class ToJSONFunctionExtensionTestCase {
 
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select "
-                + "map:createFromJSON(\"{'symbol':'WSO2','price':100,'volume':100,'last5val':{'price':150,'volume':200}}\") as hashMap insert into outputStream;" +
-                "from outputStream " +
-                "select map:toJSON() as jsonString " +
-                "insert into outputStream2");
+                + "map:createFromJSON(\"{'symbol':'WSO2','price':100,'volume':100,'last5val':{'price':150,'volume'"
+                + ":200}}\") as hashMap insert into outputStream;"
+                + "from outputStream "
+                + "select map:toJSON() as jsonString "
+                + "insert into outputStream2");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
-
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
@@ -198,15 +206,12 @@ public class ToJSONFunctionExtensionTestCase {
                 "select map:toJSON(hashMap) as jsonString " +
                 "insert into outputStream2");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100, 100l});
         executionPlanRuntime.shutdown();
     }
-
-
-
-
 }

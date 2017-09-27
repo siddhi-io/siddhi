@@ -107,17 +107,16 @@ public class IsMapFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') from inputStream " +
                 "select symbol,price,map:create() as tmpMap" +
                 " insert into tmpStream;" +
-                "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(tmpMap,symbol,price) as map1" +
-                " insert into outputStream;" +
+                "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(tmpMap,symbol,price) "+
+                "as map1 insert into outputStream;" +
                 "@info(name = 'query3') from outputStream " +
                 "select map:isMap(map1) as isMap1,map:isMap(symbol,price) as isMap2" +
                 " insert into outputStream2;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
-
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }

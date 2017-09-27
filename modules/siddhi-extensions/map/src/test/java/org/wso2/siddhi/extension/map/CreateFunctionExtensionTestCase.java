@@ -52,12 +52,12 @@ public class CreateFunctionExtensionTestCase {
         log.info("CreateFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol,price, "
                 + "map:create(symbol,price) as hashMap insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -105,7 +105,8 @@ public class CreateFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') from inputStream select symbol,price, "
                 + "map:create() as hashMap insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -150,7 +151,8 @@ public class CreateFunctionExtensionTestCase {
                 + "select map:create(\"key1\",\"value1\",\"key2\",\"value2\",symbol,price) as hashMap "
                 + "insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -197,10 +199,9 @@ public class CreateFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') from inputStream select symbol,price, "
                 + "map:create(symbol,price,volume) as hashMap insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
-
-
 }

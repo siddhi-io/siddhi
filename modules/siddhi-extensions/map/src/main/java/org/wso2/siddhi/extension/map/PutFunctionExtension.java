@@ -47,9 +47,6 @@ public class PutFunctionExtension extends FunctionExecutor {
 
     @Override
     protected Object execute(Object[] data) {
-       /* for (int i=1;i<=data.length;i++) {
-            log.info("assssssssss" + data[i].toString());
-        }*/
         if (data == null) {
             throw new ExecutionPlanRuntimeException("Data can not be null.");
         }

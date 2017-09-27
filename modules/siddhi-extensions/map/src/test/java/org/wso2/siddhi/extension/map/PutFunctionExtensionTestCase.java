@@ -53,9 +53,8 @@ public class PutFunctionExtensionTestCase {
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol,price, "
                 + "map:create() as tmpMap insert into tmpStream;"
-                + "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(tmpMap,symbol,price) as newmap"
-                + " insert into outputStream;"
-
+                + "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(tmpMap,symbol,price) "
+                + "as newmap insert into outputStream;"
         );
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
@@ -85,7 +84,6 @@ public class PutFunctionExtensionTestCase {
             }
         });
 
-
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100, 100l});
@@ -105,11 +103,13 @@ public class PutFunctionExtensionTestCase {
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol,price, "
                 + "map:create() as tmpMap insert into tmpStream;"
-                + "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(map:put(map:create(),'CHECK ID',1000),symbol,price) as newmap"
+                + "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(map:put(map:create(),"
+                + "'CHECK ID',1000),symbol,price) as newmap"
                 + " insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -135,7 +135,6 @@ public class PutFunctionExtensionTestCase {
             }
         });
 
-
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100, 100l});
@@ -157,32 +156,12 @@ public class PutFunctionExtensionTestCase {
                 + "map:create() as tmpMap insert into tmpStream;"
                 + "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(tmpMap,symbol) as newmap"
                 + " insert into outputStream;"
-
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
-
-    /*@Test
-    public void testPutFunctionExtension3() throws InterruptedException {
-        log.info("PutFunctionExtension TestCase with test data null or not");
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String inStreamDefinition = "\ndefine stream inputStream (symbol string);";
-        String query = ("@info(name = 'query1') from inputStream select symbol, "
-                + "map:create() as tmpMap insert into tmpStream;"
-                + "@info(name = 'query2') from tmpStream  select symbol,tmpMap, map:put(tmpMap,symbol,tmpMap) as newmap"
-                + " insert into outputStream;"
-        );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
-        executionPlanRuntime.start();
-        inputHandler.send(new Object[]{null});
-        executionPlanRuntime.shutdown();
-    }*/
 }

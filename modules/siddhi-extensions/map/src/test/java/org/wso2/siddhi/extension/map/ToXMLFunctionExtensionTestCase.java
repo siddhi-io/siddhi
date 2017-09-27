@@ -70,8 +70,8 @@ public class ToXMLFunctionExtensionTestCase {
                 "from outputStream " +
                 "select map:toXML(hashMap) as xmlString " +
                 "insert into outputStream2;");
-
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream2", new StreamCallback() {
             @Override
@@ -85,7 +85,8 @@ public class ToXMLFunctionExtensionTestCase {
                                     AXIOMUtil.stringToOM("<commonAttr1>19</commonAttr1>"
                                             + "<commonAttr2>11.45</commonAttr2>" + "<commonAttr3>true</commonAttr3>"
                                             + "<commonAttr4>ELEMENT_TEXT</commonAttr4>"
-                                            + "<specAttributesObj><specAttr1>111</specAttr1><specAttr2>222</specAttr2></specAttributesObj>"),
+                                            + "<specAttributesObj><specAttr1>111</specAttr1><specAttr2>222</specAttr2>"
+                                                                 +"</specAttributesObj>"),
                                     AXIOMUtil.stringToOM((String) event.getData(0))));
                         } catch (XMLStreamException e) {
                             log.error("Error parsing XML:" + e.getMessage(), e);
@@ -115,16 +116,19 @@ public class ToXMLFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
 
-        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool, strAttr string);";
+        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool,"
+                + " strAttr string);";
         String query = ("@info(name = 'query1') from inputStream select " +
                 "map:createFromXML(str:concat('<sensor><commonAttr1>',longAttr,'</commonAttr1><commonAttr2>'," +
-                "doubleAttr,'</commonAttr2><commonAttr3>',booleanAttr,'</commonAttr3><commonAttr4>',strAttr,'</commonAttr4></sensor>')) " +
-                "as hashMap insert into outputStream;" +
-                "from outputStream " +
-                "select map:toXML(hashMap) as xmlString " +
-                "insert into outputStream2");
+                "doubleAttr,'</commonAttr2><commonAttr3>',booleanAttr,'</commonAttr3><commonAttr4>',strAttr,"
+                + "'</commonAttr4></sensor>')) "
+                + "as hashMap insert into outputStream;"
+                + "from outputStream "
+                + "select map:toXML(hashMap) as xmlString "
+                + "insert into outputStream2");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
         executionPlanRuntime.addCallback("outputStream2", new StreamCallback() {
             @Override
             public void receive(Event[] inEvents) {
@@ -210,7 +214,8 @@ public class ToXMLFunctionExtensionTestCase {
                 "select map:toXML(hashMap, 'sensor') as xmlString " +
                 "insert into outputStream2;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream2", new StreamCallback() {
             @Override
@@ -224,8 +229,8 @@ public class ToXMLFunctionExtensionTestCase {
                                     AXIOMUtil.stringToOM("<sensor>" + "<commonAttr1>19</commonAttr1>"
                                             + "<commonAttr2>11.45</commonAttr2>" + "<commonAttr3>true</commonAttr3>"
                                             + "<commonAttr4>ELEMENT_TEXT</commonAttr4>"
-                                            + "<specAttributesObj><specAttr1>111</specAttr1><specAttr2>222</specAttr2></specAttributesObj>"
-                                            + "</sensor>"),
+                                            + "<specAttributesObj><specAttr1>111</specAttr1><specAttr2>222</specAttr2>"
+                                                                 + "</specAttributesObj></sensor>"),
                                     AXIOMUtil.stringToOM((String) event.getData(0))));
                         } catch (XMLStreamException e) {
                             log.error("Error parsing XML:" + e.getMessage(), e);
@@ -255,16 +260,19 @@ public class ToXMLFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
 
-        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool, strAttr string);";
+        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool,"
+                + " strAttr string);";
         String query = ("@info(name = 'query1') from inputStream select " +
                 "map:createFromXML(str:concat('<sensor><commonAttr1>',longAttr,'</commonAttr1><commonAttr2>'," +
-                "doubleAttr,'</commonAttr2><commonAttr3>',booleanAttr,'</commonAttr3><commonAttr4>',strAttr,'</commonAttr4></sensor>')) " +
+                "doubleAttr,'</commonAttr2><commonAttr3>',booleanAttr,'</commonAttr3><commonAttr4>',strAttr,"
+                + "'</commonAttr4></sensor>')) " +
                 "as hashMap insert into outputStream;" +
                 "from outputStream " +
                 "select map:toXML(hashMap, 'sensor') as xmlString " +
                 "insert into outputStream2");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
         executionPlanRuntime.addCallback("outputStream2", new StreamCallback() {
             @Override
             public void receive(Event[] inEvents) {
@@ -273,7 +281,8 @@ public class ToXMLFunctionExtensionTestCase {
                     count.incrementAndGet();
                     if (count.get() == 1) {
                         try {
-                            Assert.assertEquals(true, new XMLComparator().compare(AXIOMUtil.stringToOM("<sensor>" +
+                            Assert.assertEquals(true, new XMLComparator().compare(AXIOMUtil.stringToOM(
+                                    "<sensor>" +
                                     "<commonAttr1>25</commonAttr1>" +
                                     "<commonAttr2>100.1</commonAttr2>" +
                                     "<commonAttr3>true</commonAttr3>" +
@@ -288,7 +297,8 @@ public class ToXMLFunctionExtensionTestCase {
                     }
                     if (count.get() == 2) {
                         try {
-                            Assert.assertEquals(true, new XMLComparator().compare(AXIOMUtil.stringToOM("<sensor>" +
+                            Assert.assertEquals(true, new XMLComparator().compare(AXIOMUtil.stringToOM(
+                                    "<sensor>" +
                                     "<commonAttr1>35</commonAttr1>" +
                                     "<commonAttr2>100.11</commonAttr2>" +
                                     "<commonAttr3>false</commonAttr3>" +
@@ -303,7 +313,8 @@ public class ToXMLFunctionExtensionTestCase {
                     }
                     if (count.get() == 3) {
                         try {
-                            Assert.assertEquals(true, new XMLComparator().compare(AXIOMUtil.stringToOM("<sensor>" +
+                            Assert.assertEquals(true, new XMLComparator().compare(AXIOMUtil.stringToOM(
+                                    "<sensor>" +
                                     "<commonAttr1>45</commonAttr1>" +
                                     "<commonAttr2>100.13456</commonAttr2>" +
                                     "<commonAttr3>true</commonAttr3>" +
@@ -353,94 +364,13 @@ public class ToXMLFunctionExtensionTestCase {
                 "select map:toXML(hashMap, 'wso2' ,'ibm') as xmlString " +
                 "insert into outputStream2;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
-
-    /*@Test
-    public void testCreateFromXMLFunctionExtension5() throws InterruptedException {
-        log.info("CreateFromXMLFunctionExtension TestCase 4");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
-
-        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool, strAttr string);";
-        String query = ("@info(name = 'query1') from inputStream select " +
-                "map:createFromXML(str:concat('<sensor><commonAttr1>',longAttr,'</commonAttr1><commonAttr2>'," +
-                "doubleAttr,'</commonAttr2><commonAttr3>',booleanAttr,'</commonAttr3><commonAttr4>',strAttr,'</commonAttr4></sensor>')) " +
-                "as hashMap insert into outputStream;" +
-                "from outputStream " +
-                "select map:toXML(hashMap, 'sensor') as xmlString " +
-                "insert into outputStream2");
-
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.addCallback("outputStream2", new StreamCallback() {
-            @Override
-            public void receive(Event[] inEvents) {
-                EventPrinter.print(inEvents);
-                for (Event event : inEvents) {
-                    count.incrementAndGet();
-                    if (count.get() == 1) {
-                        try {
-                            Assert.assertEquals(true, new XMLComparator().compare(AXIOMUtil.stringToOM("<sensor>" +
-                                    "<commonAttr1>25</commonAttr1>" +
-                                    "<commonAttr2>100.1</commonAttr2>" +
-                                    "<commonAttr3>true</commonAttr3>" +
-                                    "<commonAttr4>Event1</commonAttr4>" +
-                                    "</sensor>"), AXIOMUtil.stringToOM((String) event.getData(0))));
-                        } catch (XMLComparisonException e) {
-                            log.error("Error comparing two XML elements:" + e.getMessage(), e);
-                        } catch (XMLStreamException e) {
-                            log.error("Error parsing XML:" + e.getMessage(), e);
-                        }
-                        eventArrived = true;
-                    }
-                    if (count.get() == 2) {
-                        try {
-                            Assert.assertEquals(true, new XMLComparator().compare(AXIOMUtil.stringToOM("<sensor>" +
-                                    "<commonAttr1>35</commonAttr1>" +
-                                    "<commonAttr2>100.11</commonAttr2>" +
-                                    "<commonAttr3>false</commonAttr3>" +
-                                    "<commonAttr4>Event2</commonAttr4>" +
-                                    "</sensor>"), AXIOMUtil.stringToOM((String) event.getData(0))));
-                        } catch (XMLComparisonException e) {
-                            log.error("Error comparing two XML elements:" + e.getMessage(), e);
-                        } catch (XMLStreamException e) {
-                            log.error("Error parsing XML:" + e.getMessage(), e);
-                        }
-                        eventArrived = true;
-                    }
-                    if (count.get() == 3) {
-                        try {
-                            Assert.assertEquals(true, new XMLComparator().compare(AXIOMUtil.stringToOM("<sensor>" +
-                                    "<commonAttr1>45</commonAttr1>" +
-                                    "<commonAttr2>100.13456</commonAttr2>" +
-                                    "<commonAttr3>true</commonAttr3>" +
-                                    "<commonAttr4>Event3</commonAttr4>" +
-                                    "</sensor>"), AXIOMUtil.stringToOM((String) event.getData(0))));
-                        } catch (XMLComparisonException e) {
-                            log.error("Error comparing two XML elements:" + e.getMessage(), e);
-                        } catch (XMLStreamException e) {
-                            log.error("Error parsing XML:" + e.getMessage(), e);
-                        }
-                        eventArrived = true;
-                    }
-                }
-            }
-        });
-
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
-        executionPlanRuntime.start();
-        inputHandler.send(new Object[]{25, 100.1, true, "Event1"});
-        inputHandler.send(new Object[]{35, 100.11, false, "Event2"});
-        inputHandler.send(new Object[]{45, 100.13456, true, "Event3"});
-        SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
-        Assert.assertEquals(3, count.get());
-        Assert.assertTrue(eventArrived);
-        executionPlanRuntime.shutdown();
-    }*/
 
     @Test
     public void testToXMLFunctionExtension6() throws InterruptedException {
@@ -455,9 +385,8 @@ public class ToXMLFunctionExtensionTestCase {
                 "select map:toXML(hashMap) as xmlString " +
                 "insert into outputStream2;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-
-
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -467,24 +396,25 @@ public class ToXMLFunctionExtensionTestCase {
 
     @Test
     public void testCreateFromXMLFunctionExtension5() throws InterruptedException {
-        log.info("CreateFromXMLFunctionExtension TestCase 4");
+        log.info("CreateFromXMLFunctionExtension TestCase with test Object[] data should be string format");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
 
-        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool, strAttr string);";
+        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool,"
+                + " strAttr string);";
         String query = ("@info(name = 'query1') from inputStream select " +
                 "longAttr, doubleAttr, booleanAttr, strAttr as hashMap insert into outputStream;" +
                 "from outputStream " +
                 "select map:toXML(hashMap, 'sensor') as xmlString " +
                 "insert into outputStream2");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{25, 100.1, true, "Event1"});
-        inputHandler.send(new Object[]{35, 100.11, false, "Event2"});
-        inputHandler.send(new Object[]{45, 100.13456, true, "Event3"});
+        inputHandler.send(new Object[]{25, 100.1});
         executionPlanRuntime.shutdown();
     }
 }
+

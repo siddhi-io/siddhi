@@ -61,7 +61,8 @@ public class GetFunctionExtensionTestCase {
                 " insert into outputStream2;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream2", new StreamCallback() {
             @Override
@@ -85,6 +86,7 @@ public class GetFunctionExtensionTestCase {
                 }
             }
         });
+
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100d, 100l});
@@ -108,11 +110,13 @@ public class GetFunctionExtensionTestCase {
                 "@info(name = 'query2') from tmpStream  " +
                 "select symbol,price,tmpMap, map:put(tmpMap,symbol,price) as map1" +
                 " insert into outputStream;" +
-                "@info(name = 'query3') from outputStream  select map1, convert(cast(map:get(map1,symbol), 'int'), 'string') as priceInString" +
+                "@info(name = 'query3') from outputStream  select map1, convert(cast(map:get(map1,symbol), 'int'),"+
+                " 'string') as priceInString" +
                 " insert into outputStream2;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream2", new StreamCallback() {
             @Override
@@ -165,7 +169,8 @@ public class GetFunctionExtensionTestCase {
                 " insert into outputStream2;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100d, 100l});
@@ -189,13 +194,12 @@ public class GetFunctionExtensionTestCase {
                 " insert into outputStream2;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100d, 100l});
         executionPlanRuntime.shutdown();
     }
-
-
 }
