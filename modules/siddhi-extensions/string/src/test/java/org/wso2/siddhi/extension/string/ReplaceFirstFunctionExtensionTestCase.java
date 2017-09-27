@@ -52,11 +52,13 @@ public class ReplaceFirstFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, 'hello', 'test') as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, 'hello', 'test') "
+                        + "as replacedString " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -99,11 +101,13 @@ public class ReplaceFirstFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, target string, replacement string);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, target, replacement) as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceFirst(symbol, target, replacement) as replacedString " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -141,17 +145,20 @@ public class ReplaceFirstFunctionExtensionTestCase {
 
     @Test
     public void testReplaceFirstByRegexFunctionExtension() throws InterruptedException {
-        log.info("ReplaceFirstFunctionExtension TestCase, where target is a regex and replacement is a string constant.");
+        log.info("ReplaceFirstFunctionExtension TestCase, where target is a regex and replacement "
+                         + "is a string constant.");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, 'WSO2(.*)A', 'XXXX') as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceFirst(symbol, 'WSO2(.*)A', 'XXXX') as replacedString " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -186,7 +193,7 @@ public class ReplaceFirstFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testReplaceFirstFunctionExtension3() throws InterruptedException {
         log.info("ReplaceFirstFunctionExtension TestCase.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -194,16 +201,18 @@ public class ReplaceFirstFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, target string, replacement string);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, target) as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceFirst(symbol, target) as replacedString " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testReplaceFirstFunctionExtension4() throws InterruptedException {
         log.info("ReplaceFirstFunctionExtension TestCase.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -211,16 +220,18 @@ public class ReplaceFirstFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol int, target string, replacement string);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, target, replacement) as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceFirst(symbol, target, replacement) as replacedString " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testReplaceFirstFunctionExtension5() throws InterruptedException {
         log.info("ReplaceFirstFunctionExtension TestCase.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -228,16 +239,18 @@ public class ReplaceFirstFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, target int, replacement string);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, target, replacement) as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceFirst(symbol, target, replacement) as replacedString " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testReplaceFirstFunctionExtension6() throws InterruptedException {
         log.info("ReplaceFirstFunctionExtension TestCase.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -245,10 +258,12 @@ public class ReplaceFirstFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, target string, replacement int);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, target, replacement) as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceFirst(symbol, target, replacement) as replacedString " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
@@ -262,10 +277,12 @@ public class ReplaceFirstFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, target string, replacement string);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, target, replacement) as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceFirst(symbol, target, replacement) as replacedString " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -281,10 +298,12 @@ public class ReplaceFirstFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, target string, replacement string);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, target, replacement) as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceFirst(symbol, target, replacement) as replacedString " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -300,10 +319,12 @@ public class ReplaceFirstFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, target string, replacement string);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceFirst(symbol, target, replacement) as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol ,"
+                        + " str:replaceFirst(symbol, target, replacement) as replacedString " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();

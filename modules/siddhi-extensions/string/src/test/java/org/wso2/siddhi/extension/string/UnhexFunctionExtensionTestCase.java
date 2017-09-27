@@ -54,7 +54,8 @@ public class UnhexFunctionExtensionTestCase {
         String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
                 + "select str:unhex(inValue) as unhexString "
                 + "insert into OutMediationStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inValueStream + eventFuseExecutionPlan);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -77,7 +78,7 @@ public class UnhexFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testProcess1() throws Exception {
         logger.info("UnhexFunctionExtension TestCase with no arguments");
 
@@ -87,13 +88,14 @@ public class UnhexFunctionExtensionTestCase {
         String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
                 + "select str:unhex() as unhexString "
                 + "insert into OutMediationStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inValueStream + eventFuseExecutionPlan);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testProcess2() throws Exception {
         logger.info("UnhexFunctionExtension TestCase with invalid datatype");
 
@@ -103,7 +105,8 @@ public class UnhexFunctionExtensionTestCase {
         String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
                 + "select str:unhex(inValue) as unhexString "
                 + "insert into OutMediationStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inValueStream + eventFuseExecutionPlan);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
@@ -119,7 +122,8 @@ public class UnhexFunctionExtensionTestCase {
         String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
                 + "select str:unhex(inValue) as unhexString "
                 + "insert into OutMediationStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inValueStream + eventFuseExecutionPlan);
 
         InputHandler inputHandler = executionPlanRuntime
                 .getInputHandler("InValueStream");

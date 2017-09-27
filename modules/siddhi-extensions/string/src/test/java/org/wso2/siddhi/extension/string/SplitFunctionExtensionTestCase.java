@@ -51,9 +51,10 @@ public class SplitFunctionExtensionTestCase {
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, " +
                 "volume long);";
-        String query = ("@info(name = 'query1') " + "from inputStream " + "select symbol , str:split(symbol, '_', 1) as splitText " +
-                "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        String query = ("@info(name = 'query1') " + "from inputStream " + "select symbol , "
+                + "str:split(symbol, '_', 1) as splitText insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -96,11 +97,13 @@ public class SplitFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, splitCharacter string, index int);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:split(symbol, splitCharacter, index) as splitText " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:split(symbol, splitCharacter, index) as splitText " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -135,7 +138,7 @@ public class SplitFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testSplitFunctionExtension3() throws InterruptedException {
         log.info("SplitFunctionExtensionTestCase TestCase.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -143,17 +146,19 @@ public class SplitFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, splitCharacter string, index int);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:split(symbol, splitCharacter) as splitText " +
+                "@info(name = 'query1') from inputStream select symbol ,"
+                        + " str:split(symbol, splitCharacter) as splitText " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testSplitFunctionExtension4() throws InterruptedException {
         log.info("SplitFunctionExtensionTestCase TestCase.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -161,17 +166,19 @@ public class SplitFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol int, splitCharacter string, index int);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:split(symbol, splitCharacter, index) as splitText " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:split(symbol, splitCharacter, index) as splitText " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testSplitFunctionExtension5() throws InterruptedException {
         log.info("SplitFunctionExtensionTestCase TestCase.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -179,16 +186,18 @@ public class SplitFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, splitCharacter int, index int);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:split(symbol, splitCharacter, index) as splitText " +
+                "@info(name = 'query1') from inputStream select symbol , str:split(symbol, splitCharacter, index) "
+                        + "as splitText " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testSplitFunctionExtension6() throws InterruptedException {
         log.info("SplitFunctionExtensionTestCase TestCase.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -196,11 +205,13 @@ public class SplitFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, splitCharacter string, index string);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:split(symbol, splitCharacter, index) as splitText " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:split(symbol, splitCharacter, index) as splitText " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
@@ -214,10 +225,12 @@ public class SplitFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, splitCharacter string, index int);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:split(symbol, splitCharacter, index) as splitText " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:split(symbol, splitCharacter, index) as splitText " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -233,11 +246,13 @@ public class SplitFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, splitCharacter string, index int);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:split(symbol, splitCharacter, index) as splitText " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:split(symbol, splitCharacter, index) as splitText " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -253,11 +268,13 @@ public class SplitFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, splitCharacter string, index int);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:split(symbol, splitCharacter, index) as splitText " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:split(symbol, splitCharacter, index) as splitText " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -273,11 +290,13 @@ public class SplitFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, splitCharacter string, index int);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:split(symbol, splitCharacter, index) as splitText " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:split(symbol, splitCharacter, index) as splitText " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();

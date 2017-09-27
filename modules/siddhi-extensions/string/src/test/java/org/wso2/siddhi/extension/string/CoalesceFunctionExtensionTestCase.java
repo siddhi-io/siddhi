@@ -50,9 +50,11 @@ public class CoalesceFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol1 string, symbol2 string, symbol3 string);";
-        String query = ("@info(name = 'query1') from inputStream select symbol1 , str:coalesce(symbol1,symbol2,symbol3) as coalescedString " +
+        String query = ("@info(name = 'query1') from inputStream select symbol1 , "
+                + "str:coalesce(symbol1,symbol2,symbol3) as coalescedString " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -92,28 +94,32 @@ public class CoalesceFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testCoalesceFunctionExtensionWithZeroArgument() throws InterruptedException {
         log.info("CoalesceFunctionExtension TestCase with no arguments");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol1 string, symbol2 string, symbol3 string);";
-        String query = ("@info(name = 'query1') from inputStream select symbol1 , str:coalesce() as coalescedString " +
+        String query = ("@info(name = 'query1') from inputStream select symbol1 ,"
+                + " str:coalesce() as coalescedString " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testCoalesceFunctionExtensionWithInvalidDatatypes() throws InterruptedException {
         log.info("CoalesceFunctionExtension TestCase with invalid datatype");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol1 string, symbol2 int, symbol3 string);";
-        String query = ("@info(name = 'query1') from inputStream select symbol1 , str:coalesce(symbol1,symbol2) as coalescedString " +
+        String query = ("@info(name = 'query1') from inputStream select symbol1 , str:coalesce(symbol1,symbol2) as"
+                + " coalescedString " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }

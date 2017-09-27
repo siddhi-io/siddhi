@@ -50,9 +50,11 @@ public class LengthFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:length(symbol) as symbolLength " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:length(symbol) as symbolLength " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -87,7 +89,7 @@ public class LengthFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testLengthFunctionExtensionWithZeroArguments() throws InterruptedException {
         log.info("LengthFunctionExtension TestCase with zero arguments");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -95,13 +97,14 @@ public class LengthFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol , str:length() as symbolLength " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testLengthFunctionExtensionWithInvalidDataType() throws InterruptedException {
         log.info("LengthFunctionExtension TestCase with invalid data type");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -109,7 +112,8 @@ public class LengthFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol , str:length(price) as symbolLength " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
@@ -123,7 +127,8 @@ public class LengthFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol , str:length(symbol) as symbolLength " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();

@@ -52,7 +52,8 @@ public class CharAtFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol , str:charAt(symbol,1) as charAt " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -93,9 +94,11 @@ public class CharAtFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long, times int);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:charAt(symbol,times) as charAt, times " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , str:charAt(symbol,times)"
+                + " as charAt, times " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime =
+                siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -223,6 +226,4 @@ public class CharAtFunctionExtensionTestCase {
         inputHandler.send(new Object[]{"IBM", 700f, 100l, 1});
         executionPlanRuntime.shutdown();
     }
-
-
 }

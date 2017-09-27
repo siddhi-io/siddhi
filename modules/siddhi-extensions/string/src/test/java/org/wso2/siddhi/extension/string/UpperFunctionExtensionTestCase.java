@@ -51,9 +51,11 @@ public class UpperFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:upper(symbol) as symbolInUpperCase " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:upper(symbol) as symbolInUpperCase " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -62,7 +64,8 @@ public class UpperFunctionExtensionTestCase {
                 for (Event event : inEvents) {
                     count.incrementAndGet();
                     if (count.get() == 1) {
-                        Assert.assertEquals("ABCDEFGHIJ KLMNAAAAAAAAAA", event.getData(1));    //Note: Assertion doesn't count the spaces infront or in the back
+                        Assert.assertEquals("ABCDEFGHIJ KLMNAAAAAAAAAA", event.getData(1));
+                        //Note: Assertion doesn't count the spaces infront or in the back
                         eventArrived = true;
                     }
                     if (count.get() == 2) {
@@ -88,7 +91,7 @@ public class UpperFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testUpperFunctionExtensionWithZeroArgument() throws InterruptedException {
         log.info("UpperFunctionExtension TestCase with zero argument");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -96,21 +99,24 @@ public class UpperFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol , str:upper() as symbolInUpperCase " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testUpperFunctionExtensionWithInvalidDataType() throws InterruptedException {
         log.info("UpperFunctionExtension TestCase with invalid datatype");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:upper(price) as symbolInUpperCase " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:upper(price) as symbolInUpperCase " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
@@ -122,9 +128,11 @@ public class UpperFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:upper(symbol) as symbolInUpperCase " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:upper(symbol) as symbolInUpperCase " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();

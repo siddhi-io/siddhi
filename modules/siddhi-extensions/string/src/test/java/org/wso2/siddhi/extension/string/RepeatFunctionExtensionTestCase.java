@@ -52,11 +52,13 @@ public class RepeatFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol, 3) as symbolRepeated3Times " +
+                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol, 3) as "
+                        + "symbolRepeated3Times " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -99,11 +101,13 @@ public class RepeatFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, times int, volume long);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol, times) as symbolRepeatedIndexTimes " +
+                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol, times) as "
+                        + "symbolRepeatedIndexTimes " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -138,7 +142,7 @@ public class RepeatFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testRepeatFunctionExtension1() throws InterruptedException {
         log.info("RepeatFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -146,17 +150,19 @@ public class RepeatFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, times int, volume long);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:repeat(volume, times) as symbolRepeatedIndexTimes " +
+                "@info(name = 'query1') from inputStream select symbol , str:repeat(volume, times) as "
+                        + "symbolRepeatedIndexTimes " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testRepeatFunctionExtension2() throws InterruptedException {
         log.info("RepeatFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -164,17 +170,19 @@ public class RepeatFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, times int, volume long);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol, volume) as symbolRepeatedIndexTimes " +
+                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol, volume) as "
+                        + "symbolRepeatedIndexTimes " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testRepeatFunctionExtension3() throws InterruptedException {
         log.info("RepeatFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -182,10 +190,12 @@ public class RepeatFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, times int, volume long);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol) as symbolRepeatedIndexTimes " +
+                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol) as "
+                        + "symbolRepeatedIndexTimes " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
@@ -199,10 +209,12 @@ public class RepeatFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, times int, volume long);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol, times) as symbolRepeatedIndexTimes " +
+                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol, times) as "
+                        + "symbolRepeatedIndexTimes " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -218,10 +230,12 @@ public class RepeatFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, times int, volume long);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol, times) as symbolRepeatedIndexTimes " +
+                "@info(name = 'query1') from inputStream select symbol , str:repeat(symbol, times) as "
+                        + "symbolRepeatedIndexTimes " +
                         "insert into outputStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();

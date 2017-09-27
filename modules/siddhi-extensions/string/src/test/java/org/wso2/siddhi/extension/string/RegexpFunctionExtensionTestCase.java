@@ -50,9 +50,11 @@ public class RegexpFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:regexp(symbol, regex) as beginsWithWSO2 " +
+        String query = ("@info(name = 'query1') from inputStream select symbol ,"
+                + " str:regexp(symbol, regex) as beginsWithWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -93,9 +95,11 @@ public class RegexpFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, regex int);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:regexp(symbol, '^WSO2(.*)') as beginsWithWSO2 " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:regexp(symbol, '^WSO2(.*)') as beginsWithWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -130,43 +134,49 @@ public class RegexpFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testRegexpFunctionExtension3() throws InterruptedException {
         log.info("RegexpFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:regexp(symbol) as beginsWithWSO2 " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:regexp(symbol) as beginsWithWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testRegexpFunctionExtension4() throws InterruptedException {
         log.info("RegexpFunctionExtension TestCase with invalid datatype");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol int, price long, regex string);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:regexp(symbol, regex) as beginsWithWSO2 " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:regexp(symbol, regex) as beginsWithWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testRegexpFunctionExtension5() throws InterruptedException {
         log.info("RegexpFunctionExtension TestCase with invalid datatype");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, regex int);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:regexp(symbol, regex) as beginsWithWSO2 " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:regexp(symbol, regex) as beginsWithWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
@@ -178,9 +188,11 @@ public class RegexpFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:regexp(symbol, regex) as beginsWithWSO2 " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:regexp(symbol, regex) as beginsWithWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -194,9 +206,11 @@ public class RegexpFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:regexp(symbol, regex) as beginsWithWSO2 " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:regexp(symbol, regex) as beginsWithWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();

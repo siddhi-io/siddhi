@@ -83,17 +83,17 @@ public class EqualsIgnoreCaseFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[] { "IBM", 700f, 100l });
-        inputHandler.send(new Object[] { "WSO2", 60.5f, 200l });
-        inputHandler.send(new Object[] { "wso2", 60.5f, 200l });
-        inputHandler.send(new Object[] { "", 60.5f, 200l });
+        inputHandler.send(new Object[]{"IBM", 700f, 100l});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
+        inputHandler.send(new Object[]{"wso2", 60.5f, 200l});
+        inputHandler.send(new Object[]{"", 60.5f, 200l});
         SiddhiTestHelper.waitForEvents(100, 4, count, 60000);
         Assert.assertEquals(4, count.get());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testContainsFunctionExtensionWithOneArgument() throws InterruptedException {
         log.info("EqualsIgnoreCaseFunctionExtensionTestCase TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -110,7 +110,7 @@ public class EqualsIgnoreCaseFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testContainsFunctionExtensionWithInvalidDataType() throws InterruptedException {
         log.info("EqualsIgnoreCaseFunctionExtensionTestCase TestCase with invalid datatype");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -127,7 +127,7 @@ public class EqualsIgnoreCaseFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testContainsFunctionExtensionWithInvalidDataType1() throws InterruptedException {
         log.info("EqualsIgnoreCaseFunctionExtensionTestCase TestCase with invalid datatype");
         SiddhiManager siddhiManager = new SiddhiManager();

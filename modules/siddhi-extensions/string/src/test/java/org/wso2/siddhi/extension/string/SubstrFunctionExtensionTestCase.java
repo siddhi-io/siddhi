@@ -55,7 +55,8 @@ public class SubstrFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol , str:substr(symbol, 4) as substring " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -95,13 +96,16 @@ public class SubstrFunctionExtensionTestCase {
    * */
     @Test
     public void testSubstrFunctionExtension2() throws InterruptedException {
-        log.info("SubstrFunctionExtension TestCase for str:substr(<string sourceText> , <int beginIndex>, <int length>)");
+        log.info("SubstrFunctionExtension TestCase for str:substr(<string sourceText> , <int beginIndex>, "
+                         + "<int length>)");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:substr(symbol, 2, 4) as substring " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:substr(symbol, 2, 4) as substring " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -148,7 +152,8 @@ public class SubstrFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') from inputStream select symbol , str:substr(symbol, '^WSO2(.*)') " +
                 "as substring " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -189,7 +194,7 @@ public class SubstrFunctionExtensionTestCase {
     @Test
     public void testSubstrFunctionExtension4() throws InterruptedException {
         log.info("SubstrFunctionExtension TestCase for str:substr(<string sourceText> , <string regex>, " +
-                "<int groupNumber>)");
+                         "<int groupNumber>)");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
@@ -324,7 +329,7 @@ public class SubstrFunctionExtensionTestCase {
     }
 
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testSubstrFunctionExtensionWithInvalidDataType() throws InterruptedException {
         log.info("SubstrFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -339,7 +344,7 @@ public class SubstrFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testSubstrFunctionExtensionWithInvalidDataType1() throws InterruptedException {
         log.info("SubstrFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -355,7 +360,7 @@ public class SubstrFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testSubstrFunctionExtensionWithInvalidDataType2() throws InterruptedException {
         log.info("SubstrFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -371,7 +376,7 @@ public class SubstrFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testSubstrFunctionExtensionWithInvalidDataType3() throws InterruptedException {
         log.info("SubstrFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -387,7 +392,7 @@ public class SubstrFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test(expected = ExecutionPlanValidationException.class)
     public void testSubstrFunctionExtensionWithOneArgument() throws InterruptedException {
         log.info("SubstrFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
