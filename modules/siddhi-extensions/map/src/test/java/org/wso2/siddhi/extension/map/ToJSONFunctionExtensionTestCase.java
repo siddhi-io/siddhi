@@ -33,6 +33,7 @@ import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.map.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.extension.string.ConcatFunctionExtension;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -162,4 +163,50 @@ public class ToJSONFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testToJSONFunctionExtension3() throws InterruptedException {
+        log.info("ToJSONFunctionExtension TestCase with test attributeExpressionExecutors length");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select "
+                + "map:createFromJSON(\"{'symbol':'WSO2','price':100,'volume':100,'last5val':{'price':150,'volume':200}}\") as hashMap insert into outputStream;" +
+                "from outputStream " +
+                "select map:toJSON() as jsonString " +
+                "insert into outputStream2");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testToJSONFunctionExtension4() throws InterruptedException {
+        log.info("ToJSONFunctionExtension TestCase with data should be a Map string format");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select "
+                +"symbol, price, volume as hashMap insert into outputStream;" +
+                "from outputStream " +
+                "select map:toJSON(hashMap) as jsonString " +
+                "insert into outputStream2");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 100, 100l});
+        executionPlanRuntime.shutdown();
+    }
+
+
+
+
 }

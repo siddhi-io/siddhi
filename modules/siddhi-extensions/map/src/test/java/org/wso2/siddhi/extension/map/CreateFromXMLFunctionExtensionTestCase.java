@@ -30,6 +30,7 @@ import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.map.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.extension.string.ConcatFunctionExtension;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -150,4 +151,95 @@ public class CreateFromXMLFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testCreateFromXMLFunctionExtension3() throws InterruptedException {
+        log.info("CreateFromXMLFunctionExtension TestCase 3 with test attributeExpressionExecutors length");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
+
+        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool, strAttr string);";
+        String query = ("@info(name = 'query1') from inputStream select " +
+                "map:createFromXML(str:concat('<sensor><commonAttr1>',longAttr,'</commonAttr1><commonAttr2>'," +
+                "doubleAttr,'</commonAttr2><commonAttr3>',booleanAttr,'</commonAttr3><commonAttr4>',strAttr," +
+                "'</commonAttr4></sensor>')," +
+                "str:concat('<sensor><commonAttr1>',longAttr,'</commonAttr1><commonAttr2>'," +
+                "doubleAttr,'</commonAttr2><commonAttr3>',booleanAttr,'</commonAttr3><commonAttr4>',strAttr," +
+                "'</commonAttr4></sensor>')) " +
+                "as hashMap insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+
+    @Test
+    public void testCreateFromXMLFunctionExtension4() throws InterruptedException {
+        log.info("CreateFromXMLFunctionExtension TestCase 3 with test string data has xml format");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
+
+        String inStreamDefinition = "\ndefine stream inputStream (longAttr long, doubleAttr double, booleanAttr bool, strAttr string);";
+        String query = ("@info(name = 'query1') from inputStream select " +
+                "map:createFromXML(str:concat('{<sensor><commonAttr1>',longAttr,'</commonAttr1><commonAttr2>'," +
+                "doubleAttr,'</commonAttr2><commonAttr3>',booleanAttr,'</commonAttr3><commonAttr4>',strAttr,'</commonAttr4></sensor>}')) " +
+                "as hashMap insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{25, 100.1, true, "Event1"});
+        inputHandler.send(new Object[]{35, 100.11, false, "Event2"});
+        inputHandler.send(new Object[]{45, 100.13456, true, "Event3"});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testCreateFromXMLFunctionExtension5() throws InterruptedException {
+        log.info("CreateFromXMLFunctionExtension TestCase with test data is to be a string");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select "
+                + "map:createFromXML(12) as hashMap insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 100, 100l});
+        executionPlanRuntime.shutdown();
+    }
+
+   /* @Test
+    public void testCreateFromXMLFunctionExtension6() throws InterruptedException {
+        log.info("CreateFromXMLFunctionExtension TestCase with test data has xml format string");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("str:concat", ConcatFunctionExtension.class);
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select "
+                + "map:createFromXML(\"<sensor>" +
+                "<commonAttr1>19</commonAttr1>" +
+                "<commonAttr2>11.45</commonAttr2>" +
+                "<commonAttr3>true</commonAttr3>" +
+                "<commonAttr4>ELEMENT_TEXT</commonAttr4>" +
+                "<specAttributesObj>" +
+                "<specAttr1>111</specAttr1>" +
+                "<specAttr2>222</specAttr2>" +
+                "</specAttributesObj>" +
+                "</sensor>\") as hashMap insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 100, 100l});
+        executionPlanRuntime.shutdown();
+    }
+*/
+
+
 }

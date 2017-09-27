@@ -30,6 +30,8 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.map.test.util.SiddhiTestHelper;
+import org.wso2.siddhi.extension.string.ConcatFunctionExtension;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -185,4 +187,20 @@ public class CreateFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testCreateFromXMLFunctionExtension3() throws InterruptedException {
+        log.info("CreateFromXMLFunctionExtension TestCase 3 with test attributeExpressionExecutors length");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol,price, "
+                + "map:create(symbol,price,volume) as hashMap insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+
 }

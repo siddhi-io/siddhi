@@ -36,6 +36,7 @@ import java.util.Map;
 public class PutFunctionExtension extends FunctionExecutor {
     private Attribute.Type returnType = Attribute.Type.OBJECT;
 
+
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
         if (attributeExpressionExecutors.length != 3) {
@@ -46,6 +47,9 @@ public class PutFunctionExtension extends FunctionExecutor {
 
     @Override
     protected Object execute(Object[] data) {
+       /* for (int i=1;i<=data.length;i++) {
+            log.info("assssssssss" + data[i].toString());
+        }*/
         if (data == null) {
             throw new ExecutionPlanRuntimeException("Data can not be null.");
         }
