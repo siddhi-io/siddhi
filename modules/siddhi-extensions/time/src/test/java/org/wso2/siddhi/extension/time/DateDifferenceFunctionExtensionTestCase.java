@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class DateDifferenceFunctionExtensionTestCase {
 
@@ -63,10 +64,10 @@ public class DateDifferenceFunctionExtensionTestCase {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
 
                 eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
+                for (int cnt = 0; cnt < inEvents.length; cnt++) {
                     count++;
-                    log.info("Event : " + count + ",dateDifference : " + inEvents[cnt].getData(1) +"," +
-                            "dateDifferenceInMilliseconds : "+inEvents[cnt].getData(2) );
+                    log.info("Event : " + count + ",dateDifference : " + inEvents[cnt].getData(1) + "," +
+                            "dateDifferenceInMilliseconds : " + inEvents[cnt].getData(2));
 
                 }
             }
@@ -75,14 +76,299 @@ public class DateDifferenceFunctionExtensionTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss",
-                "2014-11-9 13:23:44", "yyyy-MM-dd HH:mm:ss",1415692424000L,1415519624000L});
+                "2014-11-9 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 1415519624000L});
         inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss",
-                "2014-10-9 13:23:44", "yyyy-MM-dd HH:mm:ss",1415692424000L,1412841224000L});
+                "2014-10-9 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 1412841224000L});
         inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss",
-                "2013-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss",1415692424000L,1384156424000L});
+                "2013-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 1384156424000L});
         Thread.sleep(1000);
         Assert.assertEquals(3, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
+    @Test
+    public void dateDifferenceFunctionExtensionTest2() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionFirstDateInvalidFormatTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 string,dateValue2 string,dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+
+                eventArrived = true;
+                for (int cnt = 0; cnt < inEvents.length; cnt++) {
+                    count++;
+                    log.info("Event : " + count + ",dateDifference : " + inEvents[cnt].getData(1) + "," +
+                            "dateDifferenceInMilliseconds : " + inEvents[cnt].getData(2));
+
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2014:11:11 13:23:44", "yyyy-MM-dd HH:mm:ss",
+                "2014-11-9 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 1415519624000L});
+        Thread.sleep(1000);
+        Assert.assertEquals(1, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void dateDifferenceFunctionExtensionTest3() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionSecondDateInvalidFormatTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 string,dateValue2 string,dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+
+                eventArrived = true;
+                for (int cnt = 0; cnt < inEvents.length; cnt++) {
+                    count++;
+                    log.info("Event : " + count + ",dateDifference : " + inEvents[cnt].getData(1) + "," +
+                            "dateDifferenceInMilliseconds : " + inEvents[cnt].getData(2));
+
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss",
+                "2014:11:9 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 1415519624000L});
+        Thread.sleep(1000);
+        Assert.assertEquals(1, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateDifferenceFunctionExtension4() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionInvalidParameterTypeInFirstArgument");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 int,dateFormat1 string,dateValue2 string,dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateDifferenceFunctionExtension5() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionInvalidParameterTypeInSecondArgument");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 string,dateValue2 int,dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateDifferenceFunctionExtension6() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionInvalidParameterTypeInThirdArgument");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 int,dateValue2 string,dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateDifferenceFunctionExtension7() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionInvalidParameterTypeInFourthArgument");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 string,dateValue2 string,dateFormat2 int," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void dateDifferenceFunctionExtension8() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionFirstArgumetNullTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 string,dateValue2 string,dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+
+                eventArrived = true;
+                for (int cnt = 0; cnt < inEvents.length; cnt++) {
+                    count++;
+                    log.info("Event : " + count + ",dateDifference : " + inEvents[cnt].getData(1) + "," +
+                            "dateDifferenceInMilliseconds : " + inEvents[cnt].getData(2));
+
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", null, "yyyy-MM-dd HH:mm:ss",
+                "2014-11-9 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 1415519624000L});
+        Thread.sleep(1000);
+        Assert.assertEquals(1, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void dateDifferenceFunctionExtension9() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionThirdArgumetNullTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 string,dateValue2 string,dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+
+                eventArrived = true;
+                for (int cnt = 0; cnt < inEvents.length; cnt++) {
+                    count++;
+                    log.info("Event : " + count + ",dateDifference : " + inEvents[cnt].getData(1) + "," +
+                            "dateDifferenceInMilliseconds : " + inEvents[cnt].getData(2));
+
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", null,
+                "2014-11-9 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 1415519624000L});
+        Thread.sleep(1000);
+        Assert.assertEquals(1, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void dateDifferenceFunctionExtension10() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionSecondArgumetNullTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 string,dateValue2 string,dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+
+                eventArrived = true;
+                for (int cnt = 0; cnt < inEvents.length; cnt++) {
+                    count++;
+                    log.info("Event : " + count + ",dateDifference : " + inEvents[cnt].getData(1) + "," +
+                            "dateDifferenceInMilliseconds : " + inEvents[cnt].getData(2));
+
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss",
+                null, "yyyy-MM-dd HH:mm:ss", 1415692424000L, 1415519624000L});
+
+        Thread.sleep(1000);
+        Assert.assertEquals(1, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
 }
+
+
+
