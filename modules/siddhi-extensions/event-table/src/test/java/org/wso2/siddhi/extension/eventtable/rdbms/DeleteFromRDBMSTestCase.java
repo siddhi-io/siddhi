@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 
 import javax.sql.DataSource;
@@ -591,6 +592,52 @@ public class DeleteFromRDBMSTestCase {
                 } catch (NullPointerException ex){
                     Assert.fail("Cannot Process null values in bloom filter");
                 }
+            }
+        } catch (SQLException e) {
+            log.info("Test case ignored due to DB connection unavailability");
+        }
+
+    }
+
+    @Test(expected = ExecutionPlanRuntimeException.class)
+    public void deleteFromRDBMSTableTest12() throws InterruptedException {
+
+        log.info("deleteFromTableTest12 : fail delete operation");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setDataSource(RDBMSTestConstants.DATA_SOURCE_NAME, dataSource);
+        try {
+            if (dataSource.getConnection() != null) {
+                DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_NAME);
+
+                String streams = "" +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                        "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_NAME + "')  " +
+                        "define table StockTable (symbol_not_exists string, price float, volume long); ";
+
+                String query = "" +
+                        "@info(name = 'query1') " +
+                        "from StockStream " +
+                        "delete StockTable " +
+                        "   on StockTable.symbol_not_exists == symbol ;";
+
+                ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+                InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
+                InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
+
+                executionPlanRuntime.start();
+
+                stockStream.send(new Object[]{"WSO2", 55.6f, 100l});
+                stockStream.send(new Object[]{"IBM", 75.6f, 100l});
+                stockStream.send(new Object[]{"WSO2", 57.6f, 100l});
+                deleteStockStream.send(new Object[]{"IBM", 57.6f, 100l});
+                deleteStockStream.send(new Object[]{"WSO2", 57.6f, 100l});
+
+                Thread.sleep(1000);
+                executionPlanRuntime.shutdown();
+
             }
         } catch (SQLException e) {
             log.info("Test case ignored due to DB connection unavailability");
