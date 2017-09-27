@@ -442,6 +442,7 @@ public class DateDifferenceFunctionExtensionTestCase {
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void dateDifferenceFunctionExtension12() throws InterruptedException {
 
@@ -462,6 +463,7 @@ public class DateDifferenceFunctionExtensionTestCase {
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
+
     @Test
     public void dateDifferenceFunctionExtension13() throws InterruptedException {
 
@@ -503,6 +505,8 @@ public class DateDifferenceFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
+
 }
 
 

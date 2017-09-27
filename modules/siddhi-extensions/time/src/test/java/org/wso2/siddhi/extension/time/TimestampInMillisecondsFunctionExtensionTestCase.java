@@ -57,7 +57,8 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (int cnt = 0; cnt < inEvents.length; cnt++) {
@@ -92,7 +93,8 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (int cnt = 0; cnt < inEvents.length; cnt++) {
@@ -127,7 +129,8 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (int cnt = 0; cnt < inEvents.length; cnt++) {
@@ -146,6 +149,7 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
     @Test
     public void timestampInMillisecondsWithAllArgumentsFunctionExtension2() throws InterruptedException {
 
@@ -163,7 +167,8 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
                 query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
                     count++;
@@ -184,7 +189,8 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
-    @Test(expected=ExecutionPlanValidationException.class)
+
+    @Test(expected = ExecutionPlanValidationException.class)
     public void timestampInMillisecondsWithAllArgumentsFunctionExtension3() throws InterruptedException {
 
         log.info("TimestampInMillisecondsWithAllArgumentsFunctionExtensionInvalidNoOfArgumentsTestCase");
@@ -201,7 +207,8 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
                 query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
                     count++;

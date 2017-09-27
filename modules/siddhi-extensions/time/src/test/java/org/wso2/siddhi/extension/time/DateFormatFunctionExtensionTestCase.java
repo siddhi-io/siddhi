@@ -67,7 +67,7 @@ public class DateFormatFunctionExtensionTestCase {
                 for (int cnt = 0; cnt < inEvents.length; cnt++) {
                     count++;
                     log.info("Event : " + count + ",formattedDate : " + inEvents[cnt].getData(1) + "," +
-                                     "formattedMillsDate : " + inEvents[cnt].getData(2));
+                            "formattedMillsDate : " + inEvents[cnt].getData(2));
 
                 }
             }
@@ -78,7 +78,7 @@ public class DateFormatFunctionExtensionTestCase {
         inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, "ss"});
         inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, "ss"});
         inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44.657", "yyyy-MM-dd HH:mm:ss.SSS", 1415692424000L,
-                                       "yyyy-MM-dd"});
+                "yyyy-MM-dd"});
         Thread.sleep(100);
         Assert.assertEquals(3, count);
         Assert.assertTrue(eventArrived);
@@ -124,9 +124,9 @@ public class DateFormatFunctionExtensionTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", "2014:11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L,
-                                       "yyyy-MM-dd"});
+                "yyyy-MM-dd"});
         inputHandler.send(new Object[]{"IBM", "2014:12-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L,
-                                       "yyyy-MM-dd"});
+                "yyyy-MM-dd"});
         Thread.sleep(100);
         Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
@@ -326,9 +326,8 @@ public class DateFormatFunctionExtensionTestCase {
                     }
                     if (count == 2) {
                         Assert.assertEquals(null, event.getData(1));
-                        Assert.assertEquals("44",event.getData(2));
+                        Assert.assertEquals("44", event.getData(2));
                     }
-
                 }
             }
         });
@@ -341,6 +340,7 @@ public class DateFormatFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
     @Test
     public void dateFormatFunctionExtension10() throws InterruptedException {
 
@@ -369,11 +369,10 @@ public class DateFormatFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(2));
                     }
                     if (count == 2) {
-                        Assert.assertEquals("44",event.getData(1));
+                        Assert.assertEquals("44", event.getData(1));
                         Assert.assertEquals(null, event.getData(2));
 
                     }
-
                 }
             }
         });

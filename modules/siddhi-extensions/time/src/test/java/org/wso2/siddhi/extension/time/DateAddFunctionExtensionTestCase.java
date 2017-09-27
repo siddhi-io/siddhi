@@ -57,7 +57,7 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
@@ -88,13 +88,14 @@ public class DateAddFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[] { "IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L,2 });
-        inputHandler.send(new Object[] { "IBM", "2010-05-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L,2 });
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
+        inputHandler.send(new Object[]{"IBM", "2010-05-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
         SiddhiTestHelper.waitForEvents(100, 2, count, 60000);
         Assert.assertEquals(2, count.get());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void dateAddFunctionExtension2() throws InterruptedException {
 
@@ -107,13 +108,14 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void dateAddFunctionExtension3() throws InterruptedException {
 
@@ -126,13 +128,14 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void dateAddFunctionExtension4() throws InterruptedException {
 
@@ -145,13 +148,14 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
+
     @Test
     public void dateAddFunctionExtension5() throws InterruptedException {
 
@@ -164,7 +168,7 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
@@ -195,13 +199,14 @@ public class DateAddFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[] { "IBM", null, "yyyy-MM-dd HH:mm:ss", 1415692424000L,2 });
-        inputHandler.send(new Object[] { "IBM", "2010-05-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L,2 });
+        inputHandler.send(new Object[]{"IBM", null, "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
+        inputHandler.send(new Object[]{"IBM", "2010-05-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
         SiddhiTestHelper.waitForEvents(100, 2, count, 60000);
         Assert.assertEquals(2, count.get());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
     @Test
     public void dateAddFunctionExtension6() throws InterruptedException {
 
@@ -214,7 +219,7 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
@@ -245,13 +250,14 @@ public class DateAddFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[] { "IBM", "2014-11-11 13:23:44", null, 1415692424000L,2 });
-        inputHandler.send(new Object[] { "IBM", "2010-05-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L,2 });
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", null, 1415692424000L, 2});
+        inputHandler.send(new Object[]{"IBM", "2010-05-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
         SiddhiTestHelper.waitForEvents(100, 2, count, 60000);
         Assert.assertEquals(2, count.get());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
     @Test
     public void dateAddFunctionExtension7() throws InterruptedException {
 
@@ -264,7 +270,7 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
@@ -295,13 +301,14 @@ public class DateAddFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[] { "IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L,null });
-        inputHandler.send(new Object[] { "IBM", "2010-05-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L,2 });
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, null});
+        inputHandler.send(new Object[]{"IBM", "2010-05-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
         SiddhiTestHelper.waitForEvents(100, 2, count, 60000);
         Assert.assertEquals(2, count.get());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void dateAddFunctionExtension8() throws InterruptedException {
 
@@ -314,7 +321,7 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
@@ -336,7 +343,7 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
@@ -367,13 +374,14 @@ public class DateAddFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[] { "IBM", "2014:11:11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L,2 });
-        inputHandler.send(new Object[] { "IBM", "2010:05:11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L,2 });
+        inputHandler.send(new Object[]{"IBM", "2014:11:11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
+        inputHandler.send(new Object[]{"IBM", "2010:05:11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
         SiddhiTestHelper.waitForEvents(100, 2, count, 60000);
         Assert.assertEquals(2, count.get());
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void dateAddFunctionExtension10() throws InterruptedException {
 
@@ -387,13 +395,14 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,'YEAR',unit) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void dateAddFunctionExtension11() throws InterruptedException {
 
@@ -407,13 +416,14 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,'YEAR',unit) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void dateAddFunctionExtension12() throws InterruptedException {
 
@@ -427,13 +437,14 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,unit) as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,unit) as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void dateAddFunctionExtension13() throws InterruptedException {
 
@@ -446,7 +457,7 @@ public class DateAddFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
-                "time:dateAdd(timestampInMilliseconds,expr,unit) as yearAddedMills "+
+                "time:dateAdd(timestampInMilliseconds,expr,unit) as yearAddedMills " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);

@@ -133,6 +133,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void extractDayOfWeekFunctionExtension3() throws InterruptedException {
 
@@ -150,6 +151,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void extractDayOfWeekFunctionExtension4() throws InterruptedException {
 
@@ -167,6 +169,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
+
     @Test
     public void extractDayOfWeekFunctionExtension5() throws InterruptedException {
         log.info("ExtractDayOfWeekFunctionExtensionTestCaseFirstArgumentNull");
@@ -201,6 +204,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
         inputHandler.send(new Object[]{"IBM", null});
         executionPlanRuntime.shutdown();
     }
+
     @Test
     public void extractDayOfWeekFunctionExtension6() throws InterruptedException {
         log.info("ExtractDayOfWeekFunctionExtensionTestCaseSecondArgumentNull");
@@ -235,6 +239,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
         inputHandler.send(new Object[]{"IBM", "2014-12-11 13:23:44.657", null});
         executionPlanRuntime.shutdown();
     }
+
     @Test
     public void extractDayOfWeekFunctionExtension7() throws InterruptedException {
         log.info("ExtractDayOfWeekFunctionExtensionTestCaseInvalidFormat");
@@ -270,6 +275,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
         inputHandler.send(new Object[]{"IBM", "2014:12:11 13:23:44.657", "yyyy-MM-dd HH:mm:ss.SSS"});
         executionPlanRuntime.shutdown();
     }
+
     @Test
     public void extractDayOfWeekFunctionExtension8() throws InterruptedException {
         log.info("ExtractDayOfWeekFunctionExtensionTestCaseInvalidInput");
@@ -305,6 +311,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
         inputHandler.send(new Object[]{"IBM", null, "yyyy-MM-dd HH:mm:ss.SSS"});
         executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void extractDayOfWeekFunctionExtension9() throws InterruptedException {
         log.info("ExtractDayOfWeekFunctionExtensionTestCaseInvalidNoOFArguments");
@@ -322,7 +329,5 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
 
         executionPlanRuntime.shutdown();
     }
-
-
 
 }

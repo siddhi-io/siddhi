@@ -64,7 +64,7 @@ public class ExtractDateFunctionExtensionTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
+                for (int cnt = 0; cnt < inEvents.length; cnt++) {
                     count.incrementAndGet();
                     log.info("Event : " + count.get() + ",dateExtracted : " + inEvents[cnt].getData(1));
 
@@ -83,6 +83,7 @@ public class ExtractDateFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
 
     }
+
     @Test
     public void extractDateFunctionExtensionTest2() throws InterruptedException {
         log.info("ExtractDateFunctionExtensionWithInvalidFormatTestCase");
@@ -102,7 +103,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
-                    count.incrementAndGet();;
+                    count.incrementAndGet();
+                    ;
                     if (count.intValue() == 1) {
                         Assert.assertEquals(null, event.getData(1));
                     }
@@ -123,6 +125,7 @@ public class ExtractDateFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
 
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void extractDateFunctionExtension3() throws InterruptedException {
 
@@ -140,6 +143,7 @@ public class ExtractDateFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
 
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void extractDateFunctionExtension4() throws InterruptedException {
 
@@ -157,6 +161,7 @@ public class ExtractDateFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
 
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void extractDateFunctionExtension5() throws InterruptedException {
 
@@ -174,6 +179,7 @@ public class ExtractDateFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
 
     }
+
     @Test
     public void extractDateFunctionExtension6() throws InterruptedException {
 
@@ -195,7 +201,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
-                    count.incrementAndGet();;
+                    count.incrementAndGet();
+                    ;
                     if (count.intValue() == 1) {
                         Assert.assertEquals(null, event.getData(1));
                     }
@@ -211,6 +218,7 @@ public class ExtractDateFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
 
     }
+
     @Test
     public void extractDateFunctionExtension7() throws InterruptedException {
 
@@ -232,7 +240,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
-                    count.incrementAndGet();;
+                    count.incrementAndGet();
+                    ;
                     if (count.intValue() == 1) {
                         Assert.assertEquals(null, event.getData(1));
                     }
