@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class TimestampInMillisecondsFunctionExtensionTestCase {
 
@@ -56,7 +57,8 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (int cnt = 0; cnt < inEvents.length; cnt++) {
@@ -91,7 +93,8 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (int cnt = 0; cnt < inEvents.length; cnt++) {
@@ -126,7 +129,8 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (int cnt = 0; cnt < inEvents.length; cnt++) {
@@ -145,4 +149,85 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
+    @Test
+    public void timestampInMillisecondsWithAllArgumentsFunctionExtension2() throws InterruptedException {
+
+        log.info("TimestampInMillisecondsWithAllArgumentsFunctionExtensionInvalidFormatTypeTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:timestampInMilliseconds('2007:11:30 10:30:19','yyyy-MM-DD HH:MM:SS') as " +
+                "timestampInMillisecondsWithArguments, time:timestampInMilliseconds('2007-11-30 10:30:19.000') as " +
+                "withOnlyDate insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        eventArrived = true;
+                    }
+
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 100l});
+        Thread.sleep(100);
+        Assert.assertEquals(1, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void timestampInMillisecondsWithAllArgumentsFunctionExtension3() throws InterruptedException {
+
+        log.info("TimestampInMillisecondsWithAllArgumentsFunctionExtensionInvalidNoOfArgumentsTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:timestampInMilliseconds('2007-11-30 10:30:19','yyyy-MM-DD HH:MM:SS') as " +
+                "timestampInMillisecondsWithArguments, time:timestampInMilliseconds('2007-11-30 10:30:19.000'," +
+                "'2007-11-30 10:30:19','2006-11-30 10:30:19') as withOnlyDate insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        eventArrived = true;
+                    }
+
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 100l});
+        Thread.sleep(100);
+        Assert.assertEquals(1, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
 }
