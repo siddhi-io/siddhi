@@ -87,8 +87,51 @@ public class RegexpFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test (expected = ExecutionPlanValidationException.class)
+    @Test
     public void testRegexpFunctionExtension2() throws InterruptedException {
+        log.info("RegexpFunctionExtension TestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex int);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , str:regexp(symbol, '^WSO2(.*)') as beginsWithWSO2 " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        Assert.assertEquals(false, event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 2) {
+                        Assert.assertEquals(true, event.getData(1));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 3) {
+                        Assert.assertEquals(false, event.getData(1));
+                        eventArrived = true;
+                    }
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"hello hi hello", 700f, 1});
+        inputHandler.send(new Object[]{"WSO2 abcdh", 60.5f, 1});
+        inputHandler.send(new Object[]{"aaWSO2 hi hello", 60.5f, 1});
+        SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
+        Assert.assertEquals(3, count.get());
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test (expected = ExecutionPlanValidationException.class)
+    public void testRegexpFunctionExtension3() throws InterruptedException {
         log.info("RegexpFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -102,7 +145,7 @@ public class RegexpFunctionExtensionTestCase {
     }
 
     @Test (expected = ExecutionPlanValidationException.class)
-    public void testRegexpFunctionExtension3() throws InterruptedException {
+    public void testRegexpFunctionExtension4() throws InterruptedException {
         log.info("RegexpFunctionExtension TestCase with invalid datatype");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -116,7 +159,7 @@ public class RegexpFunctionExtensionTestCase {
     }
 
     @Test (expected = ExecutionPlanValidationException.class)
-    public void testRegexpFunctionExtension4() throws InterruptedException {
+    public void testRegexpFunctionExtension5() throws InterruptedException {
         log.info("RegexpFunctionExtension TestCase with invalid datatype");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -130,7 +173,7 @@ public class RegexpFunctionExtensionTestCase {
     }
 
     @Test
-    public void testRegexpFunctionExtension5() throws InterruptedException {
+    public void testRegexpFunctionExtension6() throws InterruptedException {
         log.info("RegexpFunctionExtension TestCase with null value");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -146,7 +189,7 @@ public class RegexpFunctionExtensionTestCase {
     }
 
     @Test
-    public void testRegexpFunctionExtension6() throws InterruptedException {
+    public void testRegexpFunctionExtension7() throws InterruptedException {
         log.info("RegexpFunctionExtension TestCase with null value");
         SiddhiManager siddhiManager = new SiddhiManager();
 
