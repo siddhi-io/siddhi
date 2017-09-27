@@ -2,19 +2,18 @@
 
 ## Introduction
 
-Siddhi Streaming SQL is designed to process event streams in streaming manner, detect complex event occurrences, 
+Siddhi Streaming SQL is designed to process event streams in a streaming manner, detect complex event occurrences, 
 and notify them in real-time. 
 
 ## Siddhi Application
 Streaming processing and Complex Event Processing rules can be written is Siddhi Streaming SQL and they can be put 
-together as `SiddhiApp` in one file. 
+together as a `SiddhiApp` in a single file. 
 
 **Purpose**
 
-Each Siddhi Application is an isolated processing unit that let you deploy and 
-execute queries independent of other SiddhiApps in the system.
+Each Siddhi Application is an isolated processing unit that allows you to deploy and execute queries independent of other Siddhi applications in the system.
 
-The flowing diagram depicts how **event flows** within some of the key Siddhi Streaming SQL elements 
+The following diagram depicts how **event flows** work with some of the key Siddhi Streaming SQL elements 
 of the Siddhi Application.
 
 ![Event Flow](../images/event-flow.png?raw=true "Event Flow")
@@ -23,21 +22,21 @@ Below table provides brief description of a few key elements in the Siddhi Strea
 
 | Elements     | Description |
 | ------------- |-------------|
-| Stream    | A logical series of events ordered in time with a uniquely identifiable name and set of defined typed attributes defining it's schema |
-| Event     | An event is associated with only one stream, and all events of that stream have an identical set of attributes assigned specific types (or the same schema). An event contains a timestamp and set of attribute values according to the schema.|
-| Table     | A structured representation of stored data with a defined schema. Stored data can be backed by `In-Memory`, `RDBMs`, `MongoDB`, etc to be accessed and manipulated at runtime.
-| Query	    | A logical construct that process events in streaming manner by combining existing streams and/or tables, and generates events to output stream or table. A query consumes one or more input streams and zero or one table, process those events in a streaming manner, publishes the output events to stream or tables for further processing or notifications. 
-| Source    | A contract that consumes data from external sources (such as `TCP`, `Kafka`, `HTTP`, etc), converts it's data format (such as `XML`, `JSON`, `binary`, etc) to Siddhi event, and passes that to a Stream for processing.
-| Sink      | A contract that takes events arriving at a Stream, map them to a predefined data format (such as `XML`, `JSON`, `binary`, etc), and publish them to external endpoints (such as `E-mail`, `TCP`, `Kafka`, `HTTP`, etc).
-| Input Handler | A mechanism to programmatically inject events into Streams. |
-| Stream/Query Callback | A mechanism to programmatically consumes output events from Streams and Queries. |
-| Partition	| A logical container that isolates processing of queries based on partition keys. Here separate instance of queries will be generated for each partition key to achieve isolation. 
-| Inner Stream | A positionable stream that connects portioned queries within their partitions preserving isolation.  
+| Stream    | A logical series of events ordered in time with a uniquely identifiable name, and set of defined attributes with specific data types defining its schema. |
+| Event     | An event is associated with only one stream, and all events of that stream have an identical set of attributes that are assigned specific types (or the same schema). An event contains a timestamp and set of attribute values according to the schema.|
+| Table     | A structured representation of data stored with a defined schema. Stored data can be backed by `In-Memory`, `RDBMs`, `MongoDB`, etc. to be accessed and manipulated at runtime.
+| Query	    | A logical construct that processes events in streaming manner by combining existing streams and/or tables, and generates events to an output stream or table. A query consumes one or more input streams, and zero or one table. Then it processes these events in a streaming manner and publishes the output events to streams or tables for further processing or to generate notifications. 
+| Source    | A contract that consumes data from external sources (such as `TCP`, `Kafka`, `HTTP`, etc)in the form of events, then converts each event (which can be in `XML`, `JSON`, `binary`, etc. format) to a Siddhi event, and passes that to a Stream for processing.
+| Sink      | A contract that takes events arriving at a stream, maps them to a predefined data format (such as `XML`, `JSON`, `binary`, etc), and publishes them to external endpoints (such as `E-mail`, `TCP`, `Kafka`, `HTTP`, etc).
+| Input Handler | A mechanism to programmatically inject events into streams. |
+| Stream/Query Callback | A mechanism to programmatically consume output events from streams and queries. |
+| Partition	| A logical container that isolates the processing of queries based on partition keys. Here, a separate instance of queries is generated for each partition key to achieve isolation. 
+| Inner Stream | A positionable stream that connects portioned queries within their partitions, preserving isolation.  
 
 **Grammar**
 
-The element of Siddhi SQL can be composed together as a script in Siddhi App, Here each construct should be separated 
-by a semicolon ( ; ). 
+An element of Siddhi SQL can be composed together as a script in a Siddhi application, Here each construct must be separated 
+by a semicolon `( ; )` as shown in the below syntax. 
 
 ```
 <siddhi app>  : 
