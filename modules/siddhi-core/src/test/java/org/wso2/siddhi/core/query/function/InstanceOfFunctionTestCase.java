@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class InstanceOfFunctionTestCase {
 
@@ -55,6 +56,51 @@ public class InstanceOfFunctionTestCase {
                 "from sensorEventStream " +
                 "select sensorName ,instanceOfLong(timestamp) as valid, timestamp " +
                 "insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(sensorEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(true, inEvent.getData(1));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(false, inEvent.getData(1));
+                    }
+                    eventArrived = true;
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("sensorEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{19900813115534l, false, 601, "temperature", 90.34344, 20.44345, 2.3f, 20.44345});
+        inputHandler.send(new Object[]{1990, false, 602, "temperature", 90.34344, 20.44345, 2.3f, 20.44345});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInstanceOfLongFunctionExtensionExceptionTestCase() throws InterruptedException {
+        log.info("testInstanceOfLongFunctionExtensionException TestCase");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String sensorEventStream = "define stream sensorEventStream (timestamp long, " +
+                                   "isPowerSaverEnabled bool, sensorId int , sensorName string, longitude double, latitude double, " +
+                                   "humidity float, sensorValue double);";
+
+        String query = ("@info(name = 'query1') " +
+                        "from sensorEventStream " +
+                        "select sensorName ,instanceOfLong(timestamp,sensorId) as valid, timestamp " +
+                        "insert into outputStream;");
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(sensorEventStream + query);
 
@@ -132,6 +178,52 @@ public class InstanceOfFunctionTestCase {
 
     }
 
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInstanceOfBooleanFunctionExtensionExceptionTestCase() throws InterruptedException {
+        log.info("testInstanceOfBooleanFunctionExtensionException TestCase");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String sensorEventStream = "define stream sensorEventStream (timestamp long, " +
+                                   "isPowerSaverEnabled bool, sensorId int , sensorName string, longitude double, latitude double, " +
+                                   "humidity float, sensorValue double);";
+
+        String query = ("@info(name = 'query1') " +
+                        "from sensorEventStream " +
+                        "select sensorName ,instanceOfBoolean(isPowerSaverEnabled,sensorName) as valid, isPowerSaverEnabled " +
+                        "insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(sensorEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(true, inEvent.getData(1));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(false, inEvent.getData(1));
+                    }
+                    eventArrived = true;
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("sensorEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{19900813115534l, false, 601, "temperature", 90.34344, 20.44345, 2.3f, 20.44345});
+        inputHandler.send(new Object[]{19900813115534l, "notAvailable", 602, "temperature", 90.34344, 20.44345, 2.3f,
+                                       20.44345});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+
     @Test
     public void testInstanceOfIntegerFunctionExtensionTestCase() throws InterruptedException {
         log.info("testInstanceOfIntegerFunctionExtension TestCase");
@@ -178,6 +270,52 @@ public class InstanceOfFunctionTestCase {
 
     }
 
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInstanceOfIntegerFunctionExtensionExceptionTestCase() throws InterruptedException {
+        log.info("testInstanceOfIntegerFunctionExtensionException TestCase");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String sensorEventStream = "define stream sensorEventStream (timestamp long, " +
+                                   "isPowerSaverEnabled bool, sensorId int , sensorName string, longitude double, latitude double, " +
+                                   "humidity float, sensorValue double);";
+
+        String query = ("@info(name = 'query1') " +
+                        "from sensorEventStream " +
+                        "select sensorName ,instanceOfInteger(sensorId,sensorName) as valid, sensorId " +
+                        "insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(sensorEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(true, inEvent.getData(1));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(false, inEvent.getData(1));
+                    }
+                    eventArrived = true;
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("sensorEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{19900813115534l, false, 601, "temperature", 90.34344, 20.44345, 2.3f, 20.44345});
+        inputHandler.send(new Object[]{19900813115534l, true, 60232434.657, "temperature", 90.34344, 20.44345, 2.3f,
+                                       20.44345});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+
     @Test
     public void testInstanceOfStringFunctionExtensionTestCase() throws InterruptedException {
         log.info("testInstanceOfStringFunctionExtension TestCase");
@@ -192,6 +330,51 @@ public class InstanceOfFunctionTestCase {
                 "from sensorEventStream " +
                 "select sensorName ,instanceOfString(sensorName) as valid " +
                 "insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(sensorEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(true, inEvent.getData(1));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(false, inEvent.getData(1));
+                    }
+                    eventArrived = true;
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("sensorEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{19900813115534l, false, 601, "temperature", 90.34344, 20.44345, 2.3f, 20.44345});
+        inputHandler.send(new Object[]{19900813115534l, true, 602, 90.34344, 90.34344, 20.44345, 2.3f, 20.44345});
+        Thread.sleep(1000);
+        junit.framework.Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInstanceOfStringFunctionExtensionExceptionTestCase() throws InterruptedException {
+        log.info("testInstanceOfStringFunctionExtensionException TestCase");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String sensorEventStream = "define stream sensorEventStream (timestamp long, " +
+                                   "isPowerSaverEnabled bool, sensorId int , sensorName string, longitude double, latitude double, " +
+                                   "humidity float, sensorValue double);";
+
+        String query = ("@info(name = 'query1') " +
+                        "from sensorEventStream " +
+                        "select sensorName ,instanceOfString(sensorName,sensorId) as valid " +
+                        "insert into outputStream;");
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(sensorEventStream + query);
 
@@ -268,6 +451,51 @@ public class InstanceOfFunctionTestCase {
 
     }
 
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInstanceOfDoubleFunctionExtensionExceptionTestCase() throws InterruptedException {
+        log.info("testInstanceOfDoubleFunctionExtensionException TestCase");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String sensorEventStream = "define stream sensorEventStream (timestamp long, " +
+                                   "isPowerSaverEnabled bool, sensorId int , sensorName string, longitude double, latitude double, " +
+                                   "humidity float, sensorValue double);";
+
+        String query = ("@info(name = 'query1') " +
+                        "from sensorEventStream " +
+                        "select sensorName ,instanceOfDouble(longitude,sensorName) as valid, longitude " +
+                        "insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(sensorEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(true, inEvent.getData(1));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(false, inEvent.getData(1));
+                    }
+                    eventArrived = true;
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("sensorEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{19900813115534l, false, 601, "temperature", 90.34344, 20.44345, 2.3f, 20.44345});
+        inputHandler.send(new Object[]{19900813115534l, true, 602, "temperature", "90.3434", 20.44345, 2.3f, 20.44345});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+
     @Test
     public void testInstanceOfFloatFunctionExtensionTestCase() throws InterruptedException {
         log.info("testInstanceOfFloatFunctionExtension TestCase");
@@ -282,6 +510,51 @@ public class InstanceOfFunctionTestCase {
                 "from sensorEventStream " +
                 "select sensorName ,instanceOfFloat(humidity) as valid, longitude " +
                 "insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(sensorEventStream + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event inEvent : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(true, inEvent.getData(1));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(false, inEvent.getData(1));
+                    }
+                    eventArrived = true;
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("sensorEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{19900813115534l, false, 601, "temperature", 90.34344, 20.44345, 2.3f, 20.44345});
+        inputHandler.send(new Object[]{19900813115534l, true, 602, "temperature", 90.34344, 20.44345, 2.3, 20.44345});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testInstanceOfFloatFunctionExtensionExceptionTestCase() throws InterruptedException {
+        log.info("testInstanceOfFloatFunctionExtensionException TestCase");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String sensorEventStream = "define stream sensorEventStream (timestamp long, " +
+                                   "isPowerSaverEnabled bool, sensorId int , sensorName string, longitude double, latitude double, " +
+                                   "humidity float, sensorValue double);";
+
+        String query = ("@info(name = 'query1') " +
+                        "from sensorEventStream " +
+                        "select sensorName ,instanceOfFloat(humidity,sensorName) as valid, longitude " +
+                        "insert into outputStream;");
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(sensorEventStream + query);
 
