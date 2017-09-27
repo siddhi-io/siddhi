@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.map.test.util.SiddhiTestHelper;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -52,9 +53,8 @@ public class PutFunctionExtensionTestCase {
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol,price, "
                 + "map:create() as tmpMap insert into tmpStream;"
-                + "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(tmpMap,symbol,price) as newmap"
-                + " insert into outputStream;"
-
+                + "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(tmpMap,symbol,price) "
+                + "as newmap insert into outputStream;"
         );
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
@@ -84,7 +84,6 @@ public class PutFunctionExtensionTestCase {
             }
         });
 
-
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100, 100l});
@@ -104,11 +103,13 @@ public class PutFunctionExtensionTestCase {
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol,price, "
                 + "map:create() as tmpMap insert into tmpStream;"
-                + "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(map:put(map:create(),'CHECK ID',1000),symbol,price) as newmap"
+                + "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(map:put(map:create(),"
+                + "'CHECK ID',1000),symbol,price) as newmap"
                 + " insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -134,7 +135,6 @@ public class PutFunctionExtensionTestCase {
             }
         });
 
-
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100, 100l});
@@ -143,6 +143,25 @@ public class PutFunctionExtensionTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
         Assert.assertEquals(3, count.get());
         Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testPutFunctionExtension1() throws InterruptedException {
+        log.info("PutFunctionExtension TestCase with test attributeExpressionExecutors length");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol,price, "
+                + "map:create() as tmpMap insert into tmpStream;"
+                + "@info(name = 'query2') from tmpStream  select symbol,price,tmpMap, map:put(tmpMap,symbol) as newmap"
+                + " insert into outputStream;"
+        );
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+
+        executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 }

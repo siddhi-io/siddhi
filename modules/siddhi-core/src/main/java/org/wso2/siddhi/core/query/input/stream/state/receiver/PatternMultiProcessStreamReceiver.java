@@ -18,8 +18,6 @@
 
 package org.wso2.siddhi.core.query.input.stream.state.receiver;
 
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.input.StateMultiProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.state.PreStateProcessor;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
@@ -46,30 +44,5 @@ public class PatternMultiProcessStreamReceiver extends StateMultiProcessStreamRe
                 preStateProcessor.updateState();
             }
         }
-    }
-
-    @Override
-    public void receive(ComplexEvent complexEvent) {
-        super.receive(complexEvent);
-    }
-
-    @Override
-    public void receive(Event event) {
-        super.receive(event);
-    }
-
-    @Override
-    public void receive(Event[] events) {
-        super.receive(events);
-    }
-
-    @Override
-    public void receive(Event event, boolean endOfBatch) {
-        super.receive(event, endOfBatch);
-    }
-
-    @Override
-    public void receive(long timeStamp, Object[] data) {
-        super.receive(timeStamp, data);
     }
 }

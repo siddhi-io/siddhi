@@ -79,10 +79,6 @@ public class StateStreamRuntime implements StreamRuntime {
         this.innerStateRuntime = innerStateRuntime;
     }
 
-    public InnerStateRuntime getInnerStateRuntime() {
-        return innerStateRuntime;
-    }
-
     public void resetAndUpdate() {
         innerStateRuntime.reset();
         innerStateRuntime.update();

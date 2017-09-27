@@ -16,6 +16,7 @@
 
 package org.wso2.siddhi.core.query.output.callback;
 
+import org.wso2.siddhi.core.debugger.SiddhiDebugger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.window.EventWindow;
@@ -36,6 +37,8 @@ public class InsertIntoWindowCallback extends OutputCallback {
      */
     private final StreamDefinition outputStreamDefinition;
 
+    private SiddhiDebugger siddhiDebugger;
+
     public InsertIntoWindowCallback(EventWindow eventWindow, StreamDefinition outputStreamDefinition) {
         this.eventWindow = eventWindow;
         this.outputStreamDefinition = outputStreamDefinition;
@@ -48,6 +51,9 @@ public class InsertIntoWindowCallback extends OutputCallback {
      */
     @Override
     public void send(ComplexEventChunk complexEventChunk) {
+        if (siddhiDebugger != null) {
+            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.OUT, complexEventChunk.getFirst());
+        }
         // If events are inserted directly from another window, expired events can arrive
         complexEventChunk.reset();
         while (complexEventChunk.hasNext()) {
@@ -57,6 +63,11 @@ public class InsertIntoWindowCallback extends OutputCallback {
             }
         }
         eventWindow.add(complexEventChunk);
+    }
+
+    @Override
+    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
+        this.siddhiDebugger = siddhiDebugger;
     }
 
     /**

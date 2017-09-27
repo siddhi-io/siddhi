@@ -39,6 +39,7 @@ public class ToXMLFunctionExtension extends FunctionExecutor {
     private Attribute.Type returnType = Attribute.Type.STRING;
     private String rootElement = null;
 
+
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
         if ((attributeExpressionExecutors.length) > 2) {
