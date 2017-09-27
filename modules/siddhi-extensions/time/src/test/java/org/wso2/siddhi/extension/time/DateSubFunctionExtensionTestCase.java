@@ -87,12 +87,16 @@ public class DateSubFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds long,expr int);";
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
+                "long,expr int);";
         String query = ("@info(name = 'query1') " +
-                "from inputStream select symbol ,time:dateSub(dateValue,expr) as yearSubtracted,time:dateSub(dateValue,expr," +
-                "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix "+
+                "from inputStream select symbol ,time:dateSub(dateValue,expr) as yearSubtracted,time:dateSub(" +
+                "dateValue,expr," +
+                "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') " +
+                "as yearSubtractedUnix "+
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
@@ -103,12 +107,16 @@ public class DateSubFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds long,expr String);";
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
+                "long,expr String);";
         String query = ("@info(name = 'query1') " +
-                "from inputStream select symbol ,time:dateSub(dateValue,expr,'year',dateFormat) as yearSubtracted,time:dateSub(dateValue,expr," +
-                "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix "+
+                "from inputStream select symbol ,time:dateSub(dateValue,expr,'year',dateFormat) as yearSubtracted," +
+                "time:dateSub(dateValue,expr," +
+                "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as " +
+                "yearSubtractedUnix "+
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
@@ -119,12 +127,16 @@ public class DateSubFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string,dateValue string,dateFormat int,timestampInMilliseconds long,expr int);";
+                "define stream inputStream (symbol string,dateValue string,dateFormat int,timestampInMilliseconds long," +
+                "expr int);";
         String query = ("@info(name = 'query1') " +
-                "from inputStream select symbol ,time:dateSub(dateValue,expr,'year',dateFormat) as yearSubtracted,time:dateSub(dateValue,expr," +
-                "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix "+
+                "from inputStream select symbol ,time:dateSub(dateValue,expr,'year',dateFormat) as yearSubtracted," +
+                "time:dateSub(dateValue,expr," +
+                "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as " +
+                "yearSubtractedUnix "+
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
@@ -135,12 +147,16 @@ public class DateSubFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string,dateValue int,dateFormat string,timestampInMilliseconds long,expr int);";
+                "define stream inputStream (symbol string,dateValue int,dateFormat string,timestampInMilliseconds " +
+                "long,expr int);";
         String query = ("@info(name = 'query1') " +
-                "from inputStream select symbol ,time:dateSub(dateValue,expr,'year',dateFormat) as yearSubtracted,time:dateSub(dateValue,expr," +
-                "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix "+
+                "from inputStream select symbol ,time:dateSub(dateValue,expr,'year',dateFormat) as yearSubtracted," +
+                "time:dateSub(dateValue,expr," +
+                "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as " +
+                "yearSubtractedUnix "+
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
+                + query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
@@ -151,30 +167,47 @@ public class DateSubFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds long,expr int);";
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
+                "long,expr int);";
         String query = ("@info(name = 'query1') " +
-                "from inputStream select symbol ,time:dateSub(dateValue,expr,'year',dateFormat) as yearSubtracted,time:dateSub(dateValue,expr," +
-                "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix "+
+                "from inputStream select symbol ,time:dateSub(dateValue,expr,'year',dateFormat) as yearSubtracted," +
+                "time:dateSub(dateValue,expr," +
+                "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as " +
+                "yearSubtractedUnix "+
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
+                for (Event event : inEvents) {
                     count++;
-                    log.info("Event : " + count + ",YEAR_SUBTRACTED : " + inEvents[cnt].getData(1) +"," +
-                            "MONTH_SUBTRACTED : "+inEvents[cnt].getData(2) + "," +
-                            "YEAR_SUBTRACTED_IN_MILLS : "+inEvents[cnt].getData(3));
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null, event.getData(2));
+                        Assert.assertEquals("1352620424000", event.getData(3));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null,event.getData(2));
+                        Assert.assertEquals("1352620424000", event.getData(3));
+                    }
+
                 }
             }
         });
 
+
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", "2014:11:11 13:23:44", "yyyy-MM-dd HH:mm:ss",1415692424000L,2});
+        inputHandler.send(new Object[]{"IBM", "2014,11,11 13:23:44", "yyyy-MM-dd HH:mm:ss",1415692424000L,2});
+        Thread.sleep(100);
+        Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
     @Test
@@ -196,11 +229,19 @@ public class DateSubFunctionExtensionTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
+                for (Event event : inEvents) {
                     count++;
-                    log.info("Event : " + count + ",YEAR_SUBTRACTED : " + inEvents[cnt].getData(1) +"," +
-                            "MONTH_SUBTRACTED : "+inEvents[cnt].getData(2) + "," +
-                            "YEAR_SUBTRACTED_IN_MILLS : "+inEvents[cnt].getData(3));
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null, event.getData(2));
+                        Assert.assertEquals("1352620424000", event.getData(3));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null,event.getData(2));
+                        Assert.assertEquals("1352620424000", event.getData(3));
+                    }
+
                 }
             }
         });
@@ -208,8 +249,9 @@ public class DateSubFunctionExtensionTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM",null, "yyyy-MM-dd HH:mm:ss",1415692424000L,2});
+        inputHandler.send(new Object[]{"IBM",null, "ss",1415692424000L,2});
         Thread.sleep(100);
-        Assert.assertEquals(1, count);
+        Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
@@ -232,20 +274,28 @@ public class DateSubFunctionExtensionTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
+                for (Event event : inEvents) {
                     count++;
-                    log.info("Event : " + count + ",YEAR_SUBTRACTED : " + inEvents[cnt].getData(1) +"," +
-                            "MONTH_SUBTRACTED : "+inEvents[cnt].getData(2) + "," +
-                            "YEAR_SUBTRACTED_IN_MILLS : "+inEvents[cnt].getData(3));
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null, event.getData(2));
+                        Assert.assertEquals("1352620424000", event.getData(3));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null,event.getData(2));
+                        Assert.assertEquals("1352620424000", event.getData(3));
+                    }
+
                 }
             }
         });
-
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM","2014-11-11 13:23:44", null,1415692424000L,2});
+        inputHandler.send(new Object[]{"IBM","2015-11-11 13:23:44", null,1415692424000L,2});
         Thread.sleep(100);
-        Assert.assertEquals(1, count);
+        Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
@@ -268,20 +318,28 @@ public class DateSubFunctionExtensionTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
+                for (Event event : inEvents) {
                     count++;
-                    log.info("Event : " + count + ",YEAR_SUBTRACTED : " + inEvents[cnt].getData(1) +"," +
-                            "MONTH_SUBTRACTED : "+inEvents[cnt].getData(2) + "," +
-                            "YEAR_SUBTRACTED_IN_MILLS : "+inEvents[cnt].getData(3));
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null, event.getData(2));
+                        Assert.assertEquals(null, event.getData(3));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null,event.getData(2));
+                        Assert.assertEquals(null, event.getData(3));
+                    }
+
                 }
             }
         });
-
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM","2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss",1415692424000L,null});
+        inputHandler.send(new Object[]{"IBM","2011-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss",1415692424000L,null});
         Thread.sleep(100);
-        Assert.assertEquals(1, count);
+        Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
@@ -299,24 +357,76 @@ public class DateSubFunctionExtensionTestCase {
                 "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix "+
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateSubFunctionExtension11() throws InterruptedException {
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
-                    count++;
-                    log.info("Event : " + count + ",YEAR_SUBTRACTED : " + inEvents[cnt].getData(1) +"," +
-                            "MONTH_SUBTRACTED : "+inEvents[cnt].getData(2) + "," +
-                            "YEAR_SUBTRACTED_IN_MILLS : "+inEvents[cnt].getData(3));
-                }
-            }
-        });
+        log.info("DateSubFunctionExtensionTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
+                " long,unit int ,expr int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream select symbol ,time:dateSub(dateValue,expr,unit) as yearSubtracted,time:dateSub(dateValue,expr," +
+                "unit) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix "+
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateSubFunctionExtension12() throws InterruptedException {
+
+        log.info("DateSubFunctionExtensionTestCaseInvalidParameterFormatSecondArgumentLengthThree");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
+                " long,unit int ,expr string);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream select symbol ,time:dateSub(dateValue,expr," +
+                "unit) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix "+
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateSubFunctionExtension13() throws InterruptedException {
+
+        log.info("DateSubFunctionExtensionTestCaseInvalidParameterFormatThirdArgumentLengthThree");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
+                " long,unit int ,expr int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream select symbol ,time:dateSub(dateValue,expr," +
+                "unit) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix "+
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateSubFunctionExtension14() throws InterruptedException {
+
+        log.info("DateSubFunctionExtensionTestCaseInvalidParameterFormatFirstArgumentLengthThree");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue int,dateFormat string,timestampInMilliseconds" +
+                " long,unit int ,expr string);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream select symbol ,time:dateSub(dateValue,expr," +
+                "unit) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix "+
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
 }

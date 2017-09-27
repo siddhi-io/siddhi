@@ -374,4 +374,83 @@ public class DateAddFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateAddFunctionExtension10() throws InterruptedException {
+
+        log.info("DateAddFunctionExtensionTestCaseInvalidParameterTypeInFirstArgumentLengthThree");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue int,dateFormat string,timestampInMilliseconds " +
+                "long,unit string,expr int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateAdd(dateValue,'YEAR',unit) as yearAdded," +
+                "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateAddFunctionExtension11() throws InterruptedException {
+
+        log.info("DateAddFunctionExtensionTestCaseInvalidParameterTypeInSecondArgumentLengthThree");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
+                "long,unit int,expr int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateAdd(dateValue,'YEAR',unit) as yearAdded," +
+                "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills "+
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateAddFunctionExtension12() throws InterruptedException {
+
+        log.info("DateAddFunctionExtensionTestCaseForUnitValueConstant");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
+                "long,unit string,expr int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
+                "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
+                "time:dateAdd(timestampInMilliseconds,expr,unit) as yearAddedMills "+
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateAddFunctionExtension13() throws InterruptedException {
+
+        log.info("DateAddFunctionExtensionTestCaseInvalidParameterTypeInThirdArgumentElseCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
+                " long,unit int,expr int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
+                "time:dateAdd(timestampInMilliseconds,expr,unit) as yearAddedMills "+
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
 }

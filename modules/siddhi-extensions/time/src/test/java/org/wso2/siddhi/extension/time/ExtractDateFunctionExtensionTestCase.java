@@ -101,20 +101,25 @@ public class ExtractDateFunctionExtensionTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
-                    count.incrementAndGet();
-                    log.info("Event : " + count.get() + ",dateExtracted : " + inEvents[cnt].getData(1));
-
+                for (Event event : inEvents) {
+                    count.incrementAndGet();;
+                    if (count.intValue() == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                    }
+                    if (count.intValue() == 2) {
+                        Assert.assertEquals(null, event.getData(1));
+                    }
                 }
             }
         });
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{"XYZ", "2014:11:11", "yyyy-MM-dd"});
+        inputHandler.send(new Object[]{"IBM", "2014:11:11", "yyyy-MM-dd"});
+        inputHandler.send(new Object[]{"IBM", "2014,11,11", "yyyy-MM-dd"});
         SiddhiTestHelper.waitForEvents(100, 1, count, 60000);
         executionPlanRuntime.shutdown();
-        Assert.assertEquals(1, count.get());
+        Assert.assertEquals(2, count.get());
         Assert.assertTrue(eventArrived);
 
     }
@@ -189,14 +194,14 @@ public class ExtractDateFunctionExtensionTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
-                    count.incrementAndGet();
-                    log.info("Event : " + count.get() + ",dateExtracted : " + inEvents[cnt].getData(1));
-
+                for (Event event : inEvents) {
+                    count.incrementAndGet();;
+                    if (count.intValue() == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                    }
                 }
             }
         });
-
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44.657", null});
@@ -226,13 +231,15 @@ public class ExtractDateFunctionExtensionTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
-                    count.incrementAndGet();
-                    log.info("Event : " + count.get() + ",dateExtracted : " + inEvents[cnt].getData(1));
-
+                for (Event event : inEvents) {
+                    count.incrementAndGet();;
+                    if (count.intValue() == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                    }
                 }
             }
         });
+
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();

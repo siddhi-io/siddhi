@@ -157,17 +157,21 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:timestampInMilliseconds('2007:11:30 10:30:19','yyyy-MM-DD HH:MM:SS') as " +
-                "timestampInMillisecondsWithArguments, time:timestampInMilliseconds('2007-11-30 10:30:19.000') as withOnlyDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+                "timestampInMillisecondsWithArguments, time:timestampInMilliseconds('2007-11-30 10:30:19.000') as " +
+                "withOnlyDate insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                eventArrived = true;
-                for (int cnt = 0; cnt < inEvents.length; cnt++) {
+                for (Event event : inEvents) {
                     count++;
-                    log.info(
-                            "Event : " + count + " timestampInMillisecondsWithAllArguments : " + inEvents[cnt].getData(1));
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        eventArrived = true;
+                    }
+
                 }
             }
         });
@@ -193,16 +197,19 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
                 "select symbol , time:timestampInMilliseconds('2007-11-30 10:30:19','yyyy-MM-DD HH:MM:SS') as " +
                 "timestampInMillisecondsWithArguments, time:timestampInMilliseconds('2007-11-30 10:30:19.000'," +
                 "'2007-11-30 10:30:19','2006-11-30 10:30:19') as withOnlyDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                eventArrived = true;
-                for (int cnt = 0; cnt < inEvents.length; cnt++) {
+                for (Event event : inEvents) {
                     count++;
-                    log.info(
-                            "Event : " + count + " timestampInMillisecondsWithAllArguments : " + inEvents[cnt].getData(1));
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        eventArrived = true;
+                    }
+
                 }
             }
         });
