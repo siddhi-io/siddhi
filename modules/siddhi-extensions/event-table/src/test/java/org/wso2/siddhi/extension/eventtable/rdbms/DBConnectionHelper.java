@@ -156,6 +156,26 @@ public class DBConnectionHelper {
 
     }
 
+    public long getRowsInTable(DataSource dataSource, String tableName) {
+
+        PreparedStatement stmt = null;
+        Connection con = null;
+        long count = 0;
+
+        try {
+            con = dataSource.getConnection();
+            stmt = con.prepareStatement("SELECT * FROM " + tableName + "");
+            ResultSet resultSet = stmt.executeQuery();
+            while (resultSet.next()) {
+                count++;
+            }
+        } catch (SQLException e) {
+            clearConnections(stmt, con);
+        }
+        return count;
+
+    }
+
     public void clearConnections(PreparedStatement stmt, Connection con) {
         if (stmt != null) {
             try {
