@@ -125,7 +125,24 @@ public class DBConnectionHelper {
             stmt = con.prepareStatement("" +
                     "INSERT INTO " + RDBMSTestConstants.TABLE_NAME +
                     " (symbol,price,volume) " +
-                    "VALUES('GOOGLE',2.0,3),('GOOGLE',3.0,4),('GOOGLE',5.0,6)");
+                    "VALUES('WSO2',2.0,3),('IBM',3.0,4),('GOOGLE',5.0,6)");
+            stmt.executeUpdate();
+            con.commit();
+
+        } catch (SQLException e) {
+            log.error("Error while insert test data into table", e);
+        } finally {
+            clearConnections(stmt, con);
+        }
+    }
+
+    public void insertTestDataIntoTableWithQuery(DataSource dataSource, String query) {
+        PreparedStatement stmt = null;
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+            con.setAutoCommit(false);
+            stmt = con.prepareStatement(query);
             stmt.executeUpdate();
             con.commit();
 
