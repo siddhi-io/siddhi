@@ -1284,12 +1284,12 @@ Partition key can be generation in two ways.
 
 * Partition by value
   
-    This is created by using an attribute value of the input stream.
+    This is created by generating unique values using input stream attributes.
 
     **Syntax**
     
     <pre>
-    partition with ( &lt;attribute name> of &lt;stream name>, &lt;attribute name> of &lt;stream name>, ... )
+    partition with ( &lt;expression> of &lt;stream name>, &lt;expression> of &lt;stream name>, ... )
     begin
         &lt;query>
         &lt;query>
