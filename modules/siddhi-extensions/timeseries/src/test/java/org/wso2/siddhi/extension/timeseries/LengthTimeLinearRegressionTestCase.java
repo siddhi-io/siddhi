@@ -275,10 +275,6 @@ public class LengthTimeLinearRegressionTestCase {
                 + "10000, y, x) select * " + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -293,9 +289,6 @@ public class LengthTimeLinearRegressionTestCase {
                 + " '2ndpara', y, x) select * " + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -310,9 +303,6 @@ public class LengthTimeLinearRegressionTestCase {
                 + "10000,1, y, x) select * " + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -327,10 +317,6 @@ public class LengthTimeLinearRegressionTestCase {
                 + "10000,1.0, y, x) select * " + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -345,10 +331,6 @@ public class LengthTimeLinearRegressionTestCase {
                 + "10000,1,2.0, y, x) select * " + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test

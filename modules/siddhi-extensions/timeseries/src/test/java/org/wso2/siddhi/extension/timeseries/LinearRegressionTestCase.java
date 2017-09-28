@@ -140,8 +140,6 @@ public class LinearRegressionTestCase {
                 + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream +
                                                                                                      executionPlan);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -155,9 +153,6 @@ public class LinearRegressionTestCase {
                 + "select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream +
                                                                                                      executionPlan);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -171,9 +166,6 @@ public class LinearRegressionTestCase {
                 + "select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream +
                                                                                                      executionPlan);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -188,9 +180,6 @@ public class LinearRegressionTestCase {
                 + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream +
                                                                                                      executionPlan);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test
@@ -375,15 +364,9 @@ public class LinearRegressionTestCase {
         String inputStream = "define stream InputStream (y double, symbol string, x double);";
 
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:forecast('1stpara', 1000, 0.95, "
-                + "x+2, y, x) "
-                + "select * "
-                + "insert into OutputStream;");
+                + "x+2, y, x) select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream +
                                                                                                      executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -394,15 +377,9 @@ public class LinearRegressionTestCase {
         String inputStream = "define stream InputStream (y double, symbol string, x double);";
 
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:forecast(2, '2ndpara', 0.95, "
-                + "x+2, y, x) "
-                + "select * "
-                + "insert into OutputStream;");
+                + "x+2, y, x) select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -413,15 +390,9 @@ public class LinearRegressionTestCase {
         String inputStream = "define stream InputStream (y double, symbol string, x double);";
 
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:forecast(2, 1000, 1, "
-                + "x+2, y, x) "
-                + "select * "
-                + "insert into OutputStream;");
+                + "x+2, y, x) select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -432,15 +403,9 @@ public class LinearRegressionTestCase {
         String inputStream = "define stream InputStream (y double, symbol string, x double);";
 
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:forecast(2, 1000, 2.0, "
-                + "x+2, y, x) "
-                + "select * "
-                + "insert into OutputStream;");
+                + "x+2, y, x) select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test
@@ -539,14 +504,9 @@ public class LinearRegressionTestCase {
         String inputStream = "define stream InputStream (y double, x double);";
 
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:outlier(1,'1stpara', y, x) "
-                + "select * "
-                + "insert into OutputStream;");
+                + "select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -557,14 +517,9 @@ public class LinearRegressionTestCase {
         String inputStream = "define stream InputStream (y double, x double);";
 
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:outlier(2,'2ndpara', y, x) "
-                + "select * "
-                + "insert into OutputStream;");
+                + "select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -575,14 +530,9 @@ public class LinearRegressionTestCase {
         String inputStream = "define stream InputStream (y double, x double);";
 
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:outlier(1,2,1, y, x) "
-                + "select * "
-                + "insert into OutputStream;");
+                + "select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -593,14 +543,9 @@ public class LinearRegressionTestCase {
         String inputStream = "define stream InputStream (y double, x double);";
 
         String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:outlier(1,2,2.0, y, x) "
-                + "select * "
-                + "insert into OutputStream;");
+                + "select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(
                 inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
     @Test
     public void discreteSeasonalityTest() throws Exception {

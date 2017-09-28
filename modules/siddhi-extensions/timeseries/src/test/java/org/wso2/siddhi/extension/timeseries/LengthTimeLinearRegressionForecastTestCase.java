@@ -233,9 +233,6 @@ public class LengthTimeLinearRegressionForecastTestCase {
                 "100000, x+2, 2, 0.95, y, x) select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream +
                                                                                                      executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -250,9 +247,6 @@ public class LengthTimeLinearRegressionForecastTestCase {
                 " '2ndpara', x+2, 2, 0.95, y, x) select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream +
                                                                                                      executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -266,9 +260,6 @@ public class LengthTimeLinearRegressionForecastTestCase {
 
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inputStream +
                                                                                                      executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -282,9 +273,6 @@ public class LengthTimeLinearRegressionForecastTestCase {
 
         ExecutionPlanRuntime executionPlanRuntime =
                 siddhiManager.createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -300,9 +288,6 @@ public class LengthTimeLinearRegressionForecastTestCase {
 
         ExecutionPlanRuntime executionPlanRuntime=siddhiManager.createExecutionPlanRuntime(inputStream +
                                                                                                    executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -317,8 +302,5 @@ public class LengthTimeLinearRegressionForecastTestCase {
                 " x, y) select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime=siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 }

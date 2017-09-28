@@ -227,10 +227,6 @@ public class LengthTimeLinearRegressionOutlierTestCase {
                 + "10000, 1, y, x) select * " + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -244,10 +240,6 @@ public class LengthTimeLinearRegressionOutlierTestCase {
                 + " '2ndpara', 1, y, x) select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -262,10 +254,6 @@ public class LengthTimeLinearRegressionOutlierTestCase {
                 + "select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -280,10 +268,6 @@ public class LengthTimeLinearRegressionOutlierTestCase {
                 + "select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -298,9 +282,5 @@ public class LengthTimeLinearRegressionOutlierTestCase {
                 + "select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 }

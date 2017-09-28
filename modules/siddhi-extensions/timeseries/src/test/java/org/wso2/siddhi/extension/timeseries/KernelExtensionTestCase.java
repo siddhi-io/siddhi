@@ -537,7 +537,6 @@ public class KernelExtensionTestCase {
         inputHandler.send(new Object[]{49d});
         inputHandler.send(new Object[]{48.35d});
 
-
         Thread.sleep(1000);
         Assert.assertEquals(5, count);
         Assert.assertTrue(eventArrived);
@@ -556,10 +555,6 @@ public class KernelExtensionTestCase {
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                                                                                                      query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
     @Test(expected = ExecutionPlanValidationException.class)
     public void testKernelMaxStreamProcessorExtension2() throws InterruptedException {
@@ -572,10 +567,6 @@ public class KernelExtensionTestCase {
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                                                                                                      query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -589,10 +580,6 @@ public class KernelExtensionTestCase {
                 + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                                                                                                      query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
-
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -605,9 +592,5 @@ public class KernelExtensionTestCase {
                 + "select * insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                                                                                                      query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
-
 }

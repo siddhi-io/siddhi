@@ -499,8 +499,6 @@ public class KalmanExtensionTestCase {
                 + "'min') select price, extremaType, id insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                                                                                                      query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -513,9 +511,6 @@ public class KalmanExtensionTestCase {
                 + "'max') select price, extremaType, id insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                                                                                                      query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -528,10 +523,8 @@ public class KalmanExtensionTestCase {
                 + "'max') select price, extremaType, id insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                                                                                                      query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
+
     @Test(expected = ExecutionPlanValidationException.class)
     public void testKalmanMaxStreamProcessorExtension4() throws InterruptedException {
         log.info("KalmanMax TestCase with test attributeExpressionExecutor[2]'s type");
@@ -543,9 +536,6 @@ public class KalmanExtensionTestCase {
                 + "'max') select price, extremaType, id insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                                                                                                      query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -559,8 +549,5 @@ public class KalmanExtensionTestCase {
                 + "'max') select price, extremaType, id insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                                                                                                      query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 }
