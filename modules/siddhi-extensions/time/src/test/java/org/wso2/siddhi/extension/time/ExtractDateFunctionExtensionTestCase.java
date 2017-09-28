@@ -95,7 +95,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateValue,dateFormat) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -138,7 +139,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateValue,dateFormat) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
 
@@ -156,7 +158,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateValue,dateFormat) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
 
@@ -174,7 +177,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateValue,dateFormat,dateValue) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
         executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
 
@@ -192,7 +196,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateFormat,dateValue) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
@@ -231,7 +236,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateFormat,dateValue) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {

@@ -289,7 +289,8 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -506,7 +507,110 @@ public class DateDifferenceFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateDifferenceFunctionExtension14() throws InterruptedException {
 
+        log.info("DateDifferenceFunctionExtensionTestCaseInvalidParameterTypeFirstArgumentLengthTwo");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 int,dateFormat1 string,dateValue2 string," +
+                "dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateDifferenceFunctionExtension15() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionTestCaseInvalidParameterTypeSecondArgumentLengthTwo");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 string,dateValue2 int," +
+                "dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateDifferenceFunctionExtension16() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionTestCaseInvalidParameterTypeSecondArgumentLengthTwo");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 int,dateFormat1 string,dateValue2 string," +
+                "dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateDifferenceFunctionExtension17() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionTestCaseInvalidParameterTypeSecondArgumentLengthTwo");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 string,dateValue2 int," +
+                "dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateDifferenceFunctionExtension18() throws InterruptedException {
+
+        log.info("DateDifferenceFunctionExtensionTestCaseInvalidParameterTypeThirdArgumentLengthTwo");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue1 string,dateFormat1 int,dateValue2 string," +
+                "dateFormat2 string," +
+                "timestampInMilliseconds1 long,timestampInMilliseconds2 long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1) as dateDifference," +
+                "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
 }
 
 
