@@ -116,7 +116,6 @@ public class DateFormatFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals("2014-11-11", event.getData(2));
                     }
-
                 }
             }
         });
@@ -145,10 +144,7 @@ public class DateFormatFunctionExtensionTestCase {
                 "time:dateFormat(dateValue,targetFormat,sourceFormat) as formattedDate," +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -163,10 +159,7 @@ public class DateFormatFunctionExtensionTestCase {
                 "time:dateFormat(dateValue,targetFormat,sourceFormat) as formattedDate," +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -181,10 +174,7 @@ public class DateFormatFunctionExtensionTestCase {
                 "time:dateFormat(dateValue,targetFormat,sourceFormat) as formattedDate," +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -199,10 +189,7 @@ public class DateFormatFunctionExtensionTestCase {
                 "time:dateFormat(dateValue) as formattedDate," +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -237,7 +224,6 @@ public class DateFormatFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals("44", event.getData(2));
                     }
-
                 }
             }
         });
@@ -282,7 +268,6 @@ public class DateFormatFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals(null, event.getData(2));
                     }
-
                 }
             }
         });
@@ -371,7 +356,6 @@ public class DateFormatFunctionExtensionTestCase {
                     if (count == 2) {
                         Assert.assertEquals("44", event.getData(1));
                         Assert.assertEquals(null, event.getData(2));
-
                     }
                 }
             }
@@ -380,6 +364,135 @@ public class DateFormatFunctionExtensionTestCase {
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, "ss"});
         inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, "ss"});
+        Thread.sleep(100);
+        Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateFormatFunctionExtension11() throws InterruptedException {
+
+        log.info("DateFormatFunctionExtensionTestCaseInvalidParameterTypeFirstArgumentLenghtTwo");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string," +
+                "dateValue int,sourceFormat string,timestampInMilliseconds long,targetFormat string);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , " +
+                "time:dateFormat(dateValue,targetFormat) as formattedDate," +
+                "time:dateFormat(timestampInMilliseconds," +
+                "targetFormat) as formattedUnixDate insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateFormatFunctionExtension12() throws InterruptedException {
+
+        log.info("DateFormatFunctionExtensionTestCaseInvalidParameterTypeSecondArgumentLenghtTwo");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string," +
+                "dateValue string,sourceFormat string,timestampInMilliseconds long,targetFormat int);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , " +
+                "time:dateFormat(dateValue,targetFormat) as formattedDate," +
+                "time:dateFormat(timestampInMilliseconds," +
+                "targetFormat) as formattedUnixDate insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ;
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void dateFormatFunctionExtension13() throws InterruptedException {
+
+        log.info("DateFormatFunctionExtensionTestCaseInvalidParameterTypeSecondArgumentLenghtTwoDefaultFormatFalse");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string," +
+                "timestampInMilliseconds long,targetFormat int);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , " +
+                "time:dateFormat(timestampInMilliseconds," +
+                "targetFormat) as formattedUnixDate insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test
+    public void dateFormatFunctionExtension14() throws InterruptedException {
+
+        log.info("DateFormatFunctionExtensionTestCaseFirstArgumentNull");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string," +
+                "dateValue string,sourceFormat string,timestampInMilliseconds long,targetFormat string);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , " +
+                "time:dateFormat(timestampInMilliseconds," +
+                "targetFormat) as formattedUnixDate insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inStreamDefinition + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(null, event.getData(1));
+                    }
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", null, "ss"});
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", null, "ss"});
+        Thread.sleep(100);
+        Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void dateFormatFunctionExtension15() throws InterruptedException {
+
+        log.info("DateFormatFunctionExtensionTestCaseDesiredFormat");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string," +
+                "dateValue string,sourceFormat string,timestampInMilliseconds long,targetFormat string);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , " +
+                "time:dateFormat(timestampInMilliseconds," +
+                "targetFormat) as formattedUnixDate insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inStreamDefinition + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(null, event.getData(1));
+                    }
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", "ss", 1415692424000L});
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", "ss", 1415692424000L});
         Thread.sleep(100);
         Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
