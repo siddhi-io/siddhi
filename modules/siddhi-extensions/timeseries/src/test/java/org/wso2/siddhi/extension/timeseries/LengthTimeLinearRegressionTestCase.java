@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class LengthTimeLinearRegressionTestCase {
     private static final Logger logger = Logger.getLogger(LengthTimeLinearRegressionTestCase.class);
@@ -48,7 +49,7 @@ public class LengthTimeLinearRegressionTestCase {
         String inputStream = "define stream InputStream (y int, x int);";
 
         // Limit number of events based on length window (query):
-        String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeRegress(1 day, 20, y, x) "
+        String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeRegress(1 day, 20, y, x)"
                 + "select * " + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
@@ -135,7 +136,7 @@ public class LengthTimeLinearRegressionTestCase {
         String inputStream = "define stream InputStream (y int, x int);";
 
         // Limit number of events based on time window (query):
-        String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeRegress(200, 10000, y, x) "
+        String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeRegress(200, 10000, y, x)"
                 + "select * " + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + executionPlan);
@@ -262,6 +263,76 @@ public class LengthTimeLinearRegressionTestCase {
 
     }
 
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void simpleRegressionTest3() throws Exception {
+        logger.info("Simple Regression TestCase with test attributeExpressionExecutors[0] type");
+
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream InputStream (y int, x int);";
+
+        // Limit number of events based on time window (query):
+        String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeRegress('1stpara', "
+                + "10000, y, x) select * " + "insert into OutputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inputStream + executionPlan);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void simpleRegressionTest4() throws Exception {
+        logger.info("Simple Regression TestCase with test attributeExpressionExecutors[1] type");
+
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream InputStream (y int, x int);";
+
+        // Limit number of events based on time window (query):
+        String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeRegress(200, "
+                + " '2ndpara', y, x) select * " + "insert into OutputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inputStream + executionPlan);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void simpleRegressionTest5() throws Exception {
+        logger.info("Simple Regression TestCase with test Confidence interval must be a constant");
+
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream InputStream (y int, x int);";
+
+        // Limit number of events based on time window (query):
+        String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeRegress(200, "
+                + "10000,1, y, x) select * " + "insert into OutputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inputStream + executionPlan);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void simpleRegressionTest6() throws Exception {
+        logger.info("Simple Regression TestCase with test attributeExpressionExecutors[2] type");
+
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream InputStream (y int, x int);";
+
+        // Limit number of events based on time window (query):
+        String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeRegress(200, "
+                + "10000,1.0, y, x) select * " + "insert into OutputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inputStream + executionPlan);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void simpleRegressionTest7() throws Exception {
+        logger.info("Simple Regression TestCase with test attributeExpressionExecutors[3] interval range");
+
+        siddhiManager = new SiddhiManager();
+        String inputStream = "define stream InputStream (y int, x int);";
+
+        // Limit number of events based on time window (query):
+        String executionPlan = ("@info(name = 'query1') from InputStream#timeseries:lengthTimeRegress(200, "
+                + "10000,1,2.0, y, x) select * " + "insert into OutputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inputStream + executionPlan);
+    }
+
     @Test
     public void multipleRegressionTest1() throws Exception {
         logger.info("Multiple Regression TestCase");
@@ -270,7 +341,8 @@ public class LengthTimeLinearRegressionTestCase {
         String inputStream = "define stream InputStream (a int, b int, c int, d int, e int);";
 
         // Limit number of events based on length window (query):
-        String eventFuseExecutionPlan = ("@info(name = 'query2') from InputStream#timeseries:lengthTimeRegress(20 days, 30, 1, 0.95, a, c, b, e) "
+        String eventFuseExecutionPlan = ("@info(name = 'query2') from InputStream#timeseries:lengthTimeRegress(20 days,"
+                + " 30, 1, 0.95, a, c, b, e) "
                 + "select * " + "insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + eventFuseExecutionPlan);
@@ -356,8 +428,9 @@ public class LengthTimeLinearRegressionTestCase {
         String inputStream = "define stream InputStream (a int, b int, c int, d int, e int);";
 
         // Limit number of events based on time window (query):
-        String eventFuseExecutionPlan = ("@info(name = 'query2') from InputStream#timeseries:lengthTimeRegress(200, 10000, 1, 0.95, a, c, b, e) "
-                + "select * " + "insert into OutputStream;");
+        String eventFuseExecutionPlan = ("@info(name = 'query2') from InputStream#timeseries:lengthTimeRegress(200, "
+                + "10000, 1, 0.95, a, c, b, e) "
+                + "select * insert into OutputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inputStream + eventFuseExecutionPlan);
 
