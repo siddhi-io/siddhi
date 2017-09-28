@@ -587,4 +587,67 @@ public class PersistenceTestCase {
 
     }
 
+    @Test
+    public void persistenceTest8() throws InterruptedException {
+        log.info("persistenceTest8");
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        String executionPlan = "" +
+                "@Plan:name('SnapshotOutputRateLimitTest1') " +
+                "" +
+                "define stream LoginEvents (timeStamp long, ip string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.length(5) " +
+                "select ip " +
+                "output snapshot every 2 sec " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        log.info("Running : " + executionPlanRuntime.getName());
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    if (count == 3) {
+                        Assert.assertEquals("192.10.1.3", inEvent.getData(0));
+                    }
+                    if (count == 4) {
+                        Assert.assertEquals("192.10.1.4", inEvent.getData(0));
+                    }
+                }
+            }
+        };
+
+        // start, persist and shutdown
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("LoginEvents");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.1"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.2"});
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+
+        // restore
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+        inputHandler = executionPlanRuntime.getInputHandler("LoginEvents");
+        executionPlanRuntime.start();
+        executionPlanRuntime.restoreLastRevision();
+        Thread.sleep(20);
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+
+        // shutdown execution plan
+        Thread.sleep(3000);
+        executionPlanRuntime.shutdown();
+        Assert.assertEquals(4, count);
+        Assert.assertEquals(true, eventArrived);
+    }
 }

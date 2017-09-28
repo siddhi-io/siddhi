@@ -524,4 +524,35 @@ public class InsertIntoTableTestCase {
 
         executionPlanRuntime.shutdown();
     }
+
+    @Test
+    public void insertIntoTableTest10() throws InterruptedException {
+        log.info("InsertIntoTableTest10");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        // Join 2 streams and insert that into table
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream PriceStream (symbol string, price float); " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream#window.length(1) as a join PriceStream#window.length(1) as b " +
+                "   on a.symbol == b.symbol " +
+                "select a.symbol as symbol, b.price as price, a.volume " +
+                "insert into StockTable ;";
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+        InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
+        InputHandler priceStream = executionPlanRuntime.getInputHandler("PriceStream");
+        executionPlanRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        priceStream.send(new Event[]{
+                new Event(123L, new Object[]{"WSO2", 99.9F}),
+                new Event(123L, new Object[]{"IBM", 100.2F})
+        });
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+    }
+
 }
