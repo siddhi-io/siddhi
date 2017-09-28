@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class ExtractAttributesFunctionExtensionTestCase {
 
@@ -52,7 +53,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
-                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR "+
+                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
@@ -61,10 +62,10 @@ public class ExtractAttributesFunctionExtensionTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
-                for(int cnt=0;cnt<inEvents.length;cnt++){
+                for (int cnt = 0; cnt < inEvents.length; cnt++) {
                     count++;
-                    log.info("Event : " + count + ",YEAR : " + inEvents[cnt].getData(1) +"," +
-                            "MONTH : "+inEvents[cnt].getData(2) + ",HOUR : "+inEvents[cnt].getData(3));
+                    log.info("Event : " + count + ",YEAR : " + inEvents[cnt].getData(1) + "," +
+                            "MONTH : " + inEvents[cnt].getData(2) + ",HOUR : " + inEvents[cnt].getData(3));
 
                 }
             }
@@ -72,12 +73,278 @@ public class ExtractAttributesFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{"IBM", "2014-3-11 02:23:44", "yyyy-MM-dd hh:mm:ss",1394484824000L});
-        inputHandler.send(new Object[]{"IBM", "2014-3-11 02:23:44", "yyyy-MM-dd hh:mm:ss",1394484824000L});
-        inputHandler.send(new Object[]{"IBM", "2014-3-11 22:23:44", "yyyy-MM-dd hh:mm:ss",1394556804000L});
+        inputHandler.send(new Object[]{"IBM", "2014-3-11 02:23:44", "yyyy-MM-dd hh:mm:ss", 1394484824000L});
+        inputHandler.send(new Object[]{"IBM", "2014-3-11 02:23:44", "yyyy-MM-dd hh:mm:ss", 1394484824000L});
+        inputHandler.send(new Object[]{"IBM", "2014-3-11 22:23:44", "yyyy-MM-dd hh:mm:ss", 1394556804000L});
         Thread.sleep(100);
         Assert.assertEquals(3, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
+    @Test
+    public void extractAttributesFunctionExtension2() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionInvalidFormatTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
+                "long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
+                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null, event.getData(2));
+                        Assert.assertEquals("2", event.getData(3).toString());
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null, event.getData(2));
+                        Assert.assertEquals("2", event.getData(3).toString());
+                    }
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2014:3-11 02:23:44", "yyyy-MM-dd hh:mm:ss", 1394484824000L});
+        inputHandler.send(new Object[]{"IBM", "2015:3-11 02:23:44", "yyyy-MM-dd hh:mm:ss", 1394484824000L});
+        Thread.sleep(100);
+        Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void extractAttributesFunctionExtension3() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionInvalidParameterTypeInSecondArgument");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue int,dateFormat string,timestampInMilliseconds " +
+                "long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
+                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
+                "insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void extractAttributesFunctionExtension4() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionInvalidParameterTypeInThirdArgument");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat int,timestampInMilliseconds " +
+                "long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
+                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
+                "insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void extractAttributesFunctionExtension5() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionInvalidParameterTypeInFirstArgument");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
+                "int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
+                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
+                "insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void extractAttributesFunctionExtension6() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionInvalidNoOfArgumentTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
+                " long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
+                "dateFormat) as MONTH,time:extract('HOUR') as HOUR " +
+                "insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test
+    public void extractAttributesFunctionExtension7() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionSecondArgumentNullTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
+                " long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
+                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null, event.getData(2));
+                        Assert.assertEquals("2", event.getData(3).toString());
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null, event.getData(2));
+                        Assert.assertEquals("2", event.getData(3).toString());
+                    }
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", null, "yyyy-MM-dd hh:mm:ss", 1394484824000L});
+        inputHandler.send(new Object[]{"IBM", null, "ss", 1394484824000L});
+        Thread.sleep(100);
+        Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void extractAttributesFunctionExtension8() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionThirdArgumentNullTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
+                " long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
+                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null, event.getData(2));
+                        Assert.assertEquals("2", event.getData(3).toString());
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals(null, event.getData(1));
+                        Assert.assertEquals(null, event.getData(2));
+                        Assert.assertEquals("2", event.getData(3).toString());
+                    }
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2014:3-11 02:23:44", null, 1394484824000L});
+        inputHandler.send(new Object[]{"IBM", "2012:3-11 02:23:44", null, 1394484824000L});
+        Thread.sleep(100);
+        Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void extractAttributesFunctionExtension9() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionTestCaseInvalidParameterFirstArgumentLengthThree");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,unit long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract(unit,dateValue,dateFormat) as YEAR insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void extractAttributesFunctionExtension10() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionTestCaseInvalidParameterSecondArgumentLengthTwo");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue int,dateFormat string,unit string);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract(unit,dateValue) as YEAR insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void extractAttributesFunctionExtension11() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionTestCaseInvalidParameterLengthTwoDefaultDateFalseSecondArgument");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,timestampInMilliseconds long,unit int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract(timestampInMilliseconds,unit) as YEAR insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void extractAttributesFunctionExtension12() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionUnitValueConstantTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,timestampInMilliseconds string,unit string);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract(timestampInMilliseconds,unit) as YEAR insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
 }

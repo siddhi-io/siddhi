@@ -27,8 +27,8 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.core.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class LenghtBatchWindowTestCase {
     private static final Logger log = Logger.getLogger(LenghtBatchWindowTestCase.class);
@@ -466,5 +466,21 @@ public class LenghtBatchWindowTestCase {
         } finally {
             executionPlanRuntime.shutdown();
         }
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void LengthBatchWindowTest10() throws InterruptedException {
+        log.info("LengthBatchWindow Test10");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream cseEventStream (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(2, volume)" +
+                "select symbol " +
+                "insert into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
     }
 }

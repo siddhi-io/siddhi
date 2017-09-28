@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class KernelExtensionTestCase {
 
@@ -51,7 +52,8 @@ public class KernelExtensionTestCase {
         String query = ("@info(name = 'query1') from inputStream#timeseries:kernelMinMax(price, 4, 17, 'max') " +
                 "select *" +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -210,7 +212,8 @@ public class KernelExtensionTestCase {
         String query = ("@info(name = 'query1') from inputStream#timeseries:kernelMinMax(price, 3 , 16, 'minmax') " +
                 "select price, extremaType , id " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -398,7 +401,8 @@ public class KernelExtensionTestCase {
         String query = ("@info(name = 'query1') from inputStream#timeseries:kernelMinMax(price, 4, 16, 'min') " +
                 "select *" +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -533,7 +537,6 @@ public class KernelExtensionTestCase {
         inputHandler.send(new Object[]{49d});
         inputHandler.send(new Object[]{48.35d});
 
-
         Thread.sleep(1000);
         Assert.assertEquals(5, count);
         Assert.assertTrue(eventArrived);
@@ -541,4 +544,53 @@ public class KernelExtensionTestCase {
 
     }
 
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testKernelMaxStreamProcessorExtension1() throws InterruptedException {
+        log.info("KernelMaxExtension TestCase test with attributeExpressionExecutor's length");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (price double);";
+        String query = ("@info(name = 'query1') from inputStream#timeseries:kernelMinMax(price, 17, 'max') " +
+                "select *" +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+    }
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testKernelMaxStreamProcessorExtension2() throws InterruptedException {
+        log.info("KernelMaxExtension TestCase test with attributeExpressionExecutor[0]'s type");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (price string);";
+        String query = ("@info(name = 'query1') from inputStream#timeseries:kernelMinMax(price, 4, 16, 'min') " +
+                "select *" +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testKernelMaxStreamProcessorExtension3() throws InterruptedException {
+        log.info("KernelMaxExtension TestCase test with attributeExpressionExecutor[1]'s type");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (price double);";
+        String query = ("@info(name = 'query1') from inputStream#timeseries:kernelMinMax(price, '2ndpara', 16, 'min') "
+                + "select *"
+                + "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testKernelMaxStreamProcessorExtension4() throws InterruptedException {
+        log.info("KernelMaxExtension TestCase test with attributeExpressionExecutor[3]'s type");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (price double);";
+        String query = ("@info(name = 'query1') from inputStream#timeseries:kernelMinMax(price, 4 , '3rdpara', 'min')"
+                + "select * insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+    }
 }

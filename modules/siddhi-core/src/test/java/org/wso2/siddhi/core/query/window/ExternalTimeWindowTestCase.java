@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class ExternalTimeWindowTestCase {
     private static final Logger log = Logger.getLogger(TimeWindowTestCase.class);
@@ -92,5 +93,73 @@ public class ExternalTimeWindowTestCase {
         executionPlanRuntime.shutdown();
 
 
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void externalTimeWindowParameterTest1() throws InterruptedException {
+        log.info("externalTimeWindow parameter test1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timeStamp long, ip string) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.externalTime(timeStamp,5 sec, ip) " +
+                "select timeStamp, ip  " +
+                "insert all events into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test
+    public void externalTimeWindowParameterTest2() throws InterruptedException {
+        log.info("externalTimeWindow parameter test2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timeStamp long, ip string) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.externalTime(timeStamp, 5) " +
+                "select timeStamp, ip  " +
+                "insert all events into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void externalTimeWindowParameterTest3() throws InterruptedException {
+        log.info("externalTimeWindow parameter test3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timeStamp long, ip string) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.externalTime(1234567, 5 sec) " +
+                "select timeStamp, ip  " +
+                "insert all events into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void externalTimeWindowParameterTest4() throws InterruptedException {
+        log.info("externalTimeWindow parameter test4");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timeStamp long, ip string) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.externalTime(ip, 5 sec) " +
+                "select timeStamp, ip  " +
+                "insert all events into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
     }
 }

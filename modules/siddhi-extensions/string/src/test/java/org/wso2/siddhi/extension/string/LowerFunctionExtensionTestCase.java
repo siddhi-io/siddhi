@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.string.test.util.SiddhiTestHelper;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -49,9 +50,11 @@ public class LowerFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:lower(symbol) as symbolInLowerCase " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:lower(symbol) as symbolInLowerCase " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -60,7 +63,8 @@ public class LowerFunctionExtensionTestCase {
                 for (Event event : inEvents) {
                     count.incrementAndGet();
                     if (count.get() == 1) {
-                        Assert.assertEquals("hello how are you ", event.getData(1));    //Note: Assertion doesn't count the spaces infront or in the back
+                        Assert.assertEquals("hello how are you ", event.getData(1));
+                        //Note: Assertion doesn't count the spaces infront or in the back
                         eventArrived = true;
                     }
                     if (count.get() == 2) {
@@ -83,6 +87,55 @@ public class LowerFunctionExtensionTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
         Assert.assertEquals(3, count.get());
         Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testLowerFunctionExtensionWithZeroArgument() throws InterruptedException {
+        log.info("LowerFunctionExtension TestCase with zero argument");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , str:lower() as symbolInLowerCase " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testLowerFunctionExtensionWithInvalidDataType() throws InterruptedException {
+        log.info("LowerFunctionExtension TestCase with invalid data type");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:lower(price) as symbolInLowerCase " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testLowerFunctionExtensionWithNullValue() throws InterruptedException {
+        log.info("LowerFunctionExtension TestCase with null value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:lower(symbol) as symbolInLowerCase " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{null, 700f, 100l});
         executionPlanRuntime.shutdown();
     }
 }

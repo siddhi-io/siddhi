@@ -30,6 +30,8 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.map.test.util.SiddhiTestHelper;
+import org.wso2.siddhi.extension.string.ConcatFunctionExtension;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,12 +52,12 @@ public class CreateFunctionExtensionTestCase {
         log.info("CreateFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-
         String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol,price, "
                 + "map:create(symbol,price) as hashMap insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -103,7 +105,8 @@ public class CreateFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') from inputStream select symbol,price, "
                 + "map:create() as hashMap insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -148,7 +151,8 @@ public class CreateFunctionExtensionTestCase {
                 + "select map:create(\"key1\",\"value1\",\"key2\",\"value2\",symbol,price) as hashMap "
                 + "insert into outputStream;");
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -183,6 +187,21 @@ public class CreateFunctionExtensionTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
         Assert.assertEquals(3, count.get());
         Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testCreateFromXMLFunctionExtension3() throws InterruptedException {
+        log.info("CreateFromXMLFunctionExtension TestCase 3 with test attributeExpressionExecutors length");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol,price, "
+                + "map:create(symbol,price,volume) as hashMap insert into outputStream;");
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+        executionPlanRuntime.start();
         executionPlanRuntime.shutdown();
     }
 }

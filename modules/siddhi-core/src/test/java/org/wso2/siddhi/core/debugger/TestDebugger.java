@@ -29,7 +29,6 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -861,6 +860,34 @@ public class TestDebugger {
 
         Assert.assertEquals("Invalid number of output events", 2, inEventCount.get());
         Assert.assertEquals("Invalid number of debug events", 4, debugEventCount.get());
+
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testDebugger13() throws InterruptedException {
+        log.info("Siddi Debugger Test 13: Test debugging a query with insert into table.");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+        InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
+
+        executionPlanRuntime.debug();
+
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Event(123L, new Object[]{"IBM", 75.6f, 100L}));
+        stockStream.send(new Event[]{new Event(123L, new Object[]{"WSO2", 57.6f, 100L})});
+        Thread.sleep(500);
 
         executionPlanRuntime.shutdown();
     }

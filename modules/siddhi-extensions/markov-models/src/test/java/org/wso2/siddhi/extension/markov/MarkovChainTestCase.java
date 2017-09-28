@@ -30,6 +30,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 import java.util.concurrent.CountDownLatch;
+
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -38,8 +39,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * MarkovChain continues training.
  * MarkovChain discontinues training.
  */
-public class MarkovChainTestcase {
-    private static final Logger logger = Logger.getLogger(MarkovChainTestcase.class);
+public class MarkovChainTestCase {
+    private static final Logger logger = Logger.getLogger(MarkovChainTestCase.class);
     protected static SiddhiManager siddhiManager;
     private CountDownLatch countDownLatch;
     private volatile int count;

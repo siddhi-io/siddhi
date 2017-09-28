@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -28,9 +28,10 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
-public class RegExFunctionExtensionTestCase {
-    static final Logger log = Logger.getLogger(RegExFunctionExtensionTestCase.class);
+public class FindFunctionExtensionTestCase {
+    static final Logger log = Logger.getLogger(FindFunctionExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 
@@ -50,7 +51,8 @@ public class RegExFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:find(regex, symbol) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -78,8 +80,10 @@ public class RegExFunctionExtensionTestCase {
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"21 products are produced by WSO2 currently", 60.5f, "\\d\\d(.*)WSO2"});
-        inputHandler.send(new Object[]{"WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware(.*)"});
-        inputHandler.send(new Object[]{"WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware"});
+        inputHandler.send(new Object[]{"WSO2 is situated in trace and its a middleware company", 60.5f,
+                                       "WSO2(.*)middleware(.*)"});
+        inputHandler.send(new Object[]{"WSO2 is situated in trace and its a middleware company", 60.5f,
+                                       "WSO2(.*)middleware"});
         inputHandler.send(new Object[]{"21 products are produced by WSO2 currently", 60.5f, "\\d(.*)WSO22"});
         Thread.sleep(100);
         Assert.assertEquals(4, count);
@@ -92,12 +96,14 @@ public class RegExFunctionExtensionTestCase {
         log.info("FindStartFromIndexFunctionExtension TestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string, startingIndex int);";
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string, "
+                + "startingIndex int);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , regex:find(regex, symbol, startingIndex) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -118,68 +124,103 @@ public class RegExFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{"21 products are produced within 10 years by WSO2 currently by WSO2 employees", 60.5f, "\\d\\d(.*)WSO2", 30});
-        inputHandler.send(new Object[]{"21 products are produced within 10 years by WSO2 currently by WSO2 employees", 60.5f, "\\d\\d(.*)WSO2", 35});
+        inputHandler.send(new Object[]{"21 products are produced within 10 years by WSO2 currently "
+                                               + "by WSO2 employees", 60.5f, "\\d\\d(.*)WSO2", 30});
+        inputHandler.send(new Object[]{"21 products are produced within 10 years by WSO2 currently "
+                                               + "by WSO2 employees", 60.5f, "\\d\\d(.*)WSO2", 35});
 
         Thread.sleep(100);
         Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
-    @Test
-    public void testMatchesFunctionExtension() throws InterruptedException {
-        log.info("MatchesFunctionExtension TestCase");
+
+    @Test (expected = ExecutionPlanValidationException.class)
+    public void testFindFunctionExtensionTestCase1() throws InterruptedException {
+        log.info("FindFunctionExtension TestCase with invalid number of arguments");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
-                "select symbol , regex:matches(regex, symbol) as aboutWSO2 " +
+                "select symbol , regex:find(regex) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                for (Event inEvent : inEvents) {
-                    count++;
-                    if (count == 1) {
-                        Assert.assertEquals(false, inEvent.getData(1));
-                    }
-                    if (count == 2) {
-                        Assert.assertEquals(true, inEvent.getData(1));
-                    }
-                    if (count == 3) {
-                        Assert.assertEquals(false, inEvent.getData(1));
-                    }
-                    eventArrived = true;
-                }
-            }
-        });
+    }
 
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
-        executionPlanRuntime.start();
-        inputHandler.send(new Object[]{"21 products are produced by WSO2 currently", 60.5f, "\\d\\d(.*)WSO2"});
-        inputHandler.send(new Object[]{"WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware(.*)"});
-        inputHandler.send(new Object[]{"WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware"});
-        Thread.sleep(100);
-        Assert.assertEquals(3, count);
-        Assert.assertTrue(eventArrived);
-        executionPlanRuntime.shutdown();
+    @Test (expected = ExecutionPlanValidationException.class)
+    public void testFindFunctionExtensionTestCase2() throws InterruptedException {
+        log.info("FindFunctionExtension TestCase with invalid datatype");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , regex:find(regex, symbol) as aboutWSO2 " +
+                "insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test (expected = ExecutionPlanValidationException.class)
+    public void testFindFunctionExtensionTestCase3() throws InterruptedException {
+        log.info("FindFunctionExtension TestCase with invalid datatype");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol int, price long, regex string);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , regex:find(regex, symbol) as aboutWSO2 " +
+                "insert into outputStream;");
+       siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test (expected = ExecutionPlanValidationException.class)
+    public void testFindFunctionExtensionTestCase4() throws InterruptedException {
+        log.info("FindFunctionExtension TestCase with invalid datatype");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string, "
+                + "startingIndex string);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , regex:find(regex, symbol, startingIndex) as aboutWSO2 " +
+                "insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
-    public void testLookingAtFunctionExtension() throws InterruptedException {
-        log.info("LookingAtFunctionExtension TestCase");
+    public void testFindFunctionExtensionTestCase5() throws InterruptedException {
+        log.info("FindFunctionExtension TestCase with null value");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
-                "select symbol , regex:lookingAt(regex, symbol) as aboutWSO2 " +
+                "select symbol , regex:find(regex, symbol) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"21 products are produced by WSO2 currently", 60.5f, null});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testFindFunctionExtensionTestCase6() throws InterruptedException {
+        log.info("FindFunctionExtension TestCase with null value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string, "
+                + "startingIndex int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , regex:find(regex, symbol, startingIndex) as aboutWSO2 " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -188,13 +229,10 @@ public class RegExFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     if (count == 1) {
-                        Assert.assertEquals(true, inEvent.getData(1));
+                        Assert.assertEquals(false, inEvent.getData(1));
                     }
                     if (count == 2) {
                         Assert.assertEquals(false, inEvent.getData(1));
-                    }
-                    if (count == 3) {
-                        Assert.assertEquals(true, inEvent.getData(1));
                     }
                     eventArrived = true;
                 }
@@ -203,59 +241,33 @@ public class RegExFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{"21 products are produced by WSO2 currently in Sri Lanka", 60.5f, "\\d\\d(.*)WSO2"});
-        inputHandler.send(new Object[]{"sample test string and WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware(.*)"});
-        inputHandler.send(new Object[]{"WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware"});
+        inputHandler.send(new Object[]{null, 60.5f, "\\d\\d(.*)WSO2", 30});
+        inputHandler.send(new Object[]{"21 products are produced within 10 years by WSO2 currently "
+                                               + "by WSO2 employees", 60.5f, "\\d\\d(.*)WSO2", null});
         Thread.sleep(100);
-        Assert.assertEquals(3, count);
+        Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
 
     @Test
-    public void testGroupFunctionExtension() throws InterruptedException {
-        log.info("GroupFunctionExtensionTestCase TestCase");
+    public void testFindFunctionExtensionTestCase7() throws InterruptedException {
+        log.info("FindStartFromIndexFunctionExtension TestCase invalid input value");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string, group int);";
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, regex string, "
+                + "startingIndex int);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
-                "select symbol , regex:group(regex, symbol, group) as aboutWSO2 " +
+                "select symbol , regex:find(regex, symbol, startingIndex) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                for (Event inEvent : inEvents) {
-                    count++;
-                    if (count == 1) {
-                        Assert.assertEquals("WSO2 employees", inEvent.getData(1));
-                    }
-                    if (count == 2) {
-                        Assert.assertEquals("21", inEvent.getData(1));
-                    }
-                    if (count == 3) {
-                        Assert.assertEquals(" is situated in trace and its a ", inEvent.getData(1));
-                    }
-                    if (count == 4) {
-                        Assert.assertEquals(null, inEvent.getData(1));
-                    }
-                    eventArrived = true;
-                }
-            }
-        });
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{"21 products are produced within 10 years by WSO2 currently by WSO2 employees", 60.5f, "(\\d\\d)(.*)(WSO2.*)", 3});
-        inputHandler.send(new Object[]{"21 products are produced within 10 years by WSO2 currently by WSO2 employees", 60.5f, "(\\d\\d)(.*)(WSO2.*)", 1});
-        inputHandler.send(new Object[]{"WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware", 1});
-        inputHandler.send(new Object[]{"WSO2 is situated in trace and its a middleware company", 60.5f, "WSO2(.*)middleware", 2});
-        Thread.sleep(100);
-        Assert.assertEquals(4, count);
-        Assert.assertTrue(eventArrived);
+        inputHandler.send(new Object[]{"21 products are produced within 10 years by WSO2 currently "
+                                               + "by WSO2 employees", 60.5f, "\\d\\d(.*)WSO2", "WSO2"});
         executionPlanRuntime.shutdown();
     }
 }

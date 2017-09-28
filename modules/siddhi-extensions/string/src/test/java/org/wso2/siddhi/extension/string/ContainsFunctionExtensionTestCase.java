@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.string.test.util.SiddhiTestHelper;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,7 +57,7 @@ public class ContainsFunctionExtensionTestCase {
                 "select symbol , str:contains(symbol, 'WSO2') as isContains " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -86,6 +87,95 @@ public class ContainsFunctionExtensionTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
         Assert.assertEquals(3, count.get());
         Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testContainsFunctionExtensionWithOneArgument() throws InterruptedException {
+        log.info("ContainsFunctionExtensionTestCase TestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, " +
+                "volume long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , str:contains(symbol) as isContains " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testContainsFunctionExtensionWithInvalidDataType() throws InterruptedException {
+        log.info("ContainsFunctionExtensionTestCase TestCase with invalid datatype");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, " +
+                "volume long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , str:contains(price, 'WSO2') as isContains " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testContainsFunctionExtensionWithInvalidDataType1() throws InterruptedException {
+        log.info("ContainsFunctionExtensionTestCase TestCase with invalid datatype");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, " +
+                "volume long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , str:contains(symbol, 123) as isContains " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testContainsFunctionExtensionWithNullValue() throws InterruptedException {
+        log.info("ContainsFunctionExtensionTestCase TestCase with null value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, " +
+                "volume long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , str:contains(symbol, 'WSO2') as isContains " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{null, 700f, 100l, 1});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testContainsFunctionExtensionWithNullValue1() throws InterruptedException {
+        log.info("ContainsFunctionExtensionTestCase TestCase with null value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol1 string, price long, " +
+                "volume long, symbol2 string);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol1 , str:contains(symbol1, symbol2) as isContains " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 100l, null});
         executionPlanRuntime.shutdown();
     }
 }
