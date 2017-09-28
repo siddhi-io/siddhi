@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -31,7 +31,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class GroupFunctionExtensionTestCase {
-    static final Logger log = Logger.getLogger(FindFunctionExtensionTestCase.class);
+    static final Logger log = Logger.getLogger(GroupFunctionExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 
@@ -103,11 +103,7 @@ public class GroupFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:group(regex, symbol) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test (expected = ExecutionPlanValidationException.class)
@@ -120,11 +116,7 @@ public class GroupFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:group(regex, symbol, group) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test (expected = ExecutionPlanValidationException.class)
@@ -137,11 +129,7 @@ public class GroupFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:group(regex, symbol, group) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test (expected = ExecutionPlanValidationException.class)
@@ -155,11 +143,7 @@ public class GroupFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:group(regex, symbol, group) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test

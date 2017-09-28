@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -145,11 +145,8 @@ public class FindFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:find(regex) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
     }
 
     @Test (expected = ExecutionPlanValidationException.class)
@@ -162,11 +159,7 @@ public class FindFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:find(regex, symbol) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test (expected = ExecutionPlanValidationException.class)
@@ -179,11 +172,7 @@ public class FindFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:find(regex, symbol) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+       siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test (expected = ExecutionPlanValidationException.class)
@@ -197,11 +186,7 @@ public class FindFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:find(regex, symbol, startingIndex) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test

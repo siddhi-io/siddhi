@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -31,7 +31,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class LookingAtFunctionExtensionTestCase {
-    static final Logger log = Logger.getLogger(FindFunctionExtensionTestCase.class);
+    static final Logger log = Logger.getLogger(LookingAtFunctionExtensionTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 
@@ -98,11 +98,7 @@ public class LookingAtFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:lookingAt(regex) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test (expected = ExecutionPlanValidationException.class)
@@ -115,11 +111,7 @@ public class LookingAtFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:lookingAt(regex, symbol) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test (expected = ExecutionPlanValidationException.class)
@@ -132,11 +124,7 @@ public class LookingAtFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , regex:lookingAt(regex, symbol) as aboutWSO2 " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
-                (inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test

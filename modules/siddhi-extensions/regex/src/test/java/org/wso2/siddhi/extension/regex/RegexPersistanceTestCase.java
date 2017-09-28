@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -32,7 +32,7 @@ import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
 public class RegexPersistanceTestCase {
-    static final Logger log = Logger.getLogger(FindFunctionExtensionTestCase.class);
+    static final Logger log = Logger.getLogger(RegexPersistanceTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
 
