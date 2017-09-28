@@ -320,6 +320,11 @@
                                 <goal>report</goal>
                             </goals>
                             <configuration>
+                                <excludes>
+                                    <exclude>**/SiddhiQLBaseVisitor.class</exclude>
+                                    <exclude>**/SiddhiQLParser*</exclude>
+                                    <exclude>**/SiddhiQLLexer*</exclude>
+                                </excludes>
                                 <dataFile>${basedir}/target/coverage-reports/jacoco.exec</dataFile>
                                 <outputDirectory>${basedir}/target/coverage-reports/</outputDirectory>
                             </configuration>

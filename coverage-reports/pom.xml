@@ -137,6 +137,9 @@
                                                     <fileset dir="${siddhi.query.compiler.basedir}/target/classes">
                                                         <exclude name="**/*Constants.class"/>
                                                         <exclude name="**/*Exception.class"/>
+                                                        <exclude name="**/SiddhiQLBaseVisitor.class"/>
+                                                        <exclude name="**/SiddhiQLParser*"/>
+                                                        <exclude name="**/SiddhiQLLexer*"/>
                                                     </fileset>
                                                     <fileset dir="${siddhi.ext.evalscript.basedir}/target/classes">
                                                         <exclude name="**/*Constants.class"/>
