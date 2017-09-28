@@ -114,13 +114,13 @@ public class CronWindowTestCase {
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
-        Thread.sleep(7000);
+        Thread.sleep(5000);
         inputHandler.send(new Object[]{"IBM1", 700f, 0});
         inputHandler.send(new Object[]{"WSO22", 60.5f, 1});
-        Thread.sleep(7000);
+        Thread.sleep(5000);
         inputHandler.send(new Object[]{"IBM43", 700f, 0});
         inputHandler.send(new Object[]{"WSO4343", 60.5f, 1});
-        Thread.sleep(7000);
+        Thread.sleep(5000);
         Assert.assertEquals(4, removeEventCount);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();

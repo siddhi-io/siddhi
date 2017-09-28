@@ -82,6 +82,11 @@ public class UniqueExternalTimeBatchWindowProcessor extends WindowProcessor impl
             }
             timestampExpressionExecutor = (VariableExpressionExecutor) attributeExpressionExecutors[1];
 
+            if (!(attributeExpressionExecutors[2] instanceof ConstantExpressionExecutor)) {
+                throw new ExecutionPlanValidationException("ExternalTime window's 3rd parameter "
+                                                                   + "should be a variable, but found "
+                                                                   + attributeExpressionExecutors[2].getClass());
+            }
             if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.INT) {
                 timeToKeep = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[2]).getValue();
             } else if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
@@ -91,6 +96,11 @@ public class UniqueExternalTimeBatchWindowProcessor extends WindowProcessor impl
             }
 
             if (attributeExpressionExecutors.length >= 4) {
+                if (!(attributeExpressionExecutors[3] instanceof ConstantExpressionExecutor)) {
+                    throw new ExecutionPlanValidationException("ExternalTime window's 4th parameter "
+                                                                       + "should be a variable, but found "
+                                                                       + attributeExpressionExecutors[3].getClass());
+                }
                 isStartTimeEnabled = true;
                 if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.INT) {
                     startTime = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[3]).getValue()));
@@ -102,6 +112,11 @@ public class UniqueExternalTimeBatchWindowProcessor extends WindowProcessor impl
             }
 
             if (attributeExpressionExecutors.length >= 5) {
+                if (!(attributeExpressionExecutors[4] instanceof ConstantExpressionExecutor)) {
+                    throw new ExecutionPlanValidationException("ExternalTime window's 5th parameter "
+                                                                       + "should be a variable, but found "
+                                                                       + attributeExpressionExecutors[4].getClass());
+                }
                 if (attributeExpressionExecutors[4].getReturnType() == Attribute.Type.INT) {
                     schedulerTimeout = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[4]).getValue()));
                 } else if (attributeExpressionExecutors[4].getReturnType() == Attribute.Type.LONG) {
@@ -112,6 +127,11 @@ public class UniqueExternalTimeBatchWindowProcessor extends WindowProcessor impl
             }
 
             if (attributeExpressionExecutors.length == 6) {
+                if (!(attributeExpressionExecutors[5] instanceof ConstantExpressionExecutor)) {
+                    throw new ExecutionPlanValidationException("ExternalTime window's 6th parameter "
+                                                                       + "should be a variable, but found "
+                                                                       + attributeExpressionExecutors[5].getClass());
+                }
                 if (attributeExpressionExecutors[5].getReturnType() == Attribute.Type.BOOL) {
                     replaceTimestampWithBatchEndTime = Boolean.parseBoolean(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[5]).getValue()));
                 } else {

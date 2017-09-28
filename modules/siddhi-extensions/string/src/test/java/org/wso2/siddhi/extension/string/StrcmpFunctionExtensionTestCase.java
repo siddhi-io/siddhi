@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.string.test.util.SiddhiTestHelper;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -49,9 +50,11 @@ public class StrcmpFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:strcmp(symbol, 'Hello') as compareText " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:strcmp(symbol, 'Hello') as compareText " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -92,9 +95,11 @@ public class StrcmpFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "define stream inputStream (symbol string, compareTo string, volume long);";
-        String query = ("@info(name = 'query1') from inputStream select symbol , str:strcmp(symbol, compareTo) as compareText " +
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:strcmp(symbol, compareTo) as compareText " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -126,6 +131,89 @@ public class StrcmpFunctionExtensionTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
         Assert.assertEquals(3, count.get());
         Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testStrcmpFunctionExtension3() throws InterruptedException {
+        log.info("StrcmpFunctionExtension TestCase, with one argument.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, compareTo string, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , str:strcmp(symbol) as compareText " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testStrcmpFunctionExtension4() throws InterruptedException {
+        log.info("StrcmpFunctionExtension TestCase, with invalid datatype.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol int, compareTo string, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:strcmp(symbol, compareTo) as compareText " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testStrcmpFunctionExtension5() throws InterruptedException {
+        log.info("StrcmpFunctionExtension TestCase, with invalid datatype.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, compareTo int, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:strcmp(symbol, compareTo) as compareText " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testStrcmpFunctionExtension6() throws InterruptedException {
+        log.info("StrcmpFunctionExtension TestCase, with null value.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, compareTo string, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:strcmp(symbol, compareTo) as compareText " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{null, "Hello", 100l});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testStrcmpFunctionExtension7() throws InterruptedException {
+        log.info("StrcmpFunctionExtension TestCase, with null value.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, compareTo string, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , "
+                + "str:strcmp(symbol, compareTo) as compareText " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"Hello", null, 100l});
         executionPlanRuntime.shutdown();
     }
 }

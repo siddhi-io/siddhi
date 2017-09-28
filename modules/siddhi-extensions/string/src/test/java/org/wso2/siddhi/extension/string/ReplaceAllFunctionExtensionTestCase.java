@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.string.test.util.SiddhiTestHelper;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -51,11 +52,13 @@ public class ReplaceAllFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceAll(symbol, 'hello', 'test') as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , str:replaceAll(symbol, 'hello', 'test') as "
+                        + "replacedString " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -98,11 +101,13 @@ public class ReplaceAllFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, regex string, replacement string);";
 
         String query = (
-                "@info(name = 'query1') from inputStream select symbol , str:replaceAll(symbol, regex, replacement) as replacedString " +
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceAll(symbol, regex, replacement) as replacedString " +
                         "insert into outputStream;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime =
+                siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -134,6 +139,145 @@ public class ReplaceAllFunctionExtensionTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
         Assert.assertEquals(3, count.get());
         Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testReplaceAllFunctionExtension3() throws InterruptedException {
+        log.info("ReplaceAllFunctionExtension TestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, regex string, replacement string);";
+
+        String query = (
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceAll(symbol, regex) as replacedString " +
+                        "insert into outputStream;"
+        );
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testReplaceAllFunctionExtension4() throws InterruptedException {
+        log.info("ReplaceAllFunctionExtension TestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol int, regex string, replacement string);";
+
+        String query = (
+                "@info(name = 'query1') from inputStream select symbol ,"
+                        + " str:replaceAll(symbol, regex, replacement) as replacedString " +
+                        "insert into outputStream;"
+        );
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testReplaceAllFunctionExtension5() throws InterruptedException {
+        log.info("ReplaceAllFunctionExtension TestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, regex int, replacement string);";
+
+        String query = (
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceAll(symbol, regex, replacement) as replacedString " +
+                        "insert into outputStream;"
+        );
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testReplaceAllFunctionExtension6() throws InterruptedException {
+        log.info("ReplaceAllFunctionExtension TestCase with invalid datatype");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, regex string, replacement int);";
+
+        String query = (
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceAll(symbol, regex, replacement) as replacedString " +
+                        "insert into outputStream;"
+        );
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testReplaceAllFunctionExtension7() throws InterruptedException {
+        log.info("ReplaceAllFunctionExtension TestCase with null value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, regex string, replacement string);";
+
+        String query = (
+                "@info(name = 'query1') from inputStream select symbol , "
+                        + "str:replaceAll(symbol, regex, replacement) as replacedString " +
+                        "insert into outputStream;"
+        );
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{null, "hello", "test"});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testReplaceAllFunctionExtension8() throws InterruptedException {
+        log.info("ReplaceAllFunctionExtension TestCase with null value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, regex string, replacement string);";
+
+        String query = (
+                "@info(name = 'query1') from inputStream select symbol , str:replaceAll(symbol, regex, replacement) "
+                        + "as replacedString " +
+                        "insert into outputStream;"
+        );
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"hello hi hello", null, "test"});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testReplaceAllFunctionExtension9() throws InterruptedException {
+        log.info("ReplaceAllFunctionExtension TestCase with null value");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, regex string, replacement string);";
+
+        String query = (
+                "@info(name = 'query1') from inputStream select symbol , str:replaceAll(symbol, regex, replacement) "
+                        + "as replacedString " +
+                        "insert into outputStream;"
+        );
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime
+                (inStreamDefinition + query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"hello hi hello", "hello", null});
         executionPlanRuntime.shutdown();
     }
 }

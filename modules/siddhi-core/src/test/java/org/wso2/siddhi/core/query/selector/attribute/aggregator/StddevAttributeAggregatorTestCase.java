@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.selector.attribute.aggregator;
 
 import junit.framework.Assert;
+import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -26,18 +27,22 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
-import org.apache.log4j.Logger;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class StddevAttributeAggregatorTestCase {
     static final Logger log = Logger.getLogger(StddevAttributeAggregatorTestCase.class);
     private final double epsilon = 0.00001; // difference threshold for two doubles to be treated distinct
     private int inEventCount; // Only used in the Test #1 and #6
+    private AtomicInteger atomicEventCount;
 
     @Before
     public void init() {
         inEventCount = 0;
+        atomicEventCount = new AtomicInteger(0);
     }
 
     @Test
@@ -269,5 +274,164 @@ public class StddevAttributeAggregatorTestCase {
         inputHandler.send(new Object[]{"WSO2", 234.5});
         Thread.sleep(100);
         execPlanRunTime.shutdown();
+    }
+
+    @Test
+    public void StddevAggregatorTest7() throws InterruptedException {
+        log.info("StddevAggregator Test #7: stddev of int attribute");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@Plan:name('StddevAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (symbol string, price int);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(3) " +
+                "select stddev(price) as deviation " +
+                "group by symbol " +
+                "insert all events into outputStream;";
+
+        ExecutionPlanRuntime execPlanRunTime = siddhiManager.createExecutionPlanRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                atomicEventCount.addAndGet(inEvents.length);
+                Assert.assertTrue(Math.abs((Double) inEvents[0].getData(0) - 4.08248) < epsilon);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"WSO2", 10000});
+        inputHandler.send(new Object[]{"WSO2", 10005});
+        inputHandler.send(new Object[]{"WSO2", 10010});
+        inputHandler.send(new Object[]{"IBM", 100});
+        inputHandler.send(new Object[]{"IBM", 105});
+        inputHandler.send(new Object[]{"IBM", 110});
+        SiddhiTestHelper.waitForEvents(100, 2, atomicEventCount, 2000);
+        Assert.assertEquals(2, atomicEventCount.intValue());
+        execPlanRunTime.shutdown();
+    }
+
+    @Test
+    public void StddevAggregatorTest8() throws InterruptedException {
+        log.info("StddevAggregator Test #8: stddev of long attribute");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@Plan:name('StddevAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (symbol string, price long);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(3) " +
+                "select stddev(price) as deviation " +
+                "group by symbol " +
+                "insert all events into outputStream;";
+
+        ExecutionPlanRuntime execPlanRunTime = siddhiManager.createExecutionPlanRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                atomicEventCount.addAndGet(inEvents.length);
+                Assert.assertTrue(Math.abs((Double) inEvents[0].getData(0) - 4.08248) < epsilon);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"WSO2", 10000L});
+        inputHandler.send(new Object[]{"WSO2", 10005L});
+        inputHandler.send(new Object[]{"WSO2", 10010L});
+        inputHandler.send(new Object[]{"IBM", 100L});
+        inputHandler.send(new Object[]{"IBM", 105L});
+        inputHandler.send(new Object[]{"IBM", 110L});
+        SiddhiTestHelper.waitForEvents(100, 2, atomicEventCount, 2000);
+        Assert.assertEquals(2, atomicEventCount.intValue());
+        execPlanRunTime.shutdown();
+    }
+
+    @Test
+    public void StddevAggregatorTest9() throws InterruptedException {
+        log.info("StddevAggregator Test #8: stddev of float attribute");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@Plan:name('StddevAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (symbol string, price float);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(3) " +
+                "select stddev(price) as deviation " +
+                "group by symbol " +
+                "insert all events into outputStream;";
+
+        ExecutionPlanRuntime execPlanRunTime = siddhiManager.createExecutionPlanRuntime(execPlan);
+        execPlanRunTime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                atomicEventCount.addAndGet(inEvents.length);
+                Assert.assertTrue(Math.abs((Double) inEvents[0].getData(0) - 4.08248) < epsilon);
+            }
+        });
+
+        InputHandler inputHandler = execPlanRunTime.getInputHandler("cseEventStream");
+
+        execPlanRunTime.start();
+        inputHandler.send(new Object[]{"WSO2", 10000F});
+        inputHandler.send(new Object[]{"WSO2", 10005F});
+        inputHandler.send(new Object[]{"WSO2", 10010F});
+        inputHandler.send(new Object[]{"IBM", 100F});
+        inputHandler.send(new Object[]{"IBM", 105F});
+        inputHandler.send(new Object[]{"IBM", 110F});
+        SiddhiTestHelper.waitForEvents(100, 2, atomicEventCount, 2000);
+        Assert.assertEquals(2, atomicEventCount.intValue());
+        execPlanRunTime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void StddevAggregatorTest10() throws InterruptedException {
+        log.info("StddevAggregator Test #10: stddev validation");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@Plan:name('StddevAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (symbol string, price float);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(3) " +
+                "select stddev(price, symbol) as deviation " +
+                "group by symbol " +
+                "insert all events into outputStream;";
+
+        ExecutionPlanRuntime execPlanRunTime = siddhiManager.createExecutionPlanRuntime(execPlan);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void StddevAggregatorTest11() throws InterruptedException {
+        log.info("StddevAggregator Test #11: stddev validation");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String execPlan = "" +
+                "@Plan:name('StddevAggregatorTests') " +
+                "" +
+                "define stream cseEventStream (symbol string, price float);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(3) " +
+                "select stddev(symbol) as deviation " +
+                "group by symbol " +
+                "insert all events into outputStream;";
+
+        ExecutionPlanRuntime execPlanRunTime = siddhiManager.createExecutionPlanRuntime(execPlan);
     }
 }

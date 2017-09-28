@@ -18,7 +18,6 @@
 
 package org.wso2.siddhi.extension.map;
 
-import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.function.FunctionExecutor;
@@ -34,7 +33,6 @@ import java.util.Map;
  * Return Type(s): HashMap
  */
 public class RemoveFunctionExtension extends FunctionExecutor {
-    private static final Logger log = Logger.getLogger(RemoveFunctionExtension.class);
     private Attribute.Type returnType = Attribute.Type.OBJECT;
 
     @Override

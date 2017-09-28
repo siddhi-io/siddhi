@@ -507,4 +507,42 @@ public class JoinPartitionTestCase {
 
 
     }
+
+    /*
+    @Test
+    public void testJoinPartition11() throws InterruptedException {
+        log.info("Join partition test11");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String executionPlan = "" +
+                "define stream twitterStream (user string, tweet string, company string); " +
+                "partition with (user of twitterStream) " +
+                "begin " +
+                "    @info(name = 'query1') " +
+                "    from twitterStream#window.length(1) as a join twitterStream#window.length(1) as b " +
+                "    select a.user as user, b.tweet as tweet " +
+                "    insert into outputStream ;" +
+                "end ";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count.addAndGet(events.length);
+                eventArrived = true;
+            }
+        });
+
+        InputHandler twitterStreamHandler = executionPlanRuntime.getInputHandler("twitterStream");
+        executionPlanRuntime.start();
+
+        twitterStreamHandler.send(new Event(123L, new Object[]{"User1", "Hello World", "WSO2"}));
+        twitterStreamHandler.send(new Event(123L, new Object[]{"User1", "Hello World", "WSO2"}));
+
+        SiddhiTestHelper.waitForEvents(100, 4, count, 6000);
+        Assert.assertEquals(4, count.get());
+        executionPlanRuntime.shutdown();
+
+    }
+    */
 }

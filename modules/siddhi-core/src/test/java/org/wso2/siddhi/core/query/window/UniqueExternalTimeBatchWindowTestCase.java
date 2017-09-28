@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 /**
  * @since Dec 23, 2015
@@ -982,6 +983,230 @@ public class UniqueExternalTimeBatchWindowTestCase {
         junit.framework.Assert.assertEquals("In Events ", 5, inEventCount);
         junit.framework.Assert.assertEquals("Remove Events ", 0, removeEventCount);
         executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters1() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, timestamp) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters2() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(\"192.168.1.1\", timestamp, 1 sec, 0, 2 sec) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters3() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, 123456, 1 sec, 0, 2 sec) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters4() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test4");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, ip, 1 sec, 0, 2 sec) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters5() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test5");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, timestamp, timestamp, 0, 2 sec) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters6() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test6");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, timestamp, \"22\", 0, 2 sec) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters7() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test7");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, timestamp, 1 sec, ip, 2 sec) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters9() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test9");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0, ip) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters10() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test10");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0, 2 sec, ip) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test
+    public void uniqueExternalTimeBatchWindowTestParameters11() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test11");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0L, 2 sec) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters12() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test12");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0.1, 2 sec) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters13() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test13");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0, 2.1) " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void uniqueExternalTimeBatchWindowTestParameters14() throws InterruptedException {
+        log.info("uniqueExternalTimeBatchWindowTest parameter test14");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream LoginEvents (timestamp long, ip string, val int) ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.uniqueExternalTimeBatch(ip, timestamp, 1 sec, 0, 2 sec, \"true\") " +
+                "select timestamp, ip, count() as totalCount, sum(val) as totalSum  " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
     }
 
 }

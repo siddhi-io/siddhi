@@ -53,10 +53,6 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
     private boolean isStartTimeEnabled = false;
     private long startTime = 0;
 
-    public void setTimeInMilliSeconds(long timeInMilliSeconds) {
-        this.timeInMilliSeconds = timeInMilliSeconds;
-    }
-
     @Override
     public void setScheduler(Scheduler scheduler) {
         this.scheduler = scheduler;

@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.extension.map.test.util.SiddhiTestHelper;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -60,7 +61,8 @@ public class GetFunctionExtensionTestCase {
                 " insert into outputStream2;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream2", new StreamCallback() {
             @Override
@@ -84,6 +86,7 @@ public class GetFunctionExtensionTestCase {
                 }
             }
         });
+
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100d, 100l});
@@ -107,11 +110,13 @@ public class GetFunctionExtensionTestCase {
                 "@info(name = 'query2') from tmpStream  " +
                 "select symbol,price,tmpMap, map:put(tmpMap,symbol,price) as map1" +
                 " insert into outputStream;" +
-                "@info(name = 'query3') from outputStream  select map1, convert(cast(map:get(map1,symbol), 'int'), 'string') as priceInString" +
+                "@info(name = 'query3') from outputStream  select map1, convert(cast(map:get(map1,symbol), 'int'),"+
+                " 'string') as priceInString" +
                 " insert into outputStream2;"
         );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
 
         executionPlanRuntime.addCallback("outputStream2", new StreamCallback() {
             @Override
@@ -144,6 +149,57 @@ public class GetFunctionExtensionTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, count, 60000);
         Assert.assertEquals(3, count.get());
         Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testGetFunctionExtension3() throws InterruptedException {
+        log.info("GetFunctionExtension TestCase with test attributeExpressionExecutors length");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price double, volume long);";
+
+        String query = ("@info(name = 'query1') from inputStream " +
+                "select symbol,price,map:create() as tmpMap" +
+                " insert into tmpStream;" +
+                "@info(name = 'query2') " +
+                "from tmpStream  " +
+                "select symbol,price,tmpMap,map:put(tmpMap,symbol,price) as map1" +
+                " insert into outputStream;" +
+                "@info(name = 'query3') from outputStream  select map1, map:get(map1,symbol,price) as price" +
+                " insert into outputStream2;"
+        );
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 100d, 100l});
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testGetFunctionExtension4() throws InterruptedException {
+        log.info("GetFunctionExtension TestCase with test first attribute value must be of type java.util.Map");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inStreamDefinition = "\ndefine stream inputStream (symbol string, price double, volume long);";
+
+        String query = ("@info(name = 'query1') from inputStream " +
+                "select symbol,price,map:create() as tmpMap" +
+                " insert into tmpStream;" +
+                "@info(name = 'query2') " +
+                "from tmpStream  " +
+                "select symbol,price,tmpMap,map:put(tmpMap,symbol,price) as map1" +
+                " insert into outputStream;" +
+                "@info(name = 'query3') from outputStream  select map1, map:get(symbol,map1) as price" +
+                " insert into outputStream2;"
+        );
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                                     query);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 100d, 100l});
         executionPlanRuntime.shutdown();
     }
 }
