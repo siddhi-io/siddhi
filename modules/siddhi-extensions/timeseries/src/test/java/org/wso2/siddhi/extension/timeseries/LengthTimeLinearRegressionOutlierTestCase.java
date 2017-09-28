@@ -29,8 +29,8 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
-public class LengthTimeLinearRegressionOutlierTestcase {
-    static final Logger logger = Logger.getLogger(LengthTimeLinearRegressionTestcase.class);
+public class LengthTimeLinearRegressionOutlierTestCase {
+    static final Logger logger = Logger.getLogger(LengthTimeLinearRegressionTestCase.class);
     private static SiddhiManager siddhiManager;
     private int count;
     private boolean outlier;

@@ -29,8 +29,8 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
-public class LengthTimeLinearRegressionForecastTestcase {
-    static final Logger logger = Logger.getLogger(LengthTimeLinearRegressionTestcase.class);
+public class LengthTimeLinearRegressionForecastTestCase {
+    static final Logger logger = Logger.getLogger(LengthTimeLinearRegressionForecastTestCase.class);
     private static SiddhiManager siddhiManager;
     private int count;
     private double betaOne, betaTwo, forecastY;
