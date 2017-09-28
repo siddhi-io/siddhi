@@ -508,7 +508,7 @@ public class JoinPartitionTestCase {
 
     }
 
-    /*
+    /* TODO: Fix Issue - https://github.com/wso2/siddhi/issues/552
     @Test
     public void testJoinPartition11() throws InterruptedException {
         log.info("Join partition test11");
