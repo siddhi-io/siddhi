@@ -695,7 +695,7 @@ public class DeleteFromRDBMSTestCase {
                 deleteStockStream.send(new Object[]{2, 100.6, true});
 
                 Thread.sleep(1000);
-                long totalRowsInTable = DBConnectionHelper.getDBConnectionHelperInstance().getRowsInTable(dataSource);
+                long totalRowsInTable = DBConnectionHelper.getDBConnectionHelperInstance().getRowsInTable(dataSource, tableName);
                 Assert.assertEquals("Deletion failed", 2, totalRowsInTable);
 
                 executionPlanRuntime.shutdown();
