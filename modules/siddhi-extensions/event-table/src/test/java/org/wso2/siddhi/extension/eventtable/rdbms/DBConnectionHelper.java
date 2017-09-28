@@ -136,6 +136,24 @@ public class DBConnectionHelper {
         }
     }
 
+    public void deleteTable(DataSource dataSource, String tableName) {
+        PreparedStatement stmt = null;
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+            con.setAutoCommit(false);
+            stmt = con.prepareStatement("" +
+                    "DROP TABLE " + tableName + ";");
+            stmt.executeUpdate();
+            con.commit();
+
+        } catch (SQLException e) {
+            log.error("Error while deleting table", e);
+        } finally {
+            clearConnections(stmt, con);
+        }
+    }
+
     public void insertTestDataIntoTableWithQuery(DataSource dataSource, String query) {
         PreparedStatement stmt = null;
         Connection con = null;
