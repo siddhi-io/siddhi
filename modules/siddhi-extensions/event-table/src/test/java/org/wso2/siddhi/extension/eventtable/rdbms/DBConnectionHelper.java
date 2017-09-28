@@ -66,7 +66,7 @@ public class DBConnectionHelper {
             con = dataSource.getConnection();
             con.setAutoCommit(false);
             stmt = con.prepareStatement("CREATE TABLE " + tableName + "( " +
-                    "SYMBOL varchar(255) PRIMARY KEY," +
+                    "SYMBOL varchar(10) PRIMARY KEY," +
                     "PRICE float," +
                     "VOLUME bigint(20)" +
                     ");");
@@ -74,7 +74,24 @@ public class DBConnectionHelper {
             con.commit();
 
         } catch (SQLException e) {
-            log.error("Error while creating the event", e);
+            log.error("Error while creating the table", e);
+        } finally {
+            clearConnections(stmt, con);
+        }
+    }
+
+    public void createTestDatabaseTableWithSchema(DataSource dataSource, String schema) {
+        PreparedStatement stmt = null;
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+            con.setAutoCommit(false);
+            stmt = con.prepareStatement(schema);
+            stmt.executeUpdate();
+            con.commit();
+
+        } catch (SQLException e) {
+            log.error("Error while creating the table", e);
         } finally {
             clearConnections(stmt, con);
         }
@@ -94,6 +111,26 @@ public class DBConnectionHelper {
         } catch (SQLException e) {
             log.error("Error while creating the event", e);
             return false;
+        } finally {
+            clearConnections(stmt, con);
+        }
+    }
+
+    public void insertTestDataIntoTable(DataSource dataSource) {
+        PreparedStatement stmt = null;
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+            con.setAutoCommit(false);
+            stmt = con.prepareStatement("" +
+                    "INSERT INTO " + RDBMSTestConstants.TABLE_NAME +
+                    " (symbol,price,volume) " +
+                    "VALUES('GOOGLE',2.0,3),('GOOGLE',3.0,4),('GOOGLE',5.0,6)");
+            stmt.executeUpdate();
+            con.commit();
+
+        } catch (SQLException e) {
+            log.error("Error while insert test data into table", e);
         } finally {
             clearConnections(stmt, con);
         }
