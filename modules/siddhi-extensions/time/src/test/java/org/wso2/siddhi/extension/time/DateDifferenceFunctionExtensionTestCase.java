@@ -122,11 +122,9 @@ public class DateDifferenceFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals("2", event.getData(2).toString());
                     }
-
                 }
             }
         });
-
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
@@ -173,7 +171,6 @@ public class DateDifferenceFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals("2", event.getData(2).toString());
                     }
-
                 }
             }
         });
@@ -205,10 +202,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -226,10 +220,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -247,10 +238,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -268,10 +256,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -307,7 +292,6 @@ public class DateDifferenceFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals("2", event.getData(2).toString());
                     }
-
                 }
             }
         });
@@ -357,7 +341,6 @@ public class DateDifferenceFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals("2", event.getData(2).toString());
                     }
-
                 }
             }
         });
@@ -406,7 +389,6 @@ public class DateDifferenceFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals("2", event.getData(2).toString());
                     }
-
                 }
             }
         });
@@ -438,10 +420,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1,dateFormat2) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -459,10 +438,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -492,7 +468,6 @@ public class DateDifferenceFunctionExtensionTestCase {
                     if (count == 1) {
                         Assert.assertEquals(null, event.getData(1));
                     }
-
                 }
             }
         });
@@ -522,10 +497,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -543,10 +515,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -564,10 +533,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -585,10 +551,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -606,10 +569,7 @@ public class DateDifferenceFunctionExtensionTestCase {
                 "select symbol , time:dateDiff(dateValue1,dateValue2,dateFormat1) as dateDifference," +
                 "time:dateDiff(timestampInMilliseconds1,timestampInMilliseconds2) as dateDifferenceInMilliseconds " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 }
 

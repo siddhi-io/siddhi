@@ -110,16 +110,12 @@ public class ExtractAttributesFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals(null, event.getData(2));
                         Assert.assertEquals("2", event.getData(3).toString());
-
-
                     }
                     if (count == 2) {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals(null, event.getData(2));
                         Assert.assertEquals("2", event.getData(3).toString());
-
                     }
-
                 }
             }
         });
@@ -147,11 +143,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
                 "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -168,11 +160,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
                 "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -189,11 +177,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
                 "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -210,10 +194,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
                 "dateFormat) as MONTH,time:extract('HOUR') as HOUR " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -249,9 +230,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals(null, event.getData(2));
                         Assert.assertEquals("2", event.getData(3).toString());
-
                     }
-
                 }
             }
         });
@@ -298,9 +277,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals(null, event.getData(2));
                         Assert.assertEquals("2", event.getData(3).toString());
-
                     }
-
                 }
             }
         });
@@ -325,10 +302,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:extract(unit,dateValue,dateFormat) as YEAR insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -342,10 +316,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:extract(unit,dateValue) as YEAR insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -359,10 +330,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:extract(timestampInMilliseconds,unit) as YEAR insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -376,10 +344,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:extract(timestampInMilliseconds,unit) as YEAR insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
 }

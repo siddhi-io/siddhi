@@ -178,7 +178,6 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
@@ -218,7 +217,6 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
@@ -257,7 +255,6 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });

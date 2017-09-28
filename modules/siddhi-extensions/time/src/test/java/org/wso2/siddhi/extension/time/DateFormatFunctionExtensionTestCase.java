@@ -116,7 +116,6 @@ public class DateFormatFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals("2014-11-11", event.getData(2));
                     }
-
                 }
             }
         });
@@ -145,10 +144,7 @@ public class DateFormatFunctionExtensionTestCase {
                 "time:dateFormat(dateValue,targetFormat,sourceFormat) as formattedDate," +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -163,10 +159,7 @@ public class DateFormatFunctionExtensionTestCase {
                 "time:dateFormat(dateValue,targetFormat,sourceFormat) as formattedDate," +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -181,10 +174,7 @@ public class DateFormatFunctionExtensionTestCase {
                 "time:dateFormat(dateValue,targetFormat,sourceFormat) as formattedDate," +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -199,10 +189,7 @@ public class DateFormatFunctionExtensionTestCase {
                 "time:dateFormat(dateValue) as formattedDate," +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -237,7 +224,6 @@ public class DateFormatFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals("44", event.getData(2));
                     }
-
                 }
             }
         });
@@ -282,7 +268,6 @@ public class DateFormatFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         Assert.assertEquals(null, event.getData(2));
                     }
-
                 }
             }
         });
@@ -371,7 +356,6 @@ public class DateFormatFunctionExtensionTestCase {
                     if (count == 2) {
                         Assert.assertEquals("44", event.getData(1));
                         Assert.assertEquals(null, event.getData(2));
-
                     }
                 }
             }
@@ -398,10 +382,7 @@ public class DateFormatFunctionExtensionTestCase {
                 "time:dateFormat(dateValue,targetFormat) as formattedDate," +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -416,10 +397,8 @@ public class DateFormatFunctionExtensionTestCase {
                 "time:dateFormat(dateValue,targetFormat) as formattedDate," +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ;
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -433,10 +412,7 @@ public class DateFormatFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') from inputStream select symbol , " +
                 "time:dateFormat(timestampInMilliseconds," +
                 "targetFormat) as formattedUnixDate insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -467,7 +443,6 @@ public class DateFormatFunctionExtensionTestCase {
                     if (count == 2) {
                         Assert.assertEquals(null, event.getData(1));
                     }
-
                 }
             }
         });
@@ -510,7 +485,6 @@ public class DateFormatFunctionExtensionTestCase {
                     if (count == 2) {
                         Assert.assertEquals(null, event.getData(1));
                     }
-
                 }
             }
         });

@@ -96,10 +96,7 @@ public class DateSubFunctionExtensionTestCase {
                 "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') " +
                 "as yearSubtractedUnix " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -117,10 +114,7 @@ public class DateSubFunctionExtensionTestCase {
                 "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as " +
                 "yearSubtractedUnix " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -138,10 +132,7 @@ public class DateSubFunctionExtensionTestCase {
                 "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as " +
                 "yearSubtractedUnix " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -159,10 +150,7 @@ public class DateSubFunctionExtensionTestCase {
                 "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as " +
                 "yearSubtractedUnix " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
-                + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -200,7 +188,6 @@ public class DateSubFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(2));
                         Assert.assertEquals("1352620424000", event.getData(3));
                     }
-
                 }
             }
         });
@@ -251,7 +238,6 @@ public class DateSubFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(2));
                         Assert.assertEquals("1352620424000", event.getData(3));
                     }
-
                 }
             }
         });
@@ -301,7 +287,6 @@ public class DateSubFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(2));
                         Assert.assertEquals("1352620424000", event.getData(3));
                     }
-
                 }
             }
         });
@@ -350,7 +335,6 @@ public class DateSubFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(2));
                         Assert.assertEquals(null, event.getData(3));
                     }
-
                 }
             }
         });
@@ -379,10 +363,7 @@ public class DateSubFunctionExtensionTestCase {
                 "'month',dateFormat) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as " +
                 "yearSubtractedUnix " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -399,10 +380,7 @@ public class DateSubFunctionExtensionTestCase {
                 "time:dateSub(dateValue,expr," +
                 "unit) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -418,10 +396,7 @@ public class DateSubFunctionExtensionTestCase {
                 "from inputStream select symbol ,time:dateSub(dateValue,expr," +
                 "unit) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -437,10 +412,7 @@ public class DateSubFunctionExtensionTestCase {
                 "from inputStream select symbol ,time:dateSub(dateValue,expr," +
                 "unit) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -456,10 +428,7 @@ public class DateSubFunctionExtensionTestCase {
                 "from inputStream select symbol ,time:dateSub(dateValue,expr," +
                 "unit) as monthSubtracted,time:dateSub(timestampInMilliseconds,expr,'year') as yearSubtractedUnix " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -488,7 +457,6 @@ public class DateSubFunctionExtensionTestCase {
                     if (count == 1) {
                         Assert.assertEquals(null, event.getData(1));
                     }
-
                 }
             }
         });
@@ -513,11 +481,7 @@ public class DateSubFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') " +
                 "from inputStream select symbol ,time:dateSub(timestampInMilliseconds,expr,unit) as yearSubtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -532,10 +496,7 @@ public class DateSubFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') " +
                 "from inputStream select symbol ,time:dateSub(timestampInMilliseconds,expr,unit) as yearSubtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -544,16 +505,12 @@ public class DateSubFunctionExtensionTestCase {
         log.info("DateSubFunctionExtensionThidParameteInvalidLengthFourTestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
                 "long,expr int,unit int);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream select symbol ,time:dateSub(dateValue,expr,unit,dateFormat) as yearSubtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 }

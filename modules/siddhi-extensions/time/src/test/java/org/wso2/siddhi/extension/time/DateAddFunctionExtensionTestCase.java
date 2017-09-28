@@ -111,10 +111,7 @@ public class DateAddFunctionExtensionTestCase {
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
                 "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -132,10 +129,7 @@ public class DateAddFunctionExtensionTestCase {
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
                 "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -153,10 +147,7 @@ public class DateAddFunctionExtensionTestCase {
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
                 "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -200,7 +191,6 @@ public class DateAddFunctionExtensionTestCase {
                 }
             }
         });
-
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", null, "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
@@ -228,8 +218,6 @@ public class DateAddFunctionExtensionTestCase {
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
-
-
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
 
             @Override
@@ -252,7 +240,6 @@ public class DateAddFunctionExtensionTestCase {
                 }
             }
         });
-
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", null, 1415692424000L, 2});
@@ -265,7 +252,6 @@ public class DateAddFunctionExtensionTestCase {
 
     @Test
     public void dateAddFunctionExtension7() throws InterruptedException {
-
         log.info("DateAddFunctionExtensionTestCaseSecondArgumentNull");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -330,12 +316,7 @@ public class DateAddFunctionExtensionTestCase {
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
                 "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -405,10 +386,7 @@ public class DateAddFunctionExtensionTestCase {
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
                 "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -426,10 +404,7 @@ public class DateAddFunctionExtensionTestCase {
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
                 "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -447,10 +422,7 @@ public class DateAddFunctionExtensionTestCase {
                 "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
                 "time:dateAdd(timestampInMilliseconds,expr,unit) as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -467,10 +439,7 @@ public class DateAddFunctionExtensionTestCase {
                 "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
                 "time:dateAdd(timestampInMilliseconds,expr,unit) as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -536,10 +505,7 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:dateAdd(timestampInMilliseconds,expr,unit) as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -555,10 +521,7 @@ public class DateAddFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:dateAdd(dateValue,expr,unit) as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -577,10 +540,8 @@ public class DateAddFunctionExtensionTestCase {
                 "time:dateAdd(dateValue,expr,unit,dateFormat) as monthAdded," +
                 "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ;
     }
 
     @Test

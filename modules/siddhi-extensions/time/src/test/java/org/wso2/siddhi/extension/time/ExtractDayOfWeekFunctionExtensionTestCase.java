@@ -146,10 +146,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:dayOfWeek(dateValue,dateFormat) as dayOfWeekExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -164,10 +161,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:dayOfWeek(dateValue,dateFormat) as dayOfWeekExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -195,7 +189,6 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
@@ -230,7 +223,6 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
@@ -265,7 +257,6 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
@@ -301,7 +292,6 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
@@ -323,11 +313,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:dayOfWeek(dateValue,dateValue,unit) as dayOfWeekExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -356,7 +342,6 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
