@@ -27,10 +27,12 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class AcosFunctionExtensionTestCase {
     private static Logger logger = Logger.getLogger(AcosFunctionExtensionTestCase.class);
     protected static SiddhiManager siddhiManager;
+    private boolean eventArrived;
 
     @Test
     public void testProcess1() throws Exception {
@@ -154,6 +156,62 @@ public class AcosFunctionExtensionTestCase {
         executionPlanRuntime.start();
         inputHandler.send(new Float[]{0.123f});
         Thread.sleep(100);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase1() throws Exception {
+        logger.info("AcosFunctionExtension exceptionTestCase1");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue double);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:acos(inValue,inValue) as acosValue "
+                                         + "insert into OutMediationStream;");
+        siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase2() throws Exception {
+        logger.info("AcosFunctionExtension exceptionTestCase2");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue object);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:acos(inValue) as acosValue "
+                                         + "insert into OutMediationStream;");
+        siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+    }
+
+    @Test
+    public void exceptionTestCase3() throws Exception {
+        logger.info("AcosFunctionExtension exceptionTestCase3");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue double);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:acos(inValue) as acosValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents,
+                                Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime
+                .getInputHandler("InValueStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Double[]{null});
+        Thread.sleep(100);
+        Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
 }

@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class RandomFunctionExtensionTestCase {
     static final Logger log = Logger.getLogger(RandomFunctionExtensionTestCase.class);
@@ -47,7 +48,8 @@ public class RandomFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol , math:rand() as randNumber " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                             query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -90,7 +92,8 @@ public class RandomFunctionExtensionTestCase {
         String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from inputStream select symbol , math:rand(12) as randNumber " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                             query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -108,6 +111,129 @@ public class RandomFunctionExtensionTestCase {
                     if (randNumbers[0] == randNumbers[1] ||
                             randNumbers[0] == randNumbers[2] ||
                             randNumbers[1] == randNumbers[2]) {
+                        isDuplicatePresent = true;
+                    }
+                    junit.framework.Assert.assertEquals(false, isDuplicatePresent);
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 100l});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
+        inputHandler.send(new Object[]{"XYZ", 60.5f, 200l});
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+        junit.framework.Assert.assertEquals(3, count);
+        junit.framework.Assert.assertTrue(eventArrived);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testRandomFunctionExtensionExceptionTestCase1() throws InterruptedException {
+        log.info("RandomFunctionExtension testRandomFunctionExtensionExceptionTestCase1");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , math:rand(symbol,symbol) as " +
+                        "randNumber insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testRandomFunctionExtensionExceptionTestCase2() throws InterruptedException {
+        log.info("RandomFunctionExtension testRandomFunctionExtensionExceptionTestCase2");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , math:rand(object) as " +
+                        "randNumber insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testRandomFunctionExtensionExceptionTestCase3() throws InterruptedException {
+        log.info("RandomFunctionExtension testRandomFunctionExtensionExceptionTestCase3");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , math:rand(symbol) as " +
+                        "randNumber insert into outputStream;");
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void testRandomFunctionExtensionExceptionTestCase4() throws InterruptedException {
+        log.info("RandomFunctionExtension testRandomFunctionExtensionExceptionTestCase4");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , math:rand(price) as randNumber " +
+                        "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                             query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                count = count + inEvents.length;
+                eventArrived = true;
+                if (inEvents.length == 3) {
+                    double[] randNumbers = new double[3];
+                    randNumbers[0] = (Double) inEvents[0].getData(1);
+                    randNumbers[1] = (Double) inEvents[1].getData(1);
+                    randNumbers[2] = (Double) inEvents[2].getData(1);
+                    boolean isDuplicatePresent = false;
+                    System.out.println(randNumbers[0] + ", " + randNumbers[1]);
+                    if (randNumbers[0] == randNumbers[1] ||
+                        randNumbers[0] == randNumbers[2] ||
+                        randNumbers[1] == randNumbers[2]) {
+                        isDuplicatePresent = true;
+                    }
+                    junit.framework.Assert.assertEquals(false, isDuplicatePresent);
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 100l});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
+        inputHandler.send(new Object[]{"XYZ", 60.5f, 200l});
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+        junit.framework.Assert.assertEquals(3, count);
+        junit.framework.Assert.assertTrue(eventArrived);
+    }
+
+    @Test
+    public void testRandomFunctionExtensionWithSeed2() throws InterruptedException {
+        log.info("RandomFunctionExtension TestCase, with seed2");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream inputStream (symbol string, price long, volume long);";
+        String query = ("@info(name = 'query1') from inputStream select symbol , math:rand(1223l) as randNumber " +
+                        "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                                                                                             query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                count = count + inEvents.length;
+                eventArrived = true;
+                if (inEvents.length == 3) {
+                    double[] randNumbers = new double[3];
+                    randNumbers[0] = (Double) inEvents[0].getData(1);
+                    randNumbers[1] = (Double) inEvents[1].getData(1);
+                    randNumbers[2] = (Double) inEvents[2].getData(1);
+                    boolean isDuplicatePresent = false;
+                    System.out.println(randNumbers[0] + ", " + randNumbers[1]);
+                    if (randNumbers[0] == randNumbers[1] ||
+                        randNumbers[0] == randNumbers[2] ||
+                        randNumbers[1] == randNumbers[2]) {
                         isDuplicatePresent = true;
                     }
                     junit.framework.Assert.assertEquals(false, isDuplicatePresent);

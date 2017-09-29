@@ -27,10 +27,12 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class RoundFunctionExtensionTestCase {
     private static Logger logger = Logger.getLogger(RoundFunctionExtensionTestCase.class);
     protected static SiddhiManager siddhiManager;
+    private boolean eventArrived;
 
     @Test
     public void testProcess() throws Exception {
@@ -42,7 +44,8 @@ public class RoundFunctionExtensionTestCase {
         String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
                 + "select math:round(inValue) as roundValue "
                 + "insert into OutMediationStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -60,6 +63,135 @@ public class RoundFunctionExtensionTestCase {
                 .getInputHandler("InValueStream");
         executionPlanRuntime.start();
         inputHandler.send(new Double[]{6.45d});
+        Thread.sleep(100);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase1() throws Exception {
+        logger.info("RoundFunctionExtension exceptionTestCase1");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue double);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:round(inValue,inValue) as roundValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents,
+                                Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                Long result;
+                for (Event event : inEvents) {
+                    result = (Long) event.getData(0);
+                    Assert.assertEquals((Long) 6l, result);
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime
+                .getInputHandler("InValueStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Double[]{6.45d});
+        Thread.sleep(100);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase2() throws Exception {
+        logger.info("RoundFunctionExtension exceptionTestCase2");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue object);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:round(inValue) as roundValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents,
+                                Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                Long result;
+                for (Event event : inEvents) {
+                    result = (Long) event.getData(0);
+                    Assert.assertEquals((Long) 6l, result);
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime
+                .getInputHandler("InValueStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Double[]{6.45d});
+        Thread.sleep(100);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void exceptionTestCase3() throws Exception {
+        logger.info("RoundFunctionExtension exceptionTestCase3");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue double);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:round(inValue) as roundValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents,
+                                Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime
+                .getInputHandler("InValueStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Double[]{null});
+        Thread.sleep(100);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testProcessFloat() throws Exception {
+        logger.info("RoundFunctionExtension testProcessFloat");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue float);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:round(inValue) as roundValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents,
+                                Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                Integer result;
+                for (Event event : inEvents) {
+                    result = (Integer) event.getData(0);
+                    Assert.assertEquals((Integer) 62, result);
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime
+                .getInputHandler("InValueStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Float[]{62.334f});
         Thread.sleep(100);
         executionPlanRuntime.shutdown();
     }

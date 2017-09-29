@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.util.concurrent.CountDownLatch;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -912,4 +913,91 @@ public class PercentileFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase1() throws Exception {
+        logger.info("PercentileFunctionExtension exceptionTestCase1");
+
+        final int EXPECTED_NO_OF_EVENTS = 10;
+        countDownLatch = new CountDownLatch(EXPECTED_NO_OF_EVENTS);
+        siddhiManager = new SiddhiManager();
+
+        String executionPlan = ("@info(name = 'query1') from inputStream "
+                                + "select math:percentile(temperature, 97.0,temperature) as percentile "
+                                + "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(INPUT_STREAM_DOUBLE + executionPlan);
+
+
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase2() throws Exception {
+        logger.info("PercentileFunctionExtension exceptionTestCase2");
+
+        final int EXPECTED_NO_OF_EVENTS = 10;
+        countDownLatch = new CountDownLatch(EXPECTED_NO_OF_EVENTS);
+        siddhiManager = new SiddhiManager();
+
+        String executionPlan = ("@info(name = 'query1') from inputStream "
+                                + "select math:percentile(temperature, 3443l) as percentile "
+                                + "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(INPUT_STREAM_DOUBLE + executionPlan);
+
+
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase3() throws Exception {
+        logger.info("PercentileFunctionExtension exceptionTestCase3");
+
+        final int EXPECTED_NO_OF_EVENTS = 10;
+        countDownLatch = new CountDownLatch(EXPECTED_NO_OF_EVENTS);
+        siddhiManager = new SiddhiManager();
+
+        String executionPlan = ("@info(name = 'query1') from inputStream "
+                                + "select math:percentile(temperature,temperature) as percentile "
+                                + "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(INPUT_STREAM_DOUBLE + executionPlan);
+
+
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase4() throws Exception {
+        logger.info("PercentileFunctionExtension exceptionTestCase4");
+
+        final int EXPECTED_NO_OF_EVENTS = 10;
+        countDownLatch = new CountDownLatch(EXPECTED_NO_OF_EVENTS);
+        siddhiManager = new SiddhiManager();
+
+        String executionPlan = ("@info(name = 'query1') from inputStream "
+                                + "select math:percentile(temperature,105.0) as percentile "
+                                + "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(INPUT_STREAM_DOUBLE + executionPlan);
+
+
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase5() throws Exception {
+        logger.info("PercentileFunctionExtension exceptionTestCase4");
+
+        String INPUT_STREAM_DOUBLE_TEST= "define stream inputStream (sensorId int, temperature object);";
+        final int EXPECTED_NO_OF_EVENTS = 10;
+        countDownLatch = new CountDownLatch(EXPECTED_NO_OF_EVENTS);
+        siddhiManager = new SiddhiManager();
+
+        String executionPlan = ("@info(name = 'query1') from inputStream "
+                                + "select math:percentile(temperature,10.0) as percentile "
+                                + "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(INPUT_STREAM_DOUBLE_TEST + executionPlan);
+
+
+    }
+
 }

@@ -27,10 +27,12 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class TanhFunctionExtensionTestCase {
     private static Logger logger = Logger.getLogger(TanhFunctionExtensionTestCase.class);
     protected static SiddhiManager siddhiManager;
+    private boolean eventArrived;
 
     @Test
     public void testProcess() throws Exception {
@@ -42,7 +44,8 @@ public class TanhFunctionExtensionTestCase {
         String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
                 + "select math:tanh(inValue) as sinValue "
                 + "insert into OutMediationStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream + eventFuseExecutionPlan);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -60,6 +63,163 @@ public class TanhFunctionExtensionTestCase {
                 .getInputHandler("InValueStream");
         executionPlanRuntime.start();
         inputHandler.send(new Double[]{6d});
+        Thread.sleep(100);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase1() throws Exception {
+        logger.info("TanhFunctionExtension exceptionTestCase1");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue double);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:tanh(inValue,inValue) as sinValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+    }
+
+    @Test(expected = ExecutionPlanValidationException.class)
+    public void exceptionTestCase2() throws Exception {
+        logger.info("TanhFunctionExtension exceptionTestCase2");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue object);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:tanh(inValue) as sinValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+    }
+
+    @Test
+    public void exceptionTestCase3() throws Exception {
+        logger.info("TanhFunctionExtension exceptionTestCase3");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue double);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:tanh(inValue) as sinValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents,
+                                Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime
+                .getInputHandler("InValueStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Double[]{null});
+        Thread.sleep(100);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testProcessInteger() throws Exception {
+        logger.info("TanhFunctionExtension testProcessInteger");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue int);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:tanh(inValue) as sinValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents,
+                                Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                Double result;
+                for (Event event : inEvents) {
+                    result = (Double) event.getData(0);
+                    Assert.assertEquals((Double) (0.9999877116507956), result);
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime
+                .getInputHandler("InValueStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Integer[]{6});
+        Thread.sleep(100);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testProcessFloat() throws Exception {
+        logger.info("TanhFunctionExtension testProcessFloat");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue float);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:tanh(inValue) as sinValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents,
+                                Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                Double result;
+                for (Event event : inEvents) {
+                    result = (Double) event.getData(0);
+                    Assert.assertEquals((Double) (1.0), result);
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime
+                .getInputHandler("InValueStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Float[]{6324.234f});
+        Thread.sleep(100);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testProcessLong() throws Exception {
+        logger.info("TanhFunctionExtension testProcessLong");
+
+        siddhiManager = new SiddhiManager();
+        String inValueStream = "define stream InValueStream (inValue long);";
+
+        String eventFuseExecutionPlan = ("@info(name = 'query1') from InValueStream "
+                                         + "select math:tanh(inValue) as sinValue "
+                                         + "insert into OutMediationStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inValueStream +
+                                                                                             eventFuseExecutionPlan);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents,
+                                Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                Double result;
+                for (Event event : inEvents) {
+                    result = (Double) event.getData(0);
+                    Assert.assertEquals((Double) (1.0), result);
+                }
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime
+                .getInputHandler("InValueStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Long[]{6324234l});
         Thread.sleep(100);
         executionPlanRuntime.shutdown();
     }
