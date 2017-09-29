@@ -1010,7 +1010,7 @@ public class PersistenceTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, atomicCount, 2000);
         executionPlanRuntime.shutdown();
 
-        Assert.assertEquals(atomicCount, 3);
+        Assert.assertEquals(3, atomicCount.intValue());
         Assert.assertEquals(true, eventArrived);
 
     }
@@ -1092,7 +1092,7 @@ public class PersistenceTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, atomicCount, 2000);
         executionPlanRuntime.shutdown();
 
-        Assert.assertEquals(atomicCount, 3);
+        Assert.assertEquals(3, atomicCount.intValue());
         Assert.assertEquals(true, eventArrived);
 
     }
@@ -1174,7 +1174,7 @@ public class PersistenceTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, atomicCount, 2000);
         executionPlanRuntime.shutdown();
 
-        Assert.assertEquals(atomicCount, 3);
+        Assert.assertEquals(3, atomicCount.intValue());
         Assert.assertEquals(true, eventArrived);
 
     }
@@ -1264,7 +1264,7 @@ public class PersistenceTestCase {
         SiddhiTestHelper.waitForEvents(100, 3, atomicCount, 2000);
         executionPlanRuntime.shutdown();
 
-        Assert.assertEquals(atomicCount, 3);
+        Assert.assertEquals(3, atomicCount.intValue());
         Assert.assertEquals(true, eventArrived);
 
     }
