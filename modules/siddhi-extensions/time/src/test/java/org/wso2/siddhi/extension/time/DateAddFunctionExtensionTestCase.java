@@ -587,4 +587,57 @@ public class DateAddFunctionExtensionTestCase {
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
+
+    @Test
+    public void dateAddFunctionExtension19() throws InterruptedException {
+
+        log.info("DateAddFunctionExtensionProcessedCalenderTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
+                "long,expr int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:dateAdd(dateValue,expr,'YEAR',dateFormat) as yearAdded," +
+                "time:dateAdd(dateValue,expr,'MONTH',dateFormat) as monthAdded," +
+                "time:dateAdd(timestampInMilliseconds,expr,'HOUR') as yearAddedMills, " +
+                "time:dateAdd(dateValue,expr,'SECOND',dateFormat) as secondAdded," +
+                "time:dateAdd(dateValue,expr,'MINUTE',dateFormat) as minuteAdded " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inStreamDefinition + query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    count.incrementAndGet();
+                    if (count.get() == 1) {
+                        Assert.assertEquals("2016-11-11 13:23:44", event.getData(1));
+                        Assert.assertEquals("2015-01-11 13:23:44", event.getData(2));
+                        Assert.assertEquals("1415699624000", event.getData(3));
+                        eventArrived = true;
+                    }
+                    if (count.get() == 2) {
+                        Assert.assertEquals("2012-05-11 13:23:44", event.getData(1));
+                        Assert.assertEquals("2010-07-11 13:23:44", event.getData(2));
+                        Assert.assertEquals("1415699624000", event.getData(3));
+                        eventArrived = true;
+                    }
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
+        inputHandler.send(new Object[]{"IBM", "2010-05-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
+        SiddhiTestHelper.waitForEvents(100, 2, count, 60000);
+        Assert.assertEquals(2, count.get());
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
 }
