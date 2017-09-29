@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.exception.ExecutionPlanRuntimeException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 
 import javax.sql.DataSource;
@@ -63,6 +64,93 @@ public class InsertIntoRDBMSTestCase {
                 Thread.sleep(1000);
 
                 long totalRowsInTable = DBConnectionHelper.getDBConnectionHelperInstance().getRowsInTable(dataSource);
+                Assert.assertEquals("Insertion failed", 3, totalRowsInTable);
+
+                executionPlanRuntime.shutdown();
+            }
+        } catch (SQLException e) {
+            log.info("Test case ignored due to DB connection unavailability");
+        }
+
+    }
+
+    @Test(expected = ExecutionPlanRuntimeException.class)
+    public void insertIntoRDBMSTableTest2() throws InterruptedException {
+        log.info("InsertIntoTableTest2 : Fail insert operation");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setDataSource(RDBMSTestConstants.DATA_SOURCE_NAME, dataSource);
+
+        try {
+            if (dataSource.getConnection() != null) {
+                if (DBConnectionHelper.getDBConnectionHelperInstance().isTableExist(dataSource,RDBMSTestConstants.TABLE_WTTH_PK)) {
+                    DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource,RDBMSTestConstants.TABLE_WTTH_PK);
+                } else {
+                    DBConnectionHelper.getDBConnectionHelperInstance().createTestDatabaseTable(dataSource, RDBMSTestConstants.TABLE_WTTH_PK);
+                }
+                String streams = "" +
+                        "define stream StockStream (symbol string, price float, volume long); " +
+                        "@from(eventtable = 'rdbms' , datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + RDBMSTestConstants.TABLE_WTTH_PK + "') " +
+                        "define table StockTable (symbol string, price float, volume long); ";
+
+                String query = "" +
+                        "@info(name = 'query1') " +
+                        "from StockStream   " +
+                        "insert into StockTable ;";
+
+                ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+                InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
+
+                executionPlanRuntime.start();
+
+                stockStream.send(new Object[]{"WSO2", 55.6f, 100l});
+                stockStream.send(new Object[]{"IBM", 75.6f, 100l});
+                stockStream.send(new Object[]{"WSO2", 57.6f, 100l});
+                Thread.sleep(1000);
+
+                executionPlanRuntime.shutdown();
+            }
+        } catch (SQLException e) {
+            log.info("Test case ignored due to DB connection unavailability");
+        }
+
+    }
+
+    @Test
+    public void insertIntoRDBMSTableTest3() throws InterruptedException {
+        log.info("InsertIntoTableTest3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setDataSource(RDBMSTestConstants.DATA_SOURCE_NAME, dataSource);
+        String tableName = "test_table_1";
+        try {
+            if (dataSource.getConnection() != null) {
+                if (DBConnectionHelper.getDBConnectionHelperInstance().isTableExist(dataSource, tableName)) {
+                    DBConnectionHelper.getDBConnectionHelperInstance().deleteTable(dataSource, tableName);
+                }
+                String streams = "" +
+                        "define stream StockStream (id int, price double, paid bool); " +
+                        "@from(eventtable = 'rdbms' , datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + tableName + "') " +
+                        "define table StockTable (id int, price double, paid bool); ";
+
+                String query = "" +
+                        "@info(name = 'query1') " +
+                        "from StockStream   " +
+                        "insert into StockTable ;";
+
+                ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+                InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
+
+                executionPlanRuntime.start();
+
+                stockStream.send(new Object[]{1, 55.6, true});
+                stockStream.send(new Object[]{2, 75.6, false});
+                stockStream.send(new Object[]{3, 57.6, false});
+                Thread.sleep(1000);
+
+                long totalRowsInTable = DBConnectionHelper.getDBConnectionHelperInstance().getRowsInTable(dataSource, tableName);
                 Assert.assertEquals("Insertion failed", 3, totalRowsInTable);
 
                 executionPlanRuntime.shutdown();

@@ -95,7 +95,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateValue,dateFormat) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -104,7 +105,6 @@ public class ExtractDateFunctionExtensionTestCase {
                 eventArrived = true;
                 for (Event event : inEvents) {
                     count.incrementAndGet();
-                    ;
                     if (count.intValue() == 1) {
                         Assert.assertEquals(null, event.getData(1));
                     }
@@ -138,9 +138,7 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateValue,dateFormat) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
     }
 
@@ -156,9 +154,7 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateValue,dateFormat) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
     }
 
@@ -174,9 +170,7 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateValue,dateFormat,dateValue) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
 
     }
 
@@ -192,8 +186,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateFormat,dateValue) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -202,7 +196,6 @@ public class ExtractDateFunctionExtensionTestCase {
                 eventArrived = true;
                 for (Event event : inEvents) {
                     count.incrementAndGet();
-                    ;
                     if (count.intValue() == 1) {
                         Assert.assertEquals(null, event.getData(1));
                     }
@@ -231,8 +224,8 @@ public class ExtractDateFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:date(dateFormat,dateValue) as dateExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
-
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -249,7 +242,6 @@ public class ExtractDateFunctionExtensionTestCase {
             }
         });
 
-
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", null, "yyyy-MM-dd HH:mm:ss"});
@@ -257,6 +249,5 @@ public class ExtractDateFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
         Assert.assertEquals(1, count.get());
         Assert.assertTrue(eventArrived);
-
     }
 }

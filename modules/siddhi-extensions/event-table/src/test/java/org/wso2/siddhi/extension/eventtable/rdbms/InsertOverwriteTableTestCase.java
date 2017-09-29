@@ -836,5 +836,115 @@ public class InsertOverwriteTableTestCase {
         } catch (SQLException e) {
             log.info("Test case ignored due to DB connection unavailability");
         }
+
+    }
+
+    @Test
+    public void insertOverwriteTableTest11() throws InterruptedException {
+        log.info("insertOverwriteTableTest11");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setDataSource(RDBMSTestConstants.DATA_SOURCE_NAME, dataSource);
+
+        final String tableName = "test_table_1";
+        siddhiManager.setDataSource(RDBMSTestConstants.DATA_SOURCE_NAME, dataSource);
+        String createDBquery = "" +
+                "CREATE TABLE " + tableName + "( " +
+                "ID int," +
+                "PRICE double," +
+                "PAID TINYINT(1)" +
+                ");";
+        String insertIntoDBquery = "" +
+                "INSERT INTO " + tableName +
+                " (ID, PRICE, PAID) " +
+                "VALUES(1, 55.6, 1),(2, 75.6, 0),(3, 57.6, 0)";
+
+        try {
+            if (dataSource.getConnection() != null) {
+                if(DBConnectionHelper.getDBConnectionHelperInstance().isTableExist(dataSource, tableName)) {
+                    DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, tableName);
+                } else {
+                    DBConnectionHelper.getDBConnectionHelperInstance().createTestDatabaseTableWithSchema(dataSource, createDBquery);
+                }
+                DBConnectionHelper.getDBConnectionHelperInstance().insertTestDataIntoTableWithQuery(dataSource, insertIntoDBquery);
+                String streams = "" +
+                        "define stream StockStream (id int, price float, paid bool); " +
+                        "define stream CheckStockStream (id int, paid bool, price float); " +
+                        "define stream UpdateStockStream (comp int, vol bool); " +
+                        "@from(eventtable = 'rdbms' , datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + tableName + "') " +
+                        "define table StockTable (id int, price float, paid bool); ";
+                String query = "" +
+                        "@info(name = 'query1') " +
+                        "from StockStream " +
+                        "insert into StockTable ;" +
+                        "" +
+                        "@info(name = 'query2') " +
+                        "from UpdateStockStream left outer join StockTable " +
+                        "   on UpdateStockStream.comp == StockTable.id " +
+                        "select  id, ifThenElse(price is null,0f,price) as price, vol as paid " +
+                        "insert overwrite StockTable " +
+                        "   on StockTable.id==id;" +
+                        "" +
+                        "@info(name = 'query3') " +
+                        "from CheckStockStream[(CheckStockStream.id==StockTable.id and CheckStockStream.paid==StockTable.paid and CheckStockStream.price < StockTable.price) in StockTable] " +
+                        "insert into OutStream;";
+
+                ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+                executionPlanRuntime.addCallback("query3", new QueryCallback() {
+                    @Override
+                    public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                        EventPrinter.print(timeStamp, inEvents, removeEvents);
+                        if (inEvents != null) {
+                            for (Event event : inEvents) {
+                                inEventCount++;
+                                switch (inEventCount) {
+                                    case 1:
+                                        Assert.assertArrayEquals(new Object[]{2, true, 55.6f}, event.getData());
+                                        break;
+                                    case 2:
+                                        Assert.assertArrayEquals(new Object[]{2, false, 55.6f}, event.getData());
+                                        break;
+                                    default:
+                                        Assert.assertSame(2, inEventCount);
+                                }
+                            }
+                            eventArrived = true;
+                        }
+                        if (removeEvents != null) {
+                            removeEventCount = removeEventCount + removeEvents.length;
+                        }
+                        eventArrived = true;
+                    }
+
+                });
+
+                InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
+                InputHandler checkStockStream = executionPlanRuntime.getInputHandler("CheckStockStream");
+                InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
+
+                executionPlanRuntime.start();
+
+                stockStream.send(new Object[]{1, 55.6f, true});
+                stockStream.send(new Object[]{2, 155.6f, true});
+                checkStockStream.send(new Object[]{2, true, 55.6f});
+                checkStockStream.send(new Object[]{1, true, 155.6f});
+                updateStockStream.send(new Object[]{2, false});
+                checkStockStream.send(new Object[]{2, false, 55.6f});
+                checkStockStream.send(new Object[]{1, true, 155.6f});
+
+                Thread.sleep(1000);
+
+                Assert.assertEquals("Number of success events", 2, inEventCount);
+                Assert.assertEquals("Number of remove events", 0, removeEventCount);
+                Assert.assertEquals("Event arrived", true, eventArrived);
+
+                executionPlanRuntime.shutdown();
+
+            }
+        } catch (SQLException e) {
+            log.info("Test case ignored due to DB connection unavailability");
+        }
+
     }
 }
