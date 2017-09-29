@@ -26,8 +26,10 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
+import org.wso2.siddhi.core.util.EventPrinter;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -889,6 +891,91 @@ public class TestDebugger {
         stockStream.send(new Event[]{new Event(123L, new Object[]{"WSO2", 57.6f, 100L})});
         Thread.sleep(500);
 
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testDebugger14() throws InterruptedException {
+        log.info("testDebugger14");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete StockTable " +
+                "   on symbol=='IBM' ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+        InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
+        executionPlanRuntime.debug(); // start in debug mode
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100l});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100l});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100l});
+        deleteStockStream.send(new Object[]{"IBM", 57.6f, 100l});
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testDebugger15() throws InterruptedException {
+        log.info("testDebugger15");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        // Join 2 streams and insert that into table
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream PriceStream (symbol string, price float); " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream#window.length(1) as a join PriceStream#window.length(1) as b " +
+                "   on a.symbol == b.symbol " +
+                "select a.symbol as symbol, b.price as price, a.volume " +
+                "insert into StockTable ;";
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+        InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
+        InputHandler priceStream = executionPlanRuntime.getInputHandler("PriceStream");
+        executionPlanRuntime.debug(); // start in debug mode for code coverage
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        priceStream.send(new Event[]{
+                new Event(123L, new Object[]{"WSO2", 99.9F}),
+                new Event(123L, new Object[]{"IBM", 100.2F})
+        });
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testDebugger16() throws InterruptedException {
+        log.info("testDebugger16");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
+        String query = "@info(name = 'query1') from cseEventStream[150 > volume] select symbol,price , symbol as sym1" +
+                " insert into outputStream ;";
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                junit.framework.Assert.assertTrue("IBM".equals(inEvents[0].getData(2)));
+                count = count + inEvents.length;
+            }
+        });
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.debug();
+        inputHandler.send(new Object[]{"IBM", 700f, 100l});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 200l});
+        Thread.sleep(100);
+        junit.framework.Assert.assertEquals(1, count);
         executionPlanRuntime.shutdown();
     }
 }
