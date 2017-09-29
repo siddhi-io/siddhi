@@ -665,13 +665,15 @@ public class DeleteFromRDBMSTestCase {
                 if(DBConnectionHelper.getDBConnectionHelperInstance().isTableExist(dataSource, tableName)) {
                     DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, tableName);
                 } else {
-                    DBConnectionHelper.getDBConnectionHelperInstance().createTestDatabaseTableWithSchema(dataSource, createDBquery);
+                    DBConnectionHelper.getDBConnectionHelperInstance().createTestDatabaseTableWithSchema(dataSource,
+                            createDBquery);
                 }
 
                 String streams = "" +
                         "define stream StockStream (id int, price double, paid bool); " +
                         "define stream DeleteStockStream (id int, price double, paid bool); " +
-                        "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' , table.name = '" + tableName + "', bloom.filters = 'enable')  " +
+                        "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' ," +
+                        " table.name = '" + tableName + "', bloom.filters = 'enable')  " +
                         "define table StockTable (id int, price double, paid bool); ";
 
                 String query = "" +
@@ -697,7 +699,8 @@ public class DeleteFromRDBMSTestCase {
                 deleteStockStream.send(new Object[]{2, 100.6, true});
 
                 Thread.sleep(1000);
-                long totalRowsInTable = DBConnectionHelper.getDBConnectionHelperInstance().getRowsInTable(dataSource, tableName);
+                long totalRowsInTable = DBConnectionHelper.getDBConnectionHelperInstance().getRowsInTable(dataSource,
+                        tableName);
                 Assert.assertEquals("Deletion failed", 2, totalRowsInTable);
 
                 executionPlanRuntime.shutdown();
@@ -708,5 +711,78 @@ public class DeleteFromRDBMSTestCase {
         }
 
     }
+
+    @Test
+    public void deleteFromRDBMSTableTest14() throws InterruptedException {
+
+        log.info("deleteFromTableTest14");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setDataSource(RDBMSTestConstants.DATA_SOURCE_NAME, dataSource);
+        final String tableName = "test_table_1";
+        String createDBquery = "" +
+                "CREATE TABLE " + tableName + "( " +
+                "ID int," +
+                "PRICE double," +
+                "PAID TINYINT(1)" +
+                ");";
+        String insertIntoDBquery = "" +
+                "INSERT INTO " + tableName +
+                " (ID, PRICE, PAID) " +
+                "VALUES(1, 55.6, 1),(2, 75.6, 0),(3, 57.6, 0)";
+        try {
+            if (dataSource.getConnection() != null) {
+                if(DBConnectionHelper.getDBConnectionHelperInstance().isTableExist(dataSource, tableName)) {
+                    DBConnectionHelper.getDBConnectionHelperInstance().clearDatabaseTable(dataSource, tableName);
+                } else {
+                    DBConnectionHelper.getDBConnectionHelperInstance().createTestDatabaseTableWithSchema(dataSource,
+                            createDBquery);
+                }
+                DBConnectionHelper.getDBConnectionHelperInstance().insertTestDataIntoTableWithQuery(dataSource, insertIntoDBquery);
+
+                String streams = "" +
+                        "define stream StockStream (id int, price double, paid bool); " +
+                        "define stream DeleteStockStream (id int, price double, paid bool); " +
+                        "@from(eventtable = 'rdbms' ,datasource.name = '" + RDBMSTestConstants.DATA_SOURCE_NAME + "' ," +
+                        " table.name = '" + tableName + "', bloom.filters = 'enable')  " +
+                        "define table StockTable (id int, price double, paid bool); ";
+
+                String query = "" +
+                        "@info(name = 'query1') " +
+                        "from StockStream " +
+                        "insert into StockTable ;" +
+                        "" +
+                        "@info(name = 'query2') " +
+                        "from DeleteStockStream " +
+                        "delete StockTable " +
+                        "   on StockTable.id == id ;";
+
+                ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+
+                InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
+                InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
+
+                executionPlanRuntime.start();
+
+                stockStream.send(new Object[]{1, 55.6, true});
+                stockStream.send(new Object[]{2, 75.6, false});
+                stockStream.send(new Object[]{3, 57.6, false});
+                deleteStockStream.send(new Object[]{2, 100.6, true});
+
+                Thread.sleep(1000);
+                long totalRowsInTable = DBConnectionHelper.getDBConnectionHelperInstance().getRowsInTable(dataSource,
+                        tableName);
+                Assert.assertEquals("Deletion failed", 4, totalRowsInTable);
+
+                executionPlanRuntime.shutdown();
+
+            }
+        } catch (SQLException e) {
+            log.info("Test case ignored due to DB connection unavailability");
+        }
+
+    }
+
+
 
 }
