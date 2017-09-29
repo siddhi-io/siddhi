@@ -146,10 +146,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:dayOfWeek(dateValue,dateFormat) as dayOfWeekExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test(expected = ExecutionPlanValidationException.class)
@@ -164,10 +161,7 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:dayOfWeek(dateValue,dateFormat) as dayOfWeekExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
     @Test
@@ -195,7 +189,6 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
@@ -230,7 +223,6 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
@@ -265,7 +257,6 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
@@ -301,7 +292,6 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                         Assert.assertEquals(null, event.getData(1));
                         eventArrived = true;
                     }
-
                 }
             }
         });
@@ -323,11 +313,42 @@ public class ExtractDayOfWeekFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol,time:dayOfWeek(dateValue,dateValue,unit) as dayOfWeekExtracted " +
                 "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                query);
-        executionPlanRuntime.start();
-
-        executionPlanRuntime.shutdown();
+        siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
+    @Test
+    public void extractDayOfWeekFunctionExtension10() throws InterruptedException {
+
+        log.info("ExtractDayOfWeekFunctionExtensionTestCaseInvalidFormatSingleParameter");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string, dateValue string,dateFormat string);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol,time:dayOfWeek(dateValue) as dayOfWeekExtracted " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+        final ArrayList<String> outputDays = new ArrayList<String>();
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals(null, event.getData(1));
+                        eventArrived = true;
+                    }
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "12"});
+        executionPlanRuntime.shutdown();
+    }
 }

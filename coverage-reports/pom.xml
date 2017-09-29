@@ -32,212 +32,100 @@
     <name>Siddhi Tests Coverage Report Aggregation</name>
     <packaging>pom</packaging>
 
-    <profiles>
-        <profile>
-            <id>Test-Coverage-Report-Aggregation</id>
-            <activation>
-                <file>
-                    <exists>../modules/siddhi-core/target/coverage-reports</exists>
-                </file>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-jacoco-dependencies</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                    <includeTypes>jar</includeTypes>
-                                    <includeArtifactIds>org.jacoco.ant</includeArtifactIds>
-                                    <stripVersion>true</stripVersion>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-query-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-query-compiler</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-eval-script</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-event-table</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-geo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-kalman-filter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-map</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-markov-models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-math</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-regex</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-reorder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-string</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-extension-timeseries</artifactId>
+        </dependency>
+    </dependencies>
 
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target xmlns:jacoco="antlib:org.jacoco.ant">
-                                        <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-                                            <classpath path="${project.build.directory}"/>
-                                        </taskdef>
-                                        <jacoco:report>
-                                            <executiondata>
-                                                <fileset dir="${siddhi.core.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.query.api.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.query.compiler.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.evalscript.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.eventtable.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.geo.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.kalman.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.map.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.markov.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.math.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.regex.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.reorder.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.string.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.time.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                                <fileset dir="${siddhi.ext.timeseries.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec"/>
-                                                </fileset>
-                                            </executiondata>
-                                            <structure name="Siddhi Tests">
-                                                <classfiles>
-                                                    <fileset dir="${siddhi.core.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.query.api.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.query.compiler.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.evalscript.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.eventtable.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.geo.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.kalman.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.map.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.markov.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.math.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.regex.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.reorder.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.string.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.time.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.ext.timeseries.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class"/>
-                                                        <exclude name="**/*Exception.class"/>
-                                                    </fileset>
-                                                </classfiles>
-                                                <sourcefiles encoding="UTF-8">
-                                                    <fileset dir="${siddhi.core.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.query.api.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.query.compiler.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.evalscript.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.eventtable.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.geo.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.kalman.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.map.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.markov.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.math.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.regex.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.reorder.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.string.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.time.basedir}/src/main/java"/>
-                                                    <fileset dir="${siddhi.ext.timeseries.basedir}/src/main/java"/>
-                                                </sourcefiles>
-                                            </structure>
-                                            <html destdir="${project.build.directory}/coverage-reports"/>
-                                        </jacoco:report>
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.jacoco</groupId>
-                                <artifactId>org.jacoco.ant</artifactId>
-                                <version>${jacoco.ant.version}</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-    <properties>
-        <siddhi.core.basedir>../modules/siddhi-core</siddhi.core.basedir>
-        <siddhi.query.api.basedir>../modules/siddhi-query-api</siddhi.query.api.basedir>
-        <siddhi.query.compiler.basedir>../modules/siddhi-query-compiler</siddhi.query.compiler.basedir>
-        <siddhi.ext.evalscript.basedir>../modules/siddhi-extensions/eval-script</siddhi.ext.evalscript.basedir>
-        <siddhi.ext.eventtable.basedir>../modules/siddhi-extensions/event-table</siddhi.ext.eventtable.basedir>
-        <siddhi.ext.geo.basedir>../modules/siddhi-extensions/geo</siddhi.ext.geo.basedir>
-        <siddhi.ext.kalman.basedir>../modules/siddhi-extensions/kalman-filter</siddhi.ext.kalman.basedir>
-        <siddhi.ext.map.basedir>../modules/siddhi-extensions/map</siddhi.ext.map.basedir>
-        <siddhi.ext.markov.basedir>../modules/siddhi-extensions/markov-models</siddhi.ext.markov.basedir>
-        <siddhi.ext.math.basedir>../modules/siddhi-extensions/math</siddhi.ext.math.basedir>
-        <siddhi.ext.regex.basedir>../modules/siddhi-extensions/regex</siddhi.ext.regex.basedir>
-        <siddhi.ext.reorder.basedir>../modules/siddhi-extensions/reorder</siddhi.ext.reorder.basedir>
-        <siddhi.ext.string.basedir>../modules/siddhi-extensions/string</siddhi.ext.string.basedir>
-        <siddhi.ext.time.basedir>../modules/siddhi-extensions/time</siddhi.ext.time.basedir>
-        <siddhi.ext.timeseries.basedir>../modules/siddhi-extensions/timeseries</siddhi.ext.timeseries.basedir>
-    </properties>
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${org.jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>report-aggregate</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report-aggregate</goal>
+                        </goals>
+                        <configuration>
+                            <title>Siddhi Test Coverage</title>
+                            <footer>Code Coverage Report for Siddhi ${project.version}</footer>
+                            <includes>
+                                <include>**/*.class</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/*Constants.class</exclude>
+                                <exclude>**/*Exception.class</exclude>
+                                <exclude>**/SiddhiQLBaseVisitor.class</exclude>
+                                <exclude>**/SiddhiQLParser*</exclude>
+                                <exclude>**/SiddhiQLLexer*</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

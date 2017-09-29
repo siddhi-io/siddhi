@@ -1305,4 +1305,632 @@ public class PersistenceTestCase {
         Assert.assertEquals(true, eventArrived);
         Assert.assertEquals(100, lastValue);
     }
+
+    @Test
+    public void persistenceStdDevTest() throws InterruptedException {
+
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        String executionPlan = "" +
+                "@plan:name('Test') " +
+                "" +
+                "define stream StockStream ( symbol string, price float, volume int, timestamp long, marketIndex "
+                + "double );" +
+                "" +
+                "@info(name = 'query1')" +
+                "from StockStream[price>10]#window.lengthBatch(2) " +
+                "select symbol, stddev(price) as stdPrice, stddev(volume) as stdVol, stddev(timestamp) as "
+                + "stdTimestamp, stddev(marketIndex) "
+                + "as stdmarketIndex"
+                + " " +
+                "group by symbol " +
+                "insert all events into OutStream ";
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                atomicCount.addAndGet(inEvents == null ? 0 : inEvents.length);
+                atomicCount.addAndGet(removeEvents == null ? 0 : removeEvents.length);
+                for (Event inEvent : inEvents) {
+                    Assert.assertTrue("WSO3".equals(inEvent.getData(0)) || "WSO2".equals(inEvent.getData(0)));
+                    Assert.assertEquals(0.5, inEvent.getData(1));
+                    Assert.assertEquals(50.0, inEvent.getData(2));
+                    Assert.assertEquals(0.0, inEvent.getData(3));
+                    Assert.assertEquals(1.5, inEvent.getData(4));
+                }
+                if (removeEvents != null) {
+                    for (Event removeEvent : removeEvents) {
+                        Assert.assertTrue("WSO2".equals(removeEvent.getData(0)));
+                    }
+                }
+            }
+        };
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+
+        long startTime = System.currentTimeMillis();
+        inputHandler.send(new Object[]{"WSO2", 75f, 100, startTime, 2.3});
+        inputHandler.send(new Object[]{"WSO2", 76f, 200, startTime, 5.3});
+
+
+        //persisting
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+
+        //restarting execution plan
+        executionPlanRuntime.shutdown();
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+        inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+
+        //loading
+        executionPlanRuntime.restoreLastRevision();
+
+        inputHandler.send(new Object[]{"WSO3", 77f, 300, startTime, 2.3});
+        inputHandler.send(new Object[]{"WSO3", 78f, 400, startTime, 5.3});
+
+        //shutdown execution plan
+        SiddhiTestHelper.waitForEvents(100, 3, atomicCount, 2000);
+        executionPlanRuntime.shutdown();
+
+        Assert.assertEquals(3, atomicCount.intValue());
+        Assert.assertEquals(true, eventArrived);
+
+    }
+
+    @Test
+    public void persistenceMaxDevTest() throws InterruptedException {
+
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        String executionPlan = "" +
+                "@plan:name('Test') " +
+                "" +
+                "define stream StockStream ( symbol string, price float, volume int, timestamp long, marketIndex "
+                + "double );" +
+                "" +
+                "@info(name = 'query1')" +
+                "from StockStream[price>10]#window.lengthBatch(2) " +
+                "select symbol, max(price) as maxPrice, max(volume) as maxVol, max(timestamp) as "
+                + "maxTimestamp, max(marketIndex) "
+                + "as maxMarketIndex"
+                + " " +
+                "group by symbol " +
+                "insert all events into OutStream ";
+        final long startTime = System.currentTimeMillis();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                atomicCount.addAndGet(inEvents == null ? 0 : inEvents.length);
+                atomicCount.addAndGet(removeEvents == null ? 0 : removeEvents.length);
+                for (Event inEvent : inEvents) {
+                    Assert.assertTrue("WSO3".equals(inEvent.getData(0)) || "WSO2".equals(inEvent.getData(0)));
+                    Assert.assertEquals(76F, inEvent.getData(1));
+                    Assert.assertEquals(200, inEvent.getData(2));
+                    Assert.assertEquals(startTime, inEvent.getData(3));
+                    Assert.assertEquals(5.3, inEvent.getData(4));
+                }
+                if (removeEvents != null) {
+                    for (Event removeEvent : removeEvents) {
+                        Assert.assertTrue("WSO2".equals(removeEvent.getData(0)));
+                    }
+                }
+            }
+        };
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+
+
+        inputHandler.send(new Object[]{"WSO2", 75f, 100, startTime, 2.3});
+        inputHandler.send(new Object[]{"WSO2", 76f, 200, startTime, 5.3});
+
+
+        //persisting
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+
+        //restarting execution plan
+        executionPlanRuntime.shutdown();
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+        inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+
+        //loading
+        executionPlanRuntime.restoreLastRevision();
+
+        inputHandler.send(new Object[]{"WSO3", 75f, 100, startTime, 2.3});
+        inputHandler.send(new Object[]{"WSO3", 76f, 200, startTime, 5.3});
+
+        //shutdown execution plan
+        SiddhiTestHelper.waitForEvents(100, 3, atomicCount, 2000);
+        executionPlanRuntime.shutdown();
+
+        Assert.assertEquals(3, atomicCount.intValue());
+        Assert.assertEquals(true, eventArrived);
+
+    }
+
+    @Test
+    public void persistenceMinDevTest() throws InterruptedException {
+
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        String executionPlan = "" +
+                "@plan:name('Test') " +
+                "" +
+                "define stream StockStream ( symbol string, price float, volume int, timestamp long, marketIndex "
+                + "double );" +
+                "" +
+                "@info(name = 'query1')" +
+                "from StockStream[price>10]#window.lengthBatch(2) " +
+                "select symbol, min(price) as minPrice, min(volume) as minVol, min(timestamp) as "
+                + "minTimestamp, min(marketIndex) "
+                + "as minMarketIndex"
+                + " " +
+                "group by symbol " +
+                "insert all events into OutStream ";
+        final long startTime = System.currentTimeMillis();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                atomicCount.addAndGet(inEvents == null ? 0 : inEvents.length);
+                atomicCount.addAndGet(removeEvents == null ? 0 : removeEvents.length);
+                for (Event inEvent : inEvents) {
+                    Assert.assertTrue("WSO3".equals(inEvent.getData(0)) || "WSO2".equals(inEvent.getData(0)));
+                    Assert.assertEquals(75F, inEvent.getData(1));
+                    Assert.assertEquals(100, inEvent.getData(2));
+                    Assert.assertEquals(startTime, inEvent.getData(3));
+                    Assert.assertEquals(2.3, inEvent.getData(4));
+                }
+                if (removeEvents != null) {
+                    for (Event removeEvent : removeEvents) {
+                        Assert.assertTrue("WSO2".equals(removeEvent.getData(0)));
+                    }
+                }
+            }
+        };
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+
+
+        inputHandler.send(new Object[]{"WSO2", 75f, 100, startTime, 2.3});
+        inputHandler.send(new Object[]{"WSO2", 76f, 200, startTime, 5.3});
+
+
+        //persisting
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+
+        //restarting execution plan
+        executionPlanRuntime.shutdown();
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+        inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+
+        //loading
+        executionPlanRuntime.restoreLastRevision();
+
+        inputHandler.send(new Object[]{"WSO3", 75f, 100, startTime, 2.3});
+        inputHandler.send(new Object[]{"WSO3", 76f, 200, startTime, 5.3});
+
+        //shutdown execution plan
+        SiddhiTestHelper.waitForEvents(100, 3, atomicCount, 2000);
+        executionPlanRuntime.shutdown();
+
+        Assert.assertEquals(3, atomicCount.intValue());
+        Assert.assertEquals(true, eventArrived);
+
+    }
+
+    @Test
+    public void persistenceAvgDevTest() throws InterruptedException {
+
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        String executionPlan = "" +
+                "@plan:name('Test') " +
+                "" +
+                "define stream StockStream ( symbol string, price float, volume int, timestamp long, marketIndex "
+                + "double );" +
+                "" +
+                "@info(name = 'query1')" +
+                "from StockStream[price>10]#window.lengthBatch(2) " +
+                "select symbol, avg(price) as avgPrice, avg(volume) as avgVol, avg(timestamp) as "
+                + "avgTimestamp, avg(marketIndex) "
+                + "as avgMarketIndex"
+                + " " +
+                "group by symbol " +
+                "insert all events into OutStream ";
+        final long startTime = System.currentTimeMillis();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                atomicCount.addAndGet(inEvents == null ? 0 : inEvents.length);
+                atomicCount.addAndGet(removeEvents == null ? 0 : removeEvents.length);
+                for (Event inEvent : inEvents) {
+                    if (atomicCount.get() == 1) {
+                        Assert.assertTrue("WSO2".equals(inEvent.getData(0)));
+                        Assert.assertEquals(75.0, inEvent.getData(1));
+                        Assert.assertEquals(150.0, inEvent.getData(2));
+                        Assert.assertEquals(Double.parseDouble(String.valueOf(startTime)), inEvent.getData(3));
+                        Assert.assertEquals(3.0, inEvent.getData(4));
+                    } else {
+                        Assert.assertTrue("WSO3".equals(inEvent.getData(0)));
+                        Assert.assertEquals(85.0, inEvent.getData(1));
+                        Assert.assertEquals(250.0, inEvent.getData(2));
+                        Assert.assertEquals(Double.parseDouble(String.valueOf(startTime)), inEvent.getData(3));
+                        Assert.assertEquals(3.0, inEvent.getData(4));
+                    }
+                }
+                if (removeEvents != null) {
+                    for (Event removeEvent : removeEvents) {
+                        Assert.assertTrue("WSO2".equals(removeEvent.getData(0)));
+                    }
+                }
+            }
+        };
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+
+
+        inputHandler.send(new Object[]{"WSO2", 74f, 100, startTime, 2.5});
+        inputHandler.send(new Object[]{"WSO2", 76f, 200, startTime, 3.5});
+
+
+        //persisting
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+
+        //restarting execution plan
+        executionPlanRuntime.shutdown();
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+        inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+
+        //loading
+        executionPlanRuntime.restoreLastRevision();
+
+        inputHandler.send(new Object[]{"WSO3", 84f, 200, startTime, 2.5});
+        inputHandler.send(new Object[]{"WSO3", 86f, 300, startTime, 3.5});
+
+        //shutdown execution plan
+        SiddhiTestHelper.waitForEvents(100, 3, atomicCount, 2000);
+        executionPlanRuntime.shutdown();
+
+        Assert.assertEquals(3, atomicCount.intValue());
+        Assert.assertEquals(true, eventArrived);
+
+    }
+
+    @Test
+    public void persistenceMaxForeverTest() throws InterruptedException {
+
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        String executionPlan = "" +
+                "@plan:name('Test') " +
+                "" +
+                "define stream StockStream ( symbol string, price float, volume int, timestamp long, marketIndex "
+                + "double );" +
+                "" +
+                "@info(name = 'query1')" +
+                "from StockStream[price>10]#window.lengthBatch(2) " +
+                "select symbol, maxForever(price) as maxForeverPrice, maxForever(volume) as maxForeverVol, "
+                + "maxForever(timestamp) as maxForeverTimestamp, maxForever(marketIndex) "
+                + "as maxForeverMarketIndex"
+                + " " +
+                "group by symbol " +
+                "insert all events into OutStream ";
+        final long startTime = System.currentTimeMillis();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                atomicCount.addAndGet(inEvents == null ? 0 : inEvents.length);
+                atomicCount.addAndGet(removeEvents == null ? 0 : removeEvents.length);
+                for (Event inEvent : inEvents) {
+                    if ("WSO2".equals(inEvent.getData(0))) {
+                        Assert.assertEquals(84.0F, inEvent.getData(1));
+                        Assert.assertEquals(200, inEvent.getData(2));
+                        Assert.assertEquals(startTime, inEvent.getData(3));
+                        Assert.assertEquals(2.5, inEvent.getData(4));
+                    } else {
+                        Assert.assertTrue("WSO3".equals(inEvent.getData(0)));
+                        Assert.assertEquals(86.0F, inEvent.getData(1));
+                        Assert.assertEquals(300, inEvent.getData(2));
+                        Assert.assertEquals(startTime, inEvent.getData(3));
+                        Assert.assertEquals(3.5, inEvent.getData(4));
+                    }
+                }
+            }
+        };
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"WSO2", 84f, 200, startTime, 2.5});
+        inputHandler.send(new Object[]{"WSO3", 86f, 300, startTime, 3.5});
+
+
+        //persisting
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+
+        //restarting execution plan
+        executionPlanRuntime.shutdown();
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+        inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+
+        //loading
+        executionPlanRuntime.restoreLastRevision();
+
+        inputHandler.send(new Object[]{"WSO2", 74f, 100, startTime, 2.5});
+        inputHandler.send(new Object[]{"WSO3", 76f, 200, startTime, 3.5});
+        //shutdown execution plan
+        SiddhiTestHelper.waitForEvents(100, 4, atomicCount, 2000);
+        executionPlanRuntime.shutdown();
+
+        Assert.assertEquals(4, atomicCount.intValue());
+        Assert.assertEquals(true, eventArrived);
+
+    }
+
+    @Test
+    public void persistenceMinForeverTest() throws InterruptedException {
+
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        String executionPlan = "" +
+                "@plan:name('Test') " +
+                "" +
+                "define stream StockStream ( symbol string, price float, volume int, timestamp long, marketIndex "
+                + "double );" +
+                "" +
+                "@info(name = 'query1')" +
+                "from StockStream[price>10]#window.lengthBatch(2) " +
+                "select symbol, minForever(price) as minForeverPrice, minForever(volume) as minForeverVol, "
+                + "minForever(timestamp) as minForeverTimestamp, minForever(marketIndex) "
+                + "as minForeverMarketIndex"
+                + " " +
+                "group by symbol " +
+                "insert all events into OutStream ";
+        final long startTime = System.currentTimeMillis();
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                atomicCount.addAndGet(inEvents == null ? 0 : inEvents.length);
+                atomicCount.addAndGet(removeEvents == null ? 0 : removeEvents.length);
+                for (Event inEvent : inEvents) {
+                    if ("WSO2".equals(inEvent.getData(0))) {
+                        Assert.assertEquals(74.0F, inEvent.getData(1));
+                        Assert.assertEquals(100, inEvent.getData(2));
+                        Assert.assertEquals(startTime, inEvent.getData(3));
+                        Assert.assertEquals(2.5, inEvent.getData(4));
+                    } else {
+                        Assert.assertTrue("WSO3".equals(inEvent.getData(0)));
+                        Assert.assertEquals(76.0F, inEvent.getData(1));
+                        Assert.assertEquals(200, inEvent.getData(2));
+                        Assert.assertEquals(startTime, inEvent.getData(3));
+                        Assert.assertEquals(3.5, inEvent.getData(4));
+                    }
+                }
+            }
+        };
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"WSO2", 74f, 100, startTime, 2.5});
+        inputHandler.send(new Object[]{"WSO3", 76f, 200, startTime, 3.5});
+
+        //persisting
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+
+        //restarting execution plan
+        executionPlanRuntime.shutdown();
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+        inputHandler = executionPlanRuntime.getInputHandler("StockStream");
+        executionPlanRuntime.start();
+
+        //loading
+        executionPlanRuntime.restoreLastRevision();
+
+        inputHandler.send(new Object[]{"WSO2", 84f, 200, startTime, 2.5});
+        inputHandler.send(new Object[]{"WSO3", 86f, 300, startTime, 3.5});
+        //shutdown execution plan
+        SiddhiTestHelper.waitForEvents(100, 4, atomicCount, 2000);
+        executionPlanRuntime.shutdown();
+
+        Assert.assertEquals(4, atomicCount.intValue());
+        Assert.assertEquals(true, eventArrived);
+
+    }
+
+    @Test
+    public void persistenceTest13() throws InterruptedException {
+        log.info("persistenceTest8");
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        String executionPlan = "" +
+                "@Plan:name('SnapshotOutputRateLimitTest1') " +
+                "" +
+                "define stream LoginEvents (timeStamp long, ip string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.length(5) " +
+                "select ip " +
+                "output snapshot every 2 sec " +
+                "insert into uniqueIps ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        log.info("Running : " + executionPlanRuntime.getName());
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    if (count == 3) {
+                        Assert.assertEquals("192.10.1.3", inEvent.getData(0));
+                    }
+                    if (count == 4) {
+                        Assert.assertEquals("192.10.1.4", inEvent.getData(0));
+                    }
+                }
+            }
+        };
+
+        // start, persist and shutdown
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("LoginEvents");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.1"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.2"});
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+
+        // restore
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+        inputHandler = executionPlanRuntime.getInputHandler("LoginEvents");
+        executionPlanRuntime.start();
+        executionPlanRuntime.restoreLastRevision();
+        Thread.sleep(20);
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+
+        // shutdown execution plan
+        Thread.sleep(3000);
+        executionPlanRuntime.shutdown();
+        Assert.assertEquals(4, count);
+        Assert.assertEquals(true, eventArrived);
+    }
+
+    /* TODO: Fix - https://github.com/wso2/siddhi/issues/551
+    @Test()
+    public void persistenceTest14() throws InterruptedException {
+        log.info("persistenceTest14");
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        String executionPlan = "" +
+                "@Plan:name('SnapshotOutputRateLimitTest1') " +
+                "" +
+                "define stream LoginEvents (timeStamp long, ip string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.length(5) " +
+                "select count() as count " +
+                "group by ip " +
+                "output snapshot every 2 sec " +
+                "insert into ipCount ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        log.info("Running : " + executionPlanRuntime.getName());
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    if (count == 3) {
+                        Assert.assertEquals("192.10.1.3", inEvent.getData(0));
+                    }
+                    if (count == 4) {
+                        Assert.assertEquals("192.10.1.4", inEvent.getData(0));
+                    }
+                }
+            }
+        };
+
+        // start, persist and shutdown
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("LoginEvents");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.1"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.2"});
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+
+        // restore
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query1", queryCallback);
+        inputHandler = executionPlanRuntime.getInputHandler("LoginEvents");
+        executionPlanRuntime.start();
+        executionPlanRuntime.restoreLastRevision();
+        Thread.sleep(20);
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+
+        // shutdown execution plan
+        Thread.sleep(3000);
+        executionPlanRuntime.shutdown();
+        Assert.assertEquals(4, count);
+        Assert.assertEquals(true, eventArrived);
+    }
+    */
 }
