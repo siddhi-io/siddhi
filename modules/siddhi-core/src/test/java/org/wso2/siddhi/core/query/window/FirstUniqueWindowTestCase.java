@@ -27,17 +27,22 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.EventPrinter;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FirstUniqueWindowTestCase {
     private static final Logger log = Logger.getLogger(FirstUniqueWindowTestCase.class);
     private int count;
     private boolean eventArrived;
+    private AtomicInteger atomicCount;
 
     @Before
     public void init() {
         count = 0;
         eventArrived = false;
+        atomicCount = new AtomicInteger(0);
     }
 
     @Test
@@ -159,7 +164,7 @@ public class FirstUniqueWindowTestCase {
                     eventArrived = true;
                     if (inEvents != null) {
                         for (Event inEvent : inEvents) {
-                            count++;
+                            atomicCount.incrementAndGet();
                         }
                     }
                 }
@@ -172,8 +177,8 @@ public class FirstUniqueWindowTestCase {
             twitterStreamHandler.send(new Object[]{"User1", "Hello World", "WSO2"});
             twitterStreamHandler.send(new Object[]{"User2", "Hello World2", "WSO2"});
             cseEventStreamHandler.send(new Object[]{"WSO2", 75.6f, 100});
-            Thread.sleep(1000);
-            Assert.assertEquals(2, count);
+            SiddhiTestHelper.waitForEvents(100, 2, atomicCount, 10000);
+            Assert.assertEquals(2, atomicCount.get());
             Assert.assertTrue(eventArrived);
         } finally {
             executionPlanRuntime.shutdown();

@@ -28,20 +28,25 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SortWindowTestCase {
     private static final Logger log = Logger.getLogger(SortWindowTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
+    private AtomicInteger atomicCount;
 
     @Before
     public void init() {
         inEventCount = 0;
         removeEventCount = 0;
         eventArrived = false;
+        atomicCount = new AtomicInteger(0);
     }
 
     @Test
@@ -157,7 +162,7 @@ public class SortWindowTestCase {
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
                     if (inEvents != null) {
-                        inEventCount+=(inEvents.length);
+                        atomicCount.addAndGet(inEvents.length);
                     }
                     if (removeEvents != null) {
                         removeEventCount+=(removeEvents.length);
@@ -174,8 +179,8 @@ public class SortWindowTestCase {
             twitterStreamHandler.send(new Object[]{15, "Hello World2", "WSO2"});
             cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, 90});
             twitterStreamHandler.send(new Object[]{5, "Hello World2", "IBM"});
-            Thread.sleep(1000);
-            Assert.assertEquals(3, inEventCount);
+            SiddhiTestHelper.waitForEvents(100, 3, atomicCount, 10000);
+            Assert.assertEquals(3, atomicCount.get());
             Assert.assertTrue(eventArrived);
         } finally {
             executionPlanRuntime.shutdown();
