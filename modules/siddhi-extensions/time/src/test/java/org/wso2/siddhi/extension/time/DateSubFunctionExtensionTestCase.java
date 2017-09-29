@@ -513,4 +513,53 @@ public class DateSubFunctionExtensionTestCase {
                 "insert into outputStream;");
         siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
+
+    @Test
+    public void dateSubFunctionExtension19() throws InterruptedException {
+
+        log.info("DateSubFunctionExtensionProcessedCalenderTestCase");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
+                " long,expr int);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream select symbol ,time:dateSub(dateValue,expr,'year',dateFormat) as yearSubtracted," +
+                "time:dateSub(dateValue,expr,'second',dateFormat) as secondSubtracted," +
+                "time:dateSub(dateValue,expr,'minute',dateFormat) as minuteSubtracted, " +
+                "time:dateSub(dateValue,expr,'hour',dateFormat) as hourSubtracted " +
+                "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+                query);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event event : inEvents) {
+                    count++;
+                    if (count == 1) {
+                        Assert.assertEquals("2012-11-11 13:23:44", event.getData(1));
+                        Assert.assertEquals("2014-11-11 13:23:42", event.getData(2));
+                    }
+                    if (count == 2) {
+                        Assert.assertEquals("2012-11-11 13:23:44", event.getData(1));
+                        Assert.assertEquals("2014-11-11 13:23:42", event.getData(2));
+                    }
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
+        inputHandler.send(new Object[]{"IBM", "2014-11-11 13:23:44", "yyyy-MM-dd HH:mm:ss", 1415692424000L, 2});
+        Thread.sleep(100);
+        Assert.assertEquals(3, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
 }
