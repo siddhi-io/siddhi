@@ -377,6 +377,8 @@ public class InsertOverwriteTableTestCase {
                 Assert.assertEquals("Event arrived", false, eventArrived);
 
                 executionPlanRuntime.shutdown();
+            } else {
+                throw new DuplicateDefinitionException("Execution failed due to duplicate definitions.");
             }
         } catch (SQLException e) {
             log.info("Test case ignored due to DB connection unavailability");

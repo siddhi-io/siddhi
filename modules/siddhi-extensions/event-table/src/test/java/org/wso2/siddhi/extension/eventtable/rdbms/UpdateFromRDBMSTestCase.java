@@ -561,6 +561,8 @@ public class UpdateFromRDBMSTestCase {
                 long totalRowsInTable = DBConnectionHelper.getDBConnectionHelperInstance().getRowsInTable(dataSource);
                 Assert.assertEquals("Update failed", 3, totalRowsInTable);
                 executionPlanRuntime.shutdown();
+            } else {
+                throw new ExecutionPlanRuntimeException("Execution plan execution failed.");
             }
         } catch (SQLException e) {
             log.info("Test case ignored due to DB connection unavailability");
