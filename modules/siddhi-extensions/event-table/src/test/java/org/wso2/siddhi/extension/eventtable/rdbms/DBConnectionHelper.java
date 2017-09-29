@@ -109,7 +109,7 @@ public class DBConnectionHelper {
             con.commit();
             return stmt.execute();
         } catch (SQLException e) {
-            log.error("Error while creating the event", e);
+            log.info("Table '" + tableName + "' is not existed.", e);
             return false;
         } finally {
             clearConnections(stmt, con);

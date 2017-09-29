@@ -110,6 +110,8 @@ public class InsertIntoRDBMSTestCase {
                 Thread.sleep(1000);
 
                 executionPlanRuntime.shutdown();
+            } else {
+                throw new ExecutionPlanRuntimeException("Execution plan execution failed.");
             }
         } catch (SQLException e) {
             log.info("Test case ignored due to DB connection unavailability");
