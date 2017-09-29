@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.List;
@@ -46,8 +47,10 @@ public class TableWindowProcessor extends WindowProcessor implements FindablePro
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ExecutionPlanContext executionPlanContext) {
-        // nothing to be done
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
+        if (attributeExpressionExecutors.length > 0) {
+            throw new ExecutionPlanValidationException("TableWindowProcessor could not be have any input parameters");
+        }
     }
 
     @Override
@@ -83,9 +86,6 @@ public class TableWindowProcessor extends WindowProcessor implements FindablePro
             streamProcessor.inputDefinition = inputDefinition;
             ExpressionExecutor[] innerExpressionExecutors = new ExpressionExecutor[attributeExpressionLength];
             ExpressionExecutor[] attributeExpressionExecutors1 = this.attributeExpressionExecutors;
-            for (int i = 0; i < attributeExpressionLength; i++) {
-                innerExpressionExecutors[i] = attributeExpressionExecutors1[i].cloneExecutor(key);
-            }
             streamProcessor.attributeExpressionExecutors = innerExpressionExecutors;
             streamProcessor.attributeExpressionLength = attributeExpressionLength;
             streamProcessor.additionalAttributes = additionalAttributes;

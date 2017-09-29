@@ -48,10 +48,6 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
     private ExecutionPlanContext executionPlanContext;
     private volatile long lastTimestamp = Long.MIN_VALUE;
 
-    public void setTimeInMilliSeconds(long timeInMilliSeconds) {
-        this.timeInMilliSeconds = timeInMilliSeconds;
-    }
-
     @Override
     public void setScheduler(Scheduler scheduler) {
         this.scheduler = scheduler;

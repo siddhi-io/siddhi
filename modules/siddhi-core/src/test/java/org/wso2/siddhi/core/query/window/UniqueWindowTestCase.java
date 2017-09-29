@@ -27,19 +27,24 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.EventPrinter;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class UniqueWindowTestCase {
     private static final Logger log = Logger.getLogger(UniqueWindowTestCase.class);
     private int count;
     private long value;
     private boolean eventArrived;
+    private AtomicInteger atomicCount;
 
     @Before
     public void init() {
         count = 0;
         value = 0;
         eventArrived = false;
+        atomicCount = new AtomicInteger(0);
     }
 
     @Test
@@ -132,4 +137,47 @@ public class UniqueWindowTestCase {
         executionPlanRuntime.shutdown();
     }
 
+    @Test
+    public void UniqueWindowTest3() throws InterruptedException {
+        log.info("UniqueWindow test3");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.unique(symbol) join twitterStream#window.unique(user) " +
+                "on cseEventStream.symbol== twitterStream.company " +
+                "select cseEventStream.symbol as symbol, twitterStream.tweet, cseEventStream.price " +
+                "insert into outputStream ;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+        try {
+            executionPlanRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
+                    eventArrived = true;
+                    if (inEvents != null) {
+                        for (Event inEvent : inEvents) {
+                            atomicCount.incrementAndGet();
+                        }
+                    }
+                }
+            });
+            InputHandler cseEventStreamHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+            InputHandler twitterStreamHandler = executionPlanRuntime.getInputHandler("twitterStream");
+            executionPlanRuntime.start();
+            cseEventStreamHandler.send(new Object[]{"WSO2", 55.6f, 100});
+            cseEventStreamHandler.send(new Object[]{"IBM", 59.6f, 100});
+            twitterStreamHandler.send(new Object[]{"User1", "Hello World", "WSO2"});
+            twitterStreamHandler.send(new Object[]{"User2", "Hello World2", "WSO2"});
+            cseEventStreamHandler.send(new Object[]{"WSO2", 75.6f, 100});
+            SiddhiTestHelper.waitForEvents(100, 4, atomicCount, 10000);
+            Assert.assertEquals(4, atomicCount.get());
+            Assert.assertTrue(eventArrived);
+        } finally {
+            executionPlanRuntime.shutdown();
+        }
+    }
 }
