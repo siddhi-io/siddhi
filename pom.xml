@@ -191,16 +191,6 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-math</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-time</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-query-compiler</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -248,17 +238,73 @@
                 <version>${org.json.wso2.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-string</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.skyscreamer</groupId>
                 <artifactId>jsonassert</artifactId>
                 <scope>test</scope>
                 <version>${jsonassert.version}</version>
             </dependency>
 
+            <!-- Extensions -->
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-eval-script</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-event-table</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-kalman-filter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-map</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-markov-models</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-math</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-regex</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-reorder</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-string</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-time</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-extension-timeseries</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -289,29 +335,25 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.4.3</version>
                     <configuration>
+                        <testSourceDirectory>${project.build.testSourceDirectory}</testSourceDirectory>
+                        <testClassesDirectory>${project.build.testOutputDirectory}</testClassesDirectory>
                         <includes>
                             <include>**/*TestCase.java</include>
                         </includes>
-                        <reportFormat>brief</reportFormat>
                         <useFile>false</useFile>
                         <forkMode>once</forkMode>
-                        <argLine>-ea -Xmx512m</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.maven.version}</version>
+                    <version>${org.jacoco.version}</version>
                     <executions>
                         <execution>
                             <id>jacoco-initialize</id>
                             <goals>
                                 <goal>prepare-agent</goal>
                             </goals>
-                            <configuration>
-                                <destFile>${basedir}/target/coverage-reports/jacoco.exec</destFile>
-                                <propertyName>argLine</propertyName>
-                            </configuration>
                         </execution>
                         <execution>
                             <id>jacoco-site</id>
@@ -325,8 +367,6 @@
                                     <exclude>**/SiddhiQLParser*</exclude>
                                     <exclude>**/SiddhiQLLexer*</exclude>
                                 </excludes>
-                                <dataFile>${basedir}/target/coverage-reports/jacoco.exec</dataFile>
-                                <outputDirectory>${basedir}/target/coverage-reports/</outputDirectory>
                             </configuration>
                         </execution>
                     </executions>
@@ -434,9 +474,7 @@
         <jama.version>1.0.3</jama.version>
         <jdbc-pool.version>7.0.34.wso2v2</jdbc-pool.version>
         <jdbc-pool.imp.pkg.version.range>[1.7.0, 1.8.0)</jdbc-pool.imp.pkg.version.range>
-        <org.jacoco.version>0.7.4.201502262128</org.jacoco.version>
-        <jacoco.maven.version>0.7.8</jacoco.maven.version>
-        <jacoco.ant.version>0.7.8</jacoco.ant.version>
+        <org.jacoco.version>0.7.9</org.jacoco.version>
         <org.eclipse.osgi.version>3.7.0.v20110613</org.eclipse.osgi.version>
         <version.equinox.osgi.services>3.3.100.v20120522-1822</version.equinox.osgi.services>
         <equinox.osgi.services.imp.pkg.version.range>[1.2.0, 1.3.0)
