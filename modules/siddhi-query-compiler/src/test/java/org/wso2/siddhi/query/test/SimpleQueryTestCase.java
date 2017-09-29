@@ -470,6 +470,110 @@ public class SimpleQueryTestCase {
     }
 
 
+    @Test(expected = SiddhiParserException.class)
+    public void testInsertOverWriteIntoStream() {
+        SiddhiCompiler.parse("" +
+                "define stream StockStream(symbol string, price double); " +
+                "from  StockStream " +
+                "select symbol, price " +
+                "insert overwrite #OutStockStream" +
+                "   on price==10; "
+        );
+    }
+
+    @Test(expected = SiddhiParserException.class)
+    public void testDeleteOnStream() {
+        SiddhiCompiler.parse("" +
+                "define stream StockStream(symbol string, price double); " +
+                "from  StockStream " +
+                "delete #OutStockStream" +
+                "   on price==10; "
+        );
+    }
+
+    @Test(expected = SiddhiParserException.class)
+    public void testUpdateStream() {
+        SiddhiCompiler.parse("" +
+                "define stream StockStream(symbol string, price double); " +
+                "from  StockStream " +
+                "select symbol, price " +
+                "update #OutStockStream" +
+                "   on price==10; "
+        );
+    }
+
+    @Test()
+    public void testEventTypeAllRaw() {
+        SiddhiCompiler.parse("" +
+                "define stream StockStream(symbol string, price double); " +
+                "from  StockStream " +
+                "select symbol, price " +
+                "insert ALL RAW EVENTS into #OutStockStream; "
+        );
+    }
+
+    @Test()
+    public void testEventTypeExpiredRaw() {
+        SiddhiCompiler.parse("" +
+                "define stream StockStream(symbol string, price double); " +
+                "from  StockStream " +
+                "select symbol, price " +
+                "insert EXPIRED RAW EVENTS into #OutStockStream; "
+        );
+    }
+
+    @Test()
+    public void testTimeConstantMilliSec() {
+        SiddhiCompiler.parse("" +
+                "define stream StockStream(symbol string, price double); " +
+                "from  StockStream#window.time(1 milliSec) " +
+                "select symbol, price " +
+                "insert into #OutStockStream; "
+        );
+    }
+
+    @Test()
+    public void testTimeConstantHour() {
+        SiddhiCompiler.parse("" +
+                "define stream StockStream(symbol string, price double); " +
+                "from  StockStream#window.time(1 hour) " +
+                "select symbol, price " +
+                "insert into #OutStockStream; "
+        );
+    }
+
+
+    @Test()
+    public void testTimeConstantYear() {
+        SiddhiCompiler.parse("" +
+                "define stream StockStream(symbol string, price double); " +
+                "from  StockStream#window.time(1 year) " +
+                "select symbol, price " +
+                "insert into #OutStockStream; "
+        );
+    }
+
+    @Test()
+    public void testTimeConstantMonth() {
+        SiddhiCompiler.parse("" +
+                "define stream StockStream(symbol string, price double); " +
+                "from  StockStream#window.time(1 month) " +
+                "select symbol, price " +
+                "insert into #OutStockStream; "
+        );
+    }
+
+    @Test()
+    public void testTimeConstantWeek() {
+        SiddhiCompiler.parse("" +
+                "define stream StockStream(symbol string, price double); " +
+                "from  StockStream#window.time(1 week) " +
+                "select symbol, price " +
+                "insert into #OutStockStream; "
+        );
+    }
+
+
 }
 
 
