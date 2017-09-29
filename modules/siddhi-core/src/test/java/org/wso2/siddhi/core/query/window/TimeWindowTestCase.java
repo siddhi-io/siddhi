@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 public class TimeWindowTestCase {
     private static final Logger log = Logger.getLogger(TimeWindowTestCase.class);
@@ -84,7 +85,6 @@ public class TimeWindowTestCase {
         executionPlanRuntime.shutdown();
 
     }
-
 
     /**
      * Commenting out intermittent failing test case until fix this properly.
@@ -172,4 +172,73 @@ public class TimeWindowTestCase {
 
     }
 
+    @Test
+    public void timeWindowTest4() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.time(2 sec, 5) " +
+                "select symbol,price,volume " +
+                "insert all events into outputStream ;";
+
+        String message = "";
+        try {
+            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        } catch (ExecutionPlanValidationException e) {
+            message = e.getMessage();
+        }
+      Assert.assertTrue("timeWindow can have only one attribute", message.contains("Time window "
+              + "should only have one parameter (<int|long|time> windowTime"));
+    }
+
+    @Test
+    public void timeWindowTest5() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, time long, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.time(time) " +
+                "select symbol,price,volume " +
+                "insert all events into outputStream ;";
+
+        String message = "";
+        try {
+            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        } catch (ExecutionPlanValidationException e) {
+            message = e.getMessage();
+        }
+        Assert.assertTrue("timeWindow can have only constant parameters", message.contains("Time "
+                + "window should have constant parameter attribute but found a dynamic attribute"));
+    }
+
+    @Test
+    public void timeWindowTest6() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, time long, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.time(4.7) " +
+                "select symbol,price,volume " +
+                "insert all events into outputStream ;";
+
+        String message = "";
+        try {
+            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+        } catch (ExecutionPlanValidationException e) {
+            message = e.getMessage();
+        }
+        Assert.assertTrue("Time window's parameter attribute should be either int or long."
+                + " float value is passed as the attribute", message.contains("Time window's "
+                + "parameter attribute should be either int or long"));
+    }
 }
