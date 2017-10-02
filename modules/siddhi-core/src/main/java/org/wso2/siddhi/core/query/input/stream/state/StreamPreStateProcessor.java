@@ -18,6 +18,7 @@
 package org.wso2.siddhi.core.query.input.stream.state;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.state.StateEventCloner;
@@ -264,6 +265,8 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
             StateEvent stateEvent = iterator.next();
             if (withinStates.size() > 0) {
                 if (isExpired(stateEvent, streamEvent)) {
+                    stateEvent.setType(ComplexEvent.Type.EXPIRED);
+                    returnEventChunk.add(stateEvent);
                     iterator.remove();
                     continue;
                 }
