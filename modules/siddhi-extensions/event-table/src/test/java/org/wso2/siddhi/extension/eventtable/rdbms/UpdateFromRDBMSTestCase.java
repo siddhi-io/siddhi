@@ -72,7 +72,7 @@ public class UpdateFromRDBMSTestCase {
                         "@info(name = 'query2') " +
                         "from UpdateStockStream " +
                         "update StockTable " +
-                        "   on StockTable.symbol == symbol ;";
+                        "   on StockTable.volume == volume ;";
 
                 ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
 
