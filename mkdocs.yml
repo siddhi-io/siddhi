@@ -56,5 +56,6 @@ pages:
   - 4.0.0-M85: api/4.0.0-M85.md
   - 4.0.0-M86: api/4.0.0-M86.md
   - 4.0.0-M87: api/4.0.0-M87.md
+  - 4.0.0-M88: api/4.0.0-M88.md
 - License: license.md
 theme: material
