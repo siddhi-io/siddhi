@@ -28,7 +28,6 @@
     <name>Siddhi Performance Samples</name>
     <!--<packaging>bundle</packaging>-->
 
-
     <dependencies>
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
