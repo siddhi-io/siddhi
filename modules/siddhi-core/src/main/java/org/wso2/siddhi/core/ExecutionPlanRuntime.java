@@ -181,23 +181,20 @@ public class ExecutionPlanRuntime {
 
     public synchronized SiddhiDebugger debug() {
         List<StreamRuntime> streamRuntime = new ArrayList<StreamRuntime>();
-        List<OutputCallback> streamCallbacks = new ArrayList<OutputCallback>();
+        List<OutputCallback> outputCallbacks = new ArrayList<OutputCallback>();
         for (QueryRuntime queryRuntime : queryProcessorMap.values()) {
             streamRuntime.add(queryRuntime.getStreamRuntime());
-            OutputCallback callback = queryRuntime.getOutputCallback();
-            callback.setQueryName(queryRuntime.getQueryId());
-            streamCallbacks.add(callback);
+            outputCallbacks.add(queryRuntime.getOutputCallback());
         }
         for (StreamRuntime streamRuntime1 : streamRuntime) {
             for (SingleStreamRuntime singleStreamRuntime : streamRuntime1.getSingleStreamRuntimes()) {
                 singleStreamRuntime.getProcessStreamReceiver().setSiddhiDebugger(siddhiDebugger);
             }
         }
-        for (OutputCallback callback : streamCallbacks) {
-            callback.setSiddhiDebugger(siddhiDebugger);
+        for (OutputCallback callback : outputCallbacks) {
+            callback.setDebugger(siddhiDebugger);
         }
         start();
-
         return siddhiDebugger;
     }
 

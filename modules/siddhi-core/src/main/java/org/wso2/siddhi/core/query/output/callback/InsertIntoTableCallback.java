@@ -28,26 +28,27 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 public class InsertIntoTableCallback extends OutputCallback {
     private EventTable eventTable;
-    private SiddhiDebugger siddhiDebugger;
     private StreamDefinition outputStreamDefinition;
     private boolean convertToStreamEvent;
     private StreamEventPool streamEventPool;
-    private StreamEventConverter streamEventConvertor;
+    private StreamEventConverter streamEventConverter;
 
     public InsertIntoTableCallback(EventTable eventTable, StreamDefinition outputStreamDefinition,
                                    boolean convertToStreamEvent, StreamEventPool streamEventPool,
-                                   StreamEventConverter streamEventConvertor) {
+                                   StreamEventConverter streamEventConverter, String queryName) {
+        super(queryName);
         this.eventTable = eventTable;
         this.outputStreamDefinition = outputStreamDefinition;
         this.convertToStreamEvent = convertToStreamEvent;
         this.streamEventPool = streamEventPool;
-        this.streamEventConvertor = streamEventConvertor;
+        this.streamEventConverter = streamEventConverter;
     }
 
     @Override
     public void send(ComplexEventChunk complexEventChunk) {
-        if (siddhiDebugger != null) {
-            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.OUT, complexEventChunk.getFirst());
+        if (getDebugger() != null) {
+            getDebugger()
+                    .checkBreakPoint(getQueryName(), SiddhiDebugger.QueryTerminal.OUT, complexEventChunk.getFirst());
         }
         if (convertToStreamEvent) {
             ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<StreamEvent>(complexEventChunk.isBatch());
@@ -55,10 +56,12 @@ public class InsertIntoTableCallback extends OutputCallback {
             while (complexEventChunk.hasNext()) {
                 ComplexEvent complexEvent = complexEventChunk.next();
                 StreamEvent borrowEvent = streamEventPool.borrowEvent();
-                streamEventConvertor.convertData(
+                streamEventConverter.convertData(
                         complexEvent.getTimestamp(),
                         complexEvent.getOutputData(),
-                        complexEvent.getType() == ComplexEvent.Type.EXPIRED ? ComplexEvent.Type.CURRENT : complexEvent.getType(),
+                        complexEvent.getType() == ComplexEvent.Type.EXPIRED
+                                ? ComplexEvent.Type.CURRENT
+                                : complexEvent.getType(),
                         borrowEvent);
                 streamEventChunk.add(borrowEvent);
             }
@@ -73,11 +76,6 @@ public class InsertIntoTableCallback extends OutputCallback {
             }
             eventTable.add((ComplexEventChunk<StreamEvent>) complexEventChunk);
         }
-    }
-
-    @Override
-    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
-        this.siddhiDebugger = siddhiDebugger;
     }
 
     public StreamDefinition getOutputStreamDefinition() {
