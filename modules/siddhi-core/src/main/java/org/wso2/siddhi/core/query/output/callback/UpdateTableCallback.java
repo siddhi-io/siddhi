@@ -35,42 +35,39 @@ public class UpdateTableCallback extends OutputCallback {
     private final UpdateAttributeMapper[] updateAttributeMappers;
     private EventTable eventTable;
     private Operator operator;
-    private SiddhiDebugger siddhiDebugger;
     private boolean convertToStreamEvent;
     private StateEventPool stateEventPool;
     private StreamEventPool streamEventPool;
-    private StreamEventConverter streamEventConvertor;
+    private StreamEventConverter streamEventConverter;
 
-    public UpdateTableCallback(EventTable eventTable, Operator operator, AbstractDefinition updatingStreamDefinition,
-                               int matchingStreamIndex, boolean convertToStreamEvent, StateEventPool stateEventPool,
-                               StreamEventPool streamEventPool, StreamEventConverter streamEventConvertor) {
+    public UpdateTableCallback(EventTable eventTable, Operator operator,
+                               AbstractDefinition updatingStreamDefinition,
+                               int matchingStreamIndex, boolean convertToStreamEvent,
+                               StateEventPool stateEventPool, StreamEventPool streamEventPool,
+                               StreamEventConverter streamEventConverter, String queryName) {
+        super(queryName);
         this.eventTable = eventTable;
         this.operator = operator;
         this.matchingStreamIndex = matchingStreamIndex;
         this.convertToStreamEvent = convertToStreamEvent;
         this.stateEventPool = stateEventPool;
         this.streamEventPool = streamEventPool;
-        this.streamEventConvertor = streamEventConvertor;
+        this.streamEventConverter = streamEventConverter;
         this.updateAttributeMappers = MatcherParser.constructUpdateAttributeMapper(eventTable.getTableDefinition(),
                 updatingStreamDefinition.getAttributeList(), matchingStreamIndex);
     }
 
     @Override
     public synchronized void send(ComplexEventChunk updatingEventChunk) {
-        if (siddhiDebugger != null) {
-            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.OUT, updatingEventChunk.getFirst());
+        if (getDebugger() != null) {
+            getDebugger()
+                    .checkBreakPoint(getQueryName(), SiddhiDebugger.QueryTerminal.OUT, updatingEventChunk.getFirst());
         }
         updatingEventChunk.reset();
         if (updatingEventChunk.hasNext()) {
             ComplexEventChunk<StateEvent> updatingStateEventChunk = constructMatchingStateEventChunk(updatingEventChunk,
-                    convertToStreamEvent, stateEventPool, matchingStreamIndex, streamEventPool, streamEventConvertor);
+                    convertToStreamEvent, stateEventPool, matchingStreamIndex, streamEventPool, streamEventConverter);
             eventTable.update(updatingStateEventChunk, operator, updateAttributeMappers);
         }
     }
-
-    @Override
-    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
-        this.siddhiDebugger = siddhiDebugger;
-    }
-
 }

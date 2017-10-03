@@ -26,12 +26,26 @@ import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
 import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
-import org.wso2.siddhi.core.query.output.callback.*;
+import org.wso2.siddhi.core.query.output.callback.DeleteTableCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertIntoTableCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertIntoWindowCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertOverwriteTableCallback;
+import org.wso2.siddhi.core.query.output.callback.OutputCallback;
+import org.wso2.siddhi.core.query.output.callback.UpdateTableCallback;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.output.ratelimit.PassThroughOutputRateLimiter;
-import org.wso2.siddhi.core.query.output.ratelimit.event.*;
+import org.wso2.siddhi.core.query.output.ratelimit.event.AllPerEventOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.event.FirstGroupByPerEventOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.event.FirstPerEventOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.event.LastGroupByPerEventOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.event.LastPerEventOutputRateLimiter;
 import org.wso2.siddhi.core.query.output.ratelimit.snapshot.WrappedSnapshotOutputRateLimiter;
-import org.wso2.siddhi.core.query.output.ratelimit.time.*;
+import org.wso2.siddhi.core.query.output.ratelimit.time.AllPerTimeOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.time.FirstGroupByPerTimeOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.time.FirstPerTimeOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.time.LastGroupByPerTimeOutputRateLimiter;
+import org.wso2.siddhi.core.query.output.ratelimit.time.LastPerTimeOutputRateLimiter;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.table.EventTable;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaStateHolder;
@@ -46,7 +60,11 @@ import org.wso2.siddhi.query.api.execution.query.output.ratelimit.EventOutputRat
 import org.wso2.siddhi.query.api.execution.query.output.ratelimit.OutputRate;
 import org.wso2.siddhi.query.api.execution.query.output.ratelimit.SnapshotOutputRate;
 import org.wso2.siddhi.query.api.execution.query.output.ratelimit.TimeOutputRate;
-import org.wso2.siddhi.query.api.execution.query.output.stream.*;
+import org.wso2.siddhi.query.api.execution.query.output.stream.DeleteStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.InsertIntoStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.InsertOverwriteStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -82,10 +100,10 @@ public class OutputParser {
         //Construct CallBack
         if (outStream instanceof InsertIntoStream) {
             if (eventWindow != null) {
-                return new InsertIntoWindowCallback(eventWindow, outputStreamDefinition);
+                return new InsertIntoWindowCallback(eventWindow, outputStreamDefinition, queryName);
             } else if (eventTable != null) {
                 DefinitionParserHelper.validateOutputStream(outputStreamDefinition, eventTable.getTableDefinition());
-                return new InsertIntoTableCallback(eventTable, outputStreamDefinition, convertToStreamEvent, streamEventPool, streamEventConvertor);
+                return new InsertIntoTableCallback(eventTable, outputStreamDefinition, convertToStreamEvent, streamEventPool, streamEventConvertor, queryName);
             } else {
                 return new InsertIntoStreamCallback(outputStreamDefinition, queryName);
             }
@@ -109,7 +127,7 @@ public class OutputParser {
                                 matchingMetaStateHolder, executionPlanContext, null, eventTableMap);
                         StateEventPool stateEventPool = new StateEventPool(matchingMetaStateHolder.getMetaStateEvent(), 10);
                         return new DeleteTableCallback(eventTable, operator, matchingMetaStateHolder.getDefaultStreamEventIndex(),
-                                convertToStreamEvent, stateEventPool, streamEventPool, streamEventConvertor);
+                                convertToStreamEvent, stateEventPool, streamEventPool, streamEventConvertor, queryName);
                     } catch (ExecutionPlanValidationException e) {
                         throw new ExecutionPlanCreationException("Cannot create delete for table '" + outStream.getId() + "', " + e.getMessage(), e);
                     }
@@ -122,7 +140,7 @@ public class OutputParser {
                         StateEventPool stateEventPool = new StateEventPool(matchingMetaStateHolder.getMetaStateEvent(), 10);
                         return new UpdateTableCallback(eventTable, operator, outputStreamDefinition,
                                 matchingMetaStateHolder.getDefaultStreamEventIndex(), convertToStreamEvent, stateEventPool,
-                                streamEventPool, streamEventConvertor);
+                                streamEventPool, streamEventConvertor, queryName);
                     } catch (ExecutionPlanValidationException e) {
                         throw new ExecutionPlanCreationException("Cannot create update for table '" + outStream.getId() + "', " + e.getMessage(), e);
                     }
@@ -136,7 +154,7 @@ public class OutputParser {
                         StateEventPool stateEventPool = new StateEventPool(matchingMetaStateHolder.getMetaStateEvent(), 10);
                         return new InsertOverwriteTableCallback(eventTable, operator, outputStreamDefinition,
                                 matchingMetaStateHolder.getDefaultStreamEventIndex(), convertToStreamEvent, stateEventPool,
-                                streamEventPool, streamEventConvertor);
+                                streamEventPool, streamEventConvertor, queryName);
 
                     } catch (ExecutionPlanValidationException e) {
                         throw new ExecutionPlanCreationException("Cannot create insert overwrite for table '" + outStream.getId() + "', " + e.getMessage(), e);

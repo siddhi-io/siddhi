@@ -26,11 +26,10 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 public class InsertIntoStreamCallback extends OutputCallback {
     private StreamDefinition outputStreamDefinition;
     private StreamJunction.Publisher publisher;
-    private SiddhiDebugger siddhiDebugger;
 
     public InsertIntoStreamCallback(StreamDefinition outputStreamDefinition, String queryName) {
+        super(queryName);
         this.outputStreamDefinition = outputStreamDefinition;
-        super.queryName = queryName;
     }
 
     public void init(StreamJunction outputStreamJunction) {
@@ -39,8 +38,9 @@ public class InsertIntoStreamCallback extends OutputCallback {
 
     @Override
     public void send(ComplexEventChunk complexEventChunk) {
-        if (siddhiDebugger != null) {
-            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.OUT, complexEventChunk.getFirst());
+        if (getDebugger() != null) {
+            getDebugger()
+                    .checkBreakPoint(getQueryName(), SiddhiDebugger.QueryTerminal.OUT, complexEventChunk.getFirst());
         }
         complexEventChunk.reset();
         while (complexEventChunk.hasNext()) {
@@ -50,11 +50,6 @@ public class InsertIntoStreamCallback extends OutputCallback {
             }
         }
         publisher.send(complexEventChunk.getFirst());
-    }
-
-    @Override
-    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
-        this.siddhiDebugger = siddhiDebugger;
     }
 
     public StreamDefinition getOutputStreamDefinition() {

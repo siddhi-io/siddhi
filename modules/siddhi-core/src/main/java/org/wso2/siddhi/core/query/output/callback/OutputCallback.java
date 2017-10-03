@@ -29,14 +29,29 @@ import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
 
 public abstract class OutputCallback {
 
-    String queryName;
+    private String queryName;
+    private SiddhiDebugger debugger;
+
+    private OutputCallback() {
+
+    }
+
+    public OutputCallback(String queryName) {
+        this.queryName = queryName;
+    }
 
     public abstract void send(ComplexEventChunk complexEventChunk);
 
-    public abstract void setSiddhiDebugger(SiddhiDebugger siddhiDebugger);
+    public String getQueryName() {
+        return queryName;
+    }
 
-    public void setQueryName(String queryName) {
-        this.queryName = queryName;
+    public SiddhiDebugger getDebugger() {
+        return debugger;
+    }
+
+    public void setDebugger(SiddhiDebugger debugger) {
+        this.debugger = debugger;
     }
 
     protected ComplexEventChunk<StateEvent> constructMatchingStateEventChunk(ComplexEventChunk matchingComplexEventChunk,
