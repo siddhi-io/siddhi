@@ -37,22 +37,24 @@ public class InsertOverwriteTableCallback extends OutputCallback {
     private final OverwritingStreamEventExtractor overwritingStreamEventExtractor;
     private EventTable eventTable;
     private Operator operator;
-    private SiddhiDebugger siddhiDebugger;
     private boolean convertToStreamEvent;
     private StateEventPool stateEventPool;
     private StreamEventPool streamEventPool;
-    private StreamEventConverter streamEventConvertor;
+    private StreamEventConverter streamEventConverter;
 
-    public InsertOverwriteTableCallback(EventTable eventTable, Operator operator, AbstractDefinition updatingStreamDefinition,
-                                        int matchingStreamIndex, boolean convertToStreamEvent, StateEventPool stateEventPool,
-                                        StreamEventPool streamEventPool, StreamEventConverter streamEventConvertor) {
+    public InsertOverwriteTableCallback(EventTable eventTable, Operator operator,
+                                        AbstractDefinition updatingStreamDefinition,
+                                        int matchingStreamIndex, boolean convertToStreamEvent,
+                                        StateEventPool stateEventPool, StreamEventPool streamEventPool,
+                                        StreamEventConverter streamEventConverter, String queryName) {
+        super(queryName);
         this.matchingStreamIndex = matchingStreamIndex;
         this.eventTable = eventTable;
         this.operator = operator;
         this.convertToStreamEvent = convertToStreamEvent;
         this.stateEventPool = stateEventPool;
         this.streamEventPool = streamEventPool;
-        this.streamEventConvertor = streamEventConvertor;
+        this.streamEventConverter = streamEventConverter;
         this.updateAttributeMappers = MatcherParser.constructUpdateAttributeMapper(eventTable.getTableDefinition(),
                 updatingStreamDefinition.getAttributeList(), matchingStreamIndex);
         this.overwritingStreamEventExtractor = new OverwritingStreamEventExtractor(matchingStreamIndex);
@@ -60,21 +62,19 @@ public class InsertOverwriteTableCallback extends OutputCallback {
 
     @Override
     public void send(ComplexEventChunk overwriteOrAddEventChunk) {
-        if (siddhiDebugger != null) {
-            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.OUT, overwriteOrAddEventChunk.getFirst());
+        if (getDebugger() != null) {
+            getDebugger().checkBreakPoint(getQueryName(),
+                    SiddhiDebugger.QueryTerminal.OUT, overwriteOrAddEventChunk.getFirst());
         }
         overwriteOrAddEventChunk.reset();
         if (overwriteOrAddEventChunk.hasNext()) {
-            ComplexEventChunk<StateEvent> overwriteOrAddStateEventChunk = constructMatchingStateEventChunk(overwriteOrAddEventChunk,
-                    convertToStreamEvent, stateEventPool, matchingStreamIndex, streamEventPool, streamEventConvertor);
-            constructMatchingStateEventChunk(overwriteOrAddEventChunk, convertToStreamEvent, stateEventPool, matchingStreamIndex, streamEventPool, streamEventConvertor);
-            eventTable.overwriteOrAdd(overwriteOrAddStateEventChunk, operator, updateAttributeMappers, overwritingStreamEventExtractor);
+            ComplexEventChunk<StateEvent> overwriteOrAddStateEventChunk = constructMatchingStateEventChunk(
+                    overwriteOrAddEventChunk, convertToStreamEvent, stateEventPool, matchingStreamIndex,
+                    streamEventPool, streamEventConverter);
+            constructMatchingStateEventChunk(overwriteOrAddEventChunk, convertToStreamEvent, stateEventPool,
+                    matchingStreamIndex, streamEventPool, streamEventConverter);
+            eventTable.overwriteOrAdd(overwriteOrAddStateEventChunk, operator, updateAttributeMappers,
+                    overwritingStreamEventExtractor);
         }
     }
-
-    @Override
-    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
-        this.siddhiDebugger = siddhiDebugger;
-    }
-
 }

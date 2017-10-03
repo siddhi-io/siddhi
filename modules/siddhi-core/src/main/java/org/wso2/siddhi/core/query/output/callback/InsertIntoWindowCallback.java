@@ -37,9 +37,8 @@ public class InsertIntoWindowCallback extends OutputCallback {
      */
     private final StreamDefinition outputStreamDefinition;
 
-    private SiddhiDebugger siddhiDebugger;
-
-    public InsertIntoWindowCallback(EventWindow eventWindow, StreamDefinition outputStreamDefinition) {
+    public InsertIntoWindowCallback(EventWindow eventWindow, StreamDefinition outputStreamDefinition, String queryName) {
+        super(queryName);
         this.eventWindow = eventWindow;
         this.outputStreamDefinition = outputStreamDefinition;
     }
@@ -51,8 +50,9 @@ public class InsertIntoWindowCallback extends OutputCallback {
      */
     @Override
     public void send(ComplexEventChunk complexEventChunk) {
-        if (siddhiDebugger != null) {
-            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.OUT, complexEventChunk.getFirst());
+        if (getDebugger() != null) {
+            getDebugger()
+                    .checkBreakPoint(getQueryName(), SiddhiDebugger.QueryTerminal.OUT, complexEventChunk.getFirst());
         }
         // If events are inserted directly from another window, expired events can arrive
         complexEventChunk.reset();
@@ -63,11 +63,6 @@ public class InsertIntoWindowCallback extends OutputCallback {
             }
         }
         eventWindow.add(complexEventChunk);
-    }
-
-    @Override
-    public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
-        this.siddhiDebugger = siddhiDebugger;
     }
 
     /**
