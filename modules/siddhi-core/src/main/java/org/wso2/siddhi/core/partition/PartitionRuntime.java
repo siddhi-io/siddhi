@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.query.input.stream.join.JoinStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.state.StateStreamRuntime;
 import org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertIntoWindowCallback;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
@@ -125,6 +126,22 @@ public class PartitionRuntime implements Snapshotable {
                 }
                 insertIntoStreamCallback.init(streamJunctionMap.get(id));
             }
+        } else if (query.getOutputStream() instanceof InsertIntoStream && metaQueryRuntime.getOutputCallback()
+                instanceof InsertIntoWindowCallback) {
+            InsertIntoWindowCallback insertIntoWindowCallback = (InsertIntoWindowCallback) metaQueryRuntime.getOutputCallback();
+            StreamDefinition streamDefinition = insertIntoWindowCallback.getOutputStreamDefinition();
+            String id = streamDefinition.getId();
+            streamDefinitionMap.putIfAbsent(id, streamDefinition);
+            DefinitionParserHelper.validateOutputStream(streamDefinition, streamDefinitionMap.get(id));
+            StreamJunction outputStreamJunction = streamJunctionMap.get(id);
+
+            if (outputStreamJunction == null) {
+                outputStreamJunction = new StreamJunction(streamDefinition,
+                                                          executionPlanContext.getExecutorService(),
+                                                          executionPlanContext.getBufferSize(), executionPlanContext);
+                streamJunctionMap.putIfAbsent(id, outputStreamJunction);
+            }
+            insertIntoWindowCallback.getEventWindow().setPublisher(streamJunctionMap.get(id).constructPublisher());
         }
         metaQueryRuntimeMap.put(metaQueryRuntime.getQueryId(), metaQueryRuntime);
 

@@ -395,63 +395,73 @@ public class WindowPartitionTestCase {
         executionRuntime.shutdown();
 
     }
-//// TODO: 9/26/17 implement after fixing partition for defined windows
-//    @Test
-//    public void testWindowPartitionQuery7() throws InterruptedException {
-//        log.info("JoinWindowPartition Test7");
-//
-//        SiddhiManager siddhiManager = new SiddhiManager();
-//
-//        String streams = "" +
-//                "define stream cseEventStream (symbol string, price float, volume int); " +
-//                "define stream twitterStream (user string, tweet string, company string); " +
-//                "define window cseEventWindow (symbol string, price float, volume int) timeBatch(1 sec); ";
-//
-//        String query = "" +
-//                "@info(name = 'query0') " +
-//                "from cseEventStream " +
-//                "insert into cseEventWindow; " +
-//                "" +
-//                "partition with (company of twitterStream) " +
-//                "begin " +
-//                "@info(name = 'query2') " +
-//                "from cseEventWindow join twitterStream#window.timeBatch(1 sec) " +
-//                "on cseEventWindow.symbol== twitterStream.company " +
-//                "select cseEventWindow.symbol as symbol, twitterStream.tweet, cseEventWindow.price " +
-//                "insert all events into outputStream ;" +
-//                "end";
-//
-//        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-//        try {
-//            executionPlanRuntime.addCallback("query2", new QueryCallback() {
-//                @Override
-//                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-//                    EventPrinter.print(timeStamp, inEvents, removeEvents);
-//                    if (inEvents != null) {
-//                        inEventCount += (inEvents.length);
-//                    }
-//                    if (removeEvents != null) {
-//                        removeEventCount += (removeEvents.length);
-//                    }
-//                    eventArrived = true;
-//                }
-//            });
-//            InputHandler cseEventStreamHandler = executionPlanRuntime.getInputHandler("cseEventStream");
-//            InputHandler twitterStreamHandler = executionPlanRuntime.getInputHandler("twitterStream");
-//            executionPlanRuntime.start();
-//            cseEventStreamHandler.send(new Object[]{"WSO2", 55.6f, 100});
-//            twitterStreamHandler.send(new Object[]{"User1", "Hello World", "WSO2"});
-//            cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, 100});
-//            Thread.sleep(1100);
-//            cseEventStreamHandler.send(new Object[]{"WSO2", 57.6f, 100});
-//            Thread.sleep(1000);
-//            Assert.assertTrue("In Events can be 1 or 2 ", inEventCount == 1 || inEventCount == 2);
-//            Assert.assertTrue("Removed Events can be 1 or 2 ", removeEventCount == 1 || removeEventCount == 2);
-//            Assert.assertTrue(eventArrived);
-//        } finally {
-//            executionPlanRuntime.shutdown();
-//        }
-//    }
+    @Test
+    public void testEventWindowPartition() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define window cseEventWindow (symbol string, price float, volume int) lengthBatch"
+                + "(4); ";
+
+        String query = "partition with (symbol of cseEventStream, symbol of cseEventWindow)" +
+                "begin " +
+                "@info(name = 'query0') " +
+
+                "from cseEventStream " +
+                "insert into cseEventWindow; " +
+                "" +
+                "@info(name = 'query1') from cseEventWindow " +
+                "select symbol,sum(price) as totalPrice,volume " +
+                "group by symbol " +
+                "insert into outputStream ;" +
+                "end;";
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(cseEventStream + query);
+
+        executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (Event event : events) {
+                    if (!event.isExpired()) {
+                        inEventAtomicCount.incrementAndGet();
+                        //We are getting four events even after groupby because of partitioning. Partition receiver will
+                        //break the coming event chunk. If we fix that to group all events for same key into one
+                        // chunk then event order will get affected.
+                        if (inEventAtomicCount.get() == 1) {
+                            Assert.assertEquals(700.0, event.getData(1));
+                            Assert.assertEquals("IBM", event.getData(0));
+                        } else if (inEventAtomicCount.get() == 2) {
+                            Assert.assertEquals(60.5, event.getData(1));
+                            Assert.assertEquals("WSO2", event.getData(0));
+                        } else if (inEventAtomicCount.get() == 3) {
+                            Assert.assertEquals(1401.0, event.getData(1));
+                            Assert.assertEquals("IBM", event.getData(0));
+                        } else if (inEventAtomicCount.get() == 3) {
+                            Assert.assertEquals(123.0, event.getData(1));
+                            Assert.assertEquals("WSO2", event.getData(0));
+                        }
+                    }
+                }
+                eventArrived = true;
+            }
+        });
+
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 0});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
+        inputHandler.send(new Object[]{"IBM", 701f, 1});
+        inputHandler.send(new Object[]{"WSO2", 62.5f, 1});
+        SiddhiTestHelper.waitForEvents(100, 4, inEventAtomicCount, 10000);
+        Assert.assertEquals(4, inEventAtomicCount.intValue());
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+
+    }
 
 
 }
