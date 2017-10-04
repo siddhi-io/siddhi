@@ -34,29 +34,18 @@ pages:
   - Siddhi Query Guide: documentation/siddhi-4.0.md
 - Extensions: extensions.md
 - API Docs:
-  - 4.0.0-M60: api/4.0.0-M60.md
-  - 4.0.0-M61: api/4.0.0-M61.md
-  - 4.0.0-M62: api/4.0.0-M62.md
-  - 4.0.0-M69: api/4.0.0-M69.md
-  - 4.0.0-M70: api/4.0.0-M70.md
-  - 4.0.0-M71: api/4.0.0-M71.md
-  - 4.0.0-M72: api/4.0.0-M72.md
-  - 4.0.0-M73: api/4.0.0-M73.md
-  - 4.0.0-M74: api/4.0.0-M74.md
-  - 4.0.0-M75: api/4.0.0-M75.md
-  - 4.0.0-M76: api/4.0.0-M76.md
-  - 4.0.0-M77: api/4.0.0-M77.md
-  - 4.0.0-M78: api/4.0.0-M78.md
-  - 4.0.0-M79: api/4.0.0-M79.md
-  - 4.0.0-M80: api/4.0.0-M80.md
-  - 4.0.0-M81: api/4.0.0-M81.md
-  - 4.0.0-M82: api/4.0.0-M82.md
-  - 4.0.0-M83: api/4.0.0-M83.md
-  - 4.0.0-M84: api/4.0.0-M84.md
-  - 4.0.0-M85: api/4.0.0-M85.md
-  - 4.0.0-M86: api/4.0.0-M86.md
-  - 4.0.0-M87: api/4.0.0-M87.md
-  - 4.0.0-M88: api/4.0.0-M88.md
+  - Latest (4.0.0-M90-SNAPSHOT): api/latest.md
+  - 4.0.0-M90-SNAPSHOT: api/4.0.0-M90-SNAPSHOT.md
   - 4.0.0-M89: api/4.0.0-M89.md
+  - 4.0.0-M88: api/4.0.0-M88.md
+  - 4.0.0-M87: api/4.0.0-M87.md
+  - 4.0.0-M86: api/4.0.0-M86.md
+  - 4.0.0-M85: api/4.0.0-M85.md
+  - 4.0.0-M84: api/4.0.0-M84.md
+  - 4.0.0-M83: api/4.0.0-M83.md
+  - 4.0.0-M82: api/4.0.0-M82.md
+  - 4.0.0-M81: api/4.0.0-M81.md
+  - 4.0.0-M80: api/4.0.0-M80.md
+  - 4.0.0-M79: api/4.0.0-M79.md
 - License: license.md
 theme: material
