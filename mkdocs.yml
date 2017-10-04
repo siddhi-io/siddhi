@@ -1,7 +1,7 @@
 site_name: WSO2 Siddhi
 site_description: Stream Processing and Complex Event Processing Engine
 site_author: WSO2
-site_url: https://wso2.github.io/siddhi/
+site_url: https://wso2.github.io/siddhi
 extra_css:
 - stylesheets/extra.css
 repo_name: WSO2 Siddhi
