@@ -9,28 +9,28 @@
         <meta name="description" content="Stream Processing and Complex Event Processing Engine">
       
       
-        <link rel="canonical" href="https://wso2.github.io/siddhi/extensions/">
+        <link rel="canonical" href="https://wso2.github.io/siddhi/documentation/user-guide/">
       
       
         <meta name="author" content="WSO2">
       
       
-        <link rel="shortcut icon" href="../images/favicon.ico">
+        <link rel="shortcut icon" href="../../images/favicon.ico">
       
       <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.6.1">
     
     
       
-        <title>Extensions - WSO2 Siddhi</title>
+        <title>User Guide - WSO2 Siddhi</title>
       
     
     
-      <script src="../assets/javascripts/modernizr-56ade86843.js"></script>
+      <script src="../../assets/javascripts/modernizr-56ade86843.js"></script>
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application-4d0d3f2fbf.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application-4d0d3f2fbf.css">
       
-        <link rel="stylesheet" href="../assets/stylesheets/application-f78e5cb881.palette.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/application-f78e5cb881.palette.css">
       
     
     
@@ -44,7 +44,7 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
     
   </head>
@@ -72,7 +72,7 @@
       <div class="md-flex__cell md-flex__cell--shrink">
         
           <a href="https://wso2.github.io/siddhi/" title="WSO2 Siddhi" class="md-logo md-header-nav__button">
-            <img src="../images/siddhi-logo-w.svg" width="24" height="24">
+            <img src="../../images/siddhi-logo-w.svg" width="24" height="24">
           </a>
         
       </div>
@@ -84,8 +84,12 @@
           
             
               
+                <span class="md-header-nav__parent">
+                  Documentation
+                </span>
+              
             
-            Extensions
+            User Guide
           
         </span>
       </div>
@@ -158,7 +162,7 @@
   <label class="md-nav__title md-nav__title--site" for="drawer">
     
       <i class="md-logo md-nav__button">
-        <img src="../images/siddhi-logo-w.svg">
+        <img src="../../images/siddhi-logo-w.svg">
       </i>
     
     WSO2 Siddhi
@@ -194,7 +198,7 @@
 
 
   <li class="md-nav__item">
-    <a href=".." title="Welcome to WSO2 Siddhi" class="md-nav__link">
+    <a href="../.." title="Welcome to WSO2 Siddhi" class="md-nav__link">
       Welcome to WSO2 Siddhi
     </a>
   </li>
@@ -206,7 +210,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../features/" title="Features" class="md-nav__link">
+    <a href="../../features/" title="Features" class="md-nav__link">
       Features
     </a>
   </li>
@@ -218,7 +222,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../documentation/siddhi-quckstart-4.0/" title="Quick Start Guide" class="md-nav__link">
+    <a href="../siddhi-quckstart-4.0/" title="Quick Start Guide" class="md-nav__link">
       Quick Start Guide
     </a>
   </li>
@@ -228,10 +232,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
     
     <label class="md-nav__link" for="nav-4">
       Documentation
@@ -247,11 +253,61 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../documentation/user-guide/" title="User Guide" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        User Guide
+      </label>
+    
+    <a href="./" title="User Guide" class="md-nav__link md-nav__link--active">
       User Guide
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-siddhi-in-wso2-stream-processor" title="Using the Siddhi in WSO2 Stream Processor" class="md-nav__link">
+    Using the Siddhi in WSO2 Stream Processor
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-siddhi-as-a-java-library" title="Using Siddhi as a java library" class="md-nav__link">
+    Using Siddhi as a java library
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-requirements" title="System Requirements" class="md-nav__link">
+    System Requirements
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -261,7 +317,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../documentation/siddhi-4.0/" title="Siddhi Query Guide" class="md-nav__link">
+    <a href="../siddhi-4.0/" title="Siddhi Query Guide" class="md-nav__link">
       Siddhi Query Guide
     </a>
   </li>
@@ -276,74 +332,11 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="toc">
-        Extensions
-      </label>
-    
-    <a href="./" title="Extensions" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../../extensions/" title="Extensions" class="md-nav__link">
       Extensions
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#available-extensions" title="Available Extensions" class="md-nav__link">
-    Available Extensions
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#extensions-released-under-apache-20-license" title="Extensions released under Apache 2.0 License" class="md-nav__link">
-    Extensions released under Apache 2.0 License
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#extensions-released-under-gpl-license" title="Extensions released under GPL License" class="md-nav__link">
-    Extensions released under GPL License
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#extension-repositories" title="Extension Repositories" class="md-nav__link">
-    Extension Repositories
-  </a>
-  
-</li>
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
     
@@ -372,7 +365,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/latest/" title="Latest (4.0.0-M93)" class="md-nav__link">
+    <a href="../../api/latest/" title="Latest (4.0.0-M93)" class="md-nav__link">
       Latest (4.0.0-M93)
     </a>
   </li>
@@ -384,7 +377,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M93/" title="4.0.0-M93" class="md-nav__link">
+    <a href="../../api/4.0.0-M93/" title="4.0.0-M93" class="md-nav__link">
       4.0.0-M93
     </a>
   </li>
@@ -396,7 +389,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M92/" title="4.0.0-M92" class="md-nav__link">
+    <a href="../../api/4.0.0-M92/" title="4.0.0-M92" class="md-nav__link">
       4.0.0-M92
     </a>
   </li>
@@ -408,7 +401,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M91/" title="4.0.0-M91" class="md-nav__link">
+    <a href="../../api/4.0.0-M91/" title="4.0.0-M91" class="md-nav__link">
       4.0.0-M91
     </a>
   </li>
@@ -420,7 +413,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M90/" title="4.0.0-M90" class="md-nav__link">
+    <a href="../../api/4.0.0-M90/" title="4.0.0-M90" class="md-nav__link">
       4.0.0-M90
     </a>
   </li>
@@ -432,7 +425,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M89/" title="4.0.0-M89" class="md-nav__link">
+    <a href="../../api/4.0.0-M89/" title="4.0.0-M89" class="md-nav__link">
       4.0.0-M89
     </a>
   </li>
@@ -444,7 +437,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M88/" title="4.0.0-M88" class="md-nav__link">
+    <a href="../../api/4.0.0-M88/" title="4.0.0-M88" class="md-nav__link">
       4.0.0-M88
     </a>
   </li>
@@ -456,7 +449,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M87/" title="4.0.0-M87" class="md-nav__link">
+    <a href="../../api/4.0.0-M87/" title="4.0.0-M87" class="md-nav__link">
       4.0.0-M87
     </a>
   </li>
@@ -468,7 +461,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M86/" title="4.0.0-M86" class="md-nav__link">
+    <a href="../../api/4.0.0-M86/" title="4.0.0-M86" class="md-nav__link">
       4.0.0-M86
     </a>
   </li>
@@ -480,7 +473,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M85/" title="4.0.0-M85" class="md-nav__link">
+    <a href="../../api/4.0.0-M85/" title="4.0.0-M85" class="md-nav__link">
       4.0.0-M85
     </a>
   </li>
@@ -492,7 +485,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M84/" title="4.0.0-M84" class="md-nav__link">
+    <a href="../../api/4.0.0-M84/" title="4.0.0-M84" class="md-nav__link">
       4.0.0-M84
     </a>
   </li>
@@ -504,7 +497,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M83/" title="4.0.0-M83" class="md-nav__link">
+    <a href="../../api/4.0.0-M83/" title="4.0.0-M83" class="md-nav__link">
       4.0.0-M83
     </a>
   </li>
@@ -516,7 +509,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M82/" title="4.0.0-M82" class="md-nav__link">
+    <a href="../../api/4.0.0-M82/" title="4.0.0-M82" class="md-nav__link">
       4.0.0-M82
     </a>
   </li>
@@ -528,7 +521,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M81/" title="4.0.0-M81" class="md-nav__link">
+    <a href="../../api/4.0.0-M81/" title="4.0.0-M81" class="md-nav__link">
       4.0.0-M81
     </a>
   </li>
@@ -540,7 +533,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M80/" title="4.0.0-M80" class="md-nav__link">
+    <a href="../../api/4.0.0-M80/" title="4.0.0-M80" class="md-nav__link">
       4.0.0-M80
     </a>
   </li>
@@ -552,7 +545,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../api/4.0.0-M79/" title="4.0.0-M79" class="md-nav__link">
+    <a href="../../api/4.0.0-M79/" title="4.0.0-M79" class="md-nav__link">
       4.0.0-M79
     </a>
   </li>
@@ -569,7 +562,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../license/" title="License" class="md-nav__link">
+    <a href="../../license/" title="License" class="md-nav__link">
       License
     </a>
   </li>
@@ -596,35 +589,22 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#available-extensions" title="Available Extensions" class="md-nav__link">
-    Available Extensions
+  <a href="#using-the-siddhi-in-wso2-stream-processor" title="Using the Siddhi in WSO2 Stream Processor" class="md-nav__link">
+    Using the Siddhi in WSO2 Stream Processor
   </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#extensions-released-under-apache-20-license" title="Extensions released under Apache 2.0 License" class="md-nav__link">
-    Extensions released under Apache 2.0 License
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#extensions-released-under-gpl-license" title="Extensions released under GPL License" class="md-nav__link">
-    Extensions released under GPL License
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#extension-repositories" title="Extension Repositories" class="md-nav__link">
-    Extension Repositories
+  <a href="#using-siddhi-as-a-java-library" title="Using Siddhi as a java library" class="md-nav__link">
+    Using Siddhi as a java library
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-requirements" title="System Requirements" class="md-nav__link">
+    System Requirements
   </a>
   
 </li>
@@ -644,61 +624,74 @@
               
                 
                 
-                <h1 id="siddhi-extensions">Siddhi Extensions<a class="headerlink" href="#siddhi-extensions" title="Permanent link">&para;</a></h1>
-<h2 id="available-extensions">Available Extensions<a class="headerlink" href="#available-extensions" title="Permanent link">&para;</a></h2>
-<p>Following are some prewritten extensions that are supported with Siddhi;</p>
-<h3 id="extensions-released-under-apache-20-license">Extensions released under Apache 2.0 License<a class="headerlink" href="#extensions-released-under-apache-20-license" title="Permanent link">&para;</a></h3>
+                <h1 id="user-guide">User Guide<a class="headerlink" href="#user-guide" title="Permanent link">&para;</a></h1>
+<h2 id="using-the-siddhi-in-wso2-stream-processor"><strong>Using the Siddhi in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a></strong><a class="headerlink" href="#using-the-siddhi-in-wso2-stream-processor" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p>You can use Siddhi in the latest <a target="_blank" href="https://github.com/wso2/product-sp/releases">WSO2 Stream Processor</a> that is a part of <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support. </p>
+</li>
+<li>
+<p>All <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">Siddhi extensions</a> are shipped by default with WSO2 Stream Processor.</p>
+</li>
+<li>
+<p>Refer the <a target="_blank" href="https://docs.wso2.com/display/SP400/Quick+Start+Guide">WSO2 SP Quick Start Guide</a> for more information.</p>
+</li>
+</ul>
+<h2 id="using-siddhi-as-a-java-library"><strong>Using Siddhi as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-quckstart-4.0/#using-siddhi-as-a-java-library">java library</a></strong><a class="headerlink" href="#using-siddhi-as-a-java-library" title="Permanent link">&para;</a></h2>
+<ul>
+<li>To embed Siddhi as a java library in your project add the following Siddhi libraries as maven dependencies to the <code>pom.xml</code> file.</li>
+</ul>
+<div class="codehilite"><pre><span></span>    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.wso2.siddhi<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>siddhi-core<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.x.x<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.wso2.siddhi<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>siddhi-query-api<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.x.x<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.wso2.siddhi<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>siddhi-query-compiler<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.x.x<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.wso2.siddhi<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>siddhi-annotations<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;version&gt;</span>4.x.x<span class="nt">&lt;/version&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>    
+</pre></div>
+
+
+<p>Add the following repository configuration to the same file.</p>
+<div class="codehilite"><pre><span></span>   <span class="nt">&lt;repositories&gt;</span>
+     <span class="nt">&lt;repository&gt;</span>
+         <span class="nt">&lt;id&gt;</span>wso2.releases<span class="nt">&lt;/id&gt;</span>
+         <span class="nt">&lt;name&gt;</span>WSO2 Repository<span class="nt">&lt;/name&gt;</span>
+         <span class="nt">&lt;url&gt;</span>http://maven.wso2.org/nexus/content/repositories/releases/<span class="nt">&lt;/url&gt;</span>
+         <span class="nt">&lt;releases&gt;</span>
+             <span class="nt">&lt;enabled&gt;</span>true<span class="nt">&lt;/enabled&gt;</span>
+             <span class="nt">&lt;updatePolicy&gt;</span>daily<span class="nt">&lt;/updatePolicy&gt;</span>
+             <span class="nt">&lt;checksumPolicy&gt;</span>ignore<span class="nt">&lt;/checksumPolicy&gt;</span>
+         <span class="nt">&lt;/releases&gt;</span>
+     <span class="nt">&lt;/repository&gt;</span>
+   <span class="nt">&lt;/repositories&gt;</span>
+</pre></div>
+
+
+<ul>
+<li>The required dependencies can be downloaded from <a href="http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/">here</a></li>
+<li>Refer the <a href="https://wso2.github.io/siddhi/documentation/siddhi-quckstart-4.0/#using-siddhi-as-a-java-library">Siddhi Quick Start Guide</a> for more how to setup and run a Siddhi Application.</li>
+</ul>
+<h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">&para;</a></h2>
 <ol>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-string">execution string</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-math">execution math</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-time">execution time</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-streamingml">execution streamingml</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-regex">execution regex</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-markov">execution markov</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-unique">execution unique</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-map">execution map</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-unitconversion">execution unitconversion</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-extrema">execution extrema</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-timeseries">execution timeseries</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-var">execution var</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-priority">execution priority</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-reorder">execution reorder</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-sentiment">execution sentiment</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-stats">execution stats</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-geo">execution geo</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-kalmanfilter">execution kalmanfilter</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http">io http</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka">io kafka</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp">io tcp</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event">io wso2event</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email">io email</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms">io jms</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file">io file</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq">io rabbitmq</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt">io mqtt</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json">map json</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml">map xml</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary">map binary</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text">map text</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event">map wso2event</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue">map keyvalue</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-rdbms">store rdbms</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr">store solr</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb">store mongodb</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-script-js">script js</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-script-scala">script scala</a></li>
+<li>Minimum memory - 500 MB (based on in-memory data stored for processing)</li>
+<li>Processor      - Pentium 800MHz or equivalent at minimum</li>
+<li>Java SE Development Kit 1.8 (1.7 for 3.x version)</li>
+<li>To build Siddhi from the Source distribution, it is necessary that you have
+   JDK 1.8 version (1.7 for 3.x version) or later and Maven 3.0.4 or later</li>
 </ol>
-<h3 id="extensions-released-under-gpl-license">Extensions released under GPL License<a class="headerlink" href="#extensions-released-under-gpl-license" title="Permanent link">&para;</a></h3>
-<ol>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-pmml">execution pmml</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-geo">execution geo</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-nlp">execution nlp</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-r">execution r</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-streamingml">execution streamingml</a></li>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-script-r">script r</a></li>
-</ol>
-<h2 id="extension-repositories">Extension Repositories<a class="headerlink" href="#extension-repositories" title="Permanent link">&para;</a></h2>
-<p>All the extension repositories maintained by WSO2 can be found <a target="_blank" href="https://github.com/wso2-extensions/?utf8=%E2%9C%93&q=siddhi&type=&language=">here</a></p>
                 
                   
                 
@@ -717,7 +710,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../documentation/siddhi-4.0/" title="Siddhi Query Guide" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../siddhi-quckstart-4.0/" title="Quick Start Guide" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -726,19 +719,19 @@
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Siddhi Query Guide
+                Quick Start Guide
               </span>
             </div>
           </a>
         
         
-          <a href="../api/latest/" title="Latest (4.0.0-M93)" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../siddhi-4.0/" title="Siddhi Query Guide" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Latest (4.0.0-M93)
+                Siddhi Query Guide
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
@@ -782,8 +775,8 @@
       
     </div>
     
-      <script src="../assets/javascripts/application-6b599127bc.js"></script>
-      <script>app.initialize({url:{base:".."}})</script>
+      <script src="../../assets/javascripts/application-6b599127bc.js"></script>
+      <script>app.initialize({url:{base:"../.."}})</script>
       
     
     
