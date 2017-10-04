@@ -48,7 +48,7 @@ by a semicolon ( ; ).
 ```
 
 
-## Streams
+## Stream
 Streams is a logical series of events ordered in time. It's schema is defined via the **stream definition**.
 A stream definition contains a unique name and a set of attributes with specific types and uniquely identifiable names within the stream.
 All events of a particular Stream will have the same schema (i.e. have the same attributes in the same order). 
@@ -81,7 +81,7 @@ The above creates a stream named `TempStream` with the following attributes.
 + `roomNo` of type `int` 
 + `temp` of type `double` 
 
-### Sources
+### Source
 Sources allow you to receive events via multiple transports and with various data formats into streams for processing.
 
 Source let you define a mapping to convert the incoming event from its native data format (such as `JSON`, `TEXT`, `XML`, etc) 
@@ -167,7 +167,7 @@ its protected by basic authentication.
   @map(type='json'))
 define stream InputStream (name string, age int, country string);
 ```
-### Sinks
+### Sink
 
 Sinks allow you to publish events from the streams via multiple transports to external endpoints with various data formats.
 
@@ -473,7 +473,7 @@ Siddhi queries supports the following for query projections.
     
 </table>
 
-###Functions
+###Function
 
 A function consumes zero, one or more parameters and always produces a result value. It can be used any location where
  an attribute can be used. 
@@ -600,7 +600,7 @@ select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID
 insert into RoomTempStream;
 ```
 
-### Filters
+### Filter
 
 Filters are included in queries to filter information from input streams based on a specified condition.
 
@@ -629,7 +629,7 @@ select roomNo, temp
 insert into HighTempStream;
 ```
 
-### Windows
+### Window
 
 Windows allow you to capture a subset of events based on a specific criterion from an input stream for calculation. 
 Each input stream can only have maximum of one window.
@@ -735,7 +735,7 @@ select *
 insert expired events into DelayedTempStream
 ```
 
-### Aggregate functions
+### Aggregate function
 
 Aggregate functions perform aggregate calculations in the query. 
 When a window is defined the aggregation will get restricted within that window and if no window is provided they will aggregate from the start of the Siddhi application.
@@ -825,7 +825,7 @@ having avgTemp > 30
 insert into AlertStream;
 ```
 
-### Joins (Stream) 
+### Join (Stream) 
 
 **Purpose**
 
@@ -933,7 +933,7 @@ Following are the supported operations of join clause.
 
 
 
-### Patterns
+### Pattern
 
 Patterns is a state machine implementation that allow you to detect event occurrence patterns over time. 
 This can correlate events within a single stream or between multiple streams. 
@@ -1085,7 +1085,7 @@ insert into AlertStream;
 ```
 
 
-### Sequences
+### Sequence
 
 Sequence is a state machine implementation that allow you to detect sequence of event occurrences over time. 
 Here **all matching events need to arrive conservatively** to match the sequence condition,
@@ -1268,7 +1268,7 @@ The possible values are as follows:
     insert into SnapshotTempStream;    </pre>
     
 
-## Partitions
+## Partition
 
 Partitions divides streams and queries into isolated groups to process them in parallel and in isolation. 
 A partition can contain one or more queries and there will be multiple instances of the same queries and streams replicated for each partition. 
@@ -1339,7 +1339,7 @@ Partition key can be generation in two ways.
     end;
     </pre>  
 
-### Inner Streams 
+### Inner Stream
 
 Queries inside a partition block can use inner streams to communicate between each other while preserving partition isolation.
 Inner streams are denoted by a "#" in front of them, and these streams cannot be accessed outside of the partition block. 
@@ -1368,7 +1368,7 @@ begin
 end;
 </pre>
 
-## Tables
+## Table
 
 A table is a stored version of an stream or a table of events. It's schema is defined via the **table definition** thats
 quite similar to a stream definition. These events are by default stored 
@@ -1662,7 +1662,7 @@ from TempStream[ServerRoomTable.roomNo == roomNo in ServerRoomTable]
 insert into ServerRoomTempStream;
 ```
 
-## Incremental Aggregations
+## Incremental Aggregation
 
 Incremental aggregation let you obtaining aggregates in an incremental manner for a specified set of time periods.
 
@@ -1783,7 +1783,7 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-## _(Defined)_ Windows 
+## _(Defined)_ Window
 
 A defined window is a window that can be shared across multiple queries. 
 Events can be inserted to a defined window from one or more queries and it can produce output events based on the defined window type.
@@ -1910,7 +1910,7 @@ select name, max(value) as maxValue, roomNo
 insert into MaxSensorReadingStream;
 ```
 
-## Triggers
+## Trigger
 
 Triggers allow events to be periodically generated. **Trigger definition** can be used to define a trigger. 
 Trigger also works like a stream with a predefined schema.
@@ -1965,7 +1965,7 @@ Types of triggers supported as following
      
     ```
 
-## Scripts
+## Script
 
 Script allows you to write functions in other programming languages and execute them within queries. 
 Functions defined via script can be accessed in queries just like any other inbuilt functions. 
