@@ -34,7 +34,8 @@ pages:
   - Siddhi Query Guide: documentation/siddhi-4.0.md
 - Extensions: extensions.md
 - API Docs:
-  - Latest (4.0.0-M93): api/latest.md
+  - Latest (4.0.0-M94): api/latest.md
+  - 4.0.0-M94: api/4.0.0-M94.md
   - 4.0.0-M93: api/4.0.0-M93.md
   - 4.0.0-M92: api/4.0.0-M92.md
   - 4.0.0-M91: api/4.0.0-M91.md
