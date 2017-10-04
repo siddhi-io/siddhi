@@ -3,7 +3,7 @@
 
     
     <url>
-     <loc>https://wso2.github.io/siddhi//</loc>
+     <loc>https://wso2.github.io/siddhi/</loc>
      <lastmod>2017-10-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
@@ -11,7 +11,7 @@
 
     
     <url>
-     <loc>https://wso2.github.io/siddhi//features/</loc>
+     <loc>https://wso2.github.io/siddhi/features/</loc>
      <lastmod>2017-10-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
@@ -19,31 +19,7 @@
 
     
     <url>
-     <loc>https://wso2.github.io/siddhi//documentation/siddhi-quckstart-4.0/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-    
-
-    
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//documentation/user-guide/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//documentation/siddhi-4.0/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    
-
-    
-    <url>
-     <loc>https://wso2.github.io/siddhi//extensions/</loc>
+     <loc>https://wso2.github.io/siddhi/documentation/siddhi-quckstart-4.0/</loc>
      <lastmod>2017-10-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
@@ -52,97 +28,13 @@
     
         
     <url>
-     <loc>https://wso2.github.io/siddhi//api/latest/</loc>
+     <loc>https://wso2.github.io/siddhi/documentation/user-guide/</loc>
      <lastmod>2017-10-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M93/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M92/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M91/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M90/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M89/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M88/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M87/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M86/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M85/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M84/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M83/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M82/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M81/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M80/</loc>
-     <lastmod>2017-10-04</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://wso2.github.io/siddhi//api/4.0.0-M79/</loc>
+     <loc>https://wso2.github.io/siddhi/documentation/siddhi-4.0/</loc>
      <lastmod>2017-10-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
@@ -151,7 +43,115 @@
 
     
     <url>
-     <loc>https://wso2.github.io/siddhi//license/</loc>
+     <loc>https://wso2.github.io/siddhi/extensions/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/latest/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M93/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M92/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M91/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M90/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M89/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M88/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M87/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M86/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M85/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M84/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M83/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M82/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M81/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M80/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://wso2.github.io/siddhi/api/4.0.0-M79/</loc>
+     <lastmod>2017-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    
+
+    
+    <url>
+     <loc>https://wso2.github.io/siddhi/license/</loc>
      <lastmod>2017-10-04</lastmod>
      <changefreq>daily</changefreq>
     </url>
