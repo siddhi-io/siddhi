@@ -60,5 +60,6 @@ pages:
   - 4.0.0-M89: api/4.0.0-M89.md
   - 4.0.0-M90: api/4.0.0-M90.md
   - 4.0.0-M91: api/4.0.0-M91.md
+  - 4.0.0-M92-SNAPSHOT: api/4.0.0-M92-SNAPSHOT.md
 - License: license.md
 theme: material
