@@ -960,7 +960,7 @@ insert into <output stream>
 ```
 | Items| Description |
 |-------------------|-------------|
-| `->` | This is used to indicate an event that should be following another event during the time interval specified via the `within` clause. The second event does not necessarily have to occur immediately after the second event. The condition to be met by the first event should be added before the sign, and the condition to be met by the second event should be added after the sign. |
+| `->` | This is used to indicate an event that should be following another event. The subsequent event does not necessarily have to occur immediately after the preceding event. The condition to be met by the preceding event should be added before the sign, and the condition to be met by the subsequent event should be added after the sign. |
 | `<event reference>` | This allows you to add a reference to the the matching event so that it can be accessed later for further processing. |
 | `(within <time gap>)?` | The `within` clause is optional. It defines the time duration within which all the matching events should occur. |
 | `every` | `every` is an optional keyword. This defines whether the event matching should be triggered for every event arrival in the specified stream with the matching condition. <br/> When this keyword is not used, the matching is carried out only once. |
@@ -1229,17 +1229,17 @@ Snapshot based output | `snapshot every <time interval>`| This outputs all event
 
 Here the `<output event>` specifies the event(s) that should be returned as the output of the query. 
 The possible values are as follows:
-* `first` : Only the first event processed by the query during the specified time interval/sliding window is output.
-* `last` : Only the last event processed by the query during the specified time interval/sliding window is output.
-* `all` : All the events processed by the query during the specified time interval/sliding window are output. **When no `<output event>` is defined, `all` is used by default.**
+* `first` : Only the first event processed by the query during the specified time interval/sliding window is emitted.
+* `last` : Only the last event processed by the query during the specified time interval/sliding window is emitted.
+* `all` : All the events processed by the query during the specified time interval/sliding window are emitted. **When no `<output event>` is defined, `all` is used by default.**
 
 **Examples**
 
 + Returning events based on the number of events
 
-    Here, events are output every time the specified number of events arrive. You can also specify whether to output only the first event/last event, or all the events out of the events that arrived.
+    Here, events are emitted every time the specified number of events arrive. You can also specify whether to emit only the first event/last event, or all the events out of the events that arrived.
     
-    In this example, the last temperature per sensor is output for every 10 events.
+    In this example, the last temperature per sensor is emitted for every 10 events.
     
     <pre>
     from TempStreamselect 
@@ -1250,9 +1250,9 @@ The possible values are as follows:
 
 + Returning events based on time
 
-    Here events are output for every predefined time interval. You can also specify whether to output only the first event, last event, or all events out of the events that arrived during the specified time interval.
+    Here events are emitted for every predefined time interval. You can also specify whether to emit only the first event, last event, or all events out of the events that arrived during the specified time interval.
 
-    In this example, outputs all temperature events every 10 seconds  
+    In this example, emits all temperature events every 10 seconds  
       
     <pre>
     from TempStreamoutput 
@@ -1261,10 +1261,10 @@ The possible values are as follows:
 
 + Returning a periodic snapshot of events
 
-    This method works best with windows. When an input stream is connected to a window, snapshot rate limiting outputs all the current events that have arrived and do not have corresponding expired events for every predefined time interval. 
-    If the input stream is not connected to a window, only the last current event for each predefined time interval is output.
+    This method works best with windows. When an input stream is connected to a window, snapshot rate limiting emits all the current events that have arrived and do not have corresponding expired events for every predefined time interval. 
+    If the input stream is not connected to a window, only the last current event for each predefined time interval is emitted.
     
-    This query outputs a snapshot of the events in a time window of 5 seconds every 1 second. 
+    This query emits a snapshot of the events in a time window of 5 seconds every 1 second. 
 
     <pre>
     from TempStream#window.time(5 sec)
@@ -1529,7 +1529,7 @@ The `condition` element specifies the basis on which events are selected to be d
 When specifying the condition, table attributes should be referred to with the table name.
  
 To execute delete for specific output event types, use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types) section.
+in the syntax. For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
 
 !!! note 
     Table attributes must be always referred to with the table name as follows: 
@@ -1564,13 +1564,11 @@ update <table> (for <output event type>)?
     on <condition>
 ```
 
-The `condition` element specifies the basis on which events are selected for update.
+The `condition` element specifies the basis on which events are selected to be updated.
 When specifying the `condition`, table attributes must be referred to with the table name.
 
-You can use the `set` keyword to update selected attributes from the table. Here, for each assignment, the attribute specified in the left must be the table attribute, and the one specified in the right can be stream/table attribute. The update operation can specify a mathametical operation or other. the left hand side 
- attribute should be a table attribute and the right hand side attribute can be stream/table attribute, mathematical 
- operations or other. When `set` clause is not provided, all the attributes in the table are updated.  
- 
+You can use the `set` keyword to update selected attributes from the table. Here, for each assignment, the attribute specified in the left must be the table attribute, and the one specified in the right can be a stream/table attribute a mathematical operation, or other. When the `set` clause is not provided, all the attributes in the table are updated.
+   
 To execute an update for specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
 in the syntax. For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
 
@@ -1595,8 +1593,6 @@ update RoomTypeTable
 
 ### Update or Insert
 
-This operation first checks if a new event already has a matching event in the table. If a matchig event ec
-
 This allows you update if the event attributes already exist in the table based on a condition, or 
 else insert the entry as a new attribute.
 
@@ -1613,7 +1609,7 @@ The `condition` element specifies the basis on which events are selected for upd
 When specifying the `condition`, table attributes should be referred to with the table name. 
 If a record that matches the condition does not already exist in the table, the arriving event is inserted into the table.
 
-The `set` clause is only used when the update operation is performed and it will not be used during the insert operation. 
+The `set` clause is only used when the update operation is performed and it is used during the insert operation. 
 When `set` clause is used the left hand side attribute should be always a table attribute and 
 the right hand side attribute can be stream/table attribute, mathematical 
  operations or other. When `set` clause is not provided all attributes in the table will be updated.  
@@ -1925,7 +1921,7 @@ A trigger also works like a stream with a predefined schema.
 For some use cases the system should be able to periodically generate events based on a specified time interval to perform 
 some periodic executions. 
 
-Trigger can be performed during three times such as `'start'`, for a given `<time interval>` or for a given `'<cron expression>'`, 
+A trigger can be performed for a `'start'` operation, for a given `<time interval>`, or for a given `'<cron expression>'`.
 
 
 **Syntax**
@@ -1936,19 +1932,19 @@ The syntax for a trigger definition is as follows.
 define trigger <trigger name> at ('start'| every <time interval>| '<cron expression>');
 ```
 
-Triggers can be used as inputs like streams and they adhere to the following stream definition, and produces `triggered_time` attribute with type `long`
+Similar to streams, triggers can be used as inputs. They adhere to the following stream definition and produce the `triggered_time` attribute of the `long` type.
 
 ```sql
 define stream <trigger name> (triggered_time long);
 ```
 
-Types of triggers supported as following
+The following types of triggeres are currently supported:
 
 |Trigger type| Description|
 |-------------|-----------|
-|`'start'`| An event will be trigger at Siddhi start.|
-|`every <time interval>`| an event will be triggered periodically on the given time interval.
-|`'<cron expression>'`| an event will be triggered periodically based on the given cron expression, refer  <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-06">quartz-scheduler</a> for config details.
+|`'start'`| An event is triggered when Siddhi is started.|
+|`every <time interval>`| An event is triggered periodically at the given time interval.
+|`'<cron expression>'`| An event is triggered periodically based on the given cron expression. For configuration details, see <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-06">quartz-scheduler</a>.
  
 
 **Examples**
@@ -1980,7 +1976,7 @@ Function parameters are passed into the function logic as `Object[]` and with th
 
 **Purpose**
 
-Scripts allow you to define a function operation that is not provided in Siddhi core or its extension. You can define the function logic without writing an extension.
+Scripts allow you to define a function operation that is not provided in Siddhi core or its extension. It is not required to write an extension to define the function logic.
 
 **Syntax**
 
@@ -2110,7 +2106,7 @@ Siddhi supports following extension types:
     
     `custom:perMinResults(<parameter>, <parameter>, ...)` 
     
-    Here, the `perMinResults` function of the `custom` extension returns all events by adding one or more attributes to the events based on the conversion logic and emit output every minute despite of event arrivals.
+    Here, the `perMinResults` function of the `custom` extension returns all events by adding one or more attributes to the events based on the conversion logic. Altered events are output every minute regardless of event arrivals.
 
 * **Sink**
 
