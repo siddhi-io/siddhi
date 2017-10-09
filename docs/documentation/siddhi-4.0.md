@@ -960,7 +960,7 @@ insert into <output stream>
 ```
 | Items| Description |
 |-------------------|-------------|
-| `->` | This is used to indicate what the event is followed by. After defining the condition the first event should meet, add this item and then define the condition to be met by the event that follows the first event. Note that the event that should follow need not occur immediately after the first event. |
+| `->` | This is used to indicate an event that should be following another event during the time interval specified via the `within` clause. The second event does not necessarily have to occur immediately after the second event. The condition to be met by the first event should be added before the sign, and the condition to be met by the second event should be added after the sign. |
 | `<event reference>` | This allows you to add a reference to the the matching event so that it can be accessed later for further processing. |
 | `(within <time gap>)?` | The `within` clause is optional. It defines the time duration within which all the matching events should occur. |
 | `every` | `every` is an optional keyword. This defines whether the event matching should be triggered for every event arrival in the specified stream with the matching condition. <br/> When this keyword is not used, the matching is carried out only once. |
