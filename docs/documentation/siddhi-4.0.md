@@ -2,19 +2,18 @@
 
 ## Introduction
 
-Siddhi Streaming SQL is designed to process event streams in streaming manner, detect complex event occurrences, 
+Siddhi Streaming SQL is designed to process event streams in a streaming manner, detect complex event occurrences, 
 and notify them in real-time. 
 
 ## Siddhi Application
 Streaming processing and Complex Event Processing rules can be written is Siddhi Streaming SQL and they can be put 
-together as `SiddhiApp` in one file. 
+together as a `SiddhiApp` in a single file. 
 
 **Purpose**
 
-Each Siddhi Application is an isolated processing unit that let you deploy and 
-execute queries independent of other SiddhiApps in the system.
+Each Siddhi Application is an isolated processing unit that allows you to deploy and execute queries independent of other Siddhi applications in the system.
 
-The flowing diagram depicts how **event flows** within some of the key Siddhi Streaming SQL elements 
+The following diagram depicts how **event flows** work with some of the key Siddhi Streaming SQL elements 
 of the Siddhi Application.
 
 ![Event Flow](../images/event-flow.png?raw=true "Event Flow")
@@ -23,21 +22,21 @@ Below table provides brief description of a few key elements in the Siddhi Strea
 
 | Elements     | Description |
 | ------------- |-------------|
-| Stream    | A logical series of events ordered in time with a uniquely identifiable name and set of defined typed attributes defining it's schema |
-| Event     | An event is associated with only one stream, and all events of that stream have an identical set of attributes assigned specific types (or the same schema). An event contains a timestamp and set of attribute values according to the schema.|
-| Table     | A structured representation of stored data with a defined schema. Stored data can be backed by `In-Memory`, `RDBMs`, `MongoDB`, etc to be accessed and manipulated at runtime.
-| Query	    | A logical construct that process events in streaming manner by combining existing streams and/or tables, and generates events to output stream or table. A query consumes one or more input streams and zero or one table, process those events in a streaming manner, publishes the output events to stream or tables for further processing or notifications. 
-| Source    | A contract that consumes data from external sources (such as `TCP`, `Kafka`, `HTTP`, etc), converts it's data format (such as `XML`, `JSON`, `binary`, etc) to Siddhi event, and passes that to a Stream for processing.
-| Sink      | A contract that takes events arriving at a Stream, map them to a predefined data format (such as `XML`, `JSON`, `binary`, etc), and publish them to external endpoints (such as `E-mail`, `TCP`, `Kafka`, `HTTP`, etc).
-| Input Handler | A mechanism to programmatically inject events into Streams. |
-| Stream/Query Callback | A mechanism to programmatically consumes output events from Streams and Queries. |
-| Partition	| A logical container that isolates processing of queries based on partition keys. Here separate instance of queries will be generated for each partition key to achieve isolation. 
-| Inner Stream | A positionable stream that connects portioned queries within their partitions preserving isolation.  
+| Stream    | A logical series of events ordered in time with a uniquely identifiable name, and set of defined attributes with specific data types defining its schema. |
+| Event     | An event is associated with only one stream, and all events of that stream have an identical set of attributes that are assigned specific types (or the same schema). An event contains a timestamp and set of attribute values according to the schema.|
+| Table     | A structured representation of data stored with a defined schema. Stored data can be backed by `In-Memory`, `RDBMs`, `MongoDB`, etc. to be accessed and manipulated at runtime.
+| Query	    | A logical construct that processes events in streaming manner by combining existing streams and/or tables, and generates events to an output stream or table. A query consumes one or more input streams, and zero or one table. Then it processes these events in a streaming manner and publishes the output events to streams or tables for further processing or to generate notifications. 
+| Source    | A contract that consumes data from external sources (such as `TCP`, `Kafka`, `HTTP`, etc)in the form of events, then converts each event (which can be in `XML`, `JSON`, `binary`, etc. format) to a Siddhi event, and passes that to a Stream for processing.
+| Sink      | A contract that takes events arriving at a stream, maps them to a predefined data format (such as `XML`, `JSON`, `binary`, etc), and publishes them to external endpoints (such as `E-mail`, `TCP`, `Kafka`, `HTTP`, etc).
+| Input Handler | A mechanism to programmatically inject events into streams. |
+| Stream/Query Callback | A mechanism to programmatically consume output events from streams and queries. |
+| Partition	| A logical container that isolates the processing of queries based on partition keys. Here, a separate instance of queries is generated for each partition key to achieve isolation. 
+| Inner Stream | A positionable stream that connects portioned queries within their partitions, preserving isolation.  
 
 **Grammar**
 
-The element of Siddhi SQL can be composed together as a script in Siddhi App, Here each construct should be separated 
-by a semicolon ( ; ). 
+An element of Siddhi SQL can be composed together as a script in a Siddhi application, Here each construct must be separated 
+by a semicolon `( ; )` as shown in the below syntax. 
 
 ```
 <siddhi app>  : 
@@ -49,17 +48,17 @@ by a semicolon ( ; ).
 
 
 ## Stream
-Streams is a logical series of events ordered in time. It's schema is defined via the **stream definition**.
+A stream is a logical series of events ordered in time. Its schema is defined via the **stream definition**.
 A stream definition contains a unique name and a set of attributes with specific types and uniquely identifiable names within the stream.
-All events of a particular Stream will have the same schema (i.e. have the same attributes in the same order). 
+All the events that are selected to be received into a specific stream have the same schema (i.e., have the same attributes in the same order). 
 
 **Purpose**
 
-By defining a schema it unifies common types of events together. This enables them to be processed at queries using their defined attributes in a streaming manner, and let sinks and sources to map events to/from various data formats.
+By defining a schema it unifies common types of events together. This enables them to be processed via queries using their defined attributes in a streaming manner, and allow sinks and sources to map events to/from various data formats.
 
 **Syntax**
 
-The following is the syntax for defining a new stream.
+The syntax for defining a new stream is as follows.
 ```sql
 define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
 ```
@@ -67,8 +66,8 @@ The following parameters are configured in a stream definition.
 
 | Parameter     | Description |
 | ------------- |-------------|
-| `stream name`      | The name of the stream created. (as a convention `PascalCase` is used for stream name) |
-| `attribute name`   | The schema of an stream is defined by its attributes by uniquely identifiable attribute names (as a convention `camalCase` is used for attribute names)|    |
+| `stream name`      | The name of the stream created. (It is recommended to define a stream name in `PascalCase`.) |
+| `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camalCase`.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 **Example**
@@ -82,19 +81,17 @@ The above creates a stream named `TempStream` with the following attributes.
 + `temp` of type `double` 
 
 ### Source
-Sources allow you to receive events via multiple transports and with various data formats into streams for processing.
+Sources receive events via multiple transports and in various data formats, and direct them into streams for processing.
 
-Source let you define a mapping to convert the incoming event from its native data format (such as `JSON`, `TEXT`, `XML`, etc) 
-to Siddhi Event, when customization to such mappings is not provided Siddhi assumes that the arriving event adhere to a 
-predefined format based on the stream definition and the selected message format.
+A source configuration allows you to define a mapping in order to convert each incoming event from its native data format to a Siddhi event. When customizations to such mappings are not provided, Siddhi assumes that the arriving event adheres to the predefined format based on the stream definition and the selected message format. </br>
 
 **Purpose**
 
-Source provides a way to Siddhi consume events from external systems and map the events to adhere to the associated stream. 
+Source allows Siddhi to consume events from external systems, and map the events to adhere to the associated stream. 
 
 **Syntax**
 
-To configure a stream to consume events via a source, add the source configuration to a stream definition by adding the `@source` annotation with the required parameter values. 
+To configure a stream that consumes events via a source, add the source configuration to a stream definition by adding the `@source` annotation with the required parameter values. 
 The source syntax is as follows:
 ```sql
 @source(type='source_type', static.option.key1='static_option_value1', static.option.keyN='static_option_valueN',
@@ -104,63 +101,68 @@ The source syntax is as follows:
 )
 define stream stream_name (attribute1 Type1, attributeN TypeN);
 ```
-
+This syntax includes the following annotations.
 **Source**
 
 The `type` parameter of `@source` defines the source type that receives events. The other parameters to be configured 
-depends on the source selected, some of those can also be optional values. 
-For detailed information about the parameters refer the appropriate source documentation.
+depends on the source type selected, some of the the parameters are optional. </br>
 
-Some of the supports source types are:
+For detailed information about the parameters see the documentation for the relevant source.
 
+The following is the list of source types that are currently supported:
+
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a> 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> _(Only works in WSO2 Stream Processor)_ 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a> 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a> 
-* In-Memory
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> _(Only works in WSO2 Stream Processor)_ 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> _(Only works in WSO2 Stream Processor)_  
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">E-mail</a>  _(Only works in WSO2 Stream Processor)_ 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">WSO2-Event</a> _(Only works in WSO2 Stream Processor)_ 
+* In-memory
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
 
 **Source Mapper**
 
-Each `@source` will have a mapping denoted by `@map` that converts the incoming message format to Siddhi event.
+Each `@source` configuration has a mapping denoted by the `@map` annotation that converts the incoming messages format to Siddhi events.
 
-The `type` parameter of `@map` defines the map type that's responsible of mapping the data. The other parameters to be 
-configured depends on the mapper selected, some of those can also be optional values. 
-For detailed information about the parameters refer the appropriate mapper documentation.
+The `type` parameter of the `@map` defines the map type to be used to map the data. The other parameters to be 
+configured depends on the mapper selected. Some of these parameters are optional. </br>
+For detailed information about the parameters see the documentation for the relevant mapper.
 
 !!! tip 
-    When `@map` is not provided `@map(type='passThrough')` will be used as default. This can be used when source consumes Siddhi events and when it does not need any mappings.
+    When the `@map` annotation is not provided, `@map(type='passThrough')` is used as default. This default mapper type can be used when source consumes Siddhi events and when it does not need any mappings.
     
+
 **Map Attributes**
 
-`@attributes` is an optional parameter of `@map` to define custom mapping. When `@attributes` is not provided each mapper
-assumes that the incoming events will be adhere to it's own expected default data format. By defining `@attributes` you 
-can configure mappers to extract data from the incoming message selectively and assign then to attributes. 
+`@attributes` is an optional annotation used with `@map` to define custom mapping. When `@attributes` is not provided, each mapper
+assumes that the incoming events  adhere to its own default data format. By adding the `@attributes` annotation, you 
+can configure mappers to extract data from the incoming message selectively, and assign them to attributes. 
 
-There are two ways you can configure `@attributes`. 
+There are two ways you can configure map attributes. 
 
-1. Defining attributes as keys and mapping content as value in the following format: <br/>
+1. Defining attributes as keys and mapping content as values in the following format: <br/>
 ```@attributes( attributeN='mapping_N', attribute1='mapping_1')``` 
-2. Defining all attributes' mapping content in the same order as how the attributes are defined in stream definition: <br/>
+2. Defining the mapping content of all attributes in the same order as how the attributes are defined in stream definition: <br/>
 ```@attributes( 'mapping_1', 'mapping_N')``` 
 
-Some of the supports source mappings are:
+**Supported Mapping Types**
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
+The following is a list of currently supported source mapping types:
+
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event/">WSO2Event</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml/">XML</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text/">TEXT</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text/">Text</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key-Value</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
 
 **Example**
 
-The following query receives events via the `HTTP` source on `JSON` data format, and passes them in the `InputStream` stream for processing. 
-Here the HTTP source is configured to receive events on all network interfaces on port `8080` on the context `foo`, and 
-its protected by basic authentication.
+This query receives events via the `HTTP` source in the `JSON` data format, and directs them to the `InputStream` stream for processing. 
+Here the HTTP source is configured to receive events on all network interfaces on the `8080`port, on the `foo` context, and 
+it is secured via basic authentication.
 
 ```sql
 @source(type='http', receiver.url='http://0.0.0.0:8080/foo', is.basic.auth.enabled='true', 
@@ -169,19 +171,19 @@ define stream InputStream (name string, age int, country string);
 ```
 ### Sink
 
-Sinks allow you to publish events from the streams via multiple transports to external endpoints with various data formats.
+Sinks publish events from the streams via multiple transports to external endpoints in various data formats.
 
-Sink let you define a mapping to convert the Siddhi event to appropriate output data format (such as `JSON`, `TEXT`, `XML`, etc), 
-when customization to such mappings is not provided Siddhi converts events to its default format based on the stream definition and 
-the selected data format and publish the events.
+A sink configuration allows you to define a mapping to convert the Siddhi event to the required output data format (such as `JSON`, `TEXT`, `XML`, etc.).
+When customization to such mappings is not provided, Siddhi converts events to its default format based on the stream definition and 
+the selected data format to publish the events.
 
 **Purpose**
 
-Sink provides a way to publish Siddhi events to external systems in their preferred data format. 
+Sinks provide a way to publish Siddhi events to external systems in the preferred data format. 
 
 **Syntax**
 
-To configure a stream to publish events via a Sink, add the sink configuration to a stream definition by adding the `@sink` 
+To configure a stream to publish events via a sink, add the sink configuration to a stream definition by adding the `@sink` 
 annotation with the required parameter values. The sink syntax is as follows:
 
 ```sql
@@ -194,8 +196,8 @@ define stream stream_name (attribute1 Type1, attributeN TypeN);
 ```
 
 !!! Note "Dynamic Properties" 
-    The Sink and Sink mapper properties that are categorised as `dynamic` have the ability to absorb attributes values 
-    from their associated Streams. This can be done by using the attribute names in double curly braces as `{{...}}` when configuring the property value. 
+    The sink and sink mapper properties that are categorized as `dynamic` have the ability to absorb attributes values 
+    from their associated streams. This can be done by using the attribute names in double curly braces as `{{...}}` when configuring the property value. 
     
     Some valid dynamic properties values are: 
     
@@ -205,62 +207,69 @@ define stream stream_name (attribute1 Type1, attributeN TypeN);
     
     Here the attribute names in the double curly braces will be replaced with event values during execution. 
 
+This syntax includes the following annotations.
 
 **Sink**
 
-The `type` parameter of `@sink` defines the sink type that publishes the events. The other parameters to be configured 
-depends on the sink selected, some of those can also be optional and some can be dynamic values. 
-For detailed information about the parameters refer the appropriate sink documentation.
+The `type` parameter of the `@sink` annotation defines the sink type that publishes the events. The other parameters to be configured 
+depends on the sink type selected. Some of these parameters are optional, and some can have dynamic values. </br>
 
-Some of the supports sink types are:
+For detailed information about the parameters see documentation for the relevant sink.
 
+The following is a list of currently supported sink types.
+
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a> 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">E-mail</a>  _(Only works in WSO2 Stream Processor)_ 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a> 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a> 
-* In-Memory
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> _(Only works in WSO2 Stream Processor)_ 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> _(Only works in WSO2 Stream Processor)_ 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> _(Only works in WSO2 Stream Processor)_  
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">WSO2-Event</a> _(Only works in WSO2 Stream Processor)_ 
+* In-memory
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
+
 
 **Sink Mapper**
 
-Each `@sink` will have a mapping denoted by `@map` that converts the Siddhi event to an outgoing message format.
+Each `@sink` annotation has a mapping denoted by the  `@map` annotation that converts the Siddhi event to an outgoing message format.
 
-The `type` parameter of `@map` defines the map type that's responsible of mapping the event. The other parameters to be configured depends on the mapper selected, some of those can also be optional or dynamic values. 
-For detailed information about the parameters refer the appropriate mapper documentation.
+The `type` parameter of the `@map` annotation defines the map type based on which the event is mapped. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional and some have dynamic values. </br> 
+
+For detailed information about the parameters see the documentation for the relevant mapping type.
 
 !!! tip 
-    When `@map` is not provided `@map(type='passThrough')` will be used as default. This can be used when Sink can publish Siddhi events and when it does not need any mappings.
+    When the `@map` annotation is not provided, `@map(type='passThrough')` is used by default. This can be used when the sink publishes in the Siddhi event format, or when it does not need any mappings.
 
 **Map Payload**
 
-`@payload` is an optional parameter of `@map` to define a custom mapping. When `@payload` is not provided each mapper
-maps the outgoing events to it's own default data format. By defining `@payload` you 
-can configure mappers to produce the output payload as of your choice using dynamic properties by selectively assigning 
-the attributes on your preferred format. 
+`@payload` is an optional annotation used with the `@map` annotation to define a custom mapping. When the `@payload` annotation is not provided, each mapper
+maps the outgoing events to its own default data format. By defining the `@payload` annotation you can configure mappers to produce the output payload with attribute names of your choice, using dynamic properties by selectively assigning 
+the attributes in your preferred format. 
 
-There are two ways you can configure `@payload`. 
+There are two ways you can configure the `@payload` annotation. 
 
-1. Some mappers such as `XML`, `JSON`, and `Test` accepts only one output payload using the following format: <br/>
+1. Some mappers such as `XML`, `JSON`, and `Test` accept only one output payload using the following format: <br/>
 ```@payload( 'This is a test message from {{user}}.' )``` 
-2. Some mappers such `key-value` accepts series of mapping values defined as: <br/>
+2. Some mappers such `key-value` accept series of mapping values defined as follows: <br/>
 ```@payload( key1='mapping_1', key2='user : {{user}}')``` 
 
-Some of the supports sink mappings are:
+**Supported Mapping Types**
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
+The following is a list of currently supported sink mapping types:
+
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event/">WSO2Event</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml/">XML</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text/">TEXT</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text/">Text</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key-Value</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
+
 
 **Example**
 
-The following query publishes events from `OutputStream` via the `HTTP` Sink. Here the events are mapped to default `JSON` payloads and sent to `http://localhost:8005/endpoint`
- using `POST` method, `Accept` header, and basic authentication having `admin` as both the username and the password.
+This query publishes events from the `OutputStream` stream via the `HTTP` sink. Here the events are mapped to the default `JSON` payloads and sent to `http://localhost:8005/endpoint`
+ using the `POST` method, with the`Accept` header, and secured via basic authentication where `admin` is both the username and the password.
 ```sql
 @sink(type='http', publisher.url='http://localhost:8005/endpoint', method='POST', headers='Accept-Date:20/02/2017', 
   basic.auth.username='admin', basic.auth.password='admin', basic.auth.enabled='true',
@@ -270,16 +279,16 @@ define stream OutputStream (name string, ang int, country string);
 
 ## Query
 
-Each Siddhi query can consume one/more streams and zero/one table, process the events in streaming manner and generate a
- output event to a stream or performs CRUD operation to a table.
+Each Siddhi query can consume one or more streams, and 0-1 tables, process the events in a streaming manner, and then generate an
+ output event to a stream or perform a CRUD operation to a table.
 
 **Purpose**
 
-Query enables you to perform Complex Event Processing and Stream Processing operations by processing incoming events one by one in the arrival order. 
+A query enables you to perform complex event rrocessing and stream processing operations by processing incoming events one by one in the order they arrive.
 
 **Syntax**
 
-All queries contain an input and output section, some also contain a projection section. A simple query with all three sections is as follows.
+All queries contain an input and an output section. Some also contain a projection section. A simple query with all three sections is as follows.
 
 ```sql
 from <input stream> 
@@ -288,7 +297,7 @@ insert into <output stream/table>
 ```
 **Example**
 
-Following simple query in the Siddhi App consumes events from defined `TempStream` stream and output the room temperature and room number to `RoomTempStream` stream.
+This query included in a Siddhi Application consumes events from the `TempStream` stream (that is already defined) and outputs the room temperature and the room number to the `RoomTempStream` stream.
 
 ```sql
 define stream TempStream (deviceID long, roomNo int, temp double);
@@ -298,9 +307,9 @@ select roomNo, temp
 insert into RoomTempStream;
 ```
 !!! tip "Inferred Stream"
-    Here the `RoomTempStream` is an inferred Stream, i.e. `RoomTempStream` can be used as any other defined stream 
-    without explicitly defining its Stream Definition and the definition of the `RoomTempStream` will be inferred from the 
-    first query that produces the Stream.  
+    Here, the `RoomTempStream` is an inferred Stream, which means it can be used as any other defined stream 
+    without explicitly defining its stream definition. The definition of the `RoomTempStream` is inferred from the 
+    first query that produces the stream.  
 
 ###Query Projection
 
@@ -323,7 +332,7 @@ Siddhi queries supports the following for query projections.
         <td>Selecting all attributes for projection</td>
         <td>Selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using asterisk ( * ) or by omitting the `select` statement.
             <br><br>
-            E.g., Use one of the following queries to select all the attributes in the `NewTempStream` stream.
+            E.g., Both the following queries select all the attributes in the `NewTempStream` stream.
             <pre>from TempStream<br>select *<br>insert into NewTempStream;</pre>
             or
             <pre>from TempStream<br>insert into NewTempStream;</pre>
@@ -331,9 +340,9 @@ Siddhi queries supports the following for query projections.
     </tr>
     <tr>
         <td>Renaming attributes</td>
-        <td>This selects attributes from the input streams and inserting them into the output stream with different names.
+        <td>This selects attributes from the input streams and inserts them into the output stream with different names.
             <br><br>
-            E.g., The following query renames `roomNo` to `roomNumber` and `temp` to `temperature`.
+            E.g., This query renames `roomNo` to `roomNumber` and `temp` to `temperature`.
             <pre>from TempStream <br>select roomNo as roomNumber, temp as temperature<br>insert into RoomTempStream;</pre>
         </td>
     </tr>
@@ -341,13 +350,13 @@ Siddhi queries supports the following for query projections.
         <td>Introducing the constant value</td>
         <td>This adds constant values by assigning it to an attribute using `as`.
             <br></br>
-            E.g., Using 'C' as the constant value for `scale` attribute. 
+            E.g., This query specifies 'C' to be used as the constant value for `scale` attribute. 
             <pre>from TempStream<br>select roomNo, temp, 'C' as scale<br>insert into RoomTempStream;</pre>
         </td>
     </tr>
     <tr>
         <td>Using mathematical and logical expressions</td>
-        <td>This uses attributes with mathematical and logical expressions in the precedence order given below, and assign them to the output attribute using `as`.
+        <td>This uses attributes with mathematical and logical expressions in the precedence order given below, and assigns them to the output attribute using `as`.
             <br><br>
             <b>Operator precedence</b><br>
             <table style="width:100%">
@@ -475,20 +484,20 @@ Siddhi queries supports the following for query projections.
 
 ###Function
 
-A function consumes zero, one or more parameters and always produces a result value. It can be used any location where
+A function consumes zero, one or more parameters and always produces a result value. It can be used in any location where
  an attribute can be used. 
 
 **Purpose**
 
-Functions encapsulates complex making the Siddhi application simple and easy to understand. 
+Functions encapsulates complex execution logic that makes Siddhi applications simple and easy to understand. 
 
 **Function Parameters**
 
 Functions parameters can be attributes, constant values, results of other functions, results of mathematical or logical expressions or time parameters. 
-Function parameters depending on the function being called.
+Function parameters vary depending on the function being called.
 
-Time is a special parameter that can we defined using the integer time value followed by its unit as `<int> <unit>`. 
-Following are the supported unit types. Upon execution time returns the value in the scale of milliseconds as a long value. 
+Time is a special parameter that can be defined using the integer time value followed by its unit as `<int> <unit>`. 
+Following are the supported unit types. Upon execution, time returns the value in the scale of milliseconds as a long value. 
 
 <table style="width:100%">
     <tr>
@@ -620,7 +629,7 @@ insert into <output stream>
 
 **Example**
 
-The following query filters all server rooms within the range of 100 and 210, and having temperature greater than 40 degrees 
+This query filters all server rooms of which the room number is within the range of 100-210, and having temperature greater than 40 degrees 
 from the `TempStream` stream, and inserts the results into the `HighTempStream` stream.
 
 ```sql
@@ -632,12 +641,12 @@ insert into HighTempStream;
 ### Window
 
 Windows allow you to capture a subset of events based on a specific criterion from an input stream for calculation. 
-Each input stream can only have maximum of one window.
+Each input stream can only have a maximum of one window.
 
 **Purpose**
 
 To create subsets of events within a stream based on time duration, number of events, etc for processing. 
-Window can operate on sliding or tumbling (batch) manner.
+A window can operate in a sliding or tumbling (batch) manner.
 
 **Syntax**
 
@@ -653,8 +662,8 @@ insert <event type> into <output stream>
     
 **Example**
 
-If you want to identify the maximum temperature out of last 10 events, you need to define a `length` window of 10 events.
- This window operates as a sliding mode where the following 3 subsets will be calculated when a list of 12 events are received in a sequential order.
+If you want to identify the maximum temperature out of the last 10 events, you need to define a `length` window of 10 events.
+ This window operates in a sliding mode where the following 3 subsets are calculated when a list of 12 events are received in a sequential order.
 
 |Subset|Event Range|
 |------|-----------|
@@ -672,7 +681,7 @@ insert into MaxTempStream;
 ```
 
 If you define the maximum temperature reading out of every 10 events, you need to define a `lengthBatch` window of 10 events.
- Where this window operates as a batch/tumbling mode where the following 3 subsets will be calculated when a list of 30 events are received in a sequential order.
+This window operates as a batch/tumbling mode where the following 3 subsets are calculated when a list of 30 events are received in a sequential order.
 
 |Subset|Event Range|
 |------|-----------|
@@ -690,10 +699,10 @@ insert into MaxTempStream;
 ```
 
 !!! note
-    Similar operations can also be done time with `time` window and `timeBatch` window and for others. 
-    Code segments such as `#window.time(10 min)` will consider events in last 10 minutes in a sliding manner and `#window.timeBatch(2 min)` will consider events every 2 minutes in a tumbling manner. 
+    Similar operations can be done based on time via `time` windows and `timeBatch` windows and for others. 
+    Code segments such as `#window.time(10 min)` considers events that arrive during the last 10 minutes in a sliding manner, and the `#window.timeBatch(2 min)` considers events that arrive every 2 minutes in a tumbling manner. 
 
-Following are some inbuilt windows shipped with Siddhi, for more window types refer execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
+Following are some inbuilt windows shipped with Siddhi. For more window types, see execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
 
 * time
 * timeBatch
@@ -706,28 +715,27 @@ Following are some inbuilt windows shipped with Siddhi, for more window types re
 * externalTime
 * externalTimeBatch
 
-**Output event type**<a id="output-event-types" class='anchor' aria-hidden='true'></a> 
+**Output event types**<a id="output-event-types" class='anchor' aria-hidden='true'></a> 
 
 Projection of the query depends on the output event types such as, `current` and `expired` event types.
  By default all queries produce `current` events and only queries with windows produce `expired` events 
- when events expire from the window.
- By controlling the event types outputted you will be able to manipulate the output of the query. 
+ when events expire from the window. You can specify whether the output of a query should be only current events, only expired events or both current and expired events.
  
- **Note!** Controlling the output event types will not alter the execution within the query and will not affect the correctness of the query execution.  
+ **Note!** Controlling the output event types does not alter the execution within the query, and it does not affect the accuracy of the query execution.  
  
  The following keywords can be used with the output stream to manipulate output. 
  
 | Output event types | Description |
 |-------------------|-------------|
-| `current events` | Output events when incoming events arrives to the query. </br> This is the default functionality of no output event types is specified.|
-| `expired events` | Output events when events expires from the window. |
-| `all events` | Output events when incoming events arrives to the query and </br> when events expires from the window. |
+| `current events` | Outputs events when incoming events arrive to be processed by the query. </br> This is default when no specific output event type is specified.|
+| `expired events` | Outputs events when events expires from the window. |
+| `all events` | Outputs events when incoming events arrive to be processed by the query as well as </br> when events expire from the window. |
 
-The output event type keyword can be used between `insert` and `into` as given in the following example.
+The output event type keyword can be used between `insert` and `into` as shown in the following example.
 
 **Example**
 
-Delay all events in a stream by 1 minute.  
+This query delays all events in a stream by 1 minute.  
 
 ```sql
 from TempStream#window.time(1 min)
@@ -738,7 +746,7 @@ insert expired events into DelayedTempStream
 ### Aggregate function
 
 Aggregate functions perform aggregate calculations in the query. 
-When a window is defined the aggregation will get restricted within that window and if no window is provided they will aggregate from the start of the Siddhi application.
+When a window is defined the aggregation is restricted within that window. If no window is provided aggregation is performed from the start of the Siddhi application.
 
 **Syntax**
 
@@ -750,20 +758,19 @@ insert into <output stream>;
 
 **Aggregate Parameters**
 
-Aggregate parameters can be attributes, constant values, results of other functions or aggregates, results of mathematical or logical expressions or time parameters. 
-Aggregate parameters depending on the Aggregation being called.
+Aggregate parameters can be attributes, constant values, results of other functions or aggregates, results of mathematical or logical expressions, or time parameters. 
+Aggregate parameters configured in a query  depends on the aggregate function being called.
 
 **Example**
 
-The following query calculates the average of `temp` attribute of `TempStream` stream for the last 
-10 minutes and emit it as `avgTemp``.
+The following query calculates the average value for the `temp` attribute of the `TempStream` stream. This calculation is done for the last 10 minutes in a sliding manner, and the result is output as `avgTemp` to the `AvgTempStream` output stream.
 
 ```sql
 from TempStream#window.time(10 min)
 select avg(temp) as avgTemp, roomNo, deviceID
 insert into AvgTempStream;
 ```
-Following are some inbuilt aggregation functions shipped with Siddhi, for more aggregation functions refer execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
+Following are some inbuilt aggregation functions shipped with Siddhi, for more aggregation functions, see execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
 
 * avg
 * sum
@@ -780,6 +787,7 @@ Following are some inbuilt aggregation functions shipped with Siddhi, for more a
 Group By allows you to group the aggregate based on specified attributes.
 
 **Syntax**
+The syntax for the Group By aggregate function is as follows:
 
 ```sql
 from <input stream>#window.<window name>(...)
@@ -789,8 +797,8 @@ insert into <output stream>;
 ```
 
 **Example**
-The following query calculates the average temperature per `roomNo` and `deviceID` combination 
-for sliding 10 minutes time from the `TempStream` stream.
+The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
+for a sliding time window of 10 minutes.
 
 ```sql
 from TempStream#window.time(10 min)
@@ -801,10 +809,13 @@ insert into AvgTempStream;
 
 ### Having
 
-Having allows you to filter events after processing the `select` statement,
- this will be helpful to filter the aggregation output.
+Having allows you to filter events after processing the `select` statement.
+
+**Purpose**
+This allows you to filter the aggregation output.
 
 **Syntax**
+The syntax for the Having aggregate function is as follows:
 
 ```sql
 from <input stream>#window.<window name>( ... )
@@ -826,20 +837,16 @@ insert into AlertStream;
 ```
 
 ### Join (Stream) 
+Joins allow you to get a combined result from two streams in real-time based on a specified condition. 
 
 **Purpose**
-
-Join let you get a combined results from two streams in real time based on a condition. 
-
-As streams are stateless to join two streams they need to be connected to a window such that 
-there will be a pool of events that can be used for joining. Join also accepts a condition to 
-join appropriate events from each streams. 
+Streams are stateless. Therefore, in order to join two streams, they need to be connected to a window so that there is a pool of events that can be used for joining. Joins also accept conditions to join the appropriate events from each stream.
  
 During the joining process each incoming event of each stream is matched against all the events in the other 
-stream's window on the given condition, and the output events are generated for all the matching event pairs.
+stream's window based on the given condition, and the output events are generated for all the matching event pairs.
 
 !!! Note
-    Join can also be performed with [sored data](#join-table), [aggregation](#join-aggregation) or externally [defined windows](#join-window).
+    Join can also be performed with [stored data](#join-table), [aggregation](#join-aggregation) or externally [defined windows](#join-window).
 
 **Syntax**
 
@@ -852,24 +859,22 @@ from <input stream>#window.<window name>(<parameter>, ... ) {unidirectional} {as
 select <attribute name>, <attribute name>, ...
 insert into <output stream>
 ```
-Here the `<join condition>` let you match the attributes from both the streams. 
+Here, the `<join condition>` allows you to match the attributes from both the streams. 
 
-**unidirectional join operation**
+**Unidirectional join operation**
 
-By default events arriving on either stream can trigger the joining process, but if you want to control the 
-join execution you can add the `unidirectional` keyword next to a stream in the join definition as depicted in the 
-syntax to only enable that stream to trigger the join operation. Here events arriving on other stream only updates its 
- window and it will not trigger the join operation.
+By default, events arriving at either stream can trigger the joining process. However, if you want to control the 
+join execution, you can add the `unidirectional` keyword next to a stream in the join definition as depicted in the 
+syntax in order to enable that stream to trigger the join operation. Here, events arriving at other stream only update the 
+ window of that stream, and this stream does not trigger the join operation.
  
-!!! note
-    We cannot use `unidirectional` keyword for both the input streams (as that's equal to the default behaviour, which 
-    is not using the unidirectional keyword at all).
+!!! Note
+    The `unidirectional` keyword cannot be applied to both the input streams because the default behaviour already allows both streams to trigger the join operation.
 
 **Example**
 
 Assuming that the temperature of regulators are updated every minute. 
-Following is a Siddhi App the controls the temperature regulators if they are not already 'on' for all the rooms that 
-have a room temperature greater than 30 degrees.  
+Following is a Siddhi App the controls the temperature regulators if they are not already `on` for all the rooms with a room temperature greater than 30 degrees.  
 
 ```sql
 define stream TempStream(deviceID long, roomNo int, temp double);
@@ -884,23 +889,23 @@ insert into RegulatorActionStream;
 
 **Supported join types** 
 
-Following are the supported operations of join clause.
+Following are the supported operations of a join clause.
 
  *  **Inner join (join)** 
 
-    The default behaviour of join, use `join` as the keyword to join both the streams. The output is generated only if there is 
-    a matching event in both the streams.
+    This is the default behaviour of a join operation. `join` is used as the keyword to join both the streams. The output is generated only if there is a matching event in both the streams.
 
  *  **Left outer join** 
 
-    Left outer join let you join two streams to be merged based on a condition. Use `left outer join` as the keyword to join both the streams.
-    Here it returns all the events of left stream even if there are no matching events in the right stream by 
-    having the right stream attribute values as nulls.
+    The left outer join operation allows you to join two streams to be merged based on a condition. `left outer join` is used as the keyword to join both the streams.
+   
+    Here, it returns all the events of left stream even if there are no matching events in the right stream by 
+    having null values for the attributes of the right stream.
 
      **Example**
 
-    The following query generates output events for all events from `StockStream` stream regardless of a matching 
-    symbol being present in the `TwitterStream` stream.
+    The following query generates output events for all events from the `StockStream` stream regardless of whether a matching 
+    symbol exists in the `TwitterStream` stream or not.
 
     <pre>
     from StockStream#window.time(1 min) as S
@@ -911,18 +916,18 @@ Following are the supported operations of join clause.
 
  *  **Right outer join** 
 
-    This is similar to left outer join. Use `Right outer join` as the keyword to join both the streams.
+    This is similar to a left outer join. `Right outer join` is used as the keyword to join both the streams.
     It returns all the events of the right stream even if there are no matching events in the left stream. 
 
  *  **Full outer join** 
 
-    The full outer join combines the results of left outer join and right outer join. Use `full outer join` as the keyword to join both the streams.
+    The full outer join combines the results of left outer join and right outer join. `full outer join` is used as the keyword to join both the streams.
     Here, output event are generated for each incoming event even if there are no matching events in the other stream.
 
     **Example**
 
     The following query generates output events for all the incoming events of each stream regardless of whether there is a 
-    match for the `symbol` in the other stream or not.
+    match for the `symbol` attribute in the other stream or not.
 
     <pre>
     from StockStream#window.time(1 min) as S
@@ -935,12 +940,11 @@ Following are the supported operations of join clause.
 
 ### Pattern
 
-Patterns is a state machine implementation that allow you to detect event occurrence patterns over time. 
-This can correlate events within a single stream or between multiple streams. 
+This is a state machine implementation that allows you to detect patterns in the events that arrive over time. This can correlate events within a single stream or between multiple streams. 
 
 **Purpose** 
 
-Let you detect a specified event occurrence pattern over a time period. 
+Patterns allow you to identify trends in events over a time period.
 
 **Syntax**
 
@@ -954,18 +958,18 @@ from (every)? <event reference>=<input stream>[<filter condition>] ->
 select <event reference>.<attribute name>, <event reference>.<attribute name>, ...
 insert into <output stream>
 ```
-| Items | Description |
+| Items| Description |
 |-------------------|-------------|
-| `->` | This represent followed by, i.e. After a event matching the first condition the next event matching the next condition arriving sometime after the first event (not necessarily need to be immediately after the previous event event) |
-| `<event reference>` | Let you add a reference to the the matching event such that it can be accessed later for further processing. |
-| `(within <time gap>)?` | `within` clause is optional, It defines the the duration within all the matching events should occur |
-| `every` | `every` is an optional keyword. This defines weather the event matching should be triggered for every event arrival for the specified stream with the matching condition. <br/> When this keyword is not used the matching happens only ones. |
+| `->` | This is used to indicate an event that should be following another event. The subsequent event does not necessarily have to occur immediately after the preceding event. The condition to be met by the preceding event should be added before the sign, and the condition to be met by the subsequent event should be added after the sign. |
+| `<event reference>` | This allows you to add a reference to the the matching event so that it can be accessed later for further processing. |
+| `(within <time gap>)?` | The `within` clause is optional. It defines the time duration within which all the matching events should occur. |
+| `every` | `every` is an optional keyword. This defines whether the event matching should be triggered for every event arrival in the specified stream with the matching condition. <br/> When this keyword is not used, the matching is carried out only once. |
 
-Siddhi also support pattern matching with counting events and matching events in a logical order such as (`and`, `or`, and `not`). Those are discussed in detail later.
+Siddhi also supports pattern matching with counting events and matching events in a logical order such as (`and`, `or`, and `not`). These are described in detail further below in this guide.
 
 **Example**
 
-The following query sends an alert if the temperature of a room increases by 5 degrees within 10 min.
+This query sends an alert if the temperature of a room increases by 5 degrees within 10 min.
 
 ```sql
 from every( e1=TempStream ) -> e2=TempStream[ e1.roomNo == roomNo and (e1.temp + 5) <= temp ]
@@ -974,18 +978,18 @@ select e1.roomNo, e1.temp as initialTemp, e2.temp as finalTemp
 insert into AlertStream;
 ```
 
-Here for each events in `TempStream`, the matching process begins (because `every` is used with `e1=TempStream`), 
-and if there is another event arrives within 10 minutes, having `temp` attribute greater then or equal to `e1.temp + 5` 
+Here, the matching process begins for each event in the `TempStream` stream (because `every` is used with `e1=TempStream`), 
+and if  another event arrives within 10 minutes with a value for the `temp` attribute that is greater than or equal to `e1.temp + 5` 
 of the event e1, an output is generated via the `AlertStream`.
 
-**Counting Pattern**
+####Counting Pattern
 
-Counting pattern allows matching multiple events that may have been received for the same matching condition.
+Counting patterns allow you to match multiple events that may have been received for the same matching condition.
 The number of events matched per condition can be limited via condition postfixes.
 
 **Syntax**
 
-Each matching condition can contain a collection of events with the minimum and maximum number of events to be matched as bellow. 
+Each matching condition can contain a collection of events with the minimum and maximum number of events to be matched as shown in the syntax below. 
 
 ```sql
 from (every)? <event reference>=<input stream>[<filter condition>] (<<min count>:<max count>>)? ->  
@@ -997,15 +1001,15 @@ insert into <output stream>
 
 Postfix|Description|Example
 ---------|---------|---------|
-`<n1:n2>`|This matches `n1` to `n2` events (including `n1` and excluding `n2`).|`1:4` matches 1 to 4 events.
+`<n1:n2>`|This matches `n1` to `n2` events (including `n1` and not more than `n2`).|`1:4` matches 1 to 4 events.
 `<n:>`|This matches `n` or more events (including `n`).|`<2:>` matches 2 or more events.
 `<:n>`|This matches up to `n` events (excluding `n`).|`<:5>` matches up to 5 events.
 `<n>`|This matches exactly `n` events.|`<5>` matches exactly 5 events.
 
-Specific occurrences of the event in a collection can be retrieved by using event index along with its reference,
- square brackets can be used to indicate the event index where `1` can be used as the index of the first event and `last` can be used as the index
- for the `last` available event in the event collection. If you provided a index grater then the last event index
- the system returns `null`. Some valid examples are bellow.
+Specific occurrences of the event in a collection can be retrieved by using an event index with its reference.
+Square brackets can be used to indicate the event index where `1` can be used as the index of the first event and `last` can be used as the index
+ for the `last` available event in the event collection. If you provide an index greater then the last event index,
+ the system returns `null`. The following are some valid examples.
 
 + `e1[3]` refers to the 3rd event.
 + `e1[last]` refers to the last event.
@@ -1013,7 +1017,7 @@ Specific occurrences of the event in a collection can be retrieved by using even
 
 **Example**
 
-The following Siddhi App calculates temperature difference between two regulator events.
+The following Siddhi App calculates the temperature difference between two regulator events.
 
 ```sql
 define stream TempStream (deviceID long, roomNo int, temp double);
@@ -1023,9 +1027,9 @@ from every( e1=RegulatorStream) -> e2=TempStream[e1.roomNo==roomNo]<1:> -> e3=Re
 select e1.roomNo, e2[0].temp - e2[last].temp as tempDiff
 insert into TempDiffStream;
 ```
-**Logical Patterns**
+#### Logical Patterns
 
-Logical pattern matches events that arrive in temporal order and correlates them with logical relationships such as `and`, 
+Logical patterns match events that arrive in temporal order and correlate them with logical relationships such as `and`, 
 `or` and `not`. 
 
 **Syntax**
@@ -1038,18 +1042,18 @@ select <event reference>([event index])?.<attribute name>, ...
 insert into <output stream>
 ```
 
-Keywords such as `and`, `or`, or `not` can used to illustrate the logical relationship.
+Keywords such as `and`, `or`, or `not` can be used to illustrate the logical relationship.
 
 Key Word|Description
 ---------|---------
 `and`|This allows both conditions of `and` to be matched by two events in any order.
-`or`|The state will succeed if either condition of `or` is satisfied. Here the event reference of the other condition will be `null`.
-`not <condition1> and <condition2>`| When `not` with `and` is present, it let you identify an event matching `<condition2>` before any event match the `<condition1>`. 
-`not <condition> for <time period>`| When `not` is present with `for`, it let you identify no event occurring that matches `<condition1>` for the given time  `<condition1>`.  is used to define a time period. E.g.`from not TemperatureStream[temp > 60] for 5 sec`. 
+`or`|The state succeeds if either condition of `or` is satisfied. Here the event reference of the other condition is `null`.
+`not <condition1> and <condition2>`| When `not` is included with `and`, it identifies the events that match <condition2> arriving before any event that match <condition1>. is identified.
+`not <condition> for <time period>`| When `not` is included with `for`, it allows you to identify a situation where no event that matches `<condition1>` arrives during the specified `<time period>`.  e.g.,`from not TemperatureStream[temp > 60] for 5 sec`. 
 
 **Example**
 
-Following Siddhi App, sends `stop` control action to regulator, when the key is removed from the hotel room. 
+Following Siddhi App, sends the `stop` control action to the regulator when the key is removed from the hotel room. 
 ```sql
 define stream RegulatorStateChangeStream(deviceID long, roomNo int, tempSet double, action string);
 define stream RoomKeyStream(deviceID long, roomNo int, action string);
@@ -1062,7 +1066,7 @@ having action != 'none'
 insert into RegulatorActionStream;
 ```
 
-Following Siddhi App, alerts if we have switch off the regulator before temperature reaches 12 degrees.  
+This Siddhi Application generates an alert if we have switch off the regulator before the temperature reaches 12 degrees.  
 
 ```sql
 define stream RegulatorStateChangeStream(deviceID long, roomNo int, tempSet double, action string);
@@ -1073,7 +1077,7 @@ select e1.roomNo as roomNo
 insert into AlertStream;
 ```
 
-Following Siddhi App, alerts if the temperature did not reduce 12 degrees within 5 minutes of switching on the regulator.  
+This Siddhi Application generates an alert if the temperature does not reduce to 12 degrees within 5 minutes of switching on the regulator.  
 
 ```sql
 define stream RegulatorStateChangeStream(deviceID long, roomNo int, tempSet double, action string);
@@ -1087,18 +1091,17 @@ insert into AlertStream;
 
 ### Sequence
 
-Sequence is a state machine implementation that allow you to detect sequence of event occurrences over time. 
-Here **all matching events need to arrive conservatively** to match the sequence condition,
- and there cannot be any non matching events arrived withing a matching sequence of events.
+Sequence is a state machine implementation that allows you to detect the sequence of event occurrences over time. 
+Here **all matching events need to arrive consecutively** to match the sequence condition, and there cannot be any non-matching events arriving within a matching sequence of events.
 This can correlate events within a single stream or between multiple streams. 
 
 **Purpose** 
 
-Let you detect a specified event sequence over a time period. 
+This allows you to detect a specified event sequence over a specified time period. 
 
 **Syntax**
 
-The following is the syntax for a sequence query:
+The syntax for a sequence query is as follows:
 
 ```sql
 from (every)? <event reference>=<input stream>[<filter condition>], 
@@ -1111,15 +1114,15 @@ insert into <output stream>
 
 | Items | Description |
 |-------------------|-------------|
-| `,` | This represent immediate next event, i.e. After a event matching the first condition the immediate next conservative event must match the next condition. |
-| `<event reference>` | Let you add a reference to the the matching event such that it can be accessed later for further processing. |
-| `(within <time gap>)?` | `within` clause is optional, It defines the the duration within all the matching events should occur |
-| `every` | `every` is an optional keyword. This defines weather the event matching should be triggered for every event arrival for the specified stream with the matching condition. <br/> When this keyword is not used the matching happens only ones. |
+| `,` | This represents the immediate next event i.e., when an event that matches the first condition arrives, the event that arrives immediately after it should match the second condition. |
+| `<event reference>` | This allows you toadd a reference to the the matching event so that it can be accessed later for further processing. |
+| `(within <time gap>)?` | The `within` clause is optional. It defines the time duration within which all the matching events should occur. |
+| `every` | `every` is an optional keyword. This defines whether the matching event should be triggered for every event that arrives at the specified stream with the matching condition. <br/> When this keyword is not used, the matching is carried out only once. |
 
 
 **Example**
 
-The following query sends an alert if there is more than 1 degree increase in the temperature between two consecutive temperature events.
+This query generates an alert if the increase in the temperature between two consecutive temperature events exceeds one degree.
 
 ```sql
 from every e1=TempStream, e2=TempStream[e1.temp + 1 < temp]
@@ -1129,15 +1132,15 @@ insert into AlertStream;
 
 **Counting Sequence**
 
-Counting Sequence allows matching multiple events for the same matching condition.
-The number of events matched per condition can be limited via condition postfixes as **Counting Patterns** or by using the 
-`*`, `+` and `?` operators.
+Counting sequences allow you to match multiple events for the same matching condition.
+The number of events matched per condition can be limited via condition postfixes such as **Counting Patterns**, or by using the 
+`*`, `+`, and `?` operators.
 
-The matching events can also be retrieved using event indexes like in  **Counting Patterns**
+The matching events can also be retrieved using event indexes, similar to how it is done in **Counting Patterns**.
 
 **Syntax**
 
-Each matching condition in a sequence can contain a collection of events as mentioned bellow. 
+Each matching condition in a sequence can contain a collection of events as shown below. 
 
 ```sql
 from (every)? <event reference>=<input stream>[<filter condition>](+|*|?)?, 
@@ -1148,16 +1151,16 @@ select <event reference>.<attribute name>, <event reference>.<attribute name>, .
 insert into <output stream>
 ```
 
-|Postfix symbol|Description|
-|---------|---------|
-| `+` | Its optional, that machines **one or more** event occurrences of the for the given condition. |
-| `*` | Its optional, that machines **zero or more** event occurrences of the for the given condition. |
-| `?` | Its optional, that machines **zero or one** event occurrences of the for the given condition. |
+|Postfix symbol|Required/Optional |Description|
+|---------|---------|---------|
+| `+` | Optional |This matches **one or more** events to the given condition. |
+| `*` | Optional |This matches **zero or more** events to the given condition. |
+| `?` | Optional |This matches **zero or one** events to the given condition. |
 
 
 **Example**
 
-The following Siddhi App identifies temperature peeks.
+This Siddhi application identifies temperature peeks.
 
 ```sql
 define stream TempStream(deviceID long, roomNo int, temp double);
@@ -1169,9 +1172,10 @@ insert into PeekTempStream;
 
 **Logical Sequence**
 
-Logical sequence identifies logical relationships using `and`, `or` and `not` on consecutively arriving events.
+Logical sequences identify logical relationships using `and`, `or` and `not` on consecutively arriving events.
 
 **Syntax**
+The syntax for a logical sequence is as follows:
 
 ```sql
 from (every)? (not)? <event reference>=<input stream>[<filter condition>] 
@@ -1181,11 +1185,11 @@ select <event reference>([event index])?.<attribute name>, ...
 insert into <output stream>
 ```
 
-Keywords such as `and`, `or`, or `not` can used to illustrate the logical relationship same as in **Logical Patterns**. 
+Keywords such as `and`, `or`, or `not` can be used to illustrate the logical relationship, similar to how it is done in **Logical Patterns**. 
 
 **Example**
 
-Following Siddhi App notifies the state when a regulator event is immediately followed by both the temperature and humidity events. 
+This Siddhi application notifies the state when a regulator event is immediately followed by both temperature and humidity events. 
 
 ```sql
 define stream TempStream(deviceID long, temp double);
@@ -1199,15 +1203,15 @@ insert into StateNotificationStream;
 
 ### Output rate limiting
 
-Output rate limiting allows queries to emit events periodically based on the condition specified.
+Output rate limiting allows queries to output events periodically based on a specified condition.
 
 **Purpose**
 
-This allows you to limit the output to avoid overloading following executions and to remove unnecessary information.
+This allows you to limit the output to avoid overloading the subsequent executions, and to remove unnecessary information.
 
 **Syntax**
 
-The following is the syntax of an output rate limiting configuration.
+The syntax of an output rate limiting configuration is as follows:
 
 ```sql
 from <input stream> ...
@@ -1215,25 +1219,25 @@ select <attribute name>, <attribute name>, ...
 output <rate limiting configuration>
 insert into <output stream>
 ```
-Three type of output rate limiting configuration are available, such as 
+Siddhi supports three types of output rate limiting configurations as explained in the following table: 
 
 Rate limiting configuration|Syntax| Description
 ---------|---------|--------
-Based on time | `<output event> every <time interval>` | Output `<output event>` for every given `<time interval>` time interval.
-Based on number of events | `<output event> every <event interval> events` | Output `<output event>` for every `<event interval>` number of events.
-Snapshot based output | `snapshot every <time interval>`| Output all events in the window (or the last event if no window is defined in the query) for every given `<time interval>` time interval.
+Based on time | `<output event> every <time interval>` | This outputs `<output event>` every `<time interval>` time interval.
+Based on number of events | `<output event> every <event interval> events` | This outputs `<output event>` for every `<event interval>` number of events.
+Snapshot based output | `snapshot every <time interval>`| This outputs all events in the window (or the last event if no window is defined in the query) for every given `<time interval>` time interval.
 
-Here the `<output event>` specifies which event(s) should be emitted as the output of the query. 
+Here the `<output event>` specifies the event(s) that should be returned as the output of the query. 
 The possible values are as follows:
-* `first` : Only the first event processed by the query in the specified time interval/sliding window is emitted.
-* `last` : Only the last event processed by the query in the specified time interval/sliding window is emitted.
-* `all` : All the events processed by the query in the specified time interval/sliding window are emitted. **When no `<output event>` is defined `all` will be used as default.**
+* `first` : Only the first event processed by the query during the specified time interval/sliding window is emitted.
+* `last` : Only the last event processed by the query during the specified time interval/sliding window is emitted.
+* `all` : All the events processed by the query during the specified time interval/sliding window are emitted. **When no `<output event>` is defined, `all` is used by default.**
 
 **Examples**
 
-+ Emitting events based on number of events
++ Returning events based on the number of events
 
-    Here the events are emitted every time the specified number of events arrive. You can also specify whether to emit only the first event, last event, or all events out of the events that arrived.
+    Here, events are emitted every time the specified number of events arrive. You can also specify whether to emit only the first event/last event, or all the events out of the events that arrived.
     
     In this example, the last temperature per sensor is emitted for every 10 events.
     
@@ -1244,9 +1248,9 @@ The possible values are as follows:
     output last every 10 events
     insert into LowRateTempStream;    </pre>
 
-+ Emitting events based on time
++ Returning events based on time
 
-    Here events are emitted for every predefined time interval. You can also specify whether to to emit only the first event, last event, or all events out of the events that arrived during the specified time interval.
+    Here events are emitted for every predefined time interval. You can also specify whether to emit only the first event, last event, or all events out of the events that arrived during the specified time interval.
 
     In this example, emits all temperature events every 10 seconds  
       
@@ -1255,12 +1259,12 @@ The possible values are as follows:
     output every 10 sec
     insert into LowRateTempStream;    </pre>
 
-+ Emitting a periodic snapshot of events
++ Returning a periodic snapshot of events
 
     This method works best with windows. When an input stream is connected to a window, snapshot rate limiting emits all the current events that have arrived and do not have corresponding expired events for every predefined time interval. 
     If the input stream is not connected to a window, only the last current event for each predefined time interval is emitted.
     
-    The following query emits snapshot of the events in a time window of 5 seconds every 1 second. 
+    This query emits a snapshot of the events in a time window of 5 seconds every 1 second. 
 
     <pre>
     from TempStream#window.time(5 sec)
@@ -1270,17 +1274,17 @@ The possible values are as follows:
 
 ## Partition
 
-Partitions divides streams and queries into isolated groups to process them in parallel and in isolation. 
-A partition can contain one or more queries and there will be multiple instances of the same queries and streams replicated for each partition. 
-Each partition is tagged with a partition key those partitions only process the events that matches the corresponding partition key. 
+Partitions divide streams and queries into isolated groups in  order to process them in parallel and in isolation. 
+A partition can contain one or more queries and there can be multiple instances where the same queries and streams are replicated for each partition. 
+Each partition is tagged with a partition key. Those partitions only process the events that match the corresponding partition key. 
 
 **Purpose** 
 
-Partition let you process the events groups in isolation such that event processing can be performed using the same set of queries for each group. 
+Partitions allow you to process the events groups in isolation so that event processing can be performed using the same set of queries for each group. 
 
 **Partition key generation**
 
-Partition key can be generation in two ways. 
+A partition key can be generated in the following two methods:
 
 * Partition by value
   
@@ -1298,7 +1302,7 @@ Partition key can be generation in two ways.
     
     **Example**
     
-    The following query calculates the maximum temperature recorded within the last 10 events per `deviceID`.
+    This query calculates the maximum temperature recorded within the last 10 events per `deviceID`.
     
     <pre>
     partition with ( deviceID of TempStream )
@@ -1311,7 +1315,7 @@ Partition key can be generation in two ways.
 
 * Partition by range
 
-    This is created by mapping each partition key to a range condition of the input stream's numerical attribute.
+    This is created by mapping each partition key to a range condition of the input streams numerical attribute.
 
     **Syntax**
     
@@ -1326,7 +1330,7 @@ Partition key can be generation in two ways.
 
     **Example**
     
-    The following query calculates the average temperature for the last 10 minutes per office area.
+    This query calculates the average temperature for the last 10 minutes per office area.
     
     <pre>
     partition with ( roomNo >= 1030 as 'serverRoom' or 
@@ -1341,18 +1345,17 @@ Partition key can be generation in two ways.
 
 ### Inner Stream
 
-Queries inside a partition block can use inner streams to communicate between each other while preserving partition isolation.
-Inner streams are denoted by a "#" in front of them, and these streams cannot be accessed outside of the partition block. 
+Queries inside a partition block can use inner streams to communicate with each other while preserving partition isolation.
+Inner streams are denoted by a "#" placed before the stream name, and these streams cannot be accessed outside a partition block. 
 
 **Purpose**
   
-Inner streams let you connect queries within the partition block such that output of a query will only feed to a query 
-that's in the same partition. With this you don't need to repartition the streams if they are communicating within the partition.
+Inner streams allow you to connect queries within the partition block so that the output of a query can be used as an input only by another query 
+within the same partition. Therefore, you do not need to repartition the streams if they are communicating within the partition.
 
 **Example**
 
-For each sensor, following partition calculates the average temperature over every 10 events
-and produces output to `DeviceTempIncreasingStream` is the consecutive average temperature values are increasing more then 
+This partition calculates the average temperature of every 10 events for each sensor, and sends an output to the `DeviceTempIncreasingStream` stream if the consecutive average temperature values increase by more than 
 5 degrees.
 
 <pre>
@@ -1370,34 +1373,33 @@ end;
 
 ## Table
 
-A table is a stored version of an stream or a table of events. It's schema is defined via the **table definition** thats
-quite similar to a stream definition. These events are by default stored 
-`in-memory` but Siddhi also provides store extension to work with data/events stored in various data stores through the 
+A table is a stored version of an stream or a table of events. Its schema is defined via the **table definition** that is
+similar to a stream definition. These events are by default stored `in-memory`, but Siddhi also provides store extensions to work with data/events stored in various data stores through the 
 table abstraction.
 
 **Purpose**
 
-Tables allow Siddhi to work with stored events. By defining a schema to table Siddhi enables them to be processed at queries using their defined attributes with the streaming data, and also interactively query the state of the stored events in the table.
+Tables allow Siddhi to work with stored events. By defining a schema for tables Siddhi enables them to be processed by queries using their defined attributes with the streaming data. You can also interactively query the state of the stored events in the table.
 
 **Syntax**
 
-The following is the syntax for defining a new table.
+The syntax for a new table definition is as follows:
 
 ```sql
 define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
 ```
-The following parameters are configured in a table definition.
+The following parameters are configured in a table definition:
 
 | Parameter     | Description |
 | ------------- |-------------|
-| `table name`      | The name of the table defined. (as a convention `PascalCase` is used for table name) |
-| `attribute name`   | The schema of the table is defined by its attributes by uniquely identifiable attribute names (as a convention `camalCase` is used for attribute names)|    |
+| `table name`      | The name of the table defined. (`PascalCase` is used for table name as a convention.) |
+| `attribute name`   | The schema of the table is defined by its attributes with uniquely identifiable attribute names (`camalCase` is used for attribute names as a convention.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 
 **Example**
 
-Defining a table named `RoomTypeTable` with the attributes `roomNo` with type `int`, and `type` with type `string`.
+The following defines a table named `RoomTypeTable` with `roomNo` and `type` attributes of data types `int` and `string` respectively.
 
 ```sql
 define table RoomTypeTable ( roomNo int, type string );
@@ -1409,13 +1411,13 @@ Tables can be configured with primary keys to avoid the duplication of data.
 
 Primary keys are configured by including the `@PrimaryKey( 'key1', 'key2' )` annotation to the table definition. 
 Each event table configuration can have only one `@PrimaryKey` annotation. 
-The number of attributes supported differ based on the table implementations and when more then one attribute 
- is used for primary key the combination of the keys will be used to grantee uniqueness among the events saved in the table.
+The number of attributes supported differ based on the table implementations. When more than one attribute 
+ is used for the primary key, the uniqueness of the events stored in the table is determined based on the combination of values for those attributes.
 
 **Examples**
 
-The following query creates an event table with the `symbol` attribute as the primary key. 
-Therefore each entry in this table will have a unique value for `symbol` attribute.
+This query creates an event table with the `symbol` attribute as the primary key. 
+Therefore each entry in this table must have a unique value for `symbol` attribute.
 
 ```sql
 @PrimaryKey('symbol')
@@ -1424,17 +1426,17 @@ define table StockTable (symbol string, price float, volume long);
 
 **Indexes**
  
-Indexes let tables to searched/modified much faster. 
+Indexes allow tables to be searched/modified much faster. 
 
 Indexes are configured by including the `@Index( 'key1', 'key2' )` annotation to the table definition.
- Each event table configuration can have at most only one `@Index` annotation. 
- Support for `@Index` annotation and the number of attributes supported differ based on the table implementations. 
- When more then one attribute used for index each of them will be used to index the table for fast access of the data. 
+ Each event table configuration can have 0-1 `@Index` annotations. 
+ Support for the `@Index` annotation and the number of attributes supported differ based on the table implementations. 
+ When more then one attribute is used for index, each one of them is used to index the table for fast access of the data. 
  Indexes can be configured together with primary keys. 
 
 **Examples**
 
-The following query creates an indexed event table named `RoomTypeTable` using attribute `roomNo` as the index key.
+This query creates an indexed event table named `RoomTypeTable` with the `roomNo` attribute as the index key.
 
 ```sql
 @Index('roomNo')
@@ -1448,10 +1450,10 @@ The following operators can be performed on tables.
 
 ### Insert
 
-This allows events to be inserted in to tables. This is similar to inserting events into streams. 
+This allows events to be inserted into tables. This is similar to inserting events into streams. 
 
 !!! warning
-    If the table is defined with primary keys, and if you insert duplicate data primary key constrain violation can occur. 
+    If the table is defined with primary keys, and if you insert duplicate data, primary key constrain violations can occur. 
     In such cases use the `update or insert` operation. 
     
 **Syntax**
@@ -1462,12 +1464,12 @@ select <attribute name>, <attribute name>, ...
 insert into <table>
 ```
 
-Like in streams to insert only the specific output event types, use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords. 
-For more information refer [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types) section.
+Similar to streams, you need to use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords in order to insert only the specific output event types. 
+For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
 
 **Example**
 
-The following query inserts all events from the `TempStream` stream to the `TempTable` table.
+This query inserts all the events from the `TempStream` stream to the `TempTable` table.
 
 ```sql
 from TempStream
@@ -1477,10 +1479,10 @@ insert into TempTable;
 
 ### Join (Table)
 
-To allow a stream to retrieve information from a table in a streaming manner.
+This allows a stream to retrieve information from a table in a streaming manner.
 
 !!! Note
-    Join can also be performed with [two streams](#join-stream), [aggregation](#join-aggregation) or against externally [defined windows](#join-window).
+    Joins can also be performed with [two streams](#join-stream), [aggregation](#join-aggregation) or against externally [defined windows](#join-window).
 
 **Syntax**
 
@@ -1492,12 +1494,12 @@ insert into <output stream>
 ```
 
 !!! Note 
-    Table can only be joint with a stream, and two tables cannot be joined because there should be at least one active 
+    A table can only be joint with a stream. Two tables cannot be joint because there must be at least one active 
     entity to trigger the join operation.
 
 **Example**
 
-The following Siddhi App performs a join to retrieve the room type from `RoomTypeTable` table based on the room number, such that it can filter the events related to `server-room`s.
+This Siddhi App performs a join to retrieve the room type from `RoomTypeTable` table based on the room number, so that it can filter the events related to `server-room`s.
 
 ```sql
 define table RoomTypeTable (roomNo int, type string);
@@ -1526,16 +1528,17 @@ delete <table> (for <output event type>)?
 The `condition` element specifies the basis on which events are selected to be deleted. 
 When specifying the condition, table attributes should be referred to with the table name.
  
-To execute delete for specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. To understand more refer [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types) section.
+To execute delete for specific output event types, use the `current events`, `expired events` or the `all events` keyword with `for` as shown
+in the syntax. For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
 
 !!! note 
-    Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
+    Table attributes must be always referred to with the table name as follows: 
+    `<table name>.<attibute name>`
     
 **Example**
 
-The following script deletes entries from the `RoomTypeTable` table, 
-that have room number equal to the `roomNumber` attribute of the events in `DeleteStream` stream.
+In this example, the script deletes a record in the `RoomTypeTable` table if it has a value for the `roomNo` attribute that matches the value for the `roomNumber` attribute of an event in the `DeleteStream` stream.
+
 
 ```sql
 define table RoomTypeTable (roomNo int, type string);
@@ -1549,7 +1552,7 @@ delete RoomTypeTable
 
 ### Update
 
-Update selected event attributes stored in a table based on a condition. 
+This operator updates selected event attributes stored in a table based on a condition. 
 
 **Syntax**
 
@@ -1557,26 +1560,25 @@ Update selected event attributes stored in a table based on a condition.
 from <input stream> 
 select <attribute name>, <attribute name>, ...
 update <table> (for <output event type>)? 
-    set <table>.<attribute name> = <attribute name>, <table>.<attribute name> = <attribute name>, ...
+    set <table>.<attribute name> = (<attribute name>|<expression>)?, <table>.<attribute name> = (<attribute name>|<expression>)?, ...
     on <condition>
 ```
 
-The `condition` element specifies the basis on which events are selected for update.
-When specifying the `condition`, table attributes should be referred to with the table name.
+The `condition` element specifies the basis on which events are selected to be updated.
+When specifying the `condition`, table attributes must be referred to with the table name.
 
-Use `set` keyword to update selected attributes from the table. Here for each assignment the left hand side 
- attribute should be a table attribute and the right hand side attribute can be stream/table attribute, mathematical 
- operations or other. When `set` clause is not provided all attributes in the table will be updated.  
- 
-To execute update upon specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. To understand more refer [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types) section.
+You can use the `set` keyword to update selected attributes from the table. Here, for each assignment, the attribute specified in the left must be the table attribute, and the one specified in the right can be a stream/table attribute a mathematical operation, or other. When the `set` clause is not provided, all the attributes in the table are updated.
+   
+To execute an update for specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
+in the syntax. For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
 
 !!! note 
-    Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
+    Table attributes must be always referred to with the table name as shown below:
+     `<table name>.<attibute name>`.
 
 **Example**
 
-Siddhi app updating room occupancy in the `RoomOccupancyTable` table for each room number based on new arrival and exit from the `UpdateStream` stream.
+This Siddhi application updates the room occupancy in the `RoomOccupancyTable` table for each room number based on new arrivals and exits from the `UpdateStream` stream.
 
 ```sql
 define table RoomOccupancyTable (roomNo int, people int);
@@ -1591,7 +1593,7 @@ update RoomTypeTable
 
 ### Update or Insert
 
-Let you update if the event attributes already exist in the table based on a condition, or 
+This allows you update if the event attributes already exist in the table based on a condition, or 
 else insert the entry as a new attribute.
 
 **Syntax**
@@ -1600,16 +1602,15 @@ else insert the entry as a new attribute.
 from <input stream> 
 select <attribute name>, <attribute name>, ...
 update or insert <table> (for <output event type>)? 
-    set <table>.<attribute name> = <attribute name>, <table>.<attribute name> = <attribute name>, ...
+    set <table>.<attribute name> = <expression>, <table>.<attribute name> = <expression>, ...
     on <condition>
 ```
 The `condition` element specifies the basis on which events are selected for update.
 When specifying the `condition`, table attributes should be referred to with the table name. 
-Here if no stored event matches for the given condition then the arriving event will be inserting into 
-the table.
+If a record that matches the condition does not already exist in the table, the arriving event is inserted into the table.
 
-The `set` clause is only used when the update operation is performed and it will during the insert operation. 
-When ing the `set` clause assignments their the left hand side attribute should be always a table attribute and 
+The `set` clause is only used when the update operation is performed and it is used during the insert operation. 
+When `set` clause is used the left hand side attribute should be always a table attribute and 
 the right hand side attribute can be stream/table attribute, mathematical 
  operations or other. When `set` clause is not provided all attributes in the table will be updated.  
  
@@ -1636,7 +1637,7 @@ update or insert RoomAssigneeTable
 
 ### In
  
-Let the stream check if the expected value exist in the table as part of a conditional operation.
+This allows the stream to check if the expected value exists in the table as part of a conditional operation.
 
 **Syntax**
 
@@ -1647,12 +1648,12 @@ insert into <output stream>
 ```
 
 The `condition` element specifies the basis on which events are selected to be compared. 
-When constructing the `condition`, the table attribute should be always referred to with the table name as 
+When constructing the `condition`, the table attribute must be always referred to with the table name as shown below:
 `<table>.<attibute name>`.
 
 **Example**
 
-The Siddhi App to filter only room numbers that are listed in the `ServerRoomTable` table.
+This Siddhi application filters only room numbers that are listed in the `ServerRoomTable` table.
 
 ```sql
 define table ServerRoomTable (roomNo int);
@@ -1913,37 +1914,37 @@ insert into MaxSensorReadingStream;
 ## Trigger
 
 Triggers allow events to be periodically generated. **Trigger definition** can be used to define a trigger. 
-Trigger also works like a stream with a predefined schema.
+A trigger also works like a stream with a predefined schema.
 
 **Purpose**
 
-For some use cases the system should be able to periodically generated events based on specified time interval to perform 
+For some use cases the system should be able to periodically generate events based on a specified time interval to perform 
 some periodic executions. 
 
-Trigger can be performed during three times such as `'start'`, for a given `<time interval>` or for a given `'<cron expression>'`, 
+A trigger can be performed for a `'start'` operation, for a given `<time interval>`, or for a given `'<cron expression>'`.
 
 
 **Syntax**
 
-The following is the syntax for an trigger definition.
+The syntax for a trigger definition is as follows.
 
 ```sql
 define trigger <trigger name> at ('start'| every <time interval>| '<cron expression>');
 ```
 
-Triggers can be used as inputs like streams and they adhere to the following stream definition, and produces `triggered_time` attribute with type `long`
+Similar to streams, triggers can be used as inputs. They adhere to the following stream definition and produce the `triggered_time` attribute of the `long` type.
 
 ```sql
 define stream <trigger name> (triggered_time long);
 ```
 
-Types of triggers supported as following
+The following types of triggeres are currently supported:
 
 |Trigger type| Description|
 |-------------|-----------|
-|`'start'`| An event will be trigger at Siddhi start.|
-|`every <time interval>`| an event will be triggered periodically on the given time interval.
-|`'<cron expression>'`| an event will be triggered periodically based on the given cron expression, refer  <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-06">quartz-scheduler</a> for config details.
+|`'start'`| An event is triggered when Siddhi is started.|
+|`every <time interval>`| An event is triggered periodically at the given time interval.
+|`'<cron expression>'`| An event is triggered periodically based on the given cron expression. For configuration details, see <a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.2.x/tutorials/tutorial-lesson-06">quartz-scheduler</a>.
  
 
 **Examples**
@@ -1967,20 +1968,19 @@ Types of triggers supported as following
 
 ## Script
 
-Script allows you to write functions in other programming languages and execute them within queries. 
-Functions defined via script can be accessed in queries just like any other inbuilt functions. 
+Scripts allow you to write functions in other programming languages and execute them within Siddhi queries. 
+Functions defined via scripts can be accessed in queries similar to any other inbuilt function. 
 **Function definitions** can be used to define these scripts.
 
-Function parameters are passed as `Object[]` with the name `data` into the function logic. 
+Function parameters are passed into the function logic as `Object[]` and with the name `data` . 
 
 **Purpose**
 
-Scripts let you define a function operation that not provided in Siddhi core or it's extension and let you define 
-the function logic without focusing you to write an extension.
+Scripts allow you to define a function operation that is not provided in Siddhi core or its extension. It is not required to write an extension to define the function logic.
 
 **Syntax**
 
-The following is the syntax for a Script definition.
+The syntax for a Script definition is as follows.
 
 ```sql
 define function <function name>[<language name>] return <return type> {
@@ -1992,14 +1992,14 @@ The following parameters are configured when defining a script.
 
 | Parameter     | Description |
 | ------------- |-------------|
-| `function name`| 	The name of the function (as a convention `camalCase` is used for function name).|
+| `function name`| 	The name of the function (`camalCase` is used for the function name) as a convention.|
 |`language name`| The name of the programming language used to define the script, such as `javascript`, `r` and `scala`.|
-| `return type`| The return attribute type of the the function. It can be `int`, `long`, `float`, `double`, `string`, `bool` or `object`. Here the function implementer should be responsible for returning the output attribute on the defined return type for proper functionality. 
-|`operation of the function`| Here, the execution logic of the function is added. This logic should be written in the language specified under the `language name`, and it should return the output on the specified `return type` parameter.
+| `return type`| The attribute type of the function’s return. This can be `int`, `long`, `float`, `double`, `string`, `bool` or `object`. Here the function implementer should be responsible for returning the output attribute on the defined return type for proper functionality.
+|`operation of the function`| Here, the execution logic of the function is added. This logic should be written in the language specified under the `language name`, and it should return the output in the data type specified via the `return type` parameter.
 
 **Examples**
 
-The following query performs concatenation using JavaScript and returns the output as a string.
+This query performs concatenation using JavaScript, and returns the output as a string.
 
 ```sql
 define function concatFn[javascript] return string {
@@ -2050,53 +2050,63 @@ Siddhi supports following extension types:
 
 * **Function**
 
-    For each event, it consumes zero or more parameters as input parameters, and outputs a single attribute. This could be used to manipulate existing event attributes to generate new attributes like any Function operation.
+    For each event, it consumes zero or more parameters as input parameters and returns a single attribute. This can be used to manipulate existing event attributes to generate new attributes like any Function operation.
     
     This is implemented by extending `org.wso2.siddhi.core.executor.function.FunctionExecutor`.
     
     Example : 
     
-    `math:sin(x)` here the `sin` function of `math` extension will return the sin value for parameter `x`.
+    `math:sin(x)` 
+    
+    Here, the `sin` function of `math` extension returns the sin value for the `x` parameter.
     
 * **Aggregate Function**
 
-    For each event, it consumes zero or more parameters as input parameters, and outputs a single attribute having an aggregated results. This could be used with conjunction with a window in order to find the aggregated results based on the given window like any Aggregate Function operation. 
+    For each event, it consumes zero or more parameters as input parameters and returns a single attribute with aggregated results. This can be used in conjunction with a window in order to find the aggregated results based on the given window like any Aggregate Function operation. 
     
      This is implemented by extending `org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator`.
 
     Example : 
     
-    `custom:std(x)` here the `std` aggregate function of `custom` extension will return the standard deviation of value `x` based on it's assigned window query. 
+    `custom:std(x)` 
+    
+    Here, the `std` aggregate function of `custom` extension returns the standard deviation of the `x` value based on its assigned window query. 
 
 * **Window** 
 
-    Allows events to be **collected, generated, dropped and expired anytime** **without altering** the event format based on the given input parameters, like any other Window operator. 
+    This allows events to be **collected, generated, dropped and expired anytime** **without altering** the event format based on the given input parameters, similar to any other Window operator. 
     
     This is implemented by extending `org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor`.
 
     Example : 
     
-    `custom:unique(key)` here the `unique` window of `custom` extension will retain one event for each unique `key` parameter.
+    `custom:unique(key)` 
+    
+    Here, the `unique` window of the `custom` extension retains one event for each unique `key` parameter.
 
 * **Stream Function**
 
-    Allows events to be  **generated or dropped only during event arrival** and **altered** by adding one or more attributes to it. 
+    This allows events to be  **generated or dropped only during event arrival** and **altered** by adding one or more attributes to it. 
     
     This is implemented by extending  `org.wso2.siddhi.core.query.processor.stream.function.StreamFunctionProcessor`.
     
     Example :  
     
-    `custom:pol2cart(theta,rho)` here the `pol2cart` function of `custom` extension will return all events by calculating the cartesian coordinates `x` & `y` and adding them as new attributes to the events.
+    `custom:pol2cart(theta,rho)` 
+    
+    Here, the `pol2cart` function of the `custom` extension returns all the events by calculating the cartesian coordinates `x` & `y` and adding them as new attributes to the events.
 
 * **Stream Processor**
     
-    Allows events to be **collected, generated, dropped and expired anytime** with **altering** the event format by adding one or more attributes to it based on the given input parameters. 
+    This allows events to be **collected, generated, dropped and expired anytime** by **altering** the event format by adding one or more attributes to it based on the given input parameters. 
     
-    Implemented by extending "oorg.wso2.siddhi.core.query.processor.stream.StreamProcessor".
+    Implemented by extending "org.wso2.siddhi.core.query.processor.stream.StreamProcessor".
     
     Example :  
     
-    `custom:perMinResults(<parameter>, <parameter>, ...)` here the `perMinResults` function of `custom` extension will return all events by adding one or more attributes the events based on the conversion logic and emit output every minute despite of event arrivals.
+    `custom:perMinResults(<parameter>, <parameter>, ...)` 
+    
+    Here, the `perMinResults` function of the `custom` extension returns all events by adding one or more attributes to the events based on the conversion logic. Altered events are output every minute regardless of event arrivals.
 
 * **Sink**
 
@@ -2118,13 +2128,13 @@ insert into StockQuote
 
 **Available Extensions**
 
-Siddhi currently have several pre written extensions <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">here</a>
+Siddhi currently has several pre written extensions that are available <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">here</a>
  
 _We value your contribution on improving Siddhi and its extensions further._
 
 
 **Writing Custom Extensions**
 
-Custom extensions can be written in order to cater use case specific logic that are not out of the box available in Siddhi or as an existing extension. 
+Custom extensions can be written in order to cater use case specific logic that are not available in Siddhi out of the box or as an existing extension. 
 
 More information on this will be available soon.
