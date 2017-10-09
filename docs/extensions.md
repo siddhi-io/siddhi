@@ -49,6 +49,7 @@ Following are some prewritten extensions that are supported with Siddhi;
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-geo">execution geo</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-nlp">execution nlp</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-r">execution r</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-streamingml">execution streamingml</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-script-r">script r</a>
 
 

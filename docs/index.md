@@ -44,7 +44,7 @@ use it to process 20 Billion events per day (300,000 events per second).
    <a target="_blank" href="http://wso2.com/platform?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 products'</a> analytics.
     * <a target="_blank" href="http://wso2.com/library/conference/2017/2/wso2con-usa-2017-scalable-real-time-complex-event-processing-at-uber?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">UBER</a> for fraud analytics
     * <a target="_blank" href="http://eagle.apache.org/docs/index.html">Apache Eagle</a> use Siddhi as a policy engine
-* Solutions based on Siddhi has been a finalist at <a target="_blank" href="http://dl.acm.org/results.cfm?query=(%252Bgrand%20%252Bchallenge%20%252Bwso2)&within=owners.owner=HOSTED&filtered=&dte=&bfr=">ACM DEBS Grand Challenge Stream Processing competitions in 2014, 2015, 2016, 2017</a>.
+* Solutions based on Siddhi have been finalists at <a target="_blank" href="http://dl.acm.org/results.cfm?query=(%252Bgrand%20%252Bchallenge%20%252Bwso2)&within=owners.owner=HOSTED&filtered=&dte=&bfr=">ACM DEBS Grand Challenge Stream Processing competitions in 2014, 2015, 2016, 2017</a>.
 * Been basis of many academic research projects and have <a target="_blank" href="https://scholar.google.com/scholar?cites=5113376427716987836&as_sdt=2005&sciodt=0,5&hl=en">60+ citations</a>. 
 
 If you also use Siddhi, we would love to hear more. 
@@ -86,7 +86,7 @@ Find the released Siddhi libraries from <a target="_blank" href="http://maven.ws
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-M80">4.0.0-M80</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-M98">4.0.0-M98</a>.
 
 ## Jenkins Build Status
 
