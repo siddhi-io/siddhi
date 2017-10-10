@@ -8,7 +8,7 @@ think, and act in real time.
 This section illustrate the architecture of Siddhi and take you through its key functionality; We hope that the article 
 will help developers to better understand the code, and will help them to better used siddhi, fix bugs and also improve Siddhi. 
 
-## Main design decisions behind Siddhi
+## Main Design Decisions
 
 - Siddhi is implemented specifically for event by event processing of real-time streaming data. 
 - It provides an intuitive way to expressing stream processing logic and Complex 
@@ -21,7 +21,7 @@ dropping the rest as soon as possible.
 - Have multiple extension points to support diverse set of functionality such as supporting multiple sources, sinks, functions, 
 aggregation operations, windows and many more.
 
-## High level architecture
+## High Level Architecture
 
 ![Simple Siddhi Overview](../images/architecture/siddhi-overview-simple.png?raw=true "Simple Siddhi Overview")
  
@@ -46,7 +46,7 @@ Internally Siddhi uses these object to understand what user expects Siddhi to do
 - **Siddhi Annotation** : This is a helping component that lets all extensions to be annotated such that they can be 
 pricked by Siddhi Core for processing and help you generate appropriate documentation. 
 
-###Siddhi Component Architecture 
+### Siddhi Component Architecture 
 
 The following diagram gives more detail information on major components of Siddhi and how they are related together. 
 
@@ -66,7 +66,7 @@ provide an isolated execution environment for all of the queries and execution l
 to the persistence store for periodic persistence, statistics manager to report performance statistics of Siddhi App Runtimes 
 and for loading Siddhi extensions. 
 
-###Siddhi App Execution Flow
+### Siddhi App Execution Flow
 
 Following diagram depicts the execution flow within a Siddhi App Runtime. 
 
@@ -150,14 +150,21 @@ Flowing are the components get involve in handling the events.
     This can be used to get events generated from Queries, this notifies the event occurrence `timestamp`, and classifies 
     the events into `currentEvents`, and `expiredEvents`. 
     
-##Siddhi Query Execution 
+## Siddhi Query Execution 
 
 Siddhi queries can be categorised in to three main types such as single input queries which comprises query types filter and windows,
  two input queries comprising joins, and multi input queries comprising pattern and sequences. 
 
 Following section explains the internal of each query type. 
 
+### Single Input Query Runtime (Filter & Windows)
 
-    
+![Single Input Query](../images/architecture/siddhi-query-single.png "Single Input Query (Filter & Window)")
+ 
+Single input query runtime is generated for filter and window queries, they consumes events from a Stream Junction 
+and convert the events according to the expected output stream format at the ProcessStreamReceiver dropping all the unrelated 
+incoming stream attributes. 
+
+
 - Partition
     - inner stream
