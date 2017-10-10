@@ -1637,7 +1637,7 @@ update or insert RoomAssigneeTable
 
 ### In
  
-This allows the stream to check if the expected value exists in the table as part of a conditional operation.
+This allows the stream to check whether the expected value exists in the table as a part of a conditional operation.
 
 **Syntax**
 
@@ -1665,10 +1665,10 @@ insert into ServerRoomTempStream;
 
 ## Incremental Aggregation
 
-Incremental aggregation let you obtaining aggregates in an incremental manner for a specified set of time periods.
+Incremental aggregation allows you to obtain aggregates in an incremental manner for a specified set of time periods.
 
-This not only let you calculate aggregations with varies time granularity but also let you access them in an interactive
- manner for reports, dashboards, and for further processing. It's schema is defined via the **aggregation definition**.
+This not only allows you calculate aggregations with varied time granularity, but also allows you access them in an interactive
+ manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**.
 
 **Purpose**
 
@@ -1676,8 +1676,8 @@ Incremental aggregation allows you to retrieve the aggregate value for different
 That is, it allows you to obtain aggregates such as `sum`, `count`, `avg`, `min`, `max`, and `count`) 
 of stream attributes for durations such as `sec`, `min`, `hour`, etc. 
 
-This is of considerable importance in many analytics scenarios since aggregate values are often needed for several time periods. 
-Furthermore, this ensures that the aggregations are not lost due to unexpected system failures, as the aggregates can be stored in different persistence `stores`.
+This is of considerable importance in many Analytics scenarios because aggregate values are often needed for several time periods. 
+Furthermore, this ensures that the aggregations are not lost due to unexpected system failures because aggregates can be stored in different persistence `stores`.
 
 **Syntax**
 
@@ -1693,16 +1693,16 @@ The above syntax includes the following:
 
 |Item                |Description
 ---------------      |---------
-|`@store`            |This annotation is used to refer to the data store where the calculated <br/>aggregate results will be stored. This annotation is optional and when <br/>no annotation is provided the data will be sored in the `in-memory` store.
-|`<aggregator name>` | Specifies a unique name for the aggregation such that it can be referred <br/>when accessing aggregate results. 
+|`@store`            |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
+|`<aggregator name>` |This specifies a unique name for the aggregation so that it can be referred <br/>when accessing aggregate results. 
 |`<input stream>`    |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
-|`group by <attribute name>`|The `group by` clause is optional. If it's given the aggregate values <br/>would be calculated, per each `group by` attribute, and otherwise all the<br/> events would be aggregated together. 
-|`by <timestamp attribute>`| This clause is optional. This defined the attribute that should be used as<br/> the timestamp if this is not provided the event time will be used by default.<br/> The timestamp could be given as either a string or long value. If it's a `long`,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it's <br/>a `string` the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` <br/>(ex. `+05:30`, `-11:00`).
-|`<time periods>`    |This depicts the aggregation period. This can be defined either as a range <br/>such as `evey sec ... year` defining that it should process all time <br/>granularities form second to year, or as comma separated values such as <br/> `every sec, hour, month`. Aggregation supports `second`, `minute`, `hour`, <br/>`day`, `month` and `year` as its time granularity levels. 
+|`group by <attribute name>`|The `group by` clause is optional. If it is included in a Siddhi application, aggregate values <br/> are calculated per each `group by` attribute. If it is not used, all the<br/> events are aggregated together. 
+|`by <timestamp attribute>`| This clause is optional. This defines the attribute that should be used as<br/> the timestamp. If this clause is not used, the event time is used by default.<br/> The timestamp could be given as either a `string` or a `long` value. If it is a `long` value,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it is <br/>a `string` value, the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` .<br/>(e.g., `+05:30`, `-11:00`).
+|`<time periods>`    |When the aggregation period is given as `every sec, hour, month`, the aggregate values are calculated per second, per hour as well as per year.
 
 **Example**
 
-Siddhi App defining `TradeAggregation` to calculate  average and sum of `price` from `TradeStream` stream every second to year time granularities.
+This Siddhi Application defines an aggregation named `TradeAggregation` to calculate the average and sum for the `price` attribute of events arriving at the `TradeStream` stream. These aggregates are calculated per every time granularity in the range second-year.
 
 ```sql
 define stream TradeStream (symbol string, price double, volume long, timestamp long);
@@ -1716,15 +1716,15 @@ define aggregation TradeAggregation
 
 ### Join (Aggregation)
 
-Join allow a stream to retrieve calculated aggregate values from the aggregation. 
+This allows a stream to retrieve calculated aggregate values from the aggregation. 
 
 !!! Note
-    Join can also be performed with [two streams](#join-stream), with [table](#join-table) or against externally [defined windows](#join-window).
+    A join can also be performed with [two streams](#join-stream), with a [table](#join-table) and a stream, or with a stream against externally [defined windows](#join-window).
 
 
 **Syntax**
 
-Join with aggregation is similer to the join with [table](#join-table), but with additional `within` and `per` clauses. 
+A join with aggregation is similer to the join with [table](#join-table), but with additional `within` and `per` clauses. 
 
 ```sql
 from <input stream> join <aggrigation> 
@@ -1734,18 +1734,18 @@ from <input stream> join <aggrigation>
 select <attribute name>, <attribute name>, ...
 insert into <output stream>;
 ```
-Apart for constructs of [table](#join-table) this includes the following :
+Apart from constructs of [table](#join-table) this includes the following :
 
 Item|Description
 ---------|---------
-`within  <time range>`| This allows you to specify the time interval for which the aggregate values need to be retrieved. This can be specified by providing the start and end time separated by comma as `string` or `long` values or by using wildcard `string` specifying the data range. For details refer examples.            
-`per <time granularity>`|This specifies the time granularity by which the aggregate values must be grouped and returned. E.g., If you specify `days`, the retrieved aggregate values are grouped for each day within the selected time interval.
+`within  <time range>`| This allows you to specify the time interval for which the aggregate values need to be retrieved. This can be specified by providing the start and end time separated by a comma as `string` or `long` values, or by using the wildcard `string` specifying the data range. For details refer examples.            
+`per <time granularity>`|This specifies the time granularity by which the aggregate values must be grouped and returned. e.g., If you specify `days`, the retrieved aggregate values are grouped for each day within the selected time interval.
 
 `within` and `par` clauses also accept attribute values from the stream.
 
 **Example**
 
-Retrieving all aggregation per day within the time range `"2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30"` 
+This query retrieves all aggregation per day within the time range `"2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30"`.
 
 ```sql
 define stream StockStream (symbol string, value int);
@@ -1758,7 +1758,7 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-Retrieving all aggregation per hour within the day `2014-02-15`  
+This query retrieves all aggregation per hour within the day `2014-02-15` .
 
 ```sql
 define stream StockStream (symbol string, value int);
@@ -1771,7 +1771,7 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-Retrieving all aggregation per an attribute value from the stream and within timestamps `1490918400` and `1490922000`  
+This query retrieves all aggregation per value for an attribute of the stream  within the time period between timestamps `1490918400` and `1490922000`  
 
 ```sql
 define stream StockStream (symbol string, value int, perValue string);
