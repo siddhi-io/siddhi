@@ -28,7 +28,6 @@ import org.wso2.siddhi.extension.eventtable.cache.CachingTable;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -39,9 +38,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.sql.DataSource;
 
 /**
- * Class which act as layer between the database and Siddhi. This class performs all the RDBMS related operations and Blooms Filter
+ * Class which act as layer between the database and Siddhi.
+ * This class performs all the RDBMS related operations and Blooms Filter
  */
 public class DBHandler {
 
@@ -58,26 +59,21 @@ public class DBHandler {
 
     public DBHandler(DataSource dataSource, String tableName, List<Attribute> attributeList,
                      TableDefinition tableDefinition) {
-
         Connection con = null;
         this.dataSource = dataSource;
         this.tableName = tableName;
         this.attributeList = attributeList;
         this.tableDefinition = tableDefinition;
         executionInfo = new ExecutionInfo();
-
         try {
-
             con = dataSource.getConnection();
             initializeDatabaseExecutionInfo(executionInfo);
             initializeConnection();
-
         } catch (SQLException e) {
             throw new ExecutionPlanRuntimeException("Error while initialising the connection, " + e.getMessage(), e);
         } finally {
             cleanUpConnections(null, con);
         }
-
     }
 
     public ExecutionInfo getExecutionInfoInstance() {
@@ -188,7 +184,6 @@ public class DBHandler {
         }
     }
 
-
     public void updateEvent(List<Object[]> updateEventList, ExecutionInfo executionInfo) {
 
         PreparedStatement updatePreparedStatement = null;
@@ -247,28 +242,27 @@ public class DBHandler {
         List<Object[]> selectedEventList = new ArrayList<Object[]>();
         Connection con = null;
         int[] updatedRows;
+        int conditionArrayStartIndex = executionInfo.getUpdateQueryColumnOrder().size() -
+                executionInfo.getConditionQueryColumnOrder().size();
         boolean isInserted = false;
 
         try {
-
             con = dataSource.getConnection();
             updatePreparedStatement = con.prepareStatement(executionInfo.getPreparedUpdateStatement());
             insertionPreparedStatement = con.prepareStatement(executionInfo.getPreparedInsertStatement());
             selectionPreparedStatement = con.prepareStatement(executionInfo.getPreparedSelectTableStatement());
             con.setAutoCommit(false);
-
             for (Object[] obj : updateEventList) {
                 populateStatement(obj, updatePreparedStatement, executionInfo.getUpdateQueryColumnOrder());
                 updatePreparedStatement.addBatch();
-                populateStatement(obj, selectionPreparedStatement, executionInfo.getConditionQueryColumnOrder());
+                populateStatement(Arrays.copyOfRange(obj, conditionArrayStartIndex, obj.length),
+                        selectionPreparedStatement, executionInfo.getConditionQueryColumnOrder());
                 if (selectionPreparedStatement != null && isBloomFilterEnabled) {
                     ResultSet resultSet = selectionPreparedStatement.executeQuery();
                     populateEventListFromResultSet(selectedEventList, resultSet);
                 }
             }
-
             updatedRows = updatePreparedStatement.executeBatch();
-
             for (int i = 0; i < updatedRows.length; i++) {
                 int isUpdated = updatedRows[i];
                 if (isUpdated == 0) {
@@ -282,12 +276,10 @@ public class DBHandler {
                     }
                 }
             }
-
             if (isInserted) {
                 insertionPreparedStatement.executeBatch();
             }
             con.commit();
-
             if (isBloomFilterEnabled) {
                 for (Object[] obj : selectedEventList) {
                     bloomFilterImpl.removeFromBloomFilters(obj);
@@ -297,7 +289,6 @@ public class DBHandler {
                     bloomFilterImpl.addToBloomFilters(obj);
                 }
             }
-
         } catch (SQLException e) {
             throw new ExecutionPlanRuntimeException("Error while insertOrOverwriting events from database," + e.getMessage(), e);
         } finally {
@@ -305,7 +296,6 @@ public class DBHandler {
             cleanUpConnections(insertionPreparedStatement, con);
             cleanUpConnections(selectionPreparedStatement, con);
         }
-
     }
 
     public StreamEvent selectEvent(Object[] obj, ExecutionInfo executionInfo) {
@@ -458,12 +448,12 @@ public class DBHandler {
                     }
                 } else {
                     throw new ExecutionPlanRuntimeException("Cannot Execute Insert/Update. Null value detected for " +
-                                                            "attribute '" + attribute.getName() + "'");
+                            "attribute '" + attribute.getName() + "'");
                 }
             }
         } catch (SQLException e) {
             throw new ExecutionPlanRuntimeException("Cannot set value to attribute name " + attribute.getName() + ". " +
-                                                    "Hence dropping the event. " + e.getMessage(), e);
+                    "Hence dropping the event. " + e.getMessage(), e);
         }
     }
 
@@ -570,15 +560,15 @@ public class DBHandler {
 
             //Constructing quert to create a new table
             String createTableQuery = constructQuery(tableName, elementMappings.get(RDBMSEventTableConstants
-                                                                                            .EVENT_TABLE_RDBMS_CREATE_TABLE), columnTypes, null, null, null, null);
+                    .EVENT_TABLE_RDBMS_CREATE_TABLE), columnTypes, null, null, null, null);
 
             //constructing query to insert date into the table row
             String insertTableRowQuery = constructQuery(tableName, elementMappings.get(RDBMSEventTableConstants
-                                                                                               .EVENT_TABLE_RDBMS_INSERT_DATA), null, columns, valuePositionsBuilder, null, null);
+                    .EVENT_TABLE_RDBMS_INSERT_DATA), null, columns, valuePositionsBuilder, null, null);
 
             //Constructing query to check for the table existence
             String isTableExistQuery = constructQuery(tableName, elementMappings.get(RDBMSEventTableConstants
-                                                                                             .EVENT_TABLE_RDBMS_TABLE_EXIST), null, null, null, null, null);
+                    .EVENT_TABLE_RDBMS_TABLE_EXIST), null, null, null, null, null);
 
             executionInfo.setPreparedInsertStatement(insertTableRowQuery);
             executionInfo.setPreparedCreateTableStatement(createTableQuery);
@@ -612,26 +602,26 @@ public class DBHandler {
         }
         if (query.contains(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_COLUMN_TYPES)) {
             query = query.replace(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_COLUMN_TYPES,
-                                  columnTypes.toString());
+                    columnTypes.toString());
         }
         if (query.contains(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_COLUMNS)) {
             query = query.replace(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_COLUMNS,
-                                  columns.toString());
+                    columns.toString());
         }
         if (query.contains(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_VALUES)) {
             query = query.replace(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_VALUES, values.toString());
         }
         if (query.contains(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_COLUMN_VALUES)) {
             query = query.replace(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_COLUMN_VALUES,
-                                  column_values.toString());
+                    column_values.toString());
         }
         if (query.contains(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_CONDITION)) {
             if (condition == null || condition.toString().trim().equals("")) {
                 query = query.replace(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_CONDITION,
-                                      "").replace("where", "").replace("WHERE", "");
+                        "").replace("where", "").replace("WHERE", "");
             } else {
                 query = query.replace(RDBMSEventTableConstants.EVENT_TABLE_RDBMS_ATTRIBUTE_CONDITION,
-                                      condition.toString());
+                        condition.toString());
             }
         }
         return query;
