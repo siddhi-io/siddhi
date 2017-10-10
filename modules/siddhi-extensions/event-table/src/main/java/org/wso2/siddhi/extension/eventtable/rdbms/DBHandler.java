@@ -271,7 +271,8 @@ public class DBHandler {
             for (Object[] obj : updateEventList) {
                 populateStatement(obj, updatePreparedStatement, executionInfo.getUpdateQueryColumnOrder());
                 updatePreparedStatement.addBatch();
-                populateStatement(obj, selectionPreparedStatement, executionInfo.getConditionQueryColumnOrder());
+                populateStatement(Arrays.copyOfRange(obj, conditionArrayStartIndex, obj.length),
+                        selectionPreparedStatement, executionInfo.getConditionQueryColumnOrder());
                 if (selectionPreparedStatement != null && isBloomFilterEnabled) {
                     if (log.isDebugEnabled()) {
                         log.debug("Operation: overwriteOrAddEvent, Selection Statement: " + selectionPreparedStatement);
