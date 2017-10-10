@@ -31,7 +31,7 @@ In very high level Siddhi consumes events from various events source processed t
  `Hazelcast` in-memory grid, etc. Siddhi also allows applications and users to query Siddhi via its Store Query API to interactively 
  retrieve data from its in-memory and other stores.
  
-### Main Components of Siddhi
+### Main Modules of Siddhi
 
 Siddhi comprises four main components, they are: 
 
@@ -48,16 +48,76 @@ pricked by Siddhi Core for processing and help you generate appropriate document
 
 ###Siddhi Component Architecture 
 
-The following diagram gives more detail information on all the sub components of Siddhi and the flow of events though them. 
+The following diagram gives more detail information on major components of Siddhi and how they are related together. 
 
-![Siddhi Component Architecture](../images/architecture/siddhi-architecture.png "Siddhi Component Architecture")
+![Siddhi Component Architecture](../images/architecture/siddhi-architecture-highlevel.png "Siddhi Component Architecture")
  
-####Siddhi components
+Here Siddhi Core module is responsible for maintaining the execution logic, and interacting with the external environment and systems 
+ to consuming and publishing events. It uses multiple components to achieve its tasks such as:  
+ 
+- Siddhi Manager : This is one of the critical component inside Siddhi Core that is responsible for managing Siddhi App Runtimes 
+  and facilitate their functionality via Siddhi Context with periodic state persistence, statistics reporting and extension loading. 
+   
+- Siddhi App Runtime : There will be one Siddhi App runtime generated for each Siddhi App deployed by the user. Siddhi Apps runtime
+provide an isolated execution environment for all of the queries and execution logic defined in the corresponding Siddhi App.
+ These Siddhi App Runtimes based on the logic defied consumes and publishes events from various external system, Java and/or Python programmes. 
+  
+- Siddhi Context : This is a shared object for all the Siddhi App runtimes within the a Siddhi manager, and it contains references 
+to the persistence store for periodic persistence, statistics manager to report performance statistics of Siddhi App Runtimes 
+and for loading Siddhi extensions. 
+
+###Siddhi App Execution Flow
+
+Following diagram depicts the execution flow within a Siddhi App Runtime. 
+
+![Execution Flow in Siddhi App](../images/architecture/siddhi-event-flow.png "Execution Flow in Siddhi App")
+ 
+The path events take within the system is coloured in blue. 
+
+Flowing are the components get involve in handling the events. 
 
 - Stream Junction
     
-    Responsible for routing events to various components within Siddhi core, there will a Stream Junction for each 
-    defined or inferred stream in the siddhi Siddhi App 
+    Responsible for routing events to various components within the Siddhi App Runtime, there will a Stream Junction 
+    generated for for each stream defined or inferred in the Siddhi App. This by default uses the incoming event's thread
+    for processing subscribed components, but it can also be configured via `@Async` annotation to buffer the events and 
+    use a different thread for subsequent execution.
+    
+- Input Handler 
+    
+    There will an instance of Input Handler for each Stream Junction, and this is used for pushing `Event` and
+     `Event[]`s objects into Stream Junctions from Sources and from Java and Python programmes 
+    
+- Stream Callback 
+
+    This is responsible for receiving `Event[]`s from Stream Junction and pass them to Sinks to publish to external endpoints 
+    or pass them subscribed Java and Python programmes for further processing. 
+    
+- Queries & Partitions 
+
+    They are the components responsible for processing the events by filtering, transforming, joining, patten matching, 
+    etc. They consume events from one or more Stream Junctions, process them and publishes the newly produced events 
+     into Stream Junctions based on the defined query or partition. 
+     
+- Source 
+    
+    This is responsible for consuming events from external sources on various data formats convert the events into Siddhi event
+    and then pass them to corresponding Stream Junction via it's Input Handler. There will be one Source generated 
+    for each `@Source` annotation defined on top of the Streams. 
+    
+- Source Mapper 
+
+   There will be a Source Mapper for each source, responsible for converting the incoming event format into Siddhi Events. 
+   Source type can be configured using the `@Map` annotation used within the `@Source` annotation. When `@Map` annotation 
+   is not defined Siddhi uses PassThroughMapper, assuming that the incoming message is already in Siddhi Event format and 
+    it does not need any changes.
+    
+- Sink 
+
+    This is responsible for publish the events to external endpoints by converting the Siddhi Events to various data formats. 
+    There will be one Sink generated for each `@Sink` annotation defined on top of the Streams to consume and publish the events arriving 
+    on that stream. 
+    
     
 - Table
 - Window
