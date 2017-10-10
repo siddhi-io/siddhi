@@ -107,9 +107,9 @@ Flowing are the components get involve in handling the events.
     
 - Source Mapper 
 
-   There will be a Source Mapper for each source, responsible for converting the incoming event format into Siddhi Events. 
-   Source type can be configured using the `@Map` annotation used within the `@Source` annotation. When `@Map` annotation 
-   is not defined Siddhi uses PassThroughMapper, assuming that the incoming message is already in Siddhi Event format and 
+    There will be a Source Mapper for each source, responsible for converting the incoming event format into Siddhi Events. 
+    Source Mapper type can be configured using the `@Map` annotation used within the `@Source` annotation. When `@Map` annotation 
+    is not defined Siddhi uses PassThroughMapper, assuming that the incoming message is already in Siddhi Event format and 
     it does not need any changes.
     
 - Sink 
@@ -118,17 +118,46 @@ Flowing are the components get involve in handling the events.
     There will be one Sink generated for each `@Sink` annotation defined on top of the Streams to consume and publish the events arriving 
     on that stream. 
     
+- Sink Mapper 
+
+    There will be one Sink Mapper for each Sink inorder to map the Siddhi events to various data formats such that they 
+    can be published via Sink. Sink Mapper type can be configured using the `@Map` annotation used within the `@Sink`
+    annotation. When `@Map` annotation is not defined Siddhi uses PassThroughMapper, by passing the events as it is 
+    any to the Sink.
     
 - Table
+    
+    Table is responsible for storing events, by default Siddhi uses In-Memory Table implementation, and when `@Store` annotation
+    is used it load the associated Table implantation based on the defined `store` type. Most table implementations are 
+    extended from the AbstractRecordTable abstract class for the easy of development.
+    
 - Window
-- Trigger 
-- Aggregation 
+    
+    Window is responsible for storing and expiring the events based on the given window constrain. Multiple version of windows 
+    can be implemented by extending the WindowProcessor abstract class. 
+    
+- Incremental Aggregation 
 
-- Query
-    - filter
-    - window
-    - join 
-    - pattern/sequence 
+    Manges incremental aggregation by letting you obtain aggregates in an incremental manner for a specified set of time periods.
+    When defining aggregates incremental aggregation functions can be implemented by extending IncrementalAttributeAggregator. 
+     
+- Trigger
+ 
+    Trigger triggers events on a given interval to the stream junction with has the same name as of the Trigger.
+    
+- Query Callback 
+
+    This can be used to get events generated from Queries, this notifies the event occurrence `timestamp`, and classifies 
+    the events into `currentEvents`, and `expiredEvents`. 
+    
+##Siddhi Query Execution 
+
+Siddhi queries can be categorised in to three main types such as single input queries which comprises query types filter and windows,
+ two input queries comprising joins, and multi input queries comprising pattern and sequences. 
+
+Following section explains the internal of each query type. 
+
+
     
 - Partition
     - inner stream
