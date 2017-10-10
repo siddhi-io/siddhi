@@ -73,7 +73,7 @@ public class PartitionRuntime implements Snapshotable {
 
     public PartitionRuntime(ConcurrentMap<String, AbstractDefinition> streamDefinitionMap, ConcurrentMap<String, StreamJunction> streamJunctionMap, Partition partition, ExecutionPlanContext executionPlanContext) {
         if (partition.getPartitionTypeMap().isEmpty()) {
-            throw new ExecutionPlanCreationException("Partition must have at least one executor. But found none.");
+            throw new ExecutionPlanCreationException("Partition must have at least one partition key. But found none.");
         }
         this.executionPlanContext = executionPlanContext;
 
