@@ -1771,7 +1771,7 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-his query retrieves all aggregation per value for an attribute of the stream  within the time period between timestamps `1490918400` and `1490922000`  
+This query retrieves all aggregation per value for an attribute of the stream  within the time period between timestamps `1490918400` and `1490922000`  
 
 ```sql
 define stream StockStream (symbol string, value int, perValue string);
