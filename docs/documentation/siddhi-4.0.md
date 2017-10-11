@@ -1791,34 +1791,35 @@ Events can be inserted to a defined window from one or more queries and it can p
  
 **Syntax**
 
-The following is the syntax for a defined window.
+The syntax for a defined window is as follows:
 
 ```sql
 define window <window name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... ) <window type>(<parameter>, <parameter>, …) <output event type>;
 ```
 
-The following parameters are configured in a table definition.
+The following parameters are configured in a table definition:
 
 | Parameter     | Description |
 | ------------- |-------------|
-| `window name`      | The name of the window defined. (as a convention `PascalCase` is used for window name) |
-| `attribute name`   | The schema of the window is defined by its attributes by uniquely identifiable attribute names (as a convention `camalCase` is used for attribute names)|    |
+| `window name`      | The name of the window defined. (`PascalCase` is used for window names as a convention.) |
+| `attribute name`   | The schema of the window is defined by its attributes with uniquely identifiable attribute names (`camalCase` is used for attribute names as a convention.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 | `<window type>(<parameter>, ...)`   | The window type associated with the window and its parameters.     |
-| `output <output event type>` | This is optional, Keywords like `current events`, `expired events` and `all events` (the default) can be used to manipulate when the window output should be exposed. For information refer section Output event types. 
+| `output <output event type>` | This is optional. Keywords such as `current events`, `expired events` and `all events` (the default) can be used to specify when the window output should be exposed. For more information, see [output event type](#output-event-types).
+ 
 
 **Examples**
  
-+ Returning all output when event arrives and when events expire from the window.
++ Returning all output when events arrive and when events expire from the window.
 
-    In the following query, output event type is not specified therefore, it emits both current and expired events as the output.
+    In this query, the output event type is not specified. Therefore, it returns both current and expired events as the output.
     
     <pre>
     define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second); </pre>
 
-+ Returning a only when events  expire from the window.
++ Returning an output only when events expire from the window.
 
-    In the following query, the window's output event type is `all events`. Therefore, it emits only the window expiry events as output.
+    In this query, the output event type of the window is `expired events`. Therefore, it only returns the events that have expired from the window as the output.
     
     <pre>
     define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second) output expired events; </pre>
@@ -1830,7 +1831,7 @@ The following operators can be performed on defined windows.
 
 ### Insert
 
-This allows events to be inserted in to windows. This is similar to inserting events into streams. 
+This allows events to be inserted into windows. This is similar to inserting events into streams. 
 
 **Syntax**
 
@@ -1840,12 +1841,13 @@ select <attribute name>, <attribute name>, ...
 insert into <window>
 ```
 
-Like in streams to insert only the specific output event types, use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords. 
-For more information refer [output event type](#output-event-types) section.
+To insert only events of a specific output event type, add the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords (similar to how it is done for streams).
+
+For more information, see [output event type](#output-event-types).
 
 **Example**
 
-The following query inserts all events from the `TempStream` stream to the `OneMinTempWindow` window.
+This query inserts all events from the `TempStream` stream to the `OneMinTempWindow` window.
 
 ```sql
 from TempStream
@@ -1858,7 +1860,7 @@ insert into OneMinTempWindow;
 To allow a stream to retrieve information from a window based on a condition.
 
 !!! Note
-    Join can also be performed with [two streams](#join-stream), [aggregation](#join-aggregation) or with tables [tables](#join-table).
+    A join can also be performed with [two streams](#join-stream), [aggregation](#join-aggregation) or with tables [tables](#join-table).
 
 **Syntax**
 
@@ -1871,7 +1873,7 @@ insert into <output stream>
 
 **Example**
 
-The following Siddhi App performs a join count the number of temperature events having more then 40 degrees 
+This Siddhi Application performs a join count the number of temperature events having more then 40 degrees 
  within the last 2 minutes. 
 
 ```sql
@@ -1886,10 +1888,10 @@ insert into HighTempCountStream;
 
 ### From
 
-A window can be also be used as input to any query like streams. 
+A window can be an input to a query, similar to streams. 
 
 Note !!!
-     When window is used as input to a query, another window cannot be applied on top of this.
+     When window is used as an input to a query, another window cannot be applied on top of this.
 
 **Syntax**
 
@@ -1900,7 +1902,7 @@ insert into <output stream>
 ```
 
 **Example**
-The following Siddhi App calculates the maximum temperature within last 5 minutes.
+This Siddhi Application calculates the maximum temperature within the last 5 minutes.
 
 ```sql
 define window FiveMinTempWindow (roomNo int, temp double) time('5 min');
