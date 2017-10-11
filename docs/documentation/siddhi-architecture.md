@@ -253,6 +253,7 @@ Note: Despite of the optimizations, a join query is quite expensive when it come
  
 ### State Input Stream Query Runtime (Pattern & Sequences)
 
+![State Input Stream Query (Pattern & Sequence)](../images/architecture/siddhi-query-state.png "State Input Stream Query (Pattern & Sequence)")
 
 
 ## Siddhi Event Formats
