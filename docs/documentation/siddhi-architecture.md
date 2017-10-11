@@ -160,7 +160,7 @@ Following section explains the internal of each query type.
 
 ### Single Input Stream Query Runtime (Filter & Windows)
 
-![Single Input Query](../images/architecture/siddhi-query-single.png "Single Input Query (Filter & Window)")
+![Single Input Stream Query](../images/architecture/siddhi-query-single.png "Single Input Stream Query (Filter & Window)")
  
 Single input stream query runtime is generated for filter and window queries, they consumes events from a Stream Junction 
 and convert the events according to the expected output stream format at the ProcessStreamReceiver and by dropping 
@@ -209,7 +209,7 @@ Timer Events: Are events informing query about an update of the execution time. 
  
 Reset Events: Events that resets states in side Siddhi queries.
  
- In Siddhi, when an event comes into a WindowProcessor, 
+In Siddhi, when an event comes into a WindowProcessor, 
 it will create an appropriate expired event corresponding to the incoming current event with the expiring timestamp and store that 
 event in the window. The WindowProcessor will also forward the current event to the next Processor for further processing. 
 WindowProcessor using a scheduler or otherwise decides when to emit the events it has in memory and during that time it emits 
@@ -221,18 +221,40 @@ This is vital in Siddhi because Siddhi relies on these events to calculate the A
 In QuerySelector, the arrived current events increase the aggregation values, expired events decrease the values, and 
 reset events reset the aggregation calculation.
 
-For example if we take the time window, when a current event arrives it creates the corresponding expired event, adds that to 
+For example if we take the sliding time window, when a current event arrives it creates the corresponding expired event, adds that to 
 the window, add an entry to the Scheduler to notify when the event need to be expired by sending a timer event at that time, and 
 finally send the current event to the next processor for processing.  
 When the window get an indication the the expected expiry time has come for the oldest event in the window via a 
 a timer event from the scheduler or other means it removes the expired event from the window and pass that to the next processor. 
 
+![Siddhi Time Window](../images/architecture/siddhi-time-window.png "Siddhi Time Window")
 
 ### Join Input Stream Query Runtime (Join)
  
-
-
+![Join Input Stream Query](../images/architecture/siddhi-query-join.png "Join Input Stream Query")
  
+Join input stream query runtime is generated for join queries. This can consume events from two Stream Junction as perform join depicted above, 
+or consume from the one Stream Junction and do join against the same stream or it can also consume from one Stream Junction can join against with 
+a table, window or incremental aggregation. When join is performed with table, window or incremental aggregation
+the WindowProcessor will be replaced with the table, window or incremental aggregation and on that side no  
+basic processors will be used. 
+
+The joining operation will be triggered by the events arriving from the Stream Junction.
+Here when an event from one stream reaches the pre JoinProcessor, it is matched against all the available events of the other stream's WindowProcessor. 
+When a match is found, those matched events are then sent to the QuerySelector as the current events; at the same time, 
+the original event will be added to the WindowProcessor and it will remain there until it expires. Similarly, when an 
+event expires from its WindowProcessor, it is matched against all the available events of the other stream's Window Processor; 
+when a match is found, those matched events are sent to the QuerySelector as expired events.
+
+Note: Despite of the optimizations, a join query is quite expensive when it comes to performance, and this is because
+ the WindowProcessor will be locked during the matching process to avoid race conditions and to achieve accuracy in 
+ joining process; therefore, users should avoid matching huge windows in high volume streams. Based on the scenario, 
+ using appropriate window sizes (by time or length) will help to achieve maximum performance.
+ 
+### State Input Stream Query Runtime (Pattern & Sequences)
+
+
+
 ## Siddhi Event Formats
 
 Siddhi has three event formats. 
