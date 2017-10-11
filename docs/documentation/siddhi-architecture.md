@@ -150,20 +150,86 @@ Flowing are the components get involve in handling the events.
     This can be used to get events generated from Queries, this notifies the event occurrence `timestamp`, and classifies 
     the events into `currentEvents`, and `expiredEvents`. 
     
+
 ## Siddhi Query Execution 
 
-Siddhi queries can be categorised in to three main types such as single input queries which comprises query types filter and windows,
- two input queries comprising joins, and multi input queries comprising pattern and sequences. 
+Siddhi queries can be categorised in to three main types such as single input stream queries which comprises query types filter and windows,
+ join input stream queries comprising joins, and state input stream queries comprising pattern and sequences. 
 
 Following section explains the internal of each query type. 
 
-### Single Input Query Runtime (Filter & Windows)
+### Single Input Stream Query Runtime (Filter & Windows)
 
 ![Single Input Query](../images/architecture/siddhi-query-single.png "Single Input Query (Filter & Window)")
  
-Single input query runtime is generated for filter and window queries, they consumes events from a Stream Junction 
-and convert the events according to the expected output stream format at the ProcessStreamReceiver dropping all the unrelated 
-incoming stream attributes. 
+Single input stream query runtime is generated for filter and window queries, they consumes events from a Stream Junction 
+and convert the events according to the expected output stream format at the ProcessStreamReceiver and by dropping 
+all the unrelated incoming stream attributes. Query runtime can also consume events from a Window.
+
+Then the converted events are passed through few Processors such as Filter, StreamProcessor, StreamFunctionProcessor, 
+WindowProcessor and QuerySelector. Here StreamProcessor, StreamFunctionProcessor, and WindowProcessor can be extended with 
+various stream processing capabilities. The chain of processors are always ended with a QuerySelector and the chain can 
+only have at most one WindowProcessor. When query runtime consumes events from a Window its chain of processors cannot 
+contain a WindowProcessor.
+
+When it comes to the Filter processor, its implemented with an Expression that returns boolean value. Expressions have a tree structure, and 
+they are processed with the Depth First Search Algorithm. To achieve high performance, currently, Siddhi depends on the user
+to formulate the lease success case in the leftmost side of the condition, thereby increasing the chances of early false detection.
+
+The condition expression `price >= 100 and ( Symbol == 'IBM' or Symbol == 'MSFT' )` will be represented as below.
+
+![Siddhi Expression](../images/architecture/siddhi-expressions.png "Single Input Query (Filter & Window)")
+
+These Expressions also supports executing user defined functions (UDFs), and they can be implemented by extending the FunctionExecutor class. 
+
+Events after getting processed by each processor they will reach to the QuerySelector for transformation. At the QuerySelector
+Events are transformed based on the `select` clause of the query. If there is a `Group By` defined then the GroupByKeyGenerator identifies the 
+group by key and then each AttributeProcessor is executed based on the group by key. AttributeProcessors can contain any Expression including 
+constant values, variables and user defined functions, at the same time they can also contain AttributeAggregators for 
+processing aggregation operations such as `sum`, `count`, etc. Here for each group by key a AttributeAggregator will be generated to 
+keep track of the aggregation state and when it becomes obsolete it will be destroyed. Through this operation the event 
+will be transformed to the expected output format. 
+ 
+After the event got transformed to the output format it will evaluated against the HavingConditionExecutor if a `having` clause is 
+provided, and only the succeeding events will be pushed to OutputRateLimiter.   
+
+At OutputRateLimiter the events output is controlled before sending the events to the stream junction or to the query callback. 
+When `output` clause is not defined PassThroughOutputRateLimiter is used by passing all the events without any rate limiting. 
+
+### Join Input Stream Query Runtime (Join)
+ 
+WIP
+
+ 
+## Siddhi Event Formats
+
+Siddhi has three event formats. 
+
+- Event 
+
+    This is the format exposed to end users when they send events via InputHandler and Consume events via StreamCallback or QueryCallback.
+    This comprises an `Object[]` containing all the values in accordance to the corresponding Streams. 
+     
+- StreamEvent (Subtype of ComplexEvent)
+
+    This is used within queries. This contains three `Object[]`s named as beforeWindowData, onAfterWindowData and outputData. Here the 
+    outputData contains the values in accordance to the output Stream of the query, and beforeWindowData contains values that are only used 
+    in Processors that are executed before the WindowProcessor, the onAfterWindowData will be contains values that are only used by WindowProcessor
+    and other processors after that and that are not sent out as output. Here the content on the beforeWindowData will be cleared before the 
+    event enter into the WindowProcessor to optimize the amount to data that will be stored in-memory at windows. StreamEvents can also be chained 
+    by linking each other via the `next` property in them.  
+    
+- StateEvent (Subtype of ComplexEvent)
+
+    This is used in Joins, Patterns and Sequences to when we need to associate with multiple different type of Streams, Tables, Windows and Aggregations.
+    This has a collection StreamEvents representing different streams used in the query and outputData for containing the values that need to be outputted 
+    according to the output Stream of the query. StreamEvents can also be chained by linking each other with the `next` property in them. 
+    
+**Event Chunks**
+
+Event Chunks provide an easier way of manipulating the chain of StreamEvents and StateEvents, such that they are be easily iterated, removed 
+and letting new events to be inserted. 
+
 
 
 - Partition
