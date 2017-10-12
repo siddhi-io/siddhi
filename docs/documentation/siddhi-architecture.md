@@ -66,7 +66,7 @@ provide an isolated execution environment for all of the queries and execution l
 to the persistence store for periodic persistence, statistics manager to report performance statistics of Siddhi App Runtimes 
 and for loading Siddhi extensions. 
 
-## Siddhi App Creating
+## Siddhi App Creation
  
 Execution logic in Siddhi is composed as Siddhi Application and this is passes as a string to 
 SiddhiManager to create the SiddhiAppRuntime for execution. 
