@@ -1,8 +1,8 @@
 # Siddhi Architecture 
 
 WSO2 Siddhi is a software that can run as server by it own or within WSO2 Stream Processor, embalmed in to Java based 
-systems and Android applications to provide analytical operators, orchestrate data flow, calculate analytics, and detect
-patterns on event data from multiple, disparate live data sources to allow developers to build applications that sense, 
+systems and in  Android applications, and capable of providing analytical operators, orchestrate data flows, calculate analytics, and detect
+patterns on event data from multiple disparate live data sources. This allows developers to build applications that sense, 
 think, and act in real time.
 
 This section illustrate the architecture of Siddhi and take you through its key functionality; We hope that the article 
@@ -46,7 +46,7 @@ Internally Siddhi uses these object to understand what user expects Siddhi to do
 - **Siddhi Annotation** : This is a helping component that lets all extensions to be annotated such that they can be 
 pricked by Siddhi Core for processing and help you generate appropriate documentation. 
 
-### Siddhi Component Architecture 
+## Siddhi Component Architecture 
 
 The following diagram gives more detail information on major components of Siddhi and how they are related together. 
 
@@ -66,7 +66,17 @@ provide an isolated execution environment for all of the queries and execution l
 to the persistence store for periodic persistence, statistics manager to report performance statistics of Siddhi App Runtimes 
 and for loading Siddhi extensions. 
 
-### Siddhi App Execution Flow
+## Siddhi App Creating
+ 
+Execution logic in Siddhi is composed as Siddhi Application and this is passes as a string to 
+SiddhiManager to create the SiddhiAppRuntime for execution. 
+
+When Siddhi App is passed to `SiddhiManager.createSiddhiAppRuntime()` internally its processed with the 
+SiddhiCompiler. Here SiddhiApp String is converted to SiddhiApp Object model by the SiddhiQLBaseVisitorImpl class. 
+The model is then passed to the SiddhiAppParser for the SiddhiAppRuntime creation.
+
+
+## Siddhi App Execution Flow
 
 Following diagram depicts the execution flow within a Siddhi App Runtime. 
 
@@ -309,3 +319,9 @@ Siddhi has three event formats.
 
 Event Chunks provide an easier way of manipulating the chain of StreamEvents and StateEvents, such that they are be easily iterated, removed 
 and letting new events to be inserted. 
+
+## Summery 
+
+This article focuses on describing the architecture of Siddhi and rationale for the architectural decisions made, this
+also explains the key features of Siddhi.  
+This is possibly a great starting point for new developers to understand Siddhi and to start contributing towards it.
