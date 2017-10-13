@@ -1,66 +1,8 @@
-# API Docs
-
-## Source
-
-### inMemory *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sources">Source</a>)*
-
-<p style="word-wrap: break-word">In-memory source that can communicate with other in-memory sinks within the same JVM, it is assumed that the publisher and subscriber of a topic uses same event schema (stream definition).</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-@source(type="inMemory", topic="<STRING>", @map(...)))
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">topic</td>
-        <td style="vertical-align: top; word-wrap: break-word">Subscribes to sent on the given topic.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-@source(type='inMemory', @map(type='passThrough'),
-define stream BarStream (symbol string, price float, volume long)
-```
-<p style="word-wrap: break-word">In this example BarStream uses inMemory transport which passes the received event internally without using external transport.</p>
-
-## Sourcemapper
-
-### passThrough *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source-mappers">Source Mapper</a>)*
-
-<p style="word-wrap: break-word">Pass-through mapper passed events (Event[]) through without any mapping or modifications.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-@source(..., @map(type="passThrough")
-```
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-@source(type='tcp', @map(type='passThrough'),
-define stream BarStream (symbol string, price float, volume long);
-```
-<p style="word-wrap: break-word">In this example BarStream uses passThrough inputmapper which passes the received Siddhi event directly without any transformation into source.</p>
+# API Docs - v4.0.0-M100
 
 ## Sink
 
-### inMemory *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sinks">Sink</a>)*
+### inMemory *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a>*
 
 <p style="word-wrap: break-word">In-memory transport that can communicate with other in-memory transports within the same JVM, itis assumed that the publisher and subscriber of a topic uses same event schema (stream definition).</p>
 
@@ -99,7 +41,7 @@ define stream BarStream (symbol string, price float, volume long)
 
 ## Sinkmapper
 
-### passThrough *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink-mappers">Sink Mapper</a>)*
+### passThrough *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink-mapper">(Sink Mapper)</a>*
 
 <p style="word-wrap: break-word">Pass-through mapper passed events (Event[]) through without any mapping or modifications.</p>
 
@@ -116,15 +58,34 @@ define stream BarStream (symbol string, price float, volume long);
 ```
 <p style="word-wrap: break-word">In the following example BarStream uses passThrough outputmapper which emit Siddhi event directly without any transformation into sink.</p>
 
-## Core
+## Sourcemapper
 
-### time *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
+### passThrough *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source-mapper">(Source Mapper)</a>*
 
-<p style="word-wrap: break-word">A sliding time window that holds events that arrived during the last windowTime period at a given time, and gets updated for each event arrival and expiry.</p>
+<p style="word-wrap: break-word">Pass-through mapper passed events (Event[]) through without any mapping or modifications.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-time(<INT|LONG|TIME> window.time)
+@source(..., @map(type="passThrough")
+```
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+@source(type='tcp', @map(type='passThrough'),
+define stream BarStream (symbol string, price float, volume long);
+```
+<p style="word-wrap: break-word">In this example BarStream uses passThrough inputmapper which passes the received Siddhi event directly without any transformation into source.</p>
+
+## Source
+
+### inMemory *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*
+
+<p style="word-wrap: break-word">In-memory source that can communicate with other in-memory sinks within the same JVM, it is assumed that the publisher and subscriber of a topic uses same event schema (stream definition).</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+@source(type="inMemory", topic="<STRING>", @map(...)))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -138,10 +99,10 @@ time(<INT|LONG|TIME> window.time)
         <th>Dynamic</th>
     </tr>
     <tr>
-        <td style="vertical-align: top">window.time</td>
-        <td style="vertical-align: top; word-wrap: break-word">The sliding time period for which the window should hold events.</td>
+        <td style="vertical-align: top">topic</td>
+        <td style="vertical-align: top; word-wrap: break-word">Subscribes to sent on the given topic.</td>
         <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
         <td style="vertical-align: top">No</td>
     </tr>
@@ -150,24 +111,20 @@ time(<INT|LONG|TIME> window.time)
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-define window cseEventWindow (symbol string, price float, volume int) time(20) output all events;
-@info(name = 'query0')
-from cseEventStream
-insert into cseEventWindow;
-@info(name = 'query1')
-from cseEventWindow
-select symbol, sum(price) as price
-insert all events into outputStream ;
+@source(type='inMemory', @map(type='passThrough'),
+define stream BarStream (symbol string, price float, volume long)
 ```
-<p style="word-wrap: break-word">This will processing events that arrived within the last 20 milliseconds.</p>
+<p style="word-wrap: break-word">In this example BarStream uses inMemory transport which passes the received event internally without using external transport.</p>
 
-### timeBatch *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
+## Core
 
-<p style="word-wrap: break-word">A batch (tumbling) time window that holds events that arrive during window.time periods, and gets updated for each window.time.</p>
+### sort *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
+
+<p style="word-wrap: break-word">This window holds a batch of events that equal the number specified as the windowLength and sorts them in the given order.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-timeBatch(<INT|LONG|TIME> window.time, <INT> start.time)
+sort(<INT> window.length, <STRING> attribute, <STRING> order)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -181,38 +138,47 @@ timeBatch(<INT|LONG|TIME> window.time, <INT> start.time)
         <th>Dynamic</th>
     </tr>
     <tr>
-        <td style="vertical-align: top">window.time</td>
-        <td style="vertical-align: top; word-wrap: break-word">The batch time period for which the window should hold events.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">start.time</td>
-        <td style="vertical-align: top; word-wrap: break-word">This specifies an offset in milliseconds in order to start the window at a time different to the standard time.</td>
+        <td style="vertical-align: top">window.length</td>
+        <td style="vertical-align: top; word-wrap: break-word">The size of the window length.</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT</td>
         <td style="vertical-align: top">No</td>
         <td style="vertical-align: top">No</td>
     </tr>
+    <tr>
+        <td style="vertical-align: top">attribute</td>
+        <td style="vertical-align: top; word-wrap: break-word">The attribute that should be checked for the order.</td>
+        <td style="vertical-align: top">The concatenation of all the attributes of the event is considered.</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">order</td>
+        <td style="vertical-align: top; word-wrap: break-word">The order define as "asc" or "desc".</td>
+        <td style="vertical-align: top">asc</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
 </table>
 
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-define window cseEventWindow (symbol string, price float, volume int) timeBatch(20) output all events;
+define stream cseEventStream (symbol string, price float, volume long);
+define window cseEventWindow (symbol string, price float, volume long) sort(2,volume, 'asc');
 @info(name = 'query0')
 from cseEventStream
 insert into cseEventWindow;
 @info(name = 'query1')
 from cseEventWindow
-select symbol, sum(price) as price
+select volume
 insert all events into outputStream ;
 ```
-<p style="word-wrap: break-word">This will processing events arrived every 20 milliseconds as a batch and out put all events.</p>
+<p style="word-wrap: break-word">sort(5, price, 'asc') keeps the events sorted by price in the ascending order. Therefore, at any given time, the window contains the 5 lowest prices.</p>
 
-### lossyFrequent *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
+### lossyFrequent *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
 <p style="word-wrap: break-word">This window identifies and returns all the events of which the current frequency exceeds the value specified for the supportThreshold parameter.</p>
 
@@ -286,7 +252,58 @@ insert all events into PotentialFraud;
 ```
 <p style="word-wrap: break-word">lossyFrequent(0.3, 0.05, cardNo) returns all the events of which the cardNo attributes frequency exceeds 0.3, with an error bound of 0.05.</p>
 
-### length *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
+### timeBatch *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
+
+<p style="word-wrap: break-word">A batch (tumbling) time window that holds events that arrive during window.time periods, and gets updated for each window.time.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+timeBatch(<INT|LONG|TIME> window.time, <INT> start.time)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">The batch time period for which the window should hold events.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">start.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">This specifies an offset in milliseconds in order to start the window at a time different to the standard time.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+define window cseEventWindow (symbol string, price float, volume int) timeBatch(20) output all events;
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select symbol, sum(price) as price
+insert all events into outputStream ;
+```
+<p style="word-wrap: break-word">This will processing events arrived every 20 milliseconds as a batch and out put all events.</p>
+
+### length *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
 <p style="word-wrap: break-word">A sliding length window that holds the last windowLength events at a given time, and gets updated for each arrival and expiry.</p>
 
@@ -329,7 +346,106 @@ insert all events into outputStream ;
 ```
 <p style="word-wrap: break-word">This will processing 10 events and out put all events.</p>
 
-### timeLength *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
+### time *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
+
+<p style="word-wrap: break-word">A sliding time window that holds events that arrived during the last windowTime period at a given time, and gets updated for each event arrival and expiry.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+time(<INT|LONG|TIME> window.time)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">The sliding time period for which the window should hold events.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+define window cseEventWindow (symbol string, price float, volume int) time(20) output all events;
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select symbol, sum(price) as price
+insert all events into outputStream ;
+```
+<p style="word-wrap: break-word">This will processing events that arrived within the last 20 milliseconds.</p>
+
+### frequent *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
+
+<p style="word-wrap: break-word">This window returns the latest events with the most frequently occurred value for a given attribute(s). Frequency calculation for this window processor is based on Misra-Gries counting algorithm.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+frequent(<INT> event.count, <STRING> attribute)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">event.count</td>
+        <td style="vertical-align: top; word-wrap: break-word">The number of most frequent events to be emitted to the stream.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">attribute</td>
+        <td style="vertical-align: top; word-wrap: break-word">The attributes to group the events. If no attributes are given, the concatenation of all the attributes of the event is considered.</td>
+        <td style="vertical-align: top">The concatenation of all the attributes of the event is considered.</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+@info(name = 'query1')
+from purchase[price >= 30]#window.frequent(2)
+select cardNo, price
+insert all events into PotentialFraud;
+```
+<p style="word-wrap: break-word">This will returns the 2 most frequent events.</p>
+
+<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
+```
+@info(name = 'query1')
+from purchase[price >= 30]#window.frequent(2, cardNo)
+select cardNo, price
+insert all events into PotentialFraud;
+```
+<p style="word-wrap: break-word">This will returns the 2 latest events with the most frequently appeared card numbers.</p>
+
+### timeLength *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
 <p style="word-wrap: break-word">A sliding time window that, at a given time holds the last window.length events that arrived during last window.time period, and gets updated for every event arrival and expiry.</p>
 
@@ -380,7 +496,136 @@ insert all events into outputStream;
 ```
 <p style="word-wrap: break-word">window.timeLength(2 sec, 10) holds the last 10 events that arrived during last 2 seconds and gets updated for every event arrival and expiry.</p>
 
-### externalTimeBatch *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
+### cron *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
+
+<p style="word-wrap: break-word">This window returns events processed periodically as the output in time-repeating patterns, triggered based on time passing.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+cron(<STRING> cron.expression)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">cron.expression</td>
+        <td style="vertical-align: top; word-wrap: break-word">The cron expression that represents a time schedule.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+define window cseEventWindow (symbol string, price float, volume int)cron('*/5 * * * * ?');
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow 
+select symbol,price,volume
+insert into outputStream ;
+```
+<p style="word-wrap: break-word">This will processed events as the output every 5 seconds.</p>
+
+### externalTime *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
+
+<p style="word-wrap: break-word">A sliding time window based on external time. It holds events that arrived during the last windowTime period from the external timestamp, and gets updated on every monotonically increasing timestamp.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+externalTime(<INT|LONG|TIME> window.time)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">The sliding time period for which the window should hold events.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+define window cseEventWindow (symbol string, price float, volume int) externalTime(eventTime, 20 sec) output expired events;
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select symbol, sum(price) as price
+insert expired events into outputStream ;
+```
+<p style="word-wrap: break-word">processing events arrived within the last 20 seconds from the eventTime and output expired events.</p>
+
+### lengthBatch *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
+
+<p style="word-wrap: break-word">A batch (tumbling) length window that holds a number of events specified as the windowLength. The window is updated each time a batch of events that equals the number specified as the windowLength arrives.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+lengthBatch(<INT> window.length)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">window.length</td>
+        <td style="vertical-align: top; word-wrap: break-word">The number of events the window should tumble.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+define window cseEventWindow (symbol string, price float, volume int) lengthBatch(10) output all events;
+@info(name = 'query0')
+from cseEventStream
+insert into cseEventWindow;
+@info(name = 'query1')
+from cseEventWindow
+select symbol, sum(price) as price
+insert all events into outputStream ;
+```
+<p style="word-wrap: break-word">This will processing 10 events as a batch and out put all events.</p>
+
+### externalTimeBatch *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
 <p style="word-wrap: break-word">A batch (tumbling) time window based on external time, that holds events arrived during windowTime periods, and gets updated for every windowTime.</p>
 
@@ -459,618 +704,7 @@ define window cseEventWindow (symbol string, price float, volume int) externalTi
 ```
 <p style="word-wrap: break-word">This will processing events that arrive every 2 seconds from the eventTim. Considers the first event's eventTimestamp value as startTime. Waits 100 milliseconds for the arrival of a new event before flushing current batch.</p>
 
-### externalTime *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
-
-<p style="word-wrap: break-word">A sliding time window based on external time. It holds events that arrived during the last windowTime period from the external timestamp, and gets updated on every monotonically increasing timestamp.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-externalTime(<INT|LONG|TIME> window.time)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">window.time</td>
-        <td style="vertical-align: top; word-wrap: break-word">The sliding time period for which the window should hold events.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-define window cseEventWindow (symbol string, price float, volume int) externalTime(eventTime, 20 sec) output expired events;
-@info(name = 'query0')
-from cseEventStream
-insert into cseEventWindow;
-@info(name = 'query1')
-from cseEventWindow
-select symbol, sum(price) as price
-insert expired events into outputStream ;
-```
-<p style="word-wrap: break-word">processing events arrived within the last 20 seconds from the eventTime and output expired events.</p>
-
-### lengthBatch *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
-
-<p style="word-wrap: break-word">A batch (tumbling) length window that holds a number of events specified as the windowLength. The window is updated each time a batch of events that equals the number specified as the windowLength arrives.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-lengthBatch(<INT> window.length)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">window.length</td>
-        <td style="vertical-align: top; word-wrap: break-word">The number of events the window should tumble.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-define window cseEventWindow (symbol string, price float, volume int) lengthBatch(10) output all events;
-@info(name = 'query0')
-from cseEventStream
-insert into cseEventWindow;
-@info(name = 'query1')
-from cseEventWindow
-select symbol, sum(price) as price
-insert all events into outputStream ;
-```
-<p style="word-wrap: break-word">This will processing 10 events as a batch and out put all events.</p>
-
-### frequent *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
-
-<p style="word-wrap: break-word">This window returns the latest events with the most frequently occurred value for a given attribute(s). Frequency calculation for this window processor is based on Misra-Gries counting algorithm.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-frequent(<INT> event.count, <STRING> attribute)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">event.count</td>
-        <td style="vertical-align: top; word-wrap: break-word">The number of most frequent events to be emitted to the stream.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">attribute</td>
-        <td style="vertical-align: top; word-wrap: break-word">The attributes to group the events. If no attributes are given, the concatenation of all the attributes of the event is considered.</td>
-        <td style="vertical-align: top">The concatenation of all the attributes of the event is considered.</td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-@info(name = 'query1')
-from purchase[price >= 30]#window.frequent(2)
-select cardNo, price
-insert all events into PotentialFraud;
-```
-<p style="word-wrap: break-word">This will returns the 2 most frequent events.</p>
-
-<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
-```
-@info(name = 'query1')
-from purchase[price >= 30]#window.frequent(2, cardNo)
-select cardNo, price
-insert all events into PotentialFraud;
-```
-<p style="word-wrap: break-word">This will returns the 2 latest events with the most frequently appeared card numbers.</p>
-
-### cron *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
-
-<p style="word-wrap: break-word">This window returns events processed periodically as the output in time-repeating patterns, triggered based on time passing.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-cron(<STRING> cron.expression)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">cron.expression</td>
-        <td style="vertical-align: top; word-wrap: break-word">The cron expression that represents a time schedule.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-define window cseEventWindow (symbol string, price float, volume int)cron('*/5 * * * * ?');
-@info(name = 'query0')
-from cseEventStream
-insert into cseEventWindow;
-@info(name = 'query1')
-from cseEventWindow 
-select symbol,price,volume
-insert into outputStream ;
-```
-<p style="word-wrap: break-word">This will processed events as the output every 5 seconds.</p>
-
-### sort *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#windows">Window</a>)*
-
-<p style="word-wrap: break-word">This window holds a batch of events that equal the number specified as the windowLength and sorts them in the given order.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-sort(<INT> window.length, <STRING> attribute, <STRING> order)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">window.length</td>
-        <td style="vertical-align: top; word-wrap: break-word">The size of the window length.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">attribute</td>
-        <td style="vertical-align: top; word-wrap: break-word">The attribute that should be checked for the order.</td>
-        <td style="vertical-align: top">The concatenation of all the attributes of the event is considered.</td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">order</td>
-        <td style="vertical-align: top; word-wrap: break-word">The order define as "asc" or "desc".</td>
-        <td style="vertical-align: top">asc</td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-define stream cseEventStream (symbol string, price float, volume long);
-define window cseEventWindow (symbol string, price float, volume long) sort(2,volume, 'asc');
-@info(name = 'query0')
-from cseEventStream
-insert into cseEventWindow;
-@info(name = 'query1')
-from cseEventWindow
-select volume
-insert all events into outputStream ;
-```
-<p style="word-wrap: break-word">sort(5, price, 'asc') keeps the events sorted by price in the ascending order. Therefore, at any given time, the window contains the 5 lowest prices.</p>
-
-### instanceOfFloat *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
-
-<p style="word-wrap: break-word">Checks whether the parameter is an instance of Float or not.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<BOOL> instanceOfFloat(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> arg)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">arg</td>
-        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from fooStream
-select instanceOfFloat(value) as state
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will return true if the value field format is float ex : 56.45f.</p>
-
-<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
-```
-from fooStream
-select instanceOfFloat(switchState) as state
-insert into barStream;
-```
-<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a float.</p>
-
-### eventTimestamp *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
-
-<p style="word-wrap: break-word">Returns the timestamp of the processed event.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<LONG> eventTimestamp()
-```
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from fooStream
-select symbol as name, eventTimestamp() as eventTimestamp 
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will extract current events timestamp.</p>
-
-### coalesce *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
-
-<p style="word-wrap: break-word">Returns the value of the first input parameter that is not null, and all input parameters have to be on the same type.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> coalesce(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> args)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">args</td>
-        <td style="vertical-align: top; word-wrap: break-word">This function accepts one or more parameters. They can belong to any one of the available types. All the specified parameters should be of the same type.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from fooStream
-select coalesce('123', null, '789') as value
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will returns first null value 123.</p>
-
-<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
-```
-from fooStream
-select coalesce(null, 76, 567) as value
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will returns first null value 76.</p>
-
-<span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span>
-```
-from fooStream
-select coalesce(null, null, null) as value
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will returns null as there are no notnull values.</p>
-
-### instanceOfInteger *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
-
-<p style="word-wrap: break-word">Checks whether the parameter is an instance of Integer or not.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<BOOL> instanceOfInteger(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> arg)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">arg</td>
-        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from fooStream
-select instanceOfInteger(value) as state
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will return true if the value field format is integer.</p>
-
-<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
-```
-from fooStream
-select instanceOfInteger(switchState) as state
-insert into barStream;
-```
-<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a long.</p>
-
-### convert *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
-
-<p style="word-wrap: break-word">Converts the first input parameter according to the convertedTo parameter.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<INT|LONG|DOUBLE|FLOAT|STRING|BOOL> convert(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL> to.be.converted, <STRING> converted.to)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">to.be.converted</td>
-        <td style="vertical-align: top; word-wrap: break-word">This specifies the value to be converted.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">converted.to</td>
-        <td style="vertical-align: top; word-wrap: break-word">A string constant parameter to which type the attribute need to be converted  using one of the following strings values: 'int', 'long', 'float', 'double', 'string', 'bool'.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from fooStream
-select convert(temp, 'double') as temp
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will convert fooStream temp value into 'double'.</p>
-
-<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
-```
-from fooStream
-select convert(temp, 'int') as temp
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will convert fooStream temp value into 'int' (value = "convert(45.9, 'int') returns 46").</p>
-
-### UUID *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
-
-<p style="word-wrap: break-word">Generates a UUID (Universally Unique Identifier).</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<STRING> UUID()
-```
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from TempStream
-select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID
-insert into RoomTempStream;
-```
-<p style="word-wrap: break-word">This will converts a room number to string, introducing a message ID to each event asUUID() returns a34eec40-32c2-44fe-8075-7f4fde2e2dd8<br><br>from TempStream<br>select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID<br>insert into RoomTempStream;</p>
-
-### instanceOfDouble *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
-
-<p style="word-wrap: break-word">Checks whether the parameter is an instance of Double or not.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<BOOL> instanceOfDouble(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> arg)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">arg</td>
-        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from fooStream
-select instanceOfDouble(value) as state
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will return true if the value field format is double ex : 56.45.</p>
-
-<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
-```
-from fooStream
-select instanceOfDouble(switchState) as state
-insert into barStream;
-```
-<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is not an instance of the double.</p>
-
-### cast *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
-
-<p style="word-wrap: break-word">Converts the first parameter according to the cast.to parameter. Incompatible arguments cause Class Cast exceptions if further processed. This function is used with map extension that returns attributes of the object type. You can use this function to cast the object to an accurate and concrete type.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> cast(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> to.be.caster, <STRING> cast.to)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">to.be.caster</td>
-        <td style="vertical-align: top; word-wrap: break-word">This specifies the attribute to be casted.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">cast.to</td>
-        <td style="vertical-align: top; word-wrap: break-word">A string constant parameter expressing the cast to type using one of the following strings values: int, long, float, double, string, bool.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from fooStream
-select symbol as name, cast(temp, 'double') as temp
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will cast the fooStream temp field value into 'double' format.</p>
-
-### minimum *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
-
-<p style="word-wrap: break-word">Returns the minimum value of the input parameters.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<INT|LONG|DOUBLE|FLOAT> minimum(<INT|LONG|DOUBLE|FLOAT> arg)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">arg</td>
-        <td style="vertical-align: top; word-wrap: break-word">This function accepts one or more parameters. They can belong to any one of the available types. All the specified parameters should be of the same type.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-@info(name = 'query1') from inputStream
-select maximum(price1, price2, price3) as max
-insert into outputStream;
-```
-<p style="word-wrap: break-word">This will returns the minimum value of the input parameters price1, price2, price3.</p>
-
-### ifThenElse *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
+### ifThenElse *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
 
 <p style="word-wrap: break-word">Evaluates the 'condition' parameter and returns value of the 'if.expression' parameter if the condition is true, or returns value of the 'else.expression' parameter if the condition is false. Here both 'if.expression' and 'else.expression' should be of the same type.</p>
 
@@ -1143,13 +777,31 @@ insert into outputStream;
 ```
 <p style="word-wrap: break-word">This will returns  passwordState as true if password = admin.</p>
 
-### default *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
+### UUID *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
 
-<p style="word-wrap: break-word">Checks if the 'attribute' parameter is null and if so returns the value of the 'default' parameter</p>
+<p style="word-wrap: break-word">Generates a UUID (Universally Unique Identifier).</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> default(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> attribute, <INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> default)
+<STRING> UUID()
+```
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from TempStream
+select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID
+insert into RoomTempStream;
+```
+<p style="word-wrap: break-word">This will converts a room number to string, introducing a message ID to each event asUUID() returns a34eec40-32c2-44fe-8075-7f4fde2e2dd8<br><br>from TempStream<br>select convert(roomNo, 'string') as roomNo, temp, UUID() as messageID<br>insert into RoomTempStream;</p>
+
+### minimum *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
+
+<p style="word-wrap: break-word">Returns the minimum value of the input parameters.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<INT|LONG|DOUBLE|FLOAT> minimum(<INT|LONG|DOUBLE|FLOAT> arg)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1163,16 +815,92 @@ insert into outputStream;
         <th>Dynamic</th>
     </tr>
     <tr>
-        <td style="vertical-align: top">attribute</td>
-        <td style="vertical-align: top; word-wrap: break-word">The attribute that could be null.</td>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">This function accepts one or more parameters. They can belong to any one of the available types. All the specified parameters should be of the same type.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+@info(name = 'query1') from inputStream
+select maximum(price1, price2, price3) as max
+insert into outputStream;
+```
+<p style="word-wrap: break-word">This will returns the minimum value of the input parameters price1, price2, price3.</p>
+
+### cast *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
+
+<p style="word-wrap: break-word">Converts the first parameter according to the cast.to parameter. Incompatible arguments cause Class Cast exceptions if further processed. This function is used with map extension that returns attributes of the object type. You can use this function to cast the object to an accurate and concrete type.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> cast(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> to.be.caster, <STRING> cast.to)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">to.be.caster</td>
+        <td style="vertical-align: top; word-wrap: break-word">This specifies the attribute to be casted.</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">default</td>
-        <td style="vertical-align: top; word-wrap: break-word">The default value that will be used when 'attribute' parameter is null</td>
+        <td style="vertical-align: top">cast.to</td>
+        <td style="vertical-align: top; word-wrap: break-word">A string constant parameter expressing the cast to type using one of the following strings values: int, long, float, double, string, bool.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from fooStream
+select symbol as name, cast(temp, 'double') as temp
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will cast the fooStream temp field value into 'double' format.</p>
+
+### instanceOfDouble *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
+
+<p style="word-wrap: break-word">Checks whether the parameter is an instance of Double or not.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<BOOL> instanceOfDouble(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> arg)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
         <td style="vertical-align: top">No</td>
@@ -1183,13 +911,121 @@ insert into outputStream;
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-from TempStream
-select default(temp, 0.0) as temp, roomNum
-insert into StandardTempStream;
+from fooStream
+select instanceOfDouble(value) as state
+insert into barStream;
 ```
-<p style="word-wrap: break-word">This will replace TempStream's temp attribute with default value if the temp is null.</p>
+<p style="word-wrap: break-word">This will return true if the value field format is double ex : 56.45.</p>
 
-### instanceOfLong *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
+<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
+```
+from fooStream
+select instanceOfDouble(switchState) as state
+insert into barStream;
+```
+<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is not an instance of the double.</p>
+
+### instanceOfFloat *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
+
+<p style="word-wrap: break-word">Checks whether the parameter is an instance of Float or not.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<BOOL> instanceOfFloat(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> arg)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from fooStream
+select instanceOfFloat(value) as state
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will return true if the value field format is float ex : 56.45f.</p>
+
+<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
+```
+from fooStream
+select instanceOfFloat(switchState) as state
+insert into barStream;
+```
+<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a float.</p>
+
+### convert *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
+
+<p style="word-wrap: break-word">Converts the first input parameter according to the convertedTo parameter.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<INT|LONG|DOUBLE|FLOAT|STRING|BOOL> convert(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL> to.be.converted, <STRING> converted.to)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">to.be.converted</td>
+        <td style="vertical-align: top; word-wrap: break-word">This specifies the value to be converted.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">converted.to</td>
+        <td style="vertical-align: top; word-wrap: break-word">A string constant parameter to which type the attribute need to be converted  using one of the following strings values: 'int', 'long', 'float', 'double', 'string', 'bool'.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from fooStream
+select convert(temp, 'double') as temp
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will convert fooStream temp value into 'double'.</p>
+
+<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
+```
+from fooStream
+select convert(temp, 'int') as temp
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will convert fooStream temp value into 'int' (value = "convert(45.9, 'int') returns 46").</p>
+
+### instanceOfLong *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
 
 <p style="word-wrap: break-word">Checks whether the parameter is an instance of Long or not.</p>
 
@@ -1235,7 +1071,155 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a long.</p>
 
-### instanceOfBoolean *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
+### instanceOfInteger *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
+
+<p style="word-wrap: break-word">Checks whether the parameter is an instance of Integer or not.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<BOOL> instanceOfInteger(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> arg)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The parameter to be checked.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from fooStream
+select instanceOfInteger(value) as state
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will return true if the value field format is integer.</p>
+
+<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
+```
+from fooStream
+select instanceOfInteger(switchState) as state
+insert into barStream;
+```
+<p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a long.</p>
+
+### default *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
+
+<p style="word-wrap: break-word">Checks if the 'attribute' parameter is null and if so returns the value of the 'default' parameter</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> default(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> attribute, <INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> default)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">attribute</td>
+        <td style="vertical-align: top; word-wrap: break-word">The attribute that could be null.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">default</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default value that will be used when 'attribute' parameter is null</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from TempStream
+select default(temp, 0.0) as temp, roomNum
+insert into StandardTempStream;
+```
+<p style="word-wrap: break-word">This will replace TempStream's temp attribute with default value if the temp is null.</p>
+
+### maximum *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
+
+<p style="word-wrap: break-word">Returns the maximum value of the input parameters.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<INT|LONG|DOUBLE|FLOAT> maximum(<INT|LONG|DOUBLE|FLOAT> arg)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">This function accepts one or more parameters. They can belong to any one of the available types. All the specified parameters should be of the same type.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+@info(name = 'query1') from inputStream
+select maximum(price1, price2, price3) as max
+insert into outputStream;
+```
+<p style="word-wrap: break-word">This will returns the maximum value of the input parameters price1, price2, price3.</p>
+
+### eventTimestamp *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
+
+<p style="word-wrap: break-word">Returns the timestamp of the processed event.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<LONG> eventTimestamp()
+```
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from fooStream
+select symbol as name, eventTimestamp() as eventTimestamp 
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will extract current events timestamp.</p>
+
+### instanceOfBoolean *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
 
 <p style="word-wrap: break-word">Checks whether the parameter is an instance of Boolean or not.</p>
 
@@ -1281,7 +1265,61 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">if the value = 32 then this will returns false as the value is not an instance of the boolean.</p>
 
-### currentTimeMillis *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
+### coalesce *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
+
+<p style="word-wrap: break-word">Returns the value of the first input parameter that is not null, and all input parameters have to be on the same type.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> coalesce(<INT|LONG|DOUBLE|FLOAT|STRING|BOOL|OBJECT> args)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">args</td>
+        <td style="vertical-align: top; word-wrap: break-word">This function accepts one or more parameters. They can belong to any one of the available types. All the specified parameters should be of the same type.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT<br>STRING<br>BOOL<br>OBJECT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from fooStream
+select coalesce('123', null, '789') as value
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will returns first null value 123.</p>
+
+<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
+```
+from fooStream
+select coalesce(null, 76, 567) as value
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will returns first null value 76.</p>
+
+<span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span>
+```
+from fooStream
+select coalesce(null, null, null) as value
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will returns null as there are no notnull values.</p>
+
+### currentTimeMillis *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
 
 <p style="word-wrap: break-word">Returns the current timestamp of siddhi application in milliseconds.</p>
 
@@ -1299,45 +1337,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">This will extract current siddhi application timestamp.</p>
 
-### maximum *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
-
-<p style="word-wrap: break-word">Returns the maximum value of the input parameters.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<INT|LONG|DOUBLE|FLOAT> maximum(<INT|LONG|DOUBLE|FLOAT> arg)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">arg</td>
-        <td style="vertical-align: top; word-wrap: break-word">This function accepts one or more parameters. They can belong to any one of the available types. All the specified parameters should be of the same type.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-@info(name = 'query1') from inputStream
-select maximum(price1, price2, price3) as max
-insert into outputStream;
-```
-<p style="word-wrap: break-word">This will returns the maximum value of the input parameters price1, price2, price3.</p>
-
-### instanceOfString *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#functions">Function</a>)*
+### instanceOfString *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#function">(Function)</a>*
 
 <p style="word-wrap: break-word">Checks whether the parameter is an instance of String or not.</p>
 
@@ -1383,7 +1383,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">if the switchState = true then this will returns false as the value is an instance of the boolean not a string.</p>
 
-### log *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#stream-processors">Stream Processor</a>)*
+### log *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#stream-processor">(Stream Processor)</a>*
 
 <p style="word-wrap: break-word">The logger stream processor logs the message with or without event for the given log priority.</p>
 
@@ -1469,45 +1469,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">This will log message and fooStream:events.</p>
 
-### stdDev *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)*
-
-<p style="word-wrap: break-word">Returns the calculated standard deviation for all the events.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<DOUBLE> stdDev(<INT|LONG|DOUBLE|FLOAT> arg)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">arg</td>
-        <td style="vertical-align: top; word-wrap: break-word">The value that should be used to calculate the standard deviation.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from inputStream
-select stddev(temp) as stdTemp
-insert into outputStream;
-```
-<p style="word-wrap: break-word">stddev(temp) returns the calculated standard deviation of temp for all the events based on their arrival and expiry.</p>
-
-### max *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)*
+### max *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-function">(Aggregate Function)</a>*
 
 <p style="word-wrap: break-word">Returns the maximum value for all the events.</p>
 
@@ -1545,45 +1507,7 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">max(temp) returns the maximum temp value recorded for all the events based on their arrival and expiry.</p>
 
-### minForever *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)*
-
-<p style="word-wrap: break-word">This is the attribute aggregator to store the minimum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<INT|LONG|DOUBLE|FLOAT> minForever(<INT|LONG|DOUBLE|FLOAT> arg)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">arg</td>
-        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be compared to find the minimum value.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from inputStream
-select minForever(temp) as max
-insert into outputStream;
-```
-<p style="word-wrap: break-word">minForever(temp) returns the minimum temp value recorded for all the events throughoutthe lifetime of the query.</p>
-
-### avg *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)*
+### avg *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-function">(Aggregate Function)</a>*
 
 <p style="word-wrap: break-word">Calculates the average for all the events.</p>
 
@@ -1621,139 +1545,7 @@ from fooStream#window.timeBatch
 ```
 <p style="word-wrap: break-word">avg(temp) returns the average temp value for all the events based on their arrival and expiry.</p>
 
-### min *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)*
-
-<p style="word-wrap: break-word">Returns the minimum value for all the events.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<INT|LONG|DOUBLE|FLOAT> min(<INT|LONG|DOUBLE|FLOAT> arg)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">arg</td>
-        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be compared to find the minimum value.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from inputStream
-select min(temp) as minTemp
-insert into outputStream;
-```
-<p style="word-wrap: break-word">min(temp) returns the minimum temp value recorded for all the events based on their arrival and expiry.</p>
-
-### sum *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)*
-
-<p style="word-wrap: break-word">Returns the sum for all the events.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<LONG|DOUBLE> sum(<INT|LONG|DOUBLE|FLOAT> arg)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">arg</td>
-        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be summed.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from inputStream
-select sum(volume) as sumOfVolume
-insert into outputStream;
-```
-<p style="word-wrap: break-word">This will returns the sum of volume values as a long value for each event arrival and expiry.</p>
-
-### count *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)*
-
-<p style="word-wrap: break-word">Returns the count of all the events.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<LONG> count()
-```
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from fooStream#window.timeBatch(10 sec)
-select count() as count
-insert into barStream;
-```
-<p style="word-wrap: break-word">This will return the count of all the events for time batch in 10 seconds.</p>
-
-### maxForever *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)*
-
-<p style="word-wrap: break-word">This is the attribute aggregator to store the maximum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.</p>
-
-<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
-```
-<INT|LONG|DOUBLE|FLOAT> maxForever(<INT|LONG|DOUBLE|FLOAT> arg)
-```
-
-<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
-<table>
-    <tr>
-        <th>Name</th>
-        <th style="min-width: 20em">Description</th>
-        <th>Default Value</th>
-        <th>Possible Data Types</th>
-        <th>Optional</th>
-        <th>Dynamic</th>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">arg</td>
-        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be compared to find the maximum value.</td>
-        <td style="vertical-align: top"></td>
-        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
-        <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-</table>
-
-<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
-<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
-```
-from inputStream
-select maxForever(temp) as max
-insert into outputStream;
-```
-<p style="word-wrap: break-word">maxForever(temp) returns the maximum temp value recorded for all the events throughout the lifetime of the query.</p>
-
-### distinctCount *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-functions">Aggregate Function</a>)*
+### distinctCount *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-function">(Aggregate Function)</a>*
 
 <p style="word-wrap: break-word">Returns the count of distinct occurrences for a given arg.</p>
 
@@ -1791,7 +1583,215 @@ insert into barStream;
 ```
 <p style="word-wrap: break-word">distinctcount(pageID) for the following output returns 3.<br>&nbsp;"WEB_PAGE_1"<br>&nbsp;"WEB_PAGE_1"<br>&nbsp;"WEB_PAGE_2"<br>&nbsp;"WEB_PAGE_3"<br>&nbsp;"WEB_PAGE_1"<br>&nbsp;"WEB_PAGE_2"</p>
 
-### pol2Cart *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#stream-functions">Stream Function</a>)*
+### maxForever *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-function">(Aggregate Function)</a>*
+
+<p style="word-wrap: break-word">This is the attribute aggregator to store the maximum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<INT|LONG|DOUBLE|FLOAT> maxForever(<INT|LONG|DOUBLE|FLOAT> arg)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be compared to find the maximum value.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from inputStream
+select maxForever(temp) as max
+insert into outputStream;
+```
+<p style="word-wrap: break-word">maxForever(temp) returns the maximum temp value recorded for all the events throughout the lifetime of the query.</p>
+
+### stdDev *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-function">(Aggregate Function)</a>*
+
+<p style="word-wrap: break-word">Returns the calculated standard deviation for all the events.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<DOUBLE> stdDev(<INT|LONG|DOUBLE|FLOAT> arg)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that should be used to calculate the standard deviation.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from inputStream
+select stddev(temp) as stdTemp
+insert into outputStream;
+```
+<p style="word-wrap: break-word">stddev(temp) returns the calculated standard deviation of temp for all the events based on their arrival and expiry.</p>
+
+### count *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-function">(Aggregate Function)</a>*
+
+<p style="word-wrap: break-word">Returns the count of all the events.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<LONG> count()
+```
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from fooStream#window.timeBatch(10 sec)
+select count() as count
+insert into barStream;
+```
+<p style="word-wrap: break-word">This will return the count of all the events for time batch in 10 seconds.</p>
+
+### min *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-function">(Aggregate Function)</a>*
+
+<p style="word-wrap: break-word">Returns the minimum value for all the events.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<INT|LONG|DOUBLE|FLOAT> min(<INT|LONG|DOUBLE|FLOAT> arg)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be compared to find the minimum value.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from inputStream
+select min(temp) as minTemp
+insert into outputStream;
+```
+<p style="word-wrap: break-word">min(temp) returns the minimum temp value recorded for all the events based on their arrival and expiry.</p>
+
+### sum *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-function">(Aggregate Function)</a>*
+
+<p style="word-wrap: break-word">Returns the sum for all the events.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<LONG|DOUBLE> sum(<INT|LONG|DOUBLE|FLOAT> arg)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be summed.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from inputStream
+select sum(volume) as sumOfVolume
+insert into outputStream;
+```
+<p style="word-wrap: break-word">This will returns the sum of volume values as a long value for each event arrival and expiry.</p>
+
+### minForever *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#aggregate-function">(Aggregate Function)</a>*
+
+<p style="word-wrap: break-word">This is the attribute aggregator to store the minimum value for a given attribute throughout the lifetime of the query regardless of any windows in-front.</p>
+
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
+```
+<INT|LONG|DOUBLE|FLOAT> minForever(<INT|LONG|DOUBLE|FLOAT> arg)
+```
+
+<span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">arg</td>
+        <td style="vertical-align: top; word-wrap: break-word">The value that needs to be compared to find the minimum value.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">INT<br>LONG<br>DOUBLE<br>FLOAT</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table>
+
+<span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
+```
+from inputStream
+select minForever(temp) as max
+insert into outputStream;
+```
+<p style="word-wrap: break-word">minForever(temp) returns the minimum temp value recorded for all the events throughoutthe lifetime of the query.</p>
+
+### pol2Cart *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#stream-function">(Stream Function)</a>*
 
 <p style="word-wrap: break-word">The pol2Cart function calculating the cartesian coordinates x & y for the given theta, rho coordinates and adding them as new attributes to the existing events.</p>
 
