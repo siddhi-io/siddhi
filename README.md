@@ -22,7 +22,7 @@ It can be used for;
 * Tracking (something over space or time)
 * Trend analysis (rise, fall, turn, tipple bottom)
 * Real-time predictions with existing and online machine learning models
-* And many more ... <a target="_blank" href="http://www.kdnuggets.com/2015/08/patterns-streaming-realtime-analytics.html">“Patterns of Streaming Realtime Analytics”</a>
+* And many more ... <a target="_blank" href="http://www.kdnuggets.com/2015/08/patterns-streaming-realtime-analytics.html">?Patterns of Streaming Realtime Analytics?</a>
 
 Siddhi is free and open source, under **Apache Software License v2.0**.
 
@@ -52,7 +52,7 @@ If you also use Siddhi, we would love to hear more.
 ## Try Siddhi with <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a>
 
 <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a> is a server version of Siddhi that's also released under 
- **Apache Software License v2.0**. It was a Strong Performer in <a target="_blank" href="https://go.forrester.com/blogs/16-04-16-15_true_streaming_analytics_platforms_for_real_time_everything/">The Forrester Wave™: Big Data Streaming Analytics, Q1 2016</a> 
+ **Apache Software License v2.0**. It was a Strong Performer in <a target="_blank" href="https://go.forrester.com/blogs/16-04-16-15_true_streaming_analytics_platforms_for_real_time_everything/">The Forrester Wave?: Big Data Streaming Analytics, Q1 2016</a> 
  (<a target="_blank" href="https://www.forrester.com/report/The+Forrester+Wave+Big+Data+Streaming+Analytics+Q1+2016/-/E-RES129023">Report</a>) 
 and a <a target="_blank" href="https://www.gartner.com/doc/3314217/cool-vendors-internet-things-analytics">Cool Vendors in Internet of Things Analytics, 2016</a>. 
 
@@ -86,7 +86,7 @@ Find the released Siddhi libraries from <a target="_blank" href="http://maven.ws
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-M103">4.0.0-M103</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-M104">4.0.0-M104</a>.
 
 ## Jenkins Build Status
 
