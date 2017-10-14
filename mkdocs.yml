@@ -34,6 +34,7 @@ pages:
   - Siddhi Query Guide: documentation/siddhi-4.0.md
 - Extensions: extensions.md
 - API Docs:
+  - 4.0.0-M105: api/4.0.0-M105.md
   - 4.0.0-M104: api/4.0.0-M104.md
   - 4.0.0-M103: api/4.0.0-M103.md
   - 4.0.0-M100: api/4.0.0-M100.md
