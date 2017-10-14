@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.siddhi</groupId>
         <artifactId>siddhi</artifactId>
-        <version>4.0.0-M98-SNAPSHOT</version>
+        <version>4.0.0-M103-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -31,104 +31,53 @@
     <name>Siddhi Tests Coverage Report Aggregation</name>
     <packaging>pom</packaging>
 
-    <profiles>
-        <profile>
-            <id>Test-Coverage-Report-Aggregation</id>
-            <activation>
-                <file>
-                    <exists>../modules/siddhi-core/target/coverage-reports</exists>
-                </file>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-jacoco-dependencies</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                    <includeTypes>jar</includeTypes>
-                                    <includeArtifactIds>org.jacoco.ant</includeArtifactIds>
-                                    <stripVersion>true</stripVersion>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-query-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.siddhi</groupId>
+            <artifactId>siddhi-query-compiler</artifactId>
+        </dependency>
+    </dependencies>
 
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target xmlns:jacoco="antlib:org.jacoco.ant">
-                                        <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-                                            <classpath path="${project.build.directory}" />
-                                        </taskdef>
-                                        <jacoco:report>
-                                            <executiondata>
-                                                <fileset dir="${siddhi.core.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec" />
-                                                </fileset>
-                                                <fileset dir="${siddhi.query.api.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec" />
-                                                </fileset>
-                                                <fileset dir="${siddhi.query.compiler.basedir}/target/coverage-reports">
-                                                    <include name="jacoco.exec" />
-                                                </fileset>
-                                            </executiondata>
-                                            <structure name="Siddhi Tests">
-                                                <classfiles>
-                                                    <fileset dir="${siddhi.core.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class" />
-                                                        <exclude name="**/*Exception.class" />
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.query.api.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class" />
-                                                        <exclude name="**/*Exception.class" />
-                                                    </fileset>
-                                                    <fileset dir="${siddhi.query.compiler.basedir}/target/classes">
-                                                        <exclude name="**/*Constants.class" />
-                                                        <exclude name="**/*Exception.class" />
-                                                    </fileset>
-                                                </classfiles>
-                                                <sourcefiles encoding="UTF-8">
-                                                    <fileset dir="${siddhi.core.basedir}/src/main/java" />
-                                                    <fileset dir="${siddhi.query.api.basedir}/src/main/java" />
-                                                    <fileset dir="${siddhi.query.compiler.basedir}/src/main/java" />
-                                                </sourcefiles>
-                                            </structure>
-                                            <html destdir="${project.build.directory}/coverage-reports" />
-                                        </jacoco:report>
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.jacoco</groupId>
-                                <artifactId>org.jacoco.ant</artifactId>
-                                <version>${jacoco.ant.version}</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-    <properties>
-        <siddhi.core.basedir>../modules/siddhi-core</siddhi.core.basedir>
-        <siddhi.query.compiler.basedir>../modules/siddhi-query-compiler</siddhi.query.compiler.basedir>
-        <siddhi.query.api.basedir>../modules/siddhi-query-api</siddhi.query.api.basedir>
-    </properties>
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${org.jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>report-aggregate</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report-aggregate</goal>
+                        </goals>
+                        <configuration>
+                            <title>Siddhi Test Coverage</title>
+                            <footer>Code Coverage Report for Siddhi ${project.version}</footer>
+                            <includes>
+                                <include>**/*.class</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/*Constants.class</exclude>
+                                <exclude>**/*Exception.class</exclude>
+                                <exclude>**/SiddhiQLBaseVisitor.class</exclude>
+                                <exclude>**/SiddhiQLParser*</exclude>
+                                <exclude>**/SiddhiQLLexer*</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
+
