@@ -1,7 +1,7 @@
 # Siddhi Architecture 
 
-WSO2 Siddhi is a software that can run as server by it own or within WSO2 Stream Processor, embalmed in to Java based 
-systems and in  Android applications, and capable of providing analytical operators, orchestrate data flows, calculate analytics, and detect
+WSO2 Siddhi is a software library that can run as server by its own, run within WSO2 Stream Processor as a service, and embeddable into any Java based, 
+Python based or on an Android application. It provides analytical operators, orchestrate data flows, calculate analytics, and detect
 patterns on event data from multiple disparate live data sources. This allows developers to build applications that sense, 
 think, and act in real time.
 
