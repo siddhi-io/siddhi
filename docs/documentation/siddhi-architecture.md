@@ -175,27 +175,38 @@ Flowing are the components get involve in handling the events.
 
 ## Siddhi Query Execution 
 
-Siddhi queries can be categorised in to three main types such as single input stream queries which comprises query types filter and windows,
- join input stream queries comprising joins, and state input stream queries comprising pattern and sequences. 
+Siddhi [QueryRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/QueryRuntime.java)s
+ can be categorised in to three main types such as [SingleInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/SingleInputStream.java) 
+ queries which comprises query types such as filters and windows,
+ [JoinInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/JoinInputStream.java)
+  queries comprising joins, and 
+   [StateInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/StateInputStream.java) 
+   queries comprising patterns and sequences. 
 
 Following section explains the internal of each query type. 
 
-### Single Input Stream Query Runtime (Filter & Windows)
+### [SingleInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/SingleInputStream.java) Query Runtime (Filter & Windows)
 
 ![Single Input Stream Query](../images/architecture/siddhi-query-single.png "Single Input Stream Query (Filter & Window)")
  
-Single input stream query runtime is generated for filter and window queries, they consumes events from a Stream Junction 
-and convert the events according to the expected output stream format at the ProcessStreamReceiver and by dropping 
-all the unrelated incoming stream attributes. Query runtime can also consume events from a Window.
+Single input stream query runtime is generated for filter and window queries, they consumes events from a Stream Junction or Window
+and convert the incoming events according to the expected output stream format at the [ProcessStreamReceiver](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/input/ProcessStreamReceiver.java)
+ and by dropping 
+all the unrelated incoming stream attributes.
 
-Then the converted events are passed through few Processors such as Filter, StreamProcessor, StreamFunctionProcessor, 
-WindowProcessor and QuerySelector. Here StreamProcessor, StreamFunctionProcessor, and WindowProcessor can be extended with 
+Then the converted events are passed through few Processors such as [FilterProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/filter/FilterProcessor.java),
+[StreamProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/stream/StreamProcessor.java), 
+[StreamFunctionProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/stream/function/StreamFunctionProcessor.java), 
+[WindowProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/stream/window/WindowProcessor.java)
+ and [QuerySelector](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/QuerySelector.java). 
+ Here StreamProcessor, StreamFunctionProcessor, and WindowProcessor can be extended with 
 various stream processing capabilities. The chain of processors are always ended with a QuerySelector and the chain can 
 only have at most one WindowProcessor. When query runtime consumes events from a Window its chain of processors cannot 
 contain a WindowProcessor.
 
-When it comes to the Filter processor, its implemented with an Expression that returns boolean value. Expressions have a tree structure, and 
-they are processed with the Depth First Search Algorithm. To achieve high performance, currently, Siddhi depends on the user
+When it comes to the FilterProcessor, its implemented with an [ExpressionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/executor/ExpressionExecutor.java) 
+that returns boolean value. Expressions have a tree structure, and 
+they are processed based on the Depth First Search Algorithm. To achieve high performance, currently, Siddhi depends on the user
 to formulate the lease success case in the leftmost side of the condition, thereby increasing the chances of early false detection.
 
 The condition expression `price >= 100 and ( Symbol == 'IBM' or Symbol == 'MSFT' )` will be represented as below.
