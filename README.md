@@ -77,8 +77,11 @@ Find the released Siddhi libraries from <a target="_blank" href="http://maven.ws
  <a target="_blank" href=""></a> 
  
 * **Active development version of Siddhi** : **v4.0.0**  _built on Java 8._ 
- 
+     
     <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v4.x.x
+    
+    <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v4.x.x
+
 
 * **Latest Stable Release of Siddhi** : **v3.0.5** _built on Java 7._
 
