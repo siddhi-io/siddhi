@@ -213,14 +213,15 @@ The condition expression `price >= 100 and ( Symbol == 'IBM' or Symbol == 'MSFT'
 
 ![Siddhi Expression](../images/architecture/siddhi-expressions.png "Single Input Query (Filter & Window)")
 
-These Expressions also supports executing user defined functions (UDFs), and they can be implemented by extending the FunctionExecutor class. 
+These Expressions also supports executing user defined functions (UDFs), and they can be implemented by extending the [FunctionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/executor/function/FunctionExecutor.java) class. 
 
-Events after getting processed by each processor they will reach to the QuerySelector for transformation. At the QuerySelector
-Events are transformed based on the `select` clause of the query. If there is a `Group By` defined then the GroupByKeyGenerator identifies the 
-group by key and then each AttributeProcessor is executed based on the group by key. AttributeProcessors can contain any Expression including 
-constant values, variables and user defined functions, at the same time they can also contain AttributeAggregators for 
-processing aggregation operations such as `sum`, `count`, etc. Here for each group by key a AttributeAggregator will be generated to 
-keep track of the aggregation state and when it becomes obsolete it will be destroyed. Through this operation the event 
+Events after getting processed by each processor they will reach the QuerySelector for transformation. At the QuerySelector
+Events are transformed based on the `select` clause of the query. If there is a `Group By` defined then the [GroupByKeyGenerator](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/GroupByKeyGenerator.java)
+ identifies the group by key and then each [AttributeProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/attribute/processor/AttributeProcessor.java)
+ is executed based on that group by key. AttributeProcessors can contain any Expression including 
+ constant values, variables and user defined functions, at the same time they can also contain [AttributeAggregator](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/attribute/aggregator/AttributeAggregator.java)s
+ for processing aggregation operations such as `sum`, `count`, etc. Here for each group by key a AttributeAggregator will be generated to 
+keep track of the aggregation state and when it becomes obsolete it will be destroyed. Through this operation the events 
 will be transformed to the expected output format. 
  
 After the event got transformed to the output format it will evaluated against the HavingConditionExecutor if a `having` clause is 
