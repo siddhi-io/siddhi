@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.doc.gen.core;
 
+import org.apache.maven.model.Scm;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -151,13 +152,16 @@ public class MkdocsGitHubPagesDeployMojo extends AbstractMojo {
             if (scmUsername == null && scmPassword == null) {
                 getLog().info("SCM_USERNAME and SCM_PASSWORD not defined!");
             }
-            getLog().info("scmUsername:" + scmUsername);
-            getLog().info("scmPassword:" + scmPassword);
+            String url = null;
+            Scm scm = rootMavenProject.getScm();
+            if (scm != null) {
+                url = scm.getUrl();
+            }
             // Deploying documentation
             DocumentationUtils.updateDocumentationOnGitHub(docGenBasePath, mkdocsConfigFile, readmeFile,
                     mavenProject.getVersion(), getLog());
             DocumentationUtils.deployMkdocsOnGitHubPages(mavenProject.getVersion(),
-                    rootMavenProject.getBasedir(), scmUsername, scmPassword, getLog());
+                    rootMavenProject.getBasedir(), url, scmUsername, scmPassword, getLog());
         } else {
             getLog().warn("Unable to generate documentation. Skipping documentation deployment.");
         }

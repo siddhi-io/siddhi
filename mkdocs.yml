@@ -34,7 +34,12 @@ pages:
   - Siddhi Query Guide: documentation/siddhi-4.0.md
 - Extensions: extensions.md
 - API Docs:
-  - Latest (4.0.0-M97): api/latest.md
+  - 4.0.0-M105: api/4.0.0-M105.md
+  - 4.0.0-M104: api/4.0.0-M104.md
+  - 4.0.0-M103: api/4.0.0-M103.md
+  - 4.0.0-M100: api/4.0.0-M100.md
+  - 4.0.0-M99: api/4.0.0-M99.md
+  - 4.0.0-M98: api/4.0.0-M98.md
   - 4.0.0-M97: api/4.0.0-M97.md
   - 4.0.0-M96: api/4.0.0-M96.md
   - 4.0.0-M95: api/4.0.0-M95.md
@@ -54,5 +59,6 @@ pages:
   - 4.0.0-M81: api/4.0.0-M81.md
   - 4.0.0-M80: api/4.0.0-M80.md
   - 4.0.0-M79: api/4.0.0-M79.md
+  - latest: api/latest.md
 - License: license.md
 theme: material
