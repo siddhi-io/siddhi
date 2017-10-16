@@ -32,6 +32,7 @@ pages:
 - Documentation:
   - User Guide: documentation/user-guide.md
   - Siddhi Query Guide: documentation/siddhi-4.0.md
+  - Siddhi Architecture : documentation/siddhi-architecture.md
 - Extensions: extensions.md
 - API Docs:
   - 4.0.0-M105: api/4.0.0-M105.md
