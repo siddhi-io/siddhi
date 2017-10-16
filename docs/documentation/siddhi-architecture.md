@@ -1,86 +1,91 @@
 # Siddhi Architecture 
 
-WSO2 Siddhi is a software library that can run as server by its own, run within WSO2 Stream Processor as a service, and embeddable into any Java based, 
-Python based or on an Android application. 
-It provides analytical operators, orchestrate data flows, calculate analytics, and detect
+WSO2 Siddhi is a software library that can be utilized in any of the following ways:
+
+- Run as a server on its own
+- Run within WSO2 SP as a service
+- Embedded into any Java or Python based application
+- Run on an Android application
+ 
+It provides analytical operators, orchestrates data flows, calculates analytics, and detects
 patterns on event data from multiple disparate live data sources. This allows developers to build applications that sense, 
 think, and act in real time.
 
-This section illustrate the architecture of Siddhi and take you through its key functionality; We hope that the article 
-will help developers to better understand Siddhi, it's the codebase, fix bugs and also improve Siddhi. 
+This section illustrates the architecture of Siddhi and guides you through its key functionality. We hope this article 
+helps developers to understand Siddhi and its the codebase better, and also contribute to improve Siddhi by reporting and fixing bugs.
 
 ## Main Design Decisions
 
 - Event by event processing of real-time streaming data to achieve low latency. 
 - Ease of use with Streaming SQL providing an intuitive way to express stream processing logic and complex 
-event processing constructs like Patterns.  
+event processing constructs such as Patterns.  
 - Achieve high performance by processing all events in-memory and by storing their states in-memory. 
-- Optimise performance by enforcing strict schema for event streams and by pre-compiling the queries.
-- Optimise memory consumption by only having the absolute necessary information in-memory and 
+- Optimizing performance by enforcing a strict schema for event streams and by pre-compiling the queries.
+- Optimizing memory consumption by having only the absolutly necessary information in-memory and 
 dropping the rest as soon as possible. 
-- Support multiple extension points to accommodate diverse set of functionality such as supporting multiple sources, sinks, functions, 
+- Supporting multiple extension points to accommodate a diverse set of functionality such as supporting multiple sources, sinks, functions, 
 aggregation operations, windows, etc.
 
 ## High Level Architecture
 
 ![Simple Siddhi Overview](../images/architecture/siddhi-overview-simple.png?raw=true "Simple Siddhi Overview")
  
-In a very high level Siddhi consumes events from various events sources, process them according to the defined Siddhi application, 
-and produce results to the subscribed event sinks. 
-Siddhi can store and consume events from in-memory tables or when configured from external data stores such as `RDBMS`, `MongoDB`, 
-`Hazelcast` in-memory grid, etc. Siddhi also allows applications and users to query Siddhi via its Store Query API to interactively 
+At a high level, Siddhi consumes events from various events sources, processes them according to the defined Siddhi application, 
+and produces results to the subscribed event sinks. 
+Siddhi can store and consume events from in-memory tables or from external data stores such as `RDBMS`, `MongoDB`, 
+`Hazelcast` in-memory grid, etc. (i.e., when configured to do so). Siddhi also allows applications and users to query Siddhi via its Store Query API to interactively 
 retrieve data from its in-memory and other stores.
  
 ### Main Modules in Siddhi
 
 Siddhi comprises four main modules, they are: 
 
-- **[Siddhi Query API](https://github.com/wso2/siddhi/tree/master/modules/siddhi-query-api)** : This let you define the execution logic of the Siddhi application as queries and definitions using POJO classes. 
-Internally Siddhi uses these object to understand what user expects it to do. 
+- **[Siddhi Query API](https://github.com/wso2/siddhi/tree/master/modules/siddhi-query-api)** : This allows you to define the execution logic of the Siddhi application as queries and definitions using POJO classes. 
+Internally, Siddhi uses these objects to identify the tasks that it is expected to perform. 
 
-- **[Siddhi Query Compiler](https://github.com/wso2/siddhi/tree/master/modules/siddhi-query-compiler)** : This let you define the Siddhi application using the Siddhi Streaming SQL, 
- and then it converts the Streaming SQL script to Siddhi Query POJO Objects such that Siddhi can execute them. 
+- **[Siddhi Query Compiler](https://github.com/wso2/siddhi/tree/master/modules/siddhi-query-compiler)** : This allows you to define the Siddhi application using the Siddhi Streaming SQL, 
+ and then it converts the Streaming SQL script to Siddhi Query POJO Objects so that Siddhi can execute them. 
  
-- **[Siddhi Core](https://github.com/wso2/siddhi/tree/master/modules/siddhi-core)** : This is responsible for building the execution runtime based on the defined Siddhi Application and process the events as and when they arrive. 
+- **[Siddhi Core](https://github.com/wso2/siddhi/tree/master/modules/siddhi-core)** : This builds the execution runtime based on the defined Siddhi Application and processes the events as and when they arrive. 
  
-- **[Siddhi Annotation](https://github.com/wso2/siddhi/tree/master/modules/siddhi-annotations)** : This is a helper module that lets all extensions to be annotated, such that they can be 
-picked by Siddhi Core for processing and help Siddhi to generate appropriate extension documentation. 
+- **[Siddhi Annotation](https://github.com/wso2/siddhi/tree/master/modules/siddhi-annotations)** : This is a helper module that allows all extensions to be annotated, so that they can be 
+picked by Siddhi Core for processing. This also helps Siddhi to generate the extension documentation. 
 
 ## Siddhi Component Architecture 
 
-The following diagram gives more detail information on major components of Siddhi and how they are related together. 
+The following diagram illustrates the mail components of Siddhi and how they work together. 
 
 ![Siddhi Component Architecture](../images/architecture/siddhi-architecture-highlevel.png "Siddhi Component Architecture")
  
 Here [Siddhi Core](https://github.com/wso2/siddhi/tree/master/modules/siddhi-core) module is responsible for maintaining
-the execution logic, interacting with the external environment and systems 
-for consuming and publishing events. To achieve its tasks, it uses multiple components such as:  
+the execution logic. It also interacts with the external environment and systems 
+for consuming and publishing events. To achieve these tasks, it uses the following components:  
  
 - [SiddhiManager](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/SiddhiManager.java) : 
   This is one of the critical component inside Siddhi Core that is responsible for managing Siddhi App Runtimes 
-  and facilitate their functionality via Siddhi Context with periodic state persistence, statistics reporting and extension loading. 
+  and facilitating their functionality via Siddhi Context with periodic state persistence, statistics reporting and extension loading. 
    
 - [SiddhiAppRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/SiddhiAppRuntime.java) : 
- There will be one Siddhi App Runtime generated for each Siddhi App deployed. Siddhi App Runtimes
- provide an isolated execution environment for each defined Siddhi App.
- These Siddhi App Runtimes based on the logic of their Siddhi App, consumes and publishes events from various external systems and Java or Python programmes. 
+ One Siddhi App Runtime is generated for each Siddhi Application deployed. Siddhi Application Runtimes
+ provide an isolated execution environment for each Siddhi Application defined.
+ These Siddhi Application Runtimes are based on the logic of their Siddhi Application, and they consume and publish events from various external systems and Java or Python programmes. 
   
 - [SiddhiContext](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/config/SiddhiContext.java) : 
-This is a shared object for all the Siddhi App Runtimes within the a Siddhi manager, and it contains references 
-to the persistence store for periodic persistence, statistics manager to report performance statistics of Siddhi App Runtimes, 
+This is a shared object for all the Siddhi Application Runtimes within the a Siddhi manager, and it contains references 
+to the persistence store for periodic persistence, statistics manager to report performance statistics of Siddhi Application Runtimes, 
 and extension holders for loading Siddhi extensions. 
 
-## Siddhi App Creation
+## Siddhi Application Creation
  
-Execution logic in Siddhi is composed as Siddhi Application and this is passes as a string to 
-SiddhiManager to create the SiddhiAppRuntime for execution. 
+Execution logic in Siddhi is composed as a Siddhi Application, and this is passed as a string to 
+**SiddhiManager** to create the **SiddhiAppRuntime** for execution. 
 
-When Siddhi App is passed to `SiddhiManager.createSiddhiAppRuntime()` internally its processed with the 
+When a Siddhi Application is passed to the `SiddhiManager.createSiddhiAppRuntime()`, it is processed internally with the 
 [SiddhiCompiler](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-compiler/src/main/java/org/wso2/siddhi/query/compiler/SiddhiCompiler.java). 
-Here SiddhiApp String is converted to [SiddhiApp](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/SiddhiApp.java)
- Object model by the [SiddhiQLBaseVisitorImpl](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-compiler/src/main/java/org/wso2/siddhi/query/compiler/internal/SiddhiQLBaseVisitorImpl.java) class. 
+Here, the **SiddhiApp** String is converted to [SiddhiApp](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/SiddhiApp.java)
+ object model by the [SiddhiQLBaseVisitorImpl](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-compiler/src/main/java/org/wso2/siddhi/query/compiler/internal/SiddhiQLBaseVisitorImpl.java) class. 
 The model is then passed to the [SiddhiAppParser](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/util/parser/SiddhiAppParser.java) 
-for the SiddhiAppRuntime creation.
+for the **SiddhiAppRuntime** creation.
 
 
 ## Siddhi App Execution Flow
