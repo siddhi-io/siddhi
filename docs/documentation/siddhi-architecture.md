@@ -57,16 +57,16 @@ The following diagram illustrates the mail components of Siddhi and how they wor
 
 ![Siddhi Component Architecture](../images/architecture/siddhi-architecture-highlevel.png "Siddhi Component Architecture")
  
-Here [Siddhi Core](https://github.com/wso2/siddhi/tree/master/modules/siddhi-core) module is responsible for maintaining
+Here [Siddhi Core](https://github.com/wso2/siddhi/tree/master/modules/siddhi-core) module maintains
 the execution logic. It also interacts with the external environment and systems 
 for consuming and publishing events. To achieve these tasks, it uses the following components:  
  
 - [SiddhiManager](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/SiddhiManager.java) : 
-  This is one of the critical component inside Siddhi Core that is responsible for managing Siddhi App Runtimes 
-  and facilitating their functionality via Siddhi Context with periodic state persistence, statistics reporting and extension loading. 
+  This is a key component of Siddhi Core that manages Siddhi Application Runtimes 
+  and facilitates their functionality via Siddhi Context with periodic state persistence, statistics reporting and extension loading. 
    
 - [SiddhiAppRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/SiddhiAppRuntime.java) : 
- One Siddhi App Runtime is generated for each Siddhi Application deployed. Siddhi Application Runtimes
+ One Siddhi Application Runtime is generated for each Siddhi Application deployed. Siddhi Application Runtimes
  provide an isolated execution environment for each Siddhi Application defined.
  These Siddhi Application Runtimes are based on the logic of their Siddhi Application, and they consume and publish events from various external systems and Java or Python programmes. 
   
@@ -94,95 +94,93 @@ Following diagram depicts the execution flow within a Siddhi App Runtime.
 
 ![Execution Flow in Siddhi App](../images/architecture/siddhi-event-flow.png "Execution Flow in Siddhi App")
  
-The path events take within the Siddhi is coloured in blue. 
+The path taken by events within Siddhi is indicated in blue. 
 
-Flowing are the components get involve in handling the events. 
+The components that are involved in handling the events are as follows: 
 
 - [StreamJunction](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/StreamJunction.java)
     
-    Responsible for routing events to various components within the Siddhi App Runtime, there will a Stream Junction 
-    generated for for each stream defined or inferred in the Siddhi App. Stream Junction by default uses the incoming event's thread
-    for processing subscribed components, but it can also be configured via `@Async` annotation to buffer the events and 
+    This routes events to various components within the Siddhi App Runtime. A stream junction is
+    generated for each stream defined or inferred in the Siddhi Application. A stream junction by default uses the incoming event's thread
+    for processing subscribed components, but it can also be configured via the `@Async` annotation to buffer the events and 
     use a different thread for subsequent execution.
     
 - [InputHandler](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/input/InputHandler.java) 
     
-    There will an instance of Input Handler for each Stream Junction, and this is used for pushing `Event` and
-     `Event[]` objects into Stream Junctions from Sources, and Java or Python programmes. 
+    An instance of input handler is created for each stream junction, and this is used for pushing `Event` and
+     `Event[]` objects into stream junctions from sources, and Java/Python programmes. 
     
 - [StreamCallback](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/output/StreamCallback.java) 
 
-    This is responsible for receiving `Event[]`s from Stream Junction and pass them to Sinks to publish to external endpoints 
-    or pass them to subscribed Java or Python programmes for further processing. 
+    This receives `Event[]`s from stream junction and passes them to sinks to publish to external endpoints, 
+    or passes them to subscribed Java/Python programmes for further processing. 
     
 - [Queries](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/QueryRuntime.java) & [Partitions](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/PartitionRuntime.java) 
 
-    They are the components responsible for processing the events by filtering, transforming, joining, patten matching, 
-    etc. They consume events from one or more Stream Junctions, process them and publishes the processed events 
-    into Stream Junctions based on the defined query or partition. 
+    These components process the events by filtering, transforming, joining, patten matching, 
+    etc. They consume events from one or more stream junctions, process them and publish the processed events 
+    into stream junctions based on the defined query or partition. 
      
 - [Source](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/input/source/Source.java) 
     
-    Sources are responsible for consuming events from external sources on various data formats, convert them into Siddhi events
-    and pass them to corresponding Stream Junctions via there Input Handlers. There will be one Source generated 
-    for each `@Source` annotation defined on top of the Stream Definition and each source with consume from one external source on a configured data format. 
+    Sources consume events from external sources in various data formats, convert them into Siddhi events
+    and pass them to corresponding Stream Junctions via their Input Handlers. A source is generated 
+    for each `@Source` annotation defined above a stream definition. Each source consumes events from an external source in the data format configured for it. 
     
 - [SourceMapper](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/input/source/SourceMapper.java) 
 
-    There will be a Source Mapper for each source, responsible for converting the incoming event's format into Siddhi Event. 
-    Source Mapper type can be configured using the `@Map` annotation within the `@Source` annotation. When `@Map` annotation 
-    is not defined Siddhi uses [PassThroughSourceMapper](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/input/source/PassThroughSourceMapper.java), 
-    where it assumes that the incoming message is already in Siddhi Event format and 
-    it does not do any changes.
+    A source mapper needs to be configured for each source in order to convert the format of each incoming event to that of a Siddhi event. 
+    The source mapper type can be configured using the `@Map` annotation within the `@Source` annotation. When the `@Map` annotation is
+    not defined, Siddhi uses the [PassThroughSourceMapper](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/input/source/PassThroughSourceMapper.java),
+    where it assumes that the incoming message is already in the Siddhi Event format, and therefore makes no changes to the event format.
     
 - [Sink](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/output/sink/Sink.java) 
 
-    This is responsible for converting the Siddhi Events to various data formats and publish them to external endpoints. 
-    There will be one Sink generated for each `@Sink` annotation defined on top of the Stream Definition to publish the events arriving 
-    on that stream. 
+    Sinks convert the Siddhi Events to various data formats and publish them to external endpoints. 
+    A Sink generated for each `@Sink` annotation defined above a stream definition to publish the events arriving 
+    to that stream. 
     
 - [SinkMapper](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/output/sink/SinkMapper.java)
 
-    There will be one Sink Mapper for each Sink inorder to map the Siddhi events to defined data format such that they 
-    can be published via Sink. Sink Mapper type can be configured using the `@Map` annotation within the `@Sink`
-    annotation. When `@Map` annotation is not defined Siddhi uses [PassThroughSinkMapper](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/output/sink/PassThroughSinkMapper.java), 
-    where it passes the Siddhi Events as it is 
-    to the Sink.
+    A sink mapper is configured for each Sink in order to map the Siddhi events to the specified data format so that they 
+    can be published via the sink. The sink mapper type can be configured using the `@Map` annotation within the `@Sink`
+    annotation. When the `@Map` annotation is not defined, Siddhi uses [PassThroughSinkMapper](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/stream/output/sink/PassThroughSinkMapper.java), 
+    where it  passes the Siddhi events in the existing format (i.e., the Siddhi event format) to the Sink.
     
 - [Table](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/table/Table.java)
     
-    Table is responsible for storing events. By default Siddhi uses [InMemoryTable](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/table/InMemoryTable.java) 
-    implementation to store events in-memory, and when `@Store` annotation
-    is used it load the associated Table implantation based on the defined `store` type. Most table implementations are 
+    Tables store events. By default, Siddhi uses the [InMemoryTable](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/table/InMemoryTable.java) 
+    implementation to store events in-memory. When `@Store` annotation
+    is used, it loads the associated Table implantation based on the defined `store` type. Most table implementations are 
     extended from the [AbstractRecordTable](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/table/record/AbstractRecordTable.java) 
-    abstract class for the easy of development.
+    abstract class for the ease of development.
     
 - [Window](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/window/Window.java)
     
-    Window is responsible for storing and expiring the events based on the given window constrain. Multiple types of windows 
+    Windows store events and determine when events can be considered expired based on the given window constrain. Multiple types of windows are
     can be implemented by extending the [WindowProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/stream/window/WindowProcessor.java) 
     abstract class. 
     
 - [IncrementalAggregation](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/attribute/aggregator/incremental/IncrementalAggregationProcessor.java) 
 
-    This let you obtain aggregates in an incremental manner for a specified set of time periods.
+    This allows you to obtain aggregates in an incremental manner for a specified set of time periods.
     Incremental aggregation functions can be implemented by extending [IncrementalAttributeAggregator](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/attribute/aggregator/incremental/IncrementalAttributeAggregator.java). 
      
 - [Trigger](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/trigger/Trigger.java)
  
-    Trigger triggers events on a given interval to the stream junction with has the same name as of the Trigger.
+    A triggers triggers events at a given interval to the stream junction that has the same name as the trigger.
     
 - [QueryCallback](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/output/callback/QueryCallback.java)
 
-    This can be used to get notifications when events are emitted from Queries. This notifies the event occurrence `timestamp`, and classifies 
+    A query callback receives notifications when events are emitted from queries. Then it notifies the event occurrence `timestamp`, and classifies 
     the events into `currentEvents`, and `expiredEvents`. 
     
 
 ## Siddhi Query Execution 
 
 Siddhi [QueryRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/QueryRuntime.java)s
- can be categorised in to three main types such as [SingleInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/SingleInputStream.java) 
- queries which comprises query types such as filters and windows,
+ can be categorized in to three main types such as [SingleInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/SingleInputStream.java) 
+ queries that comprise of query types such as filters and windows,
  [JoinInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/JoinInputStream.java)
   queries comprising joins, and 
    [StateInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/StateInputStream.java) 
