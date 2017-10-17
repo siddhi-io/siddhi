@@ -8,8 +8,8 @@ WSO2 Siddhi is a software library that can be utilized in any of the following w
 - Run on an Android application
  
 It provides analytical operators, orchestrates data flows, calculates analytics, and detects
-patterns on event data from multiple disparate live data sources. This allows developers to build applications that sense, 
-think, and act in real time.
+patterns on event data from multiple disparate live data sources. This allows developers to build applications that collect data, 
+analyze it, and communicate the results in real time.
 
 This section illustrates the architecture of Siddhi and guides you through its key functionality. We hope this article 
 helps developers to understand Siddhi and its the codebase better, and also contribute to improve Siddhi by reporting and fixing bugs.
@@ -53,11 +53,11 @@ picked by Siddhi Core for processing. This also helps Siddhi to generate the ext
 
 ## Siddhi Component Architecture 
 
-The following diagram illustrates the mail components of Siddhi and how they work together. 
+The following diagram illustrates the main components of Siddhi and how they work together. 
 
 ![Siddhi Component Architecture](../images/architecture/siddhi-architecture-highlevel.png "Siddhi Component Architecture")
  
-Here [Siddhi Core](https://github.com/wso2/siddhi/tree/master/modules/siddhi-core) module maintains
+Here the [Siddhi Core](https://github.com/wso2/siddhi/tree/master/modules/siddhi-core) module maintains
 the execution logic. It also interacts with the external environment and systems 
 for consuming and publishing events. To achieve these tasks, it uses the following components:  
  
@@ -66,7 +66,7 @@ for consuming and publishing events. To achieve these tasks, it uses the followi
   and facilitates their functionality via Siddhi Context with periodic state persistence, statistics reporting and extension loading. 
    
 - [SiddhiAppRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/SiddhiAppRuntime.java) : 
- One Siddhi Application Runtime is generated for each Siddhi Application deployed. Siddhi Application Runtimes
+ A Siddhi Application Runtime is generated for each Siddhi Application deployed. Siddhi Application Runtimes
  provide an isolated execution environment for each Siddhi Application defined.
  These Siddhi Application Runtimes are based on the logic of their Siddhi Application, and they consume and publish events from various external systems and Java or Python programmes. 
   
@@ -178,92 +178,92 @@ The components that are involved in handling the events are as follows:
 
 ## Siddhi Query Execution 
 
-Siddhi [QueryRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/QueryRuntime.java)s
- can be categorized in to three main types such as [SingleInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/SingleInputStream.java) 
- queries that comprise of query types such as filters and windows,
- [JoinInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/JoinInputStream.java)
-  queries comprising joins, and 
-   [StateInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/StateInputStream.java) 
-   queries comprising patterns and sequences. 
+Siddhi [QueryRuntimes](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/QueryRuntime.java)
+ can be categorized in to three main types: 
+  
+* [SingleInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/SingleInputStream.java): 
+ Queries that consist of query types such as filters and windows.
+ 
+* [JoinInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/JoinInputStream.java):
+  Queries that consist of joins.
+  
+* [StateInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/StateInputStream.java): 
+   Queries that consist of patterns and sequences. 
 
-Following section explains the internal of each query type. 
+Following section explains the internals of each query type. 
 
 ### [SingleInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/SingleInputStream.java) Query Runtime (Filter & Windows)
 
 ![Single Input Stream Query](../images/architecture/siddhi-query-single.png "Single Input Stream Query (Filter & Window)")
  
-Single input stream query runtime is generated for filter and window queries, they consumes events from a Stream Junction or Window
+A single input stream query runtime is generated for filter and window queries. They consume events from a stream junction or a window
 and convert the incoming events according to the expected output stream format at the [ProcessStreamReceiver](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/input/ProcessStreamReceiver.java)
- and by dropping 
-all the unrelated incoming stream attributes.
+by dropping all the unrelated incoming stream attributes.
 
-Then the converted events are passed through few Processors such as [FilterProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/filter/FilterProcessor.java),
+Then the converted events are passed through a few Processors such as [FilterProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/filter/FilterProcessor.java),
 [StreamProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/stream/StreamProcessor.java), 
 [StreamFunctionProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/stream/function/StreamFunctionProcessor.java), 
 [WindowProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/stream/window/WindowProcessor.java)
  and [QuerySelector](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/QuerySelector.java). 
- Here StreamProcessor, StreamFunctionProcessor, and WindowProcessor can be extended with 
-various stream processing capabilities. The chain of processors are always ended with a QuerySelector and the chain can 
-only have at most one WindowProcessor. When query runtime consumes events from a Window its chain of processors cannot 
-contain a WindowProcessor.
+Here, the `StreamProcessor`, `StreamFunctionProcessor`, and `WindowProcessor` can be extended with 
+various stream processing capabilities. The last processor of the chain of processors must always be a `QuerySelector`, and each chain can 
+have only one `WindowProcessor`. When the query runtime consumes events from a window, its chain of processors cannot 
+contain a `WindowProcessor`.
 
-When it comes to the FilterProcessor, its implemented with an [ExpressionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/executor/ExpressionExecutor.java) 
-that returns boolean value. Expressions have a tree structure, and 
-they are processed based on the Depth First Search Algorithm. To achieve high performance, currently, Siddhi depends on the user
-to formulate the lease success case in the leftmost side of the condition, thereby increasing the chances of early false detection.
+The `FilterProcessor` is implemented with an [ExpressionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/executor/ExpressionExecutor.java) 
+that returns a boolean value. Expressions have a tree structure, and 
+they are processed based on the Depth First Search algorithm. To achieve high performance,  Siddhi currently depends on the user
+to formulate the least successful case in the leftmost side of the condition, thereby increasing the chance of an early detection of an error.
 
-The condition expression `price >= 100 and ( Symbol == 'IBM' or Symbol == 'MSFT' )` will be represented as below.
+The condition expression `price >= 100 and ( Symbol == 'IBM' or Symbol == 'MSFT' )` is represented as shown below.
 
 ![Siddhi Expression](../images/architecture/siddhi-expressions.png "Single Input Query (Filter & Window)")
 
-These Expressions also supports executing user defined functions (UDFs), and they can be implemented by extending the [FunctionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/executor/function/FunctionExecutor.java) class. 
+These expressions also support the execution of user defined functions (UDFs), and they can be implemented by extending the [FunctionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/executor/function/FunctionExecutor.java) class. 
 
-Events after getting processed by each processor they will reach the QuerySelector for transformation. At the QuerySelector
-Events are transformed based on the `select` clause of the query. If there is a `Group By` defined then the [GroupByKeyGenerator](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/GroupByKeyGenerator.java)
- identifies the group by key and then each [AttributeProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/attribute/processor/AttributeProcessor.java)
- is executed based on that group by key. AttributeProcessors can contain any Expression including 
- constant values, variables and user defined functions, at the same time they can also contain [AttributeAggregator](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/attribute/aggregator/AttributeAggregator.java)s
- for processing aggregation operations such as `sum`, `count`, etc. Here for each group by key a AttributeAggregator will be generated to 
-keep track of the aggregation state and when it becomes obsolete it will be destroyed. Through this operation the events 
-will be transformed to the expected output format. 
+After getting processed by each processor, each event reaches the `QuerySelector` for transformation. At the `QuerySelector`,
+events are transformed based on the `select` clause of the query. If there is a `Group By` defined, then the [GroupByKeyGenerator](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/GroupByKeyGenerator.java)
+identifies the group by key, and then each [AttributeProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/attribute/processor/AttributeProcessor.java)
+is executed based on that group-by key. `AttributeProcessors` can contain any expression including 
+constant values, variables and user defined functions. They can also contain [AttributeAggregator](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/attribute/aggregator/AttributeAggregator.java)s
+for processing aggregation operations such as `sum`, `count`, etc. Here, an `AttributeAggregator` is generated to 
+keep track of the aggregation state. When it becomes obsolete, it is destroyed. The events are transformed to the expected output format through this operation.  
  
-After the event got transformed to the output format it will evaluated against the HavingConditionExecutor if a `having` clause is 
-provided, and only the succeeding events will be pushed to OutputRateLimiter.   
+After an event is transformed to the output format, it is evaluated against the `HavingConditionExecutor` if a `having` clause is 
+provided. Only the succeeding events are pushed to the `OutputRateLimiter`.   
 
-At OutputRateLimiter the events output is controlled before sending the events to the stream junction or to the query callback. 
-When `output` clause is not defined PassThroughOutputRateLimiter is used by passing all the events without any rate limiting. 
+At `OutputRateLimiter`, the event output is controlled before sending the events to the stream junction or to the query callback. 
+When the `output` clause is not defined, the `PassThroughOutputRateLimiter` is used by passing all the events without any rate limiting. 
 
 #### Temporal Processing with Windows
 
-The temporal event processing aspect is achieved through [Window](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/window/Window.java)
- and [AttributeAggregator](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/attribute/aggregator/AttributeAggregator.java)s
-Siddhi uses four type of events to achieve temporal processing : 
+The temporal event processing aspect is achieved via [Window](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/window/Window.java)
+and [AttributeAggregators](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/selector/attribute/aggregator/AttributeAggregator.java)
 
-Current Events: Events that are newly arriving to a query from streams
+To achieve temporal processing,Siddhi uses the following four type of events: 
 
-Expired Events: Events that have expired from a window. 
+* **Current Events**: Events that are newly arriving to a query from streams.
 
-Timer Events: Events informing query about an update of execution time. Usually these events are generated by Schedulers. 
+* **Expired Events**: Events that have expired from a window. 
+
+* **Timer Events**: Events that inform the query about an update of an execution time. These events are usually generated by schedulers. 
  
-Reset Events: Events that resets Siddhi query states.
+* **Reset Events**: Events that resets the Siddhi query states.
  
 In Siddhi, when an event comes into a [WindowProcessor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/stream/window/WindowProcessor.java), 
-it will create an appropriate expired event corresponding to the incoming current event with the expiring timestamp and store that 
-event in the window. The WindowProcessor will also forward the current event to the next Processor for further processing. 
-WindowProcessor using a scheduler or otherwise decides when to emit the events it has in memory and during that time it emits 
-those events as expired events, at times if its emitting all the events in the memory at ones it emits a single reset event interred of 
-sending one expired event for each event it has stored to reset the states in one go. From a window for each current event it has emitted it is essential 
-to emmit the same event as an expired event or a common reset event should be emitted.  
-This is vital in Siddhi because Siddhi relies on these events to calculate the Aggregations at the QuerySelector. 
-In QuerySelector, the arrived current events increase the aggregation values, expired events decrease the values, and 
+it creates an appropriate expired event corresponding to the incoming current event with the expiring timestamp, and stores that 
+event in the window. The `WindowProcessor`  also forwards the current event to the next processor for further processing. 
+t uses a scheduler or such to determine when to emit the events it has in memory. During that time, it emits these events as expired events. If it emits all the events in the memory at once, it emits a single reset event in one go instead of sending one expired event for each event it has stored to reset. For each current event emitted from a window, a corresponding expired event must be emitted. If not, a common reset event must be emitted.  
+This is vital in Siddhi because Siddhi relies on these events to calculate the Aggregations at the `QuerySelector`. 
+In the `QuerySelector`, the arrived current events increase the aggregation values, expired events decrease the values, and 
 reset events reset the aggregation calculation.
 
-For example if we take the sliding [TimeWindow](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/stream/window/TimeWindowProcessor.java),
- when a current event arrives it creates the corresponding expired event, adds that to 
-the window, adds an entry to the Scheduler to notify when that event need to be expired by sending it a timer event, and 
+For example, the sliding [TimeWindow](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/processor/stream/window/TimeWindowProcessor.java)
+creates a corresponding expired event for each current event that arrives,  adds that to 
+the window, adds an entry to the scheduler to notify when that event need to be expired by sending it a timer event, and 
 finally sends the current event to the next processor for subsequent processing.  
-When the window get an indication that the expected expiry time has come for the oldest event in the window via a 
-a timer event or other means it removes the expired event from the window and pass that to the next processor. 
+When the window receives an indication that the expected expiry time has come for the oldest event in the window via a 
+a timer event or other means, it removes the expired event from the window and passes that to the next processor. 
 
 ![Siddhi Time Window](../images/architecture/siddhi-time-window.png "Siddhi Time Window")
 
@@ -271,58 +271,58 @@ a timer event or other means it removes the expired event from the window and pa
  
 ![Join Input Stream Query](../images/architecture/siddhi-query-join.png "Join Input Stream Query")
  
-Join input stream query runtime is generated for join queries. This can consume events from two Stream Junction as perform join operation as depicted above. 
-It can also perform Join by consuming events from one Stream Junction and join against itself or it can join against a 
-table, window or an incremental aggregation. When join is performed with table, window or incremental aggregation
-the WindowProcessor in the image will be replaced with the table, window or incremental aggregation and on their side no  
-basic processors will be used. 
+Join input stream query runtime is generated for join queries. This can consume events from two stream junctions and perform a join operation as depicted above. 
+It can also perform a join by consuming events from one stream junction and join against itself, or it can join against a 
+table, window or an incremental aggregation. When a join is performed with a table, window or incremental aggregation,
+the `WindowProcessor` in the image is replaced with the table, window or incremental aggregation. No  
+basic processors are used on their side. 
 
-The joining operation will be triggered by the events arriving from the Stream Junction.
-Here when an event from one stream reaches the pre JoinProcessor, it matches against all the available events of the other stream's WindowProcessor. 
-When a match is found, those matched events are then sent to the QuerySelector as current events; at the same time, 
-the original event will be added to the WindowProcessor and it will remain there until it expires. Similarly, when an 
-event expires from WindowProcessor, it matches against all the available events of the other stream's WindowProcessor; 
-when a match is found, those matched events are sent to the QuerySelector as expired events.
+The joining operation is triggered by the events that arrive from the stream junction.
+Here, when an event from one stream reaches the pre `JoinProcessor`, it matches against all the available events of the other stream's `WindowProcessor`. 
+When a match is found, those matched events are sent to the `QuerySelector` as current events, and at the same time, 
+the original event is added to the `WindowProcessor` where it remains until it expires. Similarly, when an 
+event expires from the `WindowProcessor`, it matches against all the available events of the other stream's `WindowProcessor`, and 
+when a match is found, those matched events are sent to the `QuerySelector` as expired events.
 
-Note: Despite of the optimizations, a join query is quite expensive when it comes to performance, and this is because
- the WindowProcessor will be locked during the matching process to avoid race conditions and to achieve accuracy while 
- joining; therefore, users should avoid matching huge windows in high volume streams. Based on the scenario, 
- using appropriate window sizes (by time or length) will help to achieve maximum performance.
+Note: Despite the optimizations, a join query is quite expensive when it comes to performance. This is because
+ the `WindowProcessor` is locked during the matching process to avoid race conditions and to achieve accuracy while 
+ joining. Therefore, avoid matching large windows in high volume streams. Based on the scenario, 
+ using appropriate window sizes (by time or length) helps to achieve maximum performance.
  
 ### [StateInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/org/wso2/siddhi/query/api/execution/query/input/stream/StateInputStream.java) Query Runtime (Pattern & Sequence)
 
 ![State Input Stream Query (Pattern & Sequence)](../images/architecture/siddhi-query-state.png "State Input Stream Query (Pattern & Sequence)")
 
 
-State input stream query runtime is generated for pattern and sequence queries. This consume events from one or more Stream Junctions 
-via ProcessStreamReceivers. There will be a ProcessStreamReceiver and a set of basic processors for each condition defined in the query. 
-When a ProcessStreamReceiver consume events they update the states with the incoming events that are generated by previous conditions, or 
-if its for the first condition in the query then it creates a new state and update that with the incoming event. This is then passed 
-to basic processors to perform filter and transformation operations. The states 
-that passes the basic processors are consumed by the PostStateProcessor and stored at the PreStateProcessor of the following pattern or 
-sequence condition. When the state reaches the final condition's PostStateProcessor 
-the output event is generated and emitted by QuerySelector. 
+The state input stream query runtime is generated for pattern and sequence queries. This consumes events from one or more stream junctions 
+via `ProcessStreamReceivers`. A `ProcessStreamReceiver` and a set of basic processors is defined in the query for each condition.
+When a `ProcessStreamReceiver` consumes the events, it updates the states with the incoming events that are generated by previous conditions. If the condition applied
+is the first condition in the query, then it creates a new state and updates that with the incoming event. This is then passed 
+to basic processors to perform filtering and transformation operations. The states 
+that pass the basic processors are consumed by the `PostStateProcessor` and stored at the `PreStateProcessor` of the following pattern or 
+sequence condition. When the state reaches the final condition's `PostStateProcessor`, 
+the output event is generated and emitted by `QuerySelector`. 
 
 ## Siddhi Partition Execution 
 
 ![Siddhi Partition](../images/architecture/siddhi-partition.png "Siddhi Partition")
 
-Partition is a wrapper around one or more siddhi queries and inner streams that connect them. 
-Partition is implemented in Siddhi as [PartitionRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/PartitionRuntime.java) 
-and each unique partition instances are implemented as [PartitionInstanceRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/PartitionInstanceRuntime.java)
+A partition is a wrapper around one or more Siddhi queries and inner streams that connect them. 
+A partition is implemented in Siddhi as a [PartitionRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/PartitionRuntime.java),
+and each unique partition instance is implemented as a [PartitionInstanceRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/PartitionInstanceRuntime.java)
 Each partitioned stream entering the partition
-goes through the appropriate [PartitionStreamReceiver](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/PartitionStreamReceiver.java)
-and the [PartitionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/executor/PartitionExecutor.java)
+goes through the appropriate [PartitionStreamReceiver](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/PartitionStreamReceiver.java).
+The [PartitionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/executor/PartitionExecutor.java)
  of stream receiver evaluates   
 the incoming events to identify the partition key using the [RangePartitionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/executor/RangePartitionExecutor.java)
- or using the [ValuePartitionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/executor/ValuePartitionExecutor.java)
+ or the [ValuePartitionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/partition/executor/ValuePartitionExecutor.java),
   and passes 
-the events to the QueryRuntimes of the appropriate PartitionInstanceRuntime based on the partition key. 
-If a PartitionInstanceRuntime is not available for the given partition key its dynamically generated the appropriate QueryRuntimes and InnerStreamJunctions. 
+the events to the `QueryRuntimes` of the appropriate `PartitionInstanceRuntime` based on the partition key. 
+If a `PartitionInstanceRuntime` is not available for the given partition key, it is dynamically generated via the relevant `QueryRuntimes` and `InnerStreamJunctions`. 
   
-Based on the partition definition the QueryRuntimes in the PartitionInstanceRuntime wire themselves via inner StreamJunctions or using 
-StreamJunctions outside the partitions. 
-When a partition query consumes a non partitioned global stream, all instances of its QueryRuntime that are part of multiple PartitionInstanceRuntime will 
+Based on the partition definition, the `QueryRuntimes` in the `PartitionInstanceRuntime` wire themselves via inner `StreamJunctions` or using 
+`StreamJunctions` outside the partitions. 
+When a partition query consumes a non partitioned global stream, all instances of its `QueryRuntime` that are part of multiple `PartitionInstanceRuntimes`
 receive the same event as depicted in the above diagram. 
 
 ## Siddhi Event Formats
@@ -331,30 +331,31 @@ Siddhi has three event formats.
 
 - [Event](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/event/Event.java) 
 
-    This is the format exposed to end users when they send events via InputHandler, and consume events via StreamCallback or QueryCallback.
-    This comprises an `Object[]` containing all the values in accordance to the corresponding stream. 
+    This is the format exposed to end users when they send events via Input Handler, and consume events via Stream Callback or Query Callback.
+    This consists of an `Object[]` that contains all the values in accordance to the corresponding stream. 
      
 - [StreamEvent](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/event/stream/StreamEvent.java) (Subtype of [ComplexEvent](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/event/ComplexEvent.java))
 
-    This is used within queries. This contains three `Object[]`s named as beforeWindowData, onAfterWindowData and outputData. Here the 
-    outputData contains the values in accordance to the output Stream of the query, and beforeWindowData contains values that are only used 
-    in Processors that are executed before the WindowProcessor, the onAfterWindowData will contains values that are only used by WindowProcessor
-    and other processors that are after it but not sent out as output. Here the content on the beforeWindowData will be cleared before the 
-    event enter into the WindowProcessor to optimize the amount to data that will be stored in in-memory at windows. StreamEvents can also be chained 
-    by linking each other via the `next` property in them.  
+    This is used within queries. This contains the following three `Object[]`s: 
+    - `beforeWindowData`: This contains values that are only used in processors that are executed before the `WindowProcessor`.
+    - `onAfterWindowData`: This contains values that are only used by the `WindowProcessor` and the other processors that follow it, but not sent as output.
+    - `outputData`: This contains the values that comply with the output stream of the query.
+  
+   In order to optimize the amount of data that is stored in the in-memory at windows, the content in `beforeWindowData` is cleared before the 
+    event enters the `WindowProcessor`. StreamEvents can also be chained by linking each other via the `next` property in them.  
     
 - [StateEvent](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/event/state/StateEvent.java) (Subtype of [ComplexEvent](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/event/ComplexEvent.java))
 
-    This is used in Joins, Patterns and Sequences when we need to associate events of multiple different type of Streams, Tables, Windows and Aggregations together.
-    This has a collection StreamEvents representing different streams, tables, etc, that are used in the query, and outputData for containing the values that need for the query output. 
-    StreamEvents can also be chained by linking each other with the `next` property in them. 
+    This is used in Joins, Patterns and Sequences when we need to associate events of multiple streams, tables, windows and aggregations of different types together.
+    This has a collection of `StreamEvents` representing different streams, tables, etc, that are used in the query, and `outputData` to contain the values that are needed for the query output. 
+    `StreamEvents` can also be chained by linking each other with the `next` property in them. 
     
 **Event Chunks**
 
-Event Chunks provide an easier way of manipulating the chain of StreamEvents and StateEvents, such that they are be easily iterated, inserted and removed. 
+Event Chunks provide an easier way of manipulating the chain of `StreamEvents` and `StateEvents` so that they are be easily iterated, inserted and removed. 
 
-## Summery 
+## Summary 
 
-This article focuses on describing the architecture of Siddhi, rationalize the architectural decisions made, and
+This article focuses on describing the architecture of Siddhi and rationalizing the architectural decisions made. It
 also explains the key features of Siddhi.  
 This is possibly a great starting point for new developers to understand Siddhi and to start contributing to it.
