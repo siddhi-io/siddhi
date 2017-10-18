@@ -46,6 +46,21 @@ by a semicolon `( ; )` as shown in the below syntax.
         ;
 ```
 
+**Example**
+Siddhi Application named `Temperature-Analytics` defined with a stream named `TempStream` and a query 
+named `5minAvgQuery` for processing it.
+
+```sql
+@app:name('Temperature-Analytics')
+
+define stream TempStream (deviceID long, roomNo int, temp double);
+
+@name('5minAvgQuery')
+from TempStream#window.time(5 min)
+select roomNo, avg(temp) as avgTemp
+  group by room
+insert into OutputStream;
+```
 
 ## Stream
 A stream is a logical series of events ordered in time. Its schema is defined via the **stream definition**.
