@@ -516,11 +516,11 @@ public class SiddhiAppRuntime {
     }
 
     /**
-     * Get the Siddhi App matric prefix.
+     * Get the Siddhi App metric prefix.
      *
-     * @return Siddhi App matric prefix.
+     * @return Siddhi App metric prefix.
      */
-    public String getSidhhiAppMatricPrefix() {
+    public String getSidhhiAppMetricPrefix() {
         return siddhiAppContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix();
     }
 
