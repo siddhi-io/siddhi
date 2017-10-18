@@ -212,9 +212,9 @@ public class QueryParserHelper {
 
     public static LatencyTracker getLatencyTracker(SiddhiAppContext siddhiAppContext, String name, String type) {
         LatencyTracker latencyTracker = null;
-        if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
+        if (siddhiAppContext.getStatisticsManager() != null) {
             String metricName =
-                    siddhiAppContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix() +
+                    siddhiAppContext.getSiddhiContext().getStatisticsConfiguration().getMetricPrefix() +
                             SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_EXECUTION_PLANS +
                             SiddhiConstants.METRIC_DELIMITER + siddhiAppContext.getName() +
                             SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_SIDDHI +
