@@ -505,4 +505,27 @@ public class SiddhiAppRuntime {
     public void handleExceptionWith(ExceptionHandler<Object> exceptionHandler) {
         siddhiAppContext.setDisruptorExceptionHandler(exceptionHandler);
     }
+
+    /**
+     * Method to check whether the Siddhi App statistics are enabled or not.
+     *
+     * @return Boolean value of Siddhi App statistics state
+     */
+    public boolean isSiddhiAppStatEnabled() {
+        return siddhiAppContext.isStatsEnabled();
+    }
+
+    /**
+     * Get the Siddhi App matric prefix.
+     *
+     * @return Siddhi App matric prefix.
+     */
+    public String getSidhhiAppMatricPrefix() {
+        return siddhiAppContext.getSiddhiContext().getStatisticsConfiguration().getMatricPrefix();
+    }
+
+    public boolean disableSiddhiAppStats() {
+        // TODO: 10/18/17
+        return false;
+    }
 }
