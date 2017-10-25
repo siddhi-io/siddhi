@@ -1,4 +1,5 @@
-Siddhi Application can be written in a Streaming SQL language to process event streams and identify complex event occurrences.
+Siddhi Application can be written in a Streaming SQL language to process event streams and identify complex event 
+occurrences.
 
 Siddhi Application can run 
 
@@ -28,7 +29,7 @@ demanding, continuous-intelligence applications that enhance situation awareness
 
 Basically a CEP receives data event-by-event and processes them in real time to give meaningful information.
 
-#### Overview of Siddhi
+#### 2. Overview of Siddhi
 ![](../images/siddhi-overview.png?raw=true "Overview")
 
 As you can see above Siddhi can,
@@ -44,12 +45,13 @@ query and starting **a Siddhi application**, it will
 3. add the high level data generated to each event
 4. send them to the output stream.
 
-#### Using Siddhi for the First Time
+#### 3. Using Siddhi for the First Time
 We will use WSO2 Stream Processor(will be addressed as _‘SP_’ hereafter) — a server version of Siddhi that has 
 sophisticated editor with GUI (called _“Stream Processor Studio”_)where you can write your query and simulate events in 
 a data stream.
 
-**Step 1** — Install [Oracle Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) version 1.8\
+**Step 1** — Install 
+[Oracle Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) version 1.8\
 **Step 2** — Set the JAVA_HOME environment variable\
 **Step 3** — Download the [WSO2 Stream Processor](https://github.com/wso2/product-sp/releases)\
 **Step 4** — Extract the downloaded zip and navigate to <SP_HOME>/bin (SP_HOME refers to the extracted folder)\
@@ -75,30 +77,30 @@ After successfully starting the SP and accessing the editor it should display th
 \
 ![](../images/sp-studio.png?raw=true "Stream Processor Studio")
 
-#### Siddhi ‘Hello World!’ — Your First Siddhi Query
-Siddhi QL is a rich, compact, easy-to-learn SQL-like language. **We will first learn how to add data from events 
-one-by-one** and output total value with each event. Siddhi has lot of in-built functions and extensions available for 
-complex analysis but we will start with a simple one. You can find more information about the grammar and the functions 
-in [Siddhi Query Guide](https://wso2.github.io/siddhi/documentation/siddhi-4.0/).\
+#### 4. Siddhi ‘Hello World!’ — Your First Siddhi Query
+Siddhi QL is a rich, compact, easy-to-learn SQL-like language. **We will first learn how to find the total** of values 
+coming in a stream and output total value with each event. Siddhi has lot of in-built functions and extensions 
+available for complex analysis but we will start with a simple one. You can find more information about the grammar 
+and the functions in [Siddhi Query Guide](https://wso2.github.io/siddhi/documentation/siddhi-4.0/).\
 \
-We will **consider a scenario where we are loading cargo boxes into a ship**. We need to keep track of the total weight of 
-the cargo added. **Measuring the weight of a cargo box when loading is treated as an event**.
+We will **consider a scenario where we are loading cargo boxes into a ship**. We need to keep track of the total 
+weight of the cargo added. **Measuring the weight of a cargo box when loading is treated as an event**.
 \
 \
 ![](../images/loading-ship.jpg?raw=true "Loading Cargo on Ship")
 \
 \
-We can write a Siddhi program for the above scenario which will have 3 parts.\
+We can write a Siddhi program for the above scenario which will have 4 parts.\
 \
 **Part 1 — Giving our Siddhi application a suitable name.** This is a Siddhi routine. Here we will name our app as 
-_“HelloWorlApp”_
+_“HelloWorldApp”_
 
 ```
 @App:name("HelloWorldApp")
 ```
 \
 **Part 2 — Defining the input stream.** This will have a name for the input stream, name and type of the data coming 
-with each event. Here,\
+with each event. Here,
 * Name of the input stream — _“CargoStream”_
 * name of the data in each event — _“weight”_
 * Type of the data _“weight”_ — int
@@ -107,7 +109,16 @@ with each event. Here,\
 define stream CargoStream (weight int);
 ```
 \
-**Part 3 — The actual Siddhi query.** Here we will specify 4 things.\
+**Part 3 - Defining the output stream.** This will have the same info as the previous definition but we will add a 
+**sink** to log the output stream so that we can observe the output values. (Sink is the Siddhi way to publish streams. 
+This particular log type sink will just log the stream events. Learn more about sinks 
+[here](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink))
+```
+@sink(type='log',  priority='info')
+define stream OutputStream(weight int, totalWeight long);
+```
+\
+**Part 4 — The actual Siddhi query.** Here we will specify 4 things.
 1. A name for the query — _“HelloWorldQuery”_
 2. which stream should be taken into processing — _“CargoStream”_
 3. what data we require in the output stream — _“weight”_, _“totalWeight”_
@@ -118,7 +129,30 @@ from CargoStream
 select weight, sum(weight) as totalWeight
 insert into OutputStream;
 ```
+![](../images/hello-query.png?raw=true "Hello World in Stream Processor Studio")
 
+#### 5. Simulating Events
+The Stream Processor Studio has in-built support to simulate events. You can do it using the _“Event Simulator”_ 
+panel in the left side of the Stream Processor Studio. **You should save your HelloWorldApp by going to file -> 
+save before event simulation.** Then click on the _“Event Simulator”_ and configure it as shown below.
+
+![](../images/event-sim.png?raw=true "Simulating Events in Stream Processor Studio")
+
+**Step 1 — Configurations,**
+* Siddhi App Name — _“HelloWorldApp”_
+* Stream Name — _“CargoStream”_
+* Timestamp — (Leave it blank)
+* weight — 2 (or some integer)
+
+**Step 2 — Click on “Run” mode and hit the “Start” button** to start the Siddhi App. This will print a message 
+_“HelloWorldApp.siddhi Started Successfully!”_ in the Stream Processor Studio console.\
+**Step 3 — Click on the “Send” button and observe the terminal** where you started WSO2 Stream Processor Text Editor. 
+You could see a log that contains _“outputData=[2, 2]”_. Click on send again and you can see a log with 
+_“outputData=[2, 4]”_. You can even change the value of the weight and send to see it getting summed up.
+
+![](../images/log.png?raw=true "Terminal after sending 2 twice")
+
+Bravo! You have successfully finished you Siddhi Hello World!
 
 ## Using Siddhi as an Java Library
 
