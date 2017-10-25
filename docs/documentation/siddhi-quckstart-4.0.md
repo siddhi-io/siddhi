@@ -129,6 +129,7 @@ from CargoStream
 select weight, sum(weight) as totalWeight
 insert into OutputStream;
 ```
+\
 ![](../images/hello-query.png?raw=true "Hello World in Stream Processor Studio")
 
 #### 5. Simulating Events
@@ -152,9 +153,51 @@ _“outputData=[2, 4]”_. You can even change the value of the weight and send 
 
 ![](../images/log.png?raw=true "Terminal after sending 2 twice")
 
-Bravo! You have successfully finished you Siddhi Hello World!
+Bravo! You have successfully finished you Siddhi Hello World! Feel free to play around with the query and event 
+simulation to get better understanding.
 
-## Using Siddhi as an Java Library
+#### 6. What After Hello World? - Window Processing
+As mentioned previously, Siddhi has a lot of functionalities. **In this section we will see how to do window processing**
+with Siddhi.\
+\
+**Upto now** we have been processing events one-by-one i.e **we kept only one event in-memory for processing**. 
+Processed events are sent out. [Window processing](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window) 
+is a method where we will keep a few events stored in memory for operations such as finding average or maximum value.\
+\
+Let's imagine that when we are loading cargo boxes into the ship **we need to keep track of the average weight of 
+recently loaded boxes** so that we can roughly estimate how many more boxes we can load considering the capacity of 
+the ship. For that matter we will try to find the **average of last three boxes** with each event.\
+\
+We need to modify our query as following for window processing,
+```
+@info(name='HelloWorldQuery') 
+from CargoStream#window.length(3)
+select weight, sum(weight) as totalWeight, avg(weight) as averageWeight
+insert into OutputStream;
+```
+
+* `from CargoStream#window.length(3)` - Here we are asking Siddhi to keep last 3 events in memory for processing
+* `avg(weight) as averageWeight` - Here we are finding the average of events stored in the window and sending the 
+average value out as _"averageWeight"_
+
+Also we need to modify the _"OutputStream"_ definition to accomodate the new _"averageWeight"_
+```
+define stream OutputStream(weight int, totalWeight long, averageWeight double);
+```
+
+Now the query should look like the following,
+
+![](../images/window-processing.png?raw=true "Window Processing with Siddhi")
+
+Now you can send events using Event Simulator and observe the log to see average of last three events along with 
+the total and weight.\
+\
+It is also notable that the window only keeps 3 events in-memory. When the 4th event comes the first event is 
+deleted from memory so that memory usage doesn't grow. You can learn more functionalities of Siddhi at [Siddhi Query 
+Guide](https://wso2.github.io/siddhi/documentation/siddhi-4.0/).
+
+
+## Using Siddhi as a Java Library
 
 To use Siddhi as a library by embedding it in a Java project, follow the steps below:
 
