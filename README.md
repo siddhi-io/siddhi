@@ -89,7 +89,7 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-M111">4.0.0-M111</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-M114">4.0.0-M114</a>.
 
 ## Jenkins Build Status
 
@@ -110,4 +110,5 @@ Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.
 * Our unique approach ensures that all support leverages our open development methodology and is provided by the very same engineers who build the technology. 
 * For more details and to take advantage of this unique opportunity, contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>. 
 
-Siddhi was joint research project initiated by WSO2 and University of Moratuwa, Sri Lanka.
+
+Siddhi was joint research project initiated by <a target="_blank" href="http://wso2.com/"> WSO2</a> and <a target="_blank" href="http://www.mrt.ac.lk/web/">University of Moratuwa</a>, Sri Lanka.
