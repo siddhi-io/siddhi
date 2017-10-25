@@ -110,11 +110,11 @@ define stream CargoStream (weight int);
 ```
 \
 **Part 3 - Defining the output stream.** This will have the same info as the previous definition but we will add a 
-**sink** to log the output stream so that we can observe the output values. (Sink is the Siddhi way to publish streams. 
-This particular log type sink will just log the stream events. Learn more about sinks 
+_"sink"_ to log the output stream so that we can observe the output values. (**Sink is the Siddhi way to publish 
+streams.** This particular log type sink will just log the stream events. Learn more about sinks 
 [here](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink))
 ```
-@sink(type='log',  priority='info')
+@sink(type='log',  prefix='LOGGER')
 define stream OutputStream(weight int, totalWeight long);
 ```
 \
@@ -147,6 +147,7 @@ save before event simulation.** Then click on the _“Event Simulator”_ and co
 
 **Step 2 — Click on “Run” mode and hit the “Start” button** to start the Siddhi App. This will print a message 
 _“HelloWorldApp.siddhi Started Successfully!”_ in the Stream Processor Studio console.\
+\
 **Step 3 — Click on the “Send” button and observe the terminal** where you started WSO2 Stream Processor Text Editor. 
 You could see a log that contains _“outputData=[2, 2]”_. Click on send again and you can see a log with 
 _“outputData=[2, 4]”_. You can even change the value of the weight and send to see it getting summed up.
@@ -166,8 +167,10 @@ is a method where we will keep a few events stored in memory for operations such
 \
 Let's imagine that when we are loading cargo boxes into the ship **we need to keep track of the average weight of 
 recently loaded boxes** so that we can roughly estimate how many more boxes we can load considering the capacity of 
-the ship. For that matter we will try to find the **average of last three boxes** with each event.\
-\
+the ship. For that matter we will try to find the **average of last three boxes** with each event.
+
+![](../images/window.jpg?raw=true "Terminal after sending 2 twice")
+
 We need to modify our query as following for window processing,
 ```
 @info(name='HelloWorldQuery') 
