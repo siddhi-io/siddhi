@@ -21,7 +21,9 @@ This beginner's guide has **6 sections** as follows,
 4. Siddhi ‘Hello World!’ — Your **First Siddhi Query**
 5. Simulating Events - **testing** your query with simulated events
 6. What After Hello World? - **Window Processing**
-
+<br/>
+<br/>
+<br/>
 #### 1. Complex Event Processing (CEP)
 First we will look at **what an event is** through an example. **If we take the transactions through an ATM as a data 
 stream, one withdrawal from it would be an event**. This event will contain data about amount, time, account number etc. 
@@ -36,7 +38,9 @@ event data** that provides insight into what is happening."
 demanding, continuous-intelligence applications that enhance situation awareness and support real-time decisions."
 
 Basically a CEP receives data event-by-event and processes them in real time to give meaningful information.
-
+<br/>
+<br/>
+<br/>
 #### 2. Overview of Siddhi
 ![](../images/siddhi-overview.png?raw=true "Overview")
 
@@ -52,7 +56,9 @@ query and starting **a Siddhi application**, it will
 2. process the input data in each event
 3. add the high level data generated to each event
 4. send them to the output stream.
-
+<br/>
+<br/>
+<br/>
 #### 3. Using Siddhi for the First Time
 We will use WSO2 Stream Processor(will be addressed as _‘SP_’ hereafter) — a server version of Siddhi that has 
 sophisticated editor with GUI (called _**“Stream Processor Studio”**_)where you can write your query and simulate events in 
@@ -85,7 +91,9 @@ http://localhost:9090/editor
 After successfully starting the SP and accessing the editor it should display the following,\
 \
 ![](../images/sp-studio.png?raw=true "Stream Processor Studio")
-
+<br/>
+<br/>
+<br/>
 #### 4. Siddhi ‘Hello World!’ — Your First Siddhi Query
 Siddhi QL is a rich, compact, easy-to-learn SQL-like language. **We will first learn how to find the total** of values 
 coming in a stream and output total value with each event. Siddhi has lot of in-built functions and extensions 
@@ -140,7 +148,9 @@ insert into OutputStream;
 ```
 \
 ![](../images/hello-query.png?raw=true "Hello World in Stream Processor Studio")
-
+<br/>
+<br/>
+<br/>
 #### 5. Simulating Events
 The Stream Processor Studio has in-built support to simulate events. You can do it using the _“Event Simulator”_ 
 panel in the left side of the Stream Processor Studio. **You should save your HelloWorldApp by going to file -> 
@@ -165,7 +175,9 @@ _“outputData=[2, 4]”_. You can even change the value of the weight and send 
 
 Bravo! You have successfully finished you Siddhi Hello World! Feel free to play around with the query and event 
 simulation to get better understanding.
-
+<br/>
+<br/>
+<br/>
 #### 6. What After Hello World? - Window Processing
 As mentioned previously, Siddhi has a lot of functionalities. **In this section we will see how to do window processing**
 with Siddhi.\
