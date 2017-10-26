@@ -14,18 +14,26 @@ is processing data streams in real time. It is written in Java and thoroughly op
 Siddhi is used by many companies including Uber, and Cleveland Clinic. In fact **Uber processes more than 20 billion 
 events per day using Siddhi**. Before diving into how to use Siddhi we will first discuss about CEP.
 
+This beginner's guide has **6 sections** as follows,
+1. Complex Event Processing (CEP) - about the **domain** of Siddhi
+2. Overview of Siddhi - basic **architecture** explained
+3. Using Siddhi for the First Time - how to **set up** the software
+4. Siddhi ‘Hello World!’ — Your **First Siddhi Query**
+5. Simulating Events - **testing** your query with simulated events
+6. What After Hello World? - **Window Processing**
+
 #### 1. Complex Event Processing (CEP)
-First we will look at what an event is through an example. **If we take the transactions through an ATM as a data 
+First we will look at **what an event is** through an example. **If we take the transactions through an ATM as a data 
 stream, one withdrawal from it would be an event**. This event will contain data about amount, time, account number etc. 
 Many such transactions will make up a stream.
 
 [Gartner’s IT Glossary](https://www.gartner.com/it-glossary/complex-event-processing) defines CEP in the following way,
 
-_"CEP is a kind of computing in which **incoming data about events is distilled into more useful, higher level “complex” 
-event data** that provides insight into what is happening._
+>"CEP is a kind of computing in which **incoming data about events is distilled into more useful, higher level “complex” 
+event data** that provides insight into what is happening."
 
-_**CEP is event-driven** because the computation is triggered by the receipt of event data. CEP is used for highly 
-demanding, continuous-intelligence applications that enhance situation awareness and support real-time decisions."_
+>"**CEP is event-driven** because the computation is triggered by the receipt of event data. CEP is used for highly 
+demanding, continuous-intelligence applications that enhance situation awareness and support real-time decisions."
 
 Basically a CEP receives data event-by-event and processes them in real time to give meaningful information.
 
@@ -47,12 +55,13 @@ query and starting **a Siddhi application**, it will
 
 #### 3. Using Siddhi for the First Time
 We will use WSO2 Stream Processor(will be addressed as _‘SP_’ hereafter) — a server version of Siddhi that has 
-sophisticated editor with GUI (called _“Stream Processor Studio”_)where you can write your query and simulate events in 
+sophisticated editor with GUI (called _**“Stream Processor Studio”**_)where you can write your query and simulate events in 
 a data stream.
 
 **Step 1** — Install 
 [Oracle Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) version 1.8\
-**Step 2** — Set the JAVA_HOME environment variable\
+**Step 2** — [Set the JAVA_HOME](https://docs.oracle.com/cd/E19182-01/820-7851/inst_cli_jdk_javahome_t/) environment 
+variable\
 **Step 3** — Download the [WSO2 Stream Processor](https://github.com/wso2/product-sp/releases)\
 **Step 4** — Extract the downloaded zip and navigate to <SP_HOME>/bin (SP_HOME refers to the extracted folder)\
 **Step 5** — Issue the following command in command prompt(Windows)/terminal(Linux)\
@@ -61,11 +70,11 @@ For Windows: editor.bat
 For Linux: sh editor.sh
 ```
 \
-After successfully starting the SP the terminal should look like this in Linux,\
+Refer to the SP [Quick Start Guide](https://docs.wso2.com/display/SP400/Quick+Start+Guide) for more information.
+After successfully starting the SP editor the terminal should look like this in Linux,\
 \
 ![](../images/after-starting-sp.png?raw=true "Terminal after starting WSO2 Stream Processor Text Editor")
 
-Refer to the SP [Quick Start Guide](https://docs.wso2.com/display/SP400/Quick+Start+Guide) for more information. 
 After starting the WSO2 Stream Processor access the Text 
 Editor by visiting the following link in your browser
 
@@ -90,7 +99,7 @@ weight of the cargo added. **Measuring the weight of a cargo box when loading is
 ![](../images/loading-ship.jpg?raw=true "Loading Cargo on Ship")
 \
 \
-We can write a Siddhi program for the above scenario which will have 4 parts.\
+We can write a Siddhi program for the above scenario which will have **4 parts**.\
 \
 **Part 1 — Giving our Siddhi application a suitable name.** This is a Siddhi routine. Here we will name our app as 
 _“HelloWorldApp”_
