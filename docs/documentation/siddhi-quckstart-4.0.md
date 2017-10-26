@@ -30,6 +30,8 @@ First we will look at **what an event is** through an example. **If we take the 
 stream, one withdrawal from it would be an event**. This event will contain data about amount, time, account number etc. 
 Many such transactions will make up a stream.
 
+![](../images/event-stream.png?raw=true "Event Stream")
+
 [Gartner’s IT Glossary](https://www.gartner.com/it-glossary/complex-event-processing) defines CEP in the following way,
 
 >"CEP is a kind of computing in which **incoming data about events is distilled into more useful, higher level “complex” 
@@ -37,6 +39,8 @@ event data** that provides insight into what is happening."
 
 >"**CEP is event-driven** because the computation is triggered by the receipt of event data. CEP is used for highly 
 demanding, continuous-intelligence applications that enhance situation awareness and support real-time decisions."
+
+![](../images/siddhi-basic.png?raw=true "Siddhi Basic Representation")
 
 Basically a CEP receives data event-by-event and processes them in real time to give meaningful information.
 <br/>
@@ -185,14 +189,15 @@ As mentioned previously, Siddhi has a lot of functionalities. **In this section 
 with Siddhi.\
 \
 **Upto now** we have been processing events one-by-one i.e **we kept only one event in-memory for processing**. 
-Processed events are sent out. [Window processing](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window) 
+Events are sent out after processing. 
+[Window processing](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window) 
 is a method where we will keep a few events stored in memory for operations such as finding average or maximum value.\
 \
 Let's imagine that when we are loading cargo boxes into the ship **we need to keep track of the average weight of 
 recently loaded boxes** so that we can roughly estimate how many more boxes we can load considering the capacity of 
 the ship. For that matter we will try to find the **average of last three boxes** with each event.
 
-![](../images/window.jpg?raw=true "Terminal after sending 2 twice")
+![](../images/window.png?raw=true "Terminal after sending 2 twice")
 
 We need to modify our query as following for window processing,
 ```
