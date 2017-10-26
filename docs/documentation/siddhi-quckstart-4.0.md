@@ -21,9 +21,10 @@ This beginner's guide has **6 sections** as follows,
 4. Siddhi ‘Hello World!’ — Your **First Siddhi Query**
 5. Simulating Events - **testing** your query with simulated events
 6. What After Hello World? - **Window Processing**
+
 <br/>
 <br/>
-<br/>
+
 #### 1. Complex Event Processing (CEP)
 First we will look at **what an event is** through an example. **If we take the transactions through an ATM as a data 
 stream, one withdrawal from it would be an event**. This event will contain data about amount, time, account number etc. 
@@ -56,9 +57,10 @@ query and starting **a Siddhi application**, it will
 2. process the input data in each event
 3. add the high level data generated to each event
 4. send them to the output stream.
+
 <br/>
 <br/>
-<br/>
+
 #### 3. Using Siddhi for the First Time
 We will use WSO2 Stream Processor(will be addressed as _‘SP_’ hereafter) — a server version of Siddhi that has 
 sophisticated editor with GUI (called _**“Stream Processor Studio”**_)where you can write your query and simulate events in 
