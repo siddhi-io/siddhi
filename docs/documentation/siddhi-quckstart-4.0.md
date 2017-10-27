@@ -7,7 +7,8 @@ Siddhi is used by many companies including Uber, and eBay (via Apache Eagle). In
 events per day using Siddhi** for fraud analytics and Siddhi is used in Apache Eagle as a policy enforcement engine.
 
 The quick start guide has **6 sections** as following,
-1. Overview on Stream Processing and Complex Event Processing (CEP) - about the **domain** of Siddhi
+
+1. Overview on Stream Processing and Complex Event Processing - about the **domain** of Siddhi
 2. Overview of Siddhi - basic **architecture** explained
 3. Using Siddhi for the First Time - how to **set up** the software
 4. Siddhi ‘Hello World!’ — Your **First Siddhi Application**
@@ -76,12 +77,13 @@ sophisticated editor with GUI (called _**“Stream Processor Studio”**_)where 
 as a data stream.
 
 **Step 1** — Install 
-[Oracle Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) version 1.8\
+[Oracle Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) version 1.8 <br>
 **Step 2** — [Set the JAVA_HOME](https://docs.oracle.com/cd/E19182-01/820-7851/inst_cli_jdk_javahome_t/) environment 
-variable\
-**Step 3** — Download the latest [WSO2 Stream Processor](https://github.com/wso2/product-sp/releases)\
-**Step 4** — Extract the downloaded zip and navigate to <SP_HOME>/bin (SP_HOME refers to the extracted folder)\
-**Step 5** — Issue the following command in command prompt(Windows) / terminal(Linux)\
+variable <br>
+**Step 3** — Download the latest [WSO2 Stream Processor](https://github.com/wso2/product-sp/releases) <br>
+**Step 4** — Extract the downloaded zip and navigate to `<SP_HOME>/bin` <br> (`SP_HOME` refers to the extracted folder) <br>
+**Step 5** — Issue the following command in command prompt (Windows) / terminal (Linux) 
+
 ```
 For Windows: editor.bat
 For Linux: ./editor.sh
@@ -110,7 +112,7 @@ and its functions in [Siddhi Query Guide](https://wso2.github.io/siddhi/document
 We will **consider a scenario where we are loading cargo boxes into a ship**. We need to keep track of the total 
 weight of the cargo added. **Weight measurement of a cargo box when loading is treated as an event**.
 
-![](../images/quickstart/loading-ship.jpg?raw=true "Loading Cargo on Ship")
+![](../images/quickstart/loading-ship.jpeg?raw=true "Loading Cargo on Ship")
 
 We can write a Siddhi program for the above scenario which will have **4 parts**.
 
@@ -123,7 +125,7 @@ _“HelloWorldApp”_
 **Part 2 — Defining the input stream.** Stream will have a name and a schema defining the data that each of it's incoming event will contain.
 The event data attributes are expressed as name and type pairs. Here,
 
-* Name of the input stream — _“CargoStream”_ \
+* Name of the input stream — _“CargoStream”_ <br>
 This contains only one data attribute:
 * name of the data in each event — _“weight”_
 * Type of the data _“weight”_ — int
@@ -137,10 +139,11 @@ _"sink"_  to log the `OutputStream` so that we can observe the output values. (*
 streams to external systems.** This particular `log` type sink will just log the stream events. Learn more about sinks 
 [here](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink))
 ```
-@sink(type='log',  prefix='LOGGER')
+@sink(type='log', prefix='LOGGER')
 define stream OutputStream(weight int, totalWeight long);
 ```
 **Part 4 — The actual Siddhi query.** Here we will specify 5 things.
+
 1. A name for the query — _“HelloWorldQuery”_
 2. Which stream should be taken into processing — _“CargoStream”_
 3. What data we require in the output stream — _“weight”_, _“totalWeight”_
@@ -165,6 +168,7 @@ panel in the left side of the Stream Processor Studio. **You should save your He
 ![](../images/quickstart/event-simulation.png?raw=true "Simulating Events in Stream Processor Studio")
 
 **Step 1 — Configurations,**
+
 * Siddhi App Name — _“HelloWorldApp”_
 * Stream Name — _“CargoStream”_
 * Timestamp — (Leave it blank)
@@ -214,9 +218,11 @@ insert into OutputStream;
 average value as _"averageWeight"_ (Note: Now the `sum` also calculates the `totalWeight` based on last three events).
 
 We also need to modify the _"OutputStream"_ definition to accommodate the new _"averageWeight"_
+
 ```
 define stream OutputStream(weight int, totalWeight long, averageWeight double);
 ```
+
 Now the updated Siddhi App should look like the following,
 
 ![](../images/quickstart/window-processing-app.png?raw=true "Window Processing with Siddhi")
