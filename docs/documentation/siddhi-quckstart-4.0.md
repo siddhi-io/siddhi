@@ -35,7 +35,7 @@ and act in real time**.
 
 >"CEP is a kind of computing in which **incoming data about events is distilled into more useful, higher level “complex” 
 event data** that provides insight into what is happening."
-
+>
 >"**CEP is event-driven** because the computation is triggered by the receipt of event data. CEP is used for highly 
 demanding, continuous-intelligence applications that enhance situation awareness and support real-time decisions."
 
@@ -86,21 +86,18 @@ variable\
 For Windows: editor.bat
 For Linux: ./editor.sh
 ```
-\
 For more details on WSO2 Stream Processor refer it's [Quick Start Guide](https://docs.wso2.com/display/SP400/Quick+Start+Guide).
-\
-After successfully starting the Stream Processor Studio the terminal should look like this in Linux,\
-\
+
+After successfully starting the Stream Processor Studio the terminal should look like this in Linux,
+
 ![](../images/quickstart/after-starting-sp.png?raw=true "Terminal after starting WSO2 Stream Processor Text Editor")
 
 After starting the WSO2 Stream Processor access the Stream Processor Studio by visiting the following link in your browser
-
 ```
 http://localhost:9090/editor
 ```
-\
 This should lead you the Stream Processor Studio landing page,
-\
+
 ![](../images/quickstart/sp-studio.png?raw=true "Stream Processor Studio")
 
 ## 4. Siddhi ‘Hello World!’ — Your First Siddhi Application
@@ -108,23 +105,21 @@ This should lead you the Stream Processor Studio landing page,
 Siddhi Streaming SQL is a rich, compact, easy-to-learn SQL-like language. **We will first learn how to find the total** of values 
 coming in a data stream and output current running total value with each event. Siddhi has lot of in-built functions and extensions 
 available for complex analysis but we will start with a simple one. You can find more information about the grammar 
-and its functions in [Siddhi Query Guide](https://wso2.github.io/siddhi/documentation/siddhi-4.0/).\
-\
+and its functions in [Siddhi Query Guide](https://wso2.github.io/siddhi/documentation/siddhi-4.0/).
+
 We will **consider a scenario where we are loading cargo boxes into a ship**. We need to keep track of the total 
 weight of the cargo added. **Weight measurement of a cargo box when loading is treated as an event**.
-\
+
 ![](../images/quickstart/loading-ship.jpg?raw=true "Loading Cargo on Ship")
-\
-\
-We can write a Siddhi program for the above scenario which will have **4 parts**.\
-\
+
+We can write a Siddhi program for the above scenario which will have **4 parts**.
+
 **Part 1 — Giving our Siddhi application a suitable name.** This is a Siddhi routine. Here we will name our app as 
 _“HelloWorldApp”_
 
 ```
 @App:name("HelloWorldApp")
 ```
-\
 **Part 2 — Defining the input stream.** Stream will have a name and a schema defining the data that each of it's incoming event will contain.
 The event data attributes are expressed as name and type pairs. Here,
 
@@ -136,7 +131,6 @@ This contains only one data attribute:
 ```
 define stream CargoStream (weight int);
 ```
-\
 **Part 3 - Defining the output stream.** This will have the same info as the previous definition with an additional 
 _totalWeight_ attribute containing the total weight calculated so far. Here we will add a 
 _"sink"_  to log the `OutputStream` so that we can observe the output values. (**Sink is the Siddhi way to publish 
@@ -146,7 +140,6 @@ streams to external systems.** This particular `log` type sink will just log the
 @sink(type='log',  prefix='LOGGER')
 define stream OutputStream(weight int, totalWeight long);
 ```
-\
 **Part 4 — The actual Siddhi query.** Here we will specify 5 things.
 1. A name for the query — _“HelloWorldQuery”_
 2. Which stream should be taken into processing — _“CargoStream”_
@@ -160,7 +153,7 @@ from CargoStream
 select weight, sum(weight) as totalWeight
 insert into OutputStream;
 ```
-\
+
 ![](../images/quickstart/hello-query.png?raw=true "Hello World in Stream Processor Studio")
 
 ## 5. Simulating Events
@@ -179,8 +172,8 @@ panel in the left side of the Stream Processor Studio. **You should save your He
 
 **Step 2 — Click on “Run” mode and hit the “Start” button**. This will start the Siddhi App. 
 You can verify Siddhi app getting started by the message 
-_“HelloWorldApp.siddhi Started Successfully!”_ printed in the Stream Processor Studio console.\
-\
+_“HelloWorldApp.siddhi Started Successfully!”_ printed in the Stream Processor Studio console.
+
 **Step 3 — Click on the “Send” button and observe the terminal** where you started WSO2 Stream Processor Studio. 
 You could see a log that contains _“outputData=[2, 2]”_. Click on send again and you should see a log with 
 _“outputData=[2, 4]”_. You can change the value of the weight and send it to see how its getting summed up.
@@ -224,7 +217,6 @@ We also need to modify the _"OutputStream"_ definition to accommodate the new _"
 ```
 define stream OutputStream(weight int, totalWeight long, averageWeight double);
 ```
-
 Now the updated Siddhi App should look like the following,
 
 ![](../images/quickstart/window-processing-app.png?raw=true "Window Processing with Siddhi")
@@ -237,8 +229,7 @@ first event in the window get removed from memory. This will not make the memory
 optimizations to reduce memory consumptions refer [Siddhi Architecture](https://wso2.github.io/siddhi/documentation/siddhi-architecture/) 
 for more details.  
 
-You can learn about more Siddhi functionalities from [Siddhi Query 
-Guide](https://wso2.github.io/siddhi/documentation/siddhi-4.0/).
+You can learn about more Siddhi functionalities from [Siddhi Query Guide](https://wso2.github.io/siddhi/documentation/siddhi-4.0/).
 
 Feel free to play around with the Siddhi and event simulation to get better understanding.
 
