@@ -105,7 +105,12 @@ public class SiddhiAppRuntimeBuilder {
         if (currentDefinition != null) {
             streamDefinition = (StreamDefinition) currentDefinition;
         }
-        DefinitionParserHelper.addStreamJunction(streamDefinition, streamJunctionMap, siddhiAppContext);
+        try {
+            DefinitionParserHelper.addStreamJunction(streamDefinition, streamJunctionMap, siddhiAppContext);
+        } catch (Throwable t) {
+            ExceptionUtil.populateQueryContext(t, streamDefinition, siddhiAppContext);
+            throw t;
+        }
         DefinitionParserHelper.addEventSource(streamDefinition, sourceMap, siddhiAppContext);
         DefinitionParserHelper.addEventSink(streamDefinition, sinkMap, siddhiAppContext);
     }
