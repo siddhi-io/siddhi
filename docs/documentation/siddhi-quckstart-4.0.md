@@ -13,11 +13,11 @@ This quick start guide contains the following six sections:
 3. Using Siddhi for the First Time - how to **set up** the software
 4. Siddhi ‘Hello World!’ - Your **First Siddhi Application**
 5. Simulating Events - **Testing** your query with simulated events
-6. Stream Processing - **temporal event processing**
+6. A Bit of Stream Processing - **temporal event processing**
 
 ## 1. Stream Processing and Complex Event Processing (CEP) Overview
 
-Before diving into using Siddhi, let's first discussStream Processing 
+Before diving into using Siddhi, let's first discuss Stream Processing 
 and Complex Event Processing in brief so that we can identify the use-cases where Siddhi can be used.
 
 First let's understand what an event is through an example. **If we consider the transactions carried out via an ATM as a data 
@@ -48,7 +48,7 @@ Siddhi Can be used in the following use-cases:
 
 * Fraud Analytics 
 * Monitoring 
-* Abnormality Detection
+* Anomaly Detection
 * Sentiment Analysis
 * Processing Customer Behaviour
 * .. etc
@@ -187,7 +187,7 @@ _“outputData=[2, 4]”_. You can change the value of the weight and send it to
 
 Bravo! You have successfully completed creating Siddhi Hello World! 
 
-## 6. Stream Processing - **temporal event processing**
+## 6. A Bit of Stream Processing - **temporal event processing**
 
 This section demonstrates how to carry out **temporal window processing** with Siddhi.
 
