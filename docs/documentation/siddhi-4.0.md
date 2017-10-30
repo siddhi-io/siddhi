@@ -1063,7 +1063,7 @@ Key Word|Description
 ---------|---------
 `and`|This allows both conditions of `and` to be matched by two events in any order.
 `or`|The state succeeds if either condition of `or` is satisfied. Here the event reference of the other condition is `null`.
-`not <condition1> and <condition2>`| When `not` is included with `and`, it identifies the events that match <condition2> arriving before any event that match <condition1>. is identified.
+`not <condition1> and <condition2>`| When `not` is included with `and`, it identifies the events that match <condition2> arriving before any event that match <condition1>. 
 `not <condition> for <time period>`| When `not` is included with `for`, it allows you to identify a situation where no event that matches `<condition1>` arrives during the specified `<time period>`.  e.g.,`from not TemperatureStream[temp > 60] for 5 sec`. 
 
 **Example**
