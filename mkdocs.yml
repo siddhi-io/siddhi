@@ -35,6 +35,15 @@ pages:
   - Siddhi Architecture: documentation/siddhi-architecture.md
 - Extensions: extensions.md
 - API Docs:
+  - 4.0.0-M119: api/4.0.0-M119.md
+  - 4.0.0-M118: api/4.0.0-M118.md
+  - 4.0.0-M117: api/4.0.0-M117.md
+  - 4.0.0-M116: api/4.0.0-M116.md
+  - 4.0.0-M115: api/4.0.0-M115.md
+  - 4.0.0-M114: api/4.0.0-M114.md
+  - 4.0.0-M113: api/4.0.0-M113.md
+  - 4.0.0-M111: api/4.0.0-M111.md
+  - 4.0.0-M110: api/4.0.0-M110.md
   - 4.0.0-M109: api/4.0.0-M109.md
   - 4.0.0-M108: api/4.0.0-M108.md
   - 4.0.0-M107: api/4.0.0-M107.md
