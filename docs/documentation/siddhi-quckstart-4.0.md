@@ -26,7 +26,7 @@ Many such transactions form a stream.
 
 ![](../images/quickstart/event-stream.png?raw=true "Event Stream")
 
-[Forster](https://reprints.forrester.com/#/assets/2/202/'RES136545'/reports) defines Streaming Analytics as:
+[Forrester](https://reprints.forrester.com/#/assets/2/202/'RES136545'/reports) defines Streaming Analytics as:
 
 > Software that provides analytical operators to **orchestrate data flow**, **calculate analytics**, and **detect patterns** on 
 event data **from multiple, disparate live data sources** to allow developers to build applications that **sense, think, 
@@ -168,7 +168,7 @@ panel at the left of the Stream Processor Studio. You should save your _HelloWor
 
 ![](../images/quickstart/event-simulation.png?raw=true "Simulating Events in Stream Processor Studio")
 
-**Step 1 — Configurations,**
+**Step 1 — Configurations:**
 
 * Siddhi App Name — _“HelloWorldApp”_
 * Stream Name — _“CargoStream”_
@@ -191,8 +191,8 @@ Bravo! You have successfully completed creating Siddhi Hello World!
 
 This section demonstrates how to carry out **temporal window processing** with Siddhi.
 
-Upto this point, we have been carrying out the processing by having only the running sum value in-memory. 
-No events were stored during this processing. 
+Up to this point, we have been carrying out the processing by having only the running sum value in-memory. 
+No events were stored during this process. 
 
 [Window processing](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window) 
 is a method that allows us to store some events in-memory for a given period so that we can perform operations 
