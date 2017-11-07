@@ -46,4 +46,7 @@ public class IsNullConditionExpressionExecutor extends ConditionExpressionExecut
         return new IsNullConditionExpressionExecutor(expressionExecutor.cloneExecutor(key));
     }
 
+    public ExpressionExecutor getConditionExecutor() {
+        return expressionExecutor;
+    }
 }

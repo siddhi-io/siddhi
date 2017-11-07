@@ -44,4 +44,11 @@ public abstract class CompareConditionExpressionExecutor extends ConditionExpres
 
     protected abstract Boolean execute(Object left, Object right);
 
+    public ExpressionExecutor getLeftExpressionExecutor() {
+        return leftExpressionExecutor;
+    }
+
+    public ExpressionExecutor getRightExpressionExecutor() {
+        return rightExpressionExecutor;
+    }
 }

@@ -48,6 +48,7 @@ public class SiddhiAppContext {
     private boolean enforceOrder;
     private boolean async;
     private boolean statsEnabled = false;
+    private boolean queryJITCompile;
     private StatisticsManager statisticsManager = null;
 
     private ExecutorService executorService;
@@ -67,6 +68,7 @@ public class SiddhiAppContext {
     public SiddhiAppContext() {
         this.eternalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
+        this.queryJITCompile = Boolean.parseBoolean(System.getProperty("QueryJITCompile"));
     }
 
     public SiddhiContext getSiddhiContext() {
@@ -191,6 +193,10 @@ public class SiddhiAppContext {
 
     public Script getScript(String name) {
         return scriptFunctionMap.get(name);
+    }
+
+    public boolean getQueryJITCompile() {
+        return queryJITCompile;
     }
 
     public boolean isFunctionExist(String name) {

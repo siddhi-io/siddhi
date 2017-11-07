@@ -56,4 +56,7 @@ public class IsNullStreamConditionExpressionExecutor extends ConditionExpression
         return new IsNullStreamConditionExpressionExecutor(eventPosition);
     }
 
+    public int[] getEventPosition() {
+        return eventPosition;
+    }
 }

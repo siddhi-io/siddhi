@@ -55,4 +55,7 @@ public class BoolConditionExpressionExecutor extends ConditionExpressionExecutor
     }
 
 
+    public ExpressionExecutor getConditionExecutor() {
+        return conditionExecutor;
+    }
 }

@@ -55,4 +55,7 @@ public class NotConditionExpressionExecutor extends ConditionExpressionExecutor 
     }
 
 
+    public ExpressionExecutor getConditionExecutor() {
+        return conditionExecutor;
+    }
 }

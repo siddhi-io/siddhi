@@ -35,6 +35,7 @@ import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.state.StreamPreStateProcessor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
+import org.wso2.siddhi.core.query.processor.filter.FilterProcessor;
 import org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
@@ -204,6 +205,9 @@ public class QueryParserHelper {
                     ((StreamPreStateProcessor) processor).setStateEventCloner(new StateEventCloner(((MetaStateEvent)
                             metaComplexEvent), stateEventPool));
                 }
+            }
+            if (processor instanceof FilterProcessor) {
+                ((FilterProcessor) processor).filterJITCodeGenerator();
             }
 
             processor = processor.getNextProcessor();
