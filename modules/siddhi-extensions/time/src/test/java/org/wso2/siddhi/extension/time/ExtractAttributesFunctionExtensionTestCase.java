@@ -45,11 +45,13 @@ public class ExtractAttributesFunctionExtensionTestCase {
     @Test
     public void extractAttributesFunctionExtension() throws InterruptedException {
 
-        log.info("ExtractAttributesFunctionExtensionTestCase");
+        log.info("ExtractAttributesFunctionExtensionTestCase: " +
+                "<int>  time: extract (<string> unit ,<string>  dateValue, <string> dataFormat)");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String inStreamDefinition = "" +
-                "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds long);";
+                "define stream inputStream (symbol string,dateValue string,dateFormat string," +
+                "timestampInMilliseconds long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
@@ -393,6 +395,230 @@ public class ExtractAttributesFunctionExtensionTestCase {
         inputHandler.send(new Object[]{"IBM", "2014-3-11 22:23:44", "yyyy-MM-dd hh:mm:ss", 1394556804000L});
         Thread.sleep(100);
         Assert.assertEquals(3, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void extractAttributesFunctionExtension14() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionTestCase14: " +
+                "<int>  time: extract (<string> unit ,<string>  dateValue, <string> dataFormat, <string> locale)");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string," +
+                "timestampInMilliseconds long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract('WEEK',dateValue,dateFormat, 'en_US') as WEEK "+
+                "insert into outputStream;");
+        String query2 = ("@info(name = 'query2') " +
+                "from inputStream " +
+                "select symbol , time:extract('WEEK',dateValue,dateFormat, 'fr_FR') as WEEK "+
+                "insert into outputStream2;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
+                + query + query2);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
+                    Assert.assertEquals(41, inEvent.getData(1));
+                }
+            }
+        });
+
+        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
+                    Assert.assertEquals(40, inEvent.getData(1));
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2017-10-8", "yyyy-MM-dd",1507401000000L});
+        Thread.sleep(100);
+        Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void extractAttributesFunctionExtension15() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionTestCase15: " +
+                "<int>  time: extract (<long> timestampInMilliseconds ,<string>  unit, <string> locale)");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string," +
+                "timestampInMilliseconds long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract(timestampInMilliseconds, 'WEEK', 'en_US') as WEEK "+
+                "insert into outputStream;");
+        String query2 = ("@info(name = 'query2') " +
+                "from inputStream " +
+                "select symbol , time:extract(timestampInMilliseconds, 'WEEK', 'fr_FR') as WEEK "+
+                "insert into outputStream2;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
+                + query + query2);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
+                    Assert.assertEquals(41, inEvent.getData(1));
+                }
+            }
+        });
+
+        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
+                    Assert.assertEquals(40, inEvent.getData(1));
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2017-10-8", "yyyy-MM-dd",1507401000000L});
+        Thread.sleep(100);
+        Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void extractAttributesFunctionExtension16() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionTestCase16: " +
+                "<int>  time: extract (<long> timestampInMilliseconds ,<string>  unit)");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string,dateFormat string," +
+                "timestampInMilliseconds long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract(timestampInMilliseconds, 'WEEK') as WEEK "+
+                "insert into outputStream;");
+        String query2 = ("@info(name = 'query2') " +
+                "from inputStream " +
+                "select symbol , time:extract(timestampInMilliseconds, 'WEEK') as WEEK "+
+                "insert into outputStream2;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
+                + query + query2);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
+                    Assert.assertEquals(41, inEvent.getData(1));
+                }
+            }
+        });
+
+        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
+                    Assert.assertEquals(41, inEvent.getData(1));
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2017-10-8", "yyyy-MM-dd",1507401000000L});
+        Thread.sleep(100);
+        Assert.assertEquals(2, count);
+        Assert.assertTrue(eventArrived);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void extractAttributesFunctionExtension17() throws InterruptedException {
+
+        log.info("ExtractAttributesFunctionExtensionTestCase17: " +
+                "<int>  time: extract (<string> unit ,<string>  dateValue)");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "" +
+                "define stream inputStream (symbol string,dateValue string," +
+                "timestampInMilliseconds long);";
+        String query = ("@info(name = 'query1') " +
+                "from inputStream " +
+                "select symbol , time:extract('WEEK', dateValue) as WEEK "+
+                "insert into outputStream;");
+        String query2 = ("@info(name = 'query2') " +
+                "from inputStream " +
+                "select symbol , time:extract('WEEK', dateValue) as WEEK "+
+                "insert into outputStream2;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
+                + query + query2);
+
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
+                    Assert.assertEquals(41, inEvent.getData(1));
+                }
+            }
+        });
+
+        executionPlanRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
+                    Assert.assertEquals(41, inEvent.getData(1));
+                }
+            }
+        });
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        executionPlanRuntime.start();
+        inputHandler.send(new Object[]{"IBM", "2017-10-8 02:23:44.999", 1507401000000L});
+        Thread.sleep(100);
+        Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
