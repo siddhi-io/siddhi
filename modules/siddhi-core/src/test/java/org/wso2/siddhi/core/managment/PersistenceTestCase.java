@@ -1040,7 +1040,7 @@ public class PersistenceTestCase {
                     count++;
                 }
 
-                if(removeEvents != null) {
+                if (removeEvents != null) {
                     for (Event removeEvent : removeEvents) {
                         lastValue = (Integer) removeEvent.getData(0);
                     }
@@ -1804,7 +1804,7 @@ public class PersistenceTestCase {
 
     @Test
     public void persistenceTest13() throws InterruptedException {
-        log.info("persistenceTest8");
+        log.info("persistenceTest13");
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
@@ -1932,4 +1932,175 @@ public class PersistenceTestCase {
         Assert.assertEquals(true, eventArrived);
     }
     */
+
+    @Test
+    public void persistenceTest19() throws InterruptedException {
+        log.info("persistence test 19 - persist in-memory table (indexed)");
+
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        String executionPlan = "" +
+                "@plan:name('Test') " +
+                "" +
+                "define stream StockStream ( symbol string, price float, volume int ); " +
+                "define stream TriggerStream ( id int ); " +
+                "@IndexBy('symbol') " +
+                "define table StockTable (symbol string, price float, volume int); " +
+                "" +
+                "@info(name = 'query1')" +
+                "from StockStream " +
+                "insert into StockTable; " +
+                "" +
+                "@info(name = 'query2')" +
+                "from TriggerStream#window.length(1) join StockTable " +
+                "select symbol, price, volume " +
+                "insert into OutStream; ";
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                }
+            }
+        };
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        InputHandler stockStreamHandler = executionPlanRuntime.getInputHandler("StockStream");
+
+        executionPlanRuntime.start();
+        stockStreamHandler.send(new Object[]{"IBM", 75.6f, 100});
+        Thread.sleep(100);
+        stockStreamHandler.send(new Object[]{"WSO2", 75.6f, 101});
+        Thread.sleep(100);
+
+        //persisting
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+
+        stockStreamHandler.send(new Object[]{"IBM", 75.6f, 102});
+        Thread.sleep(100);
+        stockStreamHandler.send(new Object[]{"WSO2", 75.6f, 103});
+
+        //restarting execution plan
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+        siddhiManager.shutdown();
+
+        siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query2", queryCallback);
+
+        stockStreamHandler = executionPlanRuntime.getInputHandler("StockStream");
+        InputHandler triggerStreamHandler = executionPlanRuntime.getInputHandler("TriggerStream");
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.restoreLastRevision();
+        Thread.sleep(500);
+
+        stockStreamHandler.send(new Object[]{"IBM", 75.6f, 104});
+        Thread.sleep(100);
+        stockStreamHandler.send(new Object[]{"WSO2", 75.6f, 105});
+
+        Assert.assertTrue(count == 0);
+        triggerStreamHandler.send(new Object[]{1});
+
+        //shutdown execution plan
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+        Thread.sleep(100);
+
+        Assert.assertTrue(count == 2);
+        Assert.assertEquals(true, eventArrived);
+    }
+
+    @Test
+    public void persistenceTest20() throws InterruptedException {
+        log.info("persistence test 20 - persist in-memory table (non-indexed)");
+
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        String executionPlan = "" +
+                "@plan:name('Test') " +
+                "" +
+                "define stream StockStream ( symbol string, price float, volume int ); " +
+                "define stream TriggerStream ( id int ); " +
+                "define table StockTable (symbol string, price float, volume int); " +
+                "" +
+                "@info(name = 'query1')" +
+                "from StockStream " +
+                "insert into StockTable; " +
+                "" +
+                "@info(name = 'query2')" +
+                "from TriggerStream#window.length(1) join StockTable " +
+                "select symbol, price, volume " +
+                "insert into OutStream; ";
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                }
+            }
+        };
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        InputHandler stockStreamHandler = executionPlanRuntime.getInputHandler("StockStream");
+
+        executionPlanRuntime.start();
+        stockStreamHandler.send(new Object[]{"IBM", 75.6f, 100});
+        Thread.sleep(100);
+        stockStreamHandler.send(new Object[]{"WSO2", 75.6f, 101});
+        Thread.sleep(100);
+
+        //persisting
+        Thread.sleep(500);
+        executionPlanRuntime.persist();
+
+        stockStreamHandler.send(new Object[]{"IBM", 75.6f, 102});
+        Thread.sleep(100);
+        stockStreamHandler.send(new Object[]{"WSO2", 75.6f, 103});
+
+        //restarting execution plan
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+        siddhiManager.shutdown();
+
+        siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        executionPlanRuntime.addCallback("query2", queryCallback);
+
+        stockStreamHandler = executionPlanRuntime.getInputHandler("StockStream");
+        InputHandler triggerStreamHandler = executionPlanRuntime.getInputHandler("TriggerStream");
+
+        executionPlanRuntime.start();
+        executionPlanRuntime.restoreLastRevision();
+        Thread.sleep(500);
+
+        stockStreamHandler.send(new Object[]{"IBM", 75.6f, 104});
+        Thread.sleep(100);
+        stockStreamHandler.send(new Object[]{"WSO2", 75.6f, 105});
+
+        Assert.assertTrue(count == 0);
+        triggerStreamHandler.send(new Object[]{1});
+
+        //shutdown execution plan
+        Thread.sleep(500);
+        executionPlanRuntime.shutdown();
+        Thread.sleep(100);
+
+        Assert.assertTrue(count == 4);
+        Assert.assertEquals(true, eventArrived);
+    }
 }

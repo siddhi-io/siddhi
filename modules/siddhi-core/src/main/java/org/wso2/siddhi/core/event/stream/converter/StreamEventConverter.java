@@ -21,10 +21,12 @@ import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 
+import java.io.Serializable;
+
 /**
  * The converter that converts data of the events into StreamEvents
  */
-public interface StreamEventConverter {
+public interface StreamEventConverter extends Serializable {
 
     /**
      * Method to construct StreamEvent form Event
@@ -53,7 +55,8 @@ public interface StreamEventConverter {
 
     /**
      * Method to construct(change format) timeStamp and data from StreamEvent
-     *  @param timeStamp     timeStamp of the event
+     *
+     * @param timeStamp     timeStamp of the event
      * @param data          output data of the event
      * @param type          output type of the event
      * @param borrowedEvent Event that will be populated
