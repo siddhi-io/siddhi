@@ -721,6 +721,7 @@ Following are some inbuilt windows shipped with Siddhi. For more window types, s
 
 * time
 * timeBatch
+* timeLength
 * length
 * lengthBatch
 * sort
