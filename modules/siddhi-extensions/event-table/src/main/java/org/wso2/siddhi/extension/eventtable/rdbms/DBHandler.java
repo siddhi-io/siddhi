@@ -117,6 +117,9 @@ public class DBHandler {
             }
 
             if (eventArrayList.size() > 0) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Operation: addEvent, Add Event Statement: " + stmt);
+                }
                 stmt.executeBatch();
                 con.commit();
 
@@ -158,11 +161,17 @@ public class DBHandler {
                 deletionPreparedStatement.addBatch();
                 populateStatement(obj, selectionPreparedStatement, executionInfo.getConditionQueryColumnOrder());
                 if (selectionPreparedStatement != null && isBloomFilterEnabled) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Operation: deleteEvent, Selection Statement: " + selectionPreparedStatement);
+                    }
                     ResultSet resultSet = selectionPreparedStatement.executeQuery();
                     populateEventListFromResultSet(selectedEventList, resultSet);
                 }
             }
 
+            if (log.isDebugEnabled()) {
+                log.debug("Operation: deleteEvent, Deletion Statement: " + deletionPreparedStatement);
+            }
             int[] deletedRows = deletionPreparedStatement.executeBatch();
             con.commit();
 
@@ -205,11 +214,17 @@ public class DBHandler {
                 populateStatement(Arrays.copyOfRange(obj, conditionArrayStartIndex, obj.length),
                         selectionPreparedStatement, executionInfo.getConditionQueryColumnOrder());
                 if (selectionPreparedStatement != null && isBloomFilterEnabled) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Operation: updateEvent, Selection Statement: " + selectionPreparedStatement);
+                    }
                     ResultSet resultSet = selectionPreparedStatement.executeQuery();
                     populateEventListFromResultSet(selectedEventList, resultSet);
                 }
             }
 
+            if (log.isDebugEnabled()) {
+                log.debug("Operation: updateEvent, Update Statement: " + updatePreparedStatement);
+            }
             updatedRows = updatePreparedStatement.executeBatch();
             con.commit();
 
@@ -258,9 +273,15 @@ public class DBHandler {
                 populateStatement(Arrays.copyOfRange(obj, conditionArrayStartIndex, obj.length),
                         selectionPreparedStatement, executionInfo.getConditionQueryColumnOrder());
                 if (selectionPreparedStatement != null && isBloomFilterEnabled) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Operation: overwriteOrAddEvent, Selection Statement: " + selectionPreparedStatement);
+                    }
                     ResultSet resultSet = selectionPreparedStatement.executeQuery();
                     populateEventListFromResultSet(selectedEventList, resultSet);
                 }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Operation: overwriteOrAddEvent, Update Statement: " + updatePreparedStatement);
             }
             updatedRows = updatePreparedStatement.executeBatch();
             for (int i = 0; i < updatedRows.length; i++) {
@@ -277,6 +298,9 @@ public class DBHandler {
                 }
             }
             if (isInserted) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Operation: overwriteOrAddEvent, Insertion Statement: " + insertionPreparedStatement);
+                }
                 insertionPreparedStatement.executeBatch();
             }
             con.commit();
@@ -308,6 +332,9 @@ public class DBHandler {
             con = dataSource.getConnection();
             stmt = con.prepareStatement(executionInfo.getPreparedSelectTableStatement());
             populateStatement(obj, stmt, executionInfo.getConditionQueryColumnOrder());
+            if (log.isDebugEnabled()) {
+                log.debug("Operation: selectEvent, Select Statement: " + stmt);
+            }
             ResultSet resultSet = stmt.executeQuery();
             while (resultSet.next()) {
                 Object[] data = new Object[attributeList.size()];
@@ -358,6 +385,9 @@ public class DBHandler {
             con = dataSource.getConnection();
             stmt = con.prepareStatement(executionInfo.getPreparedTableRowExistenceCheckStatement());
             populateStatement(obj, stmt, executionInfo.getConditionQueryColumnOrder());
+            if (log.isDebugEnabled()) {
+                log.debug("Operation: checkExistence, Check Existence Statement: " + stmt);
+            }
             ResultSet resultSet = stmt.executeQuery();
             if (resultSet.next()) {
                 cleanUpConnections(stmt, con);
@@ -380,6 +410,10 @@ public class DBHandler {
         try {
             con = dataSource.getConnection();
             stmt = con.createStatement();
+            if (log.isDebugEnabled()) {
+                log.debug("Operation: initializeConnection, Table Existence Check Query: " +
+                        executionInfo.getPreparedTableExistenceCheckStatement());
+            }
             stmt.executeQuery(executionInfo.getPreparedTableExistenceCheckStatement());
         } catch (SQLException e) {
             tableExists = false;
@@ -394,6 +428,10 @@ public class DBHandler {
             if (!tableExists) {
                 con = dataSource.getConnection();
                 stmt = con.createStatement();
+                if (log.isDebugEnabled()) {
+                    log.debug("Operation: initializeConnection, Create Table Statement: " +
+                            executionInfo.getPreparedCreateTableStatement());
+                }
                 stmt.executeUpdate(executionInfo.getPreparedCreateTableStatement());
                 if (!con.getAutoCommit()) {
                     con.commit();
@@ -659,6 +697,9 @@ public class DBHandler {
             con = dataSource.getConnection();
             stmt = con.createStatement();
             String selectTableRowQuery = constructQuery(tableName, elementMappings.get(RDBMSEventTableConstants.EVENT_TABLE_GENERIC_RDBMS_SELECT_TABLE), null, null, null, null, null);
+            if (log.isDebugEnabled()) {
+                log.debug("Operation: buildBloomFilters, Select Row Query: " + selectTableRowQuery);
+            }
             ResultSet results = stmt.executeQuery(selectTableRowQuery);
             bloomFilterImpl.buildBloomFilters(results);
         } catch (SQLException ex) {
@@ -685,6 +726,9 @@ public class DBHandler {
             con = dataSource.getConnection();
             stmt = con.createStatement();
             String selectTableRowQuery = constructQuery(tableName, elementMappings.get(RDBMSEventTableConstants.EVENT_TABLE_GENERIC_RDBMS_LIMIT_SELECT_TABLE), null, null, new StringBuilder(cacheSizeInString), null, null);
+            if (log.isDebugEnabled()) {
+                log.debug("Operation: loadDBCache, Select Row Query: " + selectTableRowQuery);
+            }
             ResultSet resultSet = stmt.executeQuery(selectTableRowQuery);
             while (resultSet.next()) {
                 Object[] data = new Object[attributeList.size()];
