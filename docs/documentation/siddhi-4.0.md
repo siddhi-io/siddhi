@@ -1402,7 +1402,7 @@ Tables allow Siddhi to work with stored events. By defining a schema for tables 
 The syntax for a new table definition is as follows:
 
 ```sql
-define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
+define table <table name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
 ```
 The following parameters are configured in a table definition:
 
