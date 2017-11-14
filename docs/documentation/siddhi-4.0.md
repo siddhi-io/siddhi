@@ -890,7 +890,7 @@ syntax in order to enable that stream to trigger the join operation. Here, event
 **Example**
 
 Assuming that the temperature of regulators are updated every minute. 
-Following is a Siddhi App the controls the temperature regulators if they are not already `on` for all the rooms with a room temperature greater than 30 degrees.  
+Following is a Siddhi App that controls the temperature regulators if they are not already `on` for all the rooms with a room temperature greater than 30 degrees.  
 
 ```sql
 define stream TempStream(deviceID long, roomNo int, temp double);
