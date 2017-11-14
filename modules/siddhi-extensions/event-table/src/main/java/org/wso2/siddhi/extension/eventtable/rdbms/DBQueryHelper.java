@@ -28,6 +28,9 @@ import org.wso2.siddhi.extension.eventtable.jaxbMappings.Mappings;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +67,14 @@ public class DBQueryHelper {
             if (inputStream == null) {
                 throw new CannotLoadConfigurationException(RDBMSEventTableConstants.RDBMS_TABLE_CONFIG_FILE + " is not found in the classpath");
             }
-            Mappings mappings = (Mappings) unmarshaller.unmarshal(inputStream);
+
+            // Set XXE prevention properties
+            XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+            inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+            inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+            XMLStreamReader xmlReader = inputFactory.createXMLStreamReader(inputStream);
+
+            Mappings mappings = (Mappings) unmarshaller.unmarshal(xmlReader);
             Map<String, Mapping> dbMap = new HashMap<String, Mapping>();
             List<Mapping> mappingList = mappings.getMapping();
 
@@ -105,6 +115,9 @@ public class DBQueryHelper {
             }
         } catch (JAXBException e) {
             throw new CannotLoadConfigurationException("Syntax Error.Cannot unmarshal provided File "
+                    + RDBMSEventTableConstants.RDBMS_TABLE_CONFIG_FILE + e.getMessage(), e);
+        } catch (XMLStreamException e) {
+            throw new CannotLoadConfigurationException("Cannot read provided File "
                     + RDBMSEventTableConstants.RDBMS_TABLE_CONFIG_FILE + e.getMessage(), e);
         }
     }
