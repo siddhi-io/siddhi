@@ -117,7 +117,8 @@
                             org.apache.tomcat.jdbc.pool;version="${jdbc-pool.imp.pkg.version.range}",
                             javax.sql,
                             javax.xml.bind,
-                            javax.xml.bind.annotation
+                            javax.xml.bind.annotation,
+                            javax.xml.stream
                             <!--*;resolution:=optional-->
                         </Import-Package>
                     </instructions>
