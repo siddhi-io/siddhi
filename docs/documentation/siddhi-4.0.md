@@ -1131,7 +1131,7 @@ insert into <output stream>
 | Items | Description |
 |-------------------|-------------|
 | `,` | This represents the immediate next event i.e., when an event that matches the first condition arrives, the event that arrives immediately after it should match the second condition. |
-| `<event reference>` | This allows you toadd a reference to the the matching event so that it can be accessed later for further processing. |
+| `<event reference>` | This allows you to add a reference to the the matching event so that it can be accessed later for further processing. |
 | `(within <time gap>)?` | The `within` clause is optional. It defines the time duration within which all the matching events should occur. |
 | `every` | `every` is an optional keyword. This defines whether the matching event should be triggered for every event that arrives at the specified stream with the matching condition. <br/> When this keyword is not used, the matching is carried out only once. |
 
