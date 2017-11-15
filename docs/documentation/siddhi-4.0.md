@@ -1971,18 +1971,17 @@ The following types of triggeres are currently supported:
 
     The following query triggers events every 5 minutes.
     
-    ```sql
+```sql
      define trigger FiveMinTriggerStream at every 5 min;
-    ```
+```
 
 + Triggering events at a specific time on specified days
 
     The following query triggers an event at 10.15 AM on every weekdays.
     
-    ```sql
+```sql
      define trigger FiveMinTriggerStream at '0 15 10 ? * MON-FRI';
-     
-    ```
+```
 
 ## Script
 
