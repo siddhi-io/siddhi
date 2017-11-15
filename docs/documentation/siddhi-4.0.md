@@ -2042,7 +2042,7 @@ Siddhi supports an extension architecture to enhance its functionality by incorp
 **Purpose**
 
 Extensions are supported because, Siddhi core cannot have all the functionality that's needed for all the use cases, mostly use cases require 
-different type of functionality, and for come cases there can be gaps and you need to write the functionality by yourself.
+different type of functionality, and for some cases there can be gaps and you need to write the functionality by yourself.
 
 All extensions have a namespace. This is used to identify the relevant extensions together, and to let you specifically call the extension.
 
