@@ -1481,7 +1481,7 @@ insert into <table>
 ```
 
 Similar to streams, you need to use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords in order to insert only the specific output event types. 
-For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
+For more information, see [output event type](#output-event-types)
 
 **Example**
 
@@ -1545,7 +1545,7 @@ The `condition` element specifies the basis on which events are selected to be d
 When specifying the condition, table attributes should be referred to with the table name.
  
 To execute delete for specific output event types, use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
+in the syntax. For more information, see [output event type](#output-event-types)
 
 !!! note 
     Table attributes must be always referred to with the table name as follows: 
