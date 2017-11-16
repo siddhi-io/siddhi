@@ -1131,7 +1131,7 @@ insert into <output stream>
 | Items | Description |
 |-------------------|-------------|
 | `,` | This represents the immediate next event i.e., when an event that matches the first condition arrives, the event that arrives immediately after it should match the second condition. |
-| `<event reference>` | This allows you toadd a reference to the the matching event so that it can be accessed later for further processing. |
+| `<event reference>` | This allows you to add a reference to the the matching event so that it can be accessed later for further processing. |
 | `(within <time gap>)?` | The `within` clause is optional. It defines the time duration within which all the matching events should occur. |
 | `every` | `every` is an optional keyword. This defines whether the matching event should be triggered for every event that arrives at the specified stream with the matching condition. <br/> When this keyword is not used, the matching is carried out only once. |
 
@@ -1971,18 +1971,17 @@ The following types of triggeres are currently supported:
 
     The following query triggers events every 5 minutes.
     
-    ```sql
+```sql
      define trigger FiveMinTriggerStream at every 5 min;
-    ```
+```
 
 + Triggering events at a specific time on specified days
 
     The following query triggers an event at 10.15 AM on every weekdays.
     
-    ```sql
+```sql
      define trigger FiveMinTriggerStream at '0 15 10 ? * MON-FRI';
-     
-    ```
+```
 
 ## Script
 
@@ -2042,7 +2041,7 @@ Siddhi supports an extension architecture to enhance its functionality by incorp
 **Purpose**
 
 Extensions are supported because, Siddhi core cannot have all the functionality that's needed for all the use cases, mostly use cases require 
-different type of functionality, and for come cases there can be gaps and you need to write the functionality by yourself.
+different type of functionality, and for some cases there can be gaps and you need to write the functionality by yourself.
 
 All extensions have a namespace. This is used to identify the relevant extensions together, and to let you specifically call the extension.
 
