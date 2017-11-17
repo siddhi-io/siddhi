@@ -1896,7 +1896,7 @@ This Siddhi Application performs a join count the number of temperature events h
  within the last 2 minutes. 
 
 ```sql
-define window TwoMinTempWindow (roomNo int, temp double) time('2 min');
+define window TwoMinTempWindow (roomNo int, temp double) time(2 min);
 define stream CheckStream (requestId string);
    
 from CheckStream as C join TwoMinTempWindow as T
@@ -1924,7 +1924,7 @@ insert into <output stream>
 This Siddhi Application calculates the maximum temperature within the last 5 minutes.
 
 ```sql
-define window FiveMinTempWindow (roomNo int, temp double) time('5 min');
+define window FiveMinTempWindow (roomNo int, temp double) time(5 min);
 
 
 from FiveMinTempWindow
