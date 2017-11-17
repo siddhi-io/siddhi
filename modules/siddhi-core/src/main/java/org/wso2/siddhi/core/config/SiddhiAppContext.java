@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.config;
 import com.lmax.disruptor.ExceptionHandler;
 import org.wso2.siddhi.core.function.Script;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
+import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import org.wso2.siddhi.core.util.persistence.PersistenceService;
@@ -68,7 +69,7 @@ public class SiddhiAppContext {
     public SiddhiAppContext() {
         this.eternalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
-        this.queryJITCompile = Boolean.parseBoolean(System.getProperty("QueryJITCompile"));
+        this.queryJITCompile = !Boolean.parseBoolean(System.getProperty(SiddhiConstants.JIT_QUERY_COMPILE));
     }
 
     public SiddhiContext getSiddhiContext() {

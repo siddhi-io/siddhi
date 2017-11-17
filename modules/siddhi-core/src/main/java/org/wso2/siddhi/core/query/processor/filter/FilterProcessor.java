@@ -46,11 +46,26 @@ public class FilterProcessor implements Processor {
         this.queryJITCompile = new SiddhiAppContext().getQueryJITCompile();
     }
 
-    public FilterProcessor cloneProcessor(String key) {
-        return new FilterProcessor(conditionExecutor.cloneExecutor(key));
+    public FilterProcessor(ExpressionExecutor conditionExecutor, boolean queryJITCompile) {
+        if (Attribute.Type.BOOL.equals(conditionExecutor.getReturnType())) {
+            if (queryJITCompile) {
+                this.queryJITCompile = false;
+                this.conditionExecutor = conditionExecutor;
+            } else {
+                this.conditionExecutor = conditionExecutor;
+            }
+        } else {
+            throw new OperationNotSupportedException("Return type of " + conditionExecutor.toString() + " should be " +
+                    "of type BOOL. " +
+                    "Actual type: " + conditionExecutor.getReturnType().toString());
+        }
     }
 
-    public void filterJITCodeGenerator() {
+    public FilterProcessor cloneProcessor(String key) {
+        return new FilterProcessor(conditionExecutor.cloneExecutor(key), this.queryJITCompile);
+    }
+
+    public void jitCodeGenerator() {
         if (this.queryJITCompile) {
             this.conditionExecutor = new ByteCodeGenerator().build(this.conditionExecutor);
         }

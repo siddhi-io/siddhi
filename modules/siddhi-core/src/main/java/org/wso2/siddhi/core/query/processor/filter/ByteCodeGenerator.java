@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.query.processor.filter;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
@@ -201,6 +202,7 @@ import org.wso2.siddhi.core.executor.math.subtract.SubtractExpressionExecutorLon
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -208,327 +210,354 @@ import java.util.Map;
  */
 public class ByteCodeGenerator {
 
-    static Map<Class<? extends ExpressionExecutor>, ByteCodeEmitter> byteCodegenerators;
+    static Map<Class<? extends ExpressionExecutor>, ByteCodeEmitter> byteCodeGenerators;
 
     static {
-        byteCodegenerators = new HashMap<Class<? extends ExpressionExecutor>, ByteCodeEmitter>();
+        byteCodeGenerators = new HashMap<Class<? extends ExpressionExecutor>, ByteCodeEmitter>();
         ByteCodeRegistry byteCode = new ByteCodeRegistry();
         // Condition Executors.
-        byteCodegenerators.put(AndConditionExpressionExecutor.class, byteCode.
+        byteCodeGenerators.put(AndConditionExpressionExecutor.class, byteCode.
                 new PrivateANDExpressionExecutorBytecodeEmitter());
-        byteCodegenerators.put(OrConditionExpressionExecutor.class, byteCode.
+        byteCodeGenerators.put(OrConditionExpressionExecutor.class, byteCode.
                 new PrivateORExpressionExecutorBytecodeEmitter());
-        byteCodegenerators.put(NotConditionExpressionExecutor.class, byteCode.
+        byteCodeGenerators.put(NotConditionExpressionExecutor.class, byteCode.
                 new PrivateNOTExpressionExecutorBytecodeEmitter());
-        byteCodegenerators.put(VariableExpressionExecutor.class, byteCode.
+        byteCodeGenerators.put(VariableExpressionExecutor.class, byteCode.
                 new PrivateVariableExpressionExecutorBytecodeEmitter());
-        byteCodegenerators.put(ConstantExpressionExecutor.class, byteCode.
+        byteCodeGenerators.put(ConstantExpressionExecutor.class, byteCode.
                 new PrivateConstantExpressionExecutorBytecodeEmitter());
-        byteCodegenerators.put(IsNullConditionExpressionExecutor.class,
+        byteCodeGenerators.put(IsNullConditionExpressionExecutor.class,
                 byteCode.new PrivateIsNullExpressionExecutorBytecodeEmitter());
-        byteCodegenerators.put(IsNullStreamConditionExpressionExecutor.class,
+        byteCodeGenerators.put(IsNullStreamConditionExpressionExecutor.class,
                 byteCode.new PrivateIsNullStreamExpressionExecutorBytecodeEmitter());
-        byteCodegenerators.put(BoolConditionExpressionExecutor.class,
+        byteCodeGenerators.put(BoolConditionExpressionExecutor.class,
                 byteCode.new PrivateBoolExpressionExecutorBytecodeEmitter());
-        byteCodegenerators.put(InConditionExpressionExecutor.class,
+        byteCodeGenerators.put(InConditionExpressionExecutor.class,
                 byteCode.new PrivateInConditionExpressionExecutorBytecodeEmitter());
         // Greater Than Operator.
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorFloatFloat.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorFloatFloat.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorFloatFloatBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorFloatDouble.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorFloatDouble.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorFloatDoubleBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorDoubleDouble.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorDoubleDouble.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorDoubleDoubleBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorDoubleFloat.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorDoubleFloat.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorDoubleFloatBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorDoubleInt.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorDoubleInt.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorDoubleIntegerBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorIntDouble.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorIntDouble.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorIntegerDoubleBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorIntFloat.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorIntFloat.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorIntegerFloatBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorFloatInt.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorFloatInt.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorFloatIntegerBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorIntInt.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorIntInt.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorIntegerIntegerBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorDoubleLong.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorDoubleLong.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorDoubleLongBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorLongDouble.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorLongDouble.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorLongDoubleBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorFloatLong.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorFloatLong.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorFloatLongBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorLongFloat.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorLongFloat.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorLongFloatBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorIntLong.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorIntLong.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorIntegerLongBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorLongInt.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorLongInt.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorLongIntegerBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanCompareConditionExpressionExecutorLongLong.class,
+        byteCodeGenerators.put(GreaterThanCompareConditionExpressionExecutorLongLong.class,
                 byteCode.new PrivateGreaterThanCompareConditionExpressionExecutorLongLongBytecodeEmitter());
         // Less Than Operator.
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorFloatFloat.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorFloatFloat.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorFloatFloatBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorFloatDouble.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorFloatDouble.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorFloatDoubleBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorDoubleDouble.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorDoubleDouble.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorDoubleDoubleBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorDoubleFloat.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorDoubleFloat.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorDoubleFloatBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorDoubleInt.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorDoubleInt.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorDoubleIntegerBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorIntDouble.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorIntDouble.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorIntegerDoubleBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorIntFloat.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorIntFloat.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorIntegerFloatBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorFloatInt.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorFloatInt.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorFloatIntegerBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorLongLong.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorLongLong.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorLongLongBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorIntLong.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorIntLong.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorIntegerLongBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorLongInt.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorLongInt.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorLongIntegerBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorLongFloat.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorLongFloat.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorLongFloatBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorFloatLong.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorFloatLong.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorFloatLongBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorLongDouble.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorLongDouble.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorLongDoubleBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorDoubleLong.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorDoubleLong.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorDoubleLongBytecodeEmitter());
-        byteCodegenerators.put(LessThanCompareConditionExpressionExecutorIntInt.class,
+        byteCodeGenerators.put(LessThanCompareConditionExpressionExecutorIntInt.class,
                 byteCode.new PrivateLessThanCompareConditionExpressionExecutorIntegerIntegerBytecodeEmitter());
         // Greater Than Equal Operator.
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorDoubleDouble.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorDoubleDouble.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorDoubleDoubleBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorDoubleFloat.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorDoubleFloat.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorDoubleFloatBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorDoubleInt.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorDoubleInt.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorDoubleIntegerBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorDoubleLong.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorDoubleLong.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorDoubleLongBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorFloatDouble.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorFloatDouble.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorFloatDoubleBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorFloatFloat.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorFloatFloat.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorFloatFloatBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorFloatInt.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorFloatInt.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorFloatIntegerBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorFloatLong.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorFloatLong.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorFloatLongBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorIntDouble.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorIntDouble.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorIntegerDoubleBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorIntFloat.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorIntFloat.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorIntegerFloatBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorIntInt.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorIntInt.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorIntegerIntegerBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorIntLong.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorIntLong.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorIntegerLongBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorLongDouble.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorLongDouble.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorLongDoubleBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorLongFloat.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorLongFloat.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorLongFloatBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorLongInt.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorLongInt.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorLongIntegerBytecodeEmitter());
-        byteCodegenerators.put(GreaterThanEqualCompareConditionExpressionExecutorLongLong.class,
+        byteCodeGenerators.put(GreaterThanEqualCompareConditionExpressionExecutorLongLong.class,
                 byteCode.new PrivateGreaterThanEqualCompareConditionExpressionExecutorLongLongBytecodeEmitter());
         //Less Than Equal Operator.
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorDoubleDouble.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorDoubleDouble.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorDoubleDoubleBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorDoubleFloat.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorDoubleFloat.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorDoubleFloatBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorDoubleInt.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorDoubleInt.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorDoubleIntegerBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorDoubleLong.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorDoubleLong.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorDoubleLongBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorFloatDouble.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorFloatDouble.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorFloatDoubleBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorFloatFloat.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorFloatFloat.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorFloatFloatBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorFloatInt.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorFloatInt.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorFloatIntegerBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorFloatLong.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorFloatLong.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorFloatLongBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorIntDouble.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorIntDouble.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorIntegerDoubleBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorIntFloat.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorIntFloat.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorIntegerFloatBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorIntInt.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorIntInt.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorIntegerIntegerBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorIntLong.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorIntLong.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorIntegerLongBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorLongDouble.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorLongDouble.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorLongDoubleBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorLongFloat.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorLongFloat.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorLongFloatBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorLongInt.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorLongInt.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorLongIntegerBytecodeEmitter());
-        byteCodegenerators.put(LessThanEqualCompareConditionExpressionExecutorLongLong.class,
+        byteCodeGenerators.put(LessThanEqualCompareConditionExpressionExecutorLongLong.class,
                 byteCode.new PrivateLessThanEqualCompareConditionExpressionExecutorLongLongBytecodeEmitter());
         // Equal Operator.
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorBoolBool.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorBoolBool.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorBoolBoolBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorDoubleDouble.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorDoubleDouble.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorDoubleDoubleBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorDoubleFloat.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorDoubleFloat.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorDoubleFloatBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorDoubleInt.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorDoubleInt.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorDoubleIntegerBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorDoubleLong.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorDoubleLong.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorDoubleLongBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorFloatDouble.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorFloatDouble.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorFloatDoubleBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorFloatFloat.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorFloatFloat.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorFloatFloatBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorFloatInt.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorFloatInt.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorFloatIntBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorFloatLong.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorFloatLong.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorFloatLongBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorIntDouble.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorIntDouble.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorIntegerDoubleBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorIntFloat.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorIntFloat.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorIntegerFloatBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorIntInt.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorIntInt.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorIntegerIntegerBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorIntLong.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorIntLong.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorIntegerLongBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorLongDouble.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorLongDouble.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorLongDoubleBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorLongFloat.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorLongFloat.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorLongFloatBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorLongInt.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorLongInt.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorLongIntegerBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorLongLong.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorLongLong.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorLongLongBytecodeEmitter());
-        byteCodegenerators.put(EqualCompareConditionExpressionExecutorStringString.class,
+        byteCodeGenerators.put(EqualCompareConditionExpressionExecutorStringString.class,
                 byteCode.new PrivateEqualCompareConditionExpressionExecutorStringStringBytecodeEmitter());
         // Not Equal Operator.
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorBoolBool.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorBoolBool.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorBoolBoolBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorDoubleDouble.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorDoubleDouble.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorDoubleDoubleBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorDoubleFloat.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorDoubleFloat.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorDoubleFloatBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorDoubleInt.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorDoubleInt.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorDoubleIntegerBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorDoubleLong.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorDoubleLong.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorDoubleLongBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorFloatDouble.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorFloatDouble.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorFloatDoubleBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorFloatFloat.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorFloatFloat.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorFloatFloatBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorFloatInt.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorFloatInt.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorFloatIntBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorFloatLong.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorFloatLong.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorFloatLongBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorIntDouble.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorIntDouble.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorIntegerDoubleBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorIntFloat.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorIntFloat.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorIntegerFloatBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorIntInt.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorIntInt.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorIntegerIntegerBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorIntLong.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorIntLong.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorIntegerLongBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorLongDouble.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorLongDouble.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorLongDoubleBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorLongFloat.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorLongFloat.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorLongFloatBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorLongInt.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorLongInt.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorLongIntegerBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorLongLong.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorLongLong.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorLongLongBytecodeEmitter());
-        byteCodegenerators.put(NotEqualCompareConditionExpressionExecutorStringString.class,
+        byteCodeGenerators.put(NotEqualCompareConditionExpressionExecutorStringString.class,
                 byteCode.new PrivateNotEqualCompareConditionExpressionExecutorStringStringBytecodeEmitter());
         //Mathematical Operators.
-        byteCodegenerators.put(SubtractExpressionExecutorDouble.class,
+        byteCodeGenerators.put(SubtractExpressionExecutorDouble.class,
                 byteCode.new PrivateSubtractExpressionExecutorDoubleBytecodeEmitter());
-        byteCodegenerators.put(SubtractExpressionExecutorFloat.class,
+        byteCodeGenerators.put(SubtractExpressionExecutorFloat.class,
                 byteCode.new PrivateSubtractExpressionExecutorFloatBytecodeEmitter());
-        byteCodegenerators.put(SubtractExpressionExecutorInt.class,
+        byteCodeGenerators.put(SubtractExpressionExecutorInt.class,
                 byteCode.new PrivateSubtractExpressionExecutorIntBytecodeEmitter());
-        byteCodegenerators.put(SubtractExpressionExecutorLong.class,
+        byteCodeGenerators.put(SubtractExpressionExecutorLong.class,
                 byteCode.new PrivateSubtractExpressionExecutorLongBytecodeEmitter());
 
-        byteCodegenerators.put(AddExpressionExecutorDouble.class,
+        byteCodeGenerators.put(AddExpressionExecutorDouble.class,
                 byteCode.new PrivateAddExpressionExecutorDoubleBytecodeEmitter());
-        byteCodegenerators.put(AddExpressionExecutorFloat.class,
+        byteCodeGenerators.put(AddExpressionExecutorFloat.class,
                 byteCode.new PrivateAddExpressionExecutorFloatBytecodeEmitter());
-        byteCodegenerators.put(AddExpressionExecutorInt.class,
+        byteCodeGenerators.put(AddExpressionExecutorInt.class,
                 byteCode.new PrivateAddExpressionExecutorIntBytecodeEmitter());
-        byteCodegenerators.put(AddExpressionExecutorLong.class,
+        byteCodeGenerators.put(AddExpressionExecutorLong.class,
                 byteCode.new PrivateAddExpressionExecutorLongBytecodeEmitter());
 
-        byteCodegenerators.put(MultiplyExpressionExecutorDouble.class,
+        byteCodeGenerators.put(MultiplyExpressionExecutorDouble.class,
                 byteCode.new PrivateMultiplyExpressionExecutorDoubleBytecodeEmitter());
-        byteCodegenerators.put(MultiplyExpressionExecutorFloat.class,
+        byteCodeGenerators.put(MultiplyExpressionExecutorFloat.class,
                 byteCode.new PrivateMultiplyExpressionExecutorFloatBytecodeEmitter());
-        byteCodegenerators.put(MultiplyExpressionExecutorInt.class,
+        byteCodeGenerators.put(MultiplyExpressionExecutorInt.class,
                 byteCode.new PrivateMultiplyExpressionExecutorIntBytecodeEmitter());
-        byteCodegenerators.put(MultiplyExpressionExecutorLong.class,
+        byteCodeGenerators.put(MultiplyExpressionExecutorLong.class,
                 byteCode.new PrivateMultiplyExpressionExecutorLongBytecodeEmitter());
 
-        byteCodegenerators.put(DivideExpressionExecutorDouble.class,
+        byteCodeGenerators.put(DivideExpressionExecutorDouble.class,
                 byteCode.new PrivateDivideExpressionExecutorDoubleBytecodeEmitter());
-        byteCodegenerators.put(DivideExpressionExecutorFloat.class,
+        byteCodeGenerators.put(DivideExpressionExecutorFloat.class,
                 byteCode.new PrivateDivideExpressionExecutorFloatBytecodeEmitter());
-        byteCodegenerators.put(DivideExpressionExecutorInt.class,
+        byteCodeGenerators.put(DivideExpressionExecutorInt.class,
                 byteCode.new PrivateDivideExpressionExecutorIntegerBytecodeEmitter());
-        byteCodegenerators.put(DivideExpressionExecutorLong.class,
+        byteCodeGenerators.put(DivideExpressionExecutorLong.class,
                 byteCode.new PrivateDivideExpressionExecutorLongBytecodeEmitter());
 
-        byteCodegenerators.put(ModExpressionExecutorDouble.class,
+        byteCodeGenerators.put(ModExpressionExecutorDouble.class,
                 byteCode.new PrivateModExpressionExecutorDoubleBytecodeEmitter());
-        byteCodegenerators.put(ModExpressionExecutorFloat.class,
+        byteCodeGenerators.put(ModExpressionExecutorFloat.class,
                 byteCode.new PrivateModExpressionExecutorFloatBytecodeEmitter());
-        byteCodegenerators.put(ModExpressionExecutorInt.class,
+        byteCodeGenerators.put(ModExpressionExecutorInt.class,
                 byteCode.new PrivateModExpressionExecutorIntegerBytecodeEmitter());
-        byteCodegenerators.put(ModExpressionExecutorLong.class,
+        byteCodeGenerators.put(ModExpressionExecutorLong.class,
                 byteCode.new PrivateModExpressionExecutorLongBytecodeEmitter());
         //Unhandled ExpressionExecutors.
-        byteCodegenerators.put(ExpressionExecutor.class,
+        byteCodeGenerators.put(ExpressionExecutor.class,
                 byteCode.new PrivateExtensionBytecodeEmitter());
     }
 
-    protected ArrayList<ExpressionExecutor> unHandledExpressionExecutors = new ArrayList<ExpressionExecutor>();
-    protected int unHandledExpressionExecutorIndex = 0;
-    protected byte[] byteArray;
-    protected ExpressionExecutor expressionExecutor;
-    private ClassWriter classWriter;
-    private ByteCodeHelper byteCodeHelper;
+    private List<ExpressionExecutor> unHandledExpressionExecutors = new ArrayList<ExpressionExecutor>();
+    private byte[] byteArray;
+    private ExpressionExecutor expressionExecutor;
 
     /**
      * This method returns Expression executor with byte code.
      *
      * @param conditionExecutor
-     * @return
-     * @throws InstantiationException
-     * @throws IllegalAccessException
+     * @return ExpressionExecutor which optimized using JIT code generation.
      */
     public ExpressionExecutor build(ExpressionExecutor conditionExecutor) {
-        this.byteCodeHelper = new ByteCodeHelper();
-        this.classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-        MethodVisitor methodVisitor = byteCodeHelper.start(classWriter);
-        this.execute(conditionExecutor, 2, 0, null, methodVisitor, this);
-        this.byteCodeHelper.end(classWriter, methodVisitor, this, conditionExecutor);
+        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+        ByteCodeBuilder.jitCompiledExpressionExecutorClassPopulator(classWriter);
+        ByteCodeBuilder.unHandledExpressionExecutorsFieldPopulator(classWriter);
+        ByteCodeBuilder.cloneExecutorMethodPopulator(classWriter);
+        ByteCodeBuilder.getReturnTypeMethodPopulator(classWriter);
+        MethodVisitor executeMethodVisitor = ByteCodeBuilder.executeMethodPopulator(classWriter);
+        this.execute(conditionExecutor, 2, 0, null, executeMethodVisitor, this);
+        ByteCodeBuilder.end(classWriter, executeMethodVisitor, this, conditionExecutor);
         return this.expressionExecutor;
     }
 
     /**
      * This method maps ExpressionExecutor to it's ByteCodeEmitter.
-     * @param conditionExecutor
-     * @param index
-     * @param parent
-     * @param specialCase
-     * @param methodVisitor
+     * @param conditionExecutor ExpressionExecutor that needs byte-code generation.
+     * @param index             Local variable array index where data related to Expression Executor is stored.
+     * @param parent            Used to indicate  ExpressionExecutor before Current ExpressionExecutor.
+     *                          0 - all other ExpressionExecutors.
+     *                          1 - and ExpressionExecutor.
+     *                          2 - or ExpressionExecutor.
+     *                          3 - not ExpressionExecutor.
+     * @param specialCase       Used to optimize if two consecutive same kind of ExpressionExecutors are met.
+     *                          Ex- In the case of 2 consecutive 'and' ExpressionExecutors, if first 'and' is false
+     *                          then straight away will jump to instruction after second 'and' ExpressionExecutor.
+     * @param methodVisitor     Instance of ASM library class 'MethodVisitor' that used to generate a method inside the
+     *                          byte-code class.
      * @param byteCodeGenerator
      */
-    public void execute(ExpressionExecutor conditionExecutor, int index, int parent,
-                        Label specialCase, MethodVisitor methodVisitor, ByteCodeGenerator byteCodeGenerator) {
-        if (ByteCodeGenerator.byteCodegenerators.containsKey(conditionExecutor.getClass())) {
-            ByteCodeGenerator.byteCodegenerators.get(conditionExecutor.getClass()).generate(conditionExecutor, index,
-                    parent, specialCase, methodVisitor, byteCodeGenerator);
+    protected void execute(ExpressionExecutor conditionExecutor, int index, int parent,
+                           Label specialCase, MethodVisitor methodVisitor, ByteCodeGenerator byteCodeGenerator) {
+        if (conditionExecutor != null) {
+            if (ByteCodeGenerator.byteCodeGenerators.containsKey(conditionExecutor.getClass())) {
+                ByteCodeGenerator.byteCodeGenerators.get(conditionExecutor.getClass()).generate(conditionExecutor,
+                        index, parent, specialCase, methodVisitor, byteCodeGenerator);
+            } else {
+                ByteCodeGenerator.byteCodeGenerators.get(ExpressionExecutor.class).generate(conditionExecutor, index,
+                        parent, specialCase, methodVisitor, byteCodeGenerator);
+            }
         } else {
-            ByteCodeGenerator.byteCodegenerators.get(ExpressionExecutor.class).generate(conditionExecutor, index,
-                    parent, specialCase, methodVisitor, byteCodeGenerator);
+            throw new SiddhiAppRuntimeException("No ExpressionExecutor is given to generate JIT code.");
         }
     }
+
+    public List<ExpressionExecutor> getUnHandledExpressionExecutors() {
+        return unHandledExpressionExecutors;
+    }
+
+    public byte[] getByteArray() {
+        return byteArray;
+    }
+
+    public void setByteArray(byte[] byteArray) {
+        this.byteArray = byteArray;
+    }
+
+    public void setExpressionExecutor(ExpressionExecutor expressionExecutor) {
+        this.expressionExecutor = expressionExecutor;
+    }
+
+
 }

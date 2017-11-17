@@ -207,7 +207,7 @@ public class QueryParserHelper {
                 }
             }
             if (processor instanceof FilterProcessor) {
-                ((FilterProcessor) processor).filterJITCodeGenerator();
+                ((FilterProcessor) processor).jitCodeGenerator();
             }
 
             processor = processor.getNextProcessor();

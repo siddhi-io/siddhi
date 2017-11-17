@@ -92,5 +92,7 @@ public final class SiddhiConstants {
 
     public static final String KEY_DELIMITER = ":-:";
 
+    public static final String JIT_QUERY_COMPILE = "QueryJITCompile";
+
 
 }

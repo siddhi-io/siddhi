@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -178,6 +178,7 @@ import org.wso2.siddhi.core.executor.condition.compare.notequal.NotEqualCompareC
 import org.wso2.siddhi.core.executor.condition.compare.notequal.NotEqualCompareConditionExpressionExecutorLongInt;
 import org.wso2.siddhi.core.executor.condition.compare.notequal.NotEqualCompareConditionExpressionExecutorLongLong;
 import org.wso2.siddhi.core.executor.condition.compare.notequal.NotEqualCompareConditionExpressionExecutorStringString;
+import org.wso2.siddhi.core.executor.function.FunctionExecutor;
 import org.wso2.siddhi.core.executor.math.add.AddExpressionExecutorDouble;
 import org.wso2.siddhi.core.executor.math.add.AddExpressionExecutorFloat;
 import org.wso2.siddhi.core.executor.math.add.AddExpressionExecutorInt;
@@ -306,7 +307,9 @@ public class ByteCodeRegistry {
             Label l3 = new Label();
             Label l4 = new Label();
             byteCodeGenerator.execute(left, index, 1, l1, methodVisitor, byteCodeGenerator);
-            if (left instanceof VariableExpressionExecutor) {
+            if (left instanceof VariableExpressionExecutor || left instanceof FunctionExecutor) { /* This operation
+                needs to be done to check NUll values. Only checks for ExpressionExecutors for those have a possibility
+                to give Null*/
                 methodVisitor.visitVarInsn(ALOAD, index);
                 methodVisitor.visitJumpInsn(IFNULL, l3);
                 methodVisitor.visitVarInsn(ALOAD, index);
@@ -326,7 +329,7 @@ public class ByteCodeRegistry {
 
             methodVisitor.visitLabel(l0);
             byteCodeGenerator.execute(right, index, 1, l1, methodVisitor, byteCodeGenerator);
-            if (right instanceof VariableExpressionExecutor) {
+            if (right instanceof VariableExpressionExecutor || right instanceof FunctionExecutor) {
                 methodVisitor.visitVarInsn(ALOAD, index);
                 methodVisitor.visitJumpInsn(IFNULL, l4);
                 methodVisitor.visitVarInsn(ALOAD, index);
@@ -372,7 +375,7 @@ public class ByteCodeRegistry {
             Label l1 = new Label();
             Label l2 = new Label();
             byteCodeGenerator.execute(left, index, 2, l1, methodVisitor, byteCodeGenerator);
-            if (left instanceof VariableExpressionExecutor) {
+            if (left instanceof VariableExpressionExecutor || left instanceof FunctionExecutor) {
                 methodVisitor.visitVarInsn(ALOAD, index);
                 methodVisitor.visitJumpInsn(IFNULL, l0);
                 methodVisitor.visitVarInsn(ALOAD, index);
@@ -391,7 +394,7 @@ public class ByteCodeRegistry {
 
             methodVisitor.visitLabel(l0);
             byteCodeGenerator.execute(right, index, 2, l1, methodVisitor, byteCodeGenerator);
-            if (right instanceof VariableExpressionExecutor) {
+            if (right instanceof VariableExpressionExecutor || right instanceof FunctionExecutor) {
                 methodVisitor.visitVarInsn(ALOAD, index);
                 methodVisitor.visitJumpInsn(IFNULL, l2);
                 methodVisitor.visitVarInsn(ALOAD, index);
@@ -436,7 +439,7 @@ public class ByteCodeRegistry {
             Label l1 = new Label();
             Label l2 = new Label();
             byteCodeGenerator.execute(condition, index, 3, l1, methodVisitor, byteCodeGenerator);
-            if (condition instanceof VariableExpressionExecutor) {
+            if (condition instanceof VariableExpressionExecutor || condition instanceof FunctionExecutor) {
                 methodVisitor.visitVarInsn(ALOAD, index);
                 methodVisitor.visitJumpInsn(IFNULL, l2);
                 methodVisitor.visitVarInsn(ALOAD, index);
@@ -598,14 +601,12 @@ public class ByteCodeRegistry {
         @Override
         public void generate(ExpressionExecutor conditionExecutor, int index, int parent,
                              Label specialCase, MethodVisitor methodVisitor, ByteCodeGenerator byteCodeGenerator) {
-            byteCodeGenerator.unHandledExpressionExecutors.add(conditionExecutor);
+            byteCodeGenerator.getUnHandledExpressionExecutors().add(conditionExecutor);
             methodVisitor.visitVarInsn(ALOAD, 0);
             methodVisitor.visitFieldInsn(GETFIELD, "JITCompiledExpressionExecutor", "unHandledExpressionExecutors",
-                    "Ljava/util/ArrayList;");
-            methodVisitor.visitLdcInsn(byteCodeGenerator.unHandledExpressionExecutorIndex);
-            byteCodeGenerator.unHandledExpressionExecutorIndex++;
-            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/util/ArrayList", "get",
-                    "(I)Ljava/lang/Object;", false);
+                    "Ljava/util/List;");
+            methodVisitor.visitLdcInsn((byteCodeGenerator.getUnHandledExpressionExecutors().size()) - 1);
+            methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
             methodVisitor.visitTypeInsn(CHECKCAST,
                     "org/wso2/siddhi/core/executor/condition/InConditionExpressionExecutor");
             methodVisitor.visitVarInsn(ALOAD, 1);
@@ -634,14 +635,12 @@ public class ByteCodeRegistry {
         @Override
         public void generate(ExpressionExecutor conditionExecutor, int index, int parent,
                              Label specialCase, MethodVisitor methodVisitor, ByteCodeGenerator byteCodeGenerator) {
-            byteCodeGenerator.unHandledExpressionExecutors.add(conditionExecutor);
+            byteCodeGenerator.getUnHandledExpressionExecutors().add(conditionExecutor);
             methodVisitor.visitVarInsn(ALOAD, 0);
             methodVisitor.visitFieldInsn(GETFIELD, "JITCompiledExpressionExecutor", "unHandledExpressionExecutors",
-                    "Ljava/util/ArrayList;");
-            methodVisitor.visitLdcInsn(byteCodeGenerator.unHandledExpressionExecutorIndex);
-            byteCodeGenerator.unHandledExpressionExecutorIndex++;
-            methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/util/ArrayList", "get",
-                    "(I)Ljava/lang/Object;", false);
+                    "Ljava/util/List;");
+            methodVisitor.visitLdcInsn((byteCodeGenerator.getUnHandledExpressionExecutors().size()) - 1);
+            methodVisitor.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
             methodVisitor.visitVarInsn(ALOAD, 1);
             methodVisitor.visitMethodInsn(INVOKEINTERFACE, "org/wso2/siddhi/core/executor/ExpressionExecutor",
                     "execute", "(Lorg/wso2/siddhi/core/event/ComplexEvent;)Ljava/lang/Object;", true);
