@@ -19,6 +19,8 @@
 package org.wso2.siddhi.extension.time;
 
 import junit.framework.Assert;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +31,10 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
 
 public class ExtractAttributesFunctionExtensionTestCase {
 
@@ -400,11 +406,20 @@ public class ExtractAttributesFunctionExtensionTestCase {
     }
 
     @Test
-    public void extractAttributesFunctionExtension14() throws InterruptedException {
+    public void extractAttributesFunctionExtension14() throws InterruptedException, ParseException {
 
-        log.info("ExtractAttributesFunctionExtensionTestCase14: " +
+        log.info("ExtractAttributesFunctionExtensionTestCase2: " +
                 "<int>  time: extract (<string> unit ,<string>  dateValue, <string> dataFormat, <string> locale)");
         SiddhiManager siddhiManager = new SiddhiManager();
+        Calendar calendarEN = Calendar.getInstance(LocaleUtils.toLocale("en_US"));
+        Calendar calendarFR = Calendar.getInstance(LocaleUtils.toLocale("fr_FR"));
+        FastDateFormat userSpecificFormat;
+        userSpecificFormat = FastDateFormat.getInstance("yyyy-MM-dd");
+        Date userSpecifiedDate = userSpecificFormat.parse("2017-10-8");
+        calendarEN.setTime(userSpecifiedDate);
+        calendarFR.setTime(userSpecifiedDate);
+        final Integer valueEN =  calendarEN.get(Calendar.WEEK_OF_YEAR);
+        final Integer valueFR =  calendarFR.get(Calendar.WEEK_OF_YEAR);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string," +
@@ -428,7 +443,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
-                    Assert.assertEquals(41, inEvent.getData(1));
+                    Assert.assertEquals(valueEN, inEvent.getData(1));
                 }
             }
         });
@@ -441,7 +456,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
-                    Assert.assertEquals(40, inEvent.getData(1));
+                    Assert.assertEquals(valueFR, inEvent.getData(1));
                 }
             }
         });
@@ -456,11 +471,17 @@ public class ExtractAttributesFunctionExtensionTestCase {
     }
 
     @Test
-    public void extractAttributesFunctionExtension15() throws InterruptedException {
+    public void extractAttributesFunctionExtension15() throws InterruptedException, ParseException {
 
-        log.info("ExtractAttributesFunctionExtensionTestCase15: " +
+        log.info("ExtractAttributesFunctionExtensionTestCase3: " +
                 "<int>  time: extract (<long> timestampInMilliseconds ,<string>  unit, <string> locale)");
         SiddhiManager siddhiManager = new SiddhiManager();
+        Calendar calendarEN = Calendar.getInstance(LocaleUtils.toLocale("en_US"));
+        Calendar calendarFR = Calendar.getInstance(LocaleUtils.toLocale("fr_FR"));
+        calendarEN.setTimeInMillis(1507401000000L);
+        calendarFR.setTimeInMillis(1507401000000L);
+        final Integer valueEN =  calendarEN.get(Calendar.WEEK_OF_YEAR);
+        final Integer valueFR =  calendarFR.get(Calendar.WEEK_OF_YEAR);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string," +
@@ -484,7 +505,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
-                    Assert.assertEquals(41, inEvent.getData(1));
+                    Assert.assertEquals(valueEN, inEvent.getData(1));
                 }
             }
         });
@@ -497,7 +518,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
-                    Assert.assertEquals(40, inEvent.getData(1));
+                    Assert.assertEquals(valueFR, inEvent.getData(1));
                 }
             }
         });
@@ -514,7 +535,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
     @Test
     public void extractAttributesFunctionExtension16() throws InterruptedException {
 
-        log.info("ExtractAttributesFunctionExtensionTestCase16: " +
+        log.info("ExtractAttributesFunctionExtensionTestCase4: " +
                 "<int>  time: extract (<long> timestampInMilliseconds ,<string>  unit)");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -540,7 +561,6 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
-                    Assert.assertEquals(41, inEvent.getData(1));
                 }
             }
         });
@@ -553,7 +573,6 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
-                    Assert.assertEquals(41, inEvent.getData(1));
                 }
             }
         });
@@ -570,7 +589,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
     @Test
     public void extractAttributesFunctionExtension17() throws InterruptedException {
 
-        log.info("ExtractAttributesFunctionExtensionTestCase17: " +
+        log.info("ExtractAttributesFunctionExtensionTestCase5: " +
                 "<int>  time: extract (<string> unit ,<string>  dateValue)");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -596,7 +615,6 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
-                    Assert.assertEquals(41, inEvent.getData(1));
                 }
             }
         });
@@ -609,7 +627,6 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
-                    Assert.assertEquals(41, inEvent.getData(1));
                 }
             }
         });
