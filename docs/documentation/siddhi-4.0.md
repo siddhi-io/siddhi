@@ -1866,6 +1866,9 @@ For more information, see [output event type](#output-event-types).
 This query inserts all events from the `TempStream` stream to the `OneMinTempWindow` window.
 
 ```sql
+define stream TempStream(tempId string, temp double);
+define window OneMinTempWindow(tempId string, temp double) time(1 min);
+
 from TempStream
 select *
 insert into OneMinTempWindow;
