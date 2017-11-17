@@ -26,31 +26,52 @@ import org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggrega
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttributeExecutor {
 
     protected Map<String, AttributeAggregator> aggregatorMap = new HashMap<String, AttributeAggregator>();
+    protected ExpiredAggregatorTracker expiredAggregatorTracker;
+
 
     public GroupByAggregationAttributeExecutor(AttributeAggregator attributeAggregator,
                                                ExpressionExecutor[] attributeExpressionExecutors,
-                                               ExecutionPlanContext executionPlanContext, String queryName) {
+                              ExecutionPlanContext executionPlanContext, String queryName) {
         super(attributeAggregator, attributeExpressionExecutors, executionPlanContext, queryName);
+        if (executionPlanContext.getCleanAggregators()) {
+            expiredAggregatorTracker =
+                new ExpiredAggregatorTracker(executionPlanContext.getCleanAggregatorInterval() * 60 * 1000);
+        }
     }
 
     @Override
-    public Object execute(ComplexEvent event) {
+    public synchronized Object execute(ComplexEvent event) {
         if (event.getType() == ComplexEvent.Type.RESET) {
             Object aOutput = null;
-            for (AttributeAggregator attributeAggregator : aggregatorMap.values()) {
+            for (AttributeAggregator attributeAggregator: aggregatorMap.values()) {
                 aOutput = attributeAggregator.process(event);
+            }
+
+            if (expiredAggregatorTracker != null) {
+                expiredAggregatorTracker.addAll(aggregatorMap);
+                aggregatorMap.clear();
             }
             return aOutput;
         }
+
         String key = QuerySelector.getThreadLocalGroupByKey();
         AttributeAggregator currentAttributeAggregator = aggregatorMap.get(key);
         if (currentAttributeAggregator == null) {
-            currentAttributeAggregator = attributeAggregator.cloneAggregator(key);
-            currentAttributeAggregator.initAggregator(attributeExpressionExecutors, executionPlanContext);
+            if (expiredAggregatorTracker != null) {
+                currentAttributeAggregator = expiredAggregatorTracker.remove(key);
+            }
+
+            if (currentAttributeAggregator == null) {
+                currentAttributeAggregator = attributeAggregator.cloneAggregator(key);
+                currentAttributeAggregator.initAggregator(attributeExpressionExecutors, executionPlanContext);
+            }
             currentAttributeAggregator.start();
             aggregatorMap.put(key, currentAttributeAggregator);
         }
@@ -83,6 +104,36 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
             aAttributeAggregator.start();
             aAttributeAggregator.restoreState(entry.getValue());
             aggregatorMap.put(key, aAttributeAggregator);
+        }
+    }
+
+    class ExpiredAggregatorTracker {
+        private Map<String, AttributeAggregator> expiredAggregators = new HashMap<String, AttributeAggregator>();
+        private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+
+        public ExpiredAggregatorTracker(long cleanInterval) {
+            service.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    clear();
+                }
+            }, cleanInterval, cleanInterval, TimeUnit.MILLISECONDS);
+        }
+
+        public synchronized void add(String key, AttributeAggregator aggregator) {
+            expiredAggregators.put(key, aggregator);
+        }
+
+        public synchronized void addAll(Map<String, AttributeAggregator> aggregatorMap){
+            expiredAggregators.putAll(aggregatorMap);
+        }
+
+        public synchronized AttributeAggregator remove(String key) {
+             return expiredAggregators.remove(key);
+        }
+
+        public synchronized void clear() {
+            expiredAggregators.clear();
         }
     }
 }

@@ -43,6 +43,7 @@ public class ExecutionPlanContext {
     private boolean enforceOrder;
     private boolean async;
     private boolean statsEnabled = false;
+    private boolean cleanAggregators = true;
     private StatisticsManager statisticsManager = null;
 
     private ExecutorService executorService;
@@ -57,6 +58,7 @@ public class ExecutionPlanContext {
     private Map<String, EvalScript> scriptFunctionMap;
     private ExceptionHandler<Object> disruptorExceptionHandler;
     private int bufferSize;
+    private int cleanAggregatorInterval = 60;
 
     public ExecutionPlanContext() {
         this.eternalReferencedHolders = new CopyOnWriteArrayList<EternalReferencedHolder>();
@@ -215,4 +217,20 @@ public class ExecutionPlanContext {
     public int getBufferSize() {
         return bufferSize;
     }
+
+    public void setCleanAggregators(boolean value) {
+    	this.cleanAggregators = value;
+    }
+
+    public boolean getCleanAggregators() {
+    	return cleanAggregators;
+    }
+
+	public int getCleanAggregatorInterval() {
+		return cleanAggregatorInterval;
+	}
+
+	public void setCleanAggregatorInterval(int cleanAggregatorInterval) {
+		this.cleanAggregatorInterval = cleanAggregatorInterval;
+	}
 }

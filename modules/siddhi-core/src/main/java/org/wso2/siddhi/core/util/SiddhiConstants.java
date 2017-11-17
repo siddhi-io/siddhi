@@ -39,6 +39,9 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_IDLE_TIME = "IdleTime";
     public static final String ANNOTATION_INCREMENT = "Increment";
 
+    public static final String ANNOTATION_CLEAN_AGGREGATORS = "CleanAggregators";
+	public static final String ANNOTATION_INTERVAL = "interval";
+
     public static final String TRUE = "true";
     public static final String TRIGGER_START = "start";
     public static final int DEFAULT_EVENT_BUFFER_SIZE = 1024;
