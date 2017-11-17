@@ -1925,7 +1925,7 @@ define window FiveMinTempWindow (roomNo int, temp double) time('5 min');
 
 
 from FiveMinTempWindow
-select name, max(value) as maxValue, roomNo
+select max(temp) as maxValue, roomNo
 insert into MaxSensorReadingStream;
 ```
 
