@@ -58,7 +58,7 @@ define stream TempStream (deviceID long, roomNo int, temp double);
 @name('5minAvgQuery')
 from TempStream#window.time(5 min)
 select roomNo, avg(temp) as avgTemp
-  group by room
+  group by roomNo
 insert into OutputStream;
 ```
 
