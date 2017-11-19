@@ -120,8 +120,9 @@ public class FilterTestCase1 {
 
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
-        String query = "@info(name = 'query1') from cseEventStream[15 % 20 > volume / 10] select symbol," +
-                "price insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[15 % 20 > volume / 10 and price >= volume and " +
+                "not(volume >= price) and 99 < volume and 100 <= volume] select symbol,price insert into " +
+                "outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
@@ -155,8 +156,9 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
-        String query = "@info(name = 'query1') from cseEventStream[75 -5 > price % 80] select symbol," +
-                "price insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[75 -5 > price % 80 and not(price >= volume) " +
+                "and volume >= price and 200 >= volume and (99.9999- 0.001f) < volume and 100.0 <= volume] " +
+                "select symbol,price insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -190,8 +192,9 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
-        String query = "@info(name = 'query1') from cseEventStream[volume % 210 > 40f +10] select symbol,price," +
-                "volume insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume % 210 > 40f +10 and 59.99 < volume and " +
+                "60.0 <= volume and 39.99 < price and 40.00 <= price] " +
+                "select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -222,8 +225,8 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
-        String query = "@info(name = 'query1') from cseEventStream[volume + 10 > 500L / 10] select symbol," +
-                "price,volume insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume + 10 > 500L / 10 and 190 >= volume and " +
+                "190l >= volume and 190.0 >= volume] select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -255,8 +258,9 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
-        String query = "@info(name = 'query1') from cseEventStream[volume / 10 > (50L % 60) * 0.1] select symbol," +
-                "price,volume insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume / 10 > (50L % 60) * 0.1 and 201l > volume " +
+                "and 200l >= volume and 200 >= volume and volume > 39 and 200.01 > volume and 200.0 >= volume and " +
+                "70.0 > price and 70.0 >= price] select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -288,8 +292,8 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double);";
-        String query = "@info(name = 'query1') from cseEventStream[volume % 30f > 2L - 1] select symbol,price," +
-                "volume insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume % 30f > 2L - 1 and 200.0 >= volume and " +
+                "200l >= volume] select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -389,8 +393,8 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double);";
-        String query = "@info(name = 'query1') from cseEventStream[volume > 50d % 100] select symbol," +
-                "price insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume > 50d % 100 and 200 >= volume] " +
+                "select symbol,price insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -589,7 +593,7 @@ public class FilterTestCase1 {
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[(volume - 10 > 250d / 5d) and" +
-                " instanceOfLong(volume)] select symbol,price,volume insert into outputStream ;";
+                " instanceOfLong(volume) and (volume > 60)] select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -797,9 +801,10 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double);";
-        String query = "@info(name = 'query1') from cseEventStream[volume / 4 > 3L and price < 56] select symbol," +
-                "price,volume insert into outputStream ;";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double, " +
+                "available bool, outDated bool);";
+        String query = "@info(name = 'query1') from cseEventStream[outDated and volume / 4 > 3L and price < 56 and " +
+                "10f < volume and 10f <= volume and available] select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -816,8 +821,8 @@ public class FilterTestCase1 {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        inputHandler.send(new Object[]{"WSO2", 55.6f, 100d});
-        inputHandler.send(new Object[]{"WSO2", 57.6f, 10d});
+        inputHandler.send(new Object[]{"WSO2", 55.6f, 100d, true, true});
+        inputHandler.send(new Object[]{"WSO2", 57.6f, 10d, true, true});
         Thread.sleep(100);
         AssertJUnit.assertEquals(1, count);
         siddhiAppRuntime.shutdown();
@@ -833,7 +838,8 @@ public class FilterTestCase1 {
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') from cseEventStream[symbol != 'WSO2' and volume != 55L and price != " +
-                "45f ] select symbol,price,volume insert into outputStream ;";
+                "45f and 49.9f < volume and 50f <= volume and 49L < volume and 50L <= volume] select symbol,price," +
+                "volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -864,8 +870,8 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
-        String query = "@info(name = 'query1') from cseEventStream[volume * 10 != 55f -5] select symbol," +
-                "price insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume * 10 != 55f -5] select symbol,price insert " +
+                "into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -931,8 +937,8 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
-        String query = "@info(name = 'query1') from cseEventStream[volume != 100 and volume != 70d] select symbol," +
-                "price,volume insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume != 100 and volume != 70d and 10L == volume" +
+                " and not(10L != volume)] select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -963,9 +969,10 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
-        String query = "@info(name = 'query1') from cseEventStream[price != 53.6d or price != 87] select symbol," +
-                "price,volume insert into outputStream ;";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long," +
+                " available bool);";
+        String query = "@info(name = 'query1') from cseEventStream[price != 53.6d or price != 87 or not(available) ]" +
+                " select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -980,8 +987,8 @@ public class FilterTestCase1 {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        inputHandler.send(new Object[]{"WSO2", 55.6f, 100L});
-        inputHandler.send(new Object[]{"IBM", 57.6f, 10L});
+        inputHandler.send(new Object[]{"WSO2", 55.6f, 100L, true});
+        inputHandler.send(new Object[]{"IBM", 57.6f, 10L, true});
         Thread.sleep(100);
         AssertJUnit.assertEquals(2, count);
         siddhiAppRuntime.shutdown();
@@ -1062,8 +1069,8 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String cseEventStream = "define stream cseEventStream (symbol string, price float, available bool);";
-        String query = "@info(name = 'query1') from cseEventStream[available != true ] select symbol,price,available " +
-                "insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[available != true and 55.6f <= price] " +
+                "select symbol,price,available insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -1145,8 +1152,10 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
-        String query = "@info(name = 'query1') from cseEventStream[price != 50 + 10 and volume * 10 != 5L * 10] " +
-                "select symbol,price,volume insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[price != 50 + 10 and volume * 10 != 5L * 10 and " +
+                "3 < volume and 3L < volume and 4L <= volume and 3f < volume and 4f <= volume and " +
+                "(4.001 - 0.001) == volume and 5.00 != volume and 4f  == volume] select symbol,price,volume insert " +
+                "into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -1177,8 +1186,10 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double);";
-        String query = "@info(name = 'query1') from cseEventStream[volume != 50d and volume != 45f] select symbol," +
-                "price,volume insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume != 50d and volume != 45f and " +
+                "price >= volume and 39L < volume and 40L <= volume and 39 < volume and 40 <= volume and " +
+                "40.0 == volume and not(55.5 == volume) and 55.5 != volume] " +
+                "select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -1208,9 +1219,10 @@ public class FilterTestCase1 {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double);";
-        String query = "@info(name = 'query1') from cseEventStream[volume != 50f * 0.1  or volume != 5] select" +
-                " symbol,price,volume insert into outputStream ;";
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double, " +
+                "available bool, outDated bool);";
+        String query = "@info(name = 'query1') from cseEventStream[outDated or volume != 50f * 0.1 " +
+                " or volume != 5 * 1.0 or available] select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -1225,8 +1237,8 @@ public class FilterTestCase1 {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        inputHandler.send(new Object[]{"WSO2", 55.5f, 40d});
-        inputHandler.send(new Object[]{"WSO2", 53.5f, 5d});
+        inputHandler.send(new Object[]{"WSO2", 55.5f, 40d, false, false});
+        inputHandler.send(new Object[]{"WSO2", 53.5f, 5d, false, false});
 
         Thread.sleep(100);
         AssertJUnit.assertEquals(1, count);
@@ -1241,8 +1253,9 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double);";
-        String query = "@info(name = 'query1') from cseEventStream[volume != 50L] select symbol,price,volume insert " +
-                "into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume != 50L and 53 < price and 53 <= price and " +
+                "53L < price and 53L <= price and volume != 50 and 40 == volume and not(40 != volume)] " +
+                "select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -1258,7 +1271,7 @@ public class FilterTestCase1 {
         siddhiAppRuntime.start();
 
         inputHandler.send(new Object[]{"WSO2", 55.5f, 40d});
-        inputHandler.send(new Object[]{"WSO2", 53.5f, 50d});
+        inputHandler.send(new Object[]{"WSO2", 54.0, 50d});
 
         Thread.sleep(100);
         AssertJUnit.assertEquals(1, count);
@@ -1324,8 +1337,9 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double);";
-        String query = "@info(name = 'query1') from cseEventStream[volume == 50d] select symbol,price,volume insert " +
-                "into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume == 50d and 39.9 < volume and " +
+                "40.0 <= volume and 53.5 == price and 55.5 != price] select symbol,price,volume insert into " +
+                "outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -1356,8 +1370,8 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double);";
-        String query = "@info(name = 'query1') from cseEventStream[symbol == 'IBM'] select symbol,price,volume insert" +
-                " into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[symbol == 'IBM' and 53 == price and 55 != price " +
+                "and 'IBM' == symbol and 'WSO2' != symbol] select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -1372,8 +1386,8 @@ public class FilterTestCase1 {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        inputHandler.send(new Object[]{"WSO2", 55.5f, 40d});
-        inputHandler.send(new Object[]{"IBM", 53.5f, 50d});
+        inputHandler.send(new Object[]{"WSO2", 55.0f, 40d});
+        inputHandler.send(new Object[]{"IBM", 53.0f, 50d});
 
         Thread.sleep(100);
         AssertJUnit.assertEquals(1, count);
@@ -1420,8 +1434,9 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume double);";
-        String query = "@info(name = 'query1') from cseEventStream[price <= 54] select symbol,price,volume insert " +
-                "into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[price <= 54 and not((40.011f - 0.011  )== volume) " +
+                "and 40.0f != volume and 50L == volume and not(50L != volume)] select symbol,price,volume " +
+                "insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -1452,8 +1467,9 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
-        String query = "@info(name = 'query1') from cseEventStream[volume <= 4 * 10] select symbol,price," +
-                "volume insert into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume <= 4 * 10 and 55L == price and " +
+                "40L == volume and not(40L != volume) and 40 == volume and 50!= volume] " +
+                "select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
@@ -1468,7 +1484,7 @@ public class FilterTestCase1 {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        inputHandler.send(new Object[]{"WSO2", 55.5f, 40});
+        inputHandler.send(new Object[]{"WSO2", 55.0f, 40});
         inputHandler.send(new Object[]{"WSO2", 53.5f, 50});
 
         Thread.sleep(100);
@@ -1484,7 +1500,8 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int);";
-        String query = "@info(name = 'query1') from cseEventStream[price >= 54] select symbol,price,volume insert " +
+        String query = "@info(name = 'query1') from cseEventStream[price >= 54 and price > 53.9] select symbol,price," +
+                "volume insert " +
                 "into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
@@ -1516,8 +1533,9 @@ public class FilterTestCase1 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
-        String query = "@info(name = 'query1') from cseEventStream[volume >= 50] select symbol,price,volume insert " +
-                "into outputStream ;";
+        String query = "@info(name = 'query1') from cseEventStream[volume >= 50 and not(50.0 != volume) " +
+                "and 50.0 == volume and 50 == volume and 53.5f == price and 55.5f != price and 50f == volume and " +
+                "40.0f != volume] select symbol,price,volume insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
