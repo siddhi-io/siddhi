@@ -30,6 +30,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.extension.time.util.TimeExtensionConstants;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 
 import java.text.ParseException;
@@ -473,7 +474,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
     @Test
     public void extractAttributesFunctionExtension15() throws InterruptedException, ParseException {
 
-        log.info("ExtractAttributesFunctionExtensionTestCase3: " +
+        log.info("extractAttributesFunctionExtension15: " +
                 "<int>  time: extract (<long> timestampInMilliseconds ,<string>  unit, <string> locale)");
         SiddhiManager siddhiManager = new SiddhiManager();
         Calendar calendarEN = Calendar.getInstance(LocaleUtils.toLocale("en_US"));
@@ -535,9 +536,12 @@ public class ExtractAttributesFunctionExtensionTestCase {
     @Test
     public void extractAttributesFunctionExtension16() throws InterruptedException {
 
-        log.info("ExtractAttributesFunctionExtensionTestCase4: " +
+        log.info("extractAttributesFunctionExtension16: " +
                 "<int>  time: extract (<long> timestampInMilliseconds ,<string>  unit)");
         SiddhiManager siddhiManager = new SiddhiManager();
+        Calendar calendarEN = Calendar.getInstance();
+        calendarEN.setTimeInMillis(1507401000000L);
+        final Integer valueEN =  calendarEN.get(Calendar.WEEK_OF_YEAR);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string," +
@@ -546,12 +550,8 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:extract(timestampInMilliseconds, 'WEEK') as WEEK "+
                 "insert into outputStream;");
-        String query2 = ("@info(name = 'query2') " +
-                "from inputStream " +
-                "select symbol , time:extract(timestampInMilliseconds, 'WEEK') as WEEK "+
-                "insert into outputStream2;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
-                + query + query2);
+                + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -561,18 +561,8 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
-                }
-            }
-        });
+                    Assert.assertEquals(valueEN, inEvent.getData(1));
 
-        executionPlanRuntime.addCallback("query2", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                eventArrived = true;
-                for (Event inEvent : inEvents) {
-                    count++;
-                    log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
                 }
             }
         });
@@ -581,17 +571,23 @@ public class ExtractAttributesFunctionExtensionTestCase {
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", "2017-10-8", "yyyy-MM-dd",1507401000000L});
         Thread.sleep(100);
-        Assert.assertEquals(2, count);
+        Assert.assertEquals(1, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
 
     @Test
-    public void extractAttributesFunctionExtension17() throws InterruptedException {
+    public void extractAttributesFunctionExtension17() throws InterruptedException, ParseException {
 
-        log.info("ExtractAttributesFunctionExtensionTestCase5: " +
+        log.info("extractAttributesFunctionExtension17: " +
                 "<int>  time: extract (<string> unit ,<string>  dateValue)");
         SiddhiManager siddhiManager = new SiddhiManager();
+        FastDateFormat userSpecificFormat;
+        userSpecificFormat = FastDateFormat.getInstance(TimeExtensionConstants.EXTENSION_TIME_DEFAULT_DATE_FORMAT);
+        Date userSpecifiedDate = userSpecificFormat.parse("2017-10-8 02:23:44.999");
+        Calendar calendarEN = Calendar.getInstance();
+        calendarEN.setTime(userSpecifiedDate);
+        final Integer valueEN =  calendarEN.get(Calendar.WEEK_OF_YEAR);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string," +
@@ -600,12 +596,8 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 "from inputStream " +
                 "select symbol , time:extract('WEEK', dateValue) as WEEK "+
                 "insert into outputStream;");
-        String query2 = ("@info(name = 'query2') " +
-                "from inputStream " +
-                "select symbol , time:extract('WEEK', dateValue) as WEEK "+
-                "insert into outputStream2;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
-                + query + query2);
+                + query);
 
         executionPlanRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -615,18 +607,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event inEvent : inEvents) {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
-                }
-            }
-        });
-
-        executionPlanRuntime.addCallback("query2", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                eventArrived = true;
-                for (Event inEvent : inEvents) {
-                    count++;
-                    log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
+                    Assert.assertEquals(valueEN, inEvent.getData(1));
                 }
             }
         });
@@ -635,7 +616,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", "2017-10-8 02:23:44.999", 1507401000000L});
         Thread.sleep(100);
-        Assert.assertEquals(2, count);
+        Assert.assertEquals(1, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
