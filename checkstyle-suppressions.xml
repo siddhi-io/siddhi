@@ -23,25 +23,25 @@
 
 <suppressions>
 
-    <suppress checks="Javadoc.*" files=".*/src/test/java/.*"/>
-    <suppress checks=".*" files=".*/antlr4/org/wso2/siddhi/query/compiler/*" />
-    <suppress checks=".*" files=".*/src/gen/java/org/wso2/siddhi/service/*" />
+    <suppress checks="Javadoc.*" files=".*[/\\]src[/\\]test[/\\]java[/\\].*"/>
+    <suppress checks=".*" files=".*[/\\]antlr4[/\\]org[/\\]wso2[/\\]siddhi[/\\]query[/\\]compiler[/\\]*" />
+    <suppress checks=".*" files=".*[/\\]src[/\\]gen[/\\]java[/\\]org[/\\]wso2[/\\]siddhi[/\\]service[/\\]*" />
 
-    <suppress checks="JavadocPackage" files=".*/src/(main|integration)/java/.*"/>
-    <suppress checks="JavadocPackage" files=".*/src/.*/internal/.*"/>
+    <suppress checks="JavadocPackage" files=".*[/\\]src[/\\](main|integration)[/\\]java[/\\].*"/>
+    <suppress checks="JavadocPackage" files=".*[/\\]src[/\\].*[/\\]internal[/\\].*"/>
 
-    <suppress checks="JavadocStyle" files=".*/src/(main|integration)/java/.*"/>
-    <suppress checks="JavadocStyle" files=".*/src/.*/internal/.*"/>
+    <suppress checks="JavadocStyle" files=".*[/\\]src[/\\](main|integration)[/\\]java[/\\].*"/>
+    <suppress checks="JavadocStyle" files=".*[/\\]src[/\\].*[/\\]internal[/\\].*"/>
 
     <!--do not check antler files -->
-    <suppress checks="MemberNameCheck" files=".*/internal/SiddhiQLBaseVisitorImpl.java"/>
-    <suppress checks="ParameterName" files=".*/internal/SiddhiQLBaseVisitorImpl.java"/>
-    <suppress checks="LocalVariableName" files=".*/internal/SiddhiQLBaseVisitorImpl.java"/>
-    <suppress checks="LocalFinalVariableName" files=".*/internal/SiddhiQLBaseVisitorImpl.java"/>
-    <suppress checks="Regexp" files=".*/debugger/SiddhiDebuggerClient.java"/>
-    <suppress checks="Regexp" files=".*/siddhi/performance/.*"/>
-    <suppress checks="Javadoc.*" files=".*/siddhi/performance/.*"/>
-    <suppress checks="Regexp" files=".*/siddhi/sample/.*"/>
-    <suppress checks="Javadoc.*" files=".*/siddhi/sample/.*"/>
+    <suppress checks="MemberNameCheck" files=".*[/\\]internal[/\\]SiddhiQLBaseVisitorImpl.java"/>
+    <suppress checks="ParameterName" files=".*[/\\]internal[/\\]SiddhiQLBaseVisitorImpl.java"/>
+    <suppress checks="LocalVariableName" files=".*[/\\]internal[/\\]SiddhiQLBaseVisitorImpl.java"/>
+    <suppress checks="LocalFinalVariableName" files=".*[/\\]internal[/\\]SiddhiQLBaseVisitorImpl.java"/>
+    <suppress checks="Regexp" files=".*[/\\]debugger[/\\]SiddhiDebuggerClient.java"/>
+    <suppress checks="Regexp" files=".*[/\\]siddhi[/\\]performance[/\\].*"/>
+    <suppress checks="Javadoc.*" files=".*[/\\]siddhi[/\\]performance[/\\].*"/>
+    <suppress checks="Regexp" files=".*[/\\]siddhi[/\\]sample[/\\].*"/>
+    <suppress checks="Javadoc.*" files=".*[/\\]siddhi[/\\]sample[/\\].*"/>
 
 </suppressions>
