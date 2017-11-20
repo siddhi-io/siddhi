@@ -21,6 +21,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
@@ -62,7 +63,7 @@ public class ByteCodeBuilder {
      *this class's constructor will pass a list of ExpressionExecutors to field unHandledExpressionExecutors.
      * @param classWriter Instance of ASM library class 'ClassWriter' that used to generate the byte-code class.
      */
-    public static void jitCompiledExpressionExecutorClassPopulator(ClassWriter classWriter) {
+    protected static void jitCompiledExpressionExecutorClassPopulator(ClassWriter classWriter) {
         classWriter.visit(52, ACC_PUBLIC + ACC_SUPER, "JITCompiledExpressionExecutor", null,
                 "java/lang/Object", new String[] { "org/wso2/siddhi/core/executor/ExpressionExecutor" });
         classWriter.visitSource("JITCompiledExpressionExecutor.java", null);
@@ -87,7 +88,7 @@ public class ByteCodeBuilder {
      * ExpressionExecutors which are not handled through byte-code generation.
      * @param classWriter
      */
-    public static void unHandledExpressionExecutorsFieldPopulator(ClassWriter classWriter) {
+    protected static void unHandledExpressionExecutorsFieldPopulator(ClassWriter classWriter) {
         FieldVisitor fieldVisitor = classWriter.visitField(ACC_PRIVATE, "unHandledExpressionExecutors",
                 "Ljava/util/List;", "Ljava/util/List<Lorg/wso2/siddhi/core/executor/ExpressionExecutor;>;",
                 null);
@@ -100,7 +101,7 @@ public class ByteCodeBuilder {
      * JITCompiledExpressionExecutor.
      * @param classWriter
      */
-    public static void cloneExecutorMethodPopulator(ClassWriter classWriter) {
+    protected static void cloneExecutorMethodPopulator(ClassWriter classWriter) {
         MethodVisitor methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "cloneExecutor",
                 "(Ljava/lang/String;)Lorg/wso2/siddhi/core/executor/ExpressionExecutor;", null,
                 null);
@@ -142,7 +143,7 @@ public class ByteCodeBuilder {
      * FilterProcessor.
      * @param classWriter
      */
-    public static void getReturnTypeMethodPopulator(ClassWriter classWriter) {
+    protected static void getReturnTypeMethodPopulator(ClassWriter classWriter) {
         MethodVisitor methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "getReturnType",
                 "()Lorg/wso2/siddhi/query/api/definition/Attribute$Type;", null, null);
         methodVisitor.visitCode();
@@ -159,7 +160,7 @@ public class ByteCodeBuilder {
      * @param classWriter
      * @return
      */
-    public static MethodVisitor executeMethodPopulator(ClassWriter classWriter) {
+    protected static MethodVisitor executeMethodPopulator(ClassWriter classWriter) {
         MethodVisitor methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "execute",
                 "(Lorg/wso2/siddhi/core/event/ComplexEvent;)Ljava/lang/Object;",
                 null, null);
@@ -177,7 +178,7 @@ public class ByteCodeBuilder {
      * @param byteCodeGenerator Instance of ByteCodeGenerator class.
      * @param expressionExecutor Expression Executor of filter query.
      */
-    public static void end(ClassWriter classWriter, MethodVisitor methodVisitor, ByteCodeGenerator byteCodeGenerator,
+    protected static void end(ClassWriter classWriter, MethodVisitor methodVisitor, ByteCodeGenerator byteCodeGenerator,
                            ExpressionExecutor expressionExecutor) {
         if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
             methodVisitor.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf",
@@ -185,7 +186,6 @@ public class ByteCodeBuilder {
         } else {
             methodVisitor.visitVarInsn(ALOAD, 2);
         }
-
         methodVisitor.visitInsn(ARETURN);
         methodVisitor.visitMaxs(4, 12);
         methodVisitor.visitEnd();
@@ -206,14 +206,17 @@ public class ByteCodeBuilder {
             byteCodeGenerator.setExpressionExecutor((ExpressionExecutor) constructor.
                     newInstance(byteCodeGenerator.getUnHandledExpressionExecutors()));
         } catch (InstantiationException e) {
-            throw new SiddhiAppRuntimeException("Error while instantiating JITCompiledExpressionExecutor.", e);
+            throw new SiddhiAppRuntimeException("Error while instantiating JITCompiledExpressionExecutor." +
+                    "JIT code generation:" + new SiddhiAppContext().getQueryJITCompile(), e);
         } catch (IllegalAccessException e) {
-            throw new SiddhiAppRuntimeException("Error while instantiating JITCompiledExpressionExecutor.", e);
+            throw new SiddhiAppRuntimeException("Error while instantiating JITCompiledExpressionExecutor." +
+                    "JIT code generation:" + new SiddhiAppContext().getQueryJITCompile(), e);
         } catch (NoSuchMethodException e) {
-            throw new SiddhiAppRuntimeException("Error while finding constructor of JITCompiledExpressionExecutor.", e);
+            throw new SiddhiAppRuntimeException("Error while finding constructor of JITCompiledExpressionExecutor." +
+                    "JIT code generation:" + new SiddhiAppContext().getQueryJITCompile(), e);
         } catch (InvocationTargetException e) {
-            throw new SiddhiAppRuntimeException("Error while invoking constructor of JITCompiledExpressionExecutor.",
-                    e);
+            throw new SiddhiAppRuntimeException("Error while invoking constructor of JITCompiledExpressionExecutor." +
+                    "JIT code generation:" + new SiddhiAppContext().getQueryJITCompile(), e);
         }
     }
 }

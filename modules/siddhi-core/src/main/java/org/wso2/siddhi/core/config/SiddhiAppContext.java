@@ -70,6 +70,7 @@ public class SiddhiAppContext {
         this.eternalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
         this.queryJITCompile = !Boolean.parseBoolean(System.getProperty(SiddhiConstants.JIT_QUERY_COMPILE));
+        // default value for is queryJITCompile true.
     }
 
     public SiddhiContext getSiddhiContext() {
