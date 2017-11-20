@@ -58,7 +58,7 @@ define stream TempStream (deviceID long, roomNo int, temp double);
 @name('5minAvgQuery')
 from TempStream#window.time(5 min)
 select roomNo, avg(temp) as avgTemp
-  group by room
+  group by roomNo
 insert into OutputStream;
 ```
 
@@ -1481,7 +1481,7 @@ insert into <table>
 ```
 
 Similar to streams, you need to use the `current events`, `expired events` or the `all events` keyword between `insert` and `into` keywords in order to insert only the specific output event types. 
-For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
+For more information, see [output event type](#output-event-types)
 
 **Example**
 
@@ -1545,7 +1545,7 @@ The `condition` element specifies the basis on which events are selected to be d
 When specifying the condition, table attributes should be referred to with the table name.
  
 To execute delete for specific output event types, use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
+in the syntax. For more information, see [output event type](#output-event-types)
 
 !!! note 
     Table attributes must be always referred to with the table name as follows: 
@@ -1586,7 +1586,7 @@ When specifying the `condition`, table attributes must be referred to with the t
 You can use the `set` keyword to update selected attributes from the table. Here, for each assignment, the attribute specified in the left must be the table attribute, and the one specified in the right can be a stream/table attribute a mathematical operation, or other. When the `set` clause is not provided, all the attributes in the table are updated.
    
 To execute an update for specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. For more information, see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
+in the syntax. For more information, see [output event type](#output-event-types).
 
 !!! note 
     Table attributes must be always referred to with the table name as shown below:
@@ -1866,6 +1866,9 @@ For more information, see [output event type](#output-event-types).
 This query inserts all events from the `TempStream` stream to the `OneMinTempWindow` window.
 
 ```sql
+define stream TempStream(tempId string, temp double);
+define window OneMinTempWindow(tempId string, temp double) time(1 min);
+
 from TempStream
 select *
 insert into OneMinTempWindow;
@@ -1893,7 +1896,7 @@ This Siddhi Application performs a join count the number of temperature events h
  within the last 2 minutes. 
 
 ```sql
-define window TwoMinTempWindow (roomNo int, temp double) time('2 min');
+define window TwoMinTempWindow (roomNo int, temp double) time(2 min);
 define stream CheckStream (requestId string);
    
 from CheckStream as C join TwoMinTempWindow as T
@@ -1921,11 +1924,11 @@ insert into <output stream>
 This Siddhi Application calculates the maximum temperature within the last 5 minutes.
 
 ```sql
-define window FiveMinTempWindow (roomNo int, temp double) time('5 min');
+define window FiveMinTempWindow (roomNo int, temp double) time(5 min);
 
 
 from FiveMinTempWindow
-select name, max(value) as maxValue, roomNo
+select max(temp) as maxValue, roomNo
 insert into MaxSensorReadingStream;
 ```
 
