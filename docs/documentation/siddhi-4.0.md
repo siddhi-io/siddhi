@@ -58,7 +58,7 @@ define stream TempStream (deviceID long, roomNo int, temp double);
 @name('5minAvgQuery')
 from TempStream#window.time(5 min)
 select roomNo, avg(temp) as avgTemp
-  group by room
+  group by roomNo
 insert into OutputStream;
 ```
 
@@ -1866,6 +1866,9 @@ For more information, see [output event type](#output-event-types).
 This query inserts all events from the `TempStream` stream to the `OneMinTempWindow` window.
 
 ```sql
+define stream TempStream(tempId string, temp double);
+define window OneMinTempWindow(tempId string, temp double) time(1 min);
+
 from TempStream
 select *
 insert into OneMinTempWindow;
@@ -1893,7 +1896,7 @@ This Siddhi Application performs a join count the number of temperature events h
  within the last 2 minutes. 
 
 ```sql
-define window TwoMinTempWindow (roomNo int, temp double) time('2 min');
+define window TwoMinTempWindow (roomNo int, temp double) time(2 min);
 define stream CheckStream (requestId string);
    
 from CheckStream as C join TwoMinTempWindow as T
@@ -1921,11 +1924,11 @@ insert into <output stream>
 This Siddhi Application calculates the maximum temperature within the last 5 minutes.
 
 ```sql
-define window FiveMinTempWindow (roomNo int, temp double) time('5 min');
+define window FiveMinTempWindow (roomNo int, temp double) time(5 min);
 
 
 from FiveMinTempWindow
-select name, max(value) as maxValue, roomNo
+select max(temp) as maxValue, roomNo
 insert into MaxSensorReadingStream;
 ```
 
