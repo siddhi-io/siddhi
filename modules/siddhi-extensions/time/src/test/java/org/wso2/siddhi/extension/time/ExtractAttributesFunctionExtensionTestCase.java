@@ -419,19 +419,19 @@ public class ExtractAttributesFunctionExtensionTestCase {
         Date userSpecifiedDate = userSpecificFormat.parse("2017-10-8");
         calendarEN.setTime(userSpecifiedDate);
         calendarFR.setTime(userSpecifiedDate);
-        final Integer valueEN =  calendarEN.get(Calendar.WEEK_OF_YEAR);
-        final Integer valueFR =  calendarFR.get(Calendar.WEEK_OF_YEAR);
+        final Integer valueEN = calendarEN.get(Calendar.WEEK_OF_YEAR);
+        final Integer valueFR = calendarFR.get(Calendar.WEEK_OF_YEAR);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string," +
                 "timestampInMilliseconds long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
-                "select symbol , time:extract('WEEK',dateValue,dateFormat, 'en_US') as WEEK "+
+                "select symbol , time:extract('WEEK',dateValue,dateFormat, 'en_US') as WEEK " +
                 "insert into outputStream;");
         String query2 = ("@info(name = 'query2') " +
                 "from inputStream " +
-                "select symbol , time:extract('WEEK',dateValue,dateFormat, 'fr_FR') as WEEK "+
+                "select symbol , time:extract('WEEK',dateValue,dateFormat, 'fr_FR') as WEEK " +
                 "insert into outputStream2;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
                 + query + query2);
@@ -464,7 +464,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{"IBM", "2017-10-8", "yyyy-MM-dd",1507401000000L});
+        inputHandler.send(new Object[]{"IBM", "2017-10-8", "yyyy-MM-dd", 1507401000000L});
         Thread.sleep(100);
         Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
@@ -481,19 +481,19 @@ public class ExtractAttributesFunctionExtensionTestCase {
         Calendar calendarFR = Calendar.getInstance(LocaleUtils.toLocale("fr_FR"));
         calendarEN.setTimeInMillis(1507401000000L);
         calendarFR.setTimeInMillis(1507401000000L);
-        final Integer valueEN =  calendarEN.get(Calendar.WEEK_OF_YEAR);
-        final Integer valueFR =  calendarFR.get(Calendar.WEEK_OF_YEAR);
+        final Integer valueEN = calendarEN.get(Calendar.WEEK_OF_YEAR);
+        final Integer valueFR = calendarFR.get(Calendar.WEEK_OF_YEAR);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string," +
                 "timestampInMilliseconds long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
-                "select symbol , time:extract(timestampInMilliseconds, 'WEEK', 'en_US') as WEEK "+
+                "select symbol , time:extract(timestampInMilliseconds, 'WEEK', 'en_US') as WEEK " +
                 "insert into outputStream;");
         String query2 = ("@info(name = 'query2') " +
                 "from inputStream " +
-                "select symbol , time:extract(timestampInMilliseconds, 'WEEK', 'fr_FR') as WEEK "+
+                "select symbol , time:extract(timestampInMilliseconds, 'WEEK', 'fr_FR') as WEEK " +
                 "insert into outputStream2;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
                 + query + query2);
@@ -526,7 +526,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{"IBM", "2017-10-8", "yyyy-MM-dd",1507401000000L});
+        inputHandler.send(new Object[]{"IBM", "2017-10-8", "yyyy-MM-dd", 1507401000000L});
         Thread.sleep(100);
         Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
@@ -541,14 +541,14 @@ public class ExtractAttributesFunctionExtensionTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         Calendar calendarEN = Calendar.getInstance();
         calendarEN.setTimeInMillis(1507401000000L);
-        final Integer valueEN =  calendarEN.get(Calendar.WEEK_OF_YEAR);
+        final Integer valueEN = calendarEN.get(Calendar.WEEK_OF_YEAR);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string," +
                 "timestampInMilliseconds long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
-                "select symbol , time:extract(timestampInMilliseconds, 'WEEK') as WEEK "+
+                "select symbol , time:extract(timestampInMilliseconds, 'WEEK') as WEEK " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
                 + query);
@@ -569,7 +569,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
 
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{"IBM", "2017-10-8", "yyyy-MM-dd",1507401000000L});
+        inputHandler.send(new Object[]{"IBM", "2017-10-8", "yyyy-MM-dd", 1507401000000L});
         Thread.sleep(100);
         Assert.assertEquals(1, count);
         Assert.assertTrue(eventArrived);
@@ -587,14 +587,14 @@ public class ExtractAttributesFunctionExtensionTestCase {
         Date userSpecifiedDate = userSpecificFormat.parse("2017-10-8 02:23:44.999");
         Calendar calendarEN = Calendar.getInstance();
         calendarEN.setTime(userSpecifiedDate);
-        final Integer valueEN =  calendarEN.get(Calendar.WEEK_OF_YEAR);
+        final Integer valueEN = calendarEN.get(Calendar.WEEK_OF_YEAR);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string," +
                 "timestampInMilliseconds long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
-                "select symbol , time:extract('WEEK', dateValue) as WEEK "+
+                "select symbol , time:extract('WEEK', dateValue) as WEEK " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
                 + query);
