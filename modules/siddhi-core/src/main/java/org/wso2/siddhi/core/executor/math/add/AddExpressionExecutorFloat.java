@@ -54,4 +54,11 @@ public class AddExpressionExecutorFloat implements ExpressionExecutor {
                 .cloneExecutor(key));
     }
 
+    public ExpressionExecutor getLeftExpressionExecutor() {
+        return leftExpressionExecutor;
+    }
+
+    public ExpressionExecutor getRightExpressionExecutor() {
+        return rightExpressionExecutor;
+    }
 }

@@ -55,4 +55,11 @@ public class SubtractExpressionExecutorLong implements ExpressionExecutor {
                 .cloneExecutor(key));
     }
 
+    public ExpressionExecutor getLeftExpressionExecutor() {
+        return leftExpressionExecutor;
+    }
+
+    public ExpressionExecutor getRightExpressionExecutor() {
+        return rightExpressionExecutor;
+    }
 }

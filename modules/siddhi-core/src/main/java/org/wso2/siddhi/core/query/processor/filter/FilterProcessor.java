@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.core.query.processor.filter;
 
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
@@ -30,6 +31,7 @@ import org.wso2.siddhi.query.api.definition.Attribute;
 public class FilterProcessor implements Processor {
 
     protected Processor next;
+    private boolean queryJITCompile;
     private ExpressionExecutor conditionExecutor;
 
     public FilterProcessor(ExpressionExecutor conditionExecutor) {
@@ -40,10 +42,33 @@ public class FilterProcessor implements Processor {
                     "of type BOOL. " +
                     "Actual type: " + conditionExecutor.getReturnType().toString());
         }
+
+        this.queryJITCompile = new SiddhiAppContext().getQueryJITCompile();
+    }
+
+    public FilterProcessor(ExpressionExecutor conditionExecutor, boolean queryJITCompile) {
+        if (Attribute.Type.BOOL.equals(conditionExecutor.getReturnType())) {
+            if (queryJITCompile) {
+                this.queryJITCompile = false;
+                this.conditionExecutor = conditionExecutor;
+            } else {
+                this.conditionExecutor = conditionExecutor;
+            }
+        } else {
+            throw new OperationNotSupportedException("Return type of " + conditionExecutor.toString() + " should be " +
+                    "of type BOOL. " +
+                    "Actual type: " + conditionExecutor.getReturnType().toString());
+        }
     }
 
     public FilterProcessor cloneProcessor(String key) {
-        return new FilterProcessor(conditionExecutor.cloneExecutor(key));
+        return new FilterProcessor(conditionExecutor.cloneExecutor(key), this.queryJITCompile);
+    }
+
+    public void jitCodeGenerator() {
+        if (this.queryJITCompile) {
+            this.conditionExecutor = new ByteCodeGenerator().build(this.conditionExecutor);
+        }
     }
 
     @Override

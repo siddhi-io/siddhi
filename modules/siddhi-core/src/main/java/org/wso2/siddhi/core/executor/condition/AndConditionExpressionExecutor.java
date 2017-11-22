@@ -80,4 +80,11 @@ public class AndConditionExpressionExecutor extends ConditionExpressionExecutor 
                 .cloneExecutor(key));
     }
 
+    public ExpressionExecutor getLeftConditionExecutor() {
+        return leftConditionExecutor;
+    }
+
+    public ExpressionExecutor getRightConditionExecutor() {
+        return rightConditionExecutor;
+    }
 }
