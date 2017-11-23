@@ -98,6 +98,7 @@ pages:
   - 4.0.0-alpha4: api/4.0.0-alpha4.md
   - 4.0.0-alpha3: api/4.0.0-alpha3.md
   - 4.0.0-alpha2: api/4.0.0-alpha2.md
+  - 4.0.0-beta: api/4.0.0-beta.md
   - 4.0.0-alpha: api/4.0.0-alpha.md
   - latest: api/latest.md
 - License: license.md
