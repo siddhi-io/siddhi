@@ -1470,7 +1470,7 @@ This allows events to be inserted into tables. This is similar to inserting even
 
 !!! warning
     If the table is defined with primary keys, and if you insert duplicate data, primary key constrain violations can occur. 
-    In such cases use the `update or insert` operation. 
+    In such cases use the `update or insert into` operation. 
     
 **Syntax**
 
@@ -1607,7 +1607,7 @@ update RoomTypeTable
     on RoomTypeTable.roomNo == roomNumber;
 ```
 
-### Update or Insert
+### Update or Insert Into
 
 This allows you update if the event attributes already exist in the table based on a condition, or 
 else insert the entry as a new attribute.
@@ -1617,7 +1617,7 @@ else insert the entry as a new attribute.
 ```sql
 from <input stream> 
 select <attribute name>, <attribute name>, ...
-update or insert <table> (for <output event type>)? 
+update or insert into <table> (for <output event type>)? 
     set <table>.<attribute name> = <expression>, <table>.<attribute name> = <expression>, ...
     on <condition>
 ```
@@ -1646,7 +1646,7 @@ define stream RoomAssigneeStream (roomNumber int, type string, assignee string);
    
 from RoomAssigneeStream
 select roomNumber as roomNo, type, assignee
-update or insert RoomAssigneeTable
+update or insert into RoomAssigneeTable
     set RoomAssigneeTable.assignee = assignee
     on RoomAssigneeTable.roomNo == roomNo;
 ```
