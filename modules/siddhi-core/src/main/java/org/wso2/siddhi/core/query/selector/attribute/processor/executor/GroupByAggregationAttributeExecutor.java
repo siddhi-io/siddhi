@@ -24,16 +24,22 @@ import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttributeExecutor {
+    public static final int DEFAULT_AGGREGATOR_CLEAN_INTERVAL = 60;
 
     protected Map<String, AttributeAggregator> aggregatorMap = new HashMap<String, AttributeAggregator>();
     protected ExpiredAggregatorTracker expiredAggregatorTracker;
+
+    private static Map<String, List<ExpiredAggregatorTracker>> allExpiredTrackers = new HashMap<String, List<ExpiredAggregatorTracker>>();
+    private static ScheduledExecutorService aggregatorCleanTimer = null;
 
 
     public GroupByAggregationAttributeExecutor(AttributeAggregator attributeAggregator,
@@ -41,9 +47,38 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
                               ExecutionPlanContext executionPlanContext, String queryName) {
         super(attributeAggregator, attributeExpressionExecutors, executionPlanContext, queryName);
         if (executionPlanContext.getCleanAggregators()) {
-            expiredAggregatorTracker =
-                new ExpiredAggregatorTracker(executionPlanContext.getCleanAggregatorInterval() * 60 * 1000);
+            expiredAggregatorTracker = new ExpiredAggregatorTracker(executionPlanContext.getCleanAggregatorInterval());
+
+            if (executionPlanContext.getCleanAggregatorInterval() == DEFAULT_AGGREGATOR_CLEAN_INTERVAL) {
+                List<ExpiredAggregatorTracker> expiredTrackers = allExpiredTrackers.get(executionPlanContext.getName());
+                if (expiredTrackers == null) {
+                    expiredTrackers = new ArrayList<ExpiredAggregatorTracker>();
+                    allExpiredTrackers.put(executionPlanContext.getName(), expiredTrackers);
+                }
+                expiredTrackers.add(expiredAggregatorTracker);
+
+                if (aggregatorCleanTimer == null) {
+                    createDefaultAggregatorCleanTimer();
+                }
+            } else {
+                // Remove from default cleaning if it's re-deployed with custom interval
+                allExpiredTrackers.remove(executionPlanContext.getName());
+            }
         }
+    }
+
+    private void createDefaultAggregatorCleanTimer(){
+        aggregatorCleanTimer = Executors.newSingleThreadScheduledExecutor();
+        aggregatorCleanTimer.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                for (List<ExpiredAggregatorTracker> trackers : allExpiredTrackers.values()) {
+                    for (ExpiredAggregatorTracker tracker: trackers){
+                        tracker.clear();
+                    }
+                }
+            }
+        }, DEFAULT_AGGREGATOR_CLEAN_INTERVAL, DEFAULT_AGGREGATOR_CLEAN_INTERVAL, TimeUnit.MINUTES);
     }
 
     @Override
@@ -108,32 +143,52 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
     }
 
     class ExpiredAggregatorTracker {
-        private Map<String, AttributeAggregator> expiredAggregators = new HashMap<String, AttributeAggregator>();
-        private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+        private Map<String, AttributeAggregator> expiredAggregators = null;
+        private ScheduledExecutorService service = null;
+        private int cleanInterval;
 
-        public ExpiredAggregatorTracker(long cleanInterval) {
-            service.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    clear();
-                }
-            }, cleanInterval, cleanInterval, TimeUnit.MILLISECONDS);
+        public ExpiredAggregatorTracker(int cleanInterval){
+            this.cleanInterval = cleanInterval;
+        }
+
+        private void init() {
+            expiredAggregators = new HashMap<String, AttributeAggregator>();
+            if (cleanInterval != DEFAULT_AGGREGATOR_CLEAN_INTERVAL) {
+                service = Executors.newSingleThreadScheduledExecutor();
+                service.scheduleAtFixedRate(new Runnable() {
+                    @Override
+                    public void run() {
+                        clear();
+                    }
+                }, cleanInterval, cleanInterval, TimeUnit.MINUTES);
+            }
         }
 
         public synchronized void add(String key, AttributeAggregator aggregator) {
+            if (expiredAggregators == null) {
+                init();
+            }
             expiredAggregators.put(key, aggregator);
         }
 
         public synchronized void addAll(Map<String, AttributeAggregator> aggregatorMap){
+            if (expiredAggregators == null) {
+                init();
+            }
             expiredAggregators.putAll(aggregatorMap);
         }
 
         public synchronized AttributeAggregator remove(String key) {
-             return expiredAggregators.remove(key);
+            return  (expiredAggregators == null) ? null : expiredAggregators.remove(key);
         }
 
         public synchronized void clear() {
-            expiredAggregators.clear();
+            if (expiredAggregators != null) {
+                expiredAggregators.clear();
+                expiredAggregators = null;
+                service.shutdown();
+                service = null;
+            }
         }
     }
 }
