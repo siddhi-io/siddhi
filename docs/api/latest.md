@@ -1,4 +1,4 @@
-# API Docs - v4.0.0-beta3
+# API Docs - v4.0.0-beta4-SNAPSHOT
 
 ## Core
 
