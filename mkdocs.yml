@@ -94,16 +94,17 @@ pages:
   - 4.0.0-alpha8: api/4.0.0-alpha8.md
   - 4.0.0-alpha7: api/4.0.0-alpha7.md
   - 4.0.0-alpha6: api/4.0.0-alpha6.md
+  - 4.0.0-beta6: api/4.0.0-beta6.md
   - 4.0.0-beta5: api/4.0.0-beta5.md
   - 4.0.0-alpha5: api/4.0.0-alpha5.md
   - 4.0.0-beta4: api/4.0.0-beta4.md
   - 4.0.0-alpha4: api/4.0.0-alpha4.md
-  - 4.0.0-alpha3: api/4.0.0-alpha3.md
   - 4.0.0-beta3: api/4.0.0-beta3.md
-  - 4.0.0-alpha2: api/4.0.0-alpha2.md
+  - 4.0.0-alpha3: api/4.0.0-alpha3.md
   - 4.0.0-beta2: api/4.0.0-beta2.md
-  - 4.0.0-alpha: api/4.0.0-alpha.md
+  - 4.0.0-alpha2: api/4.0.0-alpha2.md
   - 4.0.0-beta: api/4.0.0-beta.md
+  - 4.0.0-alpha: api/4.0.0-alpha.md
   - latest: api/latest.md
 - License: license.md
 theme: material
