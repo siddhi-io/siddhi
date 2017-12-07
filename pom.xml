@@ -479,6 +479,7 @@
         <snakeyaml.version>1.18</snakeyaml.version>
         <org.jacoco.version>0.7.9</org.jacoco.version>
         <owasp.encoder.version>1.2.0.wso2v2</owasp.encoder.version>
+        <owasp.encoder.version.range>[1.2.0, 1.3.0)</owasp.encoder.version.range>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <mavan.checkstyle.suppression.file>checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
     </properties>
