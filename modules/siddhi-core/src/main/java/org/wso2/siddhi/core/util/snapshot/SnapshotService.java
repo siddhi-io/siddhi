@@ -22,10 +22,7 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import org.wso2.siddhi.core.util.ThreadBarrier;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Service level implementation to take/restore snapshots of processing elements.
@@ -61,24 +58,66 @@ public class SnapshotService {
         }
     }
 
-    public byte[] snapshot() {
-        HashMap<String, Map<String, Object>> snapshots = new HashMap<>(snapshotableMap.size());
-        List<Snapshotable> snapshotableList;
+    public SnapshotSerialized snapshot() {
+        HashMap<String, Object> elementWiseIncrementalSnapshots = new HashMap<>();
+        HashMap<String, Object> elementWiseFullSnapshots = new HashMap<>();
+        HashMap<String, HashMap<String, Object>> elementSnapshotMapFull = new HashMap<>();
+        HashMap<String, HashMap<String, Object>> elementSnapshotMapIncremental = new HashMap<>();
         byte[] serializedSnapshots;
+
         if (log.isDebugEnabled()) {
             log.debug("Taking snapshot ...");
         }
+
         try {
             threadBarrier.lock();
+
             for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
-                snapshotableList = entry.getValue();
-                snapshotableList.forEach(snapshotableElement -> snapshots.put(snapshotableElement.getElementId(),
-                        snapshotableElement.currentState()));
+                elementWiseIncrementalSnapshots = new HashMap<>();
+
+                Iterator<Snapshotable> iterator = (Iterator<Snapshotable>) entry.getValue().iterator();
+                while(iterator.hasNext()){
+                    Snapshotable object = iterator.next();
+                    HashMap<String, Object> currentState = (HashMap<String, Object>) object.currentState();
+                    if(currentState != null) {
+                        Set<String> set = (Set<String>) currentState.keySet();
+                        Iterator<String> itr2 = set.iterator();
+                        Map<String, Object> incrementalSnapshotableMap = new HashMap<String, Object>();
+                        HashMap<String, Object> elementWiseSnapshots = new HashMap<>();
+
+                        while (itr2.hasNext()) {
+                            String key = itr2.next();
+                            if (key.contains("inc-")) {
+                                incrementalSnapshotableMap.put(key, currentState.get(key));
+                            } else {
+                                elementWiseSnapshots.put(key, currentState.get(key));
+                            }
+                        }
+
+                        if(!incrementalSnapshotableMap.isEmpty()) {
+                            //Do we need to get and then update?
+                            elementWiseIncrementalSnapshots.put(object.getElementId(),
+                                    ByteSerializer.objectToByte(incrementalSnapshotableMap, siddhiAppContext));
+                        }
+
+                        if(!elementWiseSnapshots.isEmpty()) {
+                            elementWiseFullSnapshots.put(object.getElementId(), elementWiseSnapshots);
+                        }
+                    }
+                }
+
+                if(!elementWiseIncrementalSnapshots.isEmpty()) {
+                    elementSnapshotMapIncremental.put(entry.getKey(), elementWiseIncrementalSnapshots);
+                }
+
+                if(!elementWiseFullSnapshots.isEmpty()){
+                    elementSnapshotMapFull.put(entry.getKey(), elementWiseFullSnapshots);
+                }
             }
             if (log.isDebugEnabled()) {
                 log.debug("Snapshot serialization started ...");
             }
-            serializedSnapshots = ByteSerializer.objectToByte(snapshots, siddhiAppContext);
+            serializedSnapshots = ByteSerializer.objectToByte(elementSnapshotMapFull, siddhiAppContext);
             if (log.isDebugEnabled()) {
                 log.debug("Snapshot serialization finished.");
             }
@@ -89,7 +128,14 @@ public class SnapshotService {
             log.debug("Snapshot taken for Siddhi app '" + siddhiAppContext.getName() + "'");
         }
 
-        return serializedSnapshots;
+        SnapshotSerialized result = new SnapshotSerialized();
+        result.fullState = serializedSnapshots;
+
+        if(!elementWiseIncrementalSnapshots.isEmpty()) {
+            result.incrementalState = elementSnapshotMapIncremental;
+        }
+
+        return result;
     }
 
     public Map<String, Object> queryState(String queryName) {
@@ -116,9 +162,7 @@ public class SnapshotService {
 
     }
 
-    public void restore(byte[] snapshot) throws CannotRestoreSiddhiAppStateException {
-        Map<String, Map<String, Object>> snapshots = (Map<String, Map<String, Object>>)
-                ByteSerializer.byteToObject(snapshot, siddhiAppContext);
+    public void restore(Map<String, Map<String, Object>> snapshots) throws CannotRestoreSiddhiAppStateException {
         List<Snapshotable> snapshotableList;
         try {
             threadBarrier.lock();
@@ -126,7 +170,8 @@ public class SnapshotService {
                 snapshotableList = entry.getValue();
                 try {
                     for (Snapshotable snapshotable : snapshotableList) {
-                        snapshotable.restoreState(snapshots.get(snapshotable.getElementId()));
+                        HashMap<String, Object> hmap = (HashMap<String, Object>)snapshots.get(entry.getKey());
+                        snapshotable.restoreState((HashMap<String, Object>)hmap.get(snapshotable.getElementId()));
                     }
                 } catch (Throwable t) {
                     throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.

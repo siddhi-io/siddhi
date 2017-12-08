@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.util.SiddhiExtensionLoader;
 import org.wso2.siddhi.core.util.config.ConfigManager;
 import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
 import org.wso2.siddhi.core.util.extension.holder.AbstractExtensionHolder;
+import org.wso2.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.core.util.statistics.metrics.SiddhiMetricsFactory;
 
@@ -45,6 +46,7 @@ public class SiddhiContext {
     private ExceptionHandler<Object> defaultDisrupterExceptionHandler;
     private Map<String, Class> siddhiExtensions = new HashMap<>();
     private PersistenceStore persistenceStore = null;
+    private IncrementalPersistenceStore incrementalPersistenceStore = null;
     private ConcurrentHashMap<String, DataSource> siddhiDataSources;
     private StatisticsConfiguration statisticsConfiguration;
     private ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap;
@@ -88,6 +90,14 @@ public class SiddhiContext {
 
     public void setPersistenceStore(PersistenceStore persistenceStore) {
         this.persistenceStore = persistenceStore;
+    }
+
+    public IncrementalPersistenceStore getIncrementalPersistenceStore() {
+        return incrementalPersistenceStore;
+    }
+
+    public void setIncrementalPersistenceStore(IncrementalPersistenceStore incrementalPersistenceStore) {
+        this.incrementalPersistenceStore = incrementalPersistenceStore;
     }
 
     public void setConfigManager(ConfigManager configManager) {

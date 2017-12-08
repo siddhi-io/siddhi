@@ -21,7 +21,12 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import org.wso2.siddhi.core.exception.NoPersistenceStoreException;
+import org.wso2.siddhi.core.util.snapshot.ByteSerializer;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Persistence Service is the service layer to handle state persistence tasks such as persisting current state and
@@ -32,12 +37,16 @@ public class PersistenceService {
     private static final Logger log = Logger.getLogger(PersistenceService.class);
     private String siddhiAppName;
     private PersistenceStore persistenceStore;
+    private IncrementalPersistenceStore incrementalPersistanceStore;
     private SnapshotService snapshotService;
+    private SiddhiAppContext context;
 
     public PersistenceService(SiddhiAppContext siddhiAppContext) {
         this.snapshotService = siddhiAppContext.getSnapshotService();
         this.persistenceStore = siddhiAppContext.getSiddhiContext().getPersistenceStore();
+        this.incrementalPersistanceStore = siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore();
         this.siddhiAppName = siddhiAppContext.getName();
+        this.context = siddhiAppContext;
     }
 
 
@@ -47,7 +56,7 @@ public class PersistenceService {
             if (log.isDebugEnabled()) {
                 log.debug("Persisting...");
             }
-            byte[] snapshot = snapshotService.snapshot();
+            byte[] snapshot = snapshotService.snapshot().fullState;
             String revision = System.currentTimeMillis() + "_" + siddhiAppName;
             persistenceStore.save(siddhiAppName, revision, snapshot);
             if (log.isDebugEnabled()) {
@@ -67,7 +76,39 @@ public class PersistenceService {
                 log.debug("Restoring revision: " + revision + " ...");
             }
             byte[] snapshot = persistenceStore.load(siddhiAppName, revision);
-            snapshotService.restore(snapshot);
+
+            ArrayList<ArrayList<String>> list = incrementalPersistanceStore.getListOfRevisionsToLoad(siddhiAppName);
+            HashMap<String, Object> incState = new HashMap<>();
+
+            HashMap<String, Map<String, Object>> snapshots = (HashMap<String, Map<String, Object>>)
+                    ByteSerializer.byteToObject(snapshot, context);
+            HashMap<String, Object> hmap1;
+            HashMap<String, Object> hmap2;
+
+            for(ArrayList<String> element: list) {
+                HashMap<String, Object> item = incrementalPersistanceStore.load(element.get(1), element.get(2),
+                        element.get(3), element.get(0));
+
+                hmap2 = (HashMap<String, Object>)snapshots.get(element.get(2));
+
+                if(hmap2 == null){
+                    hmap2 = new HashMap<>();
+                }
+
+                hmap1 = (HashMap<String, Object>)hmap2.get(element.get(3));
+
+                if(hmap1 == null){
+                    hmap1 = new HashMap<>();
+                }
+
+                hmap1.put(element.get(0), (HashMap<String, Object>)ByteSerializer.byteToObject((byte[])
+                        item.get(element.get(3)), context));
+                hmap2.put(element.get(3), hmap1);
+
+                snapshots.put(element.get(2), hmap2);
+            }
+
+            snapshotService.restore(snapshots);
             if (log.isDebugEnabled()) {
                 log.debug("Restored revision: " + revision);
             }
@@ -91,6 +132,6 @@ public class PersistenceService {
     }
 
     public void restore(byte[] snapshot) throws CannotRestoreSiddhiAppStateException {
-        snapshotService.restore(snapshot);
+        //snapshotService.restore(snapshot);
     }
 }
