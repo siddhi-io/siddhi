@@ -78,30 +78,29 @@ public class PersistenceService {
             byte[] snapshot = persistenceStore.load(siddhiAppName, revision);
 
             ArrayList<ArrayList<String>> list = incrementalPersistanceStore.getListOfRevisionsToLoad(siddhiAppName);
-            HashMap<String, Object> incState = new HashMap<>();
 
             HashMap<String, Map<String, Object>> snapshots = (HashMap<String, Map<String, Object>>)
                     ByteSerializer.byteToObject(snapshot, context);
             HashMap<String, Object> hmap1;
             HashMap<String, Object> hmap2;
 
-            for(ArrayList<String> element: list) {
+            for (ArrayList<String> element: list) {
                 HashMap<String, Object> item = incrementalPersistanceStore.load(element.get(1), element.get(2),
                         element.get(3), element.get(0));
 
-                hmap2 = (HashMap<String, Object>)snapshots.get(element.get(2));
+                hmap2 = (HashMap<String, Object>) snapshots.get(element.get(2));
 
-                if(hmap2 == null){
+                if (hmap2 == null) {
                     hmap2 = new HashMap<>();
                 }
 
-                hmap1 = (HashMap<String, Object>)hmap2.get(element.get(3));
+                hmap1 = (HashMap<String, Object>) hmap2.get(element.get(3));
 
-                if(hmap1 == null){
+                if (hmap1 == null) {
                     hmap1 = new HashMap<>();
                 }
 
-                hmap1.put(element.get(0), (HashMap<String, Object>)ByteSerializer.byteToObject((byte[])
+                hmap1.put(element.get(0), (HashMap<String, Object>) ByteSerializer.byteToObject((byte[])
                         item.get(element.get(3)), context));
                 hmap2.put(element.get(3), hmap1);
 

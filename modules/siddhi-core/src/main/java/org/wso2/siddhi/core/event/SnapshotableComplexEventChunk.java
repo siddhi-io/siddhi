@@ -17,11 +17,16 @@
  */
 package org.wso2.siddhi.core.event;
 
-import java.io.Serializable;
-import java.util.*;
-
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.util.snapshot.Snapshot;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.TreeSet;
 
 /**
  * Collection used to group and manage chunk or ComplexEvents
@@ -45,7 +50,7 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
     protected int numberOfDeletions;
     private boolean isFirstSnapshot = true;
     private int eventsCount;
-    private float FULL_SNAPSHOT_THRESHOLD = 0.8f;
+    private static final float FULL_SNAPSHOT_THRESHOLD = 0.8f;
 
     public SnapshotableComplexEventChunk(boolean isBatch) {
         this.isBatch = isBatch;
@@ -279,23 +284,23 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
                 '}';
     }
 
-    public Snapshot getSnapshot(){
+    public Snapshot getSnapshot() {
         StreamEvent first = null;
 
-        if(additionsList.isEmpty()){
+        if (additionsList.isEmpty()) {
             return null;
         }
 
-        if(isFirstSnapshot){
-            first = (StreamEvent)this.getFirst();
+        if (isFirstSnapshot) {
+            first = (StreamEvent) this.getFirst();
             additionsList = new ArrayList<ComplexEvent>();
             numberOfDeletions = 0;
             isFirstSnapshot = false;
             return new Snapshot(first);
         }
 
-        if(isFullSnapshot()){
-            first = (StreamEvent)this.getFirst();
+        if (isFullSnapshot()) {
+            first = (StreamEvent) this.getFirst();
             return new Snapshot(first);
         } else {
             first = null;
@@ -307,10 +312,10 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
         }
     }
 
-    private boolean isFullSnapshot(){
+    private boolean isFullSnapshot() {
         int numberOfChanges = additionsList.size() + numberOfDeletions;
 
-        if(numberOfChanges > (eventsCount * FULL_SNAPSHOT_THRESHOLD)){
+        if (numberOfChanges > (eventsCount * FULL_SNAPSHOT_THRESHOLD)) {
             return true;
         } else {
             return false;
@@ -319,12 +324,12 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
 
     public void restore(Map<String, Object> state) {
         TreeSet<Long> revisions = new TreeSet<Long>();
-        for(Map.Entry<String, Object> entry: state.entrySet()){
-            long item = -1l;
+        for (Map.Entry<String, Object> entry : state.entrySet()) {
+            long item = -1L;
             try {
                 item = Long.parseLong(entry.getKey());
                 revisions.add(item);
-            }catch(NumberFormatException e){
+            } catch (NumberFormatException e) {
                 //ignore
             }
         }
@@ -332,20 +337,20 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
         Iterator<Long> itr = revisions.iterator();
         boolean firstFlag = true;
 
-        while(itr.hasNext()){
-            Object obj = state.get(""+itr.next());
+        while (itr.hasNext()) {
+            Object obj = state.get("" + itr.next());
 
-            HashMap<String, Snapshot> firstMap = (HashMap<String, Snapshot>)obj;
+            HashMap<String, Snapshot> firstMap = (HashMap<String, Snapshot>) obj;
             Snapshot snpObj = firstMap.get("inc-ExpiredEventChunk");
 
-            if(firstFlag) {
+            if (firstFlag) {
                 first = (E) snpObj.getEnclosingStreamEvent();
                 last = getLastEvent((E) snpObj.getEnclosingStreamEvent());
                 firstFlag = false;
             } else {
                 ArrayList<ComplexEvent> addList = snpObj.getAdditionsList();
 
-                if(addList != null) {
+                if (addList != null) {
                     for (ComplexEvent c : addList) {
                         //Maybe we should set next to null during the persistance.
                         c.setNext(null);

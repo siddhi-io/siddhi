@@ -24,12 +24,10 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-
+/**
+ * The class which encloses the state to be serialized.
+ */
 public class Snapshot implements Serializable {
-    public ArrayList<ComplexEvent> getAdditionsList() {
-        return additionsList;
-    }
-
     private ArrayList<ComplexEvent> additionsList;
     private StreamEvent firstEvent;
     private int numberOfDeletions;
@@ -54,7 +52,11 @@ public class Snapshot implements Serializable {
         this.numberOfDeletions = numberOfDeletions;
     }
 
-    public StreamEvent getEnclosingStreamEvent(){
+    public ArrayList<ComplexEvent> getAdditionsList() {
+        return additionsList;
+    }
+
+    public StreamEvent getEnclosingStreamEvent() {
         return this.firstEvent;
     }
 

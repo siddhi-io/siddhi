@@ -21,6 +21,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/**
+ * Interface class for Persistence Stores which does incremental checkpointing.
+ */
 public interface IncrementalPersistenceStore {
 
     void save(String siddhiAppId, String queryName, String elementID, String revision, byte[] snapshot);

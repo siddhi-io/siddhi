@@ -494,10 +494,12 @@ public class SiddhiAppRuntime {
 
             HashMap<String, HashMap<String, Object>> incrementalState = serializeObj.incrementalState;
             //This approach is not the best. Have to think of an alternative.
-            for(Map.Entry<String, HashMap<String, Object>> entry: incrementalState.entrySet()) {
-                for(HashMap.Entry<String, Object> entry2: entry.getValue().entrySet()) {
-                    AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
-                            siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(), siddhiAppContext.getName(), entry.getKey(), entry2.getKey(), revision.split("_")[0]);
+            for (Map.Entry<String, HashMap<String, Object>> entry : incrementalState.entrySet()) {
+                for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
+                    AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
+                            AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
+                            siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
+                            siddhiAppContext.getName(), entry.getKey(), entry2.getKey(), revision.split("_")[0]);
 
                     Future future2 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
                 }

@@ -20,6 +20,9 @@ package org.wso2.siddhi.core.util.snapshot;
 
 import java.util.HashMap;
 
+/**
+ * The class which represents the serialized snapshot.
+ */
 public class SnapshotSerialized {
     public byte[] fullState;
     public HashMap<String, HashMap<String, Object>> incrementalState;

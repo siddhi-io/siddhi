@@ -18,6 +18,9 @@
 
 package org.wso2.siddhi.core.util.persistence.util;
 
+/**
+ * A collection of constants used for state persistance.
+ */
 public class PersistenceConstants {
 
     public static final String RDBMS_QUERY_CONFIG_FILE = "rdbms-table-config.xml";

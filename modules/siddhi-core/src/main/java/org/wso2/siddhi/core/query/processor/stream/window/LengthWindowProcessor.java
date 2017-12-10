@@ -168,7 +168,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
         synchronized (this) {
             state.put("Count", count);
             Snapshot snapshot = expiredEventChunk.getSnapshot();
-            if(snapshot != null) {
+            if (snapshot != null) {
                 state.put("inc-ExpiredEventChunk", snapshot);
             }
         }

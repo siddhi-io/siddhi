@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.util.persistence;
 
 import com.google.common.io.Files;
+
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.util.persistence.util.PersistenceConstants;
 
@@ -56,7 +57,6 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
     @Override
     public void setProperties(Map properties) {
         Map configurationMap = (Map) properties.get(PersistenceConstants.STATE_PERSISTENCE_CONFIGS);
-        Object numberOfRevisionsObject = properties.get(PersistenceConstants.STATE_PERSISTENCE_REVISIONS_TO_KEEP);
 
         if (configurationMap != null) {
             Object folderObject = configurationMap.get("location");
@@ -107,7 +107,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
 
         for (File file : files) {
             String fileName = file.getName();
-            if(fileName.contains(siddhiAppName)){
+            if (fileName.contains(siddhiAppName)) {
                 ArrayList<String> result = new ArrayList<>();
                 String[] items = fileName.split("_");
 

@@ -48,10 +48,9 @@ public class IncrementalPersistenceTestCase {
 
     @Test
     public void persistenceTest1() throws InterruptedException {
-        log.info("persistence test 1 - window query");
-        int INPUT_EVENT_COUNT = 10;
-        int EVENT_WINDOW_SIZE = 4;
-
+        log.info("Incremental persistence test 1 - length window query");
+        final int inputEventCount = 10;
+        final int eventWindowSize = 4;
         //PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
@@ -65,7 +64,7 @@ public class IncrementalPersistenceTestCase {
                 "define stream StockStream ( symbol string, price float, volume int );" +
                 "" +
                 "@info(name = 'query1')" +
-                "from StockStream[price>10]#window.length(" + EVENT_WINDOW_SIZE + ") " +
+                "from StockStream[price>10]#window.length(" + eventWindowSize + ") " +
                 "select symbol, price, sum(volume) as totalVol " +
                 "insert into OutStream ";
 
@@ -79,7 +78,7 @@ public class IncrementalPersistenceTestCase {
                     AssertJUnit.assertTrue("IBM".equals(inEvent.getData(0)) ||
                             "WSO2".equals(inEvent.getData(0)));
                     lastValue = (Long) inEvent.getData(2);
-                    System.out.println("last value: " + lastValue);
+                    log.info("last value: " + lastValue);
                 }
             }
         };
@@ -90,12 +89,12 @@ public class IncrementalPersistenceTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
         siddhiAppRuntime.start();
 
-        for(int i = 0; i < INPUT_EVENT_COUNT; i++) {
+        for (int i = 0; i < inputEventCount; i++) {
             inputHandler.send(new Object[]{"IBM", 75.6f + i, 1});
         }
         Thread.sleep(100);
         AssertJUnit.assertTrue(eventArrived);
-        AssertJUnit.assertEquals(new Long(EVENT_WINDOW_SIZE), lastValue);
+        AssertJUnit.assertEquals(new Long(eventWindowSize), lastValue);
 
         //persisting
         siddhiAppRuntime.persist();
@@ -132,5 +131,9 @@ public class IncrementalPersistenceTestCase {
         //shutdown Siddhi app
         Thread.sleep(500);
         siddhiAppRuntime.shutdown();
+
+        AssertJUnit.assertTrue(count <= 6);
+        AssertJUnit.assertEquals(new Long(400), lastValue);
+        AssertJUnit.assertEquals(true, eventArrived);
     }
 }
