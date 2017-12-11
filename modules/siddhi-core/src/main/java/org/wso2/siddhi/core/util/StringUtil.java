@@ -16,21 +16,14 @@
 
 package org.wso2.siddhi.core.util;
 
-import org.owasp.encoder.Encode;
-
 /**
  * Class used to encode strings before logging.
  */
-public class LogEncoder {
+public class StringUtil {
 
-    private LogEncoder() {}
+    private StringUtil() {}
 
-    public static String getEncodedString(String str) {
-        String cleanedString = str.replace('\n', '_').replace('\r', '_');
-        cleanedString = Encode.forHtml(cleanedString);
-        if (!cleanedString.equals(str)) {
-            cleanedString += " (Encoded)";
-        }
-        return cleanedString;
+    public static String removeCRLFCharacters(String str) {
+        return str.replace('\n', '_').replace('\r', '_');
     }
 }
