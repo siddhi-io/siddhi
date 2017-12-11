@@ -26,4 +26,5 @@ import java.util.HashMap;
 public class SnapshotSerialized {
     public byte[] fullState;
     public HashMap<String, HashMap<String, Object>> incrementalState;
+    public HashMap<String, HashMap<String, Object>> incrementalStateBase;
 }

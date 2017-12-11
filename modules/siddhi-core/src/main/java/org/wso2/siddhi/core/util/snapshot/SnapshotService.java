@@ -61,10 +61,12 @@ public class SnapshotService {
     }
 
     public SnapshotSerialized snapshot() {
-        HashMap<String, Object> elementWiseIncrementalSnapshots = new HashMap<>();
+        HashMap<String, Object> elementWiseIncrementalSnapshots;
+        HashMap<String, Object> elementWiseIncrementalSnapshotsBase = new HashMap<>();
         HashMap<String, Object> elementWiseFullSnapshots = new HashMap<>();
         HashMap<String, HashMap<String, Object>> elementSnapshotMapFull = new HashMap<>();
         HashMap<String, HashMap<String, Object>> elementSnapshotMapIncremental = new HashMap<>();
+        HashMap<String, HashMap<String, Object>> elementSnapshotMapIncrementalBase = new HashMap<>();
         byte[] serializedSnapshots;
 
         if (log.isDebugEnabled()) {
@@ -83,25 +85,32 @@ public class SnapshotService {
                     HashMap<String, Object> currentState = (HashMap<String, Object>) object.currentState();
                     if (currentState != null) {
                         Map<String, Object> incrementalSnapshotableMap = new HashMap<String, Object>();
+                        Map<String, Object> incrementalSnapshotableMapBase = new HashMap<String, Object>();
                         HashMap<String, Object> elementWiseSnapshots = new HashMap<>();
 
                         for (Map.Entry<String, Object> item2: currentState.entrySet()) {
-                         //   Set<String> set = (Set<String>) currentState.keySet();
-                          //  Iterator<String> itr2 = set.iterator();
+                            String key = item2.getKey();
+                            Object snapShot = item2.getValue();
 
-                            //while (itr2.hasNext()) {
-                                String key = item2.getKey();
-                                if (key.contains("inc-")) {
-                                    incrementalSnapshotableMap.put(key, item2.getValue());
+                            if (snapShot instanceof Snapshot) {
+                                if (((Snapshot) snapShot).isIncrementalSnapshot()) {
+                                    incrementalSnapshotableMapBase.put(key, snapShot);
                                 } else {
-                                    elementWiseSnapshots.put(key, item2.getValue());
+                                    incrementalSnapshotableMap.put(key, snapShot);
                                 }
-                            //}
+                            } else {
+                                elementWiseSnapshots.put(key, snapShot);
+                            }
 
                             if (!incrementalSnapshotableMap.isEmpty()) {
                                 //Do we need to get and then update?
                                 elementWiseIncrementalSnapshots.put(object.getElementId(),
                                         ByteSerializer.objectToByte(incrementalSnapshotableMap, siddhiAppContext));
+                            }
+
+                            if (!incrementalSnapshotableMapBase.isEmpty()) {
+                                elementWiseIncrementalSnapshotsBase.put(object.getElementId(),
+                                        ByteSerializer.objectToByte(incrementalSnapshotableMapBase, siddhiAppContext));
                             }
 
                             if (!elementWiseSnapshots.isEmpty()) {
@@ -117,6 +126,10 @@ public class SnapshotService {
 
                 if (!elementWiseFullSnapshots.isEmpty()) {
                     elementSnapshotMapFull.put(entry.getKey(), elementWiseFullSnapshots);
+                }
+
+                if (!elementWiseIncrementalSnapshotsBase.isEmpty()) {
+                    elementSnapshotMapIncrementalBase.put(entry.getKey(), elementWiseIncrementalSnapshotsBase);
                 }
             }
             if (log.isDebugEnabled()) {
@@ -136,8 +149,12 @@ public class SnapshotService {
         SnapshotSerialized result = new SnapshotSerialized();
         result.fullState = serializedSnapshots;
 
-        if (!elementWiseIncrementalSnapshots.isEmpty()) {
+        if (!elementSnapshotMapIncremental.isEmpty()) {
             result.incrementalState = elementSnapshotMapIncremental;
+        }
+
+        if (!elementSnapshotMapIncrementalBase.isEmpty()) {
+            result.incrementalStateBase = elementSnapshotMapIncrementalBase;
         }
 
         return result;

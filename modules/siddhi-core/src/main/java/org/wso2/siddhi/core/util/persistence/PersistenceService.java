@@ -49,7 +49,6 @@ public class PersistenceService {
         this.context = siddhiAppContext;
     }
 
-
     public String persist() {
 
         if (persistenceStore != null) {
@@ -86,7 +85,7 @@ public class PersistenceService {
 
             for (ArrayList<String> element: list) {
                 HashMap<String, Object> item = incrementalPersistanceStore.load(element.get(1), element.get(2),
-                        element.get(3), element.get(0));
+                        element.get(3), element.get(0), element.get(4));
 
                 hmap2 = (HashMap<String, Object>) snapshots.get(element.get(2));
 

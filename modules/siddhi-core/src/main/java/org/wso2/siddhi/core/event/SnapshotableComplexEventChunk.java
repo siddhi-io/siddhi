@@ -287,10 +287,6 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
     public Snapshot getSnapshot() {
         StreamEvent first = null;
 
-        if (additionsList.isEmpty()) {
-            return null;
-        }
-
         if (isFirstSnapshot) {
             first = (StreamEvent) this.getFirst();
             additionsList = new ArrayList<ComplexEvent>();
@@ -322,7 +318,7 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
         }
     }
 
-    public void restore(Map<String, Object> state) {
+    public void restore(String key, Map<String, Object> state) {
         TreeSet<Long> revisions = new TreeSet<Long>();
         for (Map.Entry<String, Object> entry : state.entrySet()) {
             long item = -1L;
@@ -341,7 +337,7 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
             Object obj = state.get("" + itr.next());
 
             HashMap<String, Snapshot> firstMap = (HashMap<String, Snapshot>) obj;
-            Snapshot snpObj = firstMap.get("inc-ExpiredEventChunk");
+            Snapshot snpObj = firstMap.get(key);
 
             if (firstFlag) {
                 first = (E) snpObj.getEnclosingStreamEvent();

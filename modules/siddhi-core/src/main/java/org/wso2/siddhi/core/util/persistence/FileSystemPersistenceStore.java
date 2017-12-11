@@ -137,6 +137,7 @@ public class FileSystemPersistenceStore implements PersistenceStore {
                         firstRevision = fileName;
                     }
                 }
+
                 File fileToDelete = new File(targetDirectory + File.separator + firstRevision);
                 if (fileToDelete.exists()) {
                     Boolean isDeleted = fileToDelete.delete();
@@ -144,6 +145,7 @@ public class FileSystemPersistenceStore implements PersistenceStore {
                         log.error("Error deleting old revision " + firstRevision);
                     }
                 }
+
                 files = targetDirectory.listFiles();
                 if (files == null || files.length < 1) {
                     break;

@@ -493,15 +493,34 @@ public class SiddhiAppRuntime {
 
 
             HashMap<String, HashMap<String, Object>> incrementalState = serializeObj.incrementalState;
-            //This approach is not the best. Have to think of an alternative.
-            for (Map.Entry<String, HashMap<String, Object>> entry : incrementalState.entrySet()) {
-                for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
-                    AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
-                            AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
-                            siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
-                            siddhiAppContext.getName(), entry.getKey(), entry2.getKey(), revision.split("_")[0]);
 
-                    Future future2 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
+            if (incrementalState != null) {
+                for (Map.Entry<String, HashMap<String, Object>> entry : incrementalState.entrySet()) {
+                    for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
+                        AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
+                                AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
+                                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
+                                siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
+                                revision.split("_")[0], "I");
+
+                        Future future2 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
+                    }
+                }
+            }
+
+            HashMap<String, HashMap<String, Object>> incrementalStateBase = serializeObj.incrementalStateBase;
+
+            if (incrementalStateBase != null) {
+                for (Map.Entry<String, HashMap<String, Object>> entry : incrementalStateBase.entrySet()) {
+                    for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
+                        AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
+                                AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
+                                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
+                                siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
+                                revision.split("_")[0], "B");
+
+                        Future future2 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
+                    }
                 }
             }
 

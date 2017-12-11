@@ -33,16 +33,19 @@ public class AsyncIncrementalSnapshotPersistor implements Runnable {
     private String siddhiAppName;
     private String queryName;
     private String elementID;
+    private String type;
 
     public AsyncIncrementalSnapshotPersistor(byte[] snapshots, IncrementalPersistenceStore persistenceStore,
                                              String siddhiAppName, String queryName, String elementID,
-                                             String revisionToUse) {
+                                             String revisionToUse,
+                                             String type) {
         this.snapshots = snapshots;
         this.persistenceStore = persistenceStore;
         this.siddhiAppName = siddhiAppName;
         this.queryName = queryName;
         this.elementID = elementID;
-        revision = revisionToUse + "_" + siddhiAppName + "_" + queryName + "_" + elementID + "_I";
+        this.type = type;
+        revision = revisionToUse + "_" + siddhiAppName + "_" + queryName + "_" + elementID + "_" + type;
     }
 
     public String getRevision() {
@@ -55,7 +58,7 @@ public class AsyncIncrementalSnapshotPersistor implements Runnable {
             if (log.isDebugEnabled()) {
                 log.debug("Persisting...");
             }
-            persistenceStore.save(siddhiAppName, queryName, elementID, revision, snapshots);
+            persistenceStore.save(siddhiAppName, queryName, elementID, revision, snapshots, type);
             if (log.isDebugEnabled()) {
                 log.debug("Persisted.");
             }

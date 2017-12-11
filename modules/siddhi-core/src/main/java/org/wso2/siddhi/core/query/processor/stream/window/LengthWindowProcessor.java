@@ -38,7 +38,6 @@ import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
-import org.wso2.siddhi.core.util.snapshot.Snapshot;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
@@ -167,10 +166,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
             state.put("Count", count);
-            Snapshot snapshot = expiredEventChunk.getSnapshot();
-            if (snapshot != null) {
-                state.put("inc-ExpiredEventChunk", snapshot);
-            }
+            state.put("ExpiredEventChunk", expiredEventChunk.getSnapshot());
         }
 
         return state;
@@ -181,6 +177,6 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     public synchronized void restoreState(Map<String, Object> state) {
         count = (int) state.get("Count");
         expiredEventChunk.clear();
-        expiredEventChunk.restore(state);
+        expiredEventChunk.restore("ExpiredEventChunk", state);
     }
 }

@@ -31,6 +31,7 @@ public class Snapshot implements Serializable {
     private ArrayList<ComplexEvent> additionsList;
     private StreamEvent firstEvent;
     private int numberOfDeletions;
+    private boolean isIncrementalSnapshot;
 
     public Snapshot() {
 
@@ -50,6 +51,7 @@ public class Snapshot implements Serializable {
     public Snapshot(ArrayList<ComplexEvent> additionsList, int numberOfDeletions) {
         this.additionsList = additionsList;
         this.numberOfDeletions = numberOfDeletions;
+        this.isIncrementalSnapshot = true;
     }
 
     public ArrayList<ComplexEvent> getAdditionsList() {
@@ -62,5 +64,9 @@ public class Snapshot implements Serializable {
 
     public int getNumberOfDeletions() {
         return numberOfDeletions;
+    }
+
+    public boolean isIncrementalSnapshot() {
+        return isIncrementalSnapshot;
     }
 }

@@ -27,11 +27,11 @@ import java.util.Map;
  */
 public interface IncrementalPersistenceStore {
 
-    void save(String siddhiAppId, String queryName, String elementID, String revision, byte[] snapshot);
+    void save(String siddhiAppId, String queryName, String elementID, String revision, byte[] snapshot, String type);
 
     void setProperties(Map properties);
 
-    HashMap<String, Object> load(String siddhiAppId, String queryName, String elementID, String revision);
+    HashMap<String, Object> load(String siddhiAppId, String queryName, String elementID, String revision, String type);
 
     ArrayList<ArrayList<String>> getListOfRevisionsToLoad(String siddhiAppId);
 

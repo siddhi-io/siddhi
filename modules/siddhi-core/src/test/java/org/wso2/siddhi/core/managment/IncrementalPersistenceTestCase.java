@@ -90,23 +90,23 @@ public class IncrementalPersistenceTestCase {
         siddhiAppRuntime.start();
 
         for (int i = 0; i < inputEventCount; i++) {
-            inputHandler.send(new Object[]{"IBM", 75.6f + i, 1});
+            inputHandler.send(new Object[]{"IBM", 75.6f + i, 100});
         }
         Thread.sleep(100);
         AssertJUnit.assertTrue(eventArrived);
-        AssertJUnit.assertEquals(new Long(eventWindowSize), lastValue);
+        AssertJUnit.assertEquals(new Long(400), lastValue);
 
         //persisting
         siddhiAppRuntime.persist();
         Thread.sleep(5000);
 
-        inputHandler.send(new Object[]{"IBM", 100.6f, 1});
+        inputHandler.send(new Object[]{"IBM", 100.4f, 100});
         //Thread.sleep(100);
-        inputHandler.send(new Object[]{"WSO2", 200.6f, 1});
+        inputHandler.send(new Object[]{"WSO2", 200.4f, 100});
 
-        inputHandler.send(new Object[]{"IBM", 300.6f, 1});
+        inputHandler.send(new Object[]{"IBM", 300.4f, 100});
         //Thread.sleep(100);
-        inputHandler.send(new Object[]{"WSO2", 400.6f, 1});
+        inputHandler.send(new Object[]{"WSO2", 400.4f, 100});
         Thread.sleep(100);
         siddhiAppRuntime.persist();
         Thread.sleep(5000);
@@ -117,6 +117,7 @@ public class IncrementalPersistenceTestCase {
         inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
         siddhiAppRuntime.start();
 
+        Thread.sleep(500);
         //loading
         try {
             siddhiAppRuntime.restoreLastRevision();
@@ -132,7 +133,7 @@ public class IncrementalPersistenceTestCase {
         Thread.sleep(500);
         siddhiAppRuntime.shutdown();
 
-        AssertJUnit.assertTrue(count <= 6);
+        AssertJUnit.assertTrue(count <= (inputEventCount + 6));
         AssertJUnit.assertEquals(new Long(400), lastValue);
         AssertJUnit.assertEquals(true, eventArrived);
     }
