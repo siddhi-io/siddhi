@@ -119,6 +119,7 @@ pages:
   - 4.0.0-alpha2: api/4.0.0-alpha2.md
   - 4.0.0-beta: api/4.0.0-beta.md
   - 4.0.0-alpha: api/4.0.0-alpha.md
+  - 4.0.0: api/4.0.0.md
   - latest: api/latest.md
 - License: license.md
 theme: material
