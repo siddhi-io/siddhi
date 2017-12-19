@@ -18,55 +18,45 @@
 
 package org.wso2.siddhi.core.util.snapshot;
 
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  * The class which encloses the state to be serialized.
  */
 public class Snapshot implements Serializable {
-    private ArrayList<ComplexEvent> additionsList;
-    private StreamEvent firstEvent;
-    private int numberOfDeletions;
+    private Object state;
     private boolean isIncrementalSnapshot;
+    private long timeDuration = -1L; //The time period until which this snapshot is valid from the time of its creation.
 
     public Snapshot() {
 
     }
 
-    public Snapshot(StreamEvent firstEvent) {
-        this.firstEvent = firstEvent;
+    public Snapshot(Object state) {
+        this.state = state;
+        this.isIncrementalSnapshot = false;
     }
 
-    public <E extends ComplexEvent> Snapshot(StreamEvent first, ArrayList<ComplexEvent> additionsList,
-                                             int numberOfDeletions) {
-        this.firstEvent = first;
-        this.additionsList = additionsList;
-        this.numberOfDeletions = numberOfDeletions;
+    public Snapshot(Object state, boolean isIncrementalSnapshot) {
+        this.state = state;
+        this.isIncrementalSnapshot = isIncrementalSnapshot;
     }
 
-    public Snapshot(ArrayList<ComplexEvent> additionsList, int numberOfDeletions) {
-        this.additionsList = additionsList;
-        this.numberOfDeletions = numberOfDeletions;
-        this.isIncrementalSnapshot = true;
-    }
-
-    public ArrayList<ComplexEvent> getAdditionsList() {
-        return additionsList;
-    }
-
-    public StreamEvent getEnclosingStreamEvent() {
-        return this.firstEvent;
-    }
-
-    public int getNumberOfDeletions() {
-        return numberOfDeletions;
+    public Snapshot(Object state, boolean isIncrementalSnapshot, long timeDuration) {
+        this.state = state;
+        this.isIncrementalSnapshot = isIncrementalSnapshot;
+        this.timeDuration = timeDuration;
     }
 
     public boolean isIncrementalSnapshot() {
         return isIncrementalSnapshot;
+    }
+
+    public long getTimeDuration() {
+        return timeDuration;
+    }
+
+    public Object getState() {
+        return state;
     }
 }

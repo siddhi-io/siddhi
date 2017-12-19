@@ -34,5 +34,4 @@ public interface IncrementalPersistenceStore {
     HashMap<String, Object> load(String siddhiAppId, String queryName, String elementID, String revision, String type);
 
     ArrayList<ArrayList<String>> getListOfRevisionsToLoad(String siddhiAppId);
-
 }

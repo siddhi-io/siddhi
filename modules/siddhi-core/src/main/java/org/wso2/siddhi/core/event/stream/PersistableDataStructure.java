@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,68 +15,66 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.core.event;
+package org.wso2.siddhi.core.event.stream;
 
-import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.util.snapshot.Snapshot;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Collection used to group and manage chunk or ComplexEvents
+ * The class which encloses the data structure for state management in Siddhi. Supports the incremental checkpointing
+ * functionality.
  *
  * @param <E> sub types of ComplexEvent such as StreamEvent and StateEvent
  */
-public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements Iterator<E>, Serializable {
-
+public class PersistableDataStructure<E extends ComplexEvent> implements Map, Iterator<E>, Serializable {
     private static final long serialVersionUID = 3185987841726255019L;
     protected E first;
     protected E previousToLastReturned;
     protected E lastReturned;
     protected E last;
     protected boolean isBatch = false;
-    protected ArrayList<ComplexEvent> additionsList;
-
-    public int getNumberOfDeletions() {
-        return numberOfDeletions;
-    }
-
-    protected int numberOfDeletions;
+    private ArrayList<Operation> changeLog;
+    private long eventsCount;
+    private static final float FULL_SNAPSHOT_THRESHOLD = 2.1f;
     private boolean isFirstSnapshot = true;
-    private int eventsCount;
-    private static final float FULL_SNAPSHOT_THRESHOLD = 0.8f;
+    private boolean isRecovery;
 
-    public SnapshotableComplexEventChunk(boolean isBatch) {
+    public PersistableDataStructure(boolean isBatch) {
         this.isBatch = isBatch;
-        this.additionsList = new ArrayList<ComplexEvent>();
+        this.changeLog = new ArrayList<Operation>();
     }
 
     //Only to maintain backward compatibility
     @Deprecated
-    public SnapshotableComplexEventChunk() {
+    public PersistableDataStructure() {
         this.isBatch = true;
-        this.additionsList = new ArrayList<ComplexEvent>();
+        this.changeLog = new ArrayList<Operation>();
     }
 
     //Only to maintain backward compatibility
     @Deprecated
-    public SnapshotableComplexEventChunk(E first, E last) {
+    public PersistableDataStructure(E first, E last) {
         this.first = first;
         this.last = last;
         this.isBatch = true;
+        this.changeLog = new ArrayList<Operation>();
     }
 
-    public SnapshotableComplexEventChunk(E first, E last, boolean isBatch) {
+    public PersistableDataStructure(E first, E last, boolean isBatch) {
         this.first = first;
         this.last = last;
         this.isBatch = isBatch;
-        this.additionsList = new ArrayList<ComplexEvent>();
+        this.changeLog = new ArrayList<Operation>();
     }
 
     public void insertBeforeCurrent(E events) {
@@ -113,14 +111,33 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
     }
 
     public void add(E complexEvents) {
+
         if (first == null) {
             first = complexEvents;
         } else {
             last.setNext(complexEvents);
         }
         last = getLastEvent(complexEvents);
-        this.additionsList.add(complexEvents);
+
         eventsCount++;
+        if (!isRecovery) {
+            this.changeLog.add(new Operation(Operator.ADD, (StreamEvent) complexEvents));
+        }
+    }
+
+    public void add(E complexEvents, E complexEvents2) {
+
+        if (first == null) {
+            first = complexEvents;
+        } else {
+            last.setNext(complexEvents);
+        }
+        last = getLastEvent(complexEvents);
+
+        eventsCount++;
+        if (!isRecovery) {
+            this.changeLog.add(new Operation(Operator.ADD, (StreamEvent) complexEvents2));
+        }
     }
 
     private E getLastEvent(E complexEvents) {
@@ -152,7 +169,7 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
      * Returns the next element in the iteration.
      *
      * @return the next element in the iteration.
-     * @throws NoSuchElementException iteration has no more elements.
+     * @throws java.util.NoSuchElementException iteration has no more elements.
      */
     public E next() {
         E returnEvent;
@@ -189,24 +206,18 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
         if (lastReturned == null) {
             throw new IllegalStateException();
         }
-
-        ComplexEvent event = null;
-
         if (previousToLastReturned != null) {
-            event = lastReturned.getNext();
-            previousToLastReturned.setNext(event);
+            previousToLastReturned.setNext(lastReturned.getNext());
         } else {
             first = (E) lastReturned.getNext();
             if (first == null) {
                 last = null;
-            } else {
-                event = first;
             }
         }
         lastReturned.setNext(null);
         lastReturned = null;
-        numberOfDeletions++;
-        --eventsCount;
+        this.changeLog.add(new Operation(Operator.REMOVE));
+        eventsCount--;
     }
 
     public void detach() {
@@ -237,11 +248,68 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
         return firstEvent;
     }
 
+    @Override
+    public int size() {
+        return 0;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        return false;
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        return false;
+    }
+
+    @Override
+    public Object get(Object key) {
+        return null;
+    }
+
+    @Override
+    public Object put(Object key, Object value) {
+        return null;
+    }
+
+    @Override
+    public Object remove(Object key) {
+        return null;
+    }
+
+    @Override
+    public void putAll(Map m) {
+
+    }
+
     public void clear() {
         previousToLastReturned = null;
         lastReturned = null;
         first = null;
         last = null;
+        this.changeLog.add(new Operation(Operator.CLEAR));
+        eventsCount = 0;
+    }
+
+    @Override
+    public Set keySet() {
+        return null;
+    }
+
+    @Override
+    public Collection values() {
+        return null;
+    }
+
+    @Override
+    public Set<Entry> entrySet() {
+        return null;
     }
 
     public void reset() {
@@ -262,7 +330,11 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
             E firstEvent = first;
             first = (E) first.getNext();
             firstEvent.setNext(null);
-            numberOfDeletions++;
+            if (!isRecovery) {
+                this.changeLog.add(new Operation(Operator.POLL));
+            }
+            eventsCount--;
+
             return firstEvent;
         } else {
             return null;
@@ -284,34 +356,36 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
                 '}';
     }
 
-    public Snapshot getSnapshot() {
-        StreamEvent first = null;
+    public Object getFromIndex(int index) {
+        return null;
+    }
 
+    public void setAtIndex(int index, Object value) {
+
+    }
+
+    public Snapshot getSnapshot() {
         if (isFirstSnapshot) {
-            first = (StreamEvent) this.getFirst();
-            additionsList = new ArrayList<ComplexEvent>();
-            numberOfDeletions = 0;
+            //objectMap
+            Snapshot snapshot = new Snapshot((StreamEvent) this.getFirst(), false);
+            //snapshotByteSerializer.objectToByte(objectMap, siddhiAppContext);
             isFirstSnapshot = false;
-            return new Snapshot(first);
+            this.changeLog.clear();
+            return snapshot;
         }
 
         if (isFullSnapshot()) {
-            first = (StreamEvent) this.getFirst();
-            return new Snapshot(first);
+            Snapshot snapshot = new Snapshot(this, false);
+            this.changeLog = new ArrayList<Operation>();
+            return snapshot;
         } else {
-            first = null;
-            ArrayList<ComplexEvent> list1 = additionsList;
-            additionsList = new ArrayList<ComplexEvent>();
-            int deletions = numberOfDeletions;
-            numberOfDeletions = 0;
-            return new Snapshot(list1, deletions);
+            Snapshot snapshot = new Snapshot(changeLog, true);
+            return snapshot;
         }
     }
 
     private boolean isFullSnapshot() {
-        int numberOfChanges = additionsList.size() + numberOfDeletions;
-
-        if (numberOfChanges > (eventsCount * FULL_SNAPSHOT_THRESHOLD)) {
+        if ((this.changeLog.size() > (eventsCount * FULL_SNAPSHOT_THRESHOLD)) && (eventsCount != 0)) {
             return true;
         } else {
             return false;
@@ -339,26 +413,88 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
             HashMap<String, Snapshot> firstMap = (HashMap<String, Snapshot>) obj;
             Snapshot snpObj = firstMap.get(key);
 
-            if (firstFlag) {
-                first = (E) snpObj.getEnclosingStreamEvent();
-                last = getLastEvent((E) snpObj.getEnclosingStreamEvent());
-                firstFlag = false;
-            } else {
-                ArrayList<ComplexEvent> addList = snpObj.getAdditionsList();
+            if (snpObj == null) {
+                continue;
+            }
 
-                if (addList != null) {
-                    for (ComplexEvent c : addList) {
-                        //Maybe we should set next to null during the persistance.
-                        c.setNext(null);
-                        this.add((E) c);
+            if (firstFlag) {
+                Object obj2 = snpObj.getState();
+                if (obj.getClass().equals(PersistableDataStructure.class)) {
+                    first = (E) ((PersistableDataStructure) snpObj.getState()).first;
+                    last = getLastEvent((E) ((PersistableDataStructure) snpObj.getState()));
+                    firstFlag = false;
+
+
+                    E lastEvent = first;
+                    eventsCount++;
+                    while (lastEvent != null && lastEvent.getNext() != null) {
+                        lastEvent = (E) lastEvent.getNext();
+                        eventsCount++;
+                    }
+                } else if (obj2.getClass().equals(ArrayList.class)) {
+                    ArrayList<Operation> addList = (ArrayList<Operation>) snpObj.getState();
+                    isRecovery = true;
+
+                    for (Operation op : addList) {
+                        switch (op.operation) {
+                            case Operator.ADD:
+                                //Need to check whether there is only one event or multiple events. If so we have to
+                                // traverse  the linked list and then get the count by which the eventsCount needs
+                                // to be updated.
+                                this.add((E) op.parameters);
+                                //((StreamEvent)parameters).setNext(null);
+                                //changeLogForVariable.add(new Operation(operator, (StreamEvent) parameters));
+                                break;
+                            case Operator.REMOVE:
+                                this.remove();
+                                //changeLogForVariable.add(new Operation(operator, parameters));
+                                break;
+                            case Operator.POLL:
+                                //changeLogForVariable.add(new Operation(operator, parameters));
+                                this.poll();
+                                break;
+                            case Operator.CLEAR:
+                                this.clear();
+                                //changeLogForVariable.add(new Operation(operator, parameters));
+                                break;
+                            default:
+                                continue;
+                        }
+                    }
+                    isRecovery = false;
+                }
+
+            } else {
+                ArrayList<Operation> addList = (ArrayList<Operation>) snpObj.getState();
+                isRecovery = true;
+
+                for (Operation op : addList) {
+                    switch (op.operation) {
+                        case Operator.ADD:
+                            //Need to check whether there is only one event or multiple events. If so we have to
+                            //traverse the linked list and then get the count by which the eventsCount needs
+                            // to be updated.
+                            this.add((E) op.parameters);
+                            //((StreamEvent)parameters).setNext(null);
+                            //changeLogForVariable.add(new Operation(operator, (StreamEvent) parameters));
+                            break;
+                        case Operator.REMOVE:
+                            this.remove();
+                            //changeLogForVariable.add(new Operation(operator, parameters));
+                            break;
+                        case Operator.POLL:
+                            //changeLogForVariable.add(new Operation(operator, parameters));
+                            this.poll();
+                            break;
+                        case Operator.CLEAR:
+                            this.clear();
+                            //changeLogForVariable.add(new Operation(operator, parameters));
+                            break;
+                        default:
+                            continue;
                     }
                 }
-
-                int numDeletions = snpObj.getNumberOfDeletions();
-                while (numDeletions > 0) {
-                    this.poll();
-                    numDeletions--;
-                }
+                isRecovery = false;
             }
         }
     }

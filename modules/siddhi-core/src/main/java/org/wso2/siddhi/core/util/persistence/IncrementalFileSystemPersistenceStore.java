@@ -118,12 +118,36 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                 ArrayList<String> result = new ArrayList<>();
                 String[] items = fileName.split("_");
 
-                result.add(items[0]);
-                result.add(items[1]);
-                result.add(items[2]);
-                result.add(items[3]);
-                result.add(items[4]);
-                results.add(result);
+                if (items.length == 5) {
+                    result.add(items[0]);
+                    result.add(items[1]);
+                    result.add(items[2]);
+                    result.add(items[3]);
+                    result.add(items[4]);
+
+                    results.add(result);
+                } else {
+
+                    long timeDuration = Long.parseLong(items[5]);
+                    long timeOfSnapshotPersistance = Long.parseLong(items[0]);
+
+                    //We load only unexpired snapshots
+
+                    //The assumption is snapshot persistance and laoding happens on the same JVM. If its distributed
+                    //time sync related issues will appear. Also we do not count the time it takes to restore the loaded
+                    //state to the time window. Ideally it should be
+                    // (System.currentTimeMillis() - timeOfSnapshotPersistance) < (timeDUration + deltaTimeTorestore)
+                    if ((System.currentTimeMillis() - timeOfSnapshotPersistance) < timeDuration) {
+                        result.add(items[0]);
+                        result.add(items[1]);
+                        result.add(items[2]);
+                        result.add(items[3]);
+                        result.add(items[4]);
+                        result.add(items[5]);
+
+                        results.add(result);
+                    }
+                }
             }
         }
 

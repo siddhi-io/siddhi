@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
+import org.wso2.siddhi.core.event.stream.PersistableDataStructure;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
@@ -78,8 +79,9 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
 
     private int length;
     private int count = 0;
-    private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(false);
-    private ComplexEventChunk<StreamEvent> expiredEventChunk = null;
+    private PersistableDataStructure<StreamEvent> currentEventChunk =
+            new PersistableDataStructure<StreamEvent>(false);
+    private PersistableDataStructure<StreamEvent> expiredEventChunk = null;
     private boolean outputExpectsExpiredEvents;
     private SiddhiAppContext siddhiAppContext;
     private StreamEvent resetEvent = null;
@@ -91,7 +93,7 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiAppContext = siddhiAppContext;
         if (outputExpectsExpiredEvents) {
-            expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+            expiredEventChunk = new PersistableDataStructure<StreamEvent>(false);
         }
         if (attributeExpressionExecutors.length == 1) {
             length = (Integer) (((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue());
@@ -111,7 +113,8 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                currentEventChunk.add(clonedStreamEvent);
+                StreamEvent clonedStreamEvent2 = streamEventCloner.copyStreamEvent(streamEvent);
+                currentEventChunk.add(clonedStreamEvent, clonedStreamEvent2);
                 count++;
                 if (count == length) {
                     if (outputExpectsExpiredEvents) {
@@ -138,8 +141,10 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
                             while (currentEventChunk.hasNext()) {
                                 StreamEvent currentEvent = currentEventChunk.next();
                                 StreamEvent toExpireEvent = streamEventCloner.copyStreamEvent(currentEvent);
+                                StreamEvent toExpireEvent2 = streamEventCloner.copyStreamEvent(currentEvent);
                                 toExpireEvent.setType(StreamEvent.Type.EXPIRED);
-                                expiredEventChunk.add(toExpireEvent);
+                                toExpireEvent2.setType(StreamEvent.Type.EXPIRED);
+                                expiredEventChunk.add(toExpireEvent, toExpireEvent2);
                             }
                         }
 
@@ -175,8 +180,8 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
             state.put("Count", count);
-            state.put("CurrentEventChunk", currentEventChunk.getFirst());
-            state.put("ExpiredEventChunk", expiredEventChunk != null ? expiredEventChunk.getFirst() : null);
+            state.put("CurrentEventChunk", currentEventChunk.getSnapshot());
+            state.put("ExpiredEventChunk", expiredEventChunk.getSnapshot());
             state.put("ResetEvent", resetEvent);
         }
         return state;
@@ -187,10 +192,11 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
     public synchronized void restoreState(Map<String, Object> state) {
         count = (int) state.get("Count");
         currentEventChunk.clear();
-        currentEventChunk.add((StreamEvent) state.get("CurrentEventChunk"));
+        currentEventChunk.restore("CurrentEventChunk", state);
+
         if (expiredEventChunk != null) {
             expiredEventChunk.clear();
-            expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
+            expiredEventChunk.restore("ExpiredEventChunk", state);
         }
         resetEvent = (StreamEvent) state.get("ResetEvent");
     }
@@ -202,11 +208,11 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         if (expiredEventChunk == null) {
-            expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+            expiredEventChunk = new PersistableDataStructure<StreamEvent>(false);
         }
         return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);

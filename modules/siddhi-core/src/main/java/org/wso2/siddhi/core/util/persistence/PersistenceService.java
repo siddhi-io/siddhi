@@ -58,6 +58,7 @@ public class PersistenceService {
             byte[] snapshot = snapshotService.snapshot().fullState;
             String revision = System.currentTimeMillis() + "_" + siddhiAppName;
             persistenceStore.save(siddhiAppName, revision, snapshot);
+
             if (log.isDebugEnabled()) {
                 log.debug("Persisted.");
             }
@@ -105,6 +106,8 @@ public class PersistenceService {
 
                 snapshots.put(element.get(2), hmap2);
             }
+
+            //snapshotService.recoverFromIncrementalSnapshots(element.get(3), snapshots);
 
             snapshotService.restore(snapshots);
             if (log.isDebugEnabled()) {

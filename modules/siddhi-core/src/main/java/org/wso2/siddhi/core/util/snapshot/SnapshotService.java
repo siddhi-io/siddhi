@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * Service level implementation to take/restore snapshots of processing elements.
@@ -93,10 +94,12 @@ public class SnapshotService {
                             Object snapShot = item2.getValue();
 
                             if (snapShot instanceof Snapshot) {
-                                if (((Snapshot) snapShot).isIncrementalSnapshot()) {
-                                    incrementalSnapshotableMapBase.put(key, snapShot);
-                                } else {
-                                    incrementalSnapshotableMap.put(key, snapShot);
+                                if (((Snapshot) snapShot).getState() != null) {
+                                    if (((Snapshot) snapShot).isIncrementalSnapshot()) {
+                                        incrementalSnapshotableMapBase.put(key, snapShot);
+                                    } else {
+                                        incrementalSnapshotableMap.put(key, snapShot);
+                                    }
                                 }
                             } else {
                                 elementWiseSnapshots.put(key, snapShot);
@@ -181,7 +184,6 @@ public class SnapshotService {
         log.debug("Taking snapshot finished.");
 
         return state;
-
     }
 
     public void restore(Map<String, Map<String, Object>> snapshots) throws CannotRestoreSiddhiAppStateException {
@@ -193,7 +195,9 @@ public class SnapshotService {
                 try {
                     for (Snapshotable snapshotable : snapshotableList) {
                         HashMap<String, Object> hmap = (HashMap<String, Object>) snapshots.get(entry.getKey());
-                        snapshotable.restoreState((HashMap<String, Object>) hmap.get(snapshotable.getElementId()));
+                        HashMap<String, Object> variablesForElement = (HashMap<String, Object>)
+                                hmap.get(snapshotable.getElementId());
+                        snapshotable.restoreState(variablesForElement);
                     }
                 } catch (Throwable t) {
                     throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
@@ -206,4 +210,43 @@ public class SnapshotService {
         }
     }
 
+    public HashMap<String, Object> recoverFromIncrementalSnapshots(String variableName,
+                                                                   HashMap<String, Object> snapshots) {
+        TreeSet<Long> revisions = new TreeSet<Long>();
+        for (Map.Entry<String, Object> entry : snapshots.entrySet()) {
+            long item = -1L;
+            try {
+                item = Long.parseLong(entry.getKey());
+                revisions.add(item);
+            } catch (NumberFormatException e) {
+                //ignore
+            }
+        }
+
+        Iterator<Long> itr = revisions.iterator();
+        boolean firstFlag = true;
+        Snapshot snpObj;
+
+        while (itr.hasNext()) {
+            HashMap<String, Snapshot> obj = (HashMap<String, Snapshot>) snapshots.get("" + itr.next());
+
+            for (Map.Entry<String, Snapshot> item: obj.entrySet()) {
+
+                if (firstFlag) {
+                    snpObj = (Snapshot) item.getValue();
+                    firstFlag = false;
+                } else {
+                    Snapshot snpObj2 = (Snapshot) item.getValue();
+
+                    if (snpObj2.isIncrementalSnapshot()) {
+
+                    } else {
+                        snpObj = snpObj2;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
 }
