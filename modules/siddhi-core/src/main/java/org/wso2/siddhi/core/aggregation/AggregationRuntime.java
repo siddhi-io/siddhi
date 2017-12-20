@@ -30,14 +30,13 @@ import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
-import org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.IncrementalExecutor;
-import org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.RecreateInMemoryData;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
+import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.MemoryCalculable;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
@@ -72,7 +71,6 @@ public class AggregationRuntime implements MemoryCalculable {
     private final ThroughputTracker throughputTrackerFind;
     private List<TimePeriod.Duration> incrementalDurations;
     private SingleStreamRuntime singleStreamRuntime;
-    private EntryValveExecutor entryValveExecutor;
     private ExpressionExecutor perExpressionExecutor;
     private ExpressionExecutor startTimeEndTimeExpressionExecutor;
     private List<ExpressionExecutor> baseExecutors;
@@ -97,7 +95,6 @@ public class AggregationRuntime implements MemoryCalculable {
         this.incrementalDurations = incrementalDurations;
         this.siddhiAppContext = siddhiAppContext;
         this.singleStreamRuntime = singleStreamRuntime;
-        this.entryValveExecutor = entryValveExecutor;
         this.baseExecutors = baseExecutors;
         this.timestampExecutor = timestampExecutor;
         this.tableMetaStreamEvent = tableMetaStreamEvent;
@@ -172,37 +169,18 @@ public class AggregationRuntime implements MemoryCalculable {
                 tableDefinition, UNKNOWN_STATE);
     }
 
-    public Map<TimePeriod.Duration, IncrementalExecutor> getIncrementalExecutorMap() {
-        return incrementalExecutorMap;
-    }
-
-    public Map<TimePeriod.Duration, Table> getAggregationTables() {
-        return aggregationTables;
-    }
-
     public AggregationDefinition getAggregationDefinition() {
         return aggregationDefinition;
-    }
-
-    public SiddhiAppContext getSiddhiAppContext() {
-        return siddhiAppContext;
     }
 
     public SingleStreamRuntime getSingleStreamRuntime() {
         return singleStreamRuntime;
     }
 
-    public EntryValveExecutor getEntryValveExecutor() {
-        return entryValveExecutor;
-    }
-
-    public List<TimePeriod.Duration> getIncrementalDurations() {
-        return incrementalDurations;
-    }
-
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
 
         try {
+            SnapshotService.getSkipSnapshotableThreadLocal().set(true);
             if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
                 latencyTrackerFind.markIn();
                 throughputTrackerFind.eventIn();
@@ -218,10 +196,14 @@ public class AggregationRuntime implements MemoryCalculable {
             Table tableForPerDuration = aggregationTables.get(perValue);
 
             Long[] startTimeEndTime = (Long[]) startTimeEndTimeExpressionExecutor.execute(matchingEvent);
+            if (startTimeEndTime == null) {
+                throw new SiddhiAppRuntimeException("Start and end times for within duration cannot be retrieved");
+            }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent, perValue,
                     incrementalExecutorMap, incrementalDurations, tableForPerDuration, baseExecutors,
-                    timestampExecutor, outputExpressionExecutors, startTimeEndTime);
+                    timestampExecutor, outputExpressionExecutors, startTimeEndTime, siddhiAppContext);
         } finally {
+            SnapshotService.getSkipSnapshotableThreadLocal().set(null);
             if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
                 latencyTrackerFind.markOut();
             }
@@ -314,7 +296,6 @@ public class AggregationRuntime implements MemoryCalculable {
                 withinExpression, streamTableMetaInfoHolderWithStartEnd, siddhiAppContext, variableExpressionExecutors,
                 tableMap, queryName);
 
-        // TODO: 8/11/17 optimize on and to retrieve group by
         // On compile condition.
         // After finding all the aggregates belonging to within duration, the final on condition (given as
         // "on stream1.name == aggregator.nickName ..." in the join query) must be executed on that data.

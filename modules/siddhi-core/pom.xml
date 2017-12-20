@@ -21,7 +21,7 @@
     <parent>
         <artifactId>siddhi</artifactId>
         <groupId>org.wso2.siddhi</groupId>
-        <version>4.0.0-beta17-SNAPSHOT</version>
+        <version>4.0.5-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
 
     </parent>
@@ -88,10 +88,6 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.org.owasp.encoder</groupId>
-            <artifactId>encoder</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -109,7 +105,6 @@
                             org.wso2.siddhi.core.*
                         </Export-Package>
                         <Import-Package>
-                            org.owasp.encoder.*;version="${owasp.encoder.version.range}",
                             *;resolution:=optional
                         </Import-Package>
                         <Include-Resource>
