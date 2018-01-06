@@ -6,8 +6,7 @@ Siddhi is a java library that listens to events from data streams, detects compl
  
 ## Overview 
 
-![](images/siddhi-overview.png?raw=true "Overview")
-![](docs/images/siddhi-overview.png?raw=true "Overview")
+![](https://raw.githubusercontent.com/wso2/siddhi/master/docs/images/siddhi-overview.png?raw=true "Overview")
 
 Siddhi supports the following:
  
@@ -89,7 +88,7 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.0-beta20">4.0.0-beta20</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.0.8">4.0.8</a>.
 
 ## Jenkins Build Status
 
