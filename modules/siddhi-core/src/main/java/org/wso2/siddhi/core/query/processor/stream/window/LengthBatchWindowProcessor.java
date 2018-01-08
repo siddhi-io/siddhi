@@ -24,8 +24,8 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.PersistableDataStructure;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
@@ -79,9 +79,9 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
 
     private int length;
     private int count = 0;
-    private PersistableDataStructure<StreamEvent> currentEventChunk =
-            new PersistableDataStructure<StreamEvent>(false);
-    private PersistableDataStructure<StreamEvent> expiredEventChunk = null;
+    private SnapshotableComplexEventChunk<StreamEvent> currentEventChunk =
+            new SnapshotableComplexEventChunk<StreamEvent>(false);
+    private SnapshotableComplexEventChunk<StreamEvent> expiredEventChunk = null;
     private boolean outputExpectsExpiredEvents;
     private SiddhiAppContext siddhiAppContext;
     private StreamEvent resetEvent = null;
@@ -93,7 +93,7 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiAppContext = siddhiAppContext;
         if (outputExpectsExpiredEvents) {
-            expiredEventChunk = new PersistableDataStructure<StreamEvent>(false);
+            expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
         }
         if (attributeExpressionExecutors.length == 1) {
             length = (Integer) (((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue());
@@ -212,7 +212,7 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, String queryName) {
         if (expiredEventChunk == null) {
-            expiredEventChunk = new PersistableDataStructure<StreamEvent>(false);
+            expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
         }
         return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);

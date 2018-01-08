@@ -24,8 +24,8 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.PersistableDataStructure;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
@@ -75,7 +75,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
 
     private int length;
     private int count = 0;
-    private PersistableDataStructure<StreamEvent> expiredEventChunk;
+    private SnapshotableComplexEventChunk<StreamEvent> expiredEventChunk;
 
     public int getLength() {
         return length;
@@ -88,7 +88,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
-        expiredEventChunk = new PersistableDataStructure<StreamEvent>(false);
+        expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 1) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
         } else {
@@ -178,6 +178,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     public synchronized void restoreState(Map<String, Object> state) {
         count = (int) state.get("Count");
         expiredEventChunk.clear();
-        expiredEventChunk.restore("ExpiredEventChunk", state);
+        expiredEventChunk = (SnapshotableComplexEventChunk<StreamEvent>) expiredEventChunk.restore("ExpiredEventChunk", state);
+        //expiredEventChunk.add(((SnapshotableComplexEventChunk<StreamEvent>) expiredEventChunk.restore("ExpiredEventChunk", state)).getFirst());
     }
 }

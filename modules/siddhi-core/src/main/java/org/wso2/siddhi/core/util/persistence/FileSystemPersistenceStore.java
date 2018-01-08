@@ -87,7 +87,8 @@ public class FileSystemPersistenceStore implements PersistenceStore {
 
     @Override
     public byte[] load(String siddhiAppName, String revision) {
-        File file = new File(folder + File.separator + siddhiAppName + File.separator + revision);
+        File file = new File(folder + File.separator + siddhiAppName + File.separator +
+                revision + "_" + siddhiAppName);
         try {
             byte[] bytes = Files.toByteArray(file);
             log.info("State loaded for " + siddhiAppName + " revision " + revision + " from the file system.");
@@ -111,10 +112,12 @@ public class FileSystemPersistenceStore implements PersistenceStore {
         String lastRevision = null;
         for (File file : files) {
             String fileName = file.getName();
-            if (lastRevision == null || fileName.compareTo(lastRevision) > 0) {
+            if ((lastRevision == null || fileName.compareTo(lastRevision) > 0) && fileName.endsWith(siddhiAppName)) {
                 lastRevision = fileName;
             }
         }
+
+        lastRevision = lastRevision.split("_")[0];
 
         return lastRevision;
     }

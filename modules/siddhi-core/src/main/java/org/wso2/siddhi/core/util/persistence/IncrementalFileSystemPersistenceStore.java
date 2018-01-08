@@ -42,7 +42,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
     @Override
     public void save(String siddhiAppName, String queryName, String elementId, String revision, byte[] snapshot,
                      String type) {
-        File file = new File(folder + File.separator + siddhiAppName + "_I" + File.separator + revision);
+        File file = new File(folder + File.separator + siddhiAppName + File.separator + revision);
         try {
             Files.createParentDirs(file);
             Files.write(snapshot, file);
@@ -86,7 +86,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
     @Override
     public HashMap<String, Object> load(String siddhiAppName, String queryName, String elementId, String revision,
                                         String type) {
-        File file = new File(folder + File.separator + siddhiAppName + "_I" + File.separator + revision + "_"
+        File file = new File(folder + File.separator + siddhiAppName + File.separator + revision + "_"
                 + siddhiAppName + "_" + queryName + "_" + elementId + "_" + type);
         HashMap<String, Object> result = new HashMap<>();
 
@@ -104,7 +104,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
 
     @Override
     public ArrayList<ArrayList<String>> getListOfRevisionsToLoad(String siddhiAppName) {
-        File dir = new File(folder + File.separator + siddhiAppName + "_I");
+        File dir = new File(folder + File.separator + siddhiAppName);
         File[] files = dir.listFiles();
         ArrayList<ArrayList<String>> results = new ArrayList<>();
 
@@ -118,6 +118,8 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                 ArrayList<String> result = new ArrayList<>();
                 String[] items = fileName.split("_");
 
+                //Note: Here we discard the (items.length == 2) scenario which is handled by the full snapshot handling
+
                 if (items.length == 5) {
                     result.add(items[0]);
                     result.add(items[1]);
@@ -126,28 +128,8 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                     result.add(items[4]);
 
                     results.add(result);
-                } else {
-
-                    long timeDuration = Long.parseLong(items[5]);
-                    long timeOfSnapshotPersistance = Long.parseLong(items[0]);
-
-                    //We load only unexpired snapshots
-
-                    //The assumption is snapshot persistance and laoding happens on the same JVM. If its distributed
-                    //time sync related issues will appear. Also we do not count the time it takes to restore the loaded
-                    //state to the time window. Ideally it should be
-                    // (System.currentTimeMillis() - timeOfSnapshotPersistance) < (timeDUration + deltaTimeTorestore)
-                    if ((System.currentTimeMillis() - timeOfSnapshotPersistance) < timeDuration) {
-                        result.add(items[0]);
-                        result.add(items[1]);
-                        result.add(items[2]);
-                        result.add(items[3]);
-                        result.add(items[4]);
-                        result.add(items[5]);
-
-                        results.add(result);
-                    }
                 }
+
             }
         }
 
@@ -155,7 +137,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
     }
 
     public void cleanOldRevisions(String siddhiAppName, String queryName, String elementId, String revisionTimeStamp) {
-        File dir = new File(folder + File.separator + siddhiAppName + "_I");
+        File dir = new File(folder + File.separator + siddhiAppName);
         File[] files = dir.listFiles();
         boolean enableCleaning = false;
 

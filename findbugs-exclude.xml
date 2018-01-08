@@ -164,6 +164,11 @@
         <Class name="org.wso2.siddhi.core.table.holder.IndexEventHolder"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.table.holder.SnapshotableIndexEventHolder"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
 
     <Match>
         <Package name="~org\.wso2\.siddhi\.core\.query\.output\.ratelimit\.time.*"/>

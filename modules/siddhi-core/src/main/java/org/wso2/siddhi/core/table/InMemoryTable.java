@@ -169,7 +169,6 @@ public class InMemoryTable extends Table implements Snapshotable {
         } finally {
             readWriteLock.readLock().unlock();
         }
-
     }
 
     @Override
@@ -203,13 +202,14 @@ public class InMemoryTable extends Table implements Snapshotable {
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
-        state.put("EventHolder", eventHolder);
+        state.put("EventHolder", eventHolder.getSnapshot());
         return state;
     }
 
     @Override
     public void restoreState(Map<String, Object> state) {
-        eventHolder = (EventHolder) state.get("EventHolder");
+        //eventHolder = (EventHolder) state.get("EventHolder");
+        eventHolder = (EventHolder) eventHolder.restore("EventHolder", state);
     }
 
     @Override

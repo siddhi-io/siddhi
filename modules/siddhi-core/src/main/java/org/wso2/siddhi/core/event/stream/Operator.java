@@ -18,7 +18,7 @@
 package org.wso2.siddhi.core.event.stream;
 
 /**
- * The class which resembles a single operation performed on PersistableDataStructure.
+ * The class which resembles a single operation performed on SnapshotableComplexEventChunk.
  */
 public class Operator {
     public static final int ADD = 1;
@@ -27,4 +27,8 @@ public class Operator {
     public static final int GET = 4;
     public static final int POLL = 5;
     public static final int CLEAR = 6;
+    public static final int CLEARALL = 7;
+    public static final int OVERWRITE = 8;
+    public static final int REMOVE2 = 9;
+    public static final int REMOVE3 = 10;
 }

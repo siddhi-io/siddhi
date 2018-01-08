@@ -21,7 +21,7 @@ import java.io.Serializable;
 
 
 /**
- * The class which resembles an instance of operation performed on PersistableDataStructure.
+ * The class which resembles an instance of operation performed on SnapshotableComplexEventChunk.
  */
 public class Operation implements Serializable {
     //Do we need the timestamp of the operation here?

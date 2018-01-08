@@ -24,10 +24,7 @@ import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.table.holder.EventHolder;
-import org.wso2.siddhi.core.table.holder.IndexEventHolder;
-import org.wso2.siddhi.core.table.holder.ListEventHolder;
-import org.wso2.siddhi.core.table.holder.PrimaryKeyReferenceHolder;
+import org.wso2.siddhi.core.table.holder.*;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
@@ -110,7 +107,10 @@ public class EventHolderPasser {
                 }
 
             }
-            return new IndexEventHolder(tableStreamEventPool, eventConverter, primaryKeyReferenceHolders, isNumeric,
+//            return new IndexEventHolder(tableStreamEventPool, eventConverter, primaryKeyReferenceHolders, isNumeric,
+//                    indexMetaData, tableDefinition, siddhiAppContext);
+
+            return new SnapshotableIndexEventHolder(tableStreamEventPool, eventConverter, primaryKeyReferenceHolders, isNumeric,
                     indexMetaData, tableDefinition, siddhiAppContext);
         } else {
             return new ListEventHolder(tableStreamEventPool, eventConverter);

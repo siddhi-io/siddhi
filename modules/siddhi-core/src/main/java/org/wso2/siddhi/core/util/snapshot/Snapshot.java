@@ -26,7 +26,6 @@ import java.io.Serializable;
 public class Snapshot implements Serializable {
     private Object state;
     private boolean isIncrementalSnapshot;
-    private long timeDuration = -1L; //The time period until which this snapshot is valid from the time of its creation.
 
     public Snapshot() {
 
@@ -42,18 +41,8 @@ public class Snapshot implements Serializable {
         this.isIncrementalSnapshot = isIncrementalSnapshot;
     }
 
-    public Snapshot(Object state, boolean isIncrementalSnapshot, long timeDuration) {
-        this.state = state;
-        this.isIncrementalSnapshot = isIncrementalSnapshot;
-        this.timeDuration = timeDuration;
-    }
-
     public boolean isIncrementalSnapshot() {
         return isIncrementalSnapshot;
-    }
-
-    public long getTimeDuration() {
-        return timeDuration;
     }
 
     public Object getState() {

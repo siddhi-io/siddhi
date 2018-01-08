@@ -49,26 +49,26 @@ public class PersistenceService {
         this.context = siddhiAppContext;
     }
 
-    public String persist() {
-
-        if (persistenceStore != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Persisting...");
-            }
-            byte[] snapshot = snapshotService.snapshot().fullState;
-            String revision = System.currentTimeMillis() + "_" + siddhiAppName;
-            persistenceStore.save(siddhiAppName, revision, snapshot);
-
-            if (log.isDebugEnabled()) {
-                log.debug("Persisted.");
-            }
-            return revision;
-        } else {
-            throw new NoPersistenceStoreException("No persistence store assigned for siddhi app " +
-                    siddhiAppName);
-        }
-
-    }
+//    public String persist() {
+//
+//        if (persistenceStore != null) {
+//            if (log.isDebugEnabled()) {
+//                log.debug("Persisting...");
+//            }
+//            byte[] snapshot = snapshotService.snapshot().fullState;
+//            String revision = System.currentTimeMillis() + "_" + siddhiAppName;
+//            persistenceStore.save(siddhiAppName, revision, snapshot);
+//
+//            if (log.isDebugEnabled()) {
+//                log.debug("Persisted.");
+//            }
+//            return revision;
+//        } else {
+//            throw new NoPersistenceStoreException("No persistence store assigned for siddhi app " +
+//                    siddhiAppName);
+//        }
+//
+//    }
 
     public void restoreRevision(String revision) throws CannotRestoreSiddhiAppStateException {
         if (persistenceStore != null) {
@@ -77,12 +77,14 @@ public class PersistenceService {
             }
             byte[] snapshot = persistenceStore.load(siddhiAppName, revision);
 
-            ArrayList<ArrayList<String>> list = incrementalPersistanceStore.getListOfRevisionsToLoad(siddhiAppName);
-
+            //First, load the full snapshot
             HashMap<String, Map<String, Object>> snapshots = (HashMap<String, Map<String, Object>>)
                     ByteSerializer.byteToObject(snapshot, context);
+
+            //Next, load the incremental state
             HashMap<String, Object> hmap1;
             HashMap<String, Object> hmap2;
+            ArrayList<ArrayList<String>> list = incrementalPersistanceStore.getListOfRevisionsToLoad(siddhiAppName);
 
             for (ArrayList<String> element: list) {
                 HashMap<String, Object> item = incrementalPersistanceStore.load(element.get(1), element.get(2),

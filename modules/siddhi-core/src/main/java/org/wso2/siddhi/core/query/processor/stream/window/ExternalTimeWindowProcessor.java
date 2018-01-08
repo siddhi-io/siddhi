@@ -25,6 +25,7 @@ import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
@@ -77,13 +78,13 @@ import java.util.Map;
 public class ExternalTimeWindowProcessor extends WindowProcessor implements FindableProcessor {
     private static final Logger log = Logger.getLogger(ExternalTimeWindowProcessor.class);
     private long timeToKeep;
-    private ComplexEventChunk<StreamEvent> expiredEventChunk;
+    private SnapshotableComplexEventChunk<StreamEvent> expiredEventChunk;
     private VariableExpressionExecutor timeStampVariableExpressionExecutor;
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
-        this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        this.expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 2) {
             if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
                 timeToKeep = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
@@ -159,14 +160,14 @@ public class ExternalTimeWindowProcessor extends WindowProcessor implements Find
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
-        state.put("ExpiredEventChunk", expiredEventChunk.getFirst());
+        state.put("ExpiredEventChunk", expiredEventChunk.getSnapshot());
         return state;
     }
 
     @Override
     public void restoreState(Map<String, Object> state) {
         expiredEventChunk.clear();
-        expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
+        expiredEventChunk.restore("ExpiredEventChunk", state);
     }
 
     @Override
