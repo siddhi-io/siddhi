@@ -126,14 +126,14 @@ For detailed information about the parameters see the documentation for the rele
 
 The following is the list of source types that are currently supported:
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
 * In-memory
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> _(Only works in WSO2 Stream Processor)_
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> _(Only works in WSO2 Stream Processor)_
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
 
@@ -233,14 +233,14 @@ For detailed information about the parameters see documentation for the relevant
 
 The following is a list of currently supported sink types.
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
 * In-memory
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> _(Only works in WSO2 Stream Processor)_
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> _(Only works in WSO2 Stream Processor)_
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> _(Only works in WSO2 Stream Processor)_
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> 
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> 
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
 
