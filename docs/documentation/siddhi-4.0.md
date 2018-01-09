@@ -1015,12 +1015,12 @@ select <event reference>([event index])?.<attribute name>, ...
 insert into <output stream>
 ```
 
-Postfix|Description|Example
----------|---------|---------|
-`<n1:n2>`|This matches `n1` to `n2` events (including `n1` and not more than `n2`).|`1:4` matches 1 to 4 events.
-`<n:>`|This matches `n` or more events (including `n`).|`<2:>` matches 2 or more events.
-`<:n>`|This matches up to `n` events (excluding `n`).|`<:5>` matches up to 5 events.
-`<n>`|This matches exactly `n` events.|`<5>` matches exactly 5 events.
+|Postfix|Description|Example
+---------|---------|---------
+|`<n1:n2>`|This matches `n1` to `n2` events (including `n1` and not more than `n2`).|`1:4` matches 1 to 4 events.
+|`<n:>`|This matches `n` or more events (including `n`).|`<2:>` matches 2 or more events.
+|`<:n>`|This matches up to `n` events (excluding `n`).|`<:5>` matches up to 5 events.
+|`<n>`|This matches exactly `n` events.|`<5>` matches exactly 5 events.
 
 Specific occurrences of the event in a collection can be retrieved by using an event index with its reference.
 Square brackets can be used to indicate the event index where `1` can be used as the index of the first event and `last` can be used as the index
@@ -1683,14 +1683,14 @@ insert into ServerRoomTempStream;
 
 Incremental aggregation allows you to obtain aggregates in an incremental manner for a specified set of time periods.
 
-This not only allows you calculate aggregations with varied time granularity, but also allows you access them in an interactive
+This not only allows you to calculate aggregations with varied time granularity, but also allows you to access them in an interactive
  manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**.
 
 **Purpose**
 
 Incremental aggregation allows you to retrieve the aggregate value for different time durations. 
-That is, it allows you to obtain aggregates such as `sum`, `count`, `avg`, `min`, `max`, and `count`) 
-of stream attributes for durations such as `sec`, `min`, `hour`, etc. 
+That is, it allows you to obtain aggregates such as `sum`, `count`, `avg`, `min`, `max`, and `count`
+of stream attributes for durations such as `sec`, `min`, `hour`, etc.
 
 This is of considerable importance in many Analytics scenarios because aggregate values are often needed for several time periods. 
 Furthermore, this ensures that the aggregations are not lost due to unexpected system failures because aggregates can be stored in different persistence `stores`.
@@ -1698,6 +1698,8 @@ Furthermore, this ensures that the aggregations are not lost due to unexpected s
 **Syntax**
 
 ```sql
+@BufferSize("<positive integer>")
+@IgnoreEventsOlderThanBuffer("<true or false>")
 @store(type="<store type>", ...)
 define aggregation <aggregator name>
 from <input stream>
@@ -1707,14 +1709,16 @@ select <attribute name>, <aggregate function>(<attribute name>) as <attribute na
 ```
 The above syntax includes the following:
 
-|Item                |Description
----------------      |---------
-|`@store`            |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
-|`<aggregator name>` |This specifies a unique name for the aggregation so that it can be referred <br/>when accessing aggregate results. 
-|`<input stream>`    |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
-|`group by <attribute name>`|The `group by` clause is optional. If it is included in a Siddhi application, aggregate values <br/> are calculated per each `group by` attribute. If it is not used, all the<br/> events are aggregated together. 
-|`by <timestamp attribute>`| This clause is optional. This defines the attribute that should be used as<br/> the timestamp. If this clause is not used, the event time is used by default.<br/> The timestamp could be given as either a `string` or a `long` value. If it is a `long` value,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it is <br/>a `string` value, the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` .<br/>(e.g., `+05:30`, `-11:00`).
-|`<time periods>`    |When the aggregation period is given as `every sec, hour, month`, the aggregate values are calculated per second, per hour as well as per year.
+|Item                          |Description
+---------------                |---------
+|`@BufferSize`                 |This annotation is optional. The default value is buffer size 0. <br/>It is used to identify the number of 'expired' events to retain <br/>in a buffer, to handle out of order event processing. It's an optional parameter <br/>which is applicable, only if aggregation is based on external timestamp (since events <br/>aggregated based on event arrival time cannot be out of order). An event is identified <br/>as 'expired' with relation to the latest event's timestamp and the most granular duration <br/>for which aggregation is calculated. For example, if aggregation is for sec...year, the <br/>most granular duration is seconds. Hence, if buffer size is 3 and events for 51st second, <br/>52nd second, 53rd second and 54th second arrive, all of the older aggregations (for <br/>seconds 51, 52 and 53) would be kept in the buffer (since latest event is for 54th second)
+|`@IgnoreEventsOlderThanBuffer`|This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is the default value as well), an event <br/>older than the buffer would be aggregated with the oldest event in buffer. If <br/>the value is true, an event older than the buffer would be dropped. This is an optional annotation.
+|`@store`                      |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
+|`<aggregator name>`           |This specifies a unique name for the aggregation so that it can be referred <br/>when accessing aggregate results.
+|`<input stream>`              |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
+|`group by <attribute name>`   |The `group by` clause is optional. If it is included in a Siddhi application, aggregate values <br/> are calculated per each `group by` attribute. If it is not used, all the<br/> events are aggregated together.
+|`by <timestamp attribute>`    |This clause is optional. This defines the attribute that should be used as<br/> the timestamp. If this clause is not used, the event time is used by default.<br/> The timestamp could be given as either a `string` or a `long` value. If it is a `long` value,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it is <br/>a `string` value, the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` .<br/>(e.g., `+05:30`, `-11:00`).
+|`<time periods>`              |The time periods can be given as a range separated by three dots, or as comma separated values. A range would be given as sec...year, where aggregation would be done per second, minute, hour, day, month and year. Comma separated values can be given as min, hour. However, skipping durations is not yet supported for comma separated values (e.g min, day is not a valid clause since hour duration has been skipped)
 
 **Example**
 
@@ -1750,7 +1754,7 @@ from <input stream> join <aggrigation>
 select <attribute name>, <attribute name>, ...
 insert into <output stream>;
 ```
-Apart from constructs of [table](#join-table) this includes the following :
+Apart from constructs of [table join](#join-table) this includes the following. Please note that the 'on' condition is optional :
 
 Item|Description
 ---------|---------
@@ -1761,7 +1765,7 @@ Item|Description
 
 **Example**
 
-This query retrieves all aggregation per day within the time range `"2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30"`.
+This query retrieves all aggregation per day within the time range `"2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30"` (Please note that +05:30 can be omitted if timezone is GMT)
 
 ```sql
 define stream StockStream (symbol string, value int);
@@ -1787,14 +1791,14 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-This query retrieves all aggregation per value for an attribute of the stream  within the time period between timestamps `1490918400` and `1490922000`  
+This query retrieves all aggregation per value for an attribute of the stream  within the time period between timestamps `1496200000000` and `1596434876000`
 
 ```sql
 define stream StockStream (symbol string, value int, perValue string);
 
 from StockStream as S join TradeAggregation as T
   on S.symbol == T.symbol 
-  within 1490918400, 1490922000  
+  within 1496200000000L, 1596434876000L
   per S.perValue
 select S.symbol, T.total, T.avgPrice 
 insert into AggregateStockStream;
