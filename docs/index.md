@@ -36,8 +36,7 @@ uses it to process 20 Billion events per day (300,000 events per second).
 * It has **over 40 <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">Siddhi Extensions</a>**
 * It is **used by over 60 companies including many Fortune 500 companies** in production. Following are some examples:
     * **WSO2** uses Siddhi for the following purposes:
-        * To provide stream processing capabilities in their products such as <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Data Analytics Server</a> 
-   and <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a>.
+        * To provide stream processing capabilities in their products such as <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a>.
         * As the **edge analytics** library of [WSO2 IoT Server](http://wso2.com/iot?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17).
         * As the core of <a target="_blank" href="http://wso2.com/api-management?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 API Manager</a>'s throttling. 
         * As the core of <a target="_blank" href="http://wso2.com/platform?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 products'</a> analytics.
@@ -88,7 +87,7 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.1.1">4.1.1</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.1.2">4.1.2</a>.
 
 ## Jenkins Build Status
 
