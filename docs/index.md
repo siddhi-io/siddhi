@@ -37,7 +37,7 @@ uses it to process 20 Billion events per day (300,000 events per second).
 * It is **used by over 60 companies including many Fortune 500 companies** in production. Following are some examples:
     * **WSO2** uses Siddhi for the following purposes:
         * To provide stream processing capabilities in their products such as <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Data Analytics Server</a> 
-   and <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a>.
+   and <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a>.
         * As the **edge analytics** library of [WSO2 IoT Server](http://wso2.com/iot?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17).
         * As the core of <a target="_blank" href="http://wso2.com/api-management?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 API Manager</a>'s throttling. 
         * As the core of <a target="_blank" href="http://wso2.com/platform?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 products'</a> analytics.
@@ -48,14 +48,14 @@ uses it to process 20 Billion events per day (300,000 events per second).
 
 If you are a Siddhi user, we would love to hear more. 
 
-## Try Siddhi with <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a>
+## Try Siddhi with <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a>
 
-<a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a> is a server version of Siddhi that is also released under 
+<a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a> is a server version of Siddhi that is also released under 
  **Apache Software License v2.0**. It was a Strong Performer in <a target="_blank" href="https://go.forrester.com/blogs/16-04-16-15_true_streaming_analytics_platforms_for_real_time_everything/">The Forrester Wave: Big Data Streaming Analytics, Q1 2016</a> 
  (<a target="_blank" href="https://www.forrester.com/report/The+Forrester+Wave+Big+Data+Streaming+Analytics+Q1+2016/-/E-RES129023">Report</a>) 
 and a <a target="_blank" href="https://www.gartner.com/doc/3314217/cool-vendors-internet-things-analytics">Cool Vendors in Internet of Things Analytics, 2016</a>. 
 
-If you use <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a>, you can use the Siddhi functionality with the following additional features:  
+If you use <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a>, you can use the Siddhi functionality with the following additional features:  
 
 * The **Siddhi Query Editor** tool
 * The **Siddhi Debugger** tool
@@ -105,7 +105,7 @@ Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.
  * For more details and support contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>
  
 ## Support 
-* We are committed to ensuring support for Siddhi (with its <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>) and <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a> from development to production. 
+* We are committed to ensuring support for Siddhi (with its <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>) and <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a> from development to production. 
 * Our unique approach ensures that all support leverages our open development methodology and is provided by the very same engineers who build the technology. 
 * For more details and to take advantage of this unique opportunity, contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>. 
 
