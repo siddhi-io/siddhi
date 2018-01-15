@@ -24,6 +24,7 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
@@ -86,8 +87,9 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
 
     private long timeInMilliSeconds;
     private long nextEmitTime = -1;
-    private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(false);
-    private ComplexEventChunk<StreamEvent> expiredEventChunk = null;
+    private SnapshotableComplexEventChunk<StreamEvent> currentEventChunk =
+            new SnapshotableComplexEventChunk<StreamEvent>(false);
+    private SnapshotableComplexEventChunk<StreamEvent> expiredEventChunk = null;
     private StreamEvent resetEvent = null;
     private Scheduler scheduler;
     private boolean outputExpectsExpiredEvents;
@@ -115,7 +117,7 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiAppContext = siddhiAppContext;
         if (outputExpectsExpiredEvents) {
-            this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+            this.expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
         }
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
@@ -275,8 +277,8 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
-            state.put("CurrentEventChunk", currentEventChunk.getFirst());
-            state.put("ExpiredEventChunk", expiredEventChunk != null ? expiredEventChunk.getFirst() : null);
+            state.put("CurrentEventChunk", currentEventChunk.getSnapshot());
+            state.put("ExpiredEventChunk", expiredEventChunk != null ? expiredEventChunk.getSnapshot() : null);
             state.put("ResetEvent", resetEvent);
         }
         return state;
@@ -286,10 +288,14 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
     public synchronized void restoreState(Map<String, Object> state) {
         if (expiredEventChunk != null) {
             expiredEventChunk.clear();
-            expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
+            //expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
+            expiredEventChunk.restore("ExpiredEventChunk", state);
         }
         currentEventChunk.clear();
-        currentEventChunk.add((StreamEvent) state.get("CurrentEventChunk"));
+        //currentEventChunk.add((StreamEvent) state.get("CurrentEventChunk"));
+        if (expiredEventChunk != null) {
+            expiredEventChunk.restore("currentEventChunk", state);
+        }
         resetEvent = (StreamEvent) state.get("ResetEvent");
     }
 
@@ -304,7 +310,7 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, String queryName) {
         if (expiredEventChunk == null) {
-            expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+            expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
         }
         return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap,

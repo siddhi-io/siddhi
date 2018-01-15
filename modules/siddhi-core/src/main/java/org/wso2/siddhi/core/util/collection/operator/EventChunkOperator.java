@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.util.collection.operator;
 
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
@@ -47,8 +48,8 @@ public class EventChunkOperator implements Operator {
 
     @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
-        ComplexEventChunk<StreamEvent> storeEventChunk = (ComplexEventChunk<StreamEvent>) storeEvents;
-        ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        SnapshotableComplexEventChunk<StreamEvent> storeEventChunk = (SnapshotableComplexEventChunk<StreamEvent>) storeEvents;
+        SnapshotableComplexEventChunk<StreamEvent> returnEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
 
         storeEventChunk.reset();
         while (storeEventChunk.hasNext()) {

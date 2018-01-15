@@ -23,6 +23,7 @@ import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
@@ -77,7 +78,7 @@ import java.util.Map;
 public class TimeWindowProcessor extends WindowProcessor implements SchedulingProcessor, FindableProcessor {
 
     private long timeInMilliSeconds;
-    private ComplexEventChunk<StreamEvent> expiredEventChunk;
+    private SnapshotableComplexEventChunk<StreamEvent> expiredEventChunk;
     private Scheduler scheduler;
     private SiddhiAppContext siddhiAppContext;
     private volatile long lastTimestamp = Long.MIN_VALUE;
@@ -100,7 +101,7 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
-        this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        this.expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
@@ -149,8 +150,10 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
                 if (streamEvent.getType() == StreamEvent.Type.CURRENT) {
 
                     StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                    StreamEvent clonedEvent2 = streamEventCloner.copyStreamEvent(streamEvent);
                     clonedEvent.setType(StreamEvent.Type.EXPIRED);
-                    this.expiredEventChunk.add(clonedEvent);
+                    clonedEvent2.setType(StreamEvent.Type.EXPIRED);
+                    this.expiredEventChunk.add(clonedEvent, clonedEvent2);
 
                     if (lastTimestamp < clonedEvent.getTimestamp()) {
                         scheduler.notifyAt(clonedEvent.getTimestamp() + timeInMilliSeconds);
@@ -192,13 +195,15 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
-        state.put("ExpiredEventChunk", expiredEventChunk.getFirst());
+        //state.put("ExpiredEventChunk", expiredEventChunk.getFirst());
+        state.put("ExpiredEventChunk", expiredEventChunk.getSnapshot());
         return state;
     }
 
     @Override
     public void restoreState(Map<String, Object> state) {
         expiredEventChunk.clear();
-        expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
+        //expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
+        expiredEventChunk.restore("ExpiredEventChunk", state);
     }
 }

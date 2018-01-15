@@ -24,6 +24,7 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
@@ -74,7 +75,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
 
     private int length;
     private int count = 0;
-    private ComplexEventChunk<StreamEvent> expiredEventChunk;
+    private SnapshotableComplexEventChunk<StreamEvent> expiredEventChunk;
 
     public int getLength() {
         return length;
@@ -87,7 +88,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
-        expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 1) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
         } else {
@@ -104,16 +105,18 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                StreamEvent clonedEvent2 = streamEventCloner.copyStreamEvent(streamEvent);
                 clonedEvent.setType(StreamEvent.Type.EXPIRED);
+                clonedEvent2.setType(StreamEvent.Type.EXPIRED);
                 if (count < length) {
                     count++;
-                    this.expiredEventChunk.add(clonedEvent);
+                    this.expiredEventChunk.add(clonedEvent, clonedEvent2);
                 } else {
                     StreamEvent firstEvent = this.expiredEventChunk.poll();
                     if (firstEvent != null) {
                         firstEvent.setTimestamp(currentTime);
                         streamEventChunk.insertBeforeCurrent(firstEvent);
-                        this.expiredEventChunk.add(clonedEvent);
+                        this.expiredEventChunk.add(clonedEvent, clonedEvent2);
                     } else {
                         StreamEvent resetEvent = streamEventCloner.copyStreamEvent(streamEvent);
                         resetEvent.setType(ComplexEvent.Type.RESET);
@@ -142,9 +145,9 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
     }
@@ -165,7 +168,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
             state.put("Count", count);
-            state.put("ExpiredEventChunk", expiredEventChunk.getFirst());
+            state.put("ExpiredEventChunk", expiredEventChunk.getSnapshot());
         }
         return state;
     }
@@ -175,6 +178,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     public synchronized void restoreState(Map<String, Object> state) {
         count = (int) state.get("Count");
         expiredEventChunk.clear();
-        expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
+        expiredEventChunk = (SnapshotableComplexEventChunk<StreamEvent>) expiredEventChunk.restore("ExpiredEventChunk", state);
+        //expiredEventChunk.add(((SnapshotableComplexEventChunk<StreamEvent>) expiredEventChunk.restore("ExpiredEventChunk", state)).getFirst());
     }
 }

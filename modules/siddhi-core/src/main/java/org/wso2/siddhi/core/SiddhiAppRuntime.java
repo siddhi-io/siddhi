@@ -53,8 +53,10 @@ import org.wso2.siddhi.core.util.StringUtil;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import org.wso2.siddhi.core.util.parser.StoreQueryParser;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
+import org.wso2.siddhi.core.util.snapshot.AsyncIncrementalSnapshotPersistor;
 import org.wso2.siddhi.core.util.snapshot.AsyncSnapshotPersistor;
 import org.wso2.siddhi.core.util.snapshot.PersistenceReference;
+import org.wso2.siddhi.core.util.snapshot.SnapshotSerialized;
 import org.wso2.siddhi.core.util.statistics.BufferedEventsTracker;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.MemoryUsageTracker;
@@ -492,12 +494,52 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // take snapshots of execution units
-            byte[] snapshots = siddhiAppContext.getSnapshotService().snapshot();
+            SnapshotSerialized serializeObj = siddhiAppContext.getSnapshotService().snapshot();
+
+            //First, handle the full state
+            byte[] snapshots = serializeObj.fullState;
             // start the snapshot persisting task asynchronously
             AsyncSnapshotPersistor asyncSnapshotPersistor = new AsyncSnapshotPersistor(snapshots,
                     siddhiAppContext.getSiddhiContext().getPersistenceStore(), siddhiAppContext.getName());
             String revision = asyncSnapshotPersistor.getRevision();
             Future future = siddhiAppContext.getExecutorService().submit(asyncSnapshotPersistor);
+
+            //Next, handle the increment persistance scenarios
+            //Incremental state
+            HashMap<String, HashMap<String, Object>> incrementalState = serializeObj.incrementalState;
+
+            if (incrementalState != null) {
+                for (Map.Entry<String, HashMap<String, Object>> entry : incrementalState.entrySet()) {
+                    for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
+                        AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
+                                AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
+                                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
+                                siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
+                                revision.split("_")[0], "I");
+
+                        Future future2 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
+                    }
+                }
+            }
+
+            //Base state
+            HashMap<String, HashMap<String, Object>> incrementalStateBase = serializeObj.incrementalStateBase;
+
+            if (incrementalStateBase != null) {
+                for (Map.Entry<String, HashMap<String, Object>> entry : incrementalStateBase.entrySet()) {
+                    for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
+                        AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
+                                AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
+                                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
+                                siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
+                                revision.split("_")[0], "B");
+
+                        Future future3 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
+                    }
+                }
+            }
+
+            //TODO:Need to send future2 and future3
             return new PersistenceReference(future, revision);
         } finally {
             // at the end, resume the event sources
@@ -510,7 +552,7 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // take snapshots of execution units
-            return siddhiAppContext.getSnapshotService().snapshot();
+            return siddhiAppContext.getSnapshotService().snapshot().fullState;
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));

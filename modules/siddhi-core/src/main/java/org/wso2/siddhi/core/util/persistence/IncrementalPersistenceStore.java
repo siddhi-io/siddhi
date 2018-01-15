@@ -15,23 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.siddhi.core.util.persistence;
 
-package org.wso2.siddhi.core.table.holder;
-
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.util.snapshot.Snapshot;
-
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
+
 /**
- * Base EventHolder interface. EventHolder is a container of {@link StreamEvent}s. You can add {@link ComplexEventChunk}
- * to the EventHolder. There are multiple event holders to fulfill different requirements.
+ * Interface class for Persistence Stores which does incremental checkpointing.
  */
-public interface EventHolder {
-    void add(ComplexEventChunk<StreamEvent> addingEventChunk);
+public interface IncrementalPersistenceStore {
 
-    Snapshot getSnapshot();
+    void save(String siddhiAppId, String queryName, String elementID, String revision, byte[] snapshot, String type);
 
-    Object restore(String eventHolder, Map<String, Object> state);
+    void setProperties(Map properties);
+
+    HashMap<String, Object> load(String siddhiAppId, String queryName, String elementID, String revision, String type);
+
+    ArrayList<ArrayList<String>> getListOfRevisionsToLoad(String siddhiAppId);
 }

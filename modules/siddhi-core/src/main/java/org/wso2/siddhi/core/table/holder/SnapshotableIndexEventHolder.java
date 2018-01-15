@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.Operation;
 import org.wso2.siddhi.core.event.stream.Operator;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -40,9 +41,9 @@ import java.util.*;
  * EventHolder implementation where events will be indexed and stored. This will offer faster access compared to
  * other EventHolder implementations. User can only add unique events based on a given primary key.
  */
-public class IndexEventHolder implements IndexedEventHolder, Serializable {
+public class SnapshotableIndexEventHolder implements IndexedEventHolder, Serializable {
 
-    private static final Logger log = Logger.getLogger(IndexEventHolder.class);
+    private static final Logger log = Logger.getLogger(SnapshotableIndexEventHolder.class);
     private static final long serialVersionUID = 1272291743721603253L;
     private final Map<Object, StreamEvent> primaryKeyData;
     private final Map<String, TreeMap<Object, Set<StreamEvent>>> indexData;
@@ -56,21 +57,22 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     private Map<String, Integer> multiPrimaryKeyMetaData = new LinkedHashMap<>();
     private Map<String, Integer> allIndexMetaData = new HashMap<>();
     private ArrayList<Operation> changeLog;
-    private long eventsCount;
     private static final float FULL_SNAPSHOT_THRESHOLD = 2.1f;
     private boolean isFirstSnapshot = true;
     private boolean isRecovery;
+    private long eventsCount;
 
-    public IndexEventHolder(StreamEventPool tableStreamEventPool, StreamEventConverter eventConverter,
-                            PrimaryKeyReferenceHolder[] primaryKeyReferenceHolders,
-                            boolean isPrimaryNumeric, Map<String, Integer> indexMetaData,
-                            AbstractDefinition tableDefinition, SiddhiAppContext siddhiAppContext) {
+    public SnapshotableIndexEventHolder(StreamEventPool tableStreamEventPool, StreamEventConverter eventConverter,
+                                        PrimaryKeyReferenceHolder[] primaryKeyReferenceHolders,
+                                        boolean isPrimaryNumeric, Map<String, Integer> indexMetaData,
+                                        AbstractDefinition tableDefinition, SiddhiAppContext siddhiAppContext) {
         this.tableStreamEventPool = tableStreamEventPool;
         this.eventConverter = eventConverter;
         this.primaryKeyReferenceHolders = primaryKeyReferenceHolders;
         this.indexMetaData = indexMetaData;
         this.tableName = tableDefinition.getId();
         this.siddhiAppName = siddhiAppContext.getName();
+        this.changeLog = new ArrayList<Operation>();
 
         if (primaryKeyReferenceHolders != null) {
             if (isPrimaryNumeric) {
@@ -142,46 +144,23 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         while (addingEventChunk.hasNext()) {
             ComplexEvent complexEvent = addingEventChunk.next();
             StreamEvent streamEvent = tableStreamEventPool.borrowEvent();
-            StreamEvent streamEvent2 = tableStreamEventPool.borrowEvent();
             eventConverter.convertComplexEvent(complexEvent, streamEvent);
-            eventConverter.convertComplexEvent(complexEvent, streamEvent2);
-
-            eventsCount++;
-            if (!isRecovery) {
-                this.changeLog.add(new Operation(Operator.ADD, streamEvent2));
-            }
             add(streamEvent);
-        }
-    }
 
-    @Override
-    public Snapshot getSnapshot() {
-        if (isFirstSnapshot) {
-            //objectMap
-            Snapshot snapshot = new Snapshot(this, false);
-            //snapshotByteSerializer.objectToByte(objectMap, siddhiAppContext);
-            isFirstSnapshot = false;
-            this.changeLog.clear();
-            return snapshot;
-        }
 
-        if (isFullSnapshot()) {
-            Snapshot snapshot = new Snapshot(this, false);
-            this.changeLog = new ArrayList<Operation>();
-            return snapshot;
-        } else {
-            Snapshot snapshot = new Snapshot(changeLog, true);
-            return snapshot;
+            if (!isRecovery) {
+                StreamEvent streamEvent2 = tableStreamEventPool.borrowEvent();
+                eventConverter.convertComplexEvent(complexEvent, streamEvent2);
+                this.changeLog.add(new Operation(Operator.ADD, (StreamEvent) streamEvent2));
+                eventsCount++;
+            }
         }
-    }
-
-    @Override
-    public EventHolder restore(String key, Map<String, Object> state) {
-        return null;
     }
 
     private void add(StreamEvent streamEvent) {
+
         StreamEvent existingValue = null;
+
         if (primaryKeyData != null) {
             Object primaryKey = constructPrimaryKey(streamEvent, primaryKeyReferenceHolders);
             existingValue = primaryKeyData.putIfAbsent(primaryKey, streamEvent);
@@ -253,6 +232,8 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
                 }
             }
         }
+
+        changeLog.add(new Operation(Operator.OVERWRITE, streamEvent));
     }
 
     @Override
@@ -364,8 +345,6 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
 
     @Override
     public void deleteAll() {
-        this.changeLog.add(new Operation(Operator.CLEAR));
-
         if (primaryKeyData != null) {
             primaryKeyData.clear();
         }
@@ -374,10 +353,15 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
                 aIndexedData.clear();
             }
         }
+
+        this.changeLog.add(new Operation(Operator.CLEAR));
+        eventsCount = 0;
     }
 
     @Override
     public void deleteAll(Collection<StreamEvent> storeEventSet) {
+        this.changeLog.add(new Operation(Operator.REMOVE, storeEventSet));
+
         for (StreamEvent streamEvent : storeEventSet) {
             if (primaryKeyData != null) {
                 Object primaryKey = constructPrimaryKey(streamEvent, primaryKeyReferenceHolders);
@@ -385,18 +369,19 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
                 if (indexData != null) {
                     deleteFromIndexes(deletedEvent);
                 }
+                eventsCount--;
             } else if (indexData != null) {
                 deleteFromIndexes(streamEvent);
+                eventsCount--;
             }
-
-            this.changeLog.add(new Operation(Operator.REMOVE, streamEvent));
         }
     }
 
     @Override
     public void delete(String attribute, Compare.Operator operator, Object value) {
 
-        this.changeLog.add(new Operation(Operator.REMOVE3, new Object[]{attribute, operator, value}));
+        this.changeLog.add(new Operation(Operator.REMOVE2, new Object[]{attribute, operator, value}));
+        eventsCount--;
 
         if (primaryKeyData != null && attribute.equals(primaryKeyAttributes)) {
             switch (operator) {
@@ -583,12 +568,137 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         }
     }
 
+    public Snapshot getSnapshot() {
+        if (isFirstSnapshot) {
+            //objectMap
+            Snapshot snapshot = new Snapshot(this, false);
+            //snapshotByteSerializer.objectToByte(objectMap, siddhiAppContext);
+            isFirstSnapshot = false;
+            this.changeLog.clear();
+            return snapshot;
+        }
+
+        if (isFullSnapshot()) {
+            Snapshot snapshot = new Snapshot(this, false);
+            this.changeLog = new ArrayList<Operation>();
+            return snapshot;
+        } else {
+            Snapshot snapshot = new Snapshot(changeLog, true);
+            return snapshot;
+        }
+    }
+
     private boolean isFullSnapshot() {
         if ((this.changeLog.size() > (eventsCount * FULL_SNAPSHOT_THRESHOLD)) && (eventsCount != 0)) {
             return true;
         } else {
             return false;
         }
+    }
+
+    public EventHolder restore(String key, Map<String, Object> state) {
+        TreeSet<Long> revisions = new TreeSet<Long>();
+        for (Map.Entry<String, Object> entry : state.entrySet()) {
+            long item = -1L;
+            try {
+                item = Long.parseLong(entry.getKey());
+                revisions.add(item);
+            } catch (NumberFormatException e) {
+                //ignore
+            }
+        }
+
+        Iterator<Long> itr = revisions.iterator();
+        boolean firstFlag = true;
+
+        while (itr.hasNext()) {
+            Object obj = state.get("" + itr.next());
+
+            HashMap<String, Snapshot> firstMap = (HashMap<String, Snapshot>) obj;
+            Snapshot snpObj = firstMap.get(key);
+
+            if (snpObj == null) {
+                continue;
+            }
+
+            if (firstFlag) {
+                Object obj2 = snpObj.getState();
+                if (obj2.getClass().equals(SnapshotableIndexEventHolder.class)) {
+                    return (EventHolder) snpObj.getState();
+                } else if (obj2.getClass().equals(ArrayList.class)) {
+                    ArrayList<Operation> addList = (ArrayList<Operation>) snpObj.getState();
+                    isRecovery = true;
+
+                    for (Operation op : addList) {
+                        switch (op.operation) {
+                            case Operator.ADD:
+                                //Need to check whether there is only one event or multiple events. If so we have to
+                                // traverse  the linked list and then get the count by which the eventsCount needs
+                                // to be updated.
+                                this.add((StreamEvent) op.parameters);
+                                //((StreamEvent)parameters).setNext(null);
+                                //changeLogForVariable.add(new Operation(operator, (StreamEvent) parameters));
+                                break;
+                            case Operator.OVERWRITE:
+                                this.overwrite((StreamEvent) op.parameters);
+                                break;
+                            case Operator.REMOVE2:
+                                delete((String)((Object[])op.parameters)[0],
+                                        (Compare.Operator) ((Object[]) op.parameters)[1],
+                                        ((Object[]) op.parameters)[2]);
+                                break;
+                            case Operator.CLEAR:
+                                this.deleteAll();
+                                break;
+                            case Operator.REMOVE:
+                                this.deleteAll((Collection<StreamEvent>)op.parameters);
+                                break;
+                            case Operator.CLEARALL:
+                                // this.changeLog.add(new Operation(Operator.CLEARALL, storeEventSet))
+                                //this.delete((Collection<StreamEvent>) op.parameters);
+                                this.deleteAll((Collection<StreamEvent>) op.parameters);
+                            default:
+                                continue;
+                        }
+                    }
+                    isRecovery = false;
+                }
+
+            } else {
+                ArrayList<Operation> addList = (ArrayList<Operation>) snpObj.getState();
+                isRecovery = true;
+
+                for (Operation op : addList) {
+                    switch (op.operation) {
+                        case Operator.ADD:
+                            //Need to check whether there is only one event or multiple events. If so we have to
+                            // traverse  the linked list and then get the count by which the eventsCount needs
+                            // to be updated.
+                            this.add((StreamEvent) op.parameters);
+                            //((StreamEvent)parameters).setNext(null);
+                            //changeLogForVariable.add(new Operation(operator, (StreamEvent) parameters));
+                            break;
+                        case Operator.REMOVE2:
+                            delete((String)((Object[])op.parameters)[0],
+                                    (Compare.Operator) ((Object[]) op.parameters)[1],
+                                    ((Object[]) op.parameters)[2]);
+                            break;
+                        case Operator.CLEAR:
+                            this.deleteAll();
+                            break;
+                        case Operator.REMOVE:
+                            // this.changeLog.add(new Operation(Operator.CLEARALL, storeEventSet))
+                            //this.delete((Collection<StreamEvent>) op.parameters);
+                            this.deleteAll((Collection<StreamEvent>) op.parameters);
+                        default:
+                            continue;
+                    }
+                }
+                isRecovery = false;
+            }
+        }
+
+        return this;
     }
 
 }
