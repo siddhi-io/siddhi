@@ -95,6 +95,16 @@ public class ExecutionPlanParser {
                 }
             }
 
+            annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_CLEAN_AGGREGATORS, executionPlan.getAnnotations());
+            if (annotation != null) {
+            	String interval = annotation.getElement(SiddhiConstants.ANNOTATION_INTERVAL);
+            	if (interval != null) {
+		            int value = Integer.parseInt(interval);
+		            executionPlanContext.setCleanAggregators((value > 0));
+		            executionPlanContext.setCleanAggregatorInterval(value);
+	            }
+            }
+
             annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_STATISTICS,
                     executionPlan.getAnnotations());
 

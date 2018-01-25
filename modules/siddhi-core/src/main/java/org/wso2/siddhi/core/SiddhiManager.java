@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.util.ExecutionPlanRuntimeBuilder;
 import org.wso2.siddhi.core.util.parser.ExecutionPlanParser;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.core.config.StatisticsConfiguration;
+import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.query.api.ExecutionPlan;
 import org.wso2.siddhi.query.compiler.SiddhiCompiler;
 
@@ -37,7 +38,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class SiddhiManager {
 
-    private static final Logger log = Logger.getLogger(SiddhiManager.class);
+    private static final Logger LOGGER = Logger.getLogger(SiddhiManager.class);
     private SiddhiContext siddhiContext;
     private ConcurrentMap<String, ExecutionPlanRuntime> executionPlanRuntimeMap = new ConcurrentHashMap<String, ExecutionPlanRuntime>();
 
@@ -158,6 +159,7 @@ public class SiddhiManager {
         for (ExecutionPlanRuntime executionPlanRuntime : executionPlanRuntimeMap.values()) {
             executionPlanRuntime.persist();
         }
+        SnapshotService.persistSnapshotableElements();
     }
 
     /**
@@ -168,5 +170,6 @@ public class SiddhiManager {
         for (ExecutionPlanRuntime executionPlanRuntime : executionPlanRuntimeMap.values()) {
             executionPlanRuntime.restoreLastRevision();
         }
+        SnapshotService.restoreSnapshotableElements();
     }
 }

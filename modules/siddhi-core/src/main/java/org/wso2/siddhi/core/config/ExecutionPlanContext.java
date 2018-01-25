@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
 import org.wso2.siddhi.core.function.EvalScript;
+import org.wso2.siddhi.core.query.selector.attribute.processor.executor.GroupByAggregationAttributeExecutor;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
@@ -43,6 +44,7 @@ public class ExecutionPlanContext {
     private boolean enforceOrder;
     private boolean async;
     private boolean statsEnabled = false;
+    private boolean cleanAggregators = true;
     private StatisticsManager statisticsManager = null;
 
     private ExecutorService executorService;
@@ -57,6 +59,7 @@ public class ExecutionPlanContext {
     private Map<String, EvalScript> scriptFunctionMap;
     private ExceptionHandler<Object> disruptorExceptionHandler;
     private int bufferSize;
+    private int cleanAggregatorInterval = GroupByAggregationAttributeExecutor.DEFAULT_AGGREGATOR_CLEAN_INTERVAL;
 
     public ExecutionPlanContext() {
         this.eternalReferencedHolders = new CopyOnWriteArrayList<EternalReferencedHolder>();
@@ -215,4 +218,20 @@ public class ExecutionPlanContext {
     public int getBufferSize() {
         return bufferSize;
     }
+
+    public void setCleanAggregators(boolean value) {
+    	this.cleanAggregators = value;
+    }
+
+    public boolean getCleanAggregators() {
+    	return cleanAggregators;
+    }
+
+	public int getCleanAggregatorInterval() {
+		return cleanAggregatorInterval;
+	}
+
+	public void setCleanAggregatorInterval(int cleanAggregatorInterval) {
+		this.cleanAggregatorInterval = cleanAggregatorInterval;
+	}
 }

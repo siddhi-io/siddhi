@@ -193,6 +193,7 @@ public class DBHandler {
         }
     }
 
+
     public void updateEvent(List<Object[]> updateEventList, ExecutionInfo executionInfo) {
 
         PreparedStatement updatePreparedStatement = null;

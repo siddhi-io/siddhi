@@ -29,8 +29,6 @@ import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.util.collection.operator.Finder;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 
-import java.util.concurrent.locks.Lock;
-
 /**
  * Created on 12/8/14.
  */
@@ -77,9 +75,9 @@ public class JoinProcessor implements Processor {
                     if (eventType == ComplexEvent.Type.TIMER) {
                         continue;
                     } else if (eventType == ComplexEvent.Type.RESET) {
-                        if (outerJoinProcessor && !leftJoinProcessor) {
+                        if (!leftJoinProcessor) {
                             returnEventChunk.add(joinEventBuilder(null, streamEvent, eventType));
-                        } else if (outerJoinProcessor && leftJoinProcessor) {
+                        } else {
                             returnEventChunk.add(joinEventBuilder(streamEvent, null, eventType));
                         }
                     } else {

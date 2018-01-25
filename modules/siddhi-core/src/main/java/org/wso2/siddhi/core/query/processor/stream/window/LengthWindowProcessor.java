@@ -18,6 +18,7 @@
 package org.wso2.siddhi.core.query.processor.stream.window;
 
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -79,7 +80,19 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
                         streamEventChunk.insertBeforeCurrent(firstEvent);
                         this.expiredEventChunk.add(clonedEvent);
                     } else {
-                        streamEventChunk.insertBeforeCurrent(clonedEvent);
+                        StreamEvent resetEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                        resetEvent.setType(ComplexEvent.Type.RESET);
+                        // adding resetEvent and clonedEvent event to the streamEventChunk
+                        // since we are using insertAfterCurrent(), the final order will be
+                        // currentEvent > clonedEvent (or expiredEvent) > resetEvent
+                        streamEventChunk.insertAfterCurrent(resetEvent);
+                        streamEventChunk.insertAfterCurrent(clonedEvent);
+
+                        // since we manually added resetEvent and clonedEvent in earlier step
+                        // we have to skip those two events from getting processed in the next
+                        // iteration. Hence, calling next() twice.
+                        streamEventChunk.next();
+                        streamEventChunk.next();
                     }
                 }
             }

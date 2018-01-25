@@ -92,10 +92,19 @@ public class ExtractAttributesFunctionExtensionTestCase {
     }
 
     @Test
-    public void extractAttributesFunctionExtension2() throws InterruptedException {
+    public void extractAttributesFunctionExtension2() throws InterruptedException, ParseException {
 
         log.info("ExtractAttributesFunctionExtensionInvalidFormatTestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
+        Calendar calendarEN = Calendar.getInstance(LocaleUtils.toLocale("en_US"));
+        Calendar calendarFR = Calendar.getInstance(LocaleUtils.toLocale("fr_FR"));
+        FastDateFormat userSpecificFormat;
+        userSpecificFormat = FastDateFormat.getInstance("yyyy-MM-dd");
+        Date userSpecifiedDate = userSpecificFormat.parse("2017-10-8");
+        calendarEN.setTime(userSpecifiedDate);
+        calendarFR.setTime(userSpecifiedDate);
+        final Integer valueEN =  calendarEN.get(Calendar.WEEK_OF_YEAR);
+        final Integer valueFR =  calendarFR.get(Calendar.WEEK_OF_YEAR);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
@@ -562,7 +571,6 @@ public class ExtractAttributesFunctionExtensionTestCase {
                     count++;
                     log.info("Event : " + count + ",WEEK : " + inEvent.getData(1));
                     Assert.assertEquals(valueEN, inEvent.getData(1));
-
                 }
             }
         });

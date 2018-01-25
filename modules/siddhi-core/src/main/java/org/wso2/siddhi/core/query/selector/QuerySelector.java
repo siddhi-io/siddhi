@@ -92,7 +92,6 @@ public class QuerySelector implements Processor {
     private void processNoGroupBy(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         synchronized (this) {
-
             while (complexEventChunk.hasNext()) {
                 ComplexEvent event = complexEventChunk.next();
                 switch (event.getType()) {
@@ -107,13 +106,12 @@ public class QuerySelector implements Processor {
                             complexEventChunk.remove();
                         }
                         break;
-                    case TIMER:
-                        complexEventChunk.remove();
-                        break;
                     case RESET:
                         for (AttributeProcessor attributeProcessor : attributeProcessorList) {
                             attributeProcessor.process(event);
                         }
+                    case TIMER:
+                        complexEventChunk.remove();
                         break;
                 }
             }
@@ -259,18 +257,17 @@ public class QuerySelector implements Processor {
         return null;    //since there is no processors after a query selector
     }
 
-    @Override
-    public void setNextProcessor(Processor processor) {
-        //this method will not be used as there is no processors after a query selector
-    }
-
-
     public void setNextProcessor(OutputRateLimiter outputRateLimiter) {
         if (this.outputRateLimiter == null) {
             this.outputRateLimiter = outputRateLimiter;
         } else {
             throw new ExecutionPlanCreationException("outputRateLimiter is already assigned");
         }
+    }
+
+    @Override
+    public void setNextProcessor(Processor processor) {
+        //this method will not be used as there is no processors after a query selector
     }
 
     @Override
