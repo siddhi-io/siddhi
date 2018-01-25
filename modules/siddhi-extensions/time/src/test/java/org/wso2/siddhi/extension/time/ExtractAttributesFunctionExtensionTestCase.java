@@ -91,7 +91,6 @@ public class ExtractAttributesFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test
     public void extractAttributesFunctionExtension2() throws InterruptedException, ParseException {
 
         log.info("ExtractAttributesFunctionExtensionInvalidFormatTestCase");
@@ -215,7 +214,6 @@ public class ExtractAttributesFunctionExtensionTestCase {
         siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
-    @Test
     public void extractAttributesFunctionExtension7() throws InterruptedException {
 
         log.info("ExtractAttributesFunctionExtensionSecondArgumentNullTestCase");
@@ -262,7 +260,6 @@ public class ExtractAttributesFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test
     public void extractAttributesFunctionExtension8() throws InterruptedException {
 
         log.info("ExtractAttributesFunctionExtensionThirdArgumentNullTestCase");
@@ -365,7 +362,6 @@ public class ExtractAttributesFunctionExtensionTestCase {
         siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
-    @Test
     public void extractAttributesFunctionExtension13() throws InterruptedException {
 
         log.info("ExtractAttributesFunctionExtensionProcessedCalenderTestCase");

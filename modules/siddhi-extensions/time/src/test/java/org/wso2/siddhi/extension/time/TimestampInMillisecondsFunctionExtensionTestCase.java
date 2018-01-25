@@ -318,7 +318,6 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
-    @Test
     public void timestampInMillisecondsWithAllArgumentsFunctionExtension8() throws InterruptedException {
 
         log.info("TimestampInMillisecondsWithAllArgumentsFunctionExtensionFirstArgumentNullTestCase");
@@ -357,7 +356,6 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    @Test
     public void timestampInMillisecondsWithAllArgumentsFunctionExtension9() throws InterruptedException {
 
         log.info("TimestampInMillisecondsWithAllArgumentsFunctionExtensionSecondArgumentNullTestCase");

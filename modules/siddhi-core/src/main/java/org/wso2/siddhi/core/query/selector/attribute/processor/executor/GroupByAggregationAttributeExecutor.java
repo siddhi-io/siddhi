@@ -61,7 +61,7 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
                     createDefaultAggregatorCleanTimer();
                 }
             } else {
-                // Remove from default cleaning if it's re-deployed with custom interval
+                // Remove from default cleaning if it's re-deployed with custom interval    `
                 allExpiredTrackers.remove(executionPlanContext.getName());
             }
         }
