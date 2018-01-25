@@ -818,42 +818,6 @@ public class JoinTestCase {
     @Test
     public void joinTest19() throws InterruptedException {
         log.info("Join test19");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-        String streams = "" +
-                "@plan:async " +
-                "define stream streamB (id int, name string); ";
-
-        String query = "" +
-                "@info(name = 'query3') " +
-                "from streamB#window.length(1) as b1 join streamB as b2 " +
-                "select b1.id as aId, b2.id as bId " +
-                "insert into batchB; ";
-
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
-        try {
-            InputHandler streamB = executionPlanRuntime.getInputHandler("streamB");
-            executionPlanRuntime.addCallback("query3", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    EventPrinter.print(timeStamp, inEvents, removeEvents);
-                    eventArrived = true;
-                }
-            });
-            executionPlanRuntime.start();
-            Thread.sleep(100);
-            streamB.send(new Event(123, new Object[]{1, "sam"}));
-            streamB.send(new Event[]{new Event(123, new Object[]{1, "sam"})});
-            Thread.sleep(100);
-            Assert.assertEquals("Event Arrived", true, eventArrived);
-        } finally {
-            executionPlanRuntime.shutdown();
-        }
-    }
-
-    @Test
-    public void joinTest19() throws InterruptedException {
-        log.info("Join test19");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream dataIn (id int, data string); " +
