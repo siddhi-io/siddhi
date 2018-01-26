@@ -98,20 +98,20 @@ public class ExtractAttributesFunctionExtensionTestCase {
         Calendar calendarEN = Calendar.getInstance(LocaleUtils.toLocale("en_US"));
         Calendar calendarFR = Calendar.getInstance(LocaleUtils.toLocale("fr_FR"));
         FastDateFormat userSpecificFormat;
-        userSpecificFormat = FastDateFormat.getInstance("yyyy-MM-dd");
-        Date userSpecifiedDate = userSpecificFormat.parse("2017-10-8");
+        userSpecificFormat = FastDateFormat.getInstance("yyyy-MM-dd hh:mm:ss");
+        Date userSpecifiedDate = userSpecificFormat.parse("2014-3-11 02:23:44");
         calendarEN.setTime(userSpecifiedDate);
         calendarFR.setTime(userSpecifiedDate);
-        final Integer valueEN =  calendarEN.get(Calendar.WEEK_OF_YEAR);
-        final Integer valueFR =  calendarFR.get(Calendar.WEEK_OF_YEAR);
+        final int valueEN = calendarEN.get(Calendar.WEEK_OF_YEAR);
+        final int valueENHour = calendarEN.get(Calendar.HOUR_OF_DAY);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds " +
                 "long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
-                "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
-                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
+                "select symbol , time:extract('WEEK',dateValue,dateFormat,'en_US') as YEAR,time:extract('MONTH',dateValue," +
+                "dateFormat,'en_US') as MONTH,time:extract('HOUR',dateValue,dateFormat,'en_US') as HOUR " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                 query);
@@ -122,26 +122,15 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
-                    count++;
-                    if (count == 1) {
-                        Assert.assertEquals(null, event.getData(1));
-                        Assert.assertEquals(null, event.getData(2));
-                        Assert.assertEquals("2", event.getData(3).toString());
-                    }
-                    if (count == 2) {
-                        Assert.assertEquals(null, event.getData(1));
-                        Assert.assertEquals(null, event.getData(2));
-                        Assert.assertEquals("2", event.getData(3).toString());
-                    }
+                    Assert.assertEquals(valueEN, event.getData(1));
+                    Assert.assertEquals(valueENHour, event.getData(3));
                 }
             }
         });
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
-        inputHandler.send(new Object[]{"IBM", "2014:3-11 02:23:44", "yyyy-MM-dd hh:mm:ss", 1394484824000L});
-        inputHandler.send(new Object[]{"IBM", "2015:3-11 02:23:44", "yyyy-MM-dd hh:mm:ss", 1394484824000L});
+        inputHandler.send(new Object[]{"IBM", "2014-3-11 02:23:44", "yyyy-MM-dd hh:mm:ss", 1394484824000L});
         Thread.sleep(100);
-        Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
@@ -219,13 +208,17 @@ public class ExtractAttributesFunctionExtensionTestCase {
         log.info("ExtractAttributesFunctionExtensionSecondArgumentNullTestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
 
+        Calendar calendarEN = Calendar.getInstance(LocaleUtils.toLocale("en_US"));
+        calendarEN.setTimeInMillis(1394484824000L);
+        final int valueEN = calendarEN.get(Calendar.HOUR_OF_DAY);
+
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
                 " long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
-                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
+                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR','en_US') as HOUR " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                 query);
@@ -236,26 +229,16 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
-                    count++;
-                    if (count == 1) {
-                        Assert.assertEquals(null, event.getData(1));
-                        Assert.assertEquals(null, event.getData(2));
-                        Assert.assertEquals("2", event.getData(3).toString());
-                    }
-                    if (count == 2) {
-                        Assert.assertEquals(null, event.getData(1));
-                        Assert.assertEquals(null, event.getData(2));
-                        Assert.assertEquals("2", event.getData(3).toString());
-                    }
+                    Assert.assertEquals(null, event.getData(1));
+                    Assert.assertEquals(null, event.getData(2));
+                    Assert.assertEquals(valueEN, event.getData(3));
                 }
             }
         });
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", null, "yyyy-MM-dd hh:mm:ss", 1394484824000L});
-        inputHandler.send(new Object[]{"IBM", null, "ss", 1394484824000L});
         Thread.sleep(100);
-        Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
@@ -264,6 +247,9 @@ public class ExtractAttributesFunctionExtensionTestCase {
 
         log.info("ExtractAttributesFunctionExtensionThirdArgumentNullTestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
+        Calendar calendarEN = Calendar.getInstance(LocaleUtils.toLocale("en_US"));
+        calendarEN.setTimeInMillis(1394484824000L);
+        final int valueEN = calendarEN.get(Calendar.HOUR_OF_DAY);
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
@@ -271,7 +257,7 @@ public class ExtractAttributesFunctionExtensionTestCase {
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
                 "select symbol , time:extract('YEAR',dateValue,dateFormat) as YEAR,time:extract('MONTH',dateValue," +
-                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR " +
+                "dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR','en_US') as HOUR " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                 query);
@@ -282,26 +268,16 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 eventArrived = true;
                 for (Event event : inEvents) {
-                    count++;
-                    if (count == 1) {
-                        Assert.assertEquals(null, event.getData(1));
-                        Assert.assertEquals(null, event.getData(2));
-                        Assert.assertEquals("2", event.getData(3).toString());
-                    }
-                    if (count == 2) {
-                        Assert.assertEquals(null, event.getData(1));
-                        Assert.assertEquals(null, event.getData(2));
-                        Assert.assertEquals("2", event.getData(3).toString());
-                    }
+                    Assert.assertEquals(null, event.getData(1));
+                    Assert.assertEquals(null, event.getData(2));
+                    Assert.assertEquals(valueEN, event.getData(3));
                 }
             }
         });
         InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", "2014:3-11 02:23:44", null, 1394484824000L});
-        inputHandler.send(new Object[]{"IBM", "2012:3-11 02:23:44", null, 1394484824000L});
         Thread.sleep(100);
-        Assert.assertEquals(2, count);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }
@@ -362,20 +338,31 @@ public class ExtractAttributesFunctionExtensionTestCase {
         siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
-    public void extractAttributesFunctionExtension13() throws InterruptedException {
+    @Test
+    public void extractAttributesFunctionExtension13() throws InterruptedException, ParseException {
 
         log.info("ExtractAttributesFunctionExtensionProcessedCalenderTestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
+        Calendar calendarEN = Calendar.getInstance(LocaleUtils.toLocale("en_US"));
+        calendarEN.setTimeInMillis(1394484824000L);
+        final int valueENHour = calendarEN.get(Calendar.HOUR_OF_DAY);
+        FastDateFormat userSpecificFormat;
+        userSpecificFormat = FastDateFormat.getInstance("yyyy-MM-dd hh:mm:ss");
+        Date userSpecifiedDate = userSpecificFormat.parse("2014-3-11 02:23:44");
+        calendarEN.setTime(userSpecifiedDate);
+        final int valueENSec = calendarEN.get(Calendar.SECOND);
+        final int valueENMon = calendarEN.get(Calendar.MONTH) + 1;
+
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string,dateValue string,dateFormat string,timestampInMilliseconds" +
                 " long);";
         String query = ("@info(name = 'query1') " +
                 "from inputStream " +
-                "select symbol , time:extract('SECOND',dateValue,dateFormat) as SECOND,time:extract('MONTH'," +
-                "dateValue,dateFormat) as MONTH,time:extract(timestampInMilliseconds,'HOUR') as HOUR," +
-                "time:extract(timestampInMilliseconds,'MINUTE') as MINUTE," +
-                "time:extract(timestampInMilliseconds,'HOUR_OF_DAY') as HOUR_OF_DAY " +
+                "select symbol , time:extract('SECOND',dateValue,dateFormat,'en_US') as SECOND,time:extract('MONTH'," +
+                "dateValue,dateFormat,'en_US') as MONTH,time:extract(timestampInMilliseconds,'HOUR','en_US') as HOUR," +
+                "time:extract(timestampInMilliseconds,'MINUTE','en_US') as MINUTE," +
+                "time:extract(timestampInMilliseconds,'HOUR_OF_DAY','en_US') as HOUR_OF_DAY " +
                 "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                 query);
@@ -388,14 +375,14 @@ public class ExtractAttributesFunctionExtensionTestCase {
                 for (Event event : inEvents) {
                     count++;
                     if (count == 1) {
-                        Assert.assertEquals(44, event.getData(1));
-                        Assert.assertEquals(3, event.getData(2));
-                        Assert.assertEquals("2", event.getData(3).toString());
+                        Assert.assertEquals(valueENSec, event.getData(1));
+                        Assert.assertEquals(valueENMon, event.getData(2));
+                        Assert.assertEquals(valueENHour, event.getData(3));
                     }
                     if (count == 2) {
-                        Assert.assertEquals(44, event.getData(1));
-                        Assert.assertEquals(3, event.getData(2));
-                        Assert.assertEquals("2", event.getData(3).toString());
+                        Assert.assertEquals(valueENSec, event.getData(1));
+                        Assert.assertEquals(valueENMon, event.getData(2));
+                        Assert.assertEquals(valueENHour, event.getData(3));
                     }
                 }
             }
