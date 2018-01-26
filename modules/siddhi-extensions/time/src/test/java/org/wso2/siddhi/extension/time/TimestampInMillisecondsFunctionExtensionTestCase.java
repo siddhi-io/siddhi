@@ -19,6 +19,8 @@
 package org.wso2.siddhi.extension.time;
 
 import junit.framework.Assert;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +31,10 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
 
 public class TimestampInMillisecondsFunctionExtensionTestCase {
 
@@ -318,10 +324,17 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         siddhiManager.createExecutionPlanRuntime(inStreamDefinition + query);
     }
 
-    public void timestampInMillisecondsWithAllArgumentsFunctionExtension8() throws InterruptedException {
+    @Test
+    public void timestampInMillisecondsWithAllArgumentsFunctionExtension8() throws InterruptedException, ParseException {
 
         log.info("TimestampInMillisecondsWithAllArgumentsFunctionExtensionFirstArgumentNullTestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
+        Calendar calendarEN = Calendar.getInstance(LocaleUtils.toLocale("en_US"));
+        FastDateFormat userSpecificFormat;
+        userSpecificFormat = FastDateFormat.getInstance("yyyy-MM-dd hh:mm:ss");
+        Date userSpecifiedDate = userSpecificFormat.parse("2007-11-30 10:30:19.000");
+        calendarEN.setTime(userSpecifiedDate);
+        final long valueEN = calendarEN.getTimeInMillis();
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string, price string, volume long);";
@@ -341,7 +354,7 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
                     count++;
                     if (count == 1) {
                         Assert.assertEquals(null, event.getData(1));
-                        Assert.assertEquals("1196398819000", event.getData(2).toString());
+                        Assert.assertEquals(valueEN, event.getData(2));
                         eventArrived = true;
                     }
                 }
@@ -356,10 +369,17 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
         executionPlanRuntime.shutdown();
     }
 
-    public void timestampInMillisecondsWithAllArgumentsFunctionExtension9() throws InterruptedException {
+    @Test
+    public void timestampInMillisecondsWithAllArgumentsFunctionExtension9() throws InterruptedException, ParseException {
 
         log.info("TimestampInMillisecondsWithAllArgumentsFunctionExtensionSecondArgumentNullTestCase");
         SiddhiManager siddhiManager = new SiddhiManager();
+        Calendar calendarEN = Calendar.getInstance(LocaleUtils.toLocale("en_US"));
+        FastDateFormat userSpecificFormat;
+        userSpecificFormat = FastDateFormat.getInstance("yyyy-MM-dd hh:mm:ss");
+        Date userSpecifiedDate = userSpecificFormat.parse("2007-11-30 10:30:19.000");
+        calendarEN.setTime(userSpecifiedDate);
+        final long valueEN = calendarEN.getTimeInMillis();
 
         String inStreamDefinition = "" +
                 "define stream inputStream (symbol string, price long, volume string);";
@@ -379,7 +399,7 @@ public class TimestampInMillisecondsFunctionExtensionTestCase {
                     count++;
                     if (count == 1) {
                         Assert.assertEquals(null, event.getData(1));
-                        Assert.assertEquals("1196398819000", event.getData(2).toString());
+                        Assert.assertEquals(valueEN, event.getData(2));
                         eventArrived = true;
                     }
                 }
