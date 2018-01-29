@@ -2163,4 +2163,98 @@ _We value your contribution on improving Siddhi and its extensions further._
 
 Custom extensions can be written in order to cater use case specific logic that are not available in Siddhi out of the box or as an existing extension. 
 
-More information on this will be available soon.
+There are five types of Siddhi extensions that you can write to cater your specific use cases. Please find each 
+extension types and related maven archetypes below. You can use these archetypes to generate maven projects for each 
+extension type.
+
+* Follow one of the step below, based on your project :
+
+
+**siddhi-execution**
+
+* Run the following command
+            
+                mvn archetype:generate
+                    -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                    -DarchetypeArtifactId=siddhi-archetype-execution
+                    -DarchetypeVersion=1.0.1
+                    -DgroupId=org.wso2.extension.siddhi.execution
+                    -Dversion=1.0.0-SNAPSHOT
+            
+* Then the system will pop-up the following message to enter the execution name
+           
+            eg:- Define value for property 'executionType': ML
+            
+* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+                  
+**siddhi-io**
+    
+* Run the following command
+                
+          
+               mvn archetype:generate
+                   -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                   -DarchetypeArtifactId=siddhi-archetype-io
+                   -DarchetypeVersion=1.0.1
+                   -DgroupId=org.wso2.extension.siddhi.io
+                   -Dversion=1.0.0-SNAPSHOT
+            
+* Then the system will pop-up the following message to enter the typeOf_IO
+           
+         eg:- Define value for property 'typeOf_IO': http
+
+* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+         
+**siddhi-map**
+        
+* Run the following command
+                    
+            
+                mvn archetype:generate
+                    -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                    -DarchetypeArtifactId=siddhi-archetype-map
+                    -DarchetypeVersion=1.0.1
+                    -DgroupId=org.wso2.extension.siddhi.map
+                    -Dversion=1.0.0-SNAPSHOT
+            
+* Then the system will pop-up the following message to enter the mapType
+       
+            eg:- Define value for property 'mapType':CSV
+    
+* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+                   
+**siddhi-script**
+            
+* Run the following command
+                        
+           
+               mvn archetype:generate
+                   -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                   -DarchetypeArtifactId=siddhi-archetype-script
+                   -DarchetypeVersion=1.0.1
+                   -DgroupId=org.wso2.extension.siddhi.script
+                   -Dversion=1.0.0-SNAPSHOT
+           
+* Then the system will pop-up the following message to enter the script type
+       
+         eg:- Define value for property 'typeOfScript':
+
+* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+       
+**siddhi-store**
+
+* Run the following command
+                            
+   
+               mvn archetype:generate
+                  -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                  -DarchetypeArtifactId=siddhi-archetype-store
+                  -DarchetypeVersion=1.0.1
+                  -DgroupId=org.wso2.extension.siddhi.store
+                  -Dversion=1.0.0-SNAPSHOT
+           
+* Then the system will pop-up the following message to enter the store type
+                          
+          eg:- Define value for property 'storeType': RDBMS
+    
+* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
