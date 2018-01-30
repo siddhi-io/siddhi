@@ -2172,6 +2172,16 @@ extension type.
 
 **siddhi-execution**
 
+Siddhi-execution provides following extension types,
+
+* Function
+* Aggregate Function
+* Stream Function
+* Stream Processor
+* Window
+
+You can use one or more from above mentioned extension types and implement according to your requirement. You can find more information about these extension types under the heading 'Extension types' in this document. 
+
 * Run the following command
             
                 mvn archetype:generate
@@ -2188,6 +2198,13 @@ extension type.
 * Finally confirm all property values are correct or not by typing Y or press Enter, else type N
                   
 **siddhi-io**
+
+Siddhi-io provides following extension types,
+
+* Sink
+* Source
+
+You can use one or more from above mentioned extension types and implement according to your requirement. siddhi-io generaly uses to work with IO operations. If you want get inputs to your Siddhi app, you can use 'Source' extension type. If you want to get outputs from your Siddhi app, you can use 'Sink' extension and implement it. You can find more information about these extension types under the heading 'Extension types' in this document. 
     
 * Run the following command
                 
@@ -2206,6 +2223,13 @@ extension type.
 * Finally confirm all property values are correct or not by typing Y or press Enter, else type N
          
 **siddhi-map**
+
+Siddhi-map provides following extension types,
+
+* Sink Mapper
+* Source Mapper
+
+You can use one or more from above mentioned extension types and implement according to your requirement. Source Mapper is used to map events to a predefined data format (such as XML, JSON, binary, etc), and publishes them to external endpoints (such as E-mail, TCP, Kafka, HTTP, etc). Sink Mapper is used for same usecase, but in the time of publishing events from Siddhi app.You can find more information about these extension types under the heading 'Extension types' in this document. 
         
 * Run the following command
                     
@@ -2224,7 +2248,13 @@ extension type.
 * Finally confirm all property values are correct or not by typing Y or press Enter, else type N
                    
 **siddhi-script**
-            
+
+Siddhi-script provides following extension types,
+
+* Script
+
+You can use script extension type to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function. You can find more information about these extension types under the heading 'Extension types' in this document. 
+
 * Run the following command
                         
            
@@ -2242,6 +2272,12 @@ extension type.
 * Finally confirm all property values are correct or not by typing Y or press Enter, else type N
        
 **siddhi-store**
+
+Siddhi-store provides following extension types,
+
+* Store
+
+You can use Store extension type to work with data/events stored in various data stores through the table abstraction. You can find more information about these extension types under the heading 'Extension types' in this document. 
 
 * Run the following command
                             
