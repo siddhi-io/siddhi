@@ -63,7 +63,6 @@ public class IncrementalPersistenceTestCase {
         log.info("Incremental persistence test 1 - length window query");
         final int inputEventCount = 10;
         final int eventWindowSize = 4;
-        //PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -156,7 +155,6 @@ public class IncrementalPersistenceTestCase {
         log.info("Incremental persistence test 2 - length batch window query");
         final int inputEventCount = 10;
         final int eventWindowSize = 4;
-        //PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -257,7 +255,6 @@ public class IncrementalPersistenceTestCase {
         log.info("Incremental persistence test 3 - time window query");
         final int inputEventCount = 10;
         final int eventWindowSizeInSeconds = 2;
-        //PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -358,7 +355,6 @@ public class IncrementalPersistenceTestCase {
         log.info("Incremental persistence test 4 - time batch window query");
         final int inputEventCount = 10;
         final int eventWindowSizeInSeconds = 2;
-        //PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -459,7 +455,6 @@ public class IncrementalPersistenceTestCase {
         log.info("Incremental persistence test 5 - external time window query");
         final int inputEventCount = 10;
         final int eventWindowSizeInSeconds = 2;
-        //PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -773,6 +768,109 @@ public class IncrementalPersistenceTestCase {
 
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isEventsMatch(inEventsList, expected));
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void persistenceTest8() throws InterruptedException {
+        log.info("Incremental persistence test 8 - min-max counting.");
+        final int inputEventCount = 10;
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+
+        String streams = "" +
+                "@app:name('Min-max counting') " +
+                "define stream TempStream (roomNo long, temp long); " +
+                "define stream MaxTempStream (roomNo long, maxTemp long); ";
+
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from TempStream#window.length(10) " +
+                "select roomNo, max(temp) as maxTemp " +
+                "insert into MaxTempStream; ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                eventArrived = true;
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        count++;
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
+                        lastValue = (Long) event.getData(1);
+                    }
+                    eventArrived = true;
+                }
+
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+            }
+        };
+
+        try {
+            siddhiAppRuntime.addCallback("query1", queryCallback);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("TempStream");
+
+            siddhiAppRuntime.start();
+            for (int i = 0; i < inputEventCount; i++) {
+                stockStream.send(new Object[]{i, 55L + i});
+            }
+
+            //persisting
+            siddhiAppRuntime.persist();
+            Thread.sleep(5000);
+
+            siddhiAppRuntime.shutdown();
+
+            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+            siddhiAppRuntime.addCallback("query1", queryCallback);
+
+            stockStream = siddhiAppRuntime.getInputHandler("TempStream");
+            siddhiAppRuntime.start();
+
+            Thread.sleep(1000);
+
+            //loading
+            try {
+                siddhiAppRuntime.restoreLastRevision();
+            } catch (CannotRestoreSiddhiAppStateException e) {
+                Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
+            }
+
+            Thread.sleep(2000);
+
+            stockStream.send(new Object[]{inputEventCount + 1, 1000L});
+
+            //persisting
+            siddhiAppRuntime.persist();
+            Thread.sleep(2000);
+
+            stockStream.send(new Object[]{inputEventCount + 2, 20L});
+
+            siddhiAppRuntime.persist();
+            Thread.sleep(2000);
+
+            stockStream.send(new Object[]{inputEventCount + 3, 30L});
+
+
+
+            AssertJUnit.assertTrue(count <= (inputEventCount + 3));
+            AssertJUnit.assertEquals(new Long(1000), lastValue);
+            AssertJUnit.assertEquals(true, eventArrived);
+
+
         } finally {
             siddhiAppRuntime.shutdown();
         }

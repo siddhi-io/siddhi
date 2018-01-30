@@ -49,6 +49,8 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
     private static final float FULL_SNAPSHOT_THRESHOLD = 2.1f;
     private boolean isFirstSnapshot = true;
     private boolean isRecovery;
+    private String operatorType;
+    private long threshold;
 
     public SnapshotableComplexEventChunk(boolean isBatch) {
         this.isBatch = isBatch;
@@ -76,6 +78,18 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
         this.last = last;
         this.isBatch = isBatch;
         this.changeLog = new ArrayList<Operation>();
+    }
+
+    public SnapshotableComplexEventChunk(boolean isBatch, String metaInfo) {
+        this.isBatch = isBatch;
+        this.changeLog = new ArrayList<Operation>();
+        populateMetaInformation(metaInfo);
+    }
+
+    private void populateMetaInformation(String metaInfo) {
+        String[] metaInfoStringArr = metaInfo.split(":");
+        operatorType = metaInfoStringArr[0];
+        threshold = Long.parseLong(metaInfoStringArr[1]);
     }
 
     public void insertBeforeCurrent(E events) {
@@ -170,7 +184,7 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
      * Returns the next element in the iteration.
      *
      * @return the next element in the iteration.
-     * @throws java.util.NoSuchElementException iteration has no more elements.
+     * @throws NoSuchElementException iteration has no more elements.
      */
     public E next() {
         E returnEvent;
@@ -312,9 +326,7 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
 
     public Snapshot getSnapshot() {
         if (isFirstSnapshot) {
-            //objectMap
             Snapshot snapshot = new Snapshot(this, false);
-            //snapshotByteSerializer.objectToByte(objectMap, siddhiAppContext);
             isFirstSnapshot = false;
             this.changeLog.clear();
             return snapshot;
@@ -332,6 +344,8 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
 
     private boolean isFullSnapshot() {
         if ((this.changeLog.size() > (eventsCount * FULL_SNAPSHOT_THRESHOLD)) && (eventsCount != 0)) {
+            return true;
+        } else if (this.changeLog.size() > threshold) {
             return true;
         } else {
             return false;
@@ -386,24 +400,20 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
                     for (Operation op : addList) {
                         switch (op.operation) {
                             case Operator.ADD:
-                                //Need to check whether there is only one event or multiple events. If so we have to
+                                //TODO:Need to check whether there is only one event or multiple events.
+                                // If so we have to
                                 // traverse  the linked list and then get the count by which the eventsCount needs
                                 // to be updated.
                                 this.add((E) op.parameters);
-                                //((StreamEvent)parameters).setNext(null);
-                                //changeLogForVariable.add(new Operation(operator, (StreamEvent) parameters));
                                 break;
                             case Operator.REMOVE:
                                 this.remove();
-                                //changeLogForVariable.add(new Operation(operator, parameters));
                                 break;
                             case Operator.POLL:
-                                //changeLogForVariable.add(new Operation(operator, parameters));
                                 this.poll();
                                 break;
                             case Operator.CLEAR:
                                 this.clear();
-                                //changeLogForVariable.add(new Operation(operator, parameters));
                                 break;
                             default:
                                 continue;
@@ -419,24 +429,19 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
                 for (Operation op : addList) {
                     switch (op.operation) {
                         case Operator.ADD:
-                            //Need to check whether there is only one event or multiple events. If so we have to
+                            //TODO:Need to check whether there is only one event or multiple events. If so we have to
                             //traverse the linked list and then get the count by which the eventsCount needs
                             // to be updated.
                             this.add((E) op.parameters);
-                            //((StreamEvent)parameters).setNext(null);
-                            //changeLogForVariable.add(new Operation(operator, (StreamEvent) parameters));
                             break;
                         case Operator.REMOVE:
                             this.remove();
-                            //changeLogForVariable.add(new Operation(operator, parameters));
                             break;
                         case Operator.POLL:
-                            //changeLogForVariable.add(new Operation(operator, parameters));
                             this.poll();
                             break;
                         case Operator.CLEAR:
                             this.clear();
-                            //changeLogForVariable.add(new Operation(operator, parameters));
                             break;
                         default:
                             continue;
