@@ -2136,11 +2136,59 @@ Siddhi supports following extension types:
 
 * **Sink**
 
+Sinks provide a way to publish Siddhi events to external systems in the preferred data format. Sinks publish events from the streams via multiple transports to external endpoints in various data formats.
+
+Implemented by extending "org.wso2.siddhi.core.stream.output.sink.Sink".
+
+   Example : 
+
+    `@sink(type='sink_type', static_option_key1='static_option_value1')`
+    
+To configure a stream to publish events via a sink, add the sink configuration to a stream definition by adding the @sink annotation with the required parameter values. The sink syntax is as above
+
 * **Source**
+
+Source allows Siddhi to consume events from external systems, and map the events to adhere to the associated stream. Sources receive events via multiple transports and in various data formats, and direct them into streams for processing.
+
+Implemented by extending "org.wso2.siddhi.core.stream.input.source.Source".
+
+   Example : 
+
+    `@source(type='source_type', static.option.key1='static_option_value1')`
+    
+To configure a stream that consumes events via a source, add the source configuration to a stream definition by adding the @source annotation with the required parameter values. The source syntax is as above
 
 * **Store**
 
+You can use Store extension type to work with data/events stored in various data stores through the table abstraction. You can find more information about these extension types under the heading 'Extension types' in this document. 
+
+Implemented by extending "org.wso2.siddhi.core.table.record.AbstractRecordTable".
+
 * **Script**
+
+Scripts allow you to define a function operation that is not provided in Siddhi core or its extension. It is not required to write an extension to define the function logic. Scripts allow you to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function.
+
+Implemented by extending "org.wso2.siddhi.core.function.Script".
+
+* **Source Mapper**
+
+Each @source configuration has a mapping denoted by the @map annotation that converts the incoming messages format to Siddhi events.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
+
+Implemented by extending "org.wso2.siddhi.core.stream.output.sink.SourceMapper".
+
+   Example :
+   
+    `@map(type='map_type', static_option_key1='static_option_value1')`
+
+* **Sink Mapper**
+
+Each @source configuration has a mapping denoted by the @map annotation that converts the incoming messages format to Siddhi events.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
+
+Implemented by extending "org.wso2.siddhi.core.stream.output.sink.SinkMapper".
+
+   Example :
+   
+    `@map(type='map_type', static_option_key1='static_option_value1')`
 
 **Example**
 
