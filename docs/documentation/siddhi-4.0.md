@@ -2207,7 +2207,7 @@ Siddhi currently has several pre written extensions that are available <a target
 _We value your contribution on improving Siddhi and its extensions further._
 
 
-**Writing Custom Extensions**
+### Writing Custom Extensions
 
 Custom extensions can be written in order to cater use case specific logic that are not available in Siddhi out of the box or as an existing extension. 
 
