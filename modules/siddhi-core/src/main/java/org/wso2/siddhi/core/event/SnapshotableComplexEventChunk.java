@@ -51,6 +51,7 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
     private boolean isRecovery;
     private String operatorType;
     private long threshold;
+    private long sizeOfBacklogChangelogs;
 
     public SnapshotableComplexEventChunk(boolean isBatch) {
         this.isBatch = isBatch;
@@ -335,17 +336,20 @@ public class SnapshotableComplexEventChunk<E extends ComplexEvent> implements It
         if (isFullSnapshot()) {
             Snapshot snapshot = new Snapshot(this, false);
             this.changeLog = new ArrayList<Operation>();
+            sizeOfBacklogChangelogs = 0;
             return snapshot;
         } else {
             Snapshot snapshot = new Snapshot(changeLog, true);
+            sizeOfBacklogChangelogs += this.changeLog.size();
+            this.changeLog.clear();
             return snapshot;
         }
     }
 
     private boolean isFullSnapshot() {
-        if ((this.changeLog.size() > (eventsCount * FULL_SNAPSHOT_THRESHOLD)) && (eventsCount != 0)) {
+        if (sizeOfBacklogChangelogs > 100) {
             return true;
-        } else if (this.changeLog.size() > threshold) {
+        } else if (sizeOfBacklogChangelogs > threshold) {
             return true;
         } else {
             return false;
