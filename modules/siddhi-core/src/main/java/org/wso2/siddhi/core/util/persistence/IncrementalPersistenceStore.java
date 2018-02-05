@@ -18,7 +18,6 @@
 package org.wso2.siddhi.core.util.persistence;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 
@@ -31,7 +30,7 @@ public interface IncrementalPersistenceStore {
 
     void setProperties(Map properties);
 
-    HashMap<String, Object> load(String siddhiAppId, String queryName, String elementID, String revision, String type);
+    byte[] load(String siddhiAppId, String queryName, String elementID, String revision, String type);
 
     ArrayList<ArrayList<String>> getListOfRevisionsToLoad(String siddhiAppId);
 }

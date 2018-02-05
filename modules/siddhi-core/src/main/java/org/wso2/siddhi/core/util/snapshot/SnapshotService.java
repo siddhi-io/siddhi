@@ -104,9 +104,9 @@ public class SnapshotService {
                             if (snapShot instanceof Snapshot) {
                                 if (((Snapshot) snapShot).getState() != null) {
                                     if (((Snapshot) snapShot).isIncrementalSnapshot()) {
-                                        incrementalSnapshotableMapBase.put(key, snapShot);
-                                    } else {
                                         incrementalSnapshotableMap.put(key, snapShot);
+                                    } else {
+                                        incrementalSnapshotableMapBase.put(key, snapShot);
                                     }
                                 }
                             } else {
@@ -198,40 +198,42 @@ public class SnapshotService {
         List<Snapshotable> snapshotableList;
         try {
             threadBarrier.lock();
-            List<Snapshotable> partitionSnapshotables = snapshotableMap.get("partition");
-            try {
-                if (partitionSnapshotables != null) {
-                    for (Snapshotable snapshotable : partitionSnapshotables) {
-                        snapshotable.restoreState(snapshots.get(snapshotable.getElementId()));
-                    }
-                }
-            } catch (Throwable t) {
-                throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
-                        getName() + " not completed properly because content of Siddhi app has changed since " +
-                        "last state persistence. Clean persistence store for a fresh deployment.", t);
-            }
 
             for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
                 if (entry.getKey().equals("partition")) {
-                    continue;
-                }
-                snapshotableList = entry.getValue();
-                try {
-                    for (Snapshotable snapshotable : snapshotableList) {
-                        HashMap<String, Object> hmap = (HashMap<String, Object>) snapshots.get(entry.getKey());
-                        if (hmap != null) {
-                            HashMap<String, Object> variablesForElement = (HashMap<String, Object>)
-                                    hmap.get(snapshotable.getElementId());
+                    List<Snapshotable> partitionSnapshotables = entry.getValue();
 
-                            if (variablesForElement != null) {
-                                snapshotable.restoreState(variablesForElement);
+                    try {
+                        if (partitionSnapshotables != null) {
+                            for (Snapshotable snapshotable : partitionSnapshotables) {
+                                snapshotable.restoreState(snapshots.get(snapshotable.getElementId()));
                             }
                         }
+                    } catch (Throwable t) {
+                        throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
+                                getName() + " not completed properly because content of Siddhi app has changed since " +
+                                "last state persistence. Clean persistence store for a fresh deployment.", t);
                     }
-                } catch (Throwable t) {
-                    throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
-                            getName() + " not completed properly because content of Siddhi app has changed since " +
-                            "last state persistence. Clean persistence store for a fresh deployment.", t);
+                } else {
+                    snapshotableList = entry.getValue();
+                    try {
+                        for (Snapshotable snapshotable : snapshotableList) {
+                            HashMap<String, Object> hashMapOfSnapshots = (HashMap<String, Object>) snapshots.get(
+                                    entry.getKey());
+                            if (hashMapOfSnapshots != null) {
+                                HashMap<String, Object> variablesForElement = (HashMap<String, Object>)
+                                        hashMapOfSnapshots.get(snapshotable.getElementId());
+
+                                if (variablesForElement != null) {
+                                    snapshotable.restoreState(variablesForElement);
+                                }
+                            }
+                        }
+                    } catch (Throwable t) {
+                        throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
+                                getName() + " not completed properly because content of Siddhi app has changed since " +
+                                "last state persistence. Clean persistence store for a fresh deployment.", t);
+                    }
                 }
             }
         } finally {
