@@ -47,13 +47,6 @@ uses it to process 20 Billion events per day (300,000 events per second).
 
 If you are a Siddhi user, we would love to hear more. 
 
-## Develop Siddhi using IntelliJ IDEA 
-
-Install <a target="_blank" href="https://wso2.github.io/siddhi-plugin-idea/">IDEA plugin</a> to get the following features:
-
-* **Siddhi Query Editor** with syntax highlighting and with basic auto completion
-* **Siddhi Runner and Debugger** support to test Siddhi Application
-
 ## Try Siddhi with <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a>
 
 <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a> is a server version of Siddhi that is also released under 
@@ -63,8 +56,8 @@ and a <a target="_blank" href="https://www.gartner.com/doc/3314217/cool-vendors-
 
 If you use <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a>, you can use the Siddhi functionality with the following additional features:  
 
-* The **Siddhi Query Editor** tool with syntax highlighting and advanced auto completion support
-* The **Siddhi Runner and Debugger** tool
+* The **Siddhi Query Editor** tool
+* The **Siddhi Debugger** tool
 * The **Event Simulator**  tool
 * Run Siddhi as a **server** with **high availability** and **scalability**.
 * Monitoring support for Siddhi
@@ -94,7 +87,7 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.1.4">4.1.4</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.1.5">4.1.5</a>.
 
 ## Jenkins Build Status
 
