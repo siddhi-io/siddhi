@@ -136,6 +136,7 @@ The following is the list of source types that are currently supported:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
 
 **Source Mapper**
 
@@ -172,6 +173,7 @@ The following is a list of currently supported source mapping types:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a>
 
 **Example**
 
@@ -243,6 +245,7 @@ The following is a list of currently supported sink types.
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> 
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
 
 
 **Sink Mapper**
@@ -279,6 +282,7 @@ The following is a list of currently supported sink mapping types:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a>
 
 
 **Example**

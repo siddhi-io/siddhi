@@ -34,12 +34,14 @@ Following are some prewritten extensions that are supported with Siddhi;
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file">io file</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq">io rabbitmq</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt">io mqtt</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket">io websocket</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json">map json</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml">map xml</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary">map binary</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text">map text</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event">map wso2event</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue">map keyvalue</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv">map csv</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-rdbms">store rdbms</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr">store solr</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb">store mongodb</a>
