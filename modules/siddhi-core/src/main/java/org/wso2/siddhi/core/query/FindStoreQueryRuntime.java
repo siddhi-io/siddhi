@@ -30,8 +30,10 @@ import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.window.Window;
+import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -48,6 +50,7 @@ public class FindStoreQueryRuntime implements StoreQueryRuntime {
     private QuerySelector selector;
     private StateEventPool stateEventPool;
     private MetaStreamEvent metaStreamEvent;
+    private Attribute[] outputAttributes;
 
     public FindStoreQueryRuntime(Table table, CompiledCondition compiledCondition, String queryName,
                                  MetaStreamEvent metaStreamEvent) {
@@ -56,6 +59,7 @@ public class FindStoreQueryRuntime implements StoreQueryRuntime {
         this.queryName = queryName;
         this.eventType = metaStreamEvent.getEventType();
         this.metaStreamEvent = metaStreamEvent;
+        this.setOutputAttributes(metaStreamEvent.getLastInputDefinition().getAttributeList());
     }
 
     public FindStoreQueryRuntime(Window window, CompiledCondition compiledCondition, String queryName,
@@ -65,6 +69,7 @@ public class FindStoreQueryRuntime implements StoreQueryRuntime {
         this.queryName = queryName;
         this.eventType = metaStreamEvent.getEventType();
         this.metaStreamEvent = metaStreamEvent;
+        this.setOutputAttributes(metaStreamEvent.getLastInputDefinition().getAttributeList());
     }
 
     public FindStoreQueryRuntime(AggregationRuntime aggregation, CompiledCondition compiledCondition, String queryName,
@@ -74,6 +79,7 @@ public class FindStoreQueryRuntime implements StoreQueryRuntime {
         this.queryName = queryName;
         this.eventType = metaStreamEvent.getEventType();
         this.metaStreamEvent = metaStreamEvent;
+        this.setOutputAttributes(metaStreamEvent.getLastInputDefinition().getAttributeList());
     }
 
     @Override
@@ -147,6 +153,20 @@ public class FindStoreQueryRuntime implements StoreQueryRuntime {
 
     public void setSelector(QuerySelector selector) {
         this.selector = selector;
+    }
+
+    /**
+     * This method sets the output attribute list of the given store query.
+     *
+     * @param outputAttributeList
+     */
+    public void setOutputAttributes(List<Attribute> outputAttributeList) {
+        this.outputAttributes = outputAttributeList.toArray(new Attribute[outputAttributeList.size()]);
+    }
+
+    @Override
+    public Attribute[] getStoreQueryOutputAttributes() {
+        return Arrays.copyOf(outputAttributes, outputAttributes.length);
     }
 
     private Event[] executeSelector(StreamEvent streamEvents, MetaStreamEvent.EventType eventType) {
