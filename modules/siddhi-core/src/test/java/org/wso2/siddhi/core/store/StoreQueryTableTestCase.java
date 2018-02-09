@@ -28,6 +28,8 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.StoreQueryCreationException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.compiler.SiddhiCompiler;
 import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 
 public class StoreQueryTableTestCase {
@@ -445,5 +447,79 @@ public class StoreQueryTableTestCase {
         AssertJUnit.assertEquals(2, events.length);
         AssertJUnit.assertEquals(100L, events[0].getData()[2]);
         AssertJUnit.assertEquals(100L, events[1].getData()[2]);
+    }
+
+    @Test
+    public void test12() throws InterruptedException {
+        log.info("Test12 - Test output attributes and its types for table");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long);" +
+                "@PrimaryKey('symbol') " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String storeQuery = "" +
+                "from StockTable " +
+                "select * ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+
+        siddhiAppRuntime.start();
+        Attribute[] actualAttributeArray = siddhiAppRuntime.getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery
+                (storeQuery));
+        Attribute symbolAttribute = new Attribute("symbol", Attribute.Type.STRING);
+        Attribute priceAttribute = new Attribute("price", Attribute.Type.FLOAT);
+        Attribute volumeAttribute = new Attribute("volume", Attribute.Type.LONG);
+        Attribute[] expectedAttributeArray = new Attribute[]{symbolAttribute, priceAttribute, volumeAttribute};
+        AssertJUnit.assertArrayEquals(expectedAttributeArray, actualAttributeArray);
+
+        storeQuery = "" +
+                "from StockTable " +
+                "select symbol, sum(volume) as totalVolume ;";
+
+        actualAttributeArray = siddhiAppRuntime.getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery
+                (storeQuery));
+        Attribute totalVolumeAttribute = new Attribute("totalVolume", Attribute.Type.LONG);
+        expectedAttributeArray = new Attribute[]{symbolAttribute, totalVolumeAttribute};
+        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertArrayEquals(expectedAttributeArray, actualAttributeArray);
+    }
+
+    @Test
+    public void test13() throws InterruptedException {
+        log.info("Test13 - Test output attributes and its types for aggregation table");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long);" +
+                "define aggregation StockTableAg " +
+                "from StockStream " +
+                "select symbol, price " +
+                "group by symbol " +
+                "aggregate every minutes ...year;";
+        String storeQuery = "" +
+                "from StockTableAg within '2018-**-** **:**:**' per 'minutes' select symbol, price ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+
+        siddhiAppRuntime.start();
+        Attribute[] actualAttributeArray = siddhiAppRuntime.getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery
+                (storeQuery));
+        Attribute symbolAttribute = new Attribute("symbol", Attribute.Type.STRING);
+        Attribute priceAttribute = new Attribute("price", Attribute.Type.FLOAT);
+        Attribute[] expectedAttributeArray = new Attribute[]{symbolAttribute, priceAttribute};
+        AssertJUnit.assertArrayEquals(expectedAttributeArray, actualAttributeArray);
+
+        storeQuery = "" +
+                "from StockTableAg within '2018-**-** **:**:**' per 'minutes' select symbol, sum(price) as total";
+
+        actualAttributeArray = siddhiAppRuntime.getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery
+                (storeQuery));
+        Attribute totalVolumeAttribute = new Attribute("total", Attribute.Type.DOUBLE);
+        expectedAttributeArray = new Attribute[]{symbolAttribute, totalVolumeAttribute};
+        siddhiAppRuntime.shutdown();
+        AssertJUnit.assertArrayEquals(expectedAttributeArray, actualAttributeArray);
     }
 }
