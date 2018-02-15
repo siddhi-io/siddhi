@@ -2369,9 +2369,9 @@ The following elements are configured with this annotation.
 
 |Annotation| Description| Default Value|
 | ------------- |-------------|-------------|
-|`reporter`|The interface in which statistics for the Siddhi application are published. Possible values are as follows:<br/> `console`<br/> `jmx`<br/> `jdbc`<br/> |`console`|
+|`reporter`|The interface in which statistics for the Siddhi application are published. Possible values are as follows:<br/> `console`<br/> `jmx`|`console`|
 |`interval`|The time interval (in seconds) at  which the statistics for the Siddhi application are reported.|`60`|
-|`include`| This allows you to specify the types of metrics to be included in the reporting as a comma-separated list. It is also possible to use wild cards.| All (*.*)|
+|`include`|If this parameter is added, only the types of metrics you specify are included in the reporting. The required metric types can be specified as a comma-separated list. It is also possible to use wild cards| All (*.*)|
 
 The metrics are reported in the following format.
 `org.wso2.siddhi.SiddhiApps.<SiddhiAppName>.Siddhi.<Component Type>.<Component Name>. <Metrics name>`
@@ -2396,22 +2396,14 @@ e.g., the following is a Siddhi application that includes the `@app` annotation 
 
 ```sql
 @App:name('TestMetrics')
+@App:Statistics(reporter = 'console')
 
-@app:statistics(reporter = 'console')
-
+@Async(buffer.size='64')
 define stream TestStream (message string);
-
-define trigger FiveMinTriggerStream at every 5 sec;
-
-@info(name='query1')
-from FiveMinTriggerStream
-select "Hi " as message
-insert into TestSream;
 
 @info(name='logQuery')
 from TestSream#log("Message:")
 insert into TempSream;
-
 ```
 
 Statistics are reported for this Siddhi application as shown in the extract below.
@@ -2419,87 +2411,51 @@ Statistics are reported for this Siddhi application as shown in the extract belo
 <details>
   <summary>Click to view the extract</summary>
 11/26/17 8:01:20 PM ============================================================
-  -- Meters ----------------------------------------------------------------------
-  org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.FiveMinTriggerStream.throughput
-               count = 10
-           mean rate = 0.19 events/second
-       1-minute rate = 0.11 events/second
-       5-minute rate = 0.03 events/second
-   15-minute rate = 0.01 events/second
-  org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TempSream.throughput
-               count = 10
-           mean rate = 0.19 events/second
-       1-minute rate = 0.11 events/second
-       5-minute rate = 0.03 events/second
-   15-minute rate = 0.01 events/second
-  org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestSream.throughput
-               count = 10
-           mean rate = 0.19 events/second
-       1-minute rate = 0.11 events/second
-       5-minute rate = 0.03 events/second
-   15-minute rate = 0.01 events/second
-  org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestStream.throughput
-               count = 0
-           mean rate = 0.00 events/second
-       1-minute rate = 0.00 events/second
-       5-minute rate = 0.00 events/second
-   15-minute rate = 0.00 events/second
-  org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Trigger.FiveMinTriggerStream.throughput
-               count = 10
-           mean rate = 0.19 events/second
-       1-minute rate = 0.11 events/second
-       5-minute rate = 0.03 events/second
-   15-minute rate = 0.01 events/second
-  
-  -- Timers ----------------------------------------------------------------------
-  org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.latency
-               count = 10
-           mean rate = 0.19 calls/second
-       1-minute rate = 0.11 calls/second
-       5-minute rate = 0.03 calls/second
-   15-minute rate = 0.01 calls/second
-               min = 0.38 milliseconds
-               max = 1.22 milliseconds
-               mean = 0.60 milliseconds
-           stddev = 0.22 milliseconds
-           median = 0.49 milliseconds
-               75% <= 0.61 milliseconds
-               95% <= 1.22 milliseconds
-               98% <= 1.22 milliseconds
-               99% <= 1.22 milliseconds
-           99.9% <= 1.22 milliseconds
-  org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.query1.latency
-               count = 10
-           mean rate = 0.19 calls/second
-       1-minute rate = 0.11 calls/second
-       5-minute rate = 0.03 calls/second
-   15-minute rate = 0.01 calls/second
-               min = 0.47 milliseconds
-               max = 2.86 milliseconds
+
+ -- Gauges ----------------------------------------------------------------------
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.memory
+              value = 5760
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestStream.size
+              value = 0
+ 
+ -- Meters ----------------------------------------------------------------------
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Sources.TestStream.http.throughput
+              count = 0
+          mean rate = 0.00 events/second
+      1-minute rate = 0.00 events/second
+      5-minute rate = 0.00 events/second
+     15-minute rate = 0.00 events/second
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TempSream.throughput
+              count = 2
+          mean rate = 0.04 events/second
+      1-minute rate = 0.03 events/second
+      5-minute rate = 0.01 events/second
+     15-minute rate = 0.00 events/second
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestStream.throughput
+              count = 2
+          mean rate = 0.04 events/second
+      1-minute rate = 0.03 events/second
+      5-minute rate = 0.01 events/second
+     15-minute rate = 0.00 events/second
+ 
+ -- Timers ----------------------------------------------------------------------
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.latency
+              count = 2
+          mean rate = 0.11 calls/second
+      1-minute rate = 0.34 calls/second
+      5-minute rate = 0.39 calls/second
+     15-minute rate = 0.40 calls/second
+                min = 0.61 milliseconds
+                max = 1.08 milliseconds
                mean = 0.84 milliseconds
-           stddev = 0.57 milliseconds
-           median = 0.66 milliseconds
-               75% <= 0.74 milliseconds
-               95% <= 2.86 milliseconds
-               98% <= 2.86 milliseconds
-               99% <= 2.86 milliseconds
-           99.9% <= 2.86 milliseconds
-  org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.StoreQueries.query.latency
-               count = 0
-           mean rate = 0.00 calls/second
-       1-minute rate = 0.00 calls/second
-       5-minute rate = 0.00 calls/second
-   15-minute rate = 0.00 calls/second
-               min = 0.00 milliseconds
-               max = 0.00 milliseconds
-               mean = 0.00 milliseconds
-           stddev = 0.00 milliseconds
-           median = 0.00 milliseconds
-               75% <= 0.00 milliseconds
-               95% <= 0.00 milliseconds
-               98% <= 0.00 milliseconds
-               99% <= 0.00 milliseconds
-           99.9% <= 0.00 milliseconds
+             stddev = 0.23 milliseconds
+             median = 0.61 milliseconds
+               75% <= 1.08 milliseconds
+               95% <= 1.08 milliseconds
+               98% <= 1.08 milliseconds
+               99% <= 1.08 milliseconds
+             99.9% <= 1.08 milliseconds
+
 
 </details>
 
