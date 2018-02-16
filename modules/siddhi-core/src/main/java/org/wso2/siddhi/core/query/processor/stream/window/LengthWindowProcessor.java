@@ -88,13 +88,14 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
-        expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 1) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
         } else {
             throw new SiddhiAppValidationException("Length window should only have one parameter (<int> " +
                     "windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
         }
+
+        expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false, "LW:" + length);
     }
 
     @Override
@@ -178,7 +179,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     public synchronized void restoreState(Map<String, Object> state) {
         count = (int) state.get("Count");
         expiredEventChunk.clear();
-        expiredEventChunk = (SnapshotableComplexEventChunk<StreamEvent>) expiredEventChunk.restore("ExpiredEventChunk", state);
-        //expiredEventChunk.add(((SnapshotableComplexEventChunk<StreamEvent>) expiredEventChunk.restore("ExpiredEventChunk", state)).getFirst());
+        expiredEventChunk = (SnapshotableComplexEventChunk<StreamEvent>)
+                expiredEventChunk.restore("ExpiredEventChunk", state);
     }
 }

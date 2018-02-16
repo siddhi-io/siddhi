@@ -85,6 +85,13 @@ The following parameters are configured in a stream definition.
 | `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camalCase`.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
+To improve the throughput of a stream, you can add the `@Async` annotation as shown in the extract below.
+
+```sql
+@app:Async(buffer.size = '1024') define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
+```
+This annotation adds a disruptor to allow events in the stream to be processed in parallel via multiple threads. You can specify the number of events to be kept in the buffer before they are directed to the threads to be processed in parallel. This is done via the `buffer.size` parameter.
+
 **Example**
 ```sql
 define stream TempStream (deviceID long, roomNo int, temp double);
@@ -136,6 +143,7 @@ The following is the list of source types that are currently supported:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
 
 **Source Mapper**
 
@@ -172,6 +180,7 @@ The following is a list of currently supported source mapping types:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a>
 
 **Example**
 
@@ -243,6 +252,7 @@ The following is a list of currently supported sink types.
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> 
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
 
 
 **Sink Mapper**
@@ -279,6 +289,7 @@ The following is a list of currently supported sink mapping types:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a>
 
 
 **Example**
@@ -1015,12 +1026,12 @@ select <event reference>([event index])?.<attribute name>, ...
 insert into <output stream>
 ```
 
-Postfix|Description|Example
----------|---------|---------|
-`<n1:n2>`|This matches `n1` to `n2` events (including `n1` and not more than `n2`).|`1:4` matches 1 to 4 events.
-`<n:>`|This matches `n` or more events (including `n`).|`<2:>` matches 2 or more events.
-`<:n>`|This matches up to `n` events (excluding `n`).|`<:5>` matches up to 5 events.
-`<n>`|This matches exactly `n` events.|`<5>` matches exactly 5 events.
+|Postfix|Description|Example
+---------|---------|---------
+|`<n1:n2>`|This matches `n1` to `n2` events (including `n1` and not more than `n2`).|`1:4` matches 1 to 4 events.
+|`<n:>`|This matches `n` or more events (including `n`).|`<2:>` matches 2 or more events.
+|`<:n>`|This matches up to `n` events (excluding `n`).|`<:5>` matches up to 5 events.
+|`<n>`|This matches exactly `n` events.|`<5>` matches exactly 5 events.
 
 Specific occurrences of the event in a collection can be retrieved by using an event index with its reference.
 Square brackets can be used to indicate the event index where `1` can be used as the index of the first event and `last` can be used as the index
@@ -1066,6 +1077,8 @@ Key Word|Description
 `or`|The state succeeds if either condition of `or` is satisfied. Here the event reference of the other condition is `null`.
 `not <condition1> and <condition2>`| When `not` is included with `and`, it identifies the events that match <condition2> arriving before any event that match <condition1>. 
 `not <condition> for <time period>`| When `not` is included with `for`, it allows you to identify a situation where no event that matches `<condition1>` arrives during the specified `<time period>`.  e.g.,`from not TemperatureStream[temp > 60] for 5 sec`. 
+
+Here the `not` pattern can be followed by either an `and` clause or the effective period of `not` can be concluded after a given `<time period>`. Further in Siddhi more than two streams cannot be matched with logical conditions using `and`, `or`, or `not` clauses at this point.
 
 **Example**
 
@@ -1683,14 +1696,14 @@ insert into ServerRoomTempStream;
 
 Incremental aggregation allows you to obtain aggregates in an incremental manner for a specified set of time periods.
 
-This not only allows you calculate aggregations with varied time granularity, but also allows you access them in an interactive
+This not only allows you to calculate aggregations with varied time granularity, but also allows you to access them in an interactive
  manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**.
 
 **Purpose**
 
 Incremental aggregation allows you to retrieve the aggregate value for different time durations. 
-That is, it allows you to obtain aggregates such as `sum`, `count`, `avg`, `min`, `max`, and `count`) 
-of stream attributes for durations such as `sec`, `min`, `hour`, etc. 
+That is, it allows you to obtain aggregates such as `sum`, `count`, `avg`, `min`, `max`, and `count`
+of stream attributes for durations such as `sec`, `min`, `hour`, etc.
 
 This is of considerable importance in many Analytics scenarios because aggregate values are often needed for several time periods. 
 Furthermore, this ensures that the aggregations are not lost due to unexpected system failures because aggregates can be stored in different persistence `stores`.
@@ -1698,6 +1711,8 @@ Furthermore, this ensures that the aggregations are not lost due to unexpected s
 **Syntax**
 
 ```sql
+@BufferSize("<positive integer>")
+@IgnoreEventsOlderThanBuffer("<true or false>")
 @store(type="<store type>", ...)
 define aggregation <aggregator name>
 from <input stream>
@@ -1707,14 +1722,16 @@ select <attribute name>, <aggregate function>(<attribute name>) as <attribute na
 ```
 The above syntax includes the following:
 
-|Item                |Description
----------------      |---------
-|`@store`            |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
-|`<aggregator name>` |This specifies a unique name for the aggregation so that it can be referred <br/>when accessing aggregate results. 
-|`<input stream>`    |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
-|`group by <attribute name>`|The `group by` clause is optional. If it is included in a Siddhi application, aggregate values <br/> are calculated per each `group by` attribute. If it is not used, all the<br/> events are aggregated together. 
-|`by <timestamp attribute>`| This clause is optional. This defines the attribute that should be used as<br/> the timestamp. If this clause is not used, the event time is used by default.<br/> The timestamp could be given as either a `string` or a `long` value. If it is a `long` value,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it is <br/>a `string` value, the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` .<br/>(e.g., `+05:30`, `-11:00`).
-|`<time periods>`    |When the aggregation period is given as `every sec, hour, month`, the aggregate values are calculated per second, per hour as well as per year.
+|Item                          |Description
+---------------                |---------
+|`@BufferSize`                 |This annotation is optional. The default value is buffer size 0. <br/>It is used to identify the number of 'expired' events to retain <br/>in a buffer, to handle out of order event processing. It's an optional parameter <br/>which is applicable, only if aggregation is based on external timestamp (since events <br/>aggregated based on event arrival time cannot be out of order). An event is identified <br/>as 'expired' with relation to the latest event's timestamp and the most granular duration <br/>for which aggregation is calculated. For example, if aggregation is for sec...year, the <br/>most granular duration is seconds. Hence, if buffer size is 3 and events for 51st second, <br/>52nd second, 53rd second and 54th second arrive, all of the older aggregations (for <br/>seconds 51, 52 and 53) would be kept in the buffer (since latest event is for 54th second)
+|`@IgnoreEventsOlderThanBuffer`|This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is the default value as well), an event <br/>older than the buffer would be aggregated with the oldest event in buffer. If <br/>the value is true, an event older than the buffer would be dropped. This is an optional annotation.
+|`@store`                      |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
+|`<aggregator name>`           |This specifies a unique name for the aggregation so that it can be referred <br/>when accessing aggregate results.
+|`<input stream>`              |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
+|`group by <attribute name>`   |The `group by` clause is optional. If it is included in a Siddhi application, aggregate values <br/> are calculated per each `group by` attribute. If it is not used, all the<br/> events are aggregated together.
+|`by <timestamp attribute>`    |This clause is optional. This defines the attribute that should be used as<br/> the timestamp. If this clause is not used, the event time is used by default.<br/> The timestamp could be given as either a `string` or a `long` value. If it is a `long` value,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it is <br/>a `string` value, the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` .<br/>(e.g., `+05:30`, `-11:00`).
+|`<time periods>`              |The time periods can be given as a range separated by three dots, or as comma separated values. A range would be given as sec...year, where aggregation would be done per second, minute, hour, day, month and year. Comma separated values can be given as min, hour. However, skipping durations is not yet supported for comma separated values (e.g min, day is not a valid clause since hour duration has been skipped)
 
 **Example**
 
@@ -1750,7 +1767,7 @@ from <input stream> join <aggrigation>
 select <attribute name>, <attribute name>, ...
 insert into <output stream>;
 ```
-Apart from constructs of [table](#join-table) this includes the following :
+Apart from constructs of [table join](#join-table) this includes the following. Please note that the 'on' condition is optional :
 
 Item|Description
 ---------|---------
@@ -1761,7 +1778,7 @@ Item|Description
 
 **Example**
 
-This query retrieves all aggregation per day within the time range `"2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30"`.
+This query retrieves all aggregation per day within the time range `"2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30"` (Please note that +05:30 can be omitted if timezone is GMT)
 
 ```sql
 define stream StockStream (symbol string, value int);
@@ -1787,14 +1804,14 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-This query retrieves all aggregation per value for an attribute of the stream  within the time period between timestamps `1490918400` and `1490922000`  
+This query retrieves all aggregation per value for an attribute of the stream  within the time period between timestamps `1496200000000` and `1596434876000`
 
 ```sql
 define stream StockStream (symbol string, value int, perValue string);
 
 from StockStream as S join TradeAggregation as T
   on S.symbol == T.symbol 
-  within 1490918400, 1490922000  
+  within 1496200000000L, 1596434876000L
   per S.perValue
 select S.symbol, T.total, T.avgPrice 
 insert into AggregateStockStream;
@@ -2130,11 +2147,59 @@ Siddhi supports following extension types:
 
 * **Sink**
 
+Sinks provide a way to publish Siddhi events to external systems in the preferred data format. Sinks publish events from the streams via multiple transports to external endpoints in various data formats.
+
+Implemented by extending "org.wso2.siddhi.core.stream.output.sink.Sink".
+
+   Example : 
+
+    `@sink(type='sink_type', static_option_key1='static_option_value1')`
+    
+To configure a stream to publish events via a sink, add the sink configuration to a stream definition by adding the @sink annotation with the required parameter values. The sink syntax is as above
+
 * **Source**
+
+Source allows Siddhi to consume events from external systems, and map the events to adhere to the associated stream. Sources receive events via multiple transports and in various data formats, and direct them into streams for processing.
+
+Implemented by extending "org.wso2.siddhi.core.stream.input.source.Source".
+
+   Example : 
+
+    `@source(type='source_type', static.option.key1='static_option_value1')`
+    
+To configure a stream that consumes events via a source, add the source configuration to a stream definition by adding the @source annotation with the required parameter values. The source syntax is as above
 
 * **Store**
 
+You can use Store extension type to work with data/events stored in various data stores through the table abstraction. You can find more information about these extension types under the heading 'Extension types' in this document. 
+
+Implemented by extending "org.wso2.siddhi.core.table.record.AbstractRecordTable".
+
 * **Script**
+
+Scripts allow you to define a function operation that is not provided in Siddhi core or its extension. It is not required to write an extension to define the function logic. Scripts allow you to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function.
+
+Implemented by extending "org.wso2.siddhi.core.function.Script".
+
+* **Source Mapper**
+
+Each @source configuration has a mapping denoted by the @map annotation that converts the incoming messages format to Siddhi events.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
+
+Implemented by extending "org.wso2.siddhi.core.stream.output.sink.SourceMapper".
+
+   Example :
+   
+    `@map(type='map_type', static_option_key1='static_option_value1')`
+
+* **Sink Mapper**
+
+Each @source configuration has a mapping denoted by the @map annotation that converts the incoming messages format to Siddhi events.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
+
+Implemented by extending "org.wso2.siddhi.core.stream.output.sink.SinkMapper".
+
+   Example :
+   
+    `@map(type='map_type', static_option_key1='static_option_value1')`
 
 **Example**
 
@@ -2153,8 +2218,252 @@ Siddhi currently has several pre written extensions that are available <a target
 _We value your contribution on improving Siddhi and its extensions further._
 
 
-**Writing Custom Extensions**
+### Writing Custom Extensions
 
 Custom extensions can be written in order to cater use case specific logic that are not available in Siddhi out of the box or as an existing extension. 
 
-More information on this will be available soon.
+There are five types of Siddhi extensions that you can write to cater your specific use cases. Please find each 
+extension types and related maven archetypes below. You can use these archetypes to generate maven projects for each 
+extension type.
+
+* Follow one of the step below, based on your project :
+
+
+**siddhi-execution**
+
+Siddhi-execution provides following extension types,
+
+* Function
+* Aggregate Function
+* Stream Function
+* Stream Processor
+* Window
+
+You can use one or more from above mentioned extension types and implement according to your requirement. You can find more information about these extension types under the heading 'Extension types' in this document. 
+
+* Run the following command
+            
+                mvn archetype:generate
+                    -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                    -DarchetypeArtifactId=siddhi-archetype-execution
+                    -DgroupId=org.wso2.extension.siddhi.execution
+                    -Dversion=1.0.0-SNAPSHOT
+            
+* Then the system will pop-up the following message to enter the execution name
+           
+            eg:- Define value for property 'executionType': ML
+            
+* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+                  
+**siddhi-io**
+
+Siddhi-io provides following extension types,
+
+* Sink
+* Source
+
+You can use one or more from above mentioned extension types and implement according to your requirement. siddhi-io generaly uses to work with IO operations. If you want get inputs to your Siddhi app, you can use 'Source' extension type. If you want to get outputs from your Siddhi app, you can use 'Sink' extension and implement it. You can find more information about these extension types under the heading 'Extension types' in this document. 
+    
+* Run the following command
+                
+          
+               mvn archetype:generate
+                   -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                   -DarchetypeArtifactId=siddhi-archetype-io
+                   -DgroupId=org.wso2.extension.siddhi.io
+                   -Dversion=1.0.0-SNAPSHOT
+            
+* Then the system will pop-up the following message to enter the typeOf_IO
+           
+         eg:- Define value for property 'typeOf_IO': http
+
+* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+         
+**siddhi-map**
+
+Siddhi-map provides following extension types,
+
+* Sink Mapper
+* Source Mapper
+
+You can use one or more from above mentioned extension types and implement according to your requirement. Source Mapper is used to map events to a predefined data format (such as XML, JSON, binary, etc), and publishes them to external endpoints (such as E-mail, TCP, Kafka, HTTP, etc). Sink Mapper is used for same usecase, but in the time of publishing events from Siddhi app.You can find more information about these extension types under the heading 'Extension types' in this document. 
+        
+* Run the following command
+                    
+            
+                mvn archetype:generate
+                    -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                    -DarchetypeArtifactId=siddhi-archetype-map
+                    -DgroupId=org.wso2.extension.siddhi.map
+                    -Dversion=1.0.0-SNAPSHOT
+            
+* Then the system will pop-up the following message to enter the mapType
+       
+            eg:- Define value for property 'mapType':CSV
+    
+* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+                   
+**siddhi-script**
+
+Siddhi-script provides following extension types,
+
+* Script
+
+You can use script extension type to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function. You can find more information about these extension types under the heading 'Extension types' in this document. 
+
+* Run the following command
+                        
+           
+               mvn archetype:generate
+                   -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                   -DarchetypeArtifactId=siddhi-archetype-script
+                   -DgroupId=org.wso2.extension.siddhi.script
+                   -Dversion=1.0.0-SNAPSHOT
+           
+* Then the system will pop-up the following message to enter the script type
+       
+         eg:- Define value for property 'typeOfScript':
+
+* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+       
+**siddhi-store**
+
+Siddhi-store provides following extension types,
+
+* Store
+
+You can use Store extension type to work with data/events stored in various data stores through the table abstraction. You can find more information about these extension types under the heading 'Extension types' in this document. 
+
+* Run the following command
+                            
+   
+               mvn archetype:generate
+                  -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                  -DarchetypeArtifactId=siddhi-archetype-store
+                  -DgroupId=org.wso2.extension.siddhi.store
+                  -Dversion=1.0.0-SNAPSHOT
+           
+* Then the system will pop-up the following message to enter the store type
+                          
+          eg:- Define value for property 'storeType': RDBMS
+    
+* Finally confirm all property values are correct or not by typing Y or press Enter, else type N.
+
+## Configuring and Monitoring Siddhi Applications
+
+This section explains how to use the `@app` annotation to generate statistics for Siddhi applications as well as improve the performance of Siddhi applications.
+
+### @app:statistics
+
+To evaluate the performance of an application, you can enable the statistics of a Siddhi application to be published. This is done via the `@app:statistics` annotation that can be added to a Siddhi application as shown in the following example.
+
+```sql
+@app:statistics(reporter = 'console')
+```
+The following elements are configured with this annotation.
+
+|Annotation| Description| Default Value|
+| ------------- |-------------|-------------|
+|`reporter`|The interface in which statistics for the Siddhi application are published. Possible values are as follows:<br/> `console`<br/> `jmx`|`console`|
+|`interval`|The time interval (in seconds) at  which the statistics for the Siddhi application are reported.|`60`|
+|`include`|If this parameter is added, only the types of metrics you specify are included in the reporting. The required metric types can be specified as a comma-separated list. It is also possible to use wild cards| All (*.*)|
+
+The metrics are reported in the following format.
+`org.wso2.siddhi.SiddhiApps.<SiddhiAppName>.Siddhi.<Component Type>.<Component Name>. <Metrics name>`
+
+The following table lists the types of metrics supported for different Siddhi application component types.
+
+|Component Type|Metrics Type|
+| ------------- |-------------|
+|Stream|Throughput<br/>The size of the buffer if parallel processing is enabled via the @async annotation.|
+|Trigger|Throughput (Trigger and Stream)|
+|Source|Throughput|
+|Sink|Throughput|
+|Mapper|Latency<br/>Input/output throughput<br/>
+|Table|Memory<br/>Throughput (For all operations)<br/>Throughput (For all operations)|
+|Query|Memory<br/>Latency|
+|Window|Throughput (For all operations)<br/>Latency (For all operation)|
+|Partition|Throughput (For all operations)<br/>Latency (For all operation)|
+
+
+
+e.g., the following is a Siddhi application that includes the `@app` annotation to report performance statistics.
+
+```sql
+@App:name('TestMetrics')
+@App:Statistics(reporter = 'console')
+
+@Async(buffer.size='64')
+define stream TestStream (message string);
+
+@info(name='logQuery')
+from TestSream#log("Message:")
+insert into TempSream;
+```
+
+Statistics are reported for this Siddhi application as shown in the extract below.
+
+<details>
+  <summary>Click to view the extract</summary>
+11/26/17 8:01:20 PM ============================================================
+
+ -- Gauges ----------------------------------------------------------------------
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.memory
+              value = 5760
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestStream.size
+              value = 0
+ 
+ -- Meters ----------------------------------------------------------------------
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Sources.TestStream.http.throughput
+              count = 0
+          mean rate = 0.00 events/second
+      1-minute rate = 0.00 events/second
+      5-minute rate = 0.00 events/second
+     15-minute rate = 0.00 events/second
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TempSream.throughput
+              count = 2
+          mean rate = 0.04 events/second
+      1-minute rate = 0.03 events/second
+      5-minute rate = 0.01 events/second
+     15-minute rate = 0.00 events/second
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestStream.throughput
+              count = 2
+          mean rate = 0.04 events/second
+      1-minute rate = 0.03 events/second
+      5-minute rate = 0.01 events/second
+     15-minute rate = 0.00 events/second
+ 
+ -- Timers ----------------------------------------------------------------------
+ org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.latency
+              count = 2
+          mean rate = 0.11 calls/second
+      1-minute rate = 0.34 calls/second
+      5-minute rate = 0.39 calls/second
+     15-minute rate = 0.40 calls/second
+                min = 0.61 milliseconds
+                max = 1.08 milliseconds
+               mean = 0.84 milliseconds
+             stddev = 0.23 milliseconds
+             median = 0.61 milliseconds
+               75% <= 1.08 milliseconds
+               95% <= 1.08 milliseconds
+               98% <= 1.08 milliseconds
+               99% <= 1.08 milliseconds
+             99.9% <= 1.08 milliseconds
+
+
+</details>
+
+### @app:playback
+
+When this annotation is included, the timestamp of the event (specified via an attribute) is treated as the current time. This results in events being processed faster.
+The following elements are configured with this annotation.
+
+|Annotation| Description|
+| ------------- |-------------|
+|`idle.time`|If no events are received during a time interval specified (in milliseconds) via this element, the Siddhi system time is incremented by a number of seconds specified via the `increment` element.|
+|`increment`|The number of seconds by which the Siddhi system time must be incremented if no events are received during the time interval specified via the `idle.time` element.|
+
+e.g., In the following example, the Siddhi system time is incremented by two seconds if no events arrive for a time interval of 100 milliseconds.
+
+`@app:playback(idle.time = '100 millisecond', increment = '2 sec') `

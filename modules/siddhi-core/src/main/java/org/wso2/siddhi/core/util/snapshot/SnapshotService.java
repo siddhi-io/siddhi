@@ -71,8 +71,9 @@ public class SnapshotService {
 
     public SnapshotSerialized snapshot() {
         HashMap<String, Object> elementWiseIncrementalSnapshots;
-        HashMap<String, Object> elementWiseIncrementalSnapshotsBase = new HashMap<>();
-        HashMap<String, Object> elementWiseFullSnapshots = new HashMap<>();
+        HashMap<String, Object> elementWiseIncrementalSnapshotsBase;
+        HashMap<String, Object> elementWiseFullSnapshots;
+
         HashMap<String, HashMap<String, Object>> elementSnapshotMapFull = new HashMap<>();
         HashMap<String, HashMap<String, Object>> elementSnapshotMapIncremental = new HashMap<>();
         HashMap<String, HashMap<String, Object>> elementSnapshotMapIncrementalBase = new HashMap<>();
@@ -87,6 +88,8 @@ public class SnapshotService {
 
             for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
                 elementWiseIncrementalSnapshots = new HashMap<>();
+                elementWiseIncrementalSnapshotsBase = new HashMap<>();
+                elementWiseFullSnapshots = new HashMap<>();
 
                 Iterator<Snapshotable> iterator = (Iterator<Snapshotable>) entry.getValue().iterator();
                 while (iterator.hasNext()) {
@@ -104,29 +107,29 @@ public class SnapshotService {
                             if (snapShot instanceof Snapshot) {
                                 if (((Snapshot) snapShot).getState() != null) {
                                     if (((Snapshot) snapShot).isIncrementalSnapshot()) {
-                                        incrementalSnapshotableMapBase.put(key, snapShot);
-                                    } else {
                                         incrementalSnapshotableMap.put(key, snapShot);
+                                    } else {
+                                        incrementalSnapshotableMapBase.put(key, snapShot);
                                     }
                                 }
                             } else {
                                 elementWiseSnapshots.put(key, snapShot);
                             }
+                        }
 
-                            if (!incrementalSnapshotableMap.isEmpty()) {
-                                //Do we need to get and then update?
-                                elementWiseIncrementalSnapshots.put(object.getElementId(),
-                                        ByteSerializer.objectToByte(incrementalSnapshotableMap, siddhiAppContext));
-                            }
+                        if (!incrementalSnapshotableMap.isEmpty()) {
+                            //Do we need to get and then update?
+                            elementWiseIncrementalSnapshots.put(object.getElementId(),
+                                    ByteSerializer.objectToByte(incrementalSnapshotableMap, siddhiAppContext));
+                        }
 
-                            if (!incrementalSnapshotableMapBase.isEmpty()) {
-                                elementWiseIncrementalSnapshotsBase.put(object.getElementId(),
-                                        ByteSerializer.objectToByte(incrementalSnapshotableMapBase, siddhiAppContext));
-                            }
+                        if (!incrementalSnapshotableMapBase.isEmpty()) {
+                            elementWiseIncrementalSnapshotsBase.put(object.getElementId(),
+                                    ByteSerializer.objectToByte(incrementalSnapshotableMapBase, siddhiAppContext));
+                        }
 
-                            if (!elementWiseSnapshots.isEmpty()) {
-                                elementWiseFullSnapshots.put(object.getElementId(), elementWiseSnapshots);
-                            }
+                        if (!elementWiseSnapshots.isEmpty()) {
+                            elementWiseFullSnapshots.put(object.getElementId(), elementWiseSnapshots);
                         }
                     }
                 }
@@ -198,40 +201,45 @@ public class SnapshotService {
         List<Snapshotable> snapshotableList;
         try {
             threadBarrier.lock();
-            List<Snapshotable> partitionSnapshotables = snapshotableMap.get("partition");
-            try {
-                if (partitionSnapshotables != null) {
-                    for (Snapshotable snapshotable : partitionSnapshotables) {
-                        snapshotable.restoreState(snapshots.get(snapshotable.getElementId()));
-                    }
-                }
-            } catch (Throwable t) {
-                throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
-                        getName() + " not completed properly because content of Siddhi app has changed since " +
-                        "last state persistence. Clean persistence store for a fresh deployment.", t);
-            }
 
             for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
                 if (entry.getKey().equals("partition")) {
-                    continue;
-                }
-                snapshotableList = entry.getValue();
-                try {
-                    for (Snapshotable snapshotable : snapshotableList) {
-                        HashMap<String, Object> hmap = (HashMap<String, Object>) snapshots.get(entry.getKey());
-                        if (hmap != null) {
-                            HashMap<String, Object> variablesForElement = (HashMap<String, Object>)
-                                    hmap.get(snapshotable.getElementId());
+                    List<Snapshotable> partitionSnapshotables = entry.getValue();
 
-                            if (variablesForElement != null) {
-                                snapshotable.restoreState(variablesForElement);
+                    try {
+                        if (partitionSnapshotables != null) {
+                            for (Snapshotable snapshotable : partitionSnapshotables) {
+                                HashMap<String, Object> elementStateMap =
+                                        (HashMap<String, Object>) snapshots.get(entry.getKey());
+                                snapshotable.restoreState((HashMap<String, Object>)
+                                        elementStateMap.get(snapshotable.getElementId()));
                             }
                         }
+                    } catch (Throwable t) {
+                        throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
+                                getName() + " not completed properly because content of Siddhi app has changed since " +
+                                "last state persistence. Clean persistence store for a fresh deployment.", t);
                     }
-                } catch (Throwable t) {
-                    throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
-                            getName() + " not completed properly because content of Siddhi app has changed since " +
-                            "last state persistence. Clean persistence store for a fresh deployment.", t);
+                } else {
+                    snapshotableList = entry.getValue();
+                    try {
+                        for (Snapshotable snapshotable : snapshotableList) {
+                            HashMap<String, Object> hashMapOfSnapshots = (HashMap<String, Object>) snapshots.get(
+                                    entry.getKey());
+                            if (hashMapOfSnapshots != null) {
+                                HashMap<String, Object> variablesForElement = (HashMap<String, Object>)
+                                        hashMapOfSnapshots.get(snapshotable.getElementId());
+
+                                if (variablesForElement != null) {
+                                    snapshotable.restoreState(variablesForElement);
+                                }
+                            }
+                        }
+                    } catch (Throwable t) {
+                        throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
+                                getName() + " not completed properly because content of Siddhi app has changed since " +
+                                "last state persistence. Clean persistence store for a fresh deployment.", t);
+                    }
                 }
             }
         } finally {
