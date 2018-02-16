@@ -82,31 +82,34 @@ public class PersistenceService {
                     ByteSerializer.byteToObject(snapshot, context);
 
             //Next, load the incremental state
-            HashMap<String, Object> hmap1;
-            HashMap<String, Object> hmap2;
-            ArrayList<ArrayList<String>> list = incrementalPersistanceStore.getListOfRevisionsToLoad(siddhiAppName);
 
-            for (ArrayList<String> element: list) {
-                byte[] item = incrementalPersistanceStore.load(element.get(1), element.get(2),
-                        element.get(3), element.get(0), element.get(4));
+            if (incrementalPersistanceStore != null) {
+                HashMap<String, Object> hmap1;
+                HashMap<String, Object> hmap2;
+                ArrayList<ArrayList<String>> list = incrementalPersistanceStore.getListOfRevisionsToLoad(siddhiAppName);
 
-                hmap2 = (HashMap<String, Object>) snapshots.get(element.get(2));
+                for (ArrayList<String> element : list) {
+                    byte[] item = incrementalPersistanceStore.load(element.get(1), element.get(2),
+                            element.get(3), element.get(0), element.get(4));
 
-                if (hmap2 == null) {
-                    hmap2 = new HashMap<>();
+                    hmap2 = (HashMap<String, Object>) snapshots.get(element.get(2));
+
+                    if (hmap2 == null) {
+                        hmap2 = new HashMap<>();
+                    }
+
+                    hmap1 = (HashMap<String, Object>) hmap2.get(element.get(3));
+
+                    if (hmap1 == null) {
+                        hmap1 = new HashMap<>();
+                    }
+
+                    hmap1.put(element.get(0), (HashMap<String, Object>) ByteSerializer.byteToObject(
+                            item, context));
+                    hmap2.put(element.get(3), hmap1);
+
+                    snapshots.put(element.get(2), hmap2);
                 }
-
-                hmap1 = (HashMap<String, Object>) hmap2.get(element.get(3));
-
-                if (hmap1 == null) {
-                    hmap1 = new HashMap<>();
-                }
-
-                hmap1.put(element.get(0), (HashMap<String, Object>) ByteSerializer.byteToObject(
-                        item, context));
-                hmap2.put(element.get(3), hmap1);
-
-                snapshots.put(element.get(2), hmap2);
             }
 
             snapshotService.restore(snapshots);

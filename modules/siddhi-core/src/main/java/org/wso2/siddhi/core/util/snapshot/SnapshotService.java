@@ -71,8 +71,9 @@ public class SnapshotService {
 
     public SnapshotSerialized snapshot() {
         HashMap<String, Object> elementWiseIncrementalSnapshots;
-        HashMap<String, Object> elementWiseIncrementalSnapshotsBase = new HashMap<>();
-        HashMap<String, Object> elementWiseFullSnapshots = new HashMap<>();
+        HashMap<String, Object> elementWiseIncrementalSnapshotsBase;
+        HashMap<String, Object> elementWiseFullSnapshots;
+
         HashMap<String, HashMap<String, Object>> elementSnapshotMapFull = new HashMap<>();
         HashMap<String, HashMap<String, Object>> elementSnapshotMapIncremental = new HashMap<>();
         HashMap<String, HashMap<String, Object>> elementSnapshotMapIncrementalBase = new HashMap<>();
@@ -87,6 +88,8 @@ public class SnapshotService {
 
             for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
                 elementWiseIncrementalSnapshots = new HashMap<>();
+                elementWiseIncrementalSnapshotsBase = new HashMap<>();
+                elementWiseFullSnapshots = new HashMap<>();
 
                 Iterator<Snapshotable> iterator = (Iterator<Snapshotable>) entry.getValue().iterator();
                 while (iterator.hasNext()) {
@@ -112,21 +115,21 @@ public class SnapshotService {
                             } else {
                                 elementWiseSnapshots.put(key, snapShot);
                             }
+                        }
 
-                            if (!incrementalSnapshotableMap.isEmpty()) {
-                                //Do we need to get and then update?
-                                elementWiseIncrementalSnapshots.put(object.getElementId(),
-                                        ByteSerializer.objectToByte(incrementalSnapshotableMap, siddhiAppContext));
-                            }
+                        if (!incrementalSnapshotableMap.isEmpty()) {
+                            //Do we need to get and then update?
+                            elementWiseIncrementalSnapshots.put(object.getElementId(),
+                                    ByteSerializer.objectToByte(incrementalSnapshotableMap, siddhiAppContext));
+                        }
 
-                            if (!incrementalSnapshotableMapBase.isEmpty()) {
-                                elementWiseIncrementalSnapshotsBase.put(object.getElementId(),
-                                        ByteSerializer.objectToByte(incrementalSnapshotableMapBase, siddhiAppContext));
-                            }
+                        if (!incrementalSnapshotableMapBase.isEmpty()) {
+                            elementWiseIncrementalSnapshotsBase.put(object.getElementId(),
+                                    ByteSerializer.objectToByte(incrementalSnapshotableMapBase, siddhiAppContext));
+                        }
 
-                            if (!elementWiseSnapshots.isEmpty()) {
-                                elementWiseFullSnapshots.put(object.getElementId(), elementWiseSnapshots);
-                            }
+                        if (!elementWiseSnapshots.isEmpty()) {
+                            elementWiseFullSnapshots.put(object.getElementId(), elementWiseSnapshots);
                         }
                     }
                 }
@@ -206,7 +209,10 @@ public class SnapshotService {
                     try {
                         if (partitionSnapshotables != null) {
                             for (Snapshotable snapshotable : partitionSnapshotables) {
-                                snapshotable.restoreState(snapshots.get(snapshotable.getElementId()));
+                                HashMap<String, Object> elementStateMap =
+                                        (HashMap<String, Object>) snapshots.get(entry.getKey());
+                                snapshotable.restoreState((HashMap<String, Object>)
+                                        elementStateMap.get(snapshotable.getElementId()));
                             }
                         }
                     } catch (Throwable t) {

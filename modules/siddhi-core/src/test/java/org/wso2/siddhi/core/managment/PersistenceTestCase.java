@@ -229,7 +229,8 @@ public class PersistenceTestCase {
 
     }
 
-    @Test(expectedExceptions = NoPersistenceStoreException.class, dependsOnMethods = "persistenceTest2")
+//    @Test(expectedExceptions = NoPersistenceStoreException.class, dependsOnMethods = "incrementalPersistenceTest2")
+    @Test(expectedExceptions = NoPersistenceStoreException.class)
     public void persistenceTest3() throws Exception {
         log.info("persistence test 3 - no store defined");
 
@@ -950,6 +951,98 @@ public class PersistenceTestCase {
         AssertJUnit.assertEquals(new Long(103), lastValue);
         siddhiAppRuntime.shutdown();
     }
+
+//    @Test
+//    public void persistenceTest12() throws InterruptedException {
+//        log.info("persistence test 12 - partition query");
+//
+//        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+//
+//        SiddhiManager siddhiManager = new SiddhiManager();
+//        siddhiManager.setPersistenceStore(persistenceStore);
+//
+//        String siddhiApp = "@App:name('TestPlan1')\n" +
+//                "define stream TempStream(deviceID long);\n" +
+//                "\n" +
+//                "define stream DeviceTempStream (deviceID long, count long);\n" +
+//                "\n" +
+//                "from TempStream\n" +
+//                "select * insert into TempInternalStream;\n" +
+//                "\n" +
+//                "partition with ( deviceID of TempInternalStream )\n" +
+//                "begin\n" +
+//                "from TempInternalStream\n" +
+//                "select deviceID, count(deviceID) as count\n" +
+//                "insert into DeviceTempStream\n" +
+//                "end;";
+//
+//        StreamCallback queryCallback = new StreamCallback() {
+//            @Override
+//            public void receive(Event[] events) {
+//                EventPrinter.print(events);
+//                eventArrived = true;
+//                count++;
+//                lastValue = (Long) events[0].getData(1);
+//            }
+//        };
+//
+//        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+//        siddhiAppRuntime.addCallback("DeviceTempStream", queryCallback);
+//
+//        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("TempStream");
+//        siddhiAppRuntime.start();
+//
+//        inputHandler.send(new Object[]{1});
+//        Thread.sleep(100);
+//        inputHandler.send(new Object[]{1});
+//        Thread.sleep(100);
+//        inputHandler.send(new Object[]{1});
+//        Thread.sleep(100);
+//        inputHandler.send(new Object[]{2});
+//        Thread.sleep(100);
+//        inputHandler.send(new Object[]{2});
+//
+//        Thread.sleep(100);
+//
+//        //persisting
+//        Thread.sleep(500);
+//        siddhiAppRuntime.persist();
+//
+//        inputHandler.send(new Object[]{2});
+//        Thread.sleep(100);
+//        inputHandler.send(new Object[]{2});
+//
+//        //restarting siddhi app
+//        Thread.sleep(500);
+//        siddhiAppRuntime.shutdown();
+//        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+//        siddhiAppRuntime.addCallback("DeviceTempStream", queryCallback);
+//        inputHandler = siddhiAppRuntime.getInputHandler("TempStream");
+//        siddhiAppRuntime.start();
+//
+//        //loading
+//        try {
+//            siddhiAppRuntime.restoreLastRevision();
+//        } catch (CannotRestoreSiddhiAppStateException e) {
+//            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
+//        }
+//
+//        inputHandler.send(new Object[]{1});
+//        Thread.sleep(10);
+//        inputHandler.send(new Object[]{1});
+//        Thread.sleep(10);
+//        inputHandler.send(new Object[]{2});
+//        Thread.sleep(10);
+//        inputHandler.send(new Object[]{2});
+//
+//        //shutdown siddhi app
+//        Thread.sleep(500);
+//        siddhiAppRuntime.shutdown();
+//
+//        AssertJUnit.assertTrue(count == 11);
+//        AssertJUnit.assertEquals(new Long(4), lastValue);
+//        AssertJUnit.assertEquals(true, eventArrived);
+//    }
 
     @Test
     public void persistenceTest12() throws InterruptedException {
