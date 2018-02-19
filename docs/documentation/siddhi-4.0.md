@@ -2081,7 +2081,8 @@ The following parameters are configured when referring a script function.
 | `function name`| 	The name of the function referred.|
 | `parameter`| 	The function input parameter for function execution.|
 
-**Extension types**
+<a name="ExtensionTypes"></a>
+**Extension Types**
 
 Siddhi supports following extension types:
 
@@ -2220,18 +2221,18 @@ _We value your contribution on improving Siddhi and its extensions further._
 
 ### Writing Custom Extensions
 
-Custom extensions can be written in order to cater use case specific logic that are not available in Siddhi out of the box or as an existing extension. 
+Custom extensions can be written in order to cater use case specific logic that are not available in Siddhi out of the box or as an existing extension.
 
-There are five types of Siddhi extensions that you can write to cater your specific use cases. Please find each 
-extension types and related maven archetypes below. You can use these archetypes to generate maven projects for each 
+There are five types of Siddhi extensions that you can write to cater your specific use cases. These 
+extension types and the related maven archetypes are given below. You can use these archetypes to generate Maven projects for each 
 extension type.
 
-* Follow one of the step below, based on your project :
+* Follow the procedure for the required archetype, based on your project:
 
 
 **siddhi-execution**
 
-Siddhi-execution provides following extension types,
+Siddhi-execution provides following extension types:
 
 * Function
 * Aggregate Function
@@ -2239,9 +2240,13 @@ Siddhi-execution provides following extension types,
 * Stream Processor
 * Window
 
-You can use one or more from above mentioned extension types and implement according to your requirement. You can find more information about these extension types under the heading 'Extension types' in this document. 
+You can use one or more from above mentioned extension types and implement according to your requirement. 
 
-* Run the following command
+For more information about these extension types, see [Extension Types](#ExtensionTypes).
+
+To install and implement the siddhi-io extension archetype, follow the procedure below:
+
+1. Issue the following command from your CLI.
             
                 mvn archetype:generate
                     -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
@@ -2249,22 +2254,28 @@ You can use one or more from above mentioned extension types and implement accor
                     -DgroupId=org.wso2.extension.siddhi.execution
                     -Dversion=1.0.0-SNAPSHOT
             
-* Then the system will pop-up the following message to enter the execution name
+2. Enter the required execution name in the message that pops up as shown in the example below.
            
-            eg:- Define value for property 'executionType': ML
+            Define value for property 'executionType': ML
             
-* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
                   
 **siddhi-io**
 
-Siddhi-io provides following extension types,
+Siddhi-io provides following extension types:
 
 * Sink
 * Source
 
-You can use one or more from above mentioned extension types and implement according to your requirement. siddhi-io generaly uses to work with IO operations. If you want get inputs to your Siddhi app, you can use 'Source' extension type. If you want to get outputs from your Siddhi app, you can use 'Sink' extension and implement it. You can find more information about these extension types under the heading 'Extension types' in this document. 
+You can use one or more from above mentioned extension types and implement according to your requirement. siddhi-io is generally used to work with IO operations as follows:
+ * The Source extension type gets inputs to your Siddhi application.
+ * The Sink extension publishes outputs from your Siddhi application. 
+
+For more information about these extension types, see [Extension Types](#ExtensionTypes).
+
+To implement the siddhi-io extension archetype, follow the procedure below:
     
-* Run the following command
+1. Issue the following command from your CLI.
                 
           
                mvn archetype:generate
@@ -2273,11 +2284,11 @@ You can use one or more from above mentioned extension types and implement accor
                    -DgroupId=org.wso2.extension.siddhi.io
                    -Dversion=1.0.0-SNAPSHOT
             
-* Then the system will pop-up the following message to enter the typeOf_IO
+2. Enter the required execution name (the transport type in this scenario) in the message that pops up as shown in the example below.
            
-         eg:- Define value for property 'typeOf_IO': http
+         Define value for property 'typeOf_IO': http
 
-* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
          
 **siddhi-map**
 
@@ -2286,10 +2297,16 @@ Siddhi-map provides following extension types,
 * Sink Mapper
 * Source Mapper
 
-You can use one or more from above mentioned extension types and implement according to your requirement. Source Mapper is used to map events to a predefined data format (such as XML, JSON, binary, etc), and publishes them to external endpoints (such as E-mail, TCP, Kafka, HTTP, etc). Sink Mapper is used for same usecase, but in the time of publishing events from Siddhi app.You can find more information about these extension types under the heading 'Extension types' in this document. 
+You can use one or more from above mentioned extension types and implement according to your requirement as follows.
+
+* The Source Mapper maps events to a predefined data format (such as XML, JSON, binary, etc), and publishes them to external endpoints (such as E-mail, TCP, Kafka, HTTP, etc).
+* The Sink Mapper also maps events to a predefined data format, but it does it at the time of publishing events from a Siddhi application.
+
+For more information about these extension types, see [Extension Types](#ExtensionTypes).
+
+To implement the siddhi-map extension archetype, follow the procedure below:
         
-* Run the following command
-                    
+1. Issue the following command from your CLI.                
             
                 mvn archetype:generate
                     -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
@@ -2297,22 +2314,23 @@ You can use one or more from above mentioned extension types and implement accor
                     -DgroupId=org.wso2.extension.siddhi.map
                     -Dversion=1.0.0-SNAPSHOT
             
-* Then the system will pop-up the following message to enter the mapType
+2. Enter the required execution name (the map type in this scenario) in the message that pops up as shown in the example below.
        
-            eg:- Define value for property 'mapType':CSV
+            Define value for property 'mapType':CSV
     
-* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
                    
 **siddhi-script**
 
-Siddhi-script provides following extension types,
+Siddhi-script provides the `Script` extension type.
 
-* Script
+The script extension type allows you to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function. 
 
-You can use script extension type to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function. You can find more information about these extension types under the heading 'Extension types' in this document. 
+For more information about these extension types, see [Extension Types](#ExtensionTypes).
 
-* Run the following command
-                        
+To implement the siddhi-script extension archetype, follow the procedure below:
+
+1. Issue the following command from your CLI.                   
            
                mvn archetype:generate
                    -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
@@ -2320,22 +2338,23 @@ You can use script extension type to write functions in other programming langua
                    -DgroupId=org.wso2.extension.siddhi.script
                    -Dversion=1.0.0-SNAPSHOT
            
-* Then the system will pop-up the following message to enter the script type
+2. Enter the required execution name in the message that pops up as shown in the example below.
        
-         eg:- Define value for property 'typeOfScript':
+         Define value for property 'typeOfScript':
 
-* Finally confirm all property values are correct or not by typing Y or press Enter, else type N
+3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
        
 **siddhi-store**
 
-Siddhi-store provides following extension types,
+Siddhi-store provides the `Store` extension type.
 
-* Store
+The Store extension type allows you to work with data/events stored in various data stores through the table abstraction. 
 
-You can use Store extension type to work with data/events stored in various data stores through the table abstraction. You can find more information about these extension types under the heading 'Extension types' in this document. 
+For more information about these extension types, see [Extension Types](#ExtensionTypes).
 
-* Run the following command
-                            
+To implement the siddhi-store extension archetype, follow the procedure below:
+
+1. Issue the following command from your CLI.                      
    
                mvn archetype:generate
                   -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
@@ -2343,11 +2362,11 @@ You can use Store extension type to work with data/events stored in various data
                   -DgroupId=org.wso2.extension.siddhi.store
                   -Dversion=1.0.0-SNAPSHOT
            
-* Then the system will pop-up the following message to enter the store type
+2. Enter the required execution name in the message that pops up as shown in the example below.
                           
-          eg:- Define value for property 'storeType': RDBMS
+          Define value for property 'storeType': RDBMS
     
-* Finally confirm all property values are correct or not by typing Y or press Enter, else type N.
+3. To confirm that all property values are correct, type `Y` in the console. If not, press `N`.
 
 ## Configuring and Monitoring Siddhi Applications
 
