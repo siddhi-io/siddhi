@@ -25,7 +25,6 @@ import org.wso2.siddhi.core.aggregation.RecreateInMemoryData;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
@@ -103,6 +102,10 @@ public class AggregationParser {
                             "Hence, can't create the siddhi app '" + siddhiAppContext.getName() + "'",
                     aggregationDefinition.getQueryContextStartIndex(), aggregationDefinition.getQueryContextEndIndex());
         }
+        if (streamDefinitionMap.get(aggregationDefinition.getBasicSingleInputStream().getStreamId()) == null) {
+           throw new SiddhiAppCreationException("Stream " + aggregationDefinition.getBasicSingleInputStream().
+                   getStreamId() + " has not been defined");
+        }
         try {
             List<VariableExpressionExecutor> incomingVariableExpressionExecutors = new ArrayList<>();
 
@@ -118,8 +121,9 @@ public class AggregationParser {
             // Create new meta stream event.
             // This must hold the timestamp, group by attributes (if given) and the incremental attributes, in
             // onAfterWindowData array
-            // Example format: _TIMESTAMP, groupByAttribute1, groupByAttribute2, _incAttribute1, _incAttribute2
-            // _incAttribute1, _incAttribute2 would have the same attribute names as in finalListOfIncrementalAttributes
+            // Example format: AGG_TIMESTAMP, groupByAttribute1, groupByAttribute2, AGG_incAttribute1, AGG_incAttribute2
+            // AGG_incAttribute1, AGG_incAttribute2 would have the same attribute names as in
+            // finalListOfIncrementalAttributes
             incomingMetaStreamEvent.initializeAfterWindowData(); // To enter data as onAfterWindowData
 
             List<ExpressionExecutor> incomingExpressionExecutors = new ArrayList<>();
@@ -393,11 +397,11 @@ public class AggregationParser {
                 incomingMetaStreamEvent);
         ExpressionExecutor timestampExecutor = timeStampTimeZoneExecutors[0];
         ExpressionExecutor timeZoneExecutor = timeStampTimeZoneExecutors[1];
-        Attribute timestampAttribute = new Attribute("_TIMESTAMP", Attribute.Type.LONG);
+        Attribute timestampAttribute = new Attribute("AGG_TIMESTAMP", Attribute.Type.LONG);
         incomingMetaStreamEvent.addOutputData(timestampAttribute);
         incomingExpressionExecutors.add(timestampExecutor);
 
-        incomingMetaStreamEvent.addOutputData(new Attribute("_TIMEZONE", Attribute.Type.STRING));
+        incomingMetaStreamEvent.addOutputData(new Attribute("AGG_TIMEZONE", Attribute.Type.STRING));
         incomingExpressionExecutors.add(timeZoneExecutor);
 
         AbstractDefinition incomingLastInputStreamDefinition = incomingMetaStreamEvent.getLastInputDefinition();
@@ -410,8 +414,8 @@ public class AggregationParser {
                     siddhiAppContext, false, 0, aggregatorName));
         }
 
-        // Add _TIMESTAMP to output as well
-        outputExpressions.add(Expression.variable("_TIMESTAMP"));
+        // Add AGG_TIMESTAMP to output as well
+        outputExpressions.add(Expression.variable("AGG_TIMESTAMP"));
         aggregationDefinition.getAttributeList().add(timestampAttribute);
         for (OutputAttribute outputAttribute : aggregationDefinition.getSelector().getSelectionList()) {
             Expression expression = outputAttribute.getExpression();
@@ -633,23 +637,7 @@ public class AggregationParser {
             if (isRange(timePeriod)) {
                 durations = fillGap(durations.get(0), durations.get(1));
             }
-//            return sortedDurations(durations);
-            // TODO: 11/24/17 The commented out code above is to be used when we support skipping durations
-            // todo (e.g sec, min, day -> hour is skipped). For now, if comma separated values are given, we need to
-            // todo ensure that the durations are given sequentially. Hence the below code segment. Remove when
-            // todo allowing skipping durations
-
-            List<TimePeriod.Duration> sortedDurations = sortedDurations(durations);
-            int ordinalOfPrevDuration = sortedDurations.get(0).ordinal();
-            for (int i = 1; i < sortedDurations.size(); i++) {
-                if (ordinalOfPrevDuration != sortedDurations.get(i).ordinal() - 1) {
-                    TimePeriod.Duration[] allDurations = TimePeriod.Duration.values();
-                    throw new OperationNotSupportedException("Expected " + allDurations[ordinalOfPrevDuration + 1] +
-                            " after " + allDurations[ordinalOfPrevDuration] + ", but found " + sortedDurations.get(i));
-                }
-                ordinalOfPrevDuration = sortedDurations.get(i).ordinal();
-            }
-            return sortedDurations;
+            return sortedDurations(durations);
         } catch (Throwable t) {
             ExceptionUtil.populateQueryContext(t, timePeriod, null);
             throw t;
@@ -704,7 +692,7 @@ public class AggregationParser {
         HashMap<TimePeriod.Duration, Table> aggregationTableMap = new HashMap<>();
         // Create annotations for primary key
         Annotation primaryKeyAnnotation = new Annotation(SiddhiConstants.ANNOTATION_PRIMARY_KEY);
-        primaryKeyAnnotation.element(null, "_TIMESTAMP");
+        primaryKeyAnnotation.element(null, "AGG_TIMESTAMP");
         for (Variable groupByVariable : groupByVariableList) {
             primaryKeyAnnotation.element(null, groupByVariable.getAttributeName());
         }
