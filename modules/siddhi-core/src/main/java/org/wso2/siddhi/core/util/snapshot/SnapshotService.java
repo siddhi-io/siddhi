@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Service level implementation to take/restore snapshots of processing elements.
@@ -37,7 +38,7 @@ public class SnapshotService {
     private static final ThreadLocal<Boolean> skipSnapshotableThreadLocal = new ThreadLocal<Boolean>();
 
     private final ThreadBarrier threadBarrier;
-    private HashMap<String, List<Snapshotable>> snapshotableMap = new HashMap<String, List<Snapshotable>>();
+    private ConcurrentHashMap<String, List<Snapshotable>> snapshotableMap = new ConcurrentHashMap<String, List<Snapshotable>>();
     private SiddhiAppContext siddhiAppContext;
 
     public SnapshotService(SiddhiAppContext siddhiAppContext) {
@@ -50,6 +51,10 @@ public class SnapshotService {
         return skipSnapshotableThreadLocal;
     }
 
+    public ConcurrentHashMap<String, List<Snapshotable>> getSnapshotableMap() {
+        return snapshotableMap;
+    }
+
     public synchronized void addSnapshotable(String queryName, Snapshotable snapshotable) {
         Boolean skipSnapshotable = skipSnapshotableThreadLocal.get();
         if (skipSnapshotable == null || !skipSnapshotable) {
@@ -59,6 +64,7 @@ public class SnapshotService {
             if (snapshotableList == null) {
                 snapshotableList = new ArrayList<Snapshotable>();
                 snapshotableList.add(snapshotable);
+
                 snapshotableMap.put(queryName, snapshotableList);
             } else {
                 // add if item is not already in list
@@ -202,25 +208,27 @@ public class SnapshotService {
         try {
             threadBarrier.lock();
 
-            for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
-                if (entry.getKey().equals("partition")) {
-                    List<Snapshotable> partitionSnapshotables = entry.getValue();
+            if (snapshotableMap.containsKey("partition")) {
+                List<Snapshotable> partitionSnapshotables = snapshotableMap.get("partition");
 
-                    try {
-                        if (partitionSnapshotables != null) {
-                            for (Snapshotable snapshotable : partitionSnapshotables) {
-                                HashMap<String, Object> elementStateMap =
-                                        (HashMap<String, Object>) snapshots.get(entry.getKey());
-                                snapshotable.restoreState((HashMap<String, Object>)
-                                        elementStateMap.get(snapshotable.getElementId()));
-                            }
+                try {
+                    if (partitionSnapshotables != null) {
+                        for (Snapshotable snapshotable : partitionSnapshotables) {
+                            HashMap<String, Object> elementStateMap =
+                                    (HashMap<String, Object>) snapshots.get("partition");
+                            snapshotable.restoreState((HashMap<String, Object>)
+                                    elementStateMap.get(snapshotable.getElementId()));
                         }
-                    } catch (Throwable t) {
-                        throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
-                                getName() + " not completed properly because content of Siddhi app has changed since " +
-                                "last state persistence. Clean persistence store for a fresh deployment.", t);
                     }
-                } else {
+                } catch (Throwable t) {
+                    throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
+                            getName() + " not completed properly because content of Siddhi app has changed since " +
+                            "last state persistence. Clean persistence store for a fresh deployment.", t);
+                }
+            }
+
+            for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
+                if (!entry.getKey().equals("partition")) {
                     snapshotableList = entry.getValue();
                     try {
                         for (Snapshotable snapshotable : snapshotableList) {
@@ -285,5 +293,9 @@ public class SnapshotService {
         }
 
         return null;
+    }
+
+    public void setSnaphotableMap(ConcurrentHashMap<String,List<Snapshotable>> snaphotableMap) {
+        this.snapshotableMap = snaphotableMap;
     }
 }

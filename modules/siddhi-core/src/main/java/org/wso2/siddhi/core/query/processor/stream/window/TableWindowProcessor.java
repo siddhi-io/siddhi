@@ -87,7 +87,7 @@ public class TableWindowProcessor extends WindowProcessor implements FindablePro
     }
 
     @Override
-    public Processor cloneProcessor(String key) {
+    public Processor cloneProcessor(String queryName, String key) {
         try {
             TableWindowProcessor streamProcessor = new TableWindowProcessor(table);
             streamProcessor.inputDefinition = inputDefinition;
@@ -101,7 +101,7 @@ public class TableWindowProcessor extends WindowProcessor implements FindablePro
             streamProcessor.additionalAttributes = additionalAttributes;
             streamProcessor.complexEventPopulater = complexEventPopulater;
             streamProcessor.init(inputDefinition, attributeExpressionExecutors, configReader, siddhiAppContext,
-                    outputExpectsExpiredEvents);
+                    outputExpectsExpiredEvents, queryName, key);
             streamProcessor.start();
             return streamProcessor;
 

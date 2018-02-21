@@ -120,7 +120,7 @@ public class StreamPostStateProcessor implements PostStateProcessor {
      * @return clone of StreamPostStateProcessor
      */
     @Override
-    public PostStateProcessor cloneProcessor(String key) {
+    public PostStateProcessor cloneProcessor(String queryName, String key) {
         StreamPostStateProcessor streamPostStateProcessor = new StreamPostStateProcessor();
         cloneProperties(streamPostStateProcessor);
         return streamPostStateProcessor;

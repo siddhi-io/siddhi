@@ -113,7 +113,7 @@ public class IncrementalAggregationProcessor implements Processor {
     }
 
     @Override
-    public Processor cloneProcessor(String key) {
+    public Processor cloneProcessor(String queryName, String key) {
         throw new SiddhiAppCreationException("IncrementalAggregationProcessor cannot be cloned");
     }
 }

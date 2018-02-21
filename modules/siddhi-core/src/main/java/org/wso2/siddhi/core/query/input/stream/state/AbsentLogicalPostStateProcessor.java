@@ -49,7 +49,7 @@ public class AbsentLogicalPostStateProcessor extends LogicalPostStateProcessor {
     }
 
     @Override
-    public PostStateProcessor cloneProcessor(String key) {
+    public PostStateProcessor cloneProcessor(String queryName, String key) {
         AbsentLogicalPostStateProcessor logicalPostStateProcessor = new AbsentLogicalPostStateProcessor(type);
         cloneProperties(logicalPostStateProcessor);
         return logicalPostStateProcessor;

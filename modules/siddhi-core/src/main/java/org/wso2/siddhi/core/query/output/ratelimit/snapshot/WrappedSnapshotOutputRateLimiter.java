@@ -74,7 +74,7 @@ public class WrappedSnapshotOutputRateLimiter extends OutputRateLimiter {
     }
 
     public void init(SiddhiAppContext siddhiAppContext, LockWrapper lockWrapper) {
-        super.init(siddhiAppContext, lockWrapper, queryName);
+        super.init(siddhiAppContext, lockWrapper, queryName, null);
         outputRateLimiter.setQueryLock(lockWrapper);
     }
 

@@ -28,6 +28,8 @@ import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.parser.OutputParser;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
+import org.wso2.siddhi.core.util.snapshot.Snapshot;
+import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.MemoryCalculable;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.query.Query;
@@ -35,7 +37,9 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -126,10 +130,10 @@ public class QueryRuntime implements MemoryCalculable {
             lockWrapper = new LockWrapper("");
             lockWrapper.setLock(new ReentrantLock());
         }
-        StreamRuntime clonedStreamRuntime = this.streamRuntime.clone(key);
+        StreamRuntime clonedStreamRuntime = this.streamRuntime.clone(queryId, key);
         QuerySelector clonedSelector = this.selector.clone(key);
         OutputRateLimiter clonedOutputRateLimiter = outputRateLimiter.clone(key);
-        clonedOutputRateLimiter.init(siddhiAppContext, lockWrapper, queryId);
+        clonedOutputRateLimiter.init(siddhiAppContext, lockWrapper, queryId, key);
 
         QueryRuntime queryRuntime = new QueryRuntime(query, siddhiAppContext, clonedStreamRuntime, clonedSelector,
                 clonedOutputRateLimiter, outputCallback, this.metaComplexEvent,

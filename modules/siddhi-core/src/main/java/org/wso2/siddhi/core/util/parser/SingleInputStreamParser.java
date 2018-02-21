@@ -202,7 +202,7 @@ public class SingleInputStreamParser {
                     generateConfigReader(((Window) streamHandler).getNamespace(),
                             ((Window) streamHandler).getName());
             windowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(), attributeExpressionExecutors,
-                    configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName, streamHandler);
+                    configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName, streamHandler, null);
             return windowProcessor;
 
         } else if (streamHandler instanceof StreamFunction) {
@@ -218,7 +218,7 @@ public class SingleInputStreamParser {
                     metaStreamEvent.addInputDefinition(abstractStreamProcessor.initProcessor(metaStreamEvent
                                     .getLastInputDefinition(),
                             attributeExpressionExecutors, configReader, siddhiAppContext,
-                            outputExpectsExpiredEvents, queryName, streamHandler));
+                            outputExpectsExpiredEvents, queryName, streamHandler, null));
                     return abstractStreamProcessor;
                 } catch (SiddhiAppCreationException e) {
                     if (!e.isClassLoadingIssue()) {
@@ -232,7 +232,7 @@ public class SingleInputStreamParser {
                     StreamFunctionProcessorExtensionHolder.getInstance(siddhiAppContext));
             metaStreamEvent.addInputDefinition(abstractStreamProcessor.initProcessor(metaStreamEvent
                             .getLastInputDefinition(), attributeExpressionExecutors, configReader, siddhiAppContext,
-                    outputExpectsExpiredEvents, queryName, streamHandler));
+                    outputExpectsExpiredEvents, queryName, streamHandler, null));
             return abstractStreamProcessor;
         } else {
             throw new SiddhiAppCreationException(streamHandler.getClass().getName() + " is not supported",

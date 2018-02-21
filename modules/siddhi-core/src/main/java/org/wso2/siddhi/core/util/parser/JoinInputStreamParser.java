@@ -289,7 +289,7 @@ public class JoinInputStreamParser {
                 TableWindowProcessor tableWindowProcessor = new TableWindowProcessor(tableMap.get(inputStreamId));
                 tableWindowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(),
                         new ExpressionExecutor[0], null, siddhiAppContext, outputExpectsExpiredEvents,
-                        queryName, inputStream);
+                        queryName, inputStream, null);
                 streamRuntime.setProcessorChain(tableWindowProcessor);
                 break;
             case WINDOW:
@@ -297,7 +297,7 @@ public class JoinInputStreamParser {
                         windowMap.get(inputStreamId));
                 windowWindowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(),
                         variableExpressionExecutors.toArray(new ExpressionExecutor[0]), null,
-                        siddhiAppContext, outputExpectsExpiredEvents, queryName, inputStream);
+                        siddhiAppContext, outputExpectsExpiredEvents, queryName, inputStream, null);
                 streamRuntime.setProcessorChain(windowWindowProcessor);
                 break;
             case AGGREGATE:
@@ -307,7 +307,7 @@ public class JoinInputStreamParser {
                         aggregationRuntime, within, per);
                 aggregateWindowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(),
                         variableExpressionExecutors.toArray(new ExpressionExecutor[0]), null,
-                        siddhiAppContext, outputExpectsExpiredEvents, queryName, inputStream);
+                        siddhiAppContext, outputExpectsExpiredEvents, queryName, inputStream, null);
                 streamRuntime.setProcessorChain(aggregateWindowProcessor);
                 break;
             case DEFAULT:
@@ -343,7 +343,7 @@ public class JoinInputStreamParser {
                 windowProcessor.initProcessor(
                         ((MetaStreamEvent) streamRuntime.getMetaComplexEvent()).getLastInputDefinition(),
                         expressionExecutors, configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName,
-                        inputStream);
+                        inputStream, null);
                 lastProcessor = windowProcessor;
             } catch (Throwable t) {
                 throw new SiddhiAppCreationException(t);

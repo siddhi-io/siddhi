@@ -188,7 +188,7 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
      * @return clone of StreamPreStateProcessor
      */
     @Override
-    public PreStateProcessor cloneProcessor(String key) {
+    public PreStateProcessor cloneProcessor(String queryName, String key) {
         StreamPreStateProcessor streamPreStateProcessor = new StreamPreStateProcessor(stateType, withinStates);
         cloneProperties(streamPreStateProcessor, key);
         streamPreStateProcessor.init(siddhiAppContext, queryName);

@@ -98,7 +98,7 @@ public class AggregateWindowProcessor extends WindowProcessor implements Findabl
     }
 
     @Override
-    public Processor cloneProcessor(String key) {
+    public Processor cloneProcessor(String queryName, String key) {
         try {
             AggregateWindowProcessor streamProcessor = new AggregateWindowProcessor(aggregationRuntime, within, per);
             streamProcessor.inputDefinition = inputDefinition;
@@ -112,7 +112,7 @@ public class AggregateWindowProcessor extends WindowProcessor implements Findabl
             streamProcessor.additionalAttributes = additionalAttributes;
             streamProcessor.complexEventPopulater = complexEventPopulater;
             streamProcessor.init(inputDefinition, attributeExpressionExecutors, configReader, siddhiAppContext,
-                    outputExpectsExpiredEvents);
+                    outputExpectsExpiredEvents, queryName, key);
             streamProcessor.start();
             return streamProcessor;
 

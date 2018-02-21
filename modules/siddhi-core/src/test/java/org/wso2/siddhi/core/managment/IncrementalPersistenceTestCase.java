@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class IncrementalPersistenceTestCase {
     private static final Logger log = Logger.getLogger(IncrementalPersistenceTestCase.class);
@@ -1057,8 +1058,95 @@ public class IncrementalPersistenceTestCase {
 
         Thread.sleep(1000);
 
-        AssertJUnit.assertEquals(new Long(515), lastValue);
+        AssertJUnit.assertEquals(new Long(414), lastValue);
 
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void incrementalPersistenceTest11() throws InterruptedException {
+        log.info("Incremental persistence test 11");
+        AtomicInteger count = new AtomicInteger();
+        AtomicLong ibmCount = new AtomicLong();
+        AtomicLong wso2Count = new AtomicLong();
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+
+        String siddhiApp = "@app:name('incrementalPersistenceTest11') " +
+                "define stream StockQuote (symbol string, price float, volume int);" +
+                "partition with (symbol of StockQuote) " +
+                "begin " +
+                "@info(name = 'query1') " +
+                "from StockQuote#window.length(4)  " +
+                "select symbol, count(price) as price " +
+                "group by symbol insert into " +
+                "OutStockStream ;  end ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                AssertJUnit.assertTrue("IBM".equals(events[0].getData(0)) || "WSO2".equals(events[0].getData(0)));
+                count.addAndGet(events.length);
+
+                for (Event event: events) {
+                    if ("IBM".equals(event.getData(0))) {
+                        ibmCount.set((Long) event.getData(1));
+                    } else {
+                        wso2Count.set((Long) event.getData(1));
+                    }
+                }
+
+                eventArrived = true;
+            }
+        };
+        siddhiAppRuntime.addCallback("OutStockStream", streamCallback);
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("StockQuote");
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Event(System.currentTimeMillis(), new Object[]{"IBM", 700f, 100}));
+        inputHandler.send(new Event(System.currentTimeMillis(), new Object[]{"WSO2", 60f, 50}));
+        inputHandler.send(new Event(System.currentTimeMillis(), new Object[]{"WSO2", 50f, 60}));
+        inputHandler.send(new Event(System.currentTimeMillis(), new Object[]{"WSO2", 40f, 60}));
+        inputHandler.send(new Event(System.currentTimeMillis(), new Object[]{"WSO2", 30f, 60}));
+
+        siddhiAppRuntime.persist();
+
+        Thread.sleep(2000);
+
+        siddhiAppRuntime.shutdown();
+
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiAppRuntime.addCallback("OutStockStream", streamCallback);
+
+        inputHandler = siddhiAppRuntime.getInputHandler("StockQuote");
+        siddhiAppRuntime.start();
+
+        Thread.sleep(1000);
+
+        //loading
+        try {
+            siddhiAppRuntime.restoreLastRevision();
+        } catch (CannotRestoreSiddhiAppStateException e) {
+            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
+        }
+
+        Thread.sleep(2000);
+
+        inputHandler.send(new Event(System.currentTimeMillis(), new Object[]{"IBM", 800f, 100}));
+        inputHandler.send(new Event(System.currentTimeMillis(), new Object[]{"WSO2", 20f, 60}));
+
+        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertEquals(7, count.get());
+        AssertJUnit.assertEquals(2, ibmCount.get());
+        AssertJUnit.assertEquals(4, wso2Count.get());
         siddhiAppRuntime.shutdown();
     }
 }

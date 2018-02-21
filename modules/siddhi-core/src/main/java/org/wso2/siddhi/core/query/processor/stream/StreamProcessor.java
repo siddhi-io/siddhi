@@ -61,18 +61,18 @@ public abstract class StreamProcessor extends AbstractStreamProcessor {
 
     /**
      * The configure method of the StreamProcessor, this method will be called before other methods
-     *
-     * @param inputDefinition              the incoming stream definition
+     *  @param inputDefinition              the incoming stream definition
      * @param attributeExpressionExecutors the executors of each function parameters
      * @param configReader                 the config reader of StreamProcessor
      * @param siddhiAppContext         the context of the siddhi app
      * @param outputExpectsExpiredEvents   is output expects ExpiredEvents   @return the additional output attributes
-     *                                     introduced by the function
+     * @param queryName
+     * @param key
      */
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                    SiddhiAppContext
-                                           siddhiAppContext, boolean outputExpectsExpiredEvents) {
+                                           siddhiAppContext, boolean outputExpectsExpiredEvents, String queryName, String key) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         return init(inputDefinition, attributeExpressionExecutors, configReader, siddhiAppContext);
     }

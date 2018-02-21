@@ -42,7 +42,7 @@ public class FilterProcessor implements Processor {
         }
     }
 
-    public FilterProcessor cloneProcessor(String key) {
+    public FilterProcessor cloneProcessor(String queryName, String key) {
         return new FilterProcessor(conditionExecutor.cloneExecutor(key));
     }
 

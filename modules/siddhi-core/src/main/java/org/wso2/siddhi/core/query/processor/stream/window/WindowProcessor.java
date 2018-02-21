@@ -42,8 +42,15 @@ public abstract class WindowProcessor extends AbstractStreamProcessor {
     protected List<Attribute> init(AbstractDefinition inputDefinition, ExpressionExecutor[]
             attributeExpressionExecutors, ConfigReader configReader, SiddhiAppContext siddhiAppContext,
                                    boolean
-                                           outputExpectsExpiredEvents) {
+                                           outputExpectsExpiredEvents, String queryName, String key) {
         init(attributeExpressionExecutors, configReader, outputExpectsExpiredEvents, siddhiAppContext);
+
+        if (key != null) {
+            siddhiAppContext.getSnapshotService().addSnapshotable("p-" + key + "-" + queryName, this);
+        } else {
+            siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
+        }
+
         return new ArrayList<Attribute>(0);
     }
 

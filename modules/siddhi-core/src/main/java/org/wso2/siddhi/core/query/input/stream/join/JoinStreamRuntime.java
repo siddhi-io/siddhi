@@ -54,11 +54,11 @@ public class JoinStreamRuntime implements StreamRuntime {
     }
 
     @Override
-    public StreamRuntime clone(String key) {
+    public StreamRuntime clone(String queryName, String key) {
 
         JoinStreamRuntime joinStreamRuntime = new JoinStreamRuntime(siddhiAppContext, metaStateEvent);
         for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
-            joinStreamRuntime.addRuntime((SingleStreamRuntime) singleStreamRuntime.clone(key));
+            joinStreamRuntime.addRuntime((SingleStreamRuntime) singleStreamRuntime.clone(null, key));
         }
         SingleStreamRuntime leftSingleStreamRuntime = joinStreamRuntime.getSingleStreamRuntimes().get(0);
         SingleStreamRuntime rightSingleStreamRuntime = joinStreamRuntime.getSingleStreamRuntimes().get(1);

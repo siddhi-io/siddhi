@@ -65,7 +65,7 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
                                             ExpressionExecutor[] attributeExpressionExecutors,
                                             ConfigReader configReader, SiddhiAppContext
                                                     siddhiAppContext, boolean outputExpectsExpiredEvents,
-                                            String queryName, SiddhiElement siddhiElement) {
+                                            String queryName, SiddhiElement siddhiElement, String key) {
         this.configReader = configReader;
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         try {
@@ -80,7 +80,7 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
             siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
             this.additionalAttributes = init(inputDefinition, attributeExpressionExecutors, configReader,
                     siddhiAppContext,
-                    outputExpectsExpiredEvents);
+                    outputExpectsExpiredEvents, queryName, key);
 
             siddhiAppContext.addEternalReferencedHolder(this);
 
@@ -110,12 +110,13 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
      * @param siddhiAppContext             the context of the siddhi app
      * @param outputExpectsExpiredEvents   is output expects ExpiredEvents   @return the additional output attributes
      *                                     introduced by the function
-     * @return list of attributes.
+     * @param queryName
+     *@param key @return list of attributes.
      */
     protected abstract List<Attribute> init(AbstractDefinition inputDefinition,
                                             ExpressionExecutor[] attributeExpressionExecutors, ConfigReader
                                                     configReader, SiddhiAppContext
-                                                    siddhiAppContext, boolean outputExpectsExpiredEvents);
+                                                    siddhiAppContext, boolean outputExpectsExpiredEvents, String queryName, String key);
 
     public void process(ComplexEventChunk streamEventChunk) {
         streamEventChunk.reset();
@@ -149,7 +150,7 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
     }
 
     @Override
-    public Processor cloneProcessor(String key) {
+    public Processor cloneProcessor(String queryName, String key) {
         try {
             AbstractStreamProcessor abstractStreamProcessor = this.getClass().newInstance();
             abstractStreamProcessor.inputDefinition = inputDefinition;
@@ -166,7 +167,7 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
             abstractStreamProcessor.elementId = elementId + "-" + key;
             abstractStreamProcessor.init(inputDefinition, attributeExpressionExecutors, configReader,
                     siddhiAppContext,
-                    outputExpectsExpiredEvents);
+                    outputExpectsExpiredEvents, queryName, key);
             abstractStreamProcessor.start();
             return abstractStreamProcessor;
 

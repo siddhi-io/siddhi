@@ -79,7 +79,7 @@ public class JoinStreamProcessor implements Processor {
      * @return cloned processor
      */
     @Override
-    public Processor cloneProcessor(String key) {
+    public Processor cloneProcessor(String queryName, String key) {
         return null;
     }
 }

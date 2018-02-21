@@ -93,12 +93,13 @@ public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
      * @param configReader this hold the {@link StreamFunctionProcessor} extensions configuration reader.
      * @param siddhiAppContext         the context of the siddhi app
      * @param outputExpectsExpiredEvents   is output expects ExpiredEvents
-     * @return the additional output attributes introduced by the function
+     * @param queryName
+     *@param key @return the additional output attributes introduced by the function
      */
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                    SiddhiAppContext
-                                           siddhiAppContext, boolean outputExpectsExpiredEvents) {
+                                           siddhiAppContext, boolean outputExpectsExpiredEvents, String queryName, String key) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         return init(inputDefinition, attributeExpressionExecutors, configReader, siddhiAppContext);
     }

@@ -438,10 +438,10 @@ public class ExpressionParser {
                     AbstractAggregationAttributeExecutor aggregationAttributeProcessor;
                     if (groupBy) {
                         aggregationAttributeProcessor = new GroupByAggregationAttributeExecutor(attributeAggregator,
-                                innerExpressionExecutors, configReader, siddhiAppContext, queryName);
+                                innerExpressionExecutors, configReader, siddhiAppContext, queryName, null);
                     } else {
                         aggregationAttributeProcessor = new AggregationAttributeExecutor(attributeAggregator,
-                                innerExpressionExecutors, siddhiAppContext, queryName);
+                                innerExpressionExecutors, siddhiAppContext, queryName, null);
                     }
                     SelectorParser.getContainsAggregatorThreadLocal().set("true");
                     return aggregationAttributeProcessor;

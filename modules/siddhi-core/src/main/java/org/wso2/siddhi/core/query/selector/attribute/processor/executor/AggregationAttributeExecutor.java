@@ -31,8 +31,8 @@ public class AggregationAttributeExecutor extends AbstractAggregationAttributeEx
 
     public AggregationAttributeExecutor(AttributeAggregator attributeAggregator,
                                         ExpressionExecutor[] attributeExpressionExecutors, SiddhiAppContext
-                                                siddhiAppContext, String queryName) {
-        super(attributeAggregator, attributeExpressionExecutors, siddhiAppContext, queryName);
+                                                siddhiAppContext, String queryName, String key) {
+        super(attributeAggregator, attributeExpressionExecutors, siddhiAppContext, queryName, key);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class AggregationAttributeExecutor extends AbstractAggregationAttributeEx
 
     public ExpressionExecutor cloneExecutor(String key) {
         return new AggregationAttributeExecutor(attributeAggregator.cloneAggregator(key),
-                                                attributeExpressionExecutors, siddhiAppContext, queryName);
+                                                attributeExpressionExecutors, siddhiAppContext, queryName, key);
     }
 
     @Override
