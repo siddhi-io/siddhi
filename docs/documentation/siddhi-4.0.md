@@ -1638,20 +1638,22 @@ The `condition` element specifies the basis on which events are selected for upd
 When specifying the `condition`, table attributes should be referred to with the table name. 
 If a record that matches the condition does not already exist in the table, the arriving event is inserted into the table.
 
-The `set` clause is only used when the update operation is performed and it is used during the insert operation. 
-When `set` clause is used the left hand side attribute should be always a table attribute and 
-the right hand side attribute can be stream/table attribute, mathematical 
- operations or other. When `set` clause is not provided all attributes in the table will be updated.  
+The `set` clause is only used when an update is performed during the insert/update operation. 
+When `set` clause is used, the attribute to the left is always a table attribute, and the attribute to the right can be a stream/table attribute, mathematical 
+operation or other. The attribute to the left (i.e., the attribute in the event table) is updated with the value of the attribute to the right if the given condition is met. When the `set` clause is not provided, all the attributes in the table are updated. 
+
+!!! note 
+    When the attribute to the right is a table attribute, the operations supported differ based on the database type.
  
 To execute update upon specific output event types use the `current events`, `expired events` or the `all events` keyword with `for` as shown
-in the syntax. To understand more refer [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types) section.
+in the syntax. To understand more see [output event type](http://127.0.0.1:8000/documentation/siddhi-4.0/#output-event-types).
 
 !!! note 
     Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
 
 **Example**
 
-The following query update for events in the `UpdateTable` event table that have room numbers that match the same in the `UpdateStream` stream. When such events are founding the event table, they are updated. When a room number available in the stream is not found in the event table, it is inserted from the stream.
+The following query update for events in the `UpdateTable` event table that have room numbers that match the same in the `UpdateStream` stream. When such events are found in the event table, they are updated. When a room number available in the stream is not found in the event table, it is inserted from the stream.
  
 ```sql
 define table RoomAssigneeTable (roomNo int, type string, assignee string);
