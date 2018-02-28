@@ -1042,4 +1042,80 @@ public class PersistenceTestCase {
         AssertJUnit.assertEquals(new Long(4), lastValue);
         AssertJUnit.assertEquals(true, eventArrived);
     }
+
+    @Test
+    public void persistenceTest13() throws InterruptedException {
+        log.info("Persistence test 13 - partitioned sum with group-by on length windows.");
+        final int inputEventCount = 10;
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        String siddhiApp = "@app:name('incrementalPersistenceTest10') "
+                + "define stream cseEventStreamOne (symbol string, price float,volume int);"
+                + "partition with (price>=100 as 'large' or price<100 as 'small' of cseEventStreamOne) " +
+                "begin @info(name " +
+                "= 'query1') from cseEventStreamOne#window.length(4) select symbol,sum(price) as price " +
+                "group by symbol insert into " +
+                "OutStockStream ;  end ";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+
+                eventArrived = true;
+                if (events != null) {
+                    for (Event event : events) {
+                        count++;
+                        lastValue = ((Double) event.getData(1)).longValue();
+                    }
+                }
+            }
+        };
+
+        siddhiAppRuntime.addCallback("OutStockStream", streamCallback);
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStreamOne");
+        siddhiAppRuntime.start();
+
+        for (int i = 0; i < inputEventCount; i++) {
+            inputHandler.send(new Object[]{"IBM", 95f + i, 100});
+            Thread.sleep(100);
+            siddhiAppRuntime.persist();
+        }
+
+        inputHandler.send(new Object[]{"IBM", 205f, 100});
+        Thread.sleep(100);
+
+        siddhiAppRuntime.shutdown();
+
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiAppRuntime.addCallback("OutStockStream", streamCallback);
+
+        inputHandler = siddhiAppRuntime.getInputHandler("cseEventStreamOne");
+        siddhiAppRuntime.start();
+
+        Thread.sleep(1000);
+
+        //loading
+        try {
+            siddhiAppRuntime.restoreLastRevision();
+        } catch (CannotRestoreSiddhiAppStateException e) {
+            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
+        }
+
+        Thread.sleep(1000);
+
+        inputHandler.send(new Object[]{"IBM", 105f, 100});
+
+        Thread.sleep(1000);
+
+        AssertJUnit.assertEquals(new Long(414), lastValue);
+
+        siddhiAppRuntime.shutdown();
+    }
 }

@@ -147,7 +147,7 @@ public class SingleInputStreamParser {
         }
 
         metaStreamEvent.initializeAfterWindowData();
-        return new SingleStreamRuntime(processStreamReceiver, processor, metaComplexEvent);
+        return new SingleStreamRuntime(processStreamReceiver, processor, metaComplexEvent, siddhiAppContext);
 
     }
 
