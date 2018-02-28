@@ -126,7 +126,7 @@ public class QueryRuntime implements MemoryCalculable {
             lockWrapper = new LockWrapper("");
             lockWrapper.setLock(new ReentrantLock());
         }
-        StreamRuntime clonedStreamRuntime = this.streamRuntime.clone(key);
+        StreamRuntime clonedStreamRuntime = this.streamRuntime.clone(this.queryId, key);
         QuerySelector clonedSelector = this.selector.clone(key);
         OutputRateLimiter clonedOutputRateLimiter = outputRateLimiter.clone(key);
         clonedOutputRateLimiter.init(siddhiAppContext, lockWrapper, queryId);
