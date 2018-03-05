@@ -30,6 +30,8 @@ public interface StreamRuntime {
 
     List<SingleStreamRuntime> getSingleStreamRuntimes();
 
+    StreamRuntime clone(String key);
+
     StreamRuntime clone(String queryName, String key);
 
     void setCommonProcessor(Processor commonProcessor);

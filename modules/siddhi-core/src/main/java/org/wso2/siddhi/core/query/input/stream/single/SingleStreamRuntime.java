@@ -42,7 +42,12 @@ public class SingleStreamRuntime implements StreamRuntime {
 
     public SingleStreamRuntime(ProcessStreamReceiver processStreamReceiver, Processor processorChain,
                                MetaComplexEvent metaComplexEvent, SiddhiAppContext siddhiAppContext) {
+        this(processStreamReceiver, processorChain, metaComplexEvent);
         this.siddhiAppContext = siddhiAppContext;
+    }
+
+    public SingleStreamRuntime(ProcessStreamReceiver processStreamReceiver, Processor processorChain,
+                               MetaComplexEvent metaComplexEvent) {
         this.processStreamReceiver = processStreamReceiver;
         this.processorChain = processorChain;
         this.metaComplexEvent = metaComplexEvent;
@@ -70,6 +75,38 @@ public class SingleStreamRuntime implements StreamRuntime {
         list.add(this);
         return list;
 
+    }
+
+    @Override
+    public StreamRuntime clone(String key) {
+        ProcessStreamReceiver clonedProcessStreamReceiver = this.processStreamReceiver.clone(key);
+        EntryValveProcessor entryValveProcessor = null;
+        SchedulingProcessor schedulingProcessor;
+        Processor clonedProcessorChain = null;
+        if (processorChain != null) {
+            if (!(processorChain instanceof QuerySelector || processorChain instanceof OutputRateLimiter)) {
+                clonedProcessorChain = processorChain.cloneProcessor(key);
+                if (clonedProcessorChain instanceof EntryValveProcessor) {
+                    entryValveProcessor = (EntryValveProcessor) clonedProcessorChain;
+                }
+            }
+            Processor processor = processorChain.getNextProcessor();
+            while (processor != null) {
+                if (!(processor instanceof QuerySelector || processor instanceof OutputRateLimiter)) {
+                    Processor clonedProcessor = processor.cloneProcessor(key);
+                    clonedProcessorChain.setToLast(clonedProcessor);
+                    if (clonedProcessor instanceof EntryValveProcessor) {
+                        entryValveProcessor = (EntryValveProcessor) clonedProcessor;
+                    } else if (clonedProcessor instanceof SchedulingProcessor) {
+                        schedulingProcessor = (SchedulingProcessor) clonedProcessor;
+                        schedulingProcessor.setScheduler(((SchedulingProcessor) processor).getScheduler().clone(
+                                key, entryValveProcessor));
+                    }
+                }
+                processor = processor.getNextProcessor();
+            }
+        }
+        return new SingleStreamRuntime(clonedProcessStreamReceiver, clonedProcessorChain, metaComplexEvent);
     }
 
     @Override
