@@ -51,7 +51,10 @@ public class SiddhiExtensionLoader {
         Collection<String> extensionsList = new ArrayList<String>();
 
         for (String element : classPathElements) {
-            extensionsList.addAll(getResources(element, pattern));
+            Collection<String> stringCollection = getResources(element, pattern);
+            if (stringCollection != null && !stringCollection.isEmpty()) {
+                extensionsList.addAll(stringCollection);
+            }
         }
 
         Map<String, Class> classMap = new HashMap<String, Class>();
@@ -71,7 +74,11 @@ public class SiddhiExtensionLoader {
 
     private static Collection<String> getResources(String fileName, Pattern pattern) {
         File file = new File(fileName);
-        return getContent(file, pattern);
+        Collection<String> stringCollection = null;
+        if (file.exists() && file.isFile()) {
+            stringCollection = getContent(file, pattern);
+        }
+        return stringCollection;
     }
 
     private static Collection<String> getContent(File file, Pattern pattern) {
