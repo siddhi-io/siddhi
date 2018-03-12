@@ -75,7 +75,7 @@ public class SiddhiExtensionLoader {
     private static Collection<String> getResources(String fileName, Pattern pattern) {
         File file = new File(fileName);
         Collection<String> stringCollection = null;
-        if (file.exists() && file.isFile()) {
+        if (file.exists()) {
             stringCollection = getContent(file, pattern);
         }
         return stringCollection;
