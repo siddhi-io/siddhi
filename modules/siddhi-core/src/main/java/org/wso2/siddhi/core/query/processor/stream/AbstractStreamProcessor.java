@@ -163,7 +163,8 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
             abstractStreamProcessor.additionalAttributes = additionalAttributes;
             abstractStreamProcessor.complexEventPopulater = complexEventPopulater;
             abstractStreamProcessor.siddhiAppContext = siddhiAppContext;
-            abstractStreamProcessor.elementId = siddhiAppContext.getElementIdGenerator().createNewId();
+            abstractStreamProcessor.elementId = "AbstractStreamProcessor-" +
+                    siddhiAppContext.getElementIdGenerator().createNewId();
             abstractStreamProcessor.init(inputDefinition, attributeExpressionExecutors, configReader,
                     siddhiAppContext,
                     outputExpectsExpiredEvents);

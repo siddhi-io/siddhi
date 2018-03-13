@@ -67,25 +67,6 @@ public class StateStreamRuntime implements StreamRuntime {
         return stateStreamRuntime;
     }
 
-
-    @Override
-    public StreamRuntime clone(String queryName, String key) {
-        StateStreamRuntime stateStreamRuntime = new StateStreamRuntime(siddhiAppContext, metaStateEvent);
-        stateStreamRuntime.innerStateRuntime = this.innerStateRuntime.clone(key);
-        for (SingleStreamRuntime singleStreamRuntime : stateStreamRuntime.getSingleStreamRuntimes()) {
-            ProcessStreamReceiver processStreamReceiver = singleStreamRuntime.getProcessStreamReceiver();
-            if (processStreamReceiver instanceof SequenceMultiProcessStreamReceiver) {
-                ((SequenceMultiProcessStreamReceiver) processStreamReceiver).setStateStreamRuntime(stateStreamRuntime);
-            } else if (processStreamReceiver instanceof SequenceSingleProcessStreamReceiver) {
-                ((SequenceSingleProcessStreamReceiver) processStreamReceiver).setStateStreamRuntime(stateStreamRuntime);
-            }
-        }
-        ((StreamPreStateProcessor) stateStreamRuntime.innerStateRuntime.getFirstProcessor()).setThisLastProcessor(
-                (StreamPostStateProcessor)
-                        stateStreamRuntime.innerStateRuntime.getLastProcessor());
-        return stateStreamRuntime;
-    }
-
     @Override
     public void setCommonProcessor(Processor commonProcessor) {
         innerStateRuntime.setQuerySelector(commonProcessor);
