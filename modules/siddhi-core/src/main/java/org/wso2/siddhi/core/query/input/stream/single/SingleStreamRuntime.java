@@ -42,15 +42,10 @@ public class SingleStreamRuntime implements StreamRuntime {
 
     public SingleStreamRuntime(ProcessStreamReceiver processStreamReceiver, Processor processorChain,
                                MetaComplexEvent metaComplexEvent, SiddhiAppContext siddhiAppContext) {
-        this(processStreamReceiver, processorChain, metaComplexEvent);
-        this.siddhiAppContext = siddhiAppContext;
-    }
-
-    public SingleStreamRuntime(ProcessStreamReceiver processStreamReceiver, Processor processorChain,
-                               MetaComplexEvent metaComplexEvent) {
         this.processStreamReceiver = processStreamReceiver;
         this.processorChain = processorChain;
         this.metaComplexEvent = metaComplexEvent;
+        this.siddhiAppContext = siddhiAppContext;
     }
 
     public Processor getProcessorChain() {
@@ -79,50 +74,18 @@ public class SingleStreamRuntime implements StreamRuntime {
 
     @Override
     public StreamRuntime clone(String key) {
-        ProcessStreamReceiver clonedProcessStreamReceiver = this.processStreamReceiver.clone(key);
+        String[] queryIdKey = key.split("@");
+        ProcessStreamReceiver clonedProcessStreamReceiver = this.processStreamReceiver.clone(queryIdKey[1]);
         EntryValveProcessor entryValveProcessor = null;
         SchedulingProcessor schedulingProcessor;
         Processor clonedProcessorChain = null;
         if (processorChain != null) {
             if (!(processorChain instanceof QuerySelector || processorChain instanceof OutputRateLimiter)) {
-                clonedProcessorChain = processorChain.cloneProcessor(key);
-                if (clonedProcessorChain instanceof EntryValveProcessor) {
-                    entryValveProcessor = (EntryValveProcessor) clonedProcessorChain;
-                }
-            }
-            Processor processor = processorChain.getNextProcessor();
-            while (processor != null) {
-                if (!(processor instanceof QuerySelector || processor instanceof OutputRateLimiter)) {
-                    Processor clonedProcessor = processor.cloneProcessor(key);
-                    clonedProcessorChain.setToLast(clonedProcessor);
-                    if (clonedProcessor instanceof EntryValveProcessor) {
-                        entryValveProcessor = (EntryValveProcessor) clonedProcessor;
-                    } else if (clonedProcessor instanceof SchedulingProcessor) {
-                        schedulingProcessor = (SchedulingProcessor) clonedProcessor;
-                        schedulingProcessor.setScheduler(((SchedulingProcessor) processor).getScheduler().clone(
-                                key, entryValveProcessor));
-                    }
-                }
-                processor = processor.getNextProcessor();
-            }
-        }
-        return new SingleStreamRuntime(clonedProcessStreamReceiver, clonedProcessorChain, metaComplexEvent);
-    }
-
-    @Override
-    public StreamRuntime clone(String queryName, String key) {
-        ProcessStreamReceiver clonedProcessStreamReceiver = this.processStreamReceiver.clone(key);
-        EntryValveProcessor entryValveProcessor = null;
-        SchedulingProcessor schedulingProcessor;
-        Processor clonedProcessorChain = null;
-        if (processorChain != null) {
-            if (!(processorChain instanceof QuerySelector || processorChain instanceof OutputRateLimiter)) {
-                clonedProcessorChain = processorChain.cloneProcessor(key);
+                clonedProcessorChain = processorChain.cloneProcessor(queryIdKey[1]);
                 if (clonedProcessorChain instanceof AbstractStreamProcessor) {
                     AbstractStreamProcessor abstractStreamProcessor = (AbstractStreamProcessor) clonedProcessorChain;
-                    siddhiAppContext.getSnapshotService().addSnapshotable(queryName, abstractStreamProcessor);
+                    siddhiAppContext.getSnapshotService().addSnapshotable(queryIdKey[0], abstractStreamProcessor);
                 }
-
                 if (clonedProcessorChain instanceof EntryValveProcessor) {
                     entryValveProcessor = (EntryValveProcessor) clonedProcessorChain;
                 }
@@ -130,14 +93,14 @@ public class SingleStreamRuntime implements StreamRuntime {
             Processor processor = processorChain.getNextProcessor();
             while (processor != null) {
                 if (!(processor instanceof QuerySelector || processor instanceof OutputRateLimiter)) {
-                    Processor clonedProcessor = processor.cloneProcessor(key);
+                    Processor clonedProcessor = processor.cloneProcessor(queryIdKey[1]);
                     clonedProcessorChain.setToLast(clonedProcessor);
                     if (clonedProcessor instanceof EntryValveProcessor) {
                         entryValveProcessor = (EntryValveProcessor) clonedProcessor;
                     } else if (clonedProcessor instanceof SchedulingProcessor) {
                         schedulingProcessor = (SchedulingProcessor) clonedProcessor;
                         schedulingProcessor.setScheduler(((SchedulingProcessor) processor).getScheduler().clone(
-                                key, entryValveProcessor));
+                                queryIdKey[1], entryValveProcessor));
                     }
                 }
                 processor = processor.getNextProcessor();
@@ -146,6 +109,44 @@ public class SingleStreamRuntime implements StreamRuntime {
         return new SingleStreamRuntime(clonedProcessStreamReceiver, clonedProcessorChain, metaComplexEvent,
                 siddhiAppContext);
     }
+
+//    @Override
+//    public StreamRuntime clone(String queryName, String key) {
+//        ProcessStreamReceiver clonedProcessStreamReceiver = this.processStreamReceiver.clone(key);
+//        EntryValveProcessor entryValveProcessor = null;
+//        SchedulingProcessor schedulingProcessor;
+//        Processor clonedProcessorChain = null;
+//        if (processorChain != null) {
+//            if (!(processorChain instanceof QuerySelector || processorChain instanceof OutputRateLimiter)) {
+//                clonedProcessorChain = processorChain.cloneProcessor(key);
+//                if (clonedProcessorChain instanceof AbstractStreamProcessor) {
+//                    AbstractStreamProcessor abstractStreamProcessor = (AbstractStreamProcessor) clonedProcessorChain;
+//                    siddhiAppContext.getSnapshotService().addSnapshotable(queryName, abstractStreamProcessor);
+//                }
+//
+//                if (clonedProcessorChain instanceof EntryValveProcessor) {
+//                    entryValveProcessor = (EntryValveProcessor) clonedProcessorChain;
+//                }
+//            }
+//            Processor processor = processorChain.getNextProcessor();
+//            while (processor != null) {
+//                if (!(processor instanceof QuerySelector || processor instanceof OutputRateLimiter)) {
+//                    Processor clonedProcessor = processor.cloneProcessor(key);
+//                    clonedProcessorChain.setToLast(clonedProcessor);
+//                    if (clonedProcessor instanceof EntryValveProcessor) {
+//                        entryValveProcessor = (EntryValveProcessor) clonedProcessor;
+//                    } else if (clonedProcessor instanceof SchedulingProcessor) {
+//                        schedulingProcessor = (SchedulingProcessor) clonedProcessor;
+//                        schedulingProcessor.setScheduler(((SchedulingProcessor) processor).getScheduler().clone(
+//                                key, entryValveProcessor));
+//                    }
+//                }
+//                processor = processor.getNextProcessor();
+//            }
+//        }
+//        return new SingleStreamRuntime(clonedProcessStreamReceiver, clonedProcessorChain, metaComplexEvent,
+//                siddhiAppContext);
+//    }
 
     @Override
     public void setCommonProcessor(Processor commonProcessor) {

@@ -32,8 +32,6 @@ public interface StreamRuntime {
 
     StreamRuntime clone(String key);
 
-    StreamRuntime clone(String queryName, String key);
-
     void setCommonProcessor(Processor commonProcessor);
 
     MetaComplexEvent getMetaComplexEvent();

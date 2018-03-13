@@ -106,8 +106,7 @@ public class StreamInnerStateRuntime implements InnerStateRuntime {
     public InnerStateRuntime clone(String key) {
         StreamInnerStateRuntime streamInnerStateRuntime = new StreamInnerStateRuntime(stateType);
         for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
-            streamInnerStateRuntime.singleStreamRuntimeList.add((SingleStreamRuntime)
-                    singleStreamRuntime.clone(key));
+            streamInnerStateRuntime.singleStreamRuntimeList.add((SingleStreamRuntime) singleStreamRuntime.clone(key));
         }
 
         Processor processor = streamInnerStateRuntime.singleStreamRuntimeList.get(0).getProcessorChain();
