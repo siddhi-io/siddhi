@@ -110,44 +110,6 @@ public class SingleStreamRuntime implements StreamRuntime {
                 siddhiAppContext);
     }
 
-//    @Override
-//    public StreamRuntime clone(String queryName, String key) {
-//        ProcessStreamReceiver clonedProcessStreamReceiver = this.processStreamReceiver.clone(key);
-//        EntryValveProcessor entryValveProcessor = null;
-//        SchedulingProcessor schedulingProcessor;
-//        Processor clonedProcessorChain = null;
-//        if (processorChain != null) {
-//            if (!(processorChain instanceof QuerySelector || processorChain instanceof OutputRateLimiter)) {
-//                clonedProcessorChain = processorChain.cloneProcessor(key);
-//                if (clonedProcessorChain instanceof AbstractStreamProcessor) {
-//                    AbstractStreamProcessor abstractStreamProcessor = (AbstractStreamProcessor) clonedProcessorChain;
-//                    siddhiAppContext.getSnapshotService().addSnapshotable(queryName, abstractStreamProcessor);
-//                }
-//
-//                if (clonedProcessorChain instanceof EntryValveProcessor) {
-//                    entryValveProcessor = (EntryValveProcessor) clonedProcessorChain;
-//                }
-//            }
-//            Processor processor = processorChain.getNextProcessor();
-//            while (processor != null) {
-//                if (!(processor instanceof QuerySelector || processor instanceof OutputRateLimiter)) {
-//                    Processor clonedProcessor = processor.cloneProcessor(key);
-//                    clonedProcessorChain.setToLast(clonedProcessor);
-//                    if (clonedProcessor instanceof EntryValveProcessor) {
-//                        entryValveProcessor = (EntryValveProcessor) clonedProcessor;
-//                    } else if (clonedProcessor instanceof SchedulingProcessor) {
-//                        schedulingProcessor = (SchedulingProcessor) clonedProcessor;
-//                        schedulingProcessor.setScheduler(((SchedulingProcessor) processor).getScheduler().clone(
-//                                key, entryValveProcessor));
-//                    }
-//                }
-//                processor = processor.getNextProcessor();
-//            }
-//        }
-//        return new SingleStreamRuntime(clonedProcessStreamReceiver, clonedProcessorChain, metaComplexEvent,
-//                siddhiAppContext);
-//    }
-
     @Override
     public void setCommonProcessor(Processor commonProcessor) {
         if (processorChain == null) {
