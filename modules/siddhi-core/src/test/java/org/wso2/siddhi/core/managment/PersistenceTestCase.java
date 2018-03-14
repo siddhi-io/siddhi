@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.NoPersistenceStoreException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.test.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
@@ -2102,5 +2103,77 @@ public class PersistenceTestCase {
 
         Assert.assertTrue(count == 4);
         Assert.assertEquals(true, eventArrived);
+    }
+
+    @Test
+    public void persistenceTest21() throws InterruptedException {
+        log.info("Persistence test 13 - partitioned sum with group-by on length windows.");
+        final int inputEventCount = 10;
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+
+        String executionPlan = "@plan:name('incrementalPersistenceTest10') "
+                + "define stream cseEventStreamOne (symbol string, price float,volume int);"
+                + "partition with (price>=100 as 'large' or price<100 as 'small' of cseEventStreamOne) " +
+                "begin @info(name " +
+                "= 'query1') from cseEventStreamOne#window.length(4) select symbol,sum(price) as price " +
+                "group by symbol insert into " +
+                "OutStockStream ;  end ";
+
+
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+
+                eventArrived = true;
+                if (events != null) {
+                    for (Event event : events) {
+                        count++;
+                        lastValue = ((Double) event.getData(1)).longValue();
+                    }
+                }
+            }
+        };
+
+        executionPlanRuntime.addCallback("OutStockStream", streamCallback);
+
+        InputHandler inputHandler = executionPlanRuntime.getInputHandler("cseEventStreamOne");
+        executionPlanRuntime.start();
+
+        for (int i = 0; i < inputEventCount; i++) {
+            inputHandler.send(new Object[]{"IBM", 95f + i, 100});
+            Thread.sleep(100);
+            executionPlanRuntime.persist();
+        }
+
+        inputHandler.send(new Object[]{"IBM", 205f, 100});
+        Thread.sleep(100);
+
+        executionPlanRuntime.shutdown();
+
+        executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(executionPlan);
+
+        executionPlanRuntime.addCallback("OutStockStream", streamCallback);
+
+        inputHandler = executionPlanRuntime.getInputHandler("cseEventStreamOne");
+        executionPlanRuntime.start();
+
+        Thread.sleep(1000);
+
+        //loading
+        executionPlanRuntime.restoreLastRevision();
+
+        Thread.sleep(1000);
+
+        inputHandler.send(new Object[]{"IBM", 105f, 100});
+
+        Thread.sleep(1000);
+
+        Assert.assertEquals(414L, lastValue);
+
+        executionPlanRuntime.shutdown();
     }
 }

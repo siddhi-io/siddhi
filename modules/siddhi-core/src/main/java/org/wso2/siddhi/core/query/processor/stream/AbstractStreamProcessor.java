@@ -142,7 +142,13 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
             abstractStreamProcessor.complexEventPopulater = complexEventPopulater;
             abstractStreamProcessor.executionPlanContext = executionPlanContext;
             abstractStreamProcessor.elementId = elementId + "-" + key;
-            abstractStreamProcessor.init(inputDefinition, attributeExpressionExecutors, executionPlanContext, outputExpectsExpiredEvents);
+            abstractStreamProcessor.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
+            abstractStreamProcessor.queryName = queryName;
+            abstractStreamProcessor.executionPlanContext.getSnapshotService().addSnapshotable(queryName,
+                    abstractStreamProcessor);
+            abstractStreamProcessor.executionPlanContext.addEternalReferencedHolder(abstractStreamProcessor);
+            abstractStreamProcessor.init(inputDefinition, attributeExpressionExecutors, executionPlanContext,
+                    outputExpectsExpiredEvents);
             abstractStreamProcessor.start();
             return abstractStreamProcessor;
 
