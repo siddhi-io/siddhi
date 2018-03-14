@@ -113,7 +113,7 @@ public class SnapshotService {
 
         List<Snapshotable> snapshotableList = snapshotableMap.get(queryName);
 
-        // if List does not exist create it
+        // If List does not exist create it.
         if (snapshotableList == null) {
             snapshotableList = new ArrayList<Snapshotable>();
             snapshotableList.add(snapshotable);
