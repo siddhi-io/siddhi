@@ -17,14 +17,12 @@
  */
 package org.wso2.siddhi.core.query.input.stream.single;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
-import org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
 
 import java.util.ArrayList;
@@ -38,14 +36,12 @@ public class SingleStreamRuntime implements StreamRuntime {
     private Processor processorChain;
     private MetaComplexEvent metaComplexEvent;
     private ProcessStreamReceiver processStreamReceiver;
-    private SiddhiAppContext siddhiAppContext;
 
     public SingleStreamRuntime(ProcessStreamReceiver processStreamReceiver, Processor processorChain,
-                               MetaComplexEvent metaComplexEvent, SiddhiAppContext siddhiAppContext) {
+                               MetaComplexEvent metaComplexEvent) {
         this.processStreamReceiver = processStreamReceiver;
         this.processorChain = processorChain;
         this.metaComplexEvent = metaComplexEvent;
-        this.siddhiAppContext = siddhiAppContext;
     }
 
     public Processor getProcessorChain() {
@@ -74,18 +70,13 @@ public class SingleStreamRuntime implements StreamRuntime {
 
     @Override
     public StreamRuntime clone(String key) {
-        String[] queryIdKey = key.split("@");
-        ProcessStreamReceiver clonedProcessStreamReceiver = this.processStreamReceiver.clone(queryIdKey[1]);
+        ProcessStreamReceiver clonedProcessStreamReceiver = this.processStreamReceiver.clone(key);
         EntryValveProcessor entryValveProcessor = null;
         SchedulingProcessor schedulingProcessor;
         Processor clonedProcessorChain = null;
         if (processorChain != null) {
             if (!(processorChain instanceof QuerySelector || processorChain instanceof OutputRateLimiter)) {
-                clonedProcessorChain = processorChain.cloneProcessor(queryIdKey[1]);
-                if (clonedProcessorChain instanceof AbstractStreamProcessor) {
-                    AbstractStreamProcessor abstractStreamProcessor = (AbstractStreamProcessor) clonedProcessorChain;
-                    siddhiAppContext.getSnapshotService().addSnapshotable(queryIdKey[0], abstractStreamProcessor);
-                }
+                clonedProcessorChain = processorChain.cloneProcessor(key);
                 if (clonedProcessorChain instanceof EntryValveProcessor) {
                     entryValveProcessor = (EntryValveProcessor) clonedProcessorChain;
                 }
@@ -93,21 +84,20 @@ public class SingleStreamRuntime implements StreamRuntime {
             Processor processor = processorChain.getNextProcessor();
             while (processor != null) {
                 if (!(processor instanceof QuerySelector || processor instanceof OutputRateLimiter)) {
-                    Processor clonedProcessor = processor.cloneProcessor(queryIdKey[1]);
+                    Processor clonedProcessor = processor.cloneProcessor(key);
                     clonedProcessorChain.setToLast(clonedProcessor);
                     if (clonedProcessor instanceof EntryValveProcessor) {
                         entryValveProcessor = (EntryValveProcessor) clonedProcessor;
                     } else if (clonedProcessor instanceof SchedulingProcessor) {
                         schedulingProcessor = (SchedulingProcessor) clonedProcessor;
                         schedulingProcessor.setScheduler(((SchedulingProcessor) processor).getScheduler().clone(
-                                queryIdKey[1], entryValveProcessor));
+                                key, entryValveProcessor));
                     }
                 }
                 processor = processor.getNextProcessor();
             }
         }
-        return new SingleStreamRuntime(clonedProcessStreamReceiver, clonedProcessorChain, metaComplexEvent,
-                siddhiAppContext);
+        return new SingleStreamRuntime(clonedProcessStreamReceiver, clonedProcessorChain, metaComplexEvent);
     }
 
     @Override
