@@ -291,7 +291,6 @@ public class SiddhiAppRuntime {
             }
         }
     }
-
     public Event[] query(String storeQuery) {
         return query(SiddhiCompiler.parseStoreQuery(storeQuery));
     }
