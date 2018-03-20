@@ -296,7 +296,6 @@ public class SiddhiAppRuntime {
             }
         }
     }
-
     public Attribute[] getStoreQueryOutputAttributes(String storeQuery) {
         return getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery(storeQuery), storeQuery);
     }
