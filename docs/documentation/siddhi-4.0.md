@@ -842,7 +842,7 @@ Having allows you to filter events after processing the `select` statement.
 This allows you to filter the aggregation output.
 
 **Syntax**
-The syntax for the Having aggregate function is as follows:
+The syntax for the Having clause is as follows:
 
 ```sql
 from <input stream>#window.<window name>( ... )
@@ -860,6 +860,74 @@ from TempStream#window.time(10 min)
 select avg(temp) as avgTemp, roomNo
 group by roomNo
 having avgTemp > 30
+insert into AlertStream;
+```
+
+### Order By
+
+Order By allows you to order event batches returned from the `select` statement. 
+
+**Purpose**
+This allows you to order output events on ascending and/or descending order.
+
+**Syntax**
+The syntax for the Order By clause is as follows:
+
+```sql
+from <input stream>#window.<window name>( ... )
+select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
+group by <attribute1 name>, <attribute2 name> ...
+having <condition>
+order by <attribute1 name> (asc | desc)?, <attribute2 name> (<ascend/descend>)?, ...
+insert into <output stream>;
+```
+
+Here when the order is not defined the events will be ordered in ascending order.
+
+**Example**
+
+The following query calculates the average temperature per room for every 10 minutes, and generate output events 
+by ordering then in the ascending order of the room's avgTemp and then by the descending order of roomNo.
+
+```sql
+from TempStream#window.timeBatch(10 min)
+select avg(temp) as avgTemp, roomNo
+group by roomNo
+order by avgTemp, roomNo desc
+insert into AlertStream;
+```
+
+### Limit 
+
+Limit allows you to limit the number of events in each event batches returned from the `select` statement.
+
+**Purpose**
+This allows you to limit events in output event batches.
+
+**Syntax**
+The syntax for the Limit clause is as follows:
+
+```sql
+from <input stream>#window.<window name>( ... )
+select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
+group by <attribute1 name>, <attribute2 name> ...
+having <condition>
+order by <attribute1 name> (asc | desc)?, <attribute2 name> (<ascend/descend>)?, ...
+limit <positive interger>
+insert into <output stream>;
+```
+
+**Example**
+
+The following query calculates the average temperature per room for every 10 minutes, and only outputs the lowest 10
+rooms in ascending order of their room's avgTemp.
+
+```sql
+from TempStream#window.timeBatch(10 min)
+select avg(temp) as avgTemp, roomNo
+group by roomNo
+order by avgTemp
+limit 10
 insert into AlertStream;
 ```
 
