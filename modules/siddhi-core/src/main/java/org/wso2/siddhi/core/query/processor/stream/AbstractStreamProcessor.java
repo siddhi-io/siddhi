@@ -116,7 +116,8 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
     protected abstract List<Attribute> init(AbstractDefinition inputDefinition,
                                             ExpressionExecutor[] attributeExpressionExecutors, ConfigReader
                                                     configReader, SiddhiAppContext
-                                                    siddhiAppContext, boolean outputExpectsExpiredEvents, String queryName, String key);
+                                                    siddhiAppContext, boolean outputExpectsExpiredEvents,
+                                            String queryName, String key);
 
     public void process(ComplexEventChunk streamEventChunk) {
         streamEventChunk.reset();

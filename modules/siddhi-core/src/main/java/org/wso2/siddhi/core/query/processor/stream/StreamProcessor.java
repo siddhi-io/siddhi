@@ -72,7 +72,8 @@ public abstract class StreamProcessor extends AbstractStreamProcessor {
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                    SiddhiAppContext
-                                           siddhiAppContext, boolean outputExpectsExpiredEvents, String queryName, String key) {
+                                           siddhiAppContext, boolean outputExpectsExpiredEvents, String queryName,
+                                   String key) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         return init(inputDefinition, attributeExpressionExecutors, configReader, siddhiAppContext);
     }
