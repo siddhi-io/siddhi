@@ -241,7 +241,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     }
 
     @Override
-    public PreStateProcessor cloneProcessor(String queryName, String key) {
+    public PreStateProcessor cloneProcessor(String key) {
         AbsentStreamPreStateProcessor streamPreStateProcessor = new AbsentStreamPreStateProcessor(stateType,
                 withinStates, waitingTimeConstant);
         cloneProperties(streamPreStateProcessor, key);

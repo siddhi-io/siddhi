@@ -46,7 +46,7 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
     private boolean hasCallBack = false;
     private String elementId;
 
-    public void init(SiddhiAppContext siddhiAppContext, LockWrapper lockWrapper, String queryName, String key) {
+    public void init(SiddhiAppContext siddhiAppContext, LockWrapper lockWrapper, String queryName) {
         this.siddhiAppContext = siddhiAppContext;
         this.queryName = queryName;
         if (outputCallback != null && (outputCallback instanceof InsertIntoStreamCallback)) {
@@ -55,11 +55,7 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
         if (elementId == null) {
             elementId = "OutputRateLimiter-" + siddhiAppContext.getElementIdGenerator().createNewId();
         }
-        if (key != null) {
-            siddhiAppContext.getSnapshotService().addSnapshotable("p-" + key + "-" + queryName, this);
-        } else {
-            siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
-        }
+        siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
     }
 
     protected void sendToCallBacks(ComplexEventChunk complexEventChunk) {

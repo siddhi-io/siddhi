@@ -36,7 +36,7 @@ public abstract class AbstractAggregationAttributeExecutor implements Expression
 
     public AbstractAggregationAttributeExecutor(AttributeAggregator attributeAggregator,
                                                 ExpressionExecutor[] attributeExpressionExecutors,
-                                                SiddhiAppContext siddhiAppContext, String queryName, String key) {
+                                                SiddhiAppContext siddhiAppContext, String queryName) {
         this.siddhiAppContext = siddhiAppContext;
         this.attributeExpressionExecutors = attributeExpressionExecutors;
         this.attributeAggregator = attributeAggregator;
@@ -46,11 +46,7 @@ public abstract class AbstractAggregationAttributeExecutor implements Expression
             elementId = "AbstractAggregationAttributeExecutor-" + siddhiAppContext.getElementIdGenerator()
                     .createNewId();
         }
-        if (key != null) {
-            siddhiAppContext.getSnapshotService().addSnapshotable("p-" + key + "-" + queryName, this);
-        } else {
-            siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
-        }
+        siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
     }
 
     @Override

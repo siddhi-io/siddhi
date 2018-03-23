@@ -45,8 +45,8 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
     public GroupByAggregationAttributeExecutor(AttributeAggregator attributeAggregator,
                                                ExpressionExecutor[] attributeExpressionExecutors,
                                                ConfigReader configReader, SiddhiAppContext siddhiAppContext,
-                                               String queryName, String key) {
-        super(attributeAggregator, attributeExpressionExecutors, siddhiAppContext, queryName, key);
+                                               String queryName) {
+        super(attributeAggregator, attributeExpressionExecutors, siddhiAppContext, queryName);
         this.configReader = configReader;
         timestampGenerator = siddhiAppContext.getTimestampGenerator();
         lastCleanupTimestamp = timestampGenerator.currentTime();
@@ -83,7 +83,7 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
             return aOutput;
         }
 
-        String key = this.getElementId() + "-" + keyThreadLocal.get();
+        String key = keyThreadLocal.get();
         AttributeAggregator currentAttributeAggregator = aggregatorMap.get(key);
         if (currentAttributeAggregator == null) {
             currentAttributeAggregator = attributeAggregator.cloneAggregator(key);
@@ -102,7 +102,7 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
     public ExpressionExecutor cloneExecutor(String key) {
         return new GroupByAggregationAttributeExecutor(attributeAggregator.cloneAggregator(key),
                 attributeExpressionExecutors, configReader, siddhiAppContext,
-                queryName, key);
+                queryName);
     }
 
     @Override

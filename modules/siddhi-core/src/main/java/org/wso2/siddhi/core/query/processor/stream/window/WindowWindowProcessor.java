@@ -98,7 +98,7 @@ public class WindowWindowProcessor extends WindowProcessor implements FindablePr
     }
 
     @Override
-    public Processor cloneProcessor(String queryName, String key) {
+    public Processor cloneProcessor(String key) {
         try {
             WindowWindowProcessor streamProcessor = new WindowWindowProcessor(window);
             streamProcessor.inputDefinition = inputDefinition;
@@ -112,7 +112,7 @@ public class WindowWindowProcessor extends WindowProcessor implements FindablePr
             streamProcessor.additionalAttributes = additionalAttributes;
             streamProcessor.complexEventPopulater = complexEventPopulater;
             streamProcessor.init(inputDefinition, attributeExpressionExecutors, configReader, siddhiAppContext,
-                    outputExpectsExpiredEvents, queryName, key);
+                    outputExpectsExpiredEvents);
             streamProcessor.start();
             return streamProcessor;
 

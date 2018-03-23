@@ -69,14 +69,14 @@ public class SingleStreamRuntime implements StreamRuntime {
     }
 
     @Override
-    public StreamRuntime clone(String queryName, String key) {
+    public StreamRuntime clone(String key) {
         ProcessStreamReceiver clonedProcessStreamReceiver = this.processStreamReceiver.clone(key);
         EntryValveProcessor entryValveProcessor = null;
         SchedulingProcessor schedulingProcessor;
         Processor clonedProcessorChain = null;
         if (processorChain != null) {
             if (!(processorChain instanceof QuerySelector || processorChain instanceof OutputRateLimiter)) {
-                clonedProcessorChain = processorChain.cloneProcessor(queryName, key);
+                clonedProcessorChain = processorChain.cloneProcessor(key);
                 if (clonedProcessorChain instanceof EntryValveProcessor) {
                     entryValveProcessor = (EntryValveProcessor) clonedProcessorChain;
                 }
@@ -84,7 +84,7 @@ public class SingleStreamRuntime implements StreamRuntime {
             Processor processor = processorChain.getNextProcessor();
             while (processor != null) {
                 if (!(processor instanceof QuerySelector || processor instanceof OutputRateLimiter)) {
-                    Processor clonedProcessor = processor.cloneProcessor(queryName, key);
+                    Processor clonedProcessor = processor.cloneProcessor(key);
                     clonedProcessorChain.setToLast(clonedProcessor);
                     if (clonedProcessor instanceof EntryValveProcessor) {
                         entryValveProcessor = (EntryValveProcessor) clonedProcessor;

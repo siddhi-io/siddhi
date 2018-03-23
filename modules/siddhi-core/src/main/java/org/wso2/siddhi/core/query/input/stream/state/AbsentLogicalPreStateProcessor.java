@@ -331,7 +331,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     }
 
     @Override
-    public PreStateProcessor cloneProcessor(String query, String key) {
+    public PreStateProcessor cloneProcessor(String key) {
         AbsentLogicalPreStateProcessor logicalPreStateProcessor = new AbsentLogicalPreStateProcessor(logicalType,
                 stateType, withinStates, waitingTimeConstant);
         cloneProperties(logicalPreStateProcessor, key);

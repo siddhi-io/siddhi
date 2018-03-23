@@ -392,7 +392,7 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         }
 
 
-        public Processor cloneProcessor(String queryName, String key) {
+        public Processor cloneProcessor(String key) {
             return new StreamPublishProcessor(this.outputEventType);
         }
     }

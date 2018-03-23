@@ -56,7 +56,7 @@ public class AbsentStreamPostStateProcessor extends StreamPostStateProcessor {
     }
 
     @Override
-    public PostStateProcessor cloneProcessor(String queryName, String key) {
+    public PostStateProcessor cloneProcessor(String key) {
         AbsentStreamPostStateProcessor streamPostStateProcessor = new AbsentStreamPostStateProcessor();
         cloneProperties(streamPostStateProcessor);
         return streamPostStateProcessor;

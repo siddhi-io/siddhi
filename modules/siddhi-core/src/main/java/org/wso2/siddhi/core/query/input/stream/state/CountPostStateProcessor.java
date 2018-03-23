@@ -36,7 +36,7 @@ public class CountPostStateProcessor extends StreamPostStateProcessor {
         this.maxCount = maxCount;
     }
 
-    public PostStateProcessor cloneProcessor(String queryName, String key) {
+    public PostStateProcessor cloneProcessor(String key) {
         CountPostStateProcessor countPostStateProcessor = new CountPostStateProcessor(minCount, maxCount);
         cloneProperties(countPostStateProcessor);
         return countPostStateProcessor;

@@ -92,7 +92,7 @@ public class EntryValveProcessor implements Processor, Schedulable {
      * @return cloned processor
      */
     @Override
-    public Processor cloneProcessor(String queryName, String key) {
+    public Processor cloneProcessor(String key) {
         return new EntryValveProcessor(siddhiAppContext);
     }
 

@@ -211,7 +211,7 @@ public class QueryParser {
                         .init(streamRuntime.getMetaComplexEvent().getOutputStreamDefinition().getAttributeList().size(),
                                 selector.getAttributeProcessorList(), streamRuntime.getMetaComplexEvent());
             }
-            outputRateLimiter.init(siddhiAppContext, lockWrapper, queryName, null);
+            outputRateLimiter.init(siddhiAppContext, lockWrapper, queryName);
 
         } catch (DuplicateDefinitionException e) {
             if (nameElement != null) {

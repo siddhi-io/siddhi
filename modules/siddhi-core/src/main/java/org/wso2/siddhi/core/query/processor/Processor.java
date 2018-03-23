@@ -61,6 +61,6 @@ public interface Processor {
      * @param key partition key
      * @return cloned processor
      */
-    Processor cloneProcessor(String queryName, String key);
+    Processor cloneProcessor(String key);
 
 }

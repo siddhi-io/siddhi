@@ -171,7 +171,7 @@ public class JoinProcessor implements Processor {
      * @return Cloned Processor
      */
     @Override
-    public Processor cloneProcessor(String queryName, String key) {
+    public Processor cloneProcessor(String key) {
         JoinProcessor joinProcessor = new JoinProcessor(leftJoinProcessor, preJoinProcessor, outerJoinProcessor,
                 matchingStreamIndex);
         joinProcessor.setTrigger(trigger);

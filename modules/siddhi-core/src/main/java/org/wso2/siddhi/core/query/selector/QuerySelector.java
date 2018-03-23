@@ -351,7 +351,7 @@ public class QuerySelector implements Processor {
     }
 
     @Override
-    public Processor cloneProcessor(String queryName, String key) {
+    public Processor cloneProcessor(String key) {
         return null;
     }
 
