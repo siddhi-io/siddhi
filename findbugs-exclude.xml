@@ -187,7 +187,7 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.core\.util\.snapshot.*"/>
+        <Package name="~org\.wso2\.siddhi\.core\.util\.snapshot\.*"/>
         <Bug pattern="AT_OPERATION_SEQUENCE_ON_CONCURRENT_ABSTRACTION"/>
     </Match>
 
