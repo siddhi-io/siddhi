@@ -97,7 +97,7 @@ After successfully starting the Stream Processor Studio, the terminal in Linux s
 
 After starting the WSO2 Stream Processor, access the Stream Processor Studio by visiting the following link in your browser.
 ```
-http://localhost:9090/editor
+http://localhost:9390/editor
 ```
 This takes you to the Stream Processor Studio landing page.
 
