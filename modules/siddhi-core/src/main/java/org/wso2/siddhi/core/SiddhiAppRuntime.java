@@ -63,6 +63,7 @@ import org.wso2.siddhi.core.util.statistics.MemoryUsageTracker;
 import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.AggregationDefinition;
+import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.definition.WindowDefinition;
@@ -121,6 +122,7 @@ public class SiddhiAppRuntime {
     private LatencyTracker storeQueryLatencyTracker;
     private SiddhiDebugger siddhiDebugger;
     private boolean running = false;
+    private Future futureIncrementalPersistor;
 
     public SiddhiAppRuntime(Map<String, AbstractDefinition> streamDefinitionMap,
                             Map<String, AbstractDefinition> tableDefinitionMap,
@@ -261,6 +263,10 @@ public class SiddhiAppRuntime {
         queryRuntime.addCallback(callback);
     }
 
+    public Event[] query(String storeQuery) {
+        return query(SiddhiCompiler.parseStoreQuery(storeQuery), storeQuery);
+    }
+
     public Event[] query(StoreQuery storeQuery) {
         return query(storeQuery, null);
     }
@@ -275,6 +281,8 @@ public class SiddhiAppRuntime {
                 storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                         aggregationMap);
                 storeQueryRuntimeMap.put(storeQuery, storeQueryRuntime);
+            } else {
+                storeQueryRuntime.reset();
             }
 
             return storeQueryRuntime.execute();
@@ -292,8 +300,40 @@ public class SiddhiAppRuntime {
         }
     }
 
-    public Event[] query(String storeQuery) {
-        return query(SiddhiCompiler.parseStoreQuery(storeQuery));
+    public Attribute[] getStoreQueryOutputAttributes(String storeQuery) {
+        return getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery(storeQuery), storeQuery);
+    }
+
+    public Attribute[] getStoreQueryOutputAttributes(StoreQuery storeQuery) {
+        return getStoreQueryOutputAttributes(storeQuery, null);
+    }
+
+
+    /**
+     * This method get the storeQuery and return the corresponding output and its types.
+     *
+     * @param storeQuery       this storeQuery is processed and get the output attributes.
+     * @param storeQueryString this passed to report errors with context if there are any.
+     * @return List of output attributes
+     */
+    private Attribute[] getStoreQueryOutputAttributes(StoreQuery storeQuery, String storeQueryString) {
+        try {
+            StoreQueryRuntime storeQueryRuntime = storeQueryRuntimeMap.get(storeQuery);
+            if (storeQueryRuntime == null) {
+                storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
+                        aggregationMap);
+                storeQueryRuntimeMap.put(storeQuery, storeQueryRuntime);
+            }
+            return storeQueryRuntime.getStoreQueryOutputAttributes();
+        } catch (RuntimeException e) {
+            if (e instanceof SiddhiAppContextException) {
+                throw new StoreQueryCreationException(((SiddhiAppContextException) e).getMessageWithOutContext(), e,
+                        ((SiddhiAppContextException) e).getQueryContextStartIndex(),
+                        ((SiddhiAppContextException) e).getQueryContextEndIndex(), null, siddhiAppContext
+                        .getSiddhiAppString());
+            }
+            throw new StoreQueryCreationException(e.getMessage(), e);
+        }
     }
 
     public InputHandler getInputHandler(String streamId) {
@@ -313,35 +353,46 @@ public class SiddhiAppRuntime {
     }
 
     public synchronized void start() {
-        if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
-            siddhiAppContext.getStatisticsManager().startReporting();
-        }
-        for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
-            eternalReferencedHolder.start();
-        }
-        for (List<Sink> sinks : sinkMap.values()) {
-            for (Sink sink : sinks) {
-                sink.connectWithRetry();
+        try {
+            if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
+                siddhiAppContext.getStatisticsManager().startReporting();
+            }
+            for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
+                eternalReferencedHolder.start();
+            }
+            for (List<Sink> sinks : sinkMap.values()) {
+                for (Sink sink : sinks) {
+                    sink.connectWithRetry();
+                }
+            }
+
+            for (Table table : tableMap.values()) {
+                table.connectWithRetry();
+            }
+
+            for (StreamJunction streamJunction : streamJunctionMap.values()) {
+                streamJunction.startProcessing();
+            }
+            for (List<Source> sources : sourceMap.values()) {
+                for (Source source : sources) {
+                    source.connectWithRetry();
+                }
+            }
+
+            for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
+                aggregationRuntime.getRecreateInMemoryData().recreateInMemoryData();
+            }
+            running = true;
+        } catch (Throwable t) {
+            log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', triggering shutdown process. "
+                    + t.getMessage());
+            try {
+                shutdown();
+            } catch (Throwable t1) {
+                log.error("Error shutting down partially started Siddhi App '" + siddhiAppContext.getName() + "', "
+                        + t1.getMessage());
             }
         }
-
-        for (Table table : tableMap.values()) {
-            table.connectWithRetry();
-        }
-
-        for (StreamJunction streamJunction : streamJunctionMap.values()) {
-            streamJunction.startProcessing();
-        }
-        for (List<Source> sources : sourceMap.values()) {
-            for (Source source : sources) {
-                source.connectWithRetry();
-            }
-        }
-
-        for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
-            aggregationRuntime.getRecreateInMemoryData().recreateInMemoryData();
-        }
-        running = true;
     }
 
     public synchronized void shutdown() {
@@ -491,7 +542,26 @@ public class SiddhiAppRuntime {
             AsyncSnapshotPersistor asyncSnapshotPersistor = new AsyncSnapshotPersistor(snapshots,
                     siddhiAppContext.getSiddhiContext().getPersistenceStore(), siddhiAppContext.getName());
             String revision = asyncSnapshotPersistor.getRevision();
+            //TODO:Need to decide how do we handle the Future variable below.
             Future future = siddhiAppContext.getExecutorService().submit(asyncSnapshotPersistor);
+
+            //Base state
+            HashMap<String, HashMap<String, Object>> incrementalStateBase = serializeObj.incrementalStateBase;
+
+            if (incrementalStateBase != null) {
+                for (Map.Entry<String, HashMap<String, Object>> entry : incrementalStateBase.entrySet()) {
+                    for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
+                        AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
+                                AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
+                                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
+                                siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
+                                revision.split("_")[0], "B");
+
+                        //TODO:Need to decide how do we handle the Future variable below.
+                        Future future3 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
+                    }
+                }
+            }
 
             //Next, handle the increment persistance scenarios
             //Incremental state
@@ -506,24 +576,8 @@ public class SiddhiAppRuntime {
                                 siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
                                 revision.split("_")[0], "I");
 
+                        //TODO:Need to decide how do we handle the Future variable below.
                         Future future2 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
-                    }
-                }
-            }
-
-            //Base state
-            HashMap<String, HashMap<String, Object>> incrementalStateBase = serializeObj.incrementalStateBase;
-
-            if (incrementalStateBase != null) {
-                for (Map.Entry<String, HashMap<String, Object>> entry : incrementalStateBase.entrySet()) {
-                    for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
-                        AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
-                                AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
-                                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
-                                siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
-                                revision.split("_")[0], "B");
-
-                        Future future3 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
                     }
                 }
             }
@@ -548,6 +602,7 @@ public class SiddhiAppRuntime {
         }
     }
 
+    //TODO:Need to identify where this method has been used.
     public void restore(byte[] snapshot) throws CannotRestoreSiddhiAppStateException {
         try {
             // first, pause all the event sources
@@ -560,6 +615,7 @@ public class SiddhiAppRuntime {
         }
     }
 
+    //TODO:Need to identify where this method has been used.
     public void restoreRevision(String revision) throws CannotRestoreSiddhiAppStateException {
         try {
             // first, pause all the event sources

@@ -84,14 +84,15 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
     }
 
     @Override
-    public HashMap<String, Object> load(String siddhiAppName, String queryName, String elementId, String revision,
+    public byte[] load(String siddhiAppName, String queryName, String elementId, String revision,
                                         String type) {
         File file = new File(folder + File.separator + siddhiAppName + File.separator + revision + "_"
                 + siddhiAppName + "_" + queryName + "_" + elementId + "_" + type);
         HashMap<String, Object> result = new HashMap<>();
+        byte[] bytes = null;
 
         try {
-            byte[] bytes = Files.toByteArray(file);
+            bytes = Files.toByteArray(file);
             log.info("State loaded for " + siddhiAppName + " revision " + revision + " from the file system.");
             result.put(elementId, bytes);
         } catch (IOException e) {
@@ -99,7 +100,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                     " from file system.", e);
         }
 
-        return result;
+        return bytes;
     }
 
     @Override
@@ -129,7 +130,6 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
 
                     results.add(result);
                 }
-
             }
         }
 
@@ -139,12 +139,21 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
     public void cleanOldRevisions(String siddhiAppName, String queryName, String elementId, String revisionTimeStamp) {
         File dir = new File(folder + File.separator + siddhiAppName);
         File[] files = dir.listFiles();
-        boolean enableCleaning = false;
 
         if (files != null) {
             Arrays.sort(files, new Comparator<File>() {
+                @Override
                 public int compare(File f1, File f2) {
-                    return Integer.valueOf(Long.compare(f1.lastModified(), f2.lastModified()));
+                    long firstTimeStamp = Long.parseLong(f1.getName().split("_")[0]);
+                    long secondTimeStamp = Long.parseLong(f2.getName().split("_")[0]);
+
+                    if (firstTimeStamp > secondTimeStamp) {
+                        return 1;
+                    } else if (firstTimeStamp == secondTimeStamp) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
                 }
             });
 
@@ -154,18 +163,16 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                 String fileName = files[i].getName();
                 if (fileName.contains(siddhiAppName)) {
                     String[] items = fileName.split("_");
-                    long currentTimeStamp = Long.parseLong(items[0]);
+                    if (items.length == 5) {
+                        long currentTimeStamp = Long.parseLong(items[0]);
 
-                    if (currentTimeStamp < baseTimeStamp) {
-                        if (queryName.equals(items[2]) && elementId.equals(items[3])) {
-                            if (items[4].equals("B")) {
-                                enableCleaning = true;
-                            }
-
-                            if (enableCleaning && files[i].exists()) {
-                                Boolean isDeleted = files[i].delete();
-                                if (!isDeleted) {
-                                    log.error("Error deleting old revision " + fileName);
+                        if (currentTimeStamp < baseTimeStamp) {
+                            if (queryName.equals(items[2]) && elementId.equals(items[3])) {
+                                if (files[i].exists()) {
+                                    Boolean isDeleted = files[i].delete();
+                                    if (!isDeleted) {
+                                        log.error("Error deleting old revision " + fileName);
+                                    }
                                 }
                             }
                         }

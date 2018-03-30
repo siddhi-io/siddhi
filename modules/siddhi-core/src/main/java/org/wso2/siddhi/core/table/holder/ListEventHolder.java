@@ -26,7 +26,6 @@ import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
 import org.wso2.siddhi.core.util.snapshot.Snapshot;
 
-import java.util.LinkedList;
 import java.util.Map;
 
 /**
