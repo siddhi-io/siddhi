@@ -834,6 +834,61 @@ group by roomNo, deviceID
 insert into AvgTempStream;
 ```
 
+### Order By
+
+Order By allows you to order the aggregated result based on specified attributes. By default ordering will be done in
+ascending manner. User can use 'desc' keyword to order in descending manner.
+
+**Syntax**
+The syntax for the Order By aggregate function is as follows:
+
+```sql
+from <input stream>#window.<window name>(...)
+select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
+order by <attribute1 name>, <attribute2 name> ... {desc}
+insert into <output stream>;
+```
+
+**Example**
+The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
+for a sliding time window of 10 minutes and emits output in the descending order.
+
+```sql
+from TempStream#window.time(10 min)
+select avg(temp) as avgTemp, roomNo, deviceID
+group by roomNo, deviceID
+order by avgTemp desc
+insert into AvgTempStream;
+```
+
+### Limit
+
+Limit allows you to limit the number of aggregated results emitted. Users can provide the number of events to be
+emitted.
+
+**Syntax**
+The syntax for the Limit aggregate function is as follows:
+
+```sql
+from <input stream>#window.<window name>(...)
+select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
+limit <number of events to output>
+insert into <output stream>;
+```
+
+**Example**
+The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
+for a sliding time window of 10 minutes and emits two events with highest average temperature for each aggregate.
+
+```sql
+from TempStream#window.time(10 min)
+select avg(temp) as avgTemp, roomNo, deviceID
+group by roomNo, deviceID
+order by avgTemp desc
+limit 2
+insert into AvgTempStream;
+```
+
 ### Having
 
 Having allows you to filter events after processing the `select` statement.
