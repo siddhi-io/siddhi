@@ -834,61 +834,6 @@ group by roomNo, deviceID
 insert into AvgTempStream;
 ```
 
-### Order By
-
-Order By allows you to order the aggregated result based on specified attributes. By default ordering will be done in
-ascending manner. User can use 'desc' keyword to order in descending manner.
-
-**Syntax**
-The syntax for the Order By aggregate function is as follows:
-
-```sql
-from <input stream>#window.<window name>(...)
-select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
-order by <attribute1 name>, <attribute2 name> ... {desc}
-insert into <output stream>;
-```
-
-**Example**
-The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
-for a sliding time window of 10 minutes and emits output in the descending order.
-
-```sql
-from TempStream#window.time(10 min)
-select avg(temp) as avgTemp, roomNo, deviceID
-group by roomNo, deviceID
-order by avgTemp desc
-insert into AvgTempStream;
-```
-
-### Limit
-
-Limit allows you to limit the number of aggregated results emitted. Users can provide the number of events to be
-emitted.
-
-**Syntax**
-The syntax for the Limit aggregate function is as follows:
-
-```sql
-from <input stream>#window.<window name>(...)
-select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
-limit <number of events to output>
-insert into <output stream>;
-```
-
-**Example**
-The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
-for a sliding time window of 10 minutes and emits two events with highest average temperature for each aggregate.
-
-```sql
-from TempStream#window.time(10 min)
-select avg(temp) as avgTemp, roomNo, deviceID
-group by roomNo, deviceID
-order by avgTemp desc
-limit 2
-insert into AvgTempStream;
-```
-
 ### Having
 
 Having allows you to filter events after processing the `select` statement.
@@ -920,10 +865,8 @@ insert into AlertStream;
 
 ### Order By
 
-Order By allows you to order event batches returned from the `select` statement. 
-
-**Purpose**
-This allows you to order output events on ascending and/or descending order.
+Order By allows you to order the aggregated result in ascending and/or descending order based on specified attributes. By default ordering will be done in
+ascending manner. User can use 'desc' keyword to order in descending manner.
 
 **Syntax**
 The syntax for the Order By clause is as follows:
@@ -937,12 +880,10 @@ order by <attribute1 name> (asc | desc)?, <attribute2 name> (<ascend/descend>)?,
 insert into <output stream>;
 ```
 
-Here when the order is not defined the events will be ordered in ascending order.
-
 **Example**
 
-The following query calculates the average temperature per room for every 10 minutes, and generate output events 
-by ordering then in the ascending order of the room's avgTemp and then by the descending order of roomNo.
+The following query calculates the average temperature per room for every 10 minutes, and generate output events
+by ordering them in the ascending order of the room's avgTemp and then by the descending order of roomNo.
 
 ```sql
 from TempStream#window.timeBatch(10 min)
@@ -952,12 +893,10 @@ order by avgTemp, roomNo desc
 insert into AlertStream;
 ```
 
-### Limit 
+### Limit
 
-Limit allows you to limit the number of events in each event batches returned from the `select` statement.
-
-**Purpose**
-This allows you to limit events in output event batches.
+Limit allows you to limit the number of events to be emitted from an aggregated results batch. Users can provide the number of events to be
+emitted.
 
 **Syntax**
 The syntax for the Limit clause is as follows:
@@ -973,17 +912,16 @@ insert into <output stream>;
 ```
 
 **Example**
-
-The following query calculates the average temperature per room for every 10 minutes, and only outputs the lowest 10
-rooms in ascending order of their room's avgTemp.
+The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
+for every 10 minutes and emits two events with highest average temperature for each aggregate.
 
 ```sql
 from TempStream#window.timeBatch(10 min)
-select avg(temp) as avgTemp, roomNo
-group by roomNo
-order by avgTemp
-limit 10
-insert into AlertStream;
+select avg(temp) as avgTemp, roomNo, deviceID
+group by roomNo, deviceID
+order by avgTemp desc
+limit 2
+insert into HighestAvgTempStream;
 ```
 
 ### Join (Stream) 
