@@ -882,15 +882,15 @@ insert into <output stream>;
 
 **Example**
 
-The following query calculates the average temperature per room for every 10 minutes, and generate output events
+The following query calculates the average temperature per per `roomNo` and `deviceID` combination for every 10 minutes, and generate output events
 by ordering them in the ascending order of the room's avgTemp and then by the descending order of roomNo.
 
 ```sql
 from TempStream#window.timeBatch(10 min)
-select avg(temp) as avgTemp, roomNo
-group by roomNo
+select avg(temp) as avgTemp, roomNo, deviceID
+group by roomNo, deviceID
 order by avgTemp, roomNo desc
-insert into AlertStream;
+insert into AvgTempStream;
 ```
 
 ### Limit
