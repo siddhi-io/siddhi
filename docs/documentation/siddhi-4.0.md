@@ -2293,8 +2293,8 @@ extension type.
 * Follow the procedure for the required archetype, based on your project:
 
 !!! Note
-    When using generated archetypes please make sure you un-comment @Extension annotation and complete the
-    annotation with proper values. This annotation will be used to identify and document extension and hence your
+    When using the generated archetype please make sure you uncomment @Extension annotation and complete the
+    annotation with proper values. This annotation will be used to identify and document the extension, hence your
     extension will not work without @Extension annotation.
 
 **siddhi-execution**
