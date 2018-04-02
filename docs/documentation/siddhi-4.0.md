@@ -2293,7 +2293,7 @@ extension type.
 * Follow the procedure for the required archetype, based on your project:
 
 !!! Note
-    When using generated archetype please make sure you uncomment @Extension annotation and complete the
+    When using the generated archetype please make sure you uncomment @Extension annotation and complete the
     annotation with proper values. This annotation will be used to identify and document the extension, hence your
     extension will not work without @Extension annotation.
 
