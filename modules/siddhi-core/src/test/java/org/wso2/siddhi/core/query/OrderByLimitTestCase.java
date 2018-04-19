@@ -453,7 +453,7 @@ public class OrderByLimitTestCase {
                 "@info(name = 'query1') " +
                 "from cseEventStream#window.length(4) " +
                 "select symbol, price, volume " +
-                "order by price " +
+                "order by price asc " +
                 "limit 2 " +
                 "insert into outputStream ;";
 

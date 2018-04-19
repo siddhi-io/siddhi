@@ -63,6 +63,7 @@ import org.wso2.siddhi.core.util.statistics.MemoryUsageTracker;
 import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.AggregationDefinition;
+import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.definition.WindowDefinition;
@@ -261,6 +262,10 @@ public class SiddhiAppRuntime {
         queryRuntime.addCallback(callback);
     }
 
+    public Event[] query(String storeQuery) {
+        return query(SiddhiCompiler.parseStoreQuery(storeQuery), storeQuery);
+    }
+
     public Event[] query(StoreQuery storeQuery) {
         return query(storeQuery, null);
     }
@@ -275,6 +280,8 @@ public class SiddhiAppRuntime {
                 storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                         aggregationMap);
                 storeQueryRuntimeMap.put(storeQuery, storeQueryRuntime);
+            } else {
+                storeQueryRuntime.reset();
             }
 
             return storeQueryRuntime.execute();
@@ -292,8 +299,40 @@ public class SiddhiAppRuntime {
         }
     }
 
-    public Event[] query(String storeQuery) {
-        return query(SiddhiCompiler.parseStoreQuery(storeQuery));
+    public Attribute[] getStoreQueryOutputAttributes(String storeQuery) {
+        return getStoreQueryOutputAttributes(SiddhiCompiler.parseStoreQuery(storeQuery), storeQuery);
+    }
+
+    public Attribute[] getStoreQueryOutputAttributes(StoreQuery storeQuery) {
+        return getStoreQueryOutputAttributes(storeQuery, null);
+    }
+
+
+    /**
+     * This method get the storeQuery and return the corresponding output and its types.
+     *
+     * @param storeQuery       this storeQuery is processed and get the output attributes.
+     * @param storeQueryString this passed to report errors with context if there are any.
+     * @return List of output attributes
+     */
+    private Attribute[] getStoreQueryOutputAttributes(StoreQuery storeQuery, String storeQueryString) {
+        try {
+            StoreQueryRuntime storeQueryRuntime = storeQueryRuntimeMap.get(storeQuery);
+            if (storeQueryRuntime == null) {
+                storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
+                        aggregationMap);
+                storeQueryRuntimeMap.put(storeQuery, storeQueryRuntime);
+            }
+            return storeQueryRuntime.getStoreQueryOutputAttributes();
+        } catch (RuntimeException e) {
+            if (e instanceof SiddhiAppContextException) {
+                throw new StoreQueryCreationException(((SiddhiAppContextException) e).getMessageWithOutContext(), e,
+                        ((SiddhiAppContextException) e).getQueryContextStartIndex(),
+                        ((SiddhiAppContextException) e).getQueryContextEndIndex(), null, siddhiAppContext
+                        .getSiddhiAppString());
+            }
+            throw new StoreQueryCreationException(e.getMessage(), e);
+        }
     }
 
     public InputHandler getInputHandler(String streamId) {
@@ -313,35 +352,46 @@ public class SiddhiAppRuntime {
     }
 
     public synchronized void start() {
-        if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
-            siddhiAppContext.getStatisticsManager().startReporting();
-        }
-        for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
-            eternalReferencedHolder.start();
-        }
-        for (List<Sink> sinks : sinkMap.values()) {
-            for (Sink sink : sinks) {
-                sink.connectWithRetry();
+        try {
+            if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
+                siddhiAppContext.getStatisticsManager().startReporting();
+            }
+            for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
+                eternalReferencedHolder.start();
+            }
+            for (List<Sink> sinks : sinkMap.values()) {
+                for (Sink sink : sinks) {
+                    sink.connectWithRetry();
+                }
+            }
+
+            for (Table table : tableMap.values()) {
+                table.connectWithRetry();
+            }
+
+            for (StreamJunction streamJunction : streamJunctionMap.values()) {
+                streamJunction.startProcessing();
+            }
+            for (List<Source> sources : sourceMap.values()) {
+                for (Source source : sources) {
+                    source.connectWithRetry();
+                }
+            }
+
+            for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
+                aggregationRuntime.getRecreateInMemoryData().recreateInMemoryData();
+            }
+            running = true;
+        } catch (Throwable t) {
+            log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', triggering shutdown process. "
+                    + t.getMessage());
+            try {
+                shutdown();
+            } catch (Throwable t1) {
+                log.error("Error shutting down partially started Siddhi App '" + siddhiAppContext.getName() + "', "
+                        + t1.getMessage());
             }
         }
-
-        for (Table table : tableMap.values()) {
-            table.connectWithRetry();
-        }
-
-        for (StreamJunction streamJunction : streamJunctionMap.values()) {
-            streamJunction.startProcessing();
-        }
-        for (List<Source> sources : sourceMap.values()) {
-            for (Source source : sources) {
-                source.connectWithRetry();
-            }
-        }
-
-        for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
-            aggregationRuntime.getRecreateInMemoryData().recreateInMemoryData();
-        }
-        running = true;
     }
 
     public synchronized void shutdown() {

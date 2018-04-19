@@ -81,7 +81,7 @@ as a data stream.
 [Oracle Java SE Development Kit (JDK)](http://www.oracle.com/technetwork/java/javase/downloads/index.html) version 1.8. <br>
 **Step 2** — [Set the JAVA_HOME](https://docs.oracle.com/cd/E19182-01/820-7851/inst_cli_jdk_javahome_t/) environment 
 variable. <br>
-**Step 3** — Download the latest [WSO2 Stream Processor](https://github.com/wso2/product-sp/releases). <br>
+**Step 3** — Download the latest [WSO2 Stream Processor](http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17). <br>
 **Step 4** — Extract the downloaded zip and navigate to `<SP_HOME>/bin`. <br> (`SP_HOME` refers to the extracted folder) <br>
 **Step 5** — Issue the following command in the command prompt (Windows) / terminal (Linux) 
 
@@ -97,7 +97,7 @@ After successfully starting the Stream Processor Studio, the terminal in Linux s
 
 After starting the WSO2 Stream Processor, access the Stream Processor Studio by visiting the following link in your browser.
 ```
-http://localhost:9090/editor
+http://localhost:9390/editor
 ```
 This takes you to the Stream Processor Studio landing page.
 
