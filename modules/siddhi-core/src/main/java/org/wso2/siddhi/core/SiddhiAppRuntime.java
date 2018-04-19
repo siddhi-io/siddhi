@@ -122,6 +122,7 @@ public class SiddhiAppRuntime {
     private LatencyTracker storeQueryLatencyTracker;
     private SiddhiDebugger siddhiDebugger;
     private boolean running = false;
+    private Future futureIncrementalPersistor;
 
     public SiddhiAppRuntime(Map<String, AbstractDefinition> streamDefinitionMap,
                             Map<String, AbstractDefinition> tableDefinitionMap,
@@ -541,7 +542,26 @@ public class SiddhiAppRuntime {
             AsyncSnapshotPersistor asyncSnapshotPersistor = new AsyncSnapshotPersistor(snapshots,
                     siddhiAppContext.getSiddhiContext().getPersistenceStore(), siddhiAppContext.getName());
             String revision = asyncSnapshotPersistor.getRevision();
+            //TODO:Need to decide how do we handle the Future variable below.
             Future future = siddhiAppContext.getExecutorService().submit(asyncSnapshotPersistor);
+
+            //Base state
+            HashMap<String, HashMap<String, Object>> incrementalStateBase = serializeObj.incrementalStateBase;
+
+            if (incrementalStateBase != null) {
+                for (Map.Entry<String, HashMap<String, Object>> entry : incrementalStateBase.entrySet()) {
+                    for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
+                        AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
+                                AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
+                                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
+                                siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
+                                revision.split("_")[0], "B");
+
+                        //TODO:Need to decide how do we handle the Future variable below.
+                        Future future3 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
+                    }
+                }
+            }
 
             //Next, handle the increment persistance scenarios
             //Incremental state
@@ -556,24 +576,8 @@ public class SiddhiAppRuntime {
                                 siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
                                 revision.split("_")[0], "I");
 
+                        //TODO:Need to decide how do we handle the Future variable below.
                         Future future2 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
-                    }
-                }
-            }
-
-            //Base state
-            HashMap<String, HashMap<String, Object>> incrementalStateBase = serializeObj.incrementalStateBase;
-
-            if (incrementalStateBase != null) {
-                for (Map.Entry<String, HashMap<String, Object>> entry : incrementalStateBase.entrySet()) {
-                    for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
-                        AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
-                                AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
-                                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
-                                siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
-                                revision.split("_")[0], "B");
-
-                        Future future3 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
                     }
                 }
             }
@@ -598,6 +602,7 @@ public class SiddhiAppRuntime {
         }
     }
 
+    //TODO:Need to identify where this method has been used.
     public void restore(byte[] snapshot) throws CannotRestoreSiddhiAppStateException {
         try {
             // first, pause all the event sources
@@ -610,6 +615,7 @@ public class SiddhiAppRuntime {
         }
     }
 
+    //TODO:Need to identify where this method has been used.
     public void restoreRevision(String revision) throws CannotRestoreSiddhiAppStateException {
         try {
             // first, pause all the event sources

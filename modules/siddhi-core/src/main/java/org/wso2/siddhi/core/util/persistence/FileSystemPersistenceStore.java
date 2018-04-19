@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.util.persistence.util.PersistenceConstants;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Map;
 
@@ -117,7 +118,9 @@ public class FileSystemPersistenceStore implements PersistenceStore {
             }
         }
 
-        lastRevision = lastRevision.split("_")[0];
+        if (lastRevision != null) {
+            lastRevision = lastRevision.split("_")[0];
+        }
 
         return lastRevision;
     }
@@ -130,7 +133,15 @@ public class FileSystemPersistenceStore implements PersistenceStore {
 
     private void cleanOldRevisions(String siddhiAppName) {
         File targetDirectory = new File(folder + File.separator + siddhiAppName);
-        File[] files = targetDirectory.listFiles();
+        FileFilter filter = new FileFilter() {
+            @Override
+            public boolean accept(File name) {
+                String absolutePath = name.getAbsolutePath();
+                return  !absolutePath.endsWith("B") && !absolutePath.endsWith("I");
+            }
+        };
+        File[] files = targetDirectory.listFiles(filter);
+
         if (files != null) {
             while (files.length > numberOfRevisionsToSave) {
                 String firstRevision = null;
@@ -149,7 +160,8 @@ public class FileSystemPersistenceStore implements PersistenceStore {
                     }
                 }
 
-                files = targetDirectory.listFiles();
+                files = targetDirectory.listFiles(filter);
+
                 if (files == null || files.length < 1) {
                     break;
                 }
