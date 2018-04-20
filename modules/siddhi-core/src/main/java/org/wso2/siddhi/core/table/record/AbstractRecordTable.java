@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.table.record;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
+import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -88,7 +89,7 @@ public abstract class AbstractRecordTable extends Table {
         addingEventChunk.reset();
         long timestamp = 0L;
         while (addingEventChunk.hasNext()) {
-            StreamEvent event = addingEventChunk.next();
+            ComplexEvent event = addingEventChunk.next();
             records.add(event.getOutputData());
             timestamp = event.getTimestamp();
         }
