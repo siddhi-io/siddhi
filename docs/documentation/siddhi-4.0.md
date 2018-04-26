@@ -1910,15 +1910,16 @@ The following parameters are configured in a table definition:
 
     In this query, the output event type is not specified. Therefore, it returns both current and expired events as the output.
     
-    <pre>
-    define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second); </pre>
-
+    ```sql
+    define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second);
+    ```
 + Returning an output only when events expire from the window.
 
     In this query, the output event type of the window is `expired events`. Therefore, it only returns the events that have expired from the window as the output.
     
-    <pre>
-    define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second) output expired events; </pre>
+    ```sql
+    define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second) output expired events;
+    ```
      
 
 **Operators on Defined Windows**
