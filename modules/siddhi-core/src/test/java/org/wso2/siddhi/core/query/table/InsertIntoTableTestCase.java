@@ -524,4 +524,73 @@ public class InsertIntoTableTestCase {
 
         siddhiAppRuntime.shutdown();
     }
+
+    @Test
+    public void insertIntoTableTest10() throws InterruptedException {
+        log.info("InsertIntoTableTest10 - Insert into Table with Window and GroupBy");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume double); " +
+                "define stream StockCheckStream (symbol string); " +
+                "define table StockTable (symbol string, totalVolume double); ";
+        String query1 = "" +
+                "@info(name = 'query1') " +
+                "from StockStream#window.lengthBatch(3) " +
+                "select symbol , sum(volume) as totalVolume " +
+                "group by symbol " +
+                "insert into StockTable;";
+
+        String query2 = "" +
+                "@info(name = 'query2') " +
+                "from StockCheckStream join StockTable on StockCheckStream.symbol == StockTable.symbol " +
+                "select StockTable.totalVolume " +
+                "insert into OutStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query1 + query2);
+
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                AssertJUnit.assertArrayEquals(new Object[]{3000D}, event.getData());
+                                break;
+                            default:
+                                AssertJUnit.fail();
+                        }
+                    }
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler stockCheckStream = siddhiAppRuntime.getInputHandler("StockCheckStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 10.1, 1000D});
+        stockStream.send(new Object[]{"WSO2", 10.1, 1000D});
+        stockStream.send(new Object[]{"WSO2", 10.1, 1000D});
+        Thread.sleep(500);
+        stockCheckStream.send(new Object[]{"WSO2"});
+        Thread.sleep(500);
+
+        AssertJUnit.assertEquals("Number of success events", 1, inEventCount);
+        AssertJUnit.assertEquals("Number of remove events", 0, removeEventCount);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+
+        siddhiAppRuntime.shutdown();
+    }
 }
