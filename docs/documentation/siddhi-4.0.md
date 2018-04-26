@@ -136,7 +136,7 @@ The following is the list of source types that are currently supported:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
-* In-memory
+* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#inmemory-source">In-memory</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a>
@@ -245,7 +245,7 @@ The following is a list of currently supported sink types.
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
-* In-memory
+* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#inmemory-sink">In-memory</a>     
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> 
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> 
@@ -609,22 +609,22 @@ E.g. Passing 1 hour and 25 minutes to `test()` function.
 
 Following are some inbuilt functions shipped with Siddhi, for more functions refer execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>.
 
-+ eventTimestamp
-+ log
-+ UUID
-+ default
-+ cast
-+ convert
-+ ifThenElse
-+ minimum
-+ maximum
-+ coalesce
-+ instanceOfBoolean
-+ instanceOfDouble
-+ instanceOfFloat
-+ instanceOfInteger
-+ instanceOfLong
-+ instanceOfString
++ [eventTimestamp](https://wso2.github.io/siddhi/api/latest/#eventtimestamp-function)
++ [log](https://wso2.github.io/siddhi/api/latest/#log-stream-processor)
++ [UUID](https://wso2.github.io/siddhi/api/latest/#uuid-function)
++ [default](https://wso2.github.io/siddhi/api/latest/#default-function)
++ [cast](https://wso2.github.io/siddhi/api/latest/#cast-function)
++ [convert](https://wso2.github.io/siddhi/api/latest/#convert-function)
++ [ifThenElse](https://wso2.github.io/siddhi/api/latest/#ifthenelse-function)
++ [minimum](https://wso2.github.io/siddhi/api/latest/#minimum-function)
++ [maximum](https://wso2.github.io/siddhi/api/latest/#maximum-function)
++ [coalesce](https://wso2.github.io/siddhi/api/latest/#coalesce-function)
++ [instanceOfBoolean](https://wso2.github.io/siddhi/api/latest/#instanceofboolean-function)
++ [instanceOfDouble](https://wso2.github.io/siddhi/api/latest/#instanceofdouble-function)
++ [instanceOfFloat](https://wso2.github.io/siddhi/api/latest/#instanceoffloat-function)
++ [instanceOfInteger](https://wso2.github.io/siddhi/api/latest/#instanceofinteger-function)
++ [instanceOfLong](https://wso2.github.io/siddhi/api/latest/#instanceoflong-function)
++ [instanceOfString](https://wso2.github.io/siddhi/api/latest/#instanceofstring-function)
 
 **Example**
 
@@ -730,17 +730,17 @@ insert into MaxTempStream;
 
 Following are some inbuilt windows shipped with Siddhi. For more window types, see execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
 
-* time
-* timeBatch
-* timeLength
-* length
-* lengthBatch
-* sort
-* frequent
-* lossyFrequent
-* cron
-* externalTime
-* externalTimeBatch
+* [time](https://wso2.github.io/siddhi/api/latest/#time-window)
+* [timeBatch](https://wso2.github.io/siddhi/api/latest/#timebatch-window)
+* [timeLength](https://wso2.github.io/siddhi/api/latest/#timelength-window)
+* [length](https://wso2.github.io/siddhi/api/latest/#length-window)
+* [lengthBatch](https://wso2.github.io/siddhi/api/latest/#lengthbatch-window)
+* [sort](https://wso2.github.io/siddhi/api/latest/#sort-window)
+* [frequent](https://wso2.github.io/siddhi/api/latest/#frequent-window)
+* [lossyFrequent](https://wso2.github.io/siddhi/api/latest/#lossyfrequent-window)
+* [cron](https://wso2.github.io/siddhi/api/latest/#cron-window)
+* [externalTime](https://wso2.github.io/siddhi/api/latest/#externaltime-window)
+* [externalTimeBatch](https://wso2.github.io/siddhi/api/latest/#externaltimebatch-window)
 
 **Output event types**<a id="output-event-types" class='anchor' aria-hidden='true'></a> 
 
@@ -1910,15 +1910,16 @@ The following parameters are configured in a table definition:
 
     In this query, the output event type is not specified. Therefore, it returns both current and expired events as the output.
     
-    <pre>
-    define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second); </pre>
-
+    ```sql
+    define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second);
+    ```
 + Returning an output only when events expire from the window.
 
     In this query, the output event type of the window is `expired events`. Therefore, it only returns the events that have expired from the window as the output.
     
-    <pre>
-    define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second) output expired events; </pre>
+    ```sql
+    define window SensorWindow (name string, value float, roomNo int, deviceID string) timeBatch(1 second) output expired events;
+    ```
      
 
 **Operators on Defined Windows**
