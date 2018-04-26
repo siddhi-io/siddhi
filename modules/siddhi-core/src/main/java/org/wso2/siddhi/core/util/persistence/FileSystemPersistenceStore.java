@@ -34,7 +34,16 @@ public class FileSystemPersistenceStore implements PersistenceStore {
 
     private static final Logger log = Logger.getLogger(FileSystemPersistenceStore.class);
     private int numberOfRevisionsToSave = 3;
-    private String folder = "/home/miyurud/Desktop/temp";
+    private String folder;
+
+    public FileSystemPersistenceStore(String folderPath, int numberOfRevisionsToSave) {
+        this.numberOfRevisionsToSave = numberOfRevisionsToSave;
+        this.folder = folderPath;
+    }
+
+    public FileSystemPersistenceStore(String folderPath) {
+        this.folder = folderPath;
+    }
 
     @Override
     public void save(String siddhiAppName, String revision, byte[] snapshot) {
@@ -137,7 +146,7 @@ public class FileSystemPersistenceStore implements PersistenceStore {
             @Override
             public boolean accept(File name) {
                 String absolutePath = name.getAbsolutePath();
-                return  !absolutePath.endsWith("B") && !absolutePath.endsWith("I");
+                return !absolutePath.endsWith("B") && !absolutePath.endsWith("I");
             }
         };
         File[] files = targetDirectory.listFiles(filter);

@@ -21,19 +21,31 @@ import java.io.Serializable;
 
 
 /**
- * The class which resembles an instance of operation performed on SnapshotableComplexEventChunk.
+ * The class which resembles an instance of operation performed on SnapshotableStreamEventQueue.
  */
 public class Operation implements Serializable {
-    //Do we need the timestamp of the operation here?
-    public int operation;
+
+    /**
+     * Possible Operator actions
+     */
+    public enum Operator {
+        ADD ,
+        REMOVE,
+        CLEAR,
+        OVERWRITE,
+        DELETE_BY_OPERATOR,
+        DELETE_BY_INDEX
+    }
+
+    public Operator operation;
     public Object parameters;
 
-    public Operation(int operation, Object parameters) {
+    public Operation(Operator operation, Object parameters) {
         this.operation = operation;
         this.parameters = parameters;
     }
 
-    public Operation(int operation) {
+    public Operation(Operator operation) {
         this.operation = operation;
     }
 }

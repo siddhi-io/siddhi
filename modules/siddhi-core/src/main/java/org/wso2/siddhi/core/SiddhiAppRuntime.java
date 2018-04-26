@@ -537,7 +537,7 @@ public class SiddhiAppRuntime {
             SnapshotSerialized serializeObj = siddhiAppContext.getSnapshotService().snapshot();
 
             //First, handle the full state
-            byte[] snapshots = serializeObj.fullState;
+            byte[] snapshots = serializeObj.getFullState();
             // start the snapshot persisting task asynchronously
             AsyncSnapshotPersistor asyncSnapshotPersistor = new AsyncSnapshotPersistor(snapshots,
                     siddhiAppContext.getSiddhiContext().getPersistenceStore(), siddhiAppContext.getName());
@@ -546,7 +546,7 @@ public class SiddhiAppRuntime {
             Future future = siddhiAppContext.getExecutorService().submit(asyncSnapshotPersistor);
 
             //Base state
-            HashMap<String, HashMap<String, Object>> incrementalStateBase = serializeObj.incrementalStateBase;
+            HashMap<String, HashMap<String, Object>> incrementalStateBase = serializeObj.getIncrementalStateBase();
 
             if (incrementalStateBase != null) {
                 for (Map.Entry<String, HashMap<String, Object>> entry : incrementalStateBase.entrySet()) {
@@ -565,7 +565,7 @@ public class SiddhiAppRuntime {
 
             //Next, handle the increment persistance scenarios
             //Incremental state
-            HashMap<String, HashMap<String, Object>> incrementalState = serializeObj.incrementalState;
+            HashMap<String, HashMap<String, Object>> incrementalState = serializeObj.getIncrementalState();
 
             if (incrementalState != null) {
                 for (Map.Entry<String, HashMap<String, Object>> entry : incrementalState.entrySet()) {
@@ -595,7 +595,7 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // take snapshots of execution units
-            return siddhiAppContext.getSnapshotService().snapshot().fullState;
+            return siddhiAppContext.getSnapshotService().snapshot().getFullState();
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));

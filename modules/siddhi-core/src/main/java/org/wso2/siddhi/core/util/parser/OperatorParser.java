@@ -20,7 +20,8 @@ package org.wso2.siddhi.core.util.parser;
 
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
+import org.wso2.siddhi.core.util.collection.operator.SnapshotableEventQueueOperator;
+import org.wso2.siddhi.core.util.snapshot.SnapshotableStreamEventQueue;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -89,12 +90,12 @@ public class OperatorParser {
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
                     variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
             return new EventChunkOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
-        }  else if (storeEvents instanceof SnapshotableComplexEventChunk) {
-        ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
-                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
-        return new EventChunkOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
-    } else if (storeEvents instanceof Map) {
+        } else if (storeEvents instanceof SnapshotableStreamEventQueue) {
+            ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
+                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
+                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+            return new SnapshotableEventQueueOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
+        } else if (storeEvents instanceof Map) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
                     variableExpressionExecutors, siddhiAppContext, false, 0, queryName);

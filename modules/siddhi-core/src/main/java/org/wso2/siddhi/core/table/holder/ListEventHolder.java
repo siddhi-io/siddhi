@@ -20,25 +20,25 @@ package org.wso2.siddhi.core.table.holder;
 
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
-import org.wso2.siddhi.core.util.snapshot.Snapshot;
-
-import java.util.Map;
+import org.wso2.siddhi.core.util.snapshot.SnapshotableStreamEventQueue;
 
 /**
  * Holder object to contain a list of {@link StreamEvent}. Users can add {@link ComplexEventChunk}s to the
  * {@link ListEventHolder} where events in chunk will be added to the {@link StreamEvent} list.
  */
-public class ListEventHolder extends SnapshotableComplexEventChunk<StreamEvent> implements EventHolder {
+public class ListEventHolder extends SnapshotableStreamEventQueue implements EventHolder {
 
     private static final long serialVersionUID = 4695745058501269511L;
     private StreamEventPool tableStreamEventPool;
     private StreamEventConverter eventConverter;
 
-    public ListEventHolder(StreamEventPool tableStreamEventPool, StreamEventConverter eventConverter) {
+    public ListEventHolder(StreamEventPool tableStreamEventPool, StreamEventConverter eventConverter,
+                           StreamEventCloner streamEventCloner) {
+        super(streamEventCloner);
         this.tableStreamEventPool = tableStreamEventPool;
         this.eventConverter = eventConverter;
     }
@@ -49,21 +49,8 @@ public class ListEventHolder extends SnapshotableComplexEventChunk<StreamEvent> 
         while (addingEventChunk.hasNext()) {
             ComplexEvent complexEvent = addingEventChunk.next();
             StreamEvent streamEvent = tableStreamEventPool.borrowEvent();
-            StreamEvent streamEvent2 = tableStreamEventPool.borrowEvent();
             eventConverter.convertComplexEvent(complexEvent, streamEvent);
-            eventConverter.convertComplexEvent(complexEvent, streamEvent2);
-            //this.add(streamEvent);
-            this.add(streamEvent, streamEvent2);
+            this.add(streamEvent);
         }
-    }
-
-    @Override
-    public Snapshot getSnapshot() {
-        return super.getSnapshot();
-    }
-
-    @Override
-    public Object restore(String eventHolder, Map<String, Object> state) {
-        return super.restore(eventHolder, state);
     }
 }

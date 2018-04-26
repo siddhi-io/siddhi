@@ -24,7 +24,31 @@ import java.util.HashMap;
  * The class which represents the serialized snapshot.
  */
 public class SnapshotSerialized {
-    public byte[] fullState;
-    public HashMap<String, HashMap<String, Object>> incrementalState;
-    public HashMap<String, HashMap<String, Object>> incrementalStateBase;
+    private byte[] fullState;
+    private HashMap<String, HashMap<String, Object>> incrementalState;
+    private HashMap<String, HashMap<String, Object>> incrementalStateBase;
+
+    public byte[] getFullState() {
+        return fullState;
+    }
+
+    public void setFullState(byte[] fullState) {
+        this.fullState = fullState;
+    }
+
+    public HashMap<String, HashMap<String, Object>> getIncrementalState() {
+        return incrementalState;
+    }
+
+    public void setIncrementalState(HashMap<String, HashMap<String, Object>> incrementalState) {
+        this.incrementalState = incrementalState;
+    }
+
+    public HashMap<String, HashMap<String, Object>> getIncrementalStateBase() {
+        return incrementalStateBase;
+    }
+
+    public void setIncrementalStateBase(HashMap<String, HashMap<String, Object>> incrementalStateBase) {
+        this.incrementalStateBase = incrementalStateBase;
+    }
 }

@@ -32,8 +32,8 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
+import org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.IncrementalFileSystemPersistenceStore;
-import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,6 +50,7 @@ public class IncrementalPersistenceTestCase {
     private int removeEventCount;
     private List<Object[]> inEventsList;
     private AtomicInteger count2 = new AtomicInteger(0);
+    private String storageFilePath = "./temp";
 
     @BeforeMethod
     public void init() {
@@ -66,11 +67,10 @@ public class IncrementalPersistenceTestCase {
         log.info("Incremental persistence test 1 - length window query");
         final int inputEventCount = 10;
         final int eventWindowSize = 4;
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "" +
                 "@app:name('incrementalPersistenceTest1') " +
@@ -158,11 +158,10 @@ public class IncrementalPersistenceTestCase {
         log.info("Incremental persistence test 2 - length batch window query");
         final int inputEventCount = 10;
         final int eventWindowSize = 4;
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "" +
                 "@app:name('incrementalPersistenceTest2') " +
@@ -258,11 +257,10 @@ public class IncrementalPersistenceTestCase {
         log.info("Incremental persistence test 3 - time window query");
         final int inputEventCount = 10;
         final int eventWindowSizeInSeconds = 2;
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "" +
                 "@app:name('incrementalPersistenceTest3') " +
@@ -358,11 +356,10 @@ public class IncrementalPersistenceTestCase {
         log.info("Incremental persistence test 4 - time batch window query");
         final int inputEventCount = 10;
         final int eventWindowSizeInSeconds = 2;
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "" +
                 "@app:name('incrementalPersistenceTest4') " +
@@ -458,11 +455,10 @@ public class IncrementalPersistenceTestCase {
         log.info("Incremental persistence test 5 - external time window query");
         final int inputEventCount = 10;
         final int eventWindowSizeInSeconds = 2;
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "" +
                 "@app:name('incrementalPersistenceTest5') " +
@@ -508,7 +504,7 @@ public class IncrementalPersistenceTestCase {
         //Thread.sleep(100);
         inputHandler.send(new Object[]{(2L + inputEventCount), 200.4f, 110});
 
-        inputHandler.send(new Object[]{(3L  + inputEventCount), 300.4f, 100});
+        inputHandler.send(new Object[]{(3L + inputEventCount), 300.4f, 100});
         //Thread.sleep(100);
         inputHandler.send(new Object[]{(4L + inputEventCount), 400.4f, 300});
 
@@ -557,10 +553,8 @@ public class IncrementalPersistenceTestCase {
         int inputEventCountPerCategory = 10;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String streams = "" +
                 "@app:name('incrementalPersistenceTest6') " +
@@ -669,10 +663,8 @@ public class IncrementalPersistenceTestCase {
         int inputEventCountPerCategory = 10;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String streams = "" +
                 "@app:name('incrementalPersistenceTest7') " +
@@ -754,7 +746,7 @@ public class IncrementalPersistenceTestCase {
             Thread.sleep(2000);
 
             stockStream.send(new Object[]{"WSO2-" + (inputEventCountPerCategory + 1), 100.6f, 180L});
-            stockStream.send(new Object[]{"IBM-"  + (inputEventCountPerCategory + 1), 100.6f, 100L});
+            stockStream.send(new Object[]{"IBM-" + (inputEventCountPerCategory + 1), 100.6f, 100L});
 
             stockStream.send(new Object[]{"WSO2-" + (inputEventCountPerCategory + 2), 8.6f, 13L});
             stockStream.send(new Object[]{"IBM-" + (inputEventCountPerCategory + 2), 7.6f, 14L});
@@ -782,10 +774,8 @@ public class IncrementalPersistenceTestCase {
         final int inputEventCount = 10;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String streams = "" +
                 "@app:name('incrementalPersistenceTest8') " +
@@ -868,7 +858,6 @@ public class IncrementalPersistenceTestCase {
             stockStream.send(new Object[]{inputEventCount + 3, 30L});
 
 
-
             AssertJUnit.assertTrue(count <= (inputEventCount + 3));
             AssertJUnit.assertEquals(new Long(1000), lastValue);
             AssertJUnit.assertEquals(true, eventArrived);
@@ -885,10 +874,8 @@ public class IncrementalPersistenceTestCase {
         final int inputEventCount = 10;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String streams = "" +
                 "@app:name('incrementalPersistenceTest9') " +
@@ -985,11 +972,10 @@ public class IncrementalPersistenceTestCase {
     public void incrementalPersistenceTest10() throws InterruptedException {
         log.info("Incremental persistence test 10 - partitioned sum with group-by on length windows.");
         final int inputEventCount = 10;
-        SiddhiManager siddhiManager = new SiddhiManager();
 
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "@app:name('incrementalPersistenceTest10') "
                 + "define stream cseEventStreamOne (symbol string, price float,volume int);"
@@ -1069,11 +1055,10 @@ public class IncrementalPersistenceTestCase {
         AtomicInteger count = new AtomicInteger();
         AtomicLong ibmCount = new AtomicLong();
         AtomicLong wso2Count = new AtomicLong();
-        SiddhiManager siddhiManager = new SiddhiManager();
 
-        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
-        siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "@app:name('incrementalPersistenceTest11') " +
                 "define stream StockQuote (symbol string, price float, volume int);" +
@@ -1094,7 +1079,7 @@ public class IncrementalPersistenceTestCase {
                 AssertJUnit.assertTrue("IBM".equals(events[0].getData(0)) || "WSO2".equals(events[0].getData(0)));
                 count.addAndGet(events.length);
 
-                for (Event event: events) {
+                for (Event event : events) {
                     if ("IBM".equals(event.getData(0))) {
                         ibmCount.set((Long) event.getData(1));
                     } else {

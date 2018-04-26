@@ -30,6 +30,8 @@ import java.util.List;
  */
 public class BasicSingleInputStream extends SingleInputStream {
 
+    private static final long serialVersionUID = 1L;
+
     protected BasicSingleInputStream(String streamId) {
         this(streamId, false);
     }

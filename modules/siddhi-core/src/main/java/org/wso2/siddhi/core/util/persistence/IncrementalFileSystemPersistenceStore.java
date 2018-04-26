@@ -37,11 +37,15 @@ import java.util.Map;
 public class IncrementalFileSystemPersistenceStore implements IncrementalPersistenceStore {
 
     private static final Logger log = Logger.getLogger(IncrementalFileSystemPersistenceStore.class);
-    private String folder = "/home/miyurud/Desktop/temp";
+    private String folder;
+
+    public IncrementalFileSystemPersistenceStore(String storageFilePath) {
+        folder = storageFilePath;
+    }
 
     @Override
-    public void save(String siddhiAppName, String queryName, String elementId, String revision, byte[] snapshot,
-                     String type) {
+    public void save(String siddhiAppName, String queryName, String elementId, String revision,
+                     String type, byte[] snapshot) {
         File file = new File(folder + File.separator + siddhiAppName + File.separator + revision);
         try {
             Files.createParentDirs(file);
@@ -84,8 +88,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
     }
 
     @Override
-    public byte[] load(String siddhiAppName, String queryName, String elementId, String revision,
-                                        String type) {
+    public byte[] load(String siddhiAppName, String queryName, String elementId, String revision, String type) {
         File file = new File(folder + File.separator + siddhiAppName + File.separator + revision + "_"
                 + siddhiAppName + "_" + queryName + "_" + elementId + "_" + type);
         HashMap<String, Object> result = new HashMap<>();

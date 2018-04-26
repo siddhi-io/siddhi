@@ -37,7 +37,7 @@ public class AsyncSnapshotPersistor implements Runnable {
         this.snapshots = snapshots;
         this.persistenceStore = persistenceStore;
         this.siddhiAppName = siddhiAppName;
-        revision = System.currentTimeMillis() + "_" + siddhiAppName;
+        this.revision = System.currentTimeMillis() + "_" + siddhiAppName;
     }
 
     public String getRevision() {

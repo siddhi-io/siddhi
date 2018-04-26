@@ -24,7 +24,6 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
@@ -38,6 +37,8 @@ import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
+import org.wso2.siddhi.core.util.snapshot.SnapshotableStreamEventQueue;
+import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateHolder;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
@@ -75,7 +76,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
 
     private int length;
     private int count = 0;
-    private SnapshotableComplexEventChunk<StreamEvent> expiredEventChunk;
+    private SnapshotableStreamEventQueue expiredEventQueue;
 
     public int getLength() {
         return length;
@@ -94,8 +95,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
             throw new SiddhiAppValidationException("Length window should only have one parameter (<int> " +
                     "windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
         }
-
-        expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false, "LW:" + length);
+        expiredEventQueue = new SnapshotableStreamEventQueue(streamEventCloner, length);
     }
 
     @Override
@@ -106,18 +106,16 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                StreamEvent clonedEvent2 = streamEventCloner.copyStreamEvent(streamEvent);
                 clonedEvent.setType(StreamEvent.Type.EXPIRED);
-                clonedEvent2.setType(StreamEvent.Type.EXPIRED);
                 if (count < length) {
                     count++;
-                    this.expiredEventChunk.add(clonedEvent, clonedEvent2);
+                    this.expiredEventQueue.add(clonedEvent);
                 } else {
-                    StreamEvent firstEvent = this.expiredEventChunk.poll();
+                    StreamEvent firstEvent = this.expiredEventQueue.poll();
                     if (firstEvent != null) {
                         firstEvent.setTimestamp(currentTime);
                         streamEventChunk.insertBeforeCurrent(firstEvent);
-                        this.expiredEventChunk.add(clonedEvent, clonedEvent2);
+                        this.expiredEventQueue.add(clonedEvent);
                     } else {
                         StreamEvent resetEvent = streamEventCloner.copyStreamEvent(streamEvent);
                         resetEvent.setType(ComplexEvent.Type.RESET);
@@ -141,7 +139,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
 
     @Override
     public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, expiredEventChunk, streamEventCloner);
+        return ((Operator) compiledCondition).find(matchingEvent, expiredEventQueue, streamEventCloner);
     }
 
     @Override
@@ -149,7 +147,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
                                               SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, String queryName) {
-        return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
+        return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
     }
 
@@ -169,7 +167,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
             state.put("Count", count);
-            state.put("ExpiredEventChunk", expiredEventChunk.getSnapshot());
+            state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
         }
         return state;
     }
@@ -178,8 +176,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     @Override
     public synchronized void restoreState(Map<String, Object> state) {
         count = (int) state.get("Count");
-        expiredEventChunk.clear();
-        expiredEventChunk = (SnapshotableComplexEventChunk<StreamEvent>)
-                expiredEventChunk.restore("ExpiredEventChunk", state);
+        expiredEventQueue.clear();
+        expiredEventQueue.restore((SnapshotStateHolder) state.get("ExpiredEventQueue"));
     }
 }

@@ -24,6 +24,7 @@ import org.wso2.siddhi.query.api.expression.Expression;
  */
 public class Filter implements StreamHandler {
 
+    private static final long serialVersionUID = 1L;
     private Expression filterExpression;
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;

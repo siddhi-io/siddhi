@@ -25,7 +25,6 @@ import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.SnapshotableComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
@@ -39,6 +38,8 @@ import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
+import org.wso2.siddhi.core.util.snapshot.SnapshotableStreamEventQueue;
+import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateHolder;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
@@ -83,13 +84,13 @@ import java.util.Map;
 public class ExternalTimeWindowProcessor extends WindowProcessor implements FindableProcessor {
     private static final Logger log = Logger.getLogger(ExternalTimeWindowProcessor.class);
     private long timeToKeep;
-    private SnapshotableComplexEventChunk<StreamEvent> expiredEventChunk;
+    private SnapshotableStreamEventQueue expiredEventQueue;
     private VariableExpressionExecutor timeStampVariableExpressionExecutor;
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
-        this.expiredEventChunk = new SnapshotableComplexEventChunk<StreamEvent>(false);
+        this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventCloner);
         if (attributeExpressionExecutors.length == 2) {
             if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
                 timeToKeep = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
@@ -126,27 +127,27 @@ public class ExternalTimeWindowProcessor extends WindowProcessor implements Find
                 StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
                 clonedEvent.setType(StreamEvent.Type.EXPIRED);
 
-                // reset expiredEventChunk to make sure all of the expired events get removed,
+                // reset expiredEventQueue to make sure all of the expired events get removed,
                 // otherwise lastReturned.next will always return null and here while check is always false
-                expiredEventChunk.reset();
-                while (expiredEventChunk.hasNext()) {
-                    StreamEvent expiredEvent = expiredEventChunk.next();
+                expiredEventQueue.reset();
+                while (expiredEventQueue.hasNext()) {
+                    StreamEvent expiredEvent = expiredEventQueue.next();
                     long expiredEventTime = (Long) timeStampVariableExpressionExecutor.execute(expiredEvent);
                     long timeDiff = expiredEventTime - currentTime + timeToKeep;
                     if (timeDiff <= 0) {
-                        expiredEventChunk.remove();
+                        expiredEventQueue.remove();
                         expiredEvent.setTimestamp(currentTime);
                         streamEventChunk.insertBeforeCurrent(expiredEvent);
                     } else {
-                        expiredEventChunk.reset();
+                        expiredEventQueue.reset();
                         break;
                     }
                 }
 
                 if (streamEvent.getType() == StreamEvent.Type.CURRENT) {
-                    this.expiredEventChunk.add(clonedEvent);
+                    this.expiredEventQueue.add(clonedEvent);
                 }
-                expiredEventChunk.reset();
+                expiredEventQueue.reset();
             }
         }
         nextProcessor.process(streamEventChunk);
@@ -165,19 +166,19 @@ public class ExternalTimeWindowProcessor extends WindowProcessor implements Find
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
-        state.put("ExpiredEventChunk", expiredEventChunk.getSnapshot());
+        state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
         return state;
     }
 
     @Override
     public void restoreState(Map<String, Object> state) {
-        expiredEventChunk.clear();
-        expiredEventChunk.restore("ExpiredEventChunk", state);
+        expiredEventQueue.clear();
+        expiredEventQueue.restore((SnapshotStateHolder) state.get("ExpiredEventQueue"));
     }
 
     @Override
     public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, expiredEventChunk, streamEventCloner);
+        return ((Operator) compiledCondition).find(matchingEvent, expiredEventQueue, streamEventCloner);
     }
 
     @Override
@@ -185,7 +186,7 @@ public class ExternalTimeWindowProcessor extends WindowProcessor implements Find
                                                SiddhiAppContext siddhiAppContext,
                                                List<VariableExpressionExecutor> variableExpressionExecutors,
                                                Map<String, Table> tableMap, String queryName) {
-        return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
+        return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
     }
 }

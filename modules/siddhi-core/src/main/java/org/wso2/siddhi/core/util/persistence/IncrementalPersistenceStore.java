@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public interface IncrementalPersistenceStore {
 
-    void save(String siddhiAppId, String queryName, String elementID, String revision, byte[] snapshot, String type);
+    void save(String siddhiAppId, String queryName, String elementID, String revision, String type, byte[] snapshot);
 
     void setProperties(Map properties);
 

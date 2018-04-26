@@ -20,9 +20,7 @@ package org.wso2.siddhi.core.table.holder;
 
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.util.snapshot.Snapshot;
-
-import java.util.Map;
+import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateHolder;
 
 /**
  * Base EventHolder interface. EventHolder is a container of {@link StreamEvent}s. You can add {@link ComplexEventChunk}
@@ -31,7 +29,7 @@ import java.util.Map;
 public interface EventHolder {
     void add(ComplexEventChunk<StreamEvent> addingEventChunk);
 
-    Snapshot getSnapshot();
+    SnapshotStateHolder getSnapshot();
 
-    Object restore(String eventHolder, Map<String, Object> state);
+    void restore(SnapshotStateHolder snapshotStateHolder);
 }

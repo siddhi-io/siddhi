@@ -27,6 +27,8 @@ import java.util.List;
  */
 public class BasicSelector extends Selector {
 
+    private static final long serialVersionUID = 1L;
+
     public BasicSelector select(String rename, Expression expression) {
         return (BasicSelector) super.select(rename, expression);
     }

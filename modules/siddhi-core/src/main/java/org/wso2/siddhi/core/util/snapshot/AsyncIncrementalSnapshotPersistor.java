@@ -59,7 +59,7 @@ public class AsyncIncrementalSnapshotPersistor implements Runnable {
                 log.debug("Persisting...");
             }
 
-            persistenceStore.save(siddhiAppName, queryName, elementID, revision, snapshots, type);
+            persistenceStore.save(siddhiAppName, queryName, elementID, revision, type, snapshots);
 
             if (log.isDebugEnabled()) {
                 log.debug("Persisted.");

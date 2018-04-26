@@ -31,7 +31,7 @@ public class WindowDefinition extends StreamDefinition {
     /**
      * Internal window which has to be used within the EventWindow
      */
-    private Window window;
+    private Window window = null;
 
     /**
      * Output event type of the window definition.

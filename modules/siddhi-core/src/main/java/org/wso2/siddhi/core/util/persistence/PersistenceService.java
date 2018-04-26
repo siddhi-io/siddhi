@@ -55,7 +55,7 @@ public class PersistenceService {
             if (log.isDebugEnabled()) {
                 log.debug("Persisting...");
             }
-            byte[] snapshot = snapshotService.snapshot().fullState;
+            byte[] snapshot = snapshotService.snapshot().getFullState();
             String revision = System.currentTimeMillis() + "_" + siddhiAppName;
             persistenceStore.save(siddhiAppName, revision, snapshot);
 
