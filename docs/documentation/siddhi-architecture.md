@@ -1,6 +1,6 @@
 # Siddhi Architecture 
 
-WSO2 Siddhi is a software library that can be utilized in any of the following ways:
+Siddhi is a software library that can be utilized in any of the following ways:
 
 - Run as a server on its own
 - Run within WSO2 SP as a service

@@ -1,12 +1,12 @@
-site_name: WSO2 Siddhi
+site_name: Siddhi
 site_description: Stream Processing and Complex Event Processing Engine
 site_author: WSO2
 site_url: https://wso2.github.io/siddhi
 extra_css:
 - stylesheets/extra.css
-repo_name: WSO2 Siddhi
+repo_name: Siddhi
 repo_url: https://github.com/wso2/siddhi
-copyright: Copyright &copy; 2011 - 2017 WSO2
+copyright: Copyright &copy; 2011 - 2018 WSO2
 extra:
   logo: images/siddhi-logo-w.svg
   palette:
@@ -26,7 +26,7 @@ markdown_extensions:
 - toc(permalink=true)
 - codehilite(guess_lang=false)
 pages:
-- Welcome to WSO2 Siddhi: index.md
+- Welcome to Siddhi: index.md
 - Features: features.md
 - Quick Start Guide: documentation/siddhi-quckstart-4.0.md
 - Documentation:
