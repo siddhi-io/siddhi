@@ -168,6 +168,10 @@
         <Class name="org.wso2.siddhi.core.table.holder.SnapshotableIndexEventHolder"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.table.holder.ListEventHolder"/>
+        <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS"/>
+    </Match>
 
 
     <Match>

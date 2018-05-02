@@ -27,7 +27,7 @@ import org.wso2.siddhi.core.event.stream.Operation;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.util.snapshot.SnapshotableStreamEventQueue;
+import org.wso2.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -101,7 +101,7 @@ public class SnapshotableEventsTestCase {
         SnapshotableStreamEventQueue snapshotableStreamEventQueue2 =
                 new SnapshotableStreamEventQueue(streamEventCloner);
         SnapshotStateList snapshotStateList = new SnapshotStateList();
-        for (Map.Entry<Long, String> entry: snapshots.entrySet()             ) {
+        for (Map.Entry<Long, String> entry : snapshots.entrySet()) {
             snapshotStateList.putSnapshotState(entry.getKey(), (SnapshotState) fromString(entry.getValue()));
         }
         snapshotableStreamEventQueue2.restore(snapshotStateList);
@@ -122,7 +122,7 @@ public class SnapshotableEventsTestCase {
         SnapshotableStreamEventQueue snapshotableStreamEventQueue3 =
                 new SnapshotableStreamEventQueue(streamEventCloner);
         snapshotStateList = new SnapshotStateList();
-        for (Map.Entry<Long, String> entry: snapshots.entrySet()             ) {
+        for (Map.Entry<Long, String> entry : snapshots.entrySet()) {
             snapshotStateList.putSnapshotState(entry.getKey(), (SnapshotState) fromString(entry.getValue()));
         }
         snapshotableStreamEventQueue3.restore(snapshotStateList);

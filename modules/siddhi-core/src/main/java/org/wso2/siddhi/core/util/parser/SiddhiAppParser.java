@@ -29,7 +29,6 @@ import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.ThreadBarrier;
-import org.wso2.siddhi.core.util.persistence.PersistenceService;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.timestamp.EventTimeBasedMillisTimestampGenerator;
 import org.wso2.siddhi.core.util.timestamp.SystemCurrentTimeMillisTimestampGenerator;
@@ -203,7 +202,6 @@ public class SiddhiAppParser {
                 siddhiAppContext.setTimestampGenerator(new SystemCurrentTimeMillisTimestampGenerator());
             }
             siddhiAppContext.setSnapshotService(new SnapshotService(siddhiAppContext));
-            siddhiAppContext.setPersistenceService(new PersistenceService(siddhiAppContext));
             siddhiAppContext.setElementIdGenerator(new ElementIdGenerator(siddhiAppContext.getName()));
 
         } catch (DuplicateAnnotationException e) {

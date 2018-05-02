@@ -69,7 +69,6 @@ public class IncrementalPersistenceTestCase {
         final int eventWindowSize = 4;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "" +

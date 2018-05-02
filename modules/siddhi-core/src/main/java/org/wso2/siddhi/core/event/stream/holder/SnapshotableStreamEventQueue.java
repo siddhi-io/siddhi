@@ -15,14 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.core.util.snapshot;
+package org.wso2.siddhi.core.event.stream.holder;
 
 import org.wso2.siddhi.core.event.stream.Operation;
 import org.wso2.siddhi.core.event.stream.Operation.Operator;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
-import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateHolder;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
 
 import java.io.Serializable;
@@ -253,7 +252,8 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
         if (first != null ? !first.equals(that.first) : that.first != null) {
             return false;
         }
-        return operationChangeLog != null ? operationChangeLog.equals(that.operationChangeLog) : that.operationChangeLog == null;
+        return operationChangeLog != null ? operationChangeLog.equals(that.operationChangeLog) :
+                that.operationChangeLog == null;
     }
 
     @Override
@@ -284,8 +284,8 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
                 || forceFullSnapshot;
     }
 
-    public void restore(SnapshotStateHolder snapshotStateHolder) {
-        TreeMap<Long, SnapshotState> revisions = ((SnapshotStateList) snapshotStateHolder).getSnapshotStates();
+    public void restore(SnapshotStateList snapshotStatelist) {
+        TreeMap<Long, SnapshotState> revisions = snapshotStatelist.getSnapshotStates();
         Iterator<Map.Entry<Long, SnapshotState>> itr = revisions.entrySet().iterator();
         this.isOperationLogEnabled = false;
         while (itr.hasNext()) {

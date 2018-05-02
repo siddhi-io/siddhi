@@ -31,13 +31,19 @@ public class AsyncSnapshotPersistor implements Runnable {
     private PersistenceStore persistenceStore;
     private String siddhiAppName;
     private String revision;
+    private long time;
 
     public AsyncSnapshotPersistor(byte[] snapshots, PersistenceStore persistenceStore,
-                                  String siddhiAppName) {
+                                  String siddhiAppName, long time) {
+        if (persistenceStore == null) {
+            throw new NoPersistenceStoreException("No persistence store assigned for siddhi app '" +
+                    siddhiAppName + "'");
+        }
         this.snapshots = snapshots;
         this.persistenceStore = persistenceStore;
         this.siddhiAppName = siddhiAppName;
-        this.revision = System.currentTimeMillis() + "_" + siddhiAppName;
+        this.time = time;
+        this.revision = time + "_" + siddhiAppName;
     }
 
     public String getRevision() {

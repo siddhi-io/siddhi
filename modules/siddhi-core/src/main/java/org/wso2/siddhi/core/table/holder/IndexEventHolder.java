@@ -29,7 +29,6 @@ import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
-import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateHolder;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
@@ -627,8 +626,8 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         }
     }
 
-    public void restore(SnapshotStateHolder snapshotStateHolder) {
-        TreeMap<Long, SnapshotState> revisions = ((SnapshotStateList) snapshotStateHolder).getSnapshotStates();
+    public void restore(SnapshotStateList snapshotStatelist) {
+        TreeMap<Long, SnapshotState> revisions = snapshotStatelist.getSnapshotStates();
         Iterator<Map.Entry<Long, SnapshotState>> itr = revisions.entrySet().iterator();
         this.isOperationLogEnabled = false;
         while (itr.hasNext()) {

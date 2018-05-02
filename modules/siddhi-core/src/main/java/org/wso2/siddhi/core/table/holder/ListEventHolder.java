@@ -24,7 +24,7 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
-import org.wso2.siddhi.core.util.snapshot.SnapshotableStreamEventQueue;
+import org.wso2.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 
 /**
  * Holder object to contain a list of {@link StreamEvent}. Users can add {@link ComplexEventChunk}s to the

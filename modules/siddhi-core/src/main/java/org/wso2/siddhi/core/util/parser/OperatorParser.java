@@ -21,7 +21,7 @@ package org.wso2.siddhi.core.util.parser;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.util.collection.operator.SnapshotableEventQueueOperator;
-import org.wso2.siddhi.core.util.snapshot.SnapshotableStreamEventQueue;
+import org.wso2.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;

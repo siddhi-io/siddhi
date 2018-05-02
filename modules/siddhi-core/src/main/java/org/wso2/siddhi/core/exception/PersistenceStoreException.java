@@ -15,11 +15,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.wso2.siddhi.core.util.snapshot.state;
+package org.wso2.siddhi.core.exception;
 
 /**
- * Common snapshot data holder
+ * Exception class to be used when issue occur at persistence store.
  */
-public interface SnapshotStateHolder {
+public class PersistenceStoreException extends RuntimeException {
+    public PersistenceStoreException() {
+        super();
+    }
+
+    public PersistenceStoreException(String message) {
+        super(message);
+    }
+
+    public PersistenceStoreException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
+
+    public PersistenceStoreException(Throwable throwable) {
+        super(throwable);
+    }
 }

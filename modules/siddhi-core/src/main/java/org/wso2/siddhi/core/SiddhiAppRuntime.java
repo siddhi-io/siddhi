@@ -53,10 +53,8 @@ import org.wso2.siddhi.core.util.StringUtil;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import org.wso2.siddhi.core.util.parser.StoreQueryParser;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
-import org.wso2.siddhi.core.util.snapshot.AsyncIncrementalSnapshotPersistor;
-import org.wso2.siddhi.core.util.snapshot.AsyncSnapshotPersistor;
+import org.wso2.siddhi.core.util.persistence.util.PersistenceHelper;
 import org.wso2.siddhi.core.util.snapshot.PersistenceReference;
-import org.wso2.siddhi.core.util.snapshot.SnapshotSerialized;
 import org.wso2.siddhi.core.util.statistics.BufferedEventsTracker;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.MemoryUsageTracker;
@@ -534,56 +532,13 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // take snapshots of execution units
-            SnapshotSerialized serializeObj = siddhiAppContext.getSnapshotService().snapshot();
-
-            //First, handle the full state
-            byte[] snapshots = serializeObj.getFullState();
-            // start the snapshot persisting task asynchronously
-            AsyncSnapshotPersistor asyncSnapshotPersistor = new AsyncSnapshotPersistor(snapshots,
-                    siddhiAppContext.getSiddhiContext().getPersistenceStore(), siddhiAppContext.getName());
-            String revision = asyncSnapshotPersistor.getRevision();
-            //TODO:Need to decide how do we handle the Future variable below.
-            Future future = siddhiAppContext.getExecutorService().submit(asyncSnapshotPersistor);
-
-            //Base state
-            HashMap<String, HashMap<String, Object>> incrementalStateBase = serializeObj.getIncrementalStateBase();
-
-            if (incrementalStateBase != null) {
-                for (Map.Entry<String, HashMap<String, Object>> entry : incrementalStateBase.entrySet()) {
-                    for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
-                        AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
-                                AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
-                                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
-                                siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
-                                revision.split("_")[0], "B");
-
-                        //TODO:Need to decide how do we handle the Future variable below.
-                        Future future3 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
-                    }
-                }
+            if (siddhiAppContext.getSiddhiContext().getPersistenceStore() != null) {
+                return PersistenceHelper.persist(siddhiAppContext.getSnapshotService().fullSnapshot(),
+                        siddhiAppContext);
+            } else {
+                return PersistenceHelper.persist(siddhiAppContext.getSnapshotService().incrementalSnapshot(),
+                        siddhiAppContext);
             }
-
-            //Next, handle the increment persistance scenarios
-            //Incremental state
-            HashMap<String, HashMap<String, Object>> incrementalState = serializeObj.getIncrementalState();
-
-            if (incrementalState != null) {
-                for (Map.Entry<String, HashMap<String, Object>> entry : incrementalState.entrySet()) {
-                    for (HashMap.Entry<String, Object> entry2 : entry.getValue().entrySet()) {
-                        AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
-                                AsyncIncrementalSnapshotPersistor((byte[]) entry2.getValue(),
-                                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
-                                siddhiAppContext.getName(), entry.getKey(), entry2.getKey(),
-                                revision.split("_")[0], "I");
-
-                        //TODO:Need to decide how do we handle the Future variable below.
-                        Future future2 = siddhiAppContext.getExecutorService().submit(asyncIncrementSnapshotPersistor);
-                    }
-                }
-            }
-
-            //TODO:Need to send future2 and future3
-            return new PersistenceReference(future, revision);
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));
@@ -595,33 +550,31 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // take snapshots of execution units
-            return siddhiAppContext.getSnapshotService().snapshot().getFullState();
+            return siddhiAppContext.getSnapshotService().fullSnapshot();
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));
         }
     }
 
-    //TODO:Need to identify where this method has been used.
     public void restore(byte[] snapshot) throws CannotRestoreSiddhiAppStateException {
         try {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // start the restoring process
-            siddhiAppContext.getPersistenceService().restore(snapshot);
+            siddhiAppContext.getSnapshotService().restore(snapshot);
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));
         }
     }
 
-    //TODO:Need to identify where this method has been used.
     public void restoreRevision(String revision) throws CannotRestoreSiddhiAppStateException {
         try {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // start the restoring process
-            siddhiAppContext.getPersistenceService().restoreRevision(revision);
+            siddhiAppContext.getSnapshotService().restoreRevision(revision);
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));
@@ -634,7 +587,7 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // start the restoring process
-            revision = siddhiAppContext.getPersistenceService().restoreLastRevision();
+            revision = siddhiAppContext.getSnapshotService().restoreLastRevision();
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));

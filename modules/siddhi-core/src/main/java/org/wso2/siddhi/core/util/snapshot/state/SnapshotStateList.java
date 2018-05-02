@@ -24,7 +24,7 @@ import java.util.TreeMap;
 /**
  * The class which encloses multiple snapshot states.
  */
-public class SnapshotStateList implements SnapshotStateHolder, Serializable {
+public class SnapshotStateList implements Serializable {
     private TreeMap<Long, SnapshotState> snapshotStates = new TreeMap<>();
 
     public SnapshotStateList() {

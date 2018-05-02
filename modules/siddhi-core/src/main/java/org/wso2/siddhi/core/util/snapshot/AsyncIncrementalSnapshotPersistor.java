@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.util.snapshot;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.exception.NoPersistenceStoreException;
 import org.wso2.siddhi.core.util.persistence.IncrementalPersistenceStore;
+import org.wso2.siddhi.core.util.persistence.util.IncrementalSnapshotInfo;
 
 /**
  * {@link Runnable} which is responsible for persisting the snapshots that are taken
@@ -28,45 +29,37 @@ import org.wso2.siddhi.core.util.persistence.IncrementalPersistenceStore;
 public class AsyncIncrementalSnapshotPersistor implements Runnable {
     private static final Logger log = Logger.getLogger(AsyncIncrementalSnapshotPersistor.class);
     private byte[] snapshots;
-    private IncrementalPersistenceStore persistenceStore;
-    private String revision;
-    private String siddhiAppName;
-    private String queryName;
-    private String elementID;
-    private String type;
+    private IncrementalPersistenceStore incrementalPersistenceStore;
+    private IncrementalSnapshotInfo snapshotInfo;
 
-    public AsyncIncrementalSnapshotPersistor(byte[] snapshots, IncrementalPersistenceStore persistenceStore,
-                                             String siddhiAppName, String queryName, String elementID,
-                                             String revisionToUse,
-                                             String type) {
+    public AsyncIncrementalSnapshotPersistor(byte[] snapshots, IncrementalPersistenceStore incrementalPersistenceStore,
+                                             IncrementalSnapshotInfo snapshotInfo) {
+        if (incrementalPersistenceStore == null) {
+            throw new NoPersistenceStoreException("No incremental persistence store assigned for siddhi app '" +
+                    snapshotInfo.getSiddhiAppId() + "'");
+        }
         this.snapshots = snapshots;
-        this.persistenceStore = persistenceStore;
-        this.siddhiAppName = siddhiAppName;
-        this.queryName = queryName;
-        this.elementID = elementID;
-        this.type = type;
-        revision = revisionToUse + "_" + siddhiAppName + "_" + queryName + "_" + elementID + "_" + type;
+        this.incrementalPersistenceStore = incrementalPersistenceStore;
+        this.snapshotInfo = snapshotInfo;
     }
 
     public String getRevision() {
-        return revision;
+        return snapshotInfo.getRevision();
     }
 
     @Override
     public void run() {
-        if (persistenceStore != null) {
+        if (incrementalPersistenceStore != null) {
             if (log.isDebugEnabled()) {
                 log.debug("Persisting...");
             }
-
-            persistenceStore.save(siddhiAppName, queryName, elementID, revision, type, snapshots);
-
+            incrementalPersistenceStore.save(snapshotInfo, snapshots);
             if (log.isDebugEnabled()) {
                 log.debug("Persisted.");
             }
         } else {
             throw new NoPersistenceStoreException("No persistence store assigned for siddhi app " +
-                    siddhiAppName);
+                    snapshotInfo.getSiddhiAppId());
         }
 
     }

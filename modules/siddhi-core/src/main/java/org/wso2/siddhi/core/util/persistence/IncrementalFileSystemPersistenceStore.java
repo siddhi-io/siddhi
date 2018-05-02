@@ -19,16 +19,15 @@
 package org.wso2.siddhi.core.util.persistence;
 
 import com.google.common.io.Files;
-
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.util.persistence.util.IncrementalSnapshotInfo;
 import org.wso2.siddhi.core.util.persistence.util.PersistenceConstants;
+import org.wso2.siddhi.core.util.persistence.util.PersistenceHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,23 +43,22 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
     }
 
     @Override
-    public void save(String siddhiAppName, String queryName, String elementId, String revision,
-                     String type, byte[] snapshot) {
-        File file = new File(folder + File.separator + siddhiAppName + File.separator + revision);
+    public void save(IncrementalSnapshotInfo snapshotInfo, byte[] snapshot) {
+        File file = new File(folder + File.separator + snapshotInfo.getSiddhiAppId() + File.separator +
+                snapshotInfo.getRevision());
         try {
             Files.createParentDirs(file);
             Files.write(snapshot, file);
-
-            if (type.equals("B")) {
-                cleanOldRevisions(siddhiAppName, queryName, elementId, revision.split("_")[0]);
+            if (snapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.BASE) {
+                cleanOldRevisions(snapshotInfo);
             }
-
             if (log.isDebugEnabled()) {
-                log.debug("Periodic persistence of " + siddhiAppName + " persisted successfully.");
+                log.debug("incremental persistence of '" + snapshotInfo.getSiddhiAppId() +
+                        "' persisted successfully.");
             }
         } catch (IOException e) {
-            log.error("Cannot save the revision " + revision + " of SiddhiApp: " + siddhiAppName +
-                    " to the file system.", e);
+            log.error("Cannot save the revision '" + snapshotInfo.getRevision() + "' of SiddhiApp: '" +
+                    snapshotInfo.getSiddhiAppId() + "' to the file system.", e);
         }
     }
 
@@ -88,95 +86,91 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
     }
 
     @Override
-    public byte[] load(String siddhiAppName, String queryName, String elementId, String revision, String type) {
-        File file = new File(folder + File.separator + siddhiAppName + File.separator + revision + "_"
-                + siddhiAppName + "_" + queryName + "_" + elementId + "_" + type);
-        HashMap<String, Object> result = new HashMap<>();
+    public byte[] load(IncrementalSnapshotInfo snapshotInfo) {
+        File file = new File(folder + File.separator + snapshotInfo.getSiddhiAppId() + File.separator +
+                snapshotInfo.getRevision());
         byte[] bytes = null;
-
         try {
             bytes = Files.toByteArray(file);
-            log.info("State loaded for " + siddhiAppName + " revision " + revision + " from the file system.");
-            result.put(elementId, bytes);
+            log.info("State loaded for SiddhiApp '" + snapshotInfo.getSiddhiAppId() + "' revision '" +
+                    snapshotInfo.getRevision() + "' from file system.");
         } catch (IOException e) {
-            log.error("Cannot load the revision " + revision + " of SiddhiApp: " + siddhiAppName +
-                    " from file system.", e);
+            log.error("Cannot load the revision '" + snapshotInfo.getRevision() + "' of SiddhiApp '" +
+                    snapshotInfo.getSiddhiAppId() + "' from file system.", e);
         }
-
         return bytes;
     }
 
     @Override
-    public ArrayList<ArrayList<String>> getListOfRevisionsToLoad(String siddhiAppName) {
+    public List<IncrementalSnapshotInfo> getListOfRevisionsToLoad(String restoreRevision) {
+        IncrementalSnapshotInfo restoreSnapshotInfo = PersistenceHelper.convertRevision(restoreRevision);
+        long restoreTime = restoreSnapshotInfo.getTime();
+        String siddhiAppName = restoreSnapshotInfo.getSiddhiAppId();
+
         File dir = new File(folder + File.separator + siddhiAppName);
         File[] files = dir.listFiles();
-        ArrayList<ArrayList<String>> results = new ArrayList<>();
-
         if (files == null || files.length == 0) {
             return null;
         }
-
+        List<IncrementalSnapshotInfo> results = new ArrayList<>();
         for (File file : files) {
             String fileName = file.getName();
-            if (fileName.contains(siddhiAppName)) {
-                ArrayList<String> result = new ArrayList<>();
-                String[] items = fileName.split("_");
-
-                //Note: Here we discard the (items.length == 2) scenario which is handled by the full snapshot handling
-
-                if (items.length == 5) {
-                    result.add(items[0]);
-                    result.add(items[1]);
-                    result.add(items[2]);
-                    result.add(items[3]);
-                    result.add(items[4]);
-
-                    results.add(result);
-                }
+            IncrementalSnapshotInfo snapshotInfo = PersistenceHelper.convertRevision(fileName);
+            if (snapshotInfo.getTime() <= restoreTime &&
+                    siddhiAppName.equals(snapshotInfo.getSiddhiAppId()) &&
+                    snapshotInfo.getElementId() != null &&
+                    snapshotInfo.getQueryName() != null) {
+                //Note: Here we discard the (items.length == 2) scenario which is handled
+                // by the full snapshot handling
+                results.add(snapshotInfo);
             }
         }
-
         return results;
     }
 
-    public void cleanOldRevisions(String siddhiAppName, String queryName, String elementId, String revisionTimeStamp) {
+    @Override
+    public String getLastRevision(String siddhiAppName) {
+        long restoreTime = Long.MAX_VALUE;
         File dir = new File(folder + File.separator + siddhiAppName);
         File[] files = dir.listFiles();
+        if (files == null || files.length == 0) {
+            return null;
+        }
+        for (File file : files) {
+            String fileName = file.getName();
+            IncrementalSnapshotInfo snapshotInfo = PersistenceHelper.convertRevision(fileName);
+            if (snapshotInfo.getTime() < restoreTime &&
+                    siddhiAppName.equals(snapshotInfo.getSiddhiAppId()) &&
+                    snapshotInfo.getElementId() != null &&
+                    snapshotInfo.getQueryName() != null) {
+                //Note: Here we discard the (items.length == 2) scenario which is handled
+                // by the full snapshot handling
+                restoreTime = snapshotInfo.getTime();
+            }
+        }
+        if (restoreTime != Long.MAX_VALUE) {
+            return restoreTime + PersistenceConstants.REVISION_SEPARATOR + siddhiAppName;
+        }
+        return null;
+    }
 
-        if (files != null) {
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File f1, File f2) {
-                    long firstTimeStamp = Long.parseLong(f1.getName().split("_")[0]);
-                    long secondTimeStamp = Long.parseLong(f2.getName().split("_")[0]);
-
-                    if (firstTimeStamp > secondTimeStamp) {
-                        return 1;
-                    } else if (firstTimeStamp == secondTimeStamp) {
-                        return 0;
-                    } else {
-                        return -1;
-                    }
-                }
-            });
-
-            long baseTimeStamp = Long.parseLong(revisionTimeStamp);
-
-            for (int i = files.length - 1; i >= 0; i--) {
-                String fileName = files[i].getName();
-                if (fileName.contains(siddhiAppName)) {
-                    String[] items = fileName.split("_");
-                    if (items.length == 5) {
-                        long currentTimeStamp = Long.parseLong(items[0]);
-
-                        if (currentTimeStamp < baseTimeStamp) {
-                            if (queryName.equals(items[2]) && elementId.equals(items[3])) {
-                                if (files[i].exists()) {
-                                    Boolean isDeleted = files[i].delete();
-                                    if (!isDeleted) {
-                                        log.error("Error deleting old revision " + fileName);
-                                    }
-                                }
+    private void cleanOldRevisions(IncrementalSnapshotInfo incrementalSnapshotInfo) {
+        if (incrementalSnapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.BASE) {
+            File dir = new File(folder + File.separator + incrementalSnapshotInfo.getSiddhiAppId());
+            File[] files = dir.listFiles();
+            if (files != null) {
+                long baseTimeStamp = (incrementalSnapshotInfo.getTime());
+                for (File file : files) {
+                    String fileName = file.getName();
+                    IncrementalSnapshotInfo snapshotInfo = PersistenceHelper.convertRevision(fileName);
+                    if (snapshotInfo.getTime() < baseTimeStamp &&
+                            incrementalSnapshotInfo.getSiddhiAppId().equals(snapshotInfo.getSiddhiAppId()) &&
+                            incrementalSnapshotInfo.getQueryName().equals(snapshotInfo.getQueryName()) &&
+                            incrementalSnapshotInfo.getElementId().equals(snapshotInfo.getElementId())) {
+                        if (file.exists()) {
+                            Boolean isDeleted = file.delete();
+                            if (!isDeleted) {
+                                log.error("Error deleting old revision " + fileName);
                             }
                         }
                     }

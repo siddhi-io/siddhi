@@ -17,7 +17,9 @@
  */
 package org.wso2.siddhi.core.util.persistence;
 
-import java.util.ArrayList;
+import org.wso2.siddhi.core.util.persistence.util.IncrementalSnapshotInfo;
+
+import java.util.List;
 import java.util.Map;
 
 
@@ -26,11 +28,13 @@ import java.util.Map;
  */
 public interface IncrementalPersistenceStore {
 
-    void save(String siddhiAppId, String queryName, String elementID, String revision, String type, byte[] snapshot);
+    void save(IncrementalSnapshotInfo snapshotInfo, byte[] snapshot);
 
     void setProperties(Map properties);
 
-    byte[] load(String siddhiAppId, String queryName, String elementID, String revision, String type);
+    byte[] load(IncrementalSnapshotInfo snapshotInfo);
 
-    ArrayList<ArrayList<String>> getListOfRevisionsToLoad(String siddhiAppId);
+    List<IncrementalSnapshotInfo> getListOfRevisionsToLoad(String revision);
+
+    String getLastRevision(String siddhiAppId);
 }

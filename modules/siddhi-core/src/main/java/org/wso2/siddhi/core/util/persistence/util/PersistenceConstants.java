@@ -23,16 +23,9 @@ package org.wso2.siddhi.core.util.persistence.util;
  */
 public class PersistenceConstants {
 
-    public static final String RDBMS_QUERY_CONFIG_FILE = "rdbms-table-config.xml";
-    public static final String PLACEHOLDER_TABLE_NAME = "{{TABLE_NAME}}";
-    public static final String STATE_PERSISTENCE_NS = "state.persistence";
-    public static final String STATE_PERSISTENCE_ENABLED = "enabled";
-    public static final String STATE_PERSISTENCE_INTERVAL_IN_MIN = "intervalInMin";
     public static final String STATE_PERSISTENCE_REVISIONS_TO_KEEP = "revisionsToKeep";
-    public static final String STATE_PERSISTENCE_CLASS = "class";
     public static final String STATE_PERSISTENCE_CONFIGS = "config";
     public static final String DEFAULT_FILE_PERSISTENCE_FOLDER = "siddhi-app-persistence";
-    public static final String DEFAULT_DB_PERSISTENCE_DATASOURCE = "WSO2_ANALYTICS_DB";
-    public static final String DEFAULT_DB_PERSISTENCE_TABLE_NAME = "PERSISTENCE_TABLE";
+    public static final String REVISION_SEPARATOR = "_";
 
 }

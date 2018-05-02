@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.util.snapshot;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -25,19 +26,34 @@ import java.util.concurrent.Future;
  */
 public class PersistenceReference {
 
-    private Future future;
+    private Future fullStateFuture;
+    private List<Future> incrementalStateFuture;
     private String revision;
 
-    public PersistenceReference(Future future, String revision) {
-        this.future = future;
+    public PersistenceReference(Future fullStateFuture, String revision) {
+        this.fullStateFuture = fullStateFuture;
         this.revision = revision;
     }
 
+    public PersistenceReference(List<Future> incrementalStateFuture, String revision) {
+        this.incrementalStateFuture = incrementalStateFuture;
+        this.revision = revision;
+    }
+
+    @Deprecated
     public Future getFuture() {
-        return future;
+        return fullStateFuture;
     }
 
     public String getRevision() {
         return revision;
+    }
+
+    public List<Future> getIncrementalStateFuture() {
+        return incrementalStateFuture;
+    }
+
+    public Future getFullStateFuture() {
+        return fullStateFuture;
     }
 }
