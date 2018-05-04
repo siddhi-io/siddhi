@@ -32,7 +32,6 @@ import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
