@@ -19,7 +19,14 @@ package org.wso2.siddhi.query.api.execution.query;
 
 import org.wso2.siddhi.query.api.SiddhiElement;
 import org.wso2.siddhi.query.api.execution.query.input.store.InputStore;
+import org.wso2.siddhi.query.api.execution.query.output.stream.DeleteStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.ReturnStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateSet;
+import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
+import org.wso2.siddhi.query.api.expression.Expression;
 
 /**
  * Siddhi Query
@@ -29,6 +36,7 @@ public class StoreQuery implements SiddhiElement {
     private static final long serialVersionUID = 1L;
     private InputStore inputStore;
     private Selector selector = new Selector();
+    private OutputStream outputStream = new ReturnStream();
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
 
@@ -50,8 +58,46 @@ public class StoreQuery implements SiddhiElement {
         return this;
     }
 
+    public StoreQuery outStream(OutputStream outputStream) {
+        this.outputStream = outputStream;
+        return this;
+    }
+
+    public void deleteBy(String outputTableId, Expression onDeletingExpression) {
+        this.outputStream = new DeleteStream(outputTableId, onDeletingExpression);
+    }
+
+    public void updateBy(String outputTableId, Expression onUpdateExpression) {
+        this.outputStream = new UpdateStream(outputTableId, onUpdateExpression);
+    }
+
+    public void updateBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+        this.outputStream = new UpdateStream(outputTableId, updateSetAttributes, onUpdateExpression);
+    }
+
+    public void updateOrInsertBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+        this.outputStream = new UpdateOrInsertStream(outputTableId, updateSetAttributes, onUpdateExpression);
+    }
+
+
     public Selector getSelector() {
         return selector;
+    }
+
+    public OutputStream getOutputStream() {
+        return outputStream;
+    }
+
+    public boolean isDeleteQuery() {
+        return outputStream != null && outputStream instanceof DeleteStream;
+    }
+
+    public boolean isUpdateQuery() {
+        return outputStream != null && outputStream instanceof UpdateStream;
+    }
+
+    public boolean isUpdateOrInsertQuery() {
+        return outputStream != null && outputStream instanceof UpdateOrInsertStream;
     }
 
     @Override
@@ -76,6 +122,9 @@ public class StoreQuery implements SiddhiElement {
         if (inputStore != null ? !inputStore.equals(that.inputStore) : that.inputStore != null) {
             return false;
         }
+        if (outputStream != null ? !outputStream.equals(that.outputStream) : that.outputStream != null) {
+            return false;
+        }
         return selector != null ? selector.equals(that.selector) : that.selector == null;
     }
 
@@ -83,8 +132,10 @@ public class StoreQuery implements SiddhiElement {
     public int hashCode() {
         int result = inputStore != null ? inputStore.hashCode() : 0;
         result = 31 * result + (selector != null ? selector.hashCode() : 0);
+        result = 31 * result + (outputStream != null ? outputStream.hashCode() : 0);
         return result;
     }
+
 
     @Override
     public int[] getQueryContextStartIndex() {
