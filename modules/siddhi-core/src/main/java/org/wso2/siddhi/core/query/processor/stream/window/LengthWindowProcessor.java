@@ -95,7 +95,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
             throw new SiddhiAppValidationException("Length window should only have one parameter (<int> " +
                     "windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
         }
-        expiredEventQueue = new SnapshotableStreamEventQueue(streamEventCloner, length);
+        expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder, length);
     }
 
     @Override
@@ -177,6 +177,7 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     public synchronized void restoreState(Map<String, Object> state) {
         count = (int) state.get("Count");
         expiredEventQueue.clear();
+        SnapshotStateList list =    (SnapshotStateList) state.get("ExpiredEventQueue");
         expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
     }
 }

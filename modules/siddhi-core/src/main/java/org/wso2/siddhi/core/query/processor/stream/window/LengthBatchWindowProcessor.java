@@ -92,9 +92,9 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
                         boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiAppContext = siddhiAppContext;
-        currentEventQueue = new SnapshotableStreamEventQueue(streamEventCloner);
+        currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (outputExpectsExpiredEvents) {
-            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventCloner);
+            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
         if (attributeExpressionExecutors.length == 1) {
             length = (Integer) (((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue());
@@ -210,7 +210,7 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, String queryName) {
         if (expiredEventQueue == null) {
-            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventCloner);
+            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
         return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);

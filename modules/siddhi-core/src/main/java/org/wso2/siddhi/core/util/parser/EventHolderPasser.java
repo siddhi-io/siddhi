@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
+import org.wso2.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.table.holder.*;
@@ -117,7 +118,8 @@ public class EventHolderPasser {
                 metaStreamEvent.addOutputData(attribute);
             }
             StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent, tableStreamEventPool);
-            return new ListEventHolder(tableStreamEventPool, eventConverter, streamEventCloner);
+            return new ListEventHolder(tableStreamEventPool, eventConverter,
+                    new StreamEventClonerHolder(streamEventCloner));
         }
     }
 

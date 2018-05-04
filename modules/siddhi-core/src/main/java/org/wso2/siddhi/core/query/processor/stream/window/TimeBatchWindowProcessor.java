@@ -116,9 +116,9 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiAppContext = siddhiAppContext;
-        currentEventQueue = new SnapshotableStreamEventQueue(streamEventCloner);
+        currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (outputExpectsExpiredEvents) {
-            this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventCloner);
+            this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
@@ -288,10 +288,8 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
     @Override
     public synchronized void restoreState(Map<String, Object> state) {
         if (expiredEventQueue != null) {
-            expiredEventQueue.clear();
             expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
         }
-        currentEventQueue.clear();
         currentEventQueue.restore((SnapshotStateList) state.get("CurrentEventQueue"));
         resetEvent = (StreamEvent) state.get("ResetEvent");
     }
@@ -307,7 +305,7 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, String queryName) {
         if (expiredEventQueue == null) {
-            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventCloner);
+            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
         return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap,

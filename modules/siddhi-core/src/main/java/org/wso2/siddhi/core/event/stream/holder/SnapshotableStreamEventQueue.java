@@ -20,7 +20,7 @@ package org.wso2.siddhi.core.event.stream.holder;
 import org.wso2.siddhi.core.event.stream.Operation;
 import org.wso2.siddhi.core.event.stream.Operation.Operator;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import org.wso2.siddhi.core.util.snapshot.SnapshotRequest;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
 
@@ -41,20 +41,20 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
     protected StreamEvent lastReturned;
     protected StreamEvent last;
     private int operationChangeLogThreshold;
-    private transient StreamEventCloner eventCloner;
+    private transient StreamEventClonerHolder eventClonerHolder;
     private ArrayList<Operation> operationChangeLog;
     private long operationChangeLogSize;
     private boolean forceFullSnapshot = true;
     private boolean isOperationLogEnabled = true;
     private int eventIndex = -1;
 
-    public SnapshotableStreamEventQueue(StreamEventCloner eventCloner) {
-        this(eventCloner, Integer.MAX_VALUE);
+    public SnapshotableStreamEventQueue(StreamEventClonerHolder eventClonerHolder) {
+        this(eventClonerHolder, Integer.MAX_VALUE);
     }
 
-    public SnapshotableStreamEventQueue(StreamEventCloner eventCloner, int operationChangeLogThreshold) {
+    public SnapshotableStreamEventQueue(StreamEventClonerHolder eventClonerHolder, int operationChangeLogThreshold) {
         this.operationChangeLog = new ArrayList<>();
-        this.eventCloner = eventCloner;
+        this.eventClonerHolder = eventClonerHolder;
         this.operationChangeLogThreshold = operationChangeLogThreshold;
     }
 
@@ -195,6 +195,7 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
     }
 
     public StreamEvent poll() {
+        reset();
         if (first != null) {
             StreamEvent firstEvent = first;
             first = first.getNext();
@@ -281,7 +282,8 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
 
     private boolean isFullSnapshot() {
         return operationChangeLogSize > 100 || operationChangeLogSize > operationChangeLogThreshold
-                || forceFullSnapshot;
+                || forceFullSnapshot || SnapshotRequest.isRequestForFullSnapshot();
+
     }
 
     public void restore(SnapshotStateList snapshotStatelist) {
@@ -299,15 +301,12 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
                 for (Operation op : operations) {
                     switch (op.operation) {
                         case ADD:
-                            reset();
                             add((StreamEvent) op.parameters);
                             break;
                         case REMOVE:
-                            reset();
                             poll();
                             break;
                         case CLEAR:
-                            reset();
                             clear();
                             break;
                         case OVERWRITE:
@@ -316,9 +315,8 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
                             while (hasNext()) {
                                 next();
                                 if (overwriteIndex == eventIndex) {
-                                    lastReturned.setOutputData(streamEvent.getOutputData());
-                                    lastReturned.setBeforeWindowData(streamEvent.getBeforeWindowData());
-                                    lastReturned.setOnAfterWindowData(streamEvent.getOnAfterWindowData());
+                                    overwrite(streamEvent);
+                                    break;
                                 }
                             }
                             break;
@@ -330,6 +328,7 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
                                 next();
                                 if (deleteIndex == eventIndex) {
                                     remove();
+                                    break;
                                 }
                             }
                             break;
@@ -340,120 +339,17 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
             }
         }
         this.isOperationLogEnabled = true;
-
     }
-//    public Object restore(String key, Map<String, Object> state) {
-//        TreeSet<Long> revisions = new TreeSet<Long>();
-//        for (Map.Entry<String, Object> entry : state.entrySet()) {
-//            long item = -1L;
-//            try {
-//                item = Long.parseLong(entry.getKey());
-//                revisions.add(item);
-//            } catch (NumberFormatException e) {
-//                //ignore
-//            }
-//        }
-//
-//        Iterator<Long> itr = revisions.iterator();
-//        boolean firstFlag = true;
-//
-//        while (itr.hasNext()) {
-//            Object obj = state.get("" + itr.next());
-//
-//            HashMap<String, SnapshotState> firstMap = (HashMap<String, SnapshotState>) obj;
-//            SnapshotState snpObj = firstMap.get(key);
-//
-//            if (snpObj == null) {
-//                continue;
-//            }
-//
-//            if (firstFlag) {
-//                Object obj2 = snpObj.getState();
-//                if (obj2.getClass().equals(SnapshotableStreamEventQueue.class)) {
-//                    SnapshotableStreamEventQueue<StreamEvent> expiredEventChunk =
-//                            new SnapshotableStreamEventQueue<StreamEvent>();
-//
-//                    expiredEventChunk.add((StreamEvent)
-//                              ((SnapshotableStreamEventQueue) snpObj.getState()).getFirst());
-//
-//                    return expiredEventChunk;
-//                } else if (obj2.getClass().equals(ListEventHolder.class)) {
-//                    ListEventHolder holder = ((ListEventHolder) snpObj.getState());
-//                    StreamEvent firstItem = holder.getFirst();
-//                    holder.clear();
-//                    holder.add(firstItem);
-//
-//                    return holder;
-//                } else if (obj2.getClass().equals(ArrayList.class)) {
-//                    ArrayList<Operation> addList = (ArrayList<Operation>) snpObj.getState();
-//                    isOperationLogEnabled = true;
-//
-//                    for (Operation op : addList) {
-//                        switch (op.operation) {
-//                            case Operator.ADD:
-//                                //TODO:Need to check whether there is only one event or multiple events.
-//                                // If so we have to
-//                                // traverse  the linked list and then get the count by which the
-//                                // operationChangeLogSize needs to be updated.
-//                                this.add((StreamEvent) op.parameters);
-//                                break;
-//                            case Operator.REMOVE:
-//                                this.remove();
-//                                break;
-//                            case Operator.REMOVE:
-//                                this.poll();
-//                                break;
-//                            case Operator.CLEAR:
-//                                this.clear();
-//                                break;
-//                            default:
-//                                continue;
-//                        }
-//                    }
-//                    isOperationLogEnabled = false;
-//                }
-//
-//            } else {
-//                ArrayList<Operation> addList = (ArrayList<Operation>) snpObj.getState();
-//                isOperationLogEnabled = true;
-//
-//                for (Operation op : addList) {
-//                    switch (op.operation) {
-//                        case Operator.ADD:
-//                            //TODO:Need to check whether there is only one event or multiple events. If so we have to
-//                            //traverse the linked list and then get the count by which the operationChangeLogSize
-//                            // needs to be updated.
-//                            this.add((StreamEvent) op.parameters);
-//                            break;
-//                        case Operator.REMOVE:
-//                            this.remove();
-//                            break;
-//                        case Operator.REMOVE:
-//                            this.poll();
-//                            break;
-//                        case Operator.CLEAR:
-//                            this.clear();
-//                            break;
-//                        default:
-//                            continue;
-//                    }
-//                }
-//                isOperationLogEnabled = false;
-//            }
-//        }
-//
-//        return (SnapshotableStreamEventQueue) this;
-//    }
 
     private StreamEvent copyEvents(StreamEvent events) {
 
         StreamEvent currentEvent = events;
-        StreamEvent firstCopiedEvent = eventCloner.copyStreamEvent(events);
+        StreamEvent firstCopiedEvent = eventClonerHolder.getStreamEventCloner().copyStreamEvent(events);
         StreamEvent lastCopiedEvent = firstCopiedEvent;
 
         while (currentEvent.getNext() != null) {
             currentEvent = currentEvent.getNext();
-            StreamEvent copiedStreamEvent = eventCloner.copyStreamEvent(currentEvent);
+            StreamEvent copiedStreamEvent = eventClonerHolder.getStreamEventCloner().copyStreamEvent(currentEvent);
             lastCopiedEvent.setNext(copiedStreamEvent);
             lastCopiedEvent = copiedStreamEvent;
         }
@@ -464,7 +360,8 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
         if (!isFullSnapshot()) {
             if (isOperationLogEnabled) {
                 operationChangeLog.add(new Operation(Operator.OVERWRITE,
-                        new Object[]{eventIndex, eventCloner.copyStreamEvent(streamEvent)}));
+                        new Object[]{eventIndex,
+                                eventClonerHolder.getStreamEventCloner().copyStreamEvent(streamEvent)}));
             }
             operationChangeLogSize++;
         } else {

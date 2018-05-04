@@ -81,24 +81,25 @@ public class SnapshotService {
     }
 
     public byte[] fullSnapshot() {
-        Map<String, Map<String, Object>> elementSnapshotMapFull = new HashMap<>();
-        byte[] serializedFullState = null;
-        if (log.isDebugEnabled()) {
-            log.debug("Taking snapshot ...");
-        }
         try {
-            threadBarrier.lock();
-            for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
-                Map<String, Object> elementWiseFullSnapshots = new HashMap<>();
-                for (Snapshotable snapshotableObject : entry.getValue()) {
-                    Map<String, Object> currentState = snapshotableObject.currentState();
-                    if (currentState != null) {
-                        Map<String, Object> elementWiseSnapshots = new HashMap<>();
-                        for (Map.Entry<String, Object> item2 : currentState.entrySet()) {
-                            String key = item2.getKey();
-                            Object snapShot = item2.getValue();
-                            if (snapShot instanceof SnapshotState) {
-                                if (((SnapshotState) snapShot).getState() != null) {
+            SnapshotRequest.requestForFullSnapshot(true);
+            Map<String, Map<String, Object>> elementSnapshotMapFull = new HashMap<>();
+            byte[] serializedFullState = null;
+            if (log.isDebugEnabled()) {
+                log.debug("Taking snapshot ...");
+            }
+            try {
+                threadBarrier.lock();
+                for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
+                    Map<String, Object> elementWiseFullSnapshots = new HashMap<>();
+                    for (Snapshotable snapshotableObject : entry.getValue()) {
+                        Map<String, Object> currentState = snapshotableObject.currentState();
+                        if (currentState != null) {
+                            Map<String, Object> elementWiseSnapshots = new HashMap<>();
+                            for (Map.Entry<String, Object> item2 : currentState.entrySet()) {
+                                String key = item2.getKey();
+                                Object snapShot = item2.getValue();
+                                if (snapShot instanceof SnapshotState) {
                                     if (((SnapshotState) snapShot).isIncrementalSnapshot()) {
                                         throw new NoPersistenceStoreException("No incremental persistence store " +
                                                 "exist to store incremental snapshot of siddhiApp:'"
@@ -108,106 +109,110 @@ public class SnapshotService {
                                     } else {
                                         elementWiseSnapshots.put(key, snapShot);
                                     }
+                                } else {
+                                    elementWiseSnapshots.put(key, snapShot);
                                 }
-                            } else {
-                                elementWiseSnapshots.put(key, snapShot);
+                            }
+                            if (!elementWiseSnapshots.isEmpty()) {
+                                elementWiseFullSnapshots.put(snapshotableObject.getElementId(), elementWiseSnapshots);
                             }
                         }
-                        if (!elementWiseSnapshots.isEmpty()) {
-                            elementWiseFullSnapshots.put(snapshotableObject.getElementId(), elementWiseSnapshots);
-                        }
+                    }
+                    if (!elementWiseFullSnapshots.isEmpty()) {
+                        elementSnapshotMapFull.put(entry.getKey(), elementWiseFullSnapshots);
                     }
                 }
-                if (!elementWiseFullSnapshots.isEmpty()) {
-                    elementSnapshotMapFull.put(entry.getKey(), elementWiseFullSnapshots);
+                if (log.isDebugEnabled()) {
+                    log.debug("SnapshotState serialization started ...");
                 }
+                serializedFullState = ByteSerializer.objectToByte(elementSnapshotMapFull, siddhiAppContext);
+                if (log.isDebugEnabled()) {
+                    log.debug("SnapshotState serialization finished.");
+                }
+            } finally {
+                threadBarrier.unlock();
             }
             if (log.isDebugEnabled()) {
-                log.debug("SnapshotState serialization started ...");
+                log.debug("SnapshotState taken for Siddhi app '" + siddhiAppContext.getName() + "'");
             }
-            serializedFullState = ByteSerializer.objectToByte(elementSnapshotMapFull, siddhiAppContext);
-            if (log.isDebugEnabled()) {
-                log.debug("SnapshotState serialization finished.");
-            }
+            return serializedFullState;
         } finally {
-            threadBarrier.unlock();
+            SnapshotRequest.requestForFullSnapshot(false);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("SnapshotState taken for Siddhi app '" + siddhiAppContext.getName() + "'");
-        }
-        return serializedFullState;
     }
 
     public IncrementalSnapshot incrementalSnapshot() {
-        Map<String, Map<String, byte[]>> elementSnapshotMapIncremental = new HashMap<>();
-        Map<String, Map<String, byte[]>> elementSnapshotMapIncrementalBase = new HashMap<>();
-        if (log.isDebugEnabled()) {
-            log.debug("Taking snapshot ...");
-        }
         try {
-            threadBarrier.lock();
-            for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
-                Map<String, byte[]> elementWiseIncrementalSnapshots = new HashMap<>();
-                Map<String, byte[]> elementWiseIncrementalSnapshotsBase = new HashMap<>();
-                for (Snapshotable snapshotableObject : entry.getValue()) {
-                    Map<String, Object> currentState = snapshotableObject.currentState();
-                    if (currentState != null) {
-                        Map<String, Object> incrementalSnapshotableMap = new HashMap<>();
-                        ;
-                        Map<String, Object> incrementalSnapshotableMapBase = new HashMap<>();
-                        for (Map.Entry<String, Object> item2 : currentState.entrySet()) {
-                            String key = item2.getKey();
-                            Object snapShot = item2.getValue();
-                            if (snapShot instanceof SnapshotState) {
-                                if (((SnapshotState) snapShot).getState() != null) {
+            SnapshotRequest.requestForFullSnapshot(false);
+            Map<String, Map<String, byte[]>> elementSnapshotMapIncremental = new HashMap<>();
+            Map<String, Map<String, byte[]>> elementSnapshotMapIncrementalBase = new HashMap<>();
+            if (log.isDebugEnabled()) {
+                log.debug("Taking snapshot ...");
+            }
+            try {
+                threadBarrier.lock();
+                for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
+                    Map<String, byte[]> elementWiseIncrementalSnapshots = new HashMap<>();
+                    Map<String, byte[]> elementWiseIncrementalSnapshotsBase = new HashMap<>();
+                    for (Snapshotable snapshotableObject : entry.getValue()) {
+                        Map<String, Object> currentState = snapshotableObject.currentState();
+                        if (currentState != null) {
+                            Map<String, Object> incrementalSnapshotableMap = new HashMap<>();
+                            Map<String, Object> incrementalSnapshotableMapBase = new HashMap<>();
+                            for (Map.Entry<String, Object> stateEntry : currentState.entrySet()) {
+                                String key = stateEntry.getKey();
+                                Object snapShot = stateEntry.getValue();
+                                if (snapShot instanceof SnapshotState) {
                                     if (((SnapshotState) snapShot).isIncrementalSnapshot()) {
                                         incrementalSnapshotableMap.put(key, snapShot);
                                     } else {
                                         incrementalSnapshotableMapBase.put(key, snapShot);
                                     }
+                                } else {
+                                    incrementalSnapshotableMapBase.put(key, snapShot);
                                 }
-                            } else {
-                                incrementalSnapshotableMapBase.put(key, snapShot);
+                            }
+                            if (log.isDebugEnabled()) {
+                                log.debug("SnapshotState serialization started ...");
+                            }
+                            if (!incrementalSnapshotableMap.isEmpty()) {
+                                //Do we need to get and then update?
+                                elementWiseIncrementalSnapshots.put(snapshotableObject.getElementId(),
+                                        ByteSerializer.objectToByte(incrementalSnapshotableMap, siddhiAppContext));
+                            }
+                            if (!incrementalSnapshotableMapBase.isEmpty()) {
+                                elementWiseIncrementalSnapshotsBase.put(snapshotableObject.getElementId(),
+                                        ByteSerializer.objectToByte(incrementalSnapshotableMapBase, siddhiAppContext));
+                            }
+                            if (log.isDebugEnabled()) {
+                                log.debug("SnapshotState serialization finished.");
                             }
                         }
-                        if (log.isDebugEnabled()) {
-                            log.debug("SnapshotState serialization started ...");
-                        }
-                        if (!incrementalSnapshotableMap.isEmpty()) {
-                            //Do we need to get and then update?
-                            elementWiseIncrementalSnapshots.put(snapshotableObject.getElementId(),
-                                    ByteSerializer.objectToByte(incrementalSnapshotableMap, siddhiAppContext));
-                        }
-                        if (!incrementalSnapshotableMapBase.isEmpty()) {
-                            elementWiseIncrementalSnapshotsBase.put(snapshotableObject.getElementId(),
-                                    ByteSerializer.objectToByte(incrementalSnapshotableMapBase, siddhiAppContext));
-                        }
-                        if (log.isDebugEnabled()) {
-                            log.debug("SnapshotState serialization finished.");
-                        }
+                    }
+                    if (!elementWiseIncrementalSnapshots.isEmpty()) {
+                        elementSnapshotMapIncremental.put(entry.getKey(), elementWiseIncrementalSnapshots);
+                    }
+                    if (!elementWiseIncrementalSnapshotsBase.isEmpty()) {
+                        elementSnapshotMapIncrementalBase.put(entry.getKey(), elementWiseIncrementalSnapshotsBase);
                     }
                 }
-                if (!elementWiseIncrementalSnapshots.isEmpty()) {
-                    elementSnapshotMapIncremental.put(entry.getKey(), elementWiseIncrementalSnapshots);
-                }
-                if (!elementWiseIncrementalSnapshotsBase.isEmpty()) {
-                    elementSnapshotMapIncrementalBase.put(entry.getKey(), elementWiseIncrementalSnapshotsBase);
-                }
+            } finally {
+                threadBarrier.unlock();
             }
+            if (log.isDebugEnabled()) {
+                log.debug("SnapshotState taken for Siddhi app '" + siddhiAppContext.getName() + "'");
+            }
+            IncrementalSnapshot snapshot = new IncrementalSnapshot();
+            if (!elementSnapshotMapIncremental.isEmpty()) {
+                snapshot.setIncrementalState(elementSnapshotMapIncremental);
+            }
+            if (!elementSnapshotMapIncrementalBase.isEmpty()) {
+                snapshot.setIncrementalStateBase(elementSnapshotMapIncrementalBase);
+            }
+            return snapshot;
         } finally {
-            threadBarrier.unlock();
+            SnapshotRequest.requestForFullSnapshot(false);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("SnapshotState taken for Siddhi app '" + siddhiAppContext.getName() + "'");
-        }
-        IncrementalSnapshot snapshot = new IncrementalSnapshot();
-        if (!elementSnapshotMapIncremental.isEmpty()) {
-            snapshot.setIncrementalState(elementSnapshotMapIncremental);
-        }
-        if (!elementSnapshotMapIncrementalBase.isEmpty()) {
-            snapshot.setIncrementalStateBase(elementSnapshotMapIncrementalBase);
-        }
-        return snapshot;
     }
 
     public Map<String, Object> queryState(String queryName) {
@@ -232,9 +237,16 @@ public class SnapshotService {
     }
 
     public void restore(byte[] snapshot) throws CannotRestoreSiddhiAppStateException {
-
-        Map<String, Map<String, Object>> snapshots = (Map<String, Map<String, Object>>)
-                ByteSerializer.byteToObject(snapshot, siddhiAppContext);
+        if (snapshot == null) {
+            throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
+                    getName() + " failed due to no snapshot.");
+        }
+        Map<String, Map<String, Map<String, Object>>> snapshotsByQueryName =
+                (Map<String, Map<String, Map<String, Object>>>) ByteSerializer.byteToObject(snapshot, siddhiAppContext);
+        if (snapshotsByQueryName == null) {
+            throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
+                    getName() + " failed due to invalid snapshot.");
+        }
         try {
             threadBarrier.lock();
             if (snapshotableMap.containsKey("partition")) {
@@ -243,9 +255,8 @@ public class SnapshotService {
                 try {
                     if (partitionSnapshotables != null) {
                         for (Snapshotable snapshotable : partitionSnapshotables) {
-                            Map<String, Object> elementStateMap = snapshots.get("partition");
-                            snapshotable.restoreState((Map<String, Object>)
-                                    elementStateMap.get(snapshotable.getElementId()));
+                            Map<String, Map<String, Object>> snapshotsByElementId = snapshotsByQueryName.get("partition");
+                            snapshotable.restoreState(snapshotsByElementId.get(snapshotable.getElementId()));
                         }
                     }
                 } catch (Throwable t) {
@@ -260,14 +271,25 @@ public class SnapshotService {
                     List<Snapshotable> snapshotableList = entry.getValue();
                     try {
                         for (Snapshotable snapshotable : snapshotableList) {
-                            Map<String, Object> mapOfSnapshots = snapshots.get(
-                                    entry.getKey());
-                            if (mapOfSnapshots != null) {
-                                Map<String, Object> variablesForElement = (Map<String, Object>)
-                                        mapOfSnapshots.get(snapshotable.getElementId());
-
-                                if (variablesForElement != null) {
-                                    snapshotable.restoreState(variablesForElement);
+                            Map<String, Map<String, Object>> snapshotsByElementId =
+                                    snapshotsByQueryName.get(entry.getKey());
+                            if (snapshotsByElementId != null) {
+                                Map<String, Object> snapshotsByKey = snapshotsByElementId.get(
+                                        snapshotable.getElementId());
+                                if (snapshotsByKey != null) {
+                                    Map<String, Object> snapshotRestoresByKey = new HashMap<>();
+                                    for (Map.Entry<String, Object> snapshotsByKeyEntry : snapshotsByKey.entrySet()) {
+                                        if (snapshotsByKeyEntry.getValue() instanceof SnapshotState) {
+                                            SnapshotStateList snapshotStateList = new SnapshotStateList();
+                                            snapshotStateList.putSnapshotState(0L,
+                                                    (SnapshotState) snapshotsByKeyEntry.getValue());
+                                            snapshotRestoresByKey.put(snapshotsByKeyEntry.getKey(), snapshotStateList);
+                                        } else {
+                                            snapshotRestoresByKey.put(snapshotsByKeyEntry.getKey(),
+                                                    snapshotsByKeyEntry.getValue());
+                                        }
+                                    }
+                                    snapshotable.restoreState(snapshotRestoresByKey);
                                 }
                             }
                         }
@@ -407,7 +429,10 @@ public class SnapshotService {
                     public int compare(IncrementalSnapshotInfo o1, IncrementalSnapshotInfo o2) {
                         int results = o1.getElementId().compareTo(o2.getElementId());
                         if (results == 0) {
-                            return Long.compare(o1.getTime(), o2.getTime());
+                            results = Long.compare(o2.getTime(), o1.getTime());
+                            if (results == 0) {
+                                return o2.getType().compareTo(o1.getType());
+                            }
                         }
                         return results;
                     }
@@ -437,7 +462,7 @@ public class SnapshotService {
                             incrementalStateByElementId.computeIfAbsent(snapshotInfo.getElementId(),
                                     k -> new TreeMap<>());
                     Map<IncrementalSnapshotInfo, byte[]> incrementalStateByInfo = incrementalStateByTime.
-                            computeIfAbsent(snapshotInfo.getTime(), k -> new TreeMap<>());
+                            computeIfAbsent(snapshotInfo.getTime(), k -> new HashMap<>());
                     incrementalStateByInfo.put(snapshotInfo, incrementalPersistenceStore.load(snapshotInfo));
                 }
                 restore(incrementalState);

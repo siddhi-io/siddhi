@@ -102,7 +102,7 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
-        this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventCloner);
+        this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
@@ -174,9 +174,9 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
     }
@@ -200,7 +200,6 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
 
     @Override
     public void restoreState(Map<String, Object> state) {
-        expiredEventQueue.clear();
         expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
     }
 }

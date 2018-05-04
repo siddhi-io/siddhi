@@ -32,7 +32,6 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
-import org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.IncrementalFileSystemPersistenceStore;
 
 import java.util.ArrayList;
@@ -50,7 +49,7 @@ public class IncrementalPersistenceTestCase {
     private int removeEventCount;
     private List<Object[]> inEventsList;
     private AtomicInteger count2 = new AtomicInteger(0);
-    private String storageFilePath = "./temp";
+    private String storageFilePath = "./target/temp";
 
     @BeforeMethod
     public void init() {
@@ -91,7 +90,6 @@ public class IncrementalPersistenceTestCase {
                     AssertJUnit.assertTrue("IBM".equals(inEvent.getData(0)) ||
                             "WSO2".equals(inEvent.getData(0)));
                     lastValue = (Long) inEvent.getData(2);
-                    log.info("last value: " + lastValue);
                 }
             }
         };
@@ -128,16 +126,13 @@ public class IncrementalPersistenceTestCase {
         siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         siddhiAppRuntime.addCallback("query1", queryCallback);
         inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
-        siddhiAppRuntime.start();
-
-        Thread.sleep(500);
         //loading
         try {
             siddhiAppRuntime.restoreLastRevision();
         } catch (CannotRestoreSiddhiAppStateException e) {
             Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
         }
-
+        siddhiAppRuntime.start();
         Thread.sleep(5000);
 
         inputHandler.send(new Object[]{"IBM", 500.6f, 300});
@@ -159,7 +154,6 @@ public class IncrementalPersistenceTestCase {
         final int eventWindowSize = 4;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "" +
@@ -182,7 +176,6 @@ public class IncrementalPersistenceTestCase {
                     AssertJUnit.assertTrue("IBM".equals(inEvent.getData(0)) ||
                             "WSO2".equals(inEvent.getData(0)));
                     lastValue = (Long) inEvent.getData(2);
-                    log.info("last value: " + lastValue);
                 }
             }
         };
@@ -224,16 +217,15 @@ public class IncrementalPersistenceTestCase {
         siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         siddhiAppRuntime.addCallback("query1", queryCallback);
         inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
-        siddhiAppRuntime.start();
-
-        Thread.sleep(500);
         //loading
         try {
             siddhiAppRuntime.restoreLastRevision();
         } catch (CannotRestoreSiddhiAppStateException e) {
-            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
+            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed", e);
         }
+        siddhiAppRuntime.start();
 
+        Thread.sleep(500);
         inputHandler.send(new Object[]{"IBM", 700.6f, 230});
         Thread.sleep(10);
         inputHandler.send(new Object[]{"WSO2", 800.6f, 125});
@@ -258,11 +250,11 @@ public class IncrementalPersistenceTestCase {
         final int eventWindowSizeInSeconds = 2;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "" +
                 "@app:name('incrementalPersistenceTest3') " +
+                "@app:playback " +
                 "" +
                 "define stream StockStream ( symbol string, price float, volume int );" +
                 "" +
@@ -293,7 +285,7 @@ public class IncrementalPersistenceTestCase {
         siddhiAppRuntime.start();
 
         for (int i = 0; i < inputEventCount; i++) {
-            inputHandler.send(new Object[]{"IBM", 75.6f + i, 100});
+            inputHandler.send(i, new Object[]{"IBM", 75.6f + i, 100});
         }
         Thread.sleep(4000);
         AssertJUnit.assertTrue(eventArrived);
@@ -303,17 +295,17 @@ public class IncrementalPersistenceTestCase {
         siddhiAppRuntime.persist();
         Thread.sleep(5000);
 
-        inputHandler.send(new Object[]{"WSO2", 100.4f, 150});
+        inputHandler.send(3000, new Object[]{"WSO2", 100.4f, 150});
         //Thread.sleep(100);
-        inputHandler.send(new Object[]{"WSO2", 200.4f, 110});
+        inputHandler.send(3010, new Object[]{"WSO2", 200.4f, 110});
 
-        inputHandler.send(new Object[]{"IBM", 300.4f, 100});
+        inputHandler.send(3020, new Object[]{"IBM", 300.4f, 100});
         //Thread.sleep(100);
-        inputHandler.send(new Object[]{"WSO2", 400.4f, 300});
+        inputHandler.send(3030, new Object[]{"WSO2", 400.4f, 300});
 
-        inputHandler.send(new Object[]{"IBM", 500.6f, 120});
+        inputHandler.send(3040, new Object[]{"IBM", 500.6f, 120});
         Thread.sleep(10);
-        inputHandler.send(new Object[]{"WSO2", 600.6f, 400});
+        inputHandler.send(3050, new Object[]{"WSO2", 600.6f, 400});
 
         Thread.sleep(100);
         siddhiAppRuntime.persist();
@@ -323,23 +315,22 @@ public class IncrementalPersistenceTestCase {
         siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         siddhiAppRuntime.addCallback("query1", queryCallback);
         inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
-        siddhiAppRuntime.start();
-
-        Thread.sleep(500);
-        //loading
         try {
+            //loading
             siddhiAppRuntime.restoreLastRevision();
         } catch (CannotRestoreSiddhiAppStateException e) {
             Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
         }
+        siddhiAppRuntime.start();
 
-        inputHandler.send(new Object[]{"IBM", 700.6f, 230});
+        Thread.sleep(500);
+        inputHandler.send(3500, new Object[]{"IBM", 700.6f, 230});
         Thread.sleep(10);
-        inputHandler.send(new Object[]{"WSO2", 800.6f, 125});
+        inputHandler.send(3540, new Object[]{"WSO2", 800.6f, 125});
 
-        inputHandler.send(new Object[]{"IBM", 900.6f, 370});
+        inputHandler.send(3590, new Object[]{"IBM", 900.6f, 370});
         Thread.sleep(10);
-        inputHandler.send(new Object[]{"WSO2", 1000.6f, 140});
+        inputHandler.send(3600, new Object[]{"WSO2", 1000.6f, 140});
 
         //shutdown Siddhi app
         Thread.sleep(5000);
@@ -357,7 +348,6 @@ public class IncrementalPersistenceTestCase {
         final int eventWindowSizeInSeconds = 2;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "" +
@@ -422,16 +412,112 @@ public class IncrementalPersistenceTestCase {
         siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         siddhiAppRuntime.addCallback("query1", queryCallback);
         inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
-        siddhiAppRuntime.start();
-
-        Thread.sleep(500);
         //loading
         try {
             siddhiAppRuntime.restoreLastRevision();
         } catch (CannotRestoreSiddhiAppStateException e) {
             Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
         }
+        siddhiAppRuntime.start();
 
+        Thread.sleep(50);
+        inputHandler.send(new Object[]{"IBM", 700.6f, 230});
+        Thread.sleep(10);
+        inputHandler.send(new Object[]{"WSO2", 800.6f, 125});
+
+        inputHandler.send(new Object[]{"IBM", 900.6f, 370});
+        Thread.sleep(10);
+        inputHandler.send(new Object[]{"WSO2", 1000.6f, 140});
+
+        //shutdown Siddhi app
+        Thread.sleep(5000);
+        siddhiAppRuntime.shutdown();
+
+        AssertJUnit.assertTrue(count <= (inputEventCount + 10));
+        AssertJUnit.assertEquals(new Long(2045), lastValue);
+        AssertJUnit.assertEquals(true, eventArrived);
+    }
+
+    @Test
+    public void incrementalPersistenceTest4_1() throws InterruptedException {
+        log.info("Incremental persistence test 4_1 - time batch window query");
+        final int inputEventCount = 10;
+        final int eventWindowSizeInSeconds = 2;
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
+
+        String siddhiApp = "" +
+                "@app:name('incrementalPersistenceTest4') " +
+                "" +
+                "define stream StockStream ( symbol string, price float, volume int );" +
+                "" +
+                "@info(name = 'query1')" +
+                "from StockStream[price>10]#window.timeBatch(" + eventWindowSizeInSeconds + " sec) " +
+                "select symbol, price, sum(volume) as totalVol " +
+                "insert into OutStream";
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    AssertJUnit.assertTrue("IBM".equals(inEvent.getData(0)) ||
+                            "WSO2".equals(inEvent.getData(0)));
+                    lastValue = (Long) inEvent.getData(2);
+                    log.info("last value: " + lastValue);
+                }
+            }
+        };
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.addCallback("query1", queryCallback);
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
+        siddhiAppRuntime.start();
+
+        for (int i = 0; i < inputEventCount; i++) {
+            inputHandler.send(new Object[]{"IBM", 75.6f + i, 100});
+        }
+        Thread.sleep(4000);
+        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertEquals(new Long(1000), lastValue);
+
+        //persisting
+        siddhiAppRuntime.persist();
+        Thread.sleep(5000);
+
+        inputHandler.send(new Object[]{"WSO2", 100.4f, 150});
+        //Thread.sleep(100);
+        inputHandler.send(new Object[]{"WSO2", 200.4f, 110});
+
+        inputHandler.send(new Object[]{"IBM", 300.4f, 100});
+        //Thread.sleep(100);
+        inputHandler.send(new Object[]{"WSO2", 400.4f, 300});
+
+        inputHandler.send(new Object[]{"IBM", 500.6f, 120});
+        Thread.sleep(10);
+        inputHandler.send(new Object[]{"WSO2", 600.6f, 400});
+
+        Thread.sleep(100);
+        siddhiAppRuntime.persist();
+        Thread.sleep(5000);
+
+        siddhiAppRuntime.shutdown();
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.addCallback("query1", queryCallback);
+        inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
+        //loading
+        try {
+            siddhiAppRuntime.restoreLastRevision();
+        } catch (CannotRestoreSiddhiAppStateException e) {
+            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
+        }
+        siddhiAppRuntime.start();
+
+        Thread.sleep(5000);
         inputHandler.send(new Object[]{"IBM", 700.6f, 230});
         Thread.sleep(10);
         inputHandler.send(new Object[]{"WSO2", 800.6f, 125});
@@ -456,7 +542,6 @@ public class IncrementalPersistenceTestCase {
         final int eventWindowSizeInSeconds = 2;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "" +
@@ -519,16 +604,13 @@ public class IncrementalPersistenceTestCase {
         siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
         siddhiAppRuntime.addCallback("query1", queryCallback);
         inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
-        siddhiAppRuntime.start();
-
-        Thread.sleep(500);
         //loading
         try {
             siddhiAppRuntime.restoreLastRevision();
         } catch (CannotRestoreSiddhiAppStateException e) {
             Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
         }
-
+        siddhiAppRuntime.start();
         inputHandler.send(new Object[]{(7L + inputEventCount), 700.6f, 230});
         Thread.sleep(10);
         inputHandler.send(new Object[]{(8L + inputEventCount), 800.6f, 125});
@@ -552,7 +634,6 @@ public class IncrementalPersistenceTestCase {
         int inputEventCountPerCategory = 10;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String streams = "" +
@@ -620,17 +701,13 @@ public class IncrementalPersistenceTestCase {
 
             stockStream = siddhiAppRuntime.getInputHandler("StockStream");
             InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
-            siddhiAppRuntime.start();
-
-            Thread.sleep(1000);
-
             //loading
             try {
                 siddhiAppRuntime.restoreLastRevision();
             } catch (CannotRestoreSiddhiAppStateException e) {
                 Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
             }
-
+            siddhiAppRuntime.start();
             Thread.sleep(2000);
 
             stockStream.send(new Object[]{"WSO2", 100.6f, 180L});
@@ -662,7 +739,6 @@ public class IncrementalPersistenceTestCase {
         int inputEventCountPerCategory = 10;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String streams = "" +
@@ -731,16 +807,13 @@ public class IncrementalPersistenceTestCase {
 
             stockStream = siddhiAppRuntime.getInputHandler("StockStream");
             InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
-            siddhiAppRuntime.start();
-
-            Thread.sleep(1000);
-
             //loading
             try {
                 siddhiAppRuntime.restoreLastRevision();
             } catch (CannotRestoreSiddhiAppStateException e) {
-                Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
+                Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed.", e);
             }
+            siddhiAppRuntime.start();
 
             Thread.sleep(2000);
 
@@ -773,7 +846,6 @@ public class IncrementalPersistenceTestCase {
         final int inputEventCount = 10;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String streams = "" +
@@ -830,17 +902,13 @@ public class IncrementalPersistenceTestCase {
             siddhiAppRuntime.addCallback("query1", queryCallback);
 
             stockStream = siddhiAppRuntime.getInputHandler("TempStream");
-            siddhiAppRuntime.start();
-
-            Thread.sleep(1000);
-
             //loading
             try {
                 siddhiAppRuntime.restoreLastRevision();
             } catch (CannotRestoreSiddhiAppStateException e) {
                 Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
             }
-
+            siddhiAppRuntime.start();
             Thread.sleep(2000);
 
             stockStream.send(new Object[]{inputEventCount + 1, 1000L});
@@ -873,7 +941,6 @@ public class IncrementalPersistenceTestCase {
         final int inputEventCount = 10;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String streams = "" +
@@ -931,17 +998,13 @@ public class IncrementalPersistenceTestCase {
             siddhiAppRuntime.addCallback("query1", queryCallback);
 
             stockStream = siddhiAppRuntime.getInputHandler("TempStream");
-            siddhiAppRuntime.start();
-
-            Thread.sleep(1000);
-
             //loading
             try {
                 siddhiAppRuntime.restoreLastRevision();
             } catch (CannotRestoreSiddhiAppStateException e) {
                 Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
             }
-
+            siddhiAppRuntime.start();
             Thread.sleep(2000);
 
             stockStream.send(new Object[]{inputEventCount + 1, 1000L});
@@ -973,7 +1036,6 @@ public class IncrementalPersistenceTestCase {
         final int inputEventCount = 10;
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "@app:name('incrementalPersistenceTest10') "
@@ -1026,17 +1088,13 @@ public class IncrementalPersistenceTestCase {
         siddhiAppRuntime.addCallback("OutStockStream", streamCallback);
 
         inputHandler = siddhiAppRuntime.getInputHandler("cseEventStreamOne");
-        siddhiAppRuntime.start();
-
-        Thread.sleep(1000);
-
         //loading
         try {
             siddhiAppRuntime.restoreLastRevision();
         } catch (CannotRestoreSiddhiAppStateException e) {
-            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
+            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed", e);
         }
-
+        siddhiAppRuntime.start();
         Thread.sleep(2000);
 
         inputHandler.send(new Object[]{"IBM", 105f, 100});
@@ -1056,7 +1114,6 @@ public class IncrementalPersistenceTestCase {
         AtomicLong wso2Count = new AtomicLong();
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setPersistenceStore(new FileSystemPersistenceStore(storageFilePath));
         siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
 
         String siddhiApp = "@app:name('incrementalPersistenceTest11') " +
@@ -1111,10 +1168,6 @@ public class IncrementalPersistenceTestCase {
         siddhiAppRuntime.addCallback("OutStockStream", streamCallback);
 
         inputHandler = siddhiAppRuntime.getInputHandler("StockQuote");
-        siddhiAppRuntime.start();
-
-        Thread.sleep(1000);
-
         //loading
         try {
             siddhiAppRuntime.restoreLastRevision();
@@ -1122,6 +1175,7 @@ public class IncrementalPersistenceTestCase {
             Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
         }
 
+        siddhiAppRuntime.start();
         Thread.sleep(2000);
 
         inputHandler.send(new Event(System.currentTimeMillis(), new Object[]{"IBM", 800f, 100}));

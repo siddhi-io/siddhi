@@ -90,7 +90,7 @@ public class ExternalTimeWindowProcessor extends WindowProcessor implements Find
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
-        this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventCloner);
+        this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (attributeExpressionExecutors.length == 2) {
             if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
                 timeToKeep = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)

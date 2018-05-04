@@ -53,8 +53,8 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                 cleanOldRevisions(snapshotInfo);
             }
             if (log.isDebugEnabled()) {
-                log.debug("incremental persistence of '" + snapshotInfo.getSiddhiAppId() +
-                        "' persisted successfully.");
+                log.debug("Incremental persistence of '" + snapshotInfo.getSiddhiAppId() +
+                        "' with revision '" + snapshotInfo.getRevision() + "' persisted successfully.");
             }
         } catch (IOException e) {
             log.error("Cannot save the revision '" + snapshotInfo.getRevision() + "' of SiddhiApp: '" +
@@ -92,8 +92,10 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
         byte[] bytes = null;
         try {
             bytes = Files.toByteArray(file);
-            log.info("State loaded for SiddhiApp '" + snapshotInfo.getSiddhiAppId() + "' revision '" +
-                    snapshotInfo.getRevision() + "' from file system.");
+            if (log.isDebugEnabled()) {
+                log.debug("State loaded for SiddhiApp '" + snapshotInfo.getSiddhiAppId() + "' revision '" +
+                        snapshotInfo.getRevision() + "' from file system.");
+            }
         } catch (IOException e) {
             log.error("Cannot load the revision '" + snapshotInfo.getRevision() + "' of SiddhiApp '" +
                     snapshotInfo.getSiddhiAppId() + "' from file system.", e);
@@ -122,6 +124,9 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                     snapshotInfo.getQueryName() != null) {
                 //Note: Here we discard the (items.length == 2) scenario which is handled
                 // by the full snapshot handling
+                if (log.isDebugEnabled()) {
+                    log.debug("List of revisions to load : " + fileName);
+                }
                 results.add(snapshotInfo);
             }
         }
@@ -130,7 +135,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
 
     @Override
     public String getLastRevision(String siddhiAppName) {
-        long restoreTime = Long.MAX_VALUE;
+        long restoreTime = -1;
         File dir = new File(folder + File.separator + siddhiAppName);
         File[] files = dir.listFiles();
         if (files == null || files.length == 0) {
@@ -139,7 +144,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
         for (File file : files) {
             String fileName = file.getName();
             IncrementalSnapshotInfo snapshotInfo = PersistenceHelper.convertRevision(fileName);
-            if (snapshotInfo.getTime() < restoreTime &&
+            if (snapshotInfo.getTime() > restoreTime &&
                     siddhiAppName.equals(snapshotInfo.getSiddhiAppId()) &&
                     snapshotInfo.getElementId() != null &&
                     snapshotInfo.getQueryName() != null) {
@@ -148,7 +153,10 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                 restoreTime = snapshotInfo.getTime();
             }
         }
-        if (restoreTime != Long.MAX_VALUE) {
+        if (restoreTime != -1) {
+            if (log.isDebugEnabled()) {
+                log.debug("Latest revision to load: " + restoreTime + PersistenceConstants.REVISION_SEPARATOR + siddhiAppName);
+            }
             return restoreTime + PersistenceConstants.REVISION_SEPARATOR + siddhiAppName;
         }
         return null;

@@ -99,7 +99,7 @@ public class QueryParser {
             if (nameElement != null) {
                 queryName = nameElement.getValue();
             } else {
-                queryName = "query_" + queryIndex + "_" + UUID.randomUUID().toString();
+                queryName = "query_" + queryIndex;
             }
             latencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, queryName,
                     SiddhiConstants.METRIC_INFIX_QUERIES, null);

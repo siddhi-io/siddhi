@@ -111,7 +111,6 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
         for (Map.Entry<String, AttributeAggregator> entry : aggregatorMap.entrySet()) {
             state.put(entry.getKey(), entry.getValue().currentState());
         }
-
         return state;
     }
 
@@ -119,7 +118,6 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
     public void restoreState(Map<String, Object> state) {
         for (HashMap.Entry<String, Object> item: state.entrySet()) {
             String key = item.getKey();
-
             AttributeAggregator aAttributeAggregator = attributeAggregator.cloneAggregator(key);
             aAttributeAggregator.restoreState((Map<String, Object>) item.getValue());
             aggregatorMap.put(key, aAttributeAggregator);

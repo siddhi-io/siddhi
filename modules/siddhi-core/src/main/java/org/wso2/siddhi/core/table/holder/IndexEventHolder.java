@@ -70,7 +70,7 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     private Map<String, Integer> indexMetaData;
     private Map<String, Integer> multiPrimaryKeyMetaData = new LinkedHashMap<>();
     private Map<String, Integer> allIndexMetaData = new HashMap<>();
-    private ArrayList<Operation> operationChangeLog;
+    private ArrayList<Operation> operationChangeLog = new ArrayList<>();
     private long eventsCount;
     private static final float FULL_SNAPSHOT_THRESHOLD = 2.1f;
     private boolean forceFullSnapshot = true;
@@ -635,10 +635,14 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
             if (!snapshotEntry.getValue().isIncrementalSnapshot()) {
                 this.deleteAll();
                 IndexEventHolder snapshotEventHolder = (IndexEventHolder) snapshotEntry.getValue().getState();
-                primaryKeyData.clear();
-                primaryKeyData.putAll(snapshotEventHolder.primaryKeyData);
-                indexData.clear();
-                indexData.putAll(snapshotEventHolder.indexData);
+                if (primaryKeyData != null) {
+                    primaryKeyData.clear();
+                    primaryKeyData.putAll(snapshotEventHolder.primaryKeyData);
+                }
+                if (indexData != null) {
+                    indexData.clear();
+                    indexData.putAll(snapshotEventHolder.indexData);
+                }
                 forceFullSnapshot = false;
             } else {
                 ArrayList<Operation> operations = (ArrayList<Operation>) snapshotEntry.getValue().getState();
