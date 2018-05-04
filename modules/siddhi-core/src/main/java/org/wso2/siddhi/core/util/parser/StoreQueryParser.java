@@ -168,7 +168,29 @@ public class StoreQueryParser {
                 SnapshotService.getSkipSnapshotableThreadLocal().set(null);
             }
         } else if (storeQuery.isUpdateQuery()) {
+            UpdateStream outputStream = (UpdateStream) storeQuery.getOutputStream();
+            queryName = "store_update_query_" + outputStream.getId();
+            int metaPosition = SiddhiConstants.UNKNOWN_STATE;
+            Within within = null;
+            Expression per = null;
+            try {
+                SnapshotService.getSkipSnapshotableThreadLocal().set(true);
+                Expression onCondition = outputStream.getOnUpdateExpression();
+                MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
+                metaStreamEvent.setInputReferenceId(outputStream.getId());
 
+                List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
+                Table table = tableMap.get(outputStream.getId());
+                if (table != null) {
+                    return constructStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, queryName,
+                            metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors);
+                } else {
+                    throw new StoreQueryCreationException(outputStream.getId() + "is not a table.");
+                }
+
+            } finally {
+                SnapshotService.getSkipSnapshotableThreadLocal().set(null);
+            }
         } else if (storeQuery.isUpdateOrInsertQuery()) {
 
         }
@@ -256,7 +278,13 @@ public class StoreQueryParser {
             } else if (storeQuery.isUpdateOrInsertQuery()) {
 
             } else if (storeQuery.isUpdateQuery()) {
-
+                CompiledUpdateSet compiledUpdateSet =
+                        table.compileUpdateSet(
+                                ((UpdateStream)storeQuery.getOutputStream()).getUpdateSet(),
+                                metaStreamInfoHolder,
+                                siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
+                storeQueryRuntime = new UpdateStoreQueryRuntime(table, compiledCondition, compiledUpdateSet, queryName,
+                        metaStreamEvent);
             } else {
                 storeQueryRuntime = new FindStoreQueryRuntime(table, compiledCondition, queryName,
                         metaStreamEvent);
