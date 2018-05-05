@@ -255,7 +255,8 @@ public class SnapshotService {
                 try {
                     if (partitionSnapshotables != null) {
                         for (Snapshotable snapshotable : partitionSnapshotables) {
-                            Map<String, Map<String, Object>> snapshotsByElementId = snapshotsByQueryName.get("partition");
+                            Map<String, Map<String, Object>> snapshotsByElementId =
+                                    snapshotsByQueryName.get("partition");
                             snapshotable.restoreState(snapshotsByElementId.get(snapshotable.getElementId()));
                         }
                     }
@@ -498,5 +499,4 @@ public class SnapshotService {
         }
         return revision;
     }
-
 }

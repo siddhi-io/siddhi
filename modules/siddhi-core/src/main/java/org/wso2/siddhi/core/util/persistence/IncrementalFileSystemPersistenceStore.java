@@ -155,7 +155,8 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
         }
         if (restoreTime != -1) {
             if (log.isDebugEnabled()) {
-                log.debug("Latest revision to load: " + restoreTime + PersistenceConstants.REVISION_SEPARATOR + siddhiAppName);
+                log.debug("Latest revision to load: " + restoreTime + PersistenceConstants.REVISION_SEPARATOR +
+                        siddhiAppName);
             }
             return restoreTime + PersistenceConstants.REVISION_SEPARATOR + siddhiAppName;
         }

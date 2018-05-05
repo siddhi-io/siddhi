@@ -2606,7 +2606,7 @@ public class PrimaryKeyTableTestCase {
 
     @Test
     public void persistenceTest47() throws InterruptedException {
-        log.info("Incremental persistence test 7 - in-memory table persistance test with primary key.");
+        log.info("Test 47 - in-memory table persistance test with primary key.");
         int inputEventCountPerCategory = 10;
 
         SiddhiManager siddhiManager = new SiddhiManager();

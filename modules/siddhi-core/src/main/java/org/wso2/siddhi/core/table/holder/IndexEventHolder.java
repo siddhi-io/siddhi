@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.core.util.snapshot.SnapshotRequest;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
@@ -611,8 +612,9 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     }
 
     private boolean isFullSnapshot() {
-        return (operationChangeLog.size() > (eventsCount * FULL_SNAPSHOT_THRESHOLD)) && (eventsCount != 0) ||
-                forceFullSnapshot;
+        return operationChangeLog.size() > (eventsCount * FULL_SNAPSHOT_THRESHOLD)
+                || forceFullSnapshot
+                || SnapshotRequest.isRequestForFullSnapshot();
     }
 
     public SnapshotState getSnapshot() {

@@ -395,7 +395,8 @@ public class CollectionExpressionParser {
                         != MetaStreamEvent.EventType.DEFAULT) {
             return true;
         } else if (matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents().length == 2 &&
-                matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()[1].getEventType()
+                matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvents()
+                        [matchingMetaInfoHolder.getStoreEventIndex()].getEventType()
                         != MetaStreamEvent.EventType.DEFAULT) {
             return true;
         }
