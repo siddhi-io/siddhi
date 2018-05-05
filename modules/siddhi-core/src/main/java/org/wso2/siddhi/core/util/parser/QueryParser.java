@@ -194,7 +194,8 @@ public class QueryParser {
 
             OutputCallback outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(),
                     streamRuntime.getMetaComplexEvent().getOutputStreamDefinition(), tableMap, windowMap,
-                    siddhiAppContext, !(streamRuntime instanceof SingleStreamRuntime), queryName);
+                    siddhiAppContext, !(streamRuntime instanceof SingleStreamRuntime) ||
+                            !query.getSelector().getGroupByList().isEmpty(), queryName);
 
             QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);

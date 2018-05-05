@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.stream.output.sink;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * SinkHandlerManager is a factory interface that would create the appropriate {@link SinkHandler}
@@ -29,7 +30,7 @@ public abstract class SinkHandlerManager {
     /**
      * Saves a list of registered {@link SinkHandler} classes against the respective {@link Sink} elementId.
      */
-    private HashMap<String, SinkHandler> registeredSinkHandlers = new HashMap<>();
+    private Map<String, SinkHandler> registeredSinkHandlers = new HashMap<>();
 
     public abstract SinkHandler generateSinkHandler();
 
@@ -41,7 +42,7 @@ public abstract class SinkHandlerManager {
         this.registeredSinkHandlers.remove(elementId);
     }
 
-    public HashMap<String, SinkHandler> getRegisteredSinkHandlers() {
+    public Map<String, SinkHandler> getRegisteredSinkHandlers() {
         return registeredSinkHandlers;
     }
 

@@ -25,6 +25,8 @@ Following are some prewritten extensions that are supported with Siddhi;
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-kalmanfilter">execution kalmanfilter</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-approximate">execution approximate</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-graph">execution graph</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-tensorflow">execution tensorflow</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-env">execution env</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http">io http</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka">io kafka</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp">io tcp</a>
@@ -35,6 +37,8 @@ Following are some prewritten extensions that are supported with Siddhi;
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq">io rabbitmq</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt">io mqtt</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket">io websocket</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs">io sqs</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter">io twitter</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json">map json</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml">map xml</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary">map binary</a>
@@ -46,6 +50,8 @@ Following are some prewritten extensions that are supported with Siddhi;
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr">store solr</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb">store mongodb</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-hbase">store hbase</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-redis">store redis</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-cassandra">store cassandra</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-script-js">script js</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-script-scala">script scala</a>
 

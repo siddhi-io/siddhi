@@ -20,7 +20,7 @@
     <parent>
         <artifactId>siddhi</artifactId>
         <groupId>org.wso2.siddhi</groupId>
-        <version>4.1.18-SNAPSHOT</version>
+        <version>4.1.22-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -65,6 +65,8 @@
                         <extensionRepository>siddhi-execution-kalmanfilter</extensionRepository>
                         <extensionRepository>siddhi-execution-approximate</extensionRepository>
                         <extensionRepository>siddhi-execution-graph</extensionRepository>
+                        <extensionRepository>siddhi-execution-tensorflow</extensionRepository>
+                        <extensionRepository>siddhi-execution-env</extensionRepository>
                         <extensionRepository>siddhi-io-http</extensionRepository>
                         <extensionRepository>siddhi-io-kafka</extensionRepository>
                         <extensionRepository>siddhi-io-tcp</extensionRepository>
@@ -75,6 +77,8 @@
                         <extensionRepository>siddhi-io-rabbitmq</extensionRepository>
                         <extensionRepository>siddhi-io-mqtt</extensionRepository>
                         <extensionRepository>siddhi-io-websocket</extensionRepository>
+                        <extensionRepository>siddhi-io-sqs</extensionRepository>
+                        <extensionRepository>siddhi-io-twitter</extensionRepository>
                         <extensionRepository>siddhi-map-json</extensionRepository>
                         <extensionRepository>siddhi-map-xml</extensionRepository>
                         <extensionRepository>siddhi-map-binary</extensionRepository>
@@ -86,6 +90,8 @@
                         <extensionRepository>siddhi-store-solr</extensionRepository>
                         <extensionRepository>siddhi-store-mongodb</extensionRepository>
                         <extensionRepository>siddhi-store-hbase</extensionRepository>
+                        <extensionRepository>siddhi-store-redis</extensionRepository>
+                        <extensionRepository>siddhi-store-cassandra</extensionRepository>
                         <extensionRepository>siddhi-script-js</extensionRepository>
                         <extensionRepository>siddhi-script-scala</extensionRepository>
 
