@@ -88,7 +88,8 @@ The following parameters are configured in a stream definition.
 To improve the throughput of a stream, you can add the `@Async` annotation as shown in the extract below.
 
 ```sql
-@app:Async(buffer.size = '1024') define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
+@Async(buffer.size = '1024') 
+define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
 ```
 This annotation adds a disruptor to allow events in the stream to be processed in parallel via multiple threads. You can specify the number of events to be kept in the buffer before they are directed to the threads to be processed in parallel. This is done via the `buffer.size` parameter.
 
