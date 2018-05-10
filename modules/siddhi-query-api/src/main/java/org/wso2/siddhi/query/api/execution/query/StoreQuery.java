@@ -20,6 +20,7 @@ package org.wso2.siddhi.query.api.execution.query;
 import org.wso2.siddhi.query.api.SiddhiElement;
 import org.wso2.siddhi.query.api.execution.query.input.store.InputStore;
 import org.wso2.siddhi.query.api.execution.query.output.stream.DeleteStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.InsertIntoStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.ReturnStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
@@ -98,6 +99,10 @@ public class StoreQuery implements SiddhiElement {
 
     public boolean isUpdateOrInsertQuery() {
         return outputStream != null && outputStream instanceof UpdateOrInsertStream;
+    }
+
+    public boolean isSelectInsertIntoQuery() {
+        return outputStream != null && outputStream instanceof InsertIntoStream;
     }
 
     @Override

@@ -2953,12 +2953,12 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             populateQueryContext(storeQuery, ctx);
         } else if (ctx.query_section() != null) {
             storeQuery.select((Selector) visit(ctx.query_section()));
+            OutputStream outputStream = null;
             if (ctx.UPDATE() != null && ctx.OR() != null) {
                 Source source = (Source) visit(ctx.target());
                 if (source.isInnerStream) {
                     throw newSiddhiParserException(ctx, "UPDATE OR INTO INSERT be only used with Tables!");
                 }
-                OutputStream outputStream = null;
                 if (ctx.set_clause() != null) {
                     outputStream = new UpdateOrInsertStream(source.streamId,
                             (UpdateSet) visit(ctx.set_clause()), (Expression) visit(ctx.expression()));
@@ -2968,6 +2968,14 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
                             visit(ctx.expression()));
                     populateQueryContext(outputStream, ctx);
                 }
+                storeQuery.outStream(outputStream);
+            } else if (ctx.INSERT() != null) {
+                Source source = (Source) visit(ctx.target());
+                if (source.isInnerStream) {
+                    throw newSiddhiParserException(ctx, "UPDATE OR INTO INSERT be only used with Tables!");
+                }
+                outputStream = new InsertIntoStream(source.streamId);
+                populateQueryContext(outputStream, ctx);
                 storeQuery.outStream(outputStream);
             }
         }
