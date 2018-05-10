@@ -70,6 +70,7 @@ store_query_final
 
 store_query
     : FROM store_input query_section?
+    | query_section UPDATE OR INSERT INTO target set_clause? ON expression
     | store_query_output
     ;
 
@@ -396,7 +397,6 @@ query_output
 
 store_query_output
     :DELETE target ON expression
-    |UPDATE OR INSERT INTO target set_clause? ON expression
     |UPDATE target set_clause? ON expression
     ;
 

@@ -20,11 +20,15 @@ package org.wso2.siddhi.core.util.parser;
 
 import org.wso2.siddhi.core.aggregation.AggregationRuntime;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.StateEventPool;
 import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent.EventType;
+import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
+import org.wso2.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import org.wso2.siddhi.core.exception.StoreQueryCreationException;
@@ -33,7 +37,10 @@ import org.wso2.siddhi.core.query.DeleteStoreQueryRuntime;
 import org.wso2.siddhi.core.query.FindStoreQueryRuntime;
 import org.wso2.siddhi.core.query.SelectStoreQueryRuntime;
 import org.wso2.siddhi.core.query.StoreQueryRuntime;
+import org.wso2.siddhi.core.query.UpdateOrInsertQueryRuntime;
 import org.wso2.siddhi.core.query.UpdateStoreQueryRuntime;
+import org.wso2.siddhi.core.query.output.callback.OutputCallback;
+import org.wso2.siddhi.core.query.output.ratelimit.PassThroughOutputRateLimiter;
 import org.wso2.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.table.CompiledUpdateSet;
@@ -43,12 +50,14 @@ import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
 import org.wso2.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
+import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.aggregation.Within;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.execution.query.StoreQuery;
 import org.wso2.siddhi.query.api.execution.query.input.store.AggregationInputStore;
 import org.wso2.siddhi.query.api.execution.query.input.store.ConditionInputStore;
@@ -56,7 +65,9 @@ import org.wso2.siddhi.query.api.execution.query.input.store.InputStore;
 import org.wso2.siddhi.query.api.execution.query.output.stream.DeleteStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.ReturnStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream;
+import org.wso2.siddhi.query.api.execution.query.selection.OutputAttribute;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
 
@@ -64,6 +75,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.google.common.util.concurrent.RateLimiter;
 
 /**
  * Class to parse {@link StoreQueryRuntime}.
@@ -84,6 +99,8 @@ public class StoreQueryParser {
                                           Map<String, Table> tableMap, Map<String, Window> windowMap,
                                           Map<String, AggregationRuntime> aggregationMap) {
         String queryName = null;
+        final LockWrapper lockWrapper = new LockWrapper("StoreQueryLock");
+        lockWrapper.setLock(new ReentrantLock());
         if (storeQuery.getInputStore() != null) {
             queryName = "store_select_query_" + storeQuery.getInputStore().getStoreId();
             InputStore inputStore = storeQuery.getInputStore();
@@ -121,8 +138,9 @@ public class StoreQueryParser {
                 List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
                 Table table = tableMap.get(inputStore.getStoreId());
                 if (table != null) {
-                    return constructStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, queryName,
-                            metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors);
+                    return constructStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, windowMap,
+                            queryName,
+                            metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors, lockWrapper);
                 } else {
                     AggregationRuntime aggregation = aggregationMap.get(inputStore.getStoreId());
                     if (aggregation != null) {
@@ -158,8 +176,9 @@ public class StoreQueryParser {
                 List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
                 Table table = tableMap.get(outputStream.getId());
                 if (table != null) {
-                    return constructStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, queryName,
-                            metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors);
+                    return constructStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, windowMap,
+                            queryName,
+                            metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors, lockWrapper);
                 } else {
                     throw new StoreQueryCreationException(outputStream.getId() + "is not a table.");
                 }
@@ -182,8 +201,9 @@ public class StoreQueryParser {
                 List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
                 Table table = tableMap.get(outputStream.getId());
                 if (table != null) {
-                    return constructStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, queryName,
-                            metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors);
+                    return constructStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, windowMap,
+                            queryName,
+                            metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors, lockWrapper);
                 } else {
                     throw new StoreQueryCreationException(outputStream.getId() + "is not a table.");
                 }
@@ -192,7 +212,31 @@ public class StoreQueryParser {
                 SnapshotService.getSkipSnapshotableThreadLocal().set(null);
             }
         } else if (storeQuery.isUpdateOrInsertQuery()) {
+            UpdateOrInsertStream outputStream = (UpdateOrInsertStream) storeQuery.getOutputStream();
+            queryName = "store_update_or_insert_query_" + outputStream.getId();
+            int metaPosition = SiddhiConstants.UNKNOWN_STATE;
+            Within within = null;
+            Expression per = null;
+            try {
+                SnapshotService.getSkipSnapshotableThreadLocal().set(true);
+                Expression onCondition = outputStream.getOnUpdateExpression();
+                MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
+                metaStreamEvent.setInputReferenceId(outputStream.getId());
 
+                List<VariableExpressionExecutor> variableExpressionExecutors = new ArrayList<>();
+                Table table = tableMap.get(outputStream.getId());
+
+                if (table != null) {
+                    return constructStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, windowMap,
+                            queryName,
+                            metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors, lockWrapper);
+                } else {
+                    throw new StoreQueryCreationException(outputStream.getId() + "is not a table.");
+                }
+
+            } finally {
+                SnapshotService.getSkipSnapshotableThreadLocal().set(null);
+            }
         }
         return null;
     }
@@ -248,11 +292,14 @@ public class StoreQueryParser {
 
     private static StoreQueryRuntime constructStoreQueryRuntime(Table table, StoreQuery storeQuery,
                                                                 SiddhiAppContext siddhiAppContext,
-                                                                Map<String, Table> tableMap, String queryName,
+                                                                Map<String, Table> tableMap, Map<String, Window>
+                                                                        windowMap, String
+                                                                        queryName,
                                                                 int metaPosition, Expression onCondition,
                                                                 MetaStreamEvent metaStreamEvent,
                                                                 List<VariableExpressionExecutor>
-                                                                        variableExpressionExecutors) {
+                                                                        variableExpressionExecutors,
+                                                                LockWrapper lockWrapper) {
         metaStreamEvent.setEventType(EventType.TABLE);
         initMetaStreamEvent(metaStreamEvent, table.getTableDefinition());
         MatchingMetaInfoHolder metaStreamInfoHolder = generateMatchingMetaInfoHolder(metaStreamEvent,
@@ -272,10 +319,14 @@ public class StoreQueryParser {
                     variableExpressionExecutors);
             return storeQueryRuntime;
         } else {
-
             if (storeQuery.isDeleteQuery()) {
                 storeQueryRuntime = new DeleteStoreQueryRuntime(table, compiledCondition, queryName, metaStreamEvent);
             } else if (storeQuery.isUpdateOrInsertQuery()) {
+                storeQueryRuntime = new UpdateOrInsertQueryRuntime(table, compiledCondition,
+                        queryName, metaStreamEvent);
+                populateUpdateOrInsertStoreQueryRuntime((UpdateOrInsertQueryRuntime) storeQueryRuntime,
+                        metaStreamInfoHolder, variableExpressionExecutors,
+                        siddhiAppContext, tableMap, windowMap, queryName, metaPosition, storeQuery, lockWrapper);
 
             } else if (storeQuery.isUpdateQuery()) {
                 CompiledUpdateSet compiledUpdateSet =
@@ -285,6 +336,7 @@ public class StoreQueryParser {
                                 siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
                 storeQueryRuntime = new UpdateStoreQueryRuntime(table, compiledCondition, compiledUpdateSet, queryName,
                         metaStreamEvent);
+
             } else {
                 storeQueryRuntime = new FindStoreQueryRuntime(table, compiledCondition, queryName,
                         metaStreamEvent);
@@ -328,6 +380,38 @@ public class StoreQueryParser {
         findStoreQueryRuntime.setOutputAttributes(metaStreamInfoHolder.getMetaStateEvent().
                 getOutputStreamDefinition().getAttributeList());
     }
+
+    private static void populateUpdateOrInsertStoreQueryRuntime(UpdateOrInsertQueryRuntime updateOrInsertQueryRuntime,
+                                                      MatchingMetaInfoHolder metaStreamInfoHolder,
+                                                      List<VariableExpressionExecutor> variableExpressionExecutors,
+                                                      SiddhiAppContext siddhiAppContext,
+                                                      Map<String, Table> tableMap, Map<String, Window> windowMap,
+                                                      String queryName, int metaPosition, StoreQuery storeQuery,
+                                                                LockWrapper lockWrapper) {
+        QuerySelector querySelector = SelectorParser.parse(storeQuery.getSelector(),
+                storeQuery.getOutputStream(), siddhiAppContext,
+                metaStreamInfoHolder.getMetaStateEvent(), tableMap, variableExpressionExecutors, queryName,
+                metaPosition);
+
+        PassThroughOutputRateLimiter rateLimiter = new PassThroughOutputRateLimiter(queryName);
+        rateLimiter.init(siddhiAppContext, lockWrapper, queryName);
+        OutputCallback outputCallback = OutputParser.constructOutputCallback(storeQuery.getOutputStream(),
+                metaStreamInfoHolder.getMetaStateEvent().getOutputStreamDefinition(), tableMap, windowMap,
+                siddhiAppContext, true, queryName);
+        rateLimiter.setOutputCallback(outputCallback);
+        querySelector.setNextProcessor(rateLimiter);
+
+        QueryParserHelper.reduceMetaComplexEvent(metaStreamInfoHolder.getMetaStateEvent());
+        QueryParserHelper.updateVariablePosition(metaStreamInfoHolder.getMetaStateEvent(), variableExpressionExecutors);
+        querySelector.setEventPopulator(
+                StateEventPopulatorFactory.constructEventPopulator(metaStreamInfoHolder.getMetaStateEvent()));
+        updateOrInsertQueryRuntime.setStateEventPool(new StateEventPool(metaStreamInfoHolder.getMetaStateEvent(), 5));
+        updateOrInsertQueryRuntime.setSelector(querySelector);
+        updateOrInsertQueryRuntime.setOutputAttributes(metaStreamInfoHolder.getMetaStateEvent().
+                getOutputStreamDefinition().getAttributeList());
+    }
+
+
 
     private static MatchingMetaInfoHolder generateMatchingMetaInfoHolder(MetaStreamEvent metaStreamEvent,
                                                                          AbstractDefinition definition) {
