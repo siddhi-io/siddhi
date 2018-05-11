@@ -65,13 +65,18 @@ public class DeleteStoreQueryRuntime implements StoreQueryRuntime {
     @Override
     public Event[] execute() {
         try {
-            StateEvent stateEvent = new StateEvent(1, 0);
+            StateEvent stateEvent = new StateEvent(1, metaStreamEvent.getOutputData().size());
+            StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getBeforeWindowData().size(),
+                    metaStreamEvent.getOnAfterWindowData().size(),
+                    metaStreamEvent.getOutputData().size());
             StreamEvent streamEvents = null;
             ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+            stateEvent.addEvent(0, streamEvent);
             complexEventChunk.add(stateEvent);
             switch (eventType) {
                 case TABLE:
-                    table.deleteEvents(complexEventChunk, compiledCondition, 1);
+//                    table.deleteEvents(complexEventChunk, compiledCondition, 1);
+                    selector.process(complexEventChunk);
                     break;
                 case DEFAULT:
                     break;
