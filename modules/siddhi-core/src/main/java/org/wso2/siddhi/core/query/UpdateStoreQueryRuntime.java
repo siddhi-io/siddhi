@@ -53,11 +53,10 @@ public class UpdateStoreQueryRuntime implements StoreQueryRuntime {
     private MetaStreamEvent metaStreamEvent;
     private Attribute[] outputAttributes;
 
-    public UpdateStoreQueryRuntime(Table table, CompiledCondition compiledCondition, CompiledUpdateSet
-            compiledUpdateSet, String queryName, MetaStreamEvent metaStreamEvent) {
+    public UpdateStoreQueryRuntime(Table table, CompiledCondition compiledCondition,
+                                   String queryName, MetaStreamEvent metaStreamEvent) {
         this.table = table;
         this.compiledCondition = compiledCondition;
-        this.compiledUpdateSet = compiledUpdateSet;
         this.queryName = queryName;
         this.eventType = metaStreamEvent.getEventType();
         this.metaStreamEvent = metaStreamEvent;
@@ -67,13 +66,17 @@ public class UpdateStoreQueryRuntime implements StoreQueryRuntime {
     @Override
     public Event[] execute() {
         try {
-            StateEvent stateEvent = new StateEvent(1, 0);
-            StreamEvent streamEvents = null;
-            ComplexEventChunk complexEventChunk = new ComplexEventChunk();
-            complexEventChunk.add(stateEvent);
+        StateEvent stateEvent = new StateEvent(1, metaStreamEvent.getOutputData().size());
+        StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getBeforeWindowData().size(),
+                metaStreamEvent.getOnAfterWindowData().size(),
+                metaStreamEvent.getOutputData().size());
+        StreamEvent streamEvents = null;
+        ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+        stateEvent.addEvent(0, streamEvent);
+        complexEventChunk.add(stateEvent);
             switch (eventType) {
                 case TABLE:
-                    table.updateEvents(complexEventChunk, compiledCondition, compiledUpdateSet, 1);
+                    selector.process(complexEventChunk);
                     break;
                 case DEFAULT:
                     break;

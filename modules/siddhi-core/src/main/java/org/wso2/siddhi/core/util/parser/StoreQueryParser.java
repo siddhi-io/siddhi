@@ -175,7 +175,7 @@ public class StoreQueryParser {
                             queryName,
                             metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors, lockWrapper);
                 } else {
-                    throw new StoreQueryCreationException(outputStream.getId() + "is not a table.");
+                    throw new StoreQueryCreationException(outputStream.getId() + " is not a table.");
                 }
 
             } finally {
@@ -341,6 +341,7 @@ public class StoreQueryParser {
                     variableExpressionExecutors);
             return storeQueryRuntime;
         } else {
+
             if (storeQuery.isDeleteQuery()) {
                 storeQueryRuntime = new DeleteStoreQueryRuntime(table, compiledCondition, queryName, metaStreamEvent);
                 populateStoreQueryRuntime((DeleteStoreQueryRuntime) storeQueryRuntime,
@@ -353,13 +354,11 @@ public class StoreQueryParser {
                         metaStreamInfoHolder, variableExpressionExecutors,
                         siddhiAppContext, tableMap, windowMap, queryName, metaPosition, storeQuery, lockWrapper);
             } else if (storeQuery.isUpdateQuery()) {
-                CompiledUpdateSet compiledUpdateSet =
-                        table.compileUpdateSet(
-                                ((UpdateStream)storeQuery.getOutputStream()).getUpdateSet(),
-                                metaStreamInfoHolder,
-                                siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
-                storeQueryRuntime = new UpdateStoreQueryRuntime(table, compiledCondition, compiledUpdateSet, queryName,
+                storeQueryRuntime = new UpdateStoreQueryRuntime(table, compiledCondition, queryName,
                         metaStreamEvent);
+                populateStoreQueryRuntime((UpdateStoreQueryRuntime) storeQueryRuntime,
+                        metaStreamInfoHolder, variableExpressionExecutors,
+                        siddhiAppContext, tableMap, windowMap, queryName, metaPosition, storeQuery, lockWrapper);
 
             } else if (storeQuery.isSelectInsertIntoQuery()) {
                 storeQueryRuntime = new SelectInsertIntoQueryRuntime(table,  queryName,
@@ -465,7 +464,13 @@ public class StoreQueryParser {
             deleteStoreQueryRuntime.setSelector(querySelector);
             deleteStoreQueryRuntime.setOutputAttributes(metaStreamInfoHolder.getMetaStateEvent().
                     getOutputStreamDefinition().getAttributeList());
-
+        } else if (storeQueryRuntime instanceof UpdateStoreQueryRuntime) {
+            UpdateStoreQueryRuntime udpateStoreQueryRuntime = (UpdateStoreQueryRuntime) storeQueryRuntime;
+            udpateStoreQueryRuntime.setStateEventPool(
+                    new StateEventPool(metaStreamInfoHolder.getMetaStateEvent(), 5));
+            udpateStoreQueryRuntime.setSelector(querySelector);
+            udpateStoreQueryRuntime.setOutputAttributes(metaStreamInfoHolder.getMetaStateEvent().
+                    getOutputStreamDefinition().getAttributeList());
         }
     }
 
