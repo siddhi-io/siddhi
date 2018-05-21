@@ -78,6 +78,43 @@ public class SelectInsertStoreQueryRuntime implements StoreQueryRuntime {
         }
     }
 
+    /**
+     * This method sets a state event pool for the select insert query runtime.
+     *
+     * @param stateEventPool stateEventPool for the store query runtime
+     */
+    public void setStateEventPool(StateEventPool stateEventPool) {
+        if (stateEventPool != null) {
+            this.stateEventPool = stateEventPool;
+        } else {
+            throw new StoreQueryRuntimeException("Error occured while initializing run time for update or insert into" +
+                    "  query \"" + queryName + "\".");
+        }
+    }
+
+    /**
+     * This method sets selector for the select insert store query runtime.
+     *
+     * @param selector for the store query
+     */
+    public void setSelector(QuerySelector selector) {
+        this.selector = selector;
+    }
+
+    /**
+     * This method sets the output attribute list of the given store query.
+     *
+     * @param outputAttributeList output attritbutes of the store query
+     */
+    public void setOutputAttributes(List<Attribute> outputAttributeList) {
+        this.outputAttributes = outputAttributeList.toArray(new Attribute[outputAttributeList.size()]);
+    }
+
+    @Override
+    public Attribute[] getStoreQueryOutputAttributes() {
+        return Arrays.copyOf(outputAttributes, outputAttributes.length);
+    }
+
     private ComplexEventChunk<ComplexEvent> generateResetComplexEventChunk(MetaStreamEvent metaStreamEvent) {
         StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getBeforeWindowData().size(),
                 metaStreamEvent.getOnAfterWindowData().size(), metaStreamEvent.getOutputData().size());
@@ -94,32 +131,5 @@ public class SelectInsertStoreQueryRuntime implements StoreQueryRuntime {
         ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>(true);
         complexEventChunk.add(stateEvent);
         return complexEventChunk;
-    }
-
-    public void setStateEventPool(StateEventPool stateEventPool) {
-        if (stateEventPool != null) {
-            this.stateEventPool = stateEventPool;
-        } else {
-            throw new StoreQueryRuntimeException("Error occured while initializing run time for update or insert into" +
-                    "  query \"" + queryName + "\".");
-        }
-    }
-
-    public void setSelector(QuerySelector selector) {
-        this.selector = selector;
-    }
-
-    /**
-     * This method sets the output attribute list of the given store query.
-     *
-     * @param outputAttributeList output attritbutes of the store query
-     */
-    public void setOutputAttributes(List<Attribute> outputAttributeList) {
-        this.outputAttributes = outputAttributeList.toArray(new Attribute[outputAttributeList.size()]);
-    }
-
-        @Override
-    public Attribute[] getStoreQueryOutputAttributes() {
-        return Arrays.copyOf(outputAttributes, outputAttributes.length);
     }
 }

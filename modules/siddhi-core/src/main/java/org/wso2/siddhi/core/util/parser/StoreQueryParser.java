@@ -211,7 +211,7 @@ public class StoreQueryParser {
                         queryName, metaPosition, onCondition, metaStreamEvent,
                         variableExpressionExecutors, lockWrapper);
             } else {
-                throw new StoreQueryCreationException(outputStream.getId() + "is not a table.");
+                throw new StoreQueryCreationException(outputStream.getId() + " is not a table.");
             }
 
         } finally {
@@ -435,22 +435,22 @@ public class StoreQueryParser {
         } else if (storeQueryRuntime instanceof UpdateOrInsertStoreQueryRuntime){
             UpdateOrInsertStoreQueryRuntime UpdateOrInsertIntoStoreQueryRuntime = (UpdateOrInsertStoreQueryRuntime)
                     storeQueryRuntime;
-            UpdateOrInsertIntoStoreQueryRuntime.setStateEventPool(new StateEventPool(matchingMetaInfoHolder
-                    .getMetaStateEvent(), 5));
+            UpdateOrInsertIntoStoreQueryRuntime.setStateEventPool(
+                    new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
             UpdateOrInsertIntoStoreQueryRuntime.setSelector(querySelector);
             UpdateOrInsertIntoStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
                     getOutputStreamDefinition().getAttributeList());
         } else if (storeQueryRuntime instanceof DeleteStoreQueryRuntime) {
             DeleteStoreQueryRuntime deleteStoreQueryRuntime = (DeleteStoreQueryRuntime) storeQueryRuntime;
-            deleteStoreQueryRuntime.setStateEventPool(new StateEventPool(matchingMetaInfoHolder
-                    .getMetaStateEvent(), 5));
+            deleteStoreQueryRuntime.setStateEventPool(
+                    new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
             deleteStoreQueryRuntime.setSelector(querySelector);
             deleteStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
                     getOutputStreamDefinition().getAttributeList());
         } else if (storeQueryRuntime instanceof UpdateStoreQueryRuntime) {
             UpdateStoreQueryRuntime udpateStoreQueryRuntime = (UpdateStoreQueryRuntime) storeQueryRuntime;
-            udpateStoreQueryRuntime.setStateEventPool(new StateEventPool(matchingMetaInfoHolder
-                    .getMetaStateEvent(), 5));
+            udpateStoreQueryRuntime.setStateEventPool(
+                    new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
             udpateStoreQueryRuntime.setSelector(querySelector);
             udpateStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
                     getOutputStreamDefinition().getAttributeList());
