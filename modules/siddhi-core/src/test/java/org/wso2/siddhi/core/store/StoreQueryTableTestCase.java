@@ -19,8 +19,8 @@
 package org.wso2.siddhi.core.store;
 
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -35,16 +35,6 @@ import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 public class StoreQueryTableTestCase {
 
     private static final Logger log = Logger.getLogger(StoreQueryTableTestCase.class);
-    private int inEventCount;
-    private int removeEventCount;
-    private boolean eventArrived;
-
-    @BeforeMethod
-    public void init() {
-        inEventCount = 0;
-        removeEventCount = 0;
-        eventArrived = false;
-    }
 
     @Test
     public void test1() throws InterruptedException {
@@ -521,5 +511,307 @@ public class StoreQueryTableTestCase {
         expectedAttributeArray = new Attribute[]{symbolAttribute, totalVolumeAttribute};
         siddhiAppRuntime.shutdown();
         AssertJUnit.assertArrayEquals(expectedAttributeArray, actualAttributeArray);
+    }
+
+    @Test
+    public void test14() throws InterruptedException {
+        log.info("Testing InsertOrUpdate store query : 1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 200L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 300L});
+        Thread.sleep(500);
+
+        siddhiAppRuntime.query("" +
+                "select \"newSymbol\" as symbol, 123.45f as price, 123L as volume " +
+                "update or insert into StockTable " +
+                "set StockTable.symbol = symbol, StockTable.price=price on StockTable.volume == 100L ");
+
+        Event[] events = siddhiAppRuntime.query("from StockTable select * having volume == 100L;");
+
+        Assert.assertEquals(events.length, 1);
+        Assert.assertEquals(events[0].getData()[0], "newSymbol");
+        Assert.assertEquals(events[0].getData()[1], 123.45f);
+        Assert.assertEquals(events[0].getData()[2], 100L);
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void test15() throws InterruptedException {
+        log.info("Testing InsertOrUpdate store query : 2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 200L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 300L});
+        Thread.sleep(500);
+
+        siddhiAppRuntime.query("" +
+                "select \"newSymbol\" as symbol, 123.45f as price, 123L as volume " +
+                "update or insert into StockTable " +
+                "set StockTable.symbol = symbol, StockTable.price=price on StockTable.volume == 500L ");
+
+        Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
+        Assert.assertEquals(4, allEvents.length);
+
+        Event[] newEvents = siddhiAppRuntime.query("from StockTable select * having volume == 123L;");
+
+        Assert.assertEquals(1, newEvents.length);
+        Assert.assertEquals(newEvents[0].getData()[0], "newSymbol");
+        Assert.assertEquals(newEvents[0].getData()[1], 123.45f);
+        Assert.assertEquals(newEvents[0].getData()[2], 123L);
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void test16() throws InterruptedException {
+        log.info("Testing delete store query : 1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 200L});
+        stockStream.send(new Object[]{"GOOGLE", 57.6f, 300L});
+        Thread.sleep(500);
+
+
+        Event[] initialEvents = siddhiAppRuntime.query("from StockTable select *;");
+        Assert.assertEquals(initialEvents.length, 3);
+
+        siddhiAppRuntime.query("select 100L as vol " +
+                "delete StockTable on StockTable.volume == vol;");
+        Thread.sleep(500);
+
+        Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
+        Assert.assertEquals(allEvents.length, 2);
+
+        Event[] events = siddhiAppRuntime.query("from StockTable select * having volume == 100L");
+        Assert.assertNull(events);
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void test17() throws InterruptedException {
+        log.info("Testing delete store query : 2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define table StockTable (symbol string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 200L});
+        stockStream.send(new Object[]{"GOOGLE", 57.6f, 300L});
+        Thread.sleep(500);
+
+
+        Event[] initialEvents = siddhiAppRuntime.query("from StockTable select *;");
+        Assert.assertEquals(initialEvents.length, 3);
+
+        siddhiAppRuntime.query("delete StockTable on StockTable.volume == 100L;");
+        Thread.sleep(500);
+
+        Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
+        Assert.assertEquals(allEvents.length, 2);
+
+        Event[] events = siddhiAppRuntime.query("from StockTable select * having volume == 100L");
+        Assert.assertNull(events);
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void test18() throws InterruptedException {
+        log.info("Testing select insert store query : 1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (id int, symbol string, volume int); " +
+                "define table StockTable (id int, symbol string, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{1, "WSO2", 100});
+        stockStream.send(new Object[]{2, "IBM",  200});
+        stockStream.send(new Object[]{3, "GOOGLE", 300});
+        Thread.sleep(500);
+
+        Event[] events = siddhiAppRuntime.query("from StockTable select *;");
+        Assert.assertEquals(events.length, 3);
+
+        siddhiAppRuntime.query("select 10 as id, \"YAHOO\" as symbol, 400 as volume insert into StockTable;");
+        Thread.sleep(100);
+
+        Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
+        Assert.assertEquals(allEvents.length, 4);
+
+        Event[] newEvents = siddhiAppRuntime.query("from StockTable select * having id == 10;");
+        Assert.assertEquals(newEvents.length, 1);
+
+        Object[] data = newEvents[0].getData();
+
+        Assert.assertEquals(data[0], 10);
+        Assert.assertEquals(data[1], "YAHOO");
+        Assert.assertEquals(data[2], 400);
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void test19() throws InterruptedException {
+        log.info("Testing update store query : 1");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (id int, symbol string, volume int); " +
+                "define table StockTable (id int, symbol string, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{1, "WSO2", 100});
+        stockStream.send(new Object[]{2, "IBM",  200});
+        stockStream.send(new Object[]{3, "GOOGLE", 300});
+        Thread.sleep(500);
+
+        siddhiAppRuntime.query("update StockTable set StockTable.symbol=\"MICROSOFT\", StockTable.volume=2000" +
+                " on StockTable.id==2;");
+        Thread.sleep(100);
+
+        Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
+        Assert.assertEquals(allEvents.length, 3);
+
+        Event[] updatedEvents = siddhiAppRuntime.query("from StockTable select * having id == 2");
+        Assert.assertEquals(updatedEvents.length, 1);
+
+        Object[] data = updatedEvents[0].getData();
+
+        Assert.assertEquals(data[0], 2);
+        Assert.assertEquals(data[1], "MICROSOFT");
+        Assert.assertEquals(data[2], 2000);
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void test20() throws InterruptedException {
+        log.info("Testing update store query : 2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream StockStream (id int, symbol string, volume int); " +
+                "define table StockTable (id int, symbol string, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{1, "WSO2", 100});
+        stockStream.send(new Object[]{2, "IBM",  200});
+        stockStream.send(new Object[]{3, "GOOGLE", 300});
+        Thread.sleep(500);
+
+        siddhiAppRuntime.query("select \"MICROSOFT\" as newSymbol, 2000 as newVolume " +
+                "update StockTable " +
+                "set StockTable.symbol=newSymbol, StockTable.volume=newVolume " +
+                "on StockTable.id==2;");
+        Thread.sleep(100);
+
+        Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
+        Assert.assertEquals(allEvents.length, 3);
+
+        Event[] updatedEvents = siddhiAppRuntime.query("from StockTable select * having id == 2");
+        Assert.assertEquals(updatedEvents.length, 1);
+
+        Object[] data = updatedEvents[0].getData();
+
+        Assert.assertEquals(data[0], 2);
+        Assert.assertEquals(data[1], "MICROSOFT");
+        Assert.assertEquals(data[2], 2000);
+
+        siddhiAppRuntime.shutdown();
     }
 }
