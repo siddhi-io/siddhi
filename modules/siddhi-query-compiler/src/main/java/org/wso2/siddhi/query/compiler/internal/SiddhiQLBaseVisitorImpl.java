@@ -1739,7 +1739,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         } else if (ctx.UPDATE() != null) {
             Source source = (Source) visit(ctx.target());
             if (source.isInnerStream) {
-                throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
+                throw newSiddhiParserException(ctx, "UPDATE can be only used with Tables!");
             }
             if (ctx.output_event_type() != null) {
                 if (ctx.set_clause() != null) {
