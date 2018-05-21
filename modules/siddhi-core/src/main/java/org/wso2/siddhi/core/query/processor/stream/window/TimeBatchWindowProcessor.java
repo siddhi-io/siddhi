@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import org.wso2.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
@@ -39,6 +40,7 @@ import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
+import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
@@ -86,8 +88,8 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
 
     private long timeInMilliSeconds;
     private long nextEmitTime = -1;
-    private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(false);
-    private ComplexEventChunk<StreamEvent> expiredEventChunk = null;
+    private SnapshotableStreamEventQueue currentEventQueue;
+    private SnapshotableStreamEventQueue expiredEventQueue = null;
     private StreamEvent resetEvent = null;
     private Scheduler scheduler;
     private boolean outputExpectsExpiredEvents;
@@ -114,8 +116,9 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiAppContext = siddhiAppContext;
+        currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (outputExpectsExpiredEvents) {
-            this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+            this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
@@ -205,45 +208,45 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
                     continue;
                 }
                 StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                currentEventChunk.add(clonedStreamEvent);
+                currentEventQueue.add(clonedStreamEvent);
             }
             streamEventChunk.clear();
             if (sendEvents) {
 
                 if (outputExpectsExpiredEvents) {
-                    if (expiredEventChunk.getFirst() != null) {
-                        while (expiredEventChunk.hasNext()) {
-                            StreamEvent expiredEvent = expiredEventChunk.next();
+                    if (expiredEventQueue.getFirst() != null) {
+                        while (expiredEventQueue.hasNext()) {
+                            StreamEvent expiredEvent = expiredEventQueue.next();
                             expiredEvent.setTimestamp(currentTime);
                         }
-                        streamEventChunk.add(expiredEventChunk.getFirst());
+                        streamEventChunk.add(expiredEventQueue.getFirst());
                     }
                 }
-                if (expiredEventChunk != null) {
-                    expiredEventChunk.clear();
+                if (expiredEventQueue != null) {
+                    expiredEventQueue.clear();
                 }
 
-                if (currentEventChunk.getFirst() != null) {
+                if (currentEventQueue.getFirst() != null) {
 
                     // add reset event in front of current events
                     streamEventChunk.add(resetEvent);
                     resetEvent = null;
 
-                    if (expiredEventChunk != null) {
-                        currentEventChunk.reset();
-                        while (currentEventChunk.hasNext()) {
-                            StreamEvent currentEvent = currentEventChunk.next();
+                    if (expiredEventQueue != null) {
+                        currentEventQueue.reset();
+                        while (currentEventQueue.hasNext()) {
+                            StreamEvent currentEvent = currentEventQueue.next();
                             StreamEvent toExpireEvent = streamEventCloner.copyStreamEvent(currentEvent);
                             toExpireEvent.setType(StreamEvent.Type.EXPIRED);
-                            expiredEventChunk.add(toExpireEvent);
+                            expiredEventQueue.add(toExpireEvent);
                         }
                     }
 
-                    resetEvent = streamEventCloner.copyStreamEvent(currentEventChunk.getFirst());
+                    resetEvent = streamEventCloner.copyStreamEvent(currentEventQueue.getFirst());
                     resetEvent.setType(ComplexEvent.Type.RESET);
-                    streamEventChunk.add(currentEventChunk.getFirst());
+                    streamEventChunk.add(currentEventQueue.getFirst());
                 }
-                currentEventChunk.clear();
+                currentEventQueue.clear();
             }
         }
         if (streamEventChunk.getFirst() != null) {
@@ -275,8 +278,8 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
-            state.put("CurrentEventChunk", currentEventChunk.getFirst());
-            state.put("ExpiredEventChunk", expiredEventChunk != null ? expiredEventChunk.getFirst() : null);
+            state.put("CurrentEventQueue", currentEventQueue.getSnapshot());
+            state.put("ExpiredEventQueue", expiredEventQueue != null ? expiredEventQueue.getSnapshot() : null);
             state.put("ResetEvent", resetEvent);
         }
         return state;
@@ -284,18 +287,16 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
 
     @Override
     public synchronized void restoreState(Map<String, Object> state) {
-        if (expiredEventChunk != null) {
-            expiredEventChunk.clear();
-            expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
+        if (expiredEventQueue != null) {
+            expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
         }
-        currentEventChunk.clear();
-        currentEventChunk.add((StreamEvent) state.get("CurrentEventChunk"));
+        currentEventQueue.restore((SnapshotStateList) state.get("CurrentEventQueue"));
         resetEvent = (StreamEvent) state.get("ResetEvent");
     }
 
     @Override
     public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, expiredEventChunk, streamEventCloner);
+        return ((Operator) compiledCondition).find(matchingEvent, expiredEventQueue, streamEventCloner);
     }
 
     @Override
@@ -303,10 +304,10 @@ public class TimeBatchWindowProcessor extends WindowProcessor implements Schedul
                                               SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, String queryName) {
-        if (expiredEventChunk == null) {
-            expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        if (expiredEventQueue == null) {
+            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
-        return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
+        return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap,
                 this.queryName);
     }

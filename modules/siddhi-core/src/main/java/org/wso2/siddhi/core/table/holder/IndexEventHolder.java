@@ -22,15 +22,20 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.stream.Operation;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.core.util.snapshot.SnapshotRequest;
+import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
+import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +44,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
+import static org.wso2.siddhi.core.event.stream.Operation.Operator.ADD;
+import static org.wso2.siddhi.core.event.stream.Operation.Operator.CLEAR;
+import static org.wso2.siddhi.core.event.stream.Operation.Operator.DELETE_BY_OPERATOR;
+import static org.wso2.siddhi.core.event.stream.Operation.Operator.OVERWRITE;
+import static org.wso2.siddhi.core.event.stream.Operation.Operator.REMOVE;
+
 
 /**
  * EventHolder implementation where events will be indexed and stored. This will offer faster access compared to
@@ -59,6 +71,11 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     private Map<String, Integer> indexMetaData;
     private Map<String, Integer> multiPrimaryKeyMetaData = new LinkedHashMap<>();
     private Map<String, Integer> allIndexMetaData = new HashMap<>();
+    private ArrayList<Operation> operationChangeLog = new ArrayList<>();
+    private long eventsCount;
+    private static final float FULL_SNAPSHOT_THRESHOLD = 2.1f;
+    private boolean forceFullSnapshot = true;
+    private boolean isOperationLogEnabled = true;
 
     public IndexEventHolder(StreamEventPool tableStreamEventPool, StreamEventConverter eventConverter,
                             PrimaryKeyReferenceHolder[] primaryKeyReferenceHolders,
@@ -142,12 +159,22 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
             ComplexEvent complexEvent = addingEventChunk.next();
             StreamEvent streamEvent = tableStreamEventPool.borrowEvent();
             eventConverter.convertComplexEvent(complexEvent, streamEvent);
+            eventsCount++;
+            if (isOperationLogEnabled) {
+                if (!isFullSnapshot()) {
+                    StreamEvent streamEvent2 = tableStreamEventPool.borrowEvent();
+                    eventConverter.convertComplexEvent(complexEvent, streamEvent2);
+                    operationChangeLog.add(new Operation(ADD, streamEvent2));
+                } else {
+                    operationChangeLog.clear();
+                    forceFullSnapshot = true;
+                }
+            }
             add(streamEvent);
         }
     }
 
     private void add(StreamEvent streamEvent) {
-
         StreamEvent existingValue = null;
         if (primaryKeyData != null) {
             Object primaryKey = constructPrimaryKey(streamEvent, primaryKeyReferenceHolders);
@@ -191,6 +218,16 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
 
     @Override
     public void overwrite(StreamEvent streamEvent) {
+        if (isOperationLogEnabled) {
+            if (!isFullSnapshot()) {
+                StreamEvent streamEvent2 = tableStreamEventPool.borrowEvent();
+                eventConverter.convertComplexEvent(streamEvent, streamEvent2);
+                operationChangeLog.add(new Operation(OVERWRITE, streamEvent2));
+            } else {
+                operationChangeLog.clear();
+                forceFullSnapshot = true;
+            }
+        }
         StreamEvent deletedEvent = null;
         if (primaryKeyData != null) {
             Object primaryKey = constructPrimaryKey(streamEvent, primaryKeyReferenceHolders);
@@ -329,6 +366,14 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
 
     @Override
     public void deleteAll() {
+        if (isOperationLogEnabled) {
+            if (!isFullSnapshot()) {
+                operationChangeLog.add(new Operation(CLEAR));
+            } else {
+                operationChangeLog.clear();
+                forceFullSnapshot = true;
+            }
+        }
         if (primaryKeyData != null) {
             primaryKeyData.clear();
         }
@@ -342,20 +387,45 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     @Override
     public void deleteAll(Collection<StreamEvent> storeEventSet) {
         for (StreamEvent streamEvent : storeEventSet) {
-            if (primaryKeyData != null) {
-                Object primaryKey = constructPrimaryKey(streamEvent, primaryKeyReferenceHolders);
-                StreamEvent deletedEvent = primaryKeyData.remove(primaryKey);
-                if (indexData != null) {
-                    deleteFromIndexes(deletedEvent);
+            if (isOperationLogEnabled) {
+                if (!isFullSnapshot()) {
+                    StreamEvent streamEvent2 = tableStreamEventPool.borrowEvent();
+                    eventConverter.convertComplexEvent(streamEvent, streamEvent2);
+                    operationChangeLog.add(new Operation(REMOVE, streamEvent));
+                } else {
+                    operationChangeLog.clear();
+                    forceFullSnapshot = true;
                 }
-            } else if (indexData != null) {
-                deleteFromIndexes(streamEvent);
             }
+            deleteAll(streamEvent);
+
+        }
+    }
+
+    private void deleteAll(StreamEvent streamEvent) {
+        if (primaryKeyData != null) {
+            Object primaryKey = constructPrimaryKey(streamEvent, primaryKeyReferenceHolders);
+            StreamEvent deletedEvent = primaryKeyData.remove(primaryKey);
+            if (indexData != null) {
+                deleteFromIndexes(deletedEvent);
+            }
+        } else if (indexData != null) {
+            deleteFromIndexes(streamEvent);
         }
     }
 
     @Override
     public void delete(String attribute, Compare.Operator operator, Object value) {
+
+        if (isOperationLogEnabled) {
+            if (!isFullSnapshot()) {
+                operationChangeLog.add(new Operation(DELETE_BY_OPERATOR, new Object[]{attribute, operator, value}));
+            } else {
+                operationChangeLog.clear();
+                forceFullSnapshot = true;
+            }
+        }
+
         if (primaryKeyData != null && attribute.equals(primaryKeyAttributes)) {
             switch (operator) {
 
@@ -541,4 +611,67 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         }
     }
 
+    private boolean isFullSnapshot() {
+        return operationChangeLog.size() > (eventsCount * FULL_SNAPSHOT_THRESHOLD)
+                || forceFullSnapshot
+                || SnapshotRequest.isRequestForFullSnapshot();
+    }
+
+    public SnapshotState getSnapshot() {
+        if (isFullSnapshot()) {
+            forceFullSnapshot = false;
+            return new SnapshotState(this, false);
+        } else {
+            SnapshotState snapshot = new SnapshotState(operationChangeLog, true);
+            operationChangeLog = new ArrayList<>();
+            return snapshot;
+        }
+    }
+
+    public void restore(SnapshotStateList snapshotStatelist) {
+        TreeMap<Long, SnapshotState> revisions = snapshotStatelist.getSnapshotStates();
+        Iterator<Map.Entry<Long, SnapshotState>> itr = revisions.entrySet().iterator();
+        this.isOperationLogEnabled = false;
+        while (itr.hasNext()) {
+            Map.Entry<Long, SnapshotState> snapshotEntry = itr.next();
+            if (!snapshotEntry.getValue().isIncrementalSnapshot()) {
+                this.deleteAll();
+                IndexEventHolder snapshotEventHolder = (IndexEventHolder) snapshotEntry.getValue().getState();
+                if (primaryKeyData != null) {
+                    primaryKeyData.clear();
+                    primaryKeyData.putAll(snapshotEventHolder.primaryKeyData);
+                }
+                if (indexData != null) {
+                    indexData.clear();
+                    indexData.putAll(snapshotEventHolder.indexData);
+                }
+                forceFullSnapshot = false;
+            } else {
+                ArrayList<Operation> operations = (ArrayList<Operation>) snapshotEntry.getValue().getState();
+                for (Operation op : operations) {
+                    switch (op.operation) {
+                        case ADD:
+                            add((StreamEvent) op.parameters);
+                            break;
+                        case REMOVE:
+                            deleteAll((StreamEvent) op.parameters);
+                            break;
+                        case CLEAR:
+                            deleteAll();
+                            break;
+                        case OVERWRITE:
+                            overwrite((StreamEvent) op.parameters);
+                            break;
+                        case DELETE_BY_OPERATOR:
+                            Object[] args = (Object[]) op.parameters;
+                            delete((String) args[0], (Compare.Operator) args[1], args[2]);
+                            break;
+                        default:
+                            continue;
+                    }
+                }
+            }
+        }
+        this.isOperationLogEnabled = true;
+    }
 }

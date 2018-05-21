@@ -24,12 +24,14 @@ import org.wso2.siddhi.query.api.exception.DuplicateAttributeException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Abstract definition used for Streams, Tables and other common artifacts
  */
 public abstract class AbstractDefinition implements SiddhiElement {
 
+    private static final long serialVersionUID = 1L;
     protected String id;
     protected List<Attribute> attributeList = new ArrayList<Attribute>();
     protected List<Annotation> annotations = new ArrayList<Annotation>();
@@ -125,7 +127,7 @@ public abstract class AbstractDefinition implements SiddhiElement {
                 isFirst = false;
             }
             definitionBuilder.append(attribute.getName()).append(" ").
-                    append(attribute.getType().toString().toLowerCase());
+                    append(attribute.getType().toString().toLowerCase(Locale.getDefault()));
         }
         definitionBuilder.append(")");
         return definitionBuilder.toString();

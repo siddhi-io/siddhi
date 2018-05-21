@@ -32,6 +32,7 @@ import java.util.List;
  */
 public class SingleInputStream extends InputStream {
 
+    private static final long serialVersionUID = 1L;
     protected boolean isInnerStream = false;
     protected String streamId;
     protected String streamReferenceId;

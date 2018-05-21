@@ -125,7 +125,7 @@ public class PersistenceTestCase {
         try {
             siddhiAppRuntime.restoreLastRevision();
         } catch (CannotRestoreSiddhiAppStateException e) {
-            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
+            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed", e);
         }
 
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
@@ -522,6 +522,7 @@ public class PersistenceTestCase {
         try {
             siddhiAppRuntime.restoreLastRevision();
         } catch (CannotRestoreSiddhiAppStateException e) {
+            log.error(e.getMessage(), e);
             Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
         }
 
@@ -951,7 +952,7 @@ public class PersistenceTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = "persistenceTest11")
     public void persistenceTest12() throws InterruptedException {
         log.info("persistence test 12 - partition query");
 
@@ -1001,10 +1002,8 @@ public class PersistenceTestCase {
         Thread.sleep(100);
         inputHandler.send(new Object[]{2});
 
-        Thread.sleep(100);
-
+        Thread.sleep(600);
         //persisting
-        Thread.sleep(500);
         siddhiAppRuntime.persist();
 
         inputHandler.send(new Object[]{2});
@@ -1043,7 +1042,7 @@ public class PersistenceTestCase {
         AssertJUnit.assertEquals(true, eventArrived);
     }
 
-    @Test
+    @Test(dependsOnMethods = "persistenceTest12")
     public void persistenceTest13() throws InterruptedException {
         log.info("Persistence test 13 - partitioned sum with group-by on length windows.");
         final int inputEventCount = 10;
@@ -1054,10 +1053,13 @@ public class PersistenceTestCase {
         String siddhiApp = "@app:name('incrementalPersistenceTest10') "
                 + "define stream cseEventStreamOne (symbol string, price float,volume int);"
                 + "partition with (price>=100 as 'large' or price<100 as 'small' of cseEventStreamOne) " +
-                "begin @info(name " +
-                "= 'query1') from cseEventStreamOne#window.length(4) select symbol,sum(price) as price " +
-                "group by symbol insert into " +
-                "OutStockStream ;  end ";
+                "begin " +
+                "@info(name = 'query1') " +
+                "from cseEventStreamOne#window.length(4) " +
+                "select symbol,sum(price) as price " +
+                "group by symbol " +
+                "insert into OutStockStream;  " +
+                "end ";
 
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
@@ -1065,7 +1067,6 @@ public class PersistenceTestCase {
             @Override
             public void receive(Event[] events) {
                 EventPrinter.print(events);
-
                 eventArrived = true;
                 if (events != null) {
                     for (Event event : events) {

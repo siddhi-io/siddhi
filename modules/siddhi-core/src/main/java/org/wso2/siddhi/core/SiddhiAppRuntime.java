@@ -53,7 +53,7 @@ import org.wso2.siddhi.core.util.StringUtil;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import org.wso2.siddhi.core.util.parser.StoreQueryParser;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
-import org.wso2.siddhi.core.util.snapshot.AsyncSnapshotPersistor;
+import org.wso2.siddhi.core.util.persistence.util.PersistenceHelper;
 import org.wso2.siddhi.core.util.snapshot.PersistenceReference;
 import org.wso2.siddhi.core.util.statistics.BufferedEventsTracker;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
@@ -120,6 +120,7 @@ public class SiddhiAppRuntime {
     private LatencyTracker storeQueryLatencyTracker;
     private SiddhiDebugger siddhiDebugger;
     private boolean running = false;
+    private Future futureIncrementalPersistor;
 
     public SiddhiAppRuntime(Map<String, AbstractDefinition> streamDefinitionMap,
                             Map<String, AbstractDefinition> tableDefinitionMap,
@@ -531,13 +532,13 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // take snapshots of execution units
-            byte[] snapshots = siddhiAppContext.getSnapshotService().snapshot();
-            // start the snapshot persisting task asynchronously
-            AsyncSnapshotPersistor asyncSnapshotPersistor = new AsyncSnapshotPersistor(snapshots,
-                    siddhiAppContext.getSiddhiContext().getPersistenceStore(), siddhiAppContext.getName());
-            String revision = asyncSnapshotPersistor.getRevision();
-            Future future = siddhiAppContext.getExecutorService().submit(asyncSnapshotPersistor);
-            return new PersistenceReference(future, revision);
+            if (siddhiAppContext.getSiddhiContext().getPersistenceStore() != null) {
+                return PersistenceHelper.persist(siddhiAppContext.getSnapshotService().fullSnapshot(),
+                        siddhiAppContext);
+            } else {
+                return PersistenceHelper.persist(siddhiAppContext.getSnapshotService().incrementalSnapshot(),
+                        siddhiAppContext);
+            }
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));
@@ -549,7 +550,7 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // take snapshots of execution units
-            return siddhiAppContext.getSnapshotService().snapshot();
+            return siddhiAppContext.getSnapshotService().fullSnapshot();
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));
@@ -561,7 +562,7 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // start the restoring process
-            siddhiAppContext.getPersistenceService().restore(snapshot);
+            siddhiAppContext.getSnapshotService().restore(snapshot);
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));
@@ -573,7 +574,7 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // start the restoring process
-            siddhiAppContext.getPersistenceService().restoreRevision(revision);
+            siddhiAppContext.getSnapshotService().restoreRevision(revision);
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));
@@ -586,7 +587,7 @@ public class SiddhiAppRuntime {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));
             // start the restoring process
-            revision = siddhiAppContext.getPersistenceService().restoreLastRevision();
+            revision = siddhiAppContext.getSnapshotService().restoreLastRevision();
         } finally {
             // at the end, resume the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::resume));

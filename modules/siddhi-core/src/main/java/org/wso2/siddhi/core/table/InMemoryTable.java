@@ -38,6 +38,7 @@ import org.wso2.siddhi.core.util.parser.EventHolderPasser;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
+import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import org.wso2.siddhi.query.api.expression.Expression;
@@ -169,7 +170,6 @@ public class InMemoryTable extends Table implements Snapshotable {
         } finally {
             readWriteLock.readLock().unlock();
         }
-
     }
 
     @Override
@@ -203,13 +203,13 @@ public class InMemoryTable extends Table implements Snapshotable {
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
-        state.put("EventHolder", eventHolder);
+        state.put("EventHolder", eventHolder.getSnapshot());
         return state;
     }
 
     @Override
     public void restoreState(Map<String, Object> state) {
-        eventHolder = (EventHolder) state.get("EventHolder");
+        eventHolder.restore((SnapshotStateList) state.get("EventHolder"));
     }
 
     @Override

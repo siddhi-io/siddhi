@@ -163,5 +163,4 @@ public class EventChunkOperator implements Operator {
         }
         return failedEventChunk;
     }
-
 }

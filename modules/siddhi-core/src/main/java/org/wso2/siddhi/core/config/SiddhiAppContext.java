@@ -23,7 +23,6 @@ import org.wso2.siddhi.core.function.Script;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
-import org.wso2.siddhi.core.util.persistence.PersistenceService;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.statistics.StatisticsManager;
 import org.wso2.siddhi.core.util.timestamp.TimestampGenerator;
@@ -56,7 +55,6 @@ public class SiddhiAppContext {
 
     private ThreadBarrier threadBarrier = null;
     private TimestampGenerator timestampGenerator = null;
-    private PersistenceService persistenceService;
     private ElementIdGenerator elementIdGenerator;
     private Map<String, Script> scriptFunctionMap;
     private ExceptionHandler<Object> disruptorExceptionHandler;
@@ -163,14 +161,6 @@ public class SiddhiAppContext {
 
     public void setSnapshotService(SnapshotService snapshotService) {
         this.snapshotService = snapshotService;
-    }
-
-    public PersistenceService getPersistenceService() {
-        return persistenceService;
-    }
-
-    public void setPersistenceService(PersistenceService persistenceService) {
-        this.persistenceService = persistenceService;
     }
 
     public ElementIdGenerator getElementIdGenerator() {

@@ -23,6 +23,8 @@ import org.wso2.siddhi.query.api.expression.Expression;
  * Query output stream try to update table else insert into it
  */
 public class UpdateOrInsertStream extends OutputStream {
+
+    private static final long serialVersionUID = 1L;
     protected Expression onUpdateExpression;
     private UpdateSet updateSetter;
 

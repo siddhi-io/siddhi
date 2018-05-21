@@ -26,6 +26,7 @@ import org.wso2.siddhi.query.api.expression.Expression;
  */
 public class AggregationInputStore extends ConditionInputStore {
 
+    private static final long serialVersionUID = 1L;
     private final Within within;
     private final Expression per;
 

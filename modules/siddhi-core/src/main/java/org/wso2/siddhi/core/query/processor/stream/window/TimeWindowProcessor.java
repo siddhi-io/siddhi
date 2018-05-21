@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import org.wso2.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
@@ -38,6 +39,7 @@ import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
+import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
@@ -77,7 +79,7 @@ import java.util.Map;
 public class TimeWindowProcessor extends WindowProcessor implements SchedulingProcessor, FindableProcessor {
 
     private long timeInMilliSeconds;
-    private ComplexEventChunk<StreamEvent> expiredEventChunk;
+    private SnapshotableStreamEventQueue expiredEventQueue;
     private Scheduler scheduler;
     private SiddhiAppContext siddhiAppContext;
     private volatile long lastTimestamp = Long.MIN_VALUE;
@@ -100,7 +102,7 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
             outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
-        this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+        this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
@@ -133,12 +135,12 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
                 StreamEvent streamEvent = streamEventChunk.next();
                 long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
 
-                expiredEventChunk.reset();
-                while (expiredEventChunk.hasNext()) {
-                    StreamEvent expiredEvent = expiredEventChunk.next();
+                expiredEventQueue.reset();
+                while (expiredEventQueue.hasNext()) {
+                    StreamEvent expiredEvent = expiredEventQueue.next();
                     long timeDiff = expiredEvent.getTimestamp() - currentTime + timeInMilliSeconds;
                     if (timeDiff <= 0) {
-                        expiredEventChunk.remove();
+                        expiredEventQueue.remove();
                         expiredEvent.setTimestamp(currentTime);
                         streamEventChunk.insertBeforeCurrent(expiredEvent);
                     } else {
@@ -150,7 +152,7 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
 
                     StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
                     clonedEvent.setType(StreamEvent.Type.EXPIRED);
-                    this.expiredEventChunk.add(clonedEvent);
+                    this.expiredEventQueue.add(clonedEvent);
 
                     if (lastTimestamp < clonedEvent.getTimestamp()) {
                         scheduler.notifyAt(clonedEvent.getTimestamp() + timeInMilliSeconds);
@@ -160,22 +162,22 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
                     streamEventChunk.remove();
                 }
             }
-            expiredEventChunk.reset();
+            expiredEventQueue.reset();
         }
         nextProcessor.process(streamEventChunk);
     }
 
     @Override
     public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, expiredEventChunk, streamEventCloner);
+        return ((Operator) compiledCondition).find(matchingEvent, expiredEventQueue, streamEventCloner);
     }
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
-        return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
+        return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
     }
 
@@ -192,13 +194,12 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
-        state.put("ExpiredEventChunk", expiredEventChunk.getFirst());
+        state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
         return state;
     }
 
     @Override
     public void restoreState(Map<String, Object> state) {
-        expiredEventChunk.clear();
-        expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
+        expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
     }
 }

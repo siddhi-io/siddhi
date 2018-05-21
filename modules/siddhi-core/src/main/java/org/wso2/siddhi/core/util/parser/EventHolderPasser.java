@@ -20,14 +20,14 @@ package org.wso2.siddhi.core.util.parser;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
+import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
+import org.wso2.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.table.holder.EventHolder;
-import org.wso2.siddhi.core.table.holder.IndexEventHolder;
-import org.wso2.siddhi.core.table.holder.ListEventHolder;
-import org.wso2.siddhi.core.table.holder.PrimaryKeyReferenceHolder;
+import org.wso2.siddhi.core.table.holder.*;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
@@ -113,7 +113,13 @@ public class EventHolderPasser {
             return new IndexEventHolder(tableStreamEventPool, eventConverter, primaryKeyReferenceHolders, isNumeric,
                     indexMetaData, tableDefinition, siddhiAppContext);
         } else {
-            return new ListEventHolder(tableStreamEventPool, eventConverter);
+            MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
+            for (Attribute attribute : tableDefinition.getAttributeList()) {
+                metaStreamEvent.addOutputData(attribute);
+            }
+            StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent, tableStreamEventPool);
+            return new ListEventHolder(tableStreamEventPool, eventConverter,
+                    new StreamEventClonerHolder(streamEventCloner));
         }
     }
 

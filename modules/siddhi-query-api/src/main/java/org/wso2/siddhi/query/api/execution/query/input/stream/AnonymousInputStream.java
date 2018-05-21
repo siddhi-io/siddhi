@@ -28,6 +28,8 @@ import java.util.UUID;
  * Anonymous input query stream
  */
 public class AnonymousInputStream extends SingleInputStream {
+
+    private static final long serialVersionUID = 1L;
     private Query query;
 
     public AnonymousInputStream(Query query) {
