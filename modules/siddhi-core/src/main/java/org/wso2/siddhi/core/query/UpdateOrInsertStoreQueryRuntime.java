@@ -24,73 +24,46 @@ import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.state.StateEventPool;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
-import org.wso2.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import org.wso2.siddhi.core.exception.StoreQueryRuntimeException;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
-import org.wso2.siddhi.core.table.CompiledUpdateSet;
-import org.wso2.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.collection.AddingStreamEventExtractor;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
-import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
 /**
- * Store Query Runtime holds the runtime information needed for executing the store query.
+ * This class is used to keep the information needed to execute an updateOrInsert store query.
  */
-public class UpdateOrInsertQueryRuntime implements StoreQueryRuntime {
+public class UpdateOrInsertStoreQueryRuntime implements StoreQueryRuntime {
 
-    private CompiledCondition compiledCondition;
-    private CompiledUpdateSet compiledUpdateSet;
-    private CompiledSelection compiledSelection;
-    private AddingStreamEventExtractor addingStreamEventExtractor;
-    private Table table;
     private String queryName;
     private MetaStreamEvent.EventType eventType;
     private QuerySelector selector;
     private StateEventPool stateEventPool;
     private MetaStreamEvent metaStreamEvent;
     private Attribute[] outputAttributes;
-    private StreamEventConverter streamEventConverter;
-    private StreamEventPool streamEventPool;
 
-    public UpdateOrInsertQueryRuntime(Table table, CompiledCondition compiledCondition, String queryName,
-                                      MetaStreamEvent metaStreamEvent) {
-        this.table = table;
-        this.compiledCondition = compiledCondition;
-        this.compiledUpdateSet = compiledUpdateSet;
+    public UpdateOrInsertStoreQueryRuntime(String queryName, MetaStreamEvent metaStreamEvent) {
         this.queryName = queryName;
         this.eventType = metaStreamEvent.getEventType();
         this.metaStreamEvent = metaStreamEvent;
         this.setOutputAttributes(metaStreamEvent.getLastInputDefinition().getAttributeList());
-        this.streamEventConverter = StreamEventConverterFactory.constructEventConverter(metaStreamEvent);
     }
 
     @Override
     public Event[] execute() {
         try {
-            StateEvent stateEvent = new StateEvent(1, ((ArrayList) selector.getAttributeProcessorList()).size());
-            StreamEvent streamEvents = null;
-
+            StateEvent stateEvent = new StateEvent(1, outputAttributes.length);
             StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getBeforeWindowData().size(),
                     metaStreamEvent.getOnAfterWindowData().size(),
-                    ((ArrayList) selector.getAttributeProcessorList()).size());
+                    metaStreamEvent.getOutputData().size());
             stateEvent.addEvent(0, streamEvent);
-            ComplexEventChunk complexEventChunk = new ComplexEventChunk();
-            complexEventChunk.add(stateEvent);
 
-            switch (eventType) {
-                case TABLE:
-                     selector.process(complexEventChunk);
-                    break;
-                case DEFAULT:
-                    break;
+            ComplexEventChunk complexEventChunk = new ComplexEventChunk(stateEvent, stateEvent, true);
+
+            if (eventType == MetaStreamEvent.EventType.TABLE) {
+                selector.process(complexEventChunk);
             }
             return new Event[]{};
         } catch (Throwable t) {
@@ -103,6 +76,43 @@ public class UpdateOrInsertQueryRuntime implements StoreQueryRuntime {
         if (selector != null) {
             selector.process(generateResetComplexEventChunk(metaStreamEvent));
         }
+    }
+
+    /**
+     * This method sets a state event pool for the updateOrInsert query runtime.
+     *
+     * @param stateEventPool stateEventPool for the store query runtime
+     */
+    public void setStateEventPool(StateEventPool stateEventPool) {
+        if (stateEventPool != null) {
+            this.stateEventPool = stateEventPool;
+        } else {
+            throw new StoreQueryRuntimeException("Error occured while initializing run time for update or insert into" +
+                    " query \"" + queryName + "\".");
+        }
+    }
+
+    /**
+     * This method sets selector for the updateOrInsert store query runtime.
+     *
+     * @param selector for the store query
+     */
+    public void setSelector(QuerySelector selector) {
+        this.selector = selector;
+    }
+
+    /**
+     * This method sets the output attribute list of the given store query.
+     *
+     * @param outputAttributeList output attritbutes of the store query
+     */
+    public void setOutputAttributes(List<Attribute> outputAttributeList) {
+        this.outputAttributes = outputAttributeList.toArray(new Attribute[outputAttributeList.size()]);
+    }
+
+    @Override
+    public Attribute[] getStoreQueryOutputAttributes() {
+        return Arrays.copyOf(outputAttributes, outputAttributes.length);
     }
 
     private ComplexEventChunk<ComplexEvent> generateResetComplexEventChunk(MetaStreamEvent metaStreamEvent) {
@@ -121,32 +131,5 @@ public class UpdateOrInsertQueryRuntime implements StoreQueryRuntime {
         ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>(true);
         complexEventChunk.add(stateEvent);
         return complexEventChunk;
-    }
-
-    public void setStateEventPool(StateEventPool stateEventPool) {
-        if (stateEventPool != null) {
-            this.stateEventPool = stateEventPool;
-        } else {
-            throw new StoreQueryRuntimeException("Error occured while initializing run time for update or insert into" +
-                    " query \"" + queryName + "\".");
-        }
-    }
-
-    public void setSelector(QuerySelector selector) {
-        this.selector = selector;
-    }
-
-    /**
-     * This method sets the output attribute list of the given store query.
-     *
-     * @param outputAttributeList
-     */
-    public void setOutputAttributes(List<Attribute> outputAttributeList) {
-        this.outputAttributes = outputAttributeList.toArray(new Attribute[outputAttributeList.size()]);
-    }
-
-        @Override
-    public Attribute[] getStoreQueryOutputAttributes() {
-        return Arrays.copyOf(outputAttributes, outputAttributes.length);
     }
 }

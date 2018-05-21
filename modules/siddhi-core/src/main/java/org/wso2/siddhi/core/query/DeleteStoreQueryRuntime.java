@@ -17,7 +17,6 @@
  */
 package org.wso2.siddhi.core.query;
 
-import org.wso2.siddhi.core.aggregation.AggregationRuntime;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.Event;
@@ -27,59 +26,43 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.exception.StoreQueryRuntimeException;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
-import org.wso2.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
-import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Store Query Runtime holds the runtime information needed for executing the store query.
+ * This class is used to keep the runtime information needed to execute an delete store query.
  */
 public class DeleteStoreQueryRuntime implements StoreQueryRuntime {
 
-    private CompiledCondition compiledCondition;
-    private Table table;
-    private Window window;
     private String queryName;
     private MetaStreamEvent.EventType eventType;
-    private AggregationRuntime aggregation;
     private QuerySelector selector;
     private StateEventPool stateEventPool;
     private MetaStreamEvent metaStreamEvent;
     private Attribute[] outputAttributes;
 
-    public DeleteStoreQueryRuntime(Table table, CompiledCondition compiledCondition, String queryName,
-                                 MetaStreamEvent metaStreamEvent) {
-        this.table = table;
-        this.compiledCondition = compiledCondition;
+    public DeleteStoreQueryRuntime(String queryName, MetaStreamEvent metaStreamEvent) {
         this.queryName = queryName;
         this.eventType = metaStreamEvent.getEventType();
         this.metaStreamEvent = metaStreamEvent;
         this.setOutputAttributes(metaStreamEvent.getLastInputDefinition().getAttributeList());
     }
 
-
     @Override
     public Event[] execute() {
         try {
-            StateEvent stateEvent = new StateEvent(1, metaStreamEvent.getOutputData().size());
+            StateEvent stateEvent = new StateEvent(1, outputAttributes.length);
             StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getBeforeWindowData().size(),
                     metaStreamEvent.getOnAfterWindowData().size(),
                     metaStreamEvent.getOutputData().size());
-            StreamEvent streamEvents = null;
-            ComplexEventChunk complexEventChunk = new ComplexEventChunk();
             stateEvent.addEvent(0, streamEvent);
-            complexEventChunk.add(stateEvent);
-            switch (eventType) {
-                case TABLE:
-//                    table.deleteEvents(complexEventChunk, compiledCondition, 1);
-                    selector.process(complexEventChunk);
-                    break;
-                case DEFAULT:
-                    break;
+
+            ComplexEventChunk complexEventChunk = new ComplexEventChunk(stateEvent, stateEvent, true);
+
+            if (eventType == MetaStreamEvent.EventType.TABLE) {
+                selector.process(complexEventChunk);
             }
             return new Event[]{};
         } catch (Throwable t) {
@@ -92,6 +75,33 @@ public class DeleteStoreQueryRuntime implements StoreQueryRuntime {
         if (selector != null) {
             selector.process(generateResetComplexEventChunk(metaStreamEvent));
         }
+    }
+
+    public void setStateEventPool(StateEventPool stateEventPool) {
+        this.stateEventPool = stateEventPool;
+    }
+
+    /**
+     * This method sets selector for the delete store query runtime.
+     *
+     * @param selector for the store query
+     */
+    public void setSelector(QuerySelector selector) {
+        this.selector = selector;
+    }
+
+    /**
+     * This method sets the output attribute list of the given store query.
+     *
+     * @param outputAttributeList
+     */
+    public void setOutputAttributes(List<Attribute> outputAttributeList) {
+        this.outputAttributes = outputAttributeList.toArray(new Attribute[outputAttributeList.size()]);
+    }
+
+    @Override
+    public Attribute[] getStoreQueryOutputAttributes() {
+        return Arrays.copyOf(outputAttributes, outputAttributes.length);
     }
 
     private ComplexEventChunk<ComplexEvent> generateResetComplexEventChunk(MetaStreamEvent metaStreamEvent) {
@@ -110,27 +120,5 @@ public class DeleteStoreQueryRuntime implements StoreQueryRuntime {
         ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>(true);
         complexEventChunk.add(stateEvent);
         return complexEventChunk;
-    }
-
-    public void setStateEventPool(StateEventPool stateEventPool) {
-        this.stateEventPool = stateEventPool;
-    }
-
-    public void setSelector(QuerySelector selector) {
-        this.selector = selector;
-    }
-
-    /**
-     * This method sets the output attribute list of the given store query.
-     *
-     * @param outputAttributeList
-     */
-    public void setOutputAttributes(List<Attribute> outputAttributeList) {
-        this.outputAttributes = outputAttributeList.toArray(new Attribute[outputAttributeList.size()]);
-    }
-
-    @Override
-    public Attribute[] getStoreQueryOutputAttributes() {
-        return Arrays.copyOf(outputAttributes, outputAttributes.length);
     }
 }

@@ -72,7 +72,7 @@ store_query
     : FROM store_input query_section?
     | query_section INSERT INTO target
     | query_section UPDATE OR INSERT INTO target set_clause? ON expression
-    | store_query_output
+    | query_section? store_query_output
     ;
 
 store_input

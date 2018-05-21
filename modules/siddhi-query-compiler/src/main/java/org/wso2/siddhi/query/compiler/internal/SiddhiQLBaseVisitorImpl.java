@@ -1793,6 +1793,10 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
      */
     @Override
     public OutputStream visitStore_query_output(@NotNull SiddhiQLParser.Store_query_outputContext ctx) {
+        //  :DELETE target ON expression
+        //  |UPDATE target set_clause? ON expression
+        //  ;
+
         if (ctx.DELETE() != null) {
             Source source = (Source) visit(ctx.target());
             if (source.isInnerStream) {
@@ -2948,16 +2952,13 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             if (ctx.query_section() != null) {
                 storeQuery = storeQuery.select((Selector) visit(ctx.query_section()));
             }
-        } else if (ctx.store_query_output() != null) {
-            storeQuery.outStream((OutputStream) visit(ctx.store_query_output()));
-            populateQueryContext(storeQuery, ctx);
         } else if (ctx.query_section() != null) {
             storeQuery.select((Selector) visit(ctx.query_section()));
             OutputStream outputStream = null;
             if (ctx.UPDATE() != null && ctx.OR() != null) {
                 Source source = (Source) visit(ctx.target());
                 if (source.isInnerStream) {
-                    throw newSiddhiParserException(ctx, "UPDATE OR INTO INSERT be only used with Tables!");
+                    throw newSiddhiParserException(ctx, "UPDATE OR INTO INSERT can be only used with Tables!");
                 }
                 if (ctx.set_clause() != null) {
                     outputStream = new UpdateOrInsertStream(source.streamId,
@@ -2972,12 +2973,16 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             } else if (ctx.INSERT() != null) {
                 Source source = (Source) visit(ctx.target());
                 if (source.isInnerStream) {
-                    throw newSiddhiParserException(ctx, "UPDATE OR INTO INSERT be only used with Tables!");
+                    throw newSiddhiParserException(ctx, "SELECT INSERT can be only used with Tables!");
                 }
                 outputStream = new InsertIntoStream(source.streamId);
                 populateQueryContext(outputStream, ctx);
                 storeQuery.outStream(outputStream);
+            } else if (ctx.store_query_output() != null) {
+                storeQuery.outStream((OutputStream) visit(ctx.store_query_output()));
             }
+        } else if (ctx.store_query_output() != null) {
+            storeQuery.outStream((OutputStream) visit(ctx.store_query_output()));
         }
         populateQueryContext(storeQuery, ctx);
         return storeQuery;
