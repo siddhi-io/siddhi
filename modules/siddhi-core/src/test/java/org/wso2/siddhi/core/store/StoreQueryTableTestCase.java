@@ -538,12 +538,23 @@ public class StoreQueryTableTestCase {
         stockStream.send(new Object[]{"WSO2", 57.6f, 300L});
         Thread.sleep(500);
 
-        siddhiAppRuntime.query("" +
-                "select \"newSymbol\" as symbol, 123.45f as price, 123L as volume " +
+        String storeQuery = "select \"newSymbol\" as symbol, 123.45f as price, 123L as volume " +
                 "update or insert into StockTable " +
-                "set StockTable.symbol = symbol, StockTable.price=price on StockTable.volume == 100L ");
+                "set StockTable.symbol = symbol, StockTable.price=price on StockTable.volume == 100L ";
+
+        siddhiAppRuntime.query(storeQuery);
 
         Event[] events = siddhiAppRuntime.query("from StockTable select * having volume == 100L;");
+
+        Assert.assertEquals(events.length, 1);
+        Assert.assertEquals(events[0].getData()[0], "newSymbol");
+        Assert.assertEquals(events[0].getData()[1], 123.45f);
+        Assert.assertEquals(events[0].getData()[2], 100L);
+
+        // submit the same store query again to test resetting the query runtime
+        siddhiAppRuntime.query(storeQuery);
+
+        events = siddhiAppRuntime.query("from StockTable select * having volume == 100L;");
 
         Assert.assertEquals(events.length, 1);
         Assert.assertEquals(events[0].getData()[0], "newSymbol");
@@ -625,14 +636,22 @@ public class StoreQueryTableTestCase {
         Event[] initialEvents = siddhiAppRuntime.query("from StockTable select *;");
         Assert.assertEquals(initialEvents.length, 3);
 
-        siddhiAppRuntime.query("select 100L as vol " +
-                "delete StockTable on StockTable.volume == vol;");
+        String storeQuery = "select 100L as vol " +
+                            "delete StockTable on StockTable.volume == vol;";
+
+        siddhiAppRuntime.query(storeQuery);
         Thread.sleep(500);
 
         Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
         Assert.assertEquals(allEvents.length, 2);
 
         Event[] events = siddhiAppRuntime.query("from StockTable select * having volume == 100L");
+        Assert.assertNull(events);
+
+        // submit the same store query again to test resetting the query runtime
+        siddhiAppRuntime.query(storeQuery);
+
+        events = siddhiAppRuntime.query("from StockTable select * having volume == 100L");
         Assert.assertNull(events);
 
         siddhiAppRuntime.shutdown();
@@ -707,7 +726,9 @@ public class StoreQueryTableTestCase {
         Event[] events = siddhiAppRuntime.query("from StockTable select *;");
         Assert.assertEquals(events.length, 3);
 
-        siddhiAppRuntime.query("select 10 as id, \"YAHOO\" as symbol, 400 as volume insert into StockTable;");
+        String storeQuery = "select 10 as id, \"YAHOO\" as symbol, 400 as volume insert into StockTable;";
+
+        siddhiAppRuntime.query(storeQuery);
         Thread.sleep(100);
 
         Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
@@ -721,6 +742,12 @@ public class StoreQueryTableTestCase {
         Assert.assertEquals(data[0], 10);
         Assert.assertEquals(data[1], "YAHOO");
         Assert.assertEquals(data[2], 400);
+
+        // submit the same store query again to test resetting the query runtime
+        siddhiAppRuntime.query(storeQuery);
+
+        newEvents = siddhiAppRuntime.query("from StockTable select * having id == 10;");
+        Assert.assertEquals(newEvents.length, 2);
 
         siddhiAppRuntime.shutdown();
     }
@@ -750,8 +777,9 @@ public class StoreQueryTableTestCase {
         stockStream.send(new Object[]{3, "GOOGLE", 300});
         Thread.sleep(500);
 
-        siddhiAppRuntime.query("update StockTable set StockTable.symbol=\"MICROSOFT\", StockTable.volume=2000" +
-                " on StockTable.id==2;");
+        String storeQuery = "update StockTable set StockTable.symbol=\"MICROSOFT\", StockTable.volume=2000" +
+                " on StockTable.id==2;";
+        siddhiAppRuntime.query(storeQuery);
         Thread.sleep(100);
 
         Event[] allEvents = siddhiAppRuntime.query("from StockTable select *;");
@@ -765,6 +793,18 @@ public class StoreQueryTableTestCase {
         Assert.assertEquals(data[0], 2);
         Assert.assertEquals(data[1], "MICROSOFT");
         Assert.assertEquals(data[2], 2000);
+
+        // submit the same store query again to test resetting the query runtime
+        siddhiAppRuntime.query(storeQuery);
+        updatedEvents = siddhiAppRuntime.query("from StockTable select * having id == 2");
+        Assert.assertEquals(updatedEvents.length, 1);
+
+        data = updatedEvents[0].getData();
+
+        Assert.assertEquals(data[0], 2);
+        Assert.assertEquals(data[1], "MICROSOFT");
+        Assert.assertEquals(data[2], 2000);
+
 
         siddhiAppRuntime.shutdown();
     }
