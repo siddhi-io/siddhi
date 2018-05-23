@@ -107,5 +107,6 @@ public final class SiddhiConstants {
     public static final String EXTENSION_SEPARATOR = ":";
 
     public static final String KEY_DELIMITER = ":-:";
+    public static final String TRANSPORT_CHANNEL_CREATION_IDENTIFIER = "transportChannelCreationEnabled";
 
 }
