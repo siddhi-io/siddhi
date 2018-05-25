@@ -1754,6 +1754,176 @@ define stream TempStream (deviceID long, roomNo int, temp double);
 from TempStream[ServerRoomTable.roomNo == roomNo in ServerRoomTable]
 insert into ServerRoomTempStream;
 ```
+## Store Query
+
+Siddhi store queries are a set of siddhi queries which can be used to query database tables.
+
+**Purpose**
+
+Store Queries provides support to execute following queries on database tables without intervention of streams.
+
+* SELECT
+* DELETE
+* UPDATE
+* UPDATE OR INSERT
+* SELECT INSERT
+
+This could be done by submitting the store query to the Siddhi app runtime using its query() method.
+
+In order to execute store queries, there should be a siddhi app deployed with a store defined, that contains the table which is going to be queried.
+
+**Example**
+
+If user needs to query the table named "**RoomTypeTable**", the it should have been defined in the siddhi app.
+
+In order to execute a store query on **RoomTypeTable**, user needs to submit the store query using query() method of SiddhiAppRuntime intance as below.
+
+```java
+siddhiAppRuntime.query(<store query>);
+```
+
+### Select
+
+SELECT store query supports to retrieve one or more records that match with a given condition, from a given table.
+
+**Syntax**
+
+```sql
+from <table>
+select <attribute name>, <attribute name>, ...
+group_by? having? order_by? limit?
+```
+
+**Example**
+
+Following example shows how to retrieve room numbers and types of the rooms starting from the room no 10.
+
+```sql
+from roomTypeTable
+select roomNo, type
+on roomNo >= 10;
+```
+
+### Delete
+
+DELETE store query can be used to delete selected records from a given database table.
+
+**Syntax**
+
+```sql
+<select>?  
+delete <table>  on <conditional_expresssion>
+```
+
+The `condition` element specifies the basis on which records are selected to be deleted.
+
+!!! note
+    When specifying the condition,table attributes must be always referred to with the table name as, 
+    `<table name>.<attibute name>`
+
+**Example**
+
+In this example, query deletes a record in the table named `RoomTypeTable` if it has value for the `roomNo` 
+attribute that matches the value for the `roomNumber` attribute of the selection which has 10 as the actual value.
+
+```sql
+select 10 as roomNumber
+delete RoomTypeTable
+on RoomTypeTable.roomNo == roomNumber;
+```
+
+### Update
+
+Update store query can be used to update selected attributes stored in a table based on a condition.
+
+**Syntax**
+
+```sql
+select <attribute name>, <attribute name>, ...?
+update <table>
+    set <table>.<attribute name> = (<attribute name>|<expression>)?, <table>.<attribute name> = (<attribute name>|<expression>)?, ...
+    on <condition>
+```
+
+The `condition` element specifies the basis on which records are selected to be updated.
+When specifying the `condition`, table attributes must be referred to with the table name.
+
+You can use the `set` keyword to update selected attributes from the table. Here, for each assignment, the attribute specified in the left must be the table attribute, and the one specified in the right can be a stream/table attribute a mathematical operation, or other. When the `set` clause is not provided, all the attributes in the table are updated.
+
+
+!!! note
+    Table attributes must be always referred to with the table name as, 
+     `<table name>.<attibute name>`.
+
+**Example**
+
+The following query updates the room occupancy by increasing its value by 1, in the `RoomOccupancyTable` table for each room number greater than 10.
+
+```sql
+select 10 as roomNumber, 1 as arrival
+update RoomTypeTable
+    set RoomTypeTable.people = RoomTypeTable.people + arrival
+    on RoomTypeTable.roomNo == roomNumber;
+```
+
+### Update or Insert Into
+
+This allows you to update the given attributes, if a matching record to the given condition already exists in the database table.  
+Or else insert the entry as a new record.
+
+**Syntax**
+
+```sql
+select <attribute name>, <attribute name>, ...
+update or insert into <table>
+    set <table>.<attribute name> = <expression>, <table>.<attribute name> = <expression>, ...
+    on <condition>
+```
+The `condition` element specifies the basis on which records are selected for update.
+When specifying the `condition`, table attributes should be referred to with the table name.
+If a record that matches the condition does not already exist in the table, the arriving event is inserted into the table.
+
+The `set` clause is only used when an update is performed during the insert/update operation.
+When `set` clause is used, the attribute to the left is always a table attribute, and the attribute to the right can be a stream/table attribute, mathematical
+operation or other. The attribute to the left (i.e., the attribute in the event table) is updated with the value of the attribute to the right if the given condition is met. When the `set` clause is not provided, all the attributes in the table are updated.
+
+!!! note
+    Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
+
+**Example**
+
+The following query update the records in the `UpdateTable` table that have room numbers that match the same in the selection. If such records are found in the event table, they are updated. If such records are not found, it is inserted from the stream.
+
+```sql
+from RoomAssigneeStream
+select 10 as roomNo, "single" as type, "abc" as assignee
+update or insert into RoomAssigneeTable
+    set RoomAssigneeTable.assignee = assignee
+    on RoomAssigneeTable.roomNo == roomNo;
+```
+
+### Select Insert Into
+
+This allows you to insert a new record to the database table with the attribtue values you define in the select section.
+
+**Syntax**
+
+```sql
+select <attribute name>, <attribute name>, ...
+insert into <table>;
+```
+
+**Example**
+
+The following store query insret a new record to the table **RoomOccupancyTable**,  with the attribute values as below.
+- roomNo = 10
+- people 2
+
+
+```sql
+select 10 as roomNo, 2 as people
+insert into RoomOccupancyTable 
+```
 
 ## Incremental Aggregation
 
