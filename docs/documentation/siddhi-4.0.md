@@ -1756,11 +1756,11 @@ insert into ServerRoomTempStream;
 ```
 ## Store Query
 
-Siddhi store queries are a set of siddhi queries which can be used to query database tables.
+Siddhi store queries are a set of siddhi queries that can be used to query database tables.
 
 **Purpose**
 
-Store Queries provides support to execute following queries on database tables without intervention of streams.
+Store queries allow you to execute the following operations on database tables without the intervention of streams.
 
 * SELECT
 * DELETE
@@ -1768,15 +1768,18 @@ Store Queries provides support to execute following queries on database tables w
 * UPDATE OR INSERT
 * SELECT INSERT
 
-This could be done by submitting the store query to the Siddhi app runtime using its query() method.
+This is be done by submitting the store query to the Siddhi application runtime using its `query()` method.
 
-In order to execute store queries, there should be a siddhi app deployed with a store defined, that contains the table which is going to be queried.
+In order to execute store queries, the Siddhi application of the siddhi application runtime you are using, should have
+ a store defined for the database which contains the table that needs to be queried.
+
 
 **Example**
 
-If user needs to query the table named "**RoomTypeTable**", the it should have been defined in the siddhi app.
+If you need to query the table named `RoomTypeTable` the it should have been defined in the Siddhi application.
 
-In order to execute a store query on **RoomTypeTable**, user needs to submit the store query using query() method of SiddhiAppRuntime intance as below.
+In order to execute a store query on `RoomTypeTable`, you need to submit the store query using `query()` 
+method of `SiddhiAppRuntime` instance as below.
 
 ```java
 siddhiAppRuntime.query(<store query>);
@@ -1784,8 +1787,7 @@ siddhiAppRuntime.query(<store query>);
 
 ### Select
 
-SELECT store query supports to retrieve one or more records that match with a given condition, from a given table.
-
+The `SELECT` store query retrieves one or more records that match a given condition from a specified table.
 **Syntax**
 
 ```sql
@@ -1796,7 +1798,7 @@ group_by? having? order_by? limit?
 
 **Example**
 
-Following example shows how to retrieve room numbers and types of the rooms starting from the room no 10.
+This query retrieves room numbers and types of the rooms starting from room no 10.
 
 ```sql
 from roomTypeTable
@@ -1806,7 +1808,7 @@ on roomNo >= 10;
 
 ### Delete
 
-DELETE store query can be used to delete selected records from a given database table.
+The `DELETE` store query deletes selected records from a specified database table.
 
 **Syntax**
 
@@ -1818,8 +1820,8 @@ delete <table>  on <conditional_expresssion>
 The `condition` element specifies the basis on which records are selected to be deleted.
 
 !!! note
-    When specifying the condition,table attributes must be always referred to with the table name as, 
-    `<table name>.<attibute name>`
+    Table attributes must always be referred to with the table name as shown below: <br />
+     `<table name>.<attibute name>`.
 
 **Example**
 
@@ -1834,8 +1836,7 @@ on RoomTypeTable.roomNo == roomNumber;
 
 ### Update
 
-Update store query can be used to update selected attributes stored in a table based on a condition.
-
+The `UPDATE` store query updates selected attributes stored in a specific table, based on a given condition.
 **Syntax**
 
 ```sql
@@ -1852,12 +1853,13 @@ You can use the `set` keyword to update selected attributes from the table. Here
 
 
 !!! note
-    Table attributes must be always referred to with the table name as, 
+    Table attributes must always be referred to with the table name as shown below: <br />
      `<table name>.<attibute name>`.
 
 **Example**
 
-The following query updates the room occupancy by increasing its value by 1, in the `RoomOccupancyTable` table for each room number greater than 10.
+The following query updates the room occupancy by increasing the value of `people` by 1, in the `RoomOccupancyTable` 
+table for each room number greater than 10.
 
 ```sql
 select 10 as roomNumber, 1 as arrival
@@ -1868,8 +1870,8 @@ update RoomTypeTable
 
 ### Update or Insert Into
 
-This allows you to update the given attributes, if a matching record to the given condition already exists in the database table.  
-Or else insert the entry as a new record.
+This allows you to update selected attributes if a record that meets the given conditions already exists in the specified database table. 
+If a matching record does not exist, the entry is inserted as a new record.
 
 **Syntax**
 
@@ -1888,7 +1890,8 @@ When `set` clause is used, the attribute to the left is always a table attribute
 operation or other. The attribute to the left (i.e., the attribute in the event table) is updated with the value of the attribute to the right if the given condition is met. When the `set` clause is not provided, all the attributes in the table are updated.
 
 !!! note
-    Table attributes should be always referred to with the table name as `<table name>.<attibute name>`.
+    Table attributes must always be referred to with the table name as shown below: <br />
+     `<table name>.<attibute name>`.
 
 **Example**
 
@@ -1904,7 +1907,7 @@ update or insert into RoomAssigneeTable
 
 ### Select Insert Into
 
-This allows you to insert a new record to the database table with the attribtue values you define in the select section.
+This allows you to insert a new record to the database table with the attribute values you define in the `select` section.
 
 **Syntax**
 
@@ -1915,9 +1918,7 @@ insert into <table>;
 
 **Example**
 
-The following store query insret a new record to the table **RoomOccupancyTable**,  with the attribute values as below.
-- roomNo = 10
-- people 2
+This store query inserts a new record to the table `RoomOccupancyTable`, with the specified attribute values.
 
 
 ```sql
