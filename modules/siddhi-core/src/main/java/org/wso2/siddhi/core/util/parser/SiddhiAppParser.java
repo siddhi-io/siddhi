@@ -141,6 +141,15 @@ public class SiddhiAppParser {
                     SiddhiConstants.ANNOTATION_ELEMENT_INCLUDE, siddhiApp.getAnnotations());
             siddhiAppContext.setIncludedMetrics(generateIncludedMetrics(statStateIncludElement));
 
+            Element transportCreationEnabledElement = AnnotationHelper.getAnnotationElement(
+                    SiddhiConstants.TRANSPORT_CHANNEL_CREATION_IDENTIFIER, null, siddhiApp.getAnnotations());
+            if (transportCreationEnabledElement == null) {
+                siddhiAppContext.setTransportChannelCreationEnabled(true);
+            } else {
+                siddhiAppContext.setTransportChannelCreationEnabled(
+                        Boolean.valueOf(transportCreationEnabledElement.getValue()));
+            }
+
 
             siddhiAppContext.setThreadBarrier(new ThreadBarrier());
 

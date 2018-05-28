@@ -61,6 +61,7 @@ public class SiddhiAppContext {
     private int bufferSize;
     private String siddhiAppString;
     private List<String> includedMetrics;
+    private boolean transportChannelCreationEnabled;
 
     public SiddhiAppContext() {
         this.eternalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
@@ -217,5 +218,13 @@ public class SiddhiAppContext {
 
     public List<String> getIncludedMetrics() {
         return includedMetrics;
+    }
+
+    public boolean isTransportChannelCreationEnabled() {
+        return transportChannelCreationEnabled;
+    }
+
+    public void setTransportChannelCreationEnabled(boolean transportChannelCreationEnabled) {
+        this.transportChannelCreationEnabled = transportChannelCreationEnabled;
     }
 }
