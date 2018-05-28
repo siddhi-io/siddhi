@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.core.util.persistence.util.IncrementalSnapshotInfo;
+import org.wso2.siddhi.core.util.persistence.util.PersistenceHelper;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
 
@@ -422,8 +423,10 @@ public class SnapshotService {
             if (log.isDebugEnabled()) {
                 log.debug("Restoring revision: " + revision + " ...");
             }
+            IncrementalSnapshotInfo restoreSnapshotInfo = PersistenceHelper.convertRevision(revision);
             List<IncrementalSnapshotInfo> incrementalSnapshotInfos =
-                    incrementalPersistenceStore.getListOfRevisionsToLoad(revision);
+                    incrementalPersistenceStore.getListOfRevisionsToLoad(
+                            restoreSnapshotInfo.getTime(), restoreSnapshotInfo.getSiddhiAppId());
             if (incrementalSnapshotInfos != null) {
                 incrementalSnapshotInfos.sort(new Comparator<IncrementalSnapshotInfo>() {
                     @Override

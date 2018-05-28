@@ -34,7 +34,7 @@ public interface IncrementalPersistenceStore {
 
     byte[] load(IncrementalSnapshotInfo snapshotInfo);
 
-    List<IncrementalSnapshotInfo> getListOfRevisionsToLoad(String revision);
+    List<IncrementalSnapshotInfo> getListOfRevisionsToLoad(long restoreTime, String siddhiAppName);
 
     String getLastRevision(String siddhiAppId);
 }
