@@ -27,7 +27,7 @@ import org.wso2.siddhi.core.table.record.RecordTableHandlerManager;
 import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import org.wso2.siddhi.core.util.config.ConfigManager;
 import org.wso2.siddhi.core.util.parser.SiddhiAppParser;
-import org.wso2.siddhi.core.util.persistence.IncrementalFileSystemPersistenceStore;
+import org.wso2.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.query.api.SiddhiApp;
 import org.wso2.siddhi.query.compiler.SiddhiCompiler;
@@ -237,7 +237,7 @@ public class SiddhiManager {
         }
     }
 
-    public void setIncrementalPersistenceStore(IncrementalFileSystemPersistenceStore incrementalPersistenceStore) {
+    public void setIncrementalPersistenceStore(IncrementalPersistenceStore incrementalPersistenceStore) {
         this.siddhiContext.setIncrementalPersistenceStore(incrementalPersistenceStore);
     }
 }
