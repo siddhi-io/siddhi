@@ -64,6 +64,9 @@ public class UpdateOrInsertStoreQueryRuntime implements StoreQueryRuntime {
 
             if (eventType == MetaStreamEvent.EventType.TABLE) {
                 selector.process(complexEventChunk);
+            } else {
+                throw new StoreQueryRuntimeException("Update or insert store query consumes only stream events of " +
+                        "type \"TABLE\".");
             }
             return new Event[]{};
         } catch (Throwable t) {
@@ -76,6 +79,11 @@ public class UpdateOrInsertStoreQueryRuntime implements StoreQueryRuntime {
         if (selector != null) {
             selector.process(generateResetComplexEventChunk(metaStreamEvent));
         }
+    }
+
+    @Override
+    public TYPE getType() {
+        return TYPE.UPDATE_OR_INSERT;
     }
 
     /**
@@ -104,7 +112,7 @@ public class UpdateOrInsertStoreQueryRuntime implements StoreQueryRuntime {
     /**
      * This method sets the output attribute list of the given store query.
      *
-     * @param outputAttributeList output attritbutes of the store query
+     * @param outputAttributeList output attributes of the store query
      */
     public void setOutputAttributes(List<Attribute> outputAttributeList) {
         this.outputAttributes = outputAttributeList.toArray(new Attribute[outputAttributeList.size()]);
@@ -121,11 +129,7 @@ public class UpdateOrInsertStoreQueryRuntime implements StoreQueryRuntime {
         streamEvent.setType(ComplexEvent.Type.RESET);
 
         StateEvent stateEvent = stateEventPool.borrowEvent();
-        if (eventType == MetaStreamEvent.EventType.AGGREGATE) {
-            stateEvent.addEvent(1, streamEvent);
-        } else {
-            stateEvent.addEvent(0, streamEvent);
-        }
+        stateEvent.addEvent(0, streamEvent);
         stateEvent.setType(ComplexEvent.Type.RESET);
 
         ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<>(true);

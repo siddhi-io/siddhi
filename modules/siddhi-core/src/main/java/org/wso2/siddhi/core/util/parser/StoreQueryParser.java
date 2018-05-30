@@ -31,7 +31,7 @@ import org.wso2.siddhi.core.exception.StoreQueryCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.DeleteStoreQueryRuntime;
 import org.wso2.siddhi.core.query.FindStoreQueryRuntime;
-import org.wso2.siddhi.core.query.SelectInsertStoreQueryRuntime;
+import org.wso2.siddhi.core.query.InsertStoreQueryRuntime;
 import org.wso2.siddhi.core.query.SelectStoreQueryRuntime;
 import org.wso2.siddhi.core.query.StoreQueryRuntime;
 import org.wso2.siddhi.core.query.UpdateOrInsertStoreQueryRuntime;
@@ -278,11 +278,11 @@ public class StoreQueryParser {
                                                                 List<VariableExpressionExecutor>
                                                                         variableExpressionExecutors,
                                                                 LockWrapper lockWrapper) {
-        MatchingMetaInfoHolder metaStreamInfoHolder = null;
-        AbstractDefinition inputDefinition = null;
+        MatchingMetaInfoHolder metaStreamInfoHolder;
+        AbstractDefinition inputDefinition;
         metaStreamEvent.setEventType(EventType.TABLE);
 
-        StoreQueryRuntime storeQueryRuntime = null;
+        StoreQueryRuntime storeQueryRuntime;
         if (table instanceof QueryableProcessor) {
             initMetaStreamEvent(metaStreamEvent, table.getTableDefinition());
             metaStreamInfoHolder = generateMatchingMetaInfoHolder(metaStreamEvent, table.getTableDefinition());
@@ -309,8 +309,7 @@ public class StoreQueryParser {
                         inputDefinition, table.getTableDefinition());
 
                 storeQueryRuntime = new DeleteStoreQueryRuntime(queryName, metaStreamEvent);
-                populateStoreQueryRuntime((DeleteStoreQueryRuntime) storeQueryRuntime,
-                        metaStreamInfoHolder, variableExpressionExecutors,
+                populateStoreQueryRuntime(storeQueryRuntime, metaStreamInfoHolder, variableExpressionExecutors,
                         siddhiAppContext, tableMap, windowMap, queryName, metaPosition, storeQuery, lockWrapper);
 
             } else if (storeQuery.isUpdateQuery()) {
@@ -321,8 +320,7 @@ public class StoreQueryParser {
                         inputDefinition, table.getTableDefinition());
 
                 storeQueryRuntime = new UpdateStoreQueryRuntime(queryName, metaStreamEvent);
-                populateStoreQueryRuntime((UpdateStoreQueryRuntime) storeQueryRuntime,
-                        metaStreamInfoHolder, variableExpressionExecutors,
+                populateStoreQueryRuntime(storeQueryRuntime, metaStreamInfoHolder, variableExpressionExecutors,
                         siddhiAppContext, tableMap, windowMap, queryName, metaPosition, storeQuery, lockWrapper);
             } else if (storeQuery.isUpdateOrInsertQuery()) {
                 inputDefinition = getInputDefinition(storeQuery, table);
@@ -332,14 +330,13 @@ public class StoreQueryParser {
                         inputDefinition, table.getTableDefinition());
 
                 storeQueryRuntime = new UpdateOrInsertStoreQueryRuntime(queryName, metaStreamEvent);
-                populateStoreQueryRuntime((UpdateOrInsertStoreQueryRuntime) storeQueryRuntime,
-                        metaStreamInfoHolder, variableExpressionExecutors,
+                populateStoreQueryRuntime(storeQueryRuntime, metaStreamInfoHolder, variableExpressionExecutors,
                         siddhiAppContext, tableMap, windowMap, queryName, metaPosition, storeQuery, lockWrapper);
             } else if (storeQuery.isSelectInsertQuery()) {
                 initMetaStreamEvent(metaStreamEvent, getInputDefinition(storeQuery, table));
                 metaStreamInfoHolder = generateMatchingMetaInfoHolder(metaStreamEvent,
                         table.getTableDefinition());
-                storeQueryRuntime = new SelectInsertStoreQueryRuntime(queryName, metaStreamEvent);
+                storeQueryRuntime = new InsertStoreQueryRuntime(queryName, metaStreamEvent);
                 populateStoreQueryRuntime(storeQueryRuntime, metaStreamInfoHolder, variableExpressionExecutors,
                         siddhiAppContext, tableMap, windowMap, queryName, metaPosition, storeQuery, lockWrapper);
             } else {
@@ -392,7 +389,7 @@ public class StoreQueryParser {
     }
 
     /*
-    * This method is used to pupulate following two types of store query runtimes.
+    * This method is used to populate following two types of store query runtimes.
     *      1. Update Or Insert Store Query Runtime.
     *      2. Select Insert Store Query Runtime.
     *      3. Delete Query Runtime.
@@ -424,36 +421,44 @@ public class StoreQueryParser {
         querySelector.setEventPopulator(
                 StateEventPopulatorFactory.constructEventPopulator(matchingMetaInfoHolder.getMetaStateEvent()));
 
-        if (storeQueryRuntime instanceof SelectInsertStoreQueryRuntime) {
-            SelectInsertStoreQueryRuntime selectInsertStoreQueryRuntime = (SelectInsertStoreQueryRuntime)
-                    storeQueryRuntime;
-            selectInsertStoreQueryRuntime.setStateEventPool(
-                    new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
-            selectInsertStoreQueryRuntime.setSelector(querySelector);
-            selectInsertStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
-                    getOutputStreamDefinition().getAttributeList());
-        } else if (storeQueryRuntime instanceof UpdateOrInsertStoreQueryRuntime){
-            UpdateOrInsertStoreQueryRuntime UpdateOrInsertIntoStoreQueryRuntime = (UpdateOrInsertStoreQueryRuntime)
-                    storeQueryRuntime;
-            UpdateOrInsertIntoStoreQueryRuntime.setStateEventPool(
-                    new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
-            UpdateOrInsertIntoStoreQueryRuntime.setSelector(querySelector);
-            UpdateOrInsertIntoStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
-                    getOutputStreamDefinition().getAttributeList());
-        } else if (storeQueryRuntime instanceof DeleteStoreQueryRuntime) {
-            DeleteStoreQueryRuntime deleteStoreQueryRuntime = (DeleteStoreQueryRuntime) storeQueryRuntime;
-            deleteStoreQueryRuntime.setStateEventPool(
-                    new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
-            deleteStoreQueryRuntime.setSelector(querySelector);
-            deleteStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
-                    getOutputStreamDefinition().getAttributeList());
-        } else if (storeQueryRuntime instanceof UpdateStoreQueryRuntime) {
-            UpdateStoreQueryRuntime udpateStoreQueryRuntime = (UpdateStoreQueryRuntime) storeQueryRuntime;
-            udpateStoreQueryRuntime.setStateEventPool(
-                    new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
-            udpateStoreQueryRuntime.setSelector(querySelector);
-            udpateStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
-                    getOutputStreamDefinition().getAttributeList());
+        switch (storeQueryRuntime.getType()) {
+            case INSERT:
+                InsertStoreQueryRuntime insertStoreQueryRuntime = (InsertStoreQueryRuntime)
+                        storeQueryRuntime;
+                insertStoreQueryRuntime.setStateEventPool(
+                        new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
+                insertStoreQueryRuntime.setSelector(querySelector);
+                insertStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
+                        getOutputStreamDefinition().getAttributeList());
+                break;
+            case DELETE:
+                DeleteStoreQueryRuntime deleteStoreQueryRuntime = (DeleteStoreQueryRuntime) storeQueryRuntime;
+                deleteStoreQueryRuntime.setStateEventPool(
+                        new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
+                deleteStoreQueryRuntime.setSelector(querySelector);
+                deleteStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
+                        getOutputStreamDefinition().getAttributeList());
+                break;
+            case UPDATE:
+                UpdateStoreQueryRuntime updateStoreQueryRuntime = (UpdateStoreQueryRuntime) storeQueryRuntime;
+                updateStoreQueryRuntime.setStateEventPool(
+                        new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
+                updateStoreQueryRuntime.setSelector(querySelector);
+                updateStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
+                        getOutputStreamDefinition().getAttributeList());
+                break;
+            case UPDATE_OR_INSERT:
+                UpdateOrInsertStoreQueryRuntime updateOrInsertIntoStoreQueryRuntime = (UpdateOrInsertStoreQueryRuntime)
+                        storeQueryRuntime;
+                updateOrInsertIntoStoreQueryRuntime.setStateEventPool(
+                        new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
+                updateOrInsertIntoStoreQueryRuntime.setSelector(querySelector);
+                updateOrInsertIntoStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent().
+                        getOutputStreamDefinition().getAttributeList());
+                break;
+            default:
+                throw new StoreQueryCreationException("Failed to parse store query " + queryName + " due to invalid " +
+                        "type.");
         }
     }
 
@@ -481,7 +486,7 @@ public class StoreQueryParser {
     }
 
     private static AbstractDefinition getInputDefinition(StoreQuery storeQuery, Table table) {
-        if (storeQuery.getSelector().getSelectionList().size() == 0) {
+        if (storeQuery.getSelector().getSelectionList().isEmpty()) {
             return table.getTableDefinition();
         } else {
             StreamDefinition streamDefinition = new StreamDefinition();
@@ -490,3 +495,4 @@ public class StoreQueryParser {
         }
     }
 }
+

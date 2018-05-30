@@ -81,4 +81,9 @@ public class SelectStoreQueryRuntime implements StoreQueryRuntime {
 
     }
 
+    @Override
+    public TYPE getType() {
+        return TYPE.SELECT;
+    }
+
 }

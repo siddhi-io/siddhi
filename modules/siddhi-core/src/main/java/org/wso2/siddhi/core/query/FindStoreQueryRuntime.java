@@ -129,6 +129,11 @@ public class FindStoreQueryRuntime implements StoreQueryRuntime {
         }
     }
 
+    @Override
+    public TYPE getType() {
+        return TYPE.FIND;
+    }
+
     private ComplexEventChunk<ComplexEvent> generateResetComplexEventChunk(MetaStreamEvent metaStreamEvent) {
         StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getBeforeWindowData().size(),
                 metaStreamEvent.getOnAfterWindowData().size(), metaStreamEvent.getOutputData().size());

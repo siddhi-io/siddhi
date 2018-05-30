@@ -30,9 +30,28 @@ public interface StoreQueryRuntime {
     void reset();
 
     /**
+     * This method will return the type of the store query runtime.
+     *
+     * @return type of store query runtime. (one of the types DELETE, INSERT, SELECT, UPDATE, FIND or UPDATE OR INSERT)
+     */
+    TYPE getType();
+
+    /**
      * This method will return the output attributes name and its types.
      *
      * @return List of output attributes
      */
     Attribute[] getStoreQueryOutputAttributes();
+
+    /**
+     * This enum contains the possible types of the store query runtimes
+     */
+    enum TYPE {
+        DELETE,
+        INSERT,
+        SELECT,
+        UPDATE,
+        UPDATE_OR_INSERT,
+        FIND
+    }
 }
