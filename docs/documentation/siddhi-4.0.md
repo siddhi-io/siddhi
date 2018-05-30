@@ -1756,22 +1756,28 @@ insert into ServerRoomTempStream;
 ```
 ## Store Query
 
-Siddhi store queries are a set of siddhi queries that can be used to query database tables.
+Siddhi store queries are a set of on-demand queries that can be used to perform operations on Siddhi tables, windows, and aggregators.
 
 **Purpose**
 
-Store queries allow you to execute the following operations on database tables without the intervention of streams.
+Store queries allow you to execute the following operations on Siddhi tables, windows, and aggregators without the intervention of streams.
+
+Queries supported for tables:
 
 * SELECT
+* INSERT
 * DELETE
 * UPDATE
 * UPDATE OR INSERT
-* SELECT INSERT
+
+Queries supported for windows and aggregators:
+
+* SELECT
 
 This is be done by submitting the store query to the Siddhi application runtime using its `query()` method.
 
-In order to execute store queries, the Siddhi application of the siddhi application runtime you are using, should have
- a store defined for the database which contains the table that needs to be queried.
+In order to execute store queries, the Siddhi application of the Siddhi application runtime you are using, should have
+ a store defined, which contains the table that needs to be queried.
 
 
 **Example**
@@ -1791,9 +1797,12 @@ The `SELECT` store query retrieves one or more records that match a given condit
 **Syntax**
 
 ```sql
-from <table>
+from <table/window/aggregation>
 select <attribute name>, <attribute name>, ...
-group_by? having? order_by? limit?
+group_by? 
+having? 
+order_by? 
+limit?
 ```
 
 **Example**
@@ -1808,13 +1817,14 @@ on roomNo >= 10;
 
 ### Delete
 
-The `DELETE` store query deletes selected records from a specified database table.
+The `DELETE` store query deletes selected records from a specified table.
 
 **Syntax**
 
 ```sql
 <select>?  
-delete <table>  on <conditional_expresssion>
+delete <table>  
+on <conditional expresssion>
 ```
 
 The `condition` element specifies the basis on which records are selected to be deleted.
@@ -1832,6 +1842,11 @@ attribute that matches the value for the `roomNumber` attribute of the selection
 select 10 as roomNumber
 delete RoomTypeTable
 on RoomTypeTable.roomNo == roomNumber;
+```
+
+```sql
+delete RoomTypeTable
+on RoomTypeTable.roomNo == 10;
 ```
 
 ### Update
@@ -1868,9 +1883,15 @@ update RoomTypeTable
     on RoomTypeTable.roomNo == roomNumber;
 ```
 
+```sql
+update RoomTypeTable
+    set RoomTypeTable.people = RoomTypeTable.people + 1
+    on RoomTypeTable.roomNo == 10;
+```
+
 ### Update or Insert Into
 
-This allows you to update selected attributes if a record that meets the given conditions already exists in the specified database table. 
+This allows you to update selected attributes if a record that meets the given conditions already exists in the specified  table. 
 If a matching record does not exist, the entry is inserted as a new record.
 
 **Syntax**
@@ -1905,9 +1926,9 @@ update or insert into RoomAssigneeTable
     on RoomAssigneeTable.roomNo == roomNo;
 ```
 
-### Select Insert Into
+### Insert Into
 
-This allows you to insert a new record to the database table with the attribute values you define in the `select` section.
+This allows you to insert a new record to the table with the attribute values you define in the `select` section.
 
 **Syntax**
 
