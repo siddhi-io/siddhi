@@ -1,5 +1,5 @@
-WSO2 Siddhi 
-===========
+Siddhi 
+======
 
 Siddhi is a java library that listens to events from data streams, detects complex conditions described via a **Streaming
  SQL language**, and triggers actions. It performs both **_Stream Processing_** and **_Complex Event Processing_**.  

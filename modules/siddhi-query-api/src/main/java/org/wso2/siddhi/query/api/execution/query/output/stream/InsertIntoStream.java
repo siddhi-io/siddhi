@@ -24,6 +24,7 @@ import org.wso2.siddhi.query.api.util.SiddhiConstants;
  */
 public class InsertIntoStream extends OutputStream {
 
+    private static final long serialVersionUID = 1L;
     private boolean isInnerStream;
 
     public InsertIntoStream(String streamId) {

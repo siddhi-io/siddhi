@@ -18,10 +18,12 @@
 
 package org.wso2.siddhi.query.api.execution.query.input.store;
 
+import java.io.Serializable;
+
 /**
  * Input Store
  */
-public interface InputStore {
+public interface InputStore extends Serializable {
 
     static Store store(String storeId) {
         return new Store(storeId);

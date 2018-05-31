@@ -24,6 +24,7 @@ import org.wso2.siddhi.query.api.expression.Expression;
  */
 public class DeleteStream extends OutputStream {
 
+    private static final long serialVersionUID = 1L;
     protected Expression onDeleteExpression;
 
     public DeleteStream(String tableId, OutputEventType outputEventType, Expression onDeleteExpression) {

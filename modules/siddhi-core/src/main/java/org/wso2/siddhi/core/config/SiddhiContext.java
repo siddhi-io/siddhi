@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.exception.PersistenceStoreException;
 import org.wso2.siddhi.core.stream.input.source.SourceHandlerManager;
 import org.wso2.siddhi.core.stream.output.sink.SinkHandlerManager;
 import org.wso2.siddhi.core.table.record.RecordTableHandlerManager;
@@ -27,6 +28,7 @@ import org.wso2.siddhi.core.util.SiddhiExtensionLoader;
 import org.wso2.siddhi.core.util.config.ConfigManager;
 import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
 import org.wso2.siddhi.core.util.extension.holder.AbstractExtensionHolder;
+import org.wso2.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.core.util.statistics.metrics.SiddhiMetricsFactory;
 
@@ -45,6 +47,7 @@ public class SiddhiContext {
     private ExceptionHandler<Object> defaultDisrupterExceptionHandler;
     private Map<String, Class> siddhiExtensions = new HashMap<>();
     private PersistenceStore persistenceStore = null;
+    private IncrementalPersistenceStore incrementalPersistenceStore = null;
     private ConcurrentHashMap<String, DataSource> siddhiDataSources;
     private StatisticsConfiguration statisticsConfiguration;
     private ConcurrentHashMap<Class, AbstractExtensionHolder> extensionHolderMap;
@@ -82,12 +85,29 @@ public class SiddhiContext {
         return siddhiExtensions;
     }
 
-    public PersistenceStore getPersistenceStore() {
+    public synchronized PersistenceStore getPersistenceStore() {
         return persistenceStore;
     }
 
-    public void setPersistenceStore(PersistenceStore persistenceStore) {
+    public synchronized void setPersistenceStore(PersistenceStore persistenceStore) {
+        if (incrementalPersistenceStore != null) {
+            throw new PersistenceStoreException("Only one type of persistence store can exist. " +
+                    "Incremental persistence store '" + incrementalPersistenceStore.getClass().getName() +
+                    "' already registered!");
+        }
         this.persistenceStore = persistenceStore;
+    }
+
+    public synchronized IncrementalPersistenceStore getIncrementalPersistenceStore() {
+        return incrementalPersistenceStore;
+    }
+
+    public synchronized void setIncrementalPersistenceStore(IncrementalPersistenceStore incrementalPersistenceStore) {
+        if (persistenceStore != null) {
+            throw new PersistenceStoreException("Only one type of persistence store can exist." +
+                    " Persistence store '" + persistenceStore.getClass().getName() + "' already registered!");
+        }
+        this.incrementalPersistenceStore = incrementalPersistenceStore;
     }
 
     public void setConfigManager(ConfigManager configManager) {

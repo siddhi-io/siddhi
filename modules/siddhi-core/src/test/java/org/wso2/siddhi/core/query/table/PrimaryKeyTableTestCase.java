@@ -2603,4 +2603,91 @@ public class PrimaryKeyTableTestCase {
 //        }
 //    }
 
+
+    @Test
+    public void persistenceTest47() throws InterruptedException {
+        log.info("Test 47 - in-memory table persistance test with primary key.");
+        int inputEventCountPerCategory = 10;
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "@app:name('InMemoryTableTest') " +
+                "" +
+                "define stream StockStream (symbol2 string, price float, volume long); " +
+                "define stream CheckStockStream (symbol1 string); " +
+                "define stream OutStream (symbol1 string, TB long); " +
+                "@PrimaryKey('symbol2') " +
+                "define table StockTable (symbol2 string, price float, volume long); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into StockTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from StockTable join CheckStockStream " +
+                " on symbol2 == symbol1 " +
+                "select symbol2 as symbol1, volume as TB " +
+                "group by symbol2 " +
+                "insert all events into OutStream;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
+                    }
+                    eventArrived = true;
+                }
+
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+        };
+
+        try {
+            siddhiAppRuntime.addCallback("query2", queryCallback);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+
+            siddhiAppRuntime.start();
+            for (int i = 0; i < inputEventCountPerCategory; i++) {
+                stockStream.send(new Object[]{"WSO2-" + i, 55.6f, 180L + i});
+            }
+
+            for (int i = 0; i < inputEventCountPerCategory; i++) {
+                stockStream.send(new Object[]{"IBM-" + i, 55.6f, 100L + i});
+            }
+
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+
+            stockStream.send(new Object[]{"WSO2-" + (inputEventCountPerCategory + 1), 100.6f, 180L});
+            stockStream.send(new Object[]{"IBM-"  + (inputEventCountPerCategory + 1), 100.6f, 100L});
+
+            stockStream.send(new Object[]{"WSO2-" + (inputEventCountPerCategory + 2), 8.6f, 13L});
+            stockStream.send(new Object[]{"IBM-" + (inputEventCountPerCategory + 2), 7.6f, 14L});
+
+            checkStockStream.send(new Object[]{"IBM-1"});
+            checkStockStream.send(new Object[]{"WSO2-1"});
+
+            List<Object[]> expected = Arrays.asList(
+                    new Object[]{"IBM-1", 101L},
+                    new Object[]{"WSO2-1", 181L}
+            );
+
+            Thread.sleep(1000);
+
+            AssertJUnit.assertEquals("In events matched", true,
+                    SiddhiTestHelper.isEventsMatch(inEventsList, expected));
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
+
 }

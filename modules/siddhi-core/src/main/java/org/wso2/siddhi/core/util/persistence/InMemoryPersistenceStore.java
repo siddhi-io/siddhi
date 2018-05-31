@@ -34,17 +34,13 @@ public class InMemoryPersistenceStore implements PersistenceStore {
     Map<String, Map<String, byte[]>> persistenceMap = new HashMap<String, Map<String, byte[]>>();
     Map<String, List<String>> revisionMap = new HashMap<String, List<String>>();
 
-
     @Override
     public void save(String siddhiAppId, String revision, byte[] data) {
         Map<String, byte[]> executionPersistenceMap = persistenceMap.get(siddhiAppId);
         if (executionPersistenceMap == null) {
             executionPersistenceMap = new HashMap<String, byte[]>();
         }
-
         executionPersistenceMap.put(revision, data);
-
-
         List<String> revisionList = revisionMap.get(siddhiAppId);
         if (revisionList == null) {
             revisionList = new ArrayList<String>();

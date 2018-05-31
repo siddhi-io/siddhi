@@ -25,6 +25,7 @@ import org.wso2.siddhi.query.api.expression.Expression;
  */
 public class ConditionInputStore implements InputStore {
 
+    private static final long serialVersionUID = 1L;
     protected final Store store;
     protected Expression onCondition = null;
 

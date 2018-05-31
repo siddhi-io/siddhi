@@ -107,23 +107,19 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
 
     @Override
     public Map<String, Object> currentState() {
-        HashMap<String, Map<String, Object>> data = new HashMap<>();
-        for (Map.Entry<String, AttributeAggregator> entry : aggregatorMap.entrySet()) {
-            data.put(entry.getKey(), entry.getValue().currentState());
-        }
         Map<String, Object> state = new HashMap<>();
-        state.put("Data", data);
+        for (Map.Entry<String, AttributeAggregator> entry : aggregatorMap.entrySet()) {
+            state.put(entry.getKey(), entry.getValue().currentState());
+        }
         return state;
     }
 
     @Override
     public void restoreState(Map<String, Object> state) {
-        HashMap<String, Map<String, Object>> data = (HashMap<String, Map<String, Object>>) state.get("Data");
-
-        for (Map.Entry<String, Map<String, Object>> entry : data.entrySet()) {
-            String key = entry.getKey();
+        for (HashMap.Entry<String, Object> item: state.entrySet()) {
+            String key = item.getKey();
             AttributeAggregator aAttributeAggregator = attributeAggregator.cloneAggregator(key);
-            aAttributeAggregator.restoreState(entry.getValue());
+            aAttributeAggregator.restoreState((Map<String, Object>) item.getValue());
             aggregatorMap.put(key, aAttributeAggregator);
         }
     }
