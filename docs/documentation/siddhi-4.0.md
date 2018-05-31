@@ -1677,9 +1677,9 @@ define stream UpdateStream (roomNumber int, arrival int, exit int);
   
 from UpdateStream
 select *
-update RoomTypeTable
-    set RoomTypeTable.people = RoomTypeTable.people + arrival - exit
-    on RoomTypeTable.roomNo == roomNumber;
+update RoomOccupancyTable
+    set RoomOccupancyTable.people = RoomOccupancyTable.people + arrival - exit
+    on RoomOccupancyTable.roomNo == roomNumber;
 ```
 
 ### Update or Insert Into
