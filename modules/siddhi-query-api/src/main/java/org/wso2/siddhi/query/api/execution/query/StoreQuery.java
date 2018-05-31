@@ -20,7 +20,6 @@ package org.wso2.siddhi.query.api.execution.query;
 import org.wso2.siddhi.query.api.SiddhiElement;
 import org.wso2.siddhi.query.api.execution.query.input.store.InputStore;
 import org.wso2.siddhi.query.api.execution.query.output.stream.DeleteStream;
-import org.wso2.siddhi.query.api.execution.query.output.stream.InsertIntoStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.ReturnStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
@@ -40,6 +39,7 @@ public class StoreQuery implements SiddhiElement {
     private OutputStream outputStream = new ReturnStream();
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
+    private StoreQueryType type;
 
     /**
      * Builder method to get a new store query instance
@@ -141,44 +141,13 @@ public class StoreQuery implements SiddhiElement {
         return outputStream;
     }
 
-    /**
-     * Method to check whether the store query is a delete query
-     * @return true if the store query is a delete query
-     */
-    public boolean isDeleteQuery() {
-        return outputStream != null && outputStream instanceof DeleteStream;
-    }
-
-    /**
-     * Method to check whether the store query is an update query
-     * @return true if the store query is an update query
-     */
-    public boolean isUpdateQuery() {
-        return outputStream != null && outputStream instanceof UpdateStream;
-    }
-
-    /**
-     * Method to check whether the store query is an updateOrInsert query
-     * @return true if the store query is an updateOrInsert query
-     */
-    public boolean isUpdateOrInsertQuery() {
-        return outputStream != null && outputStream instanceof UpdateOrInsertStream;
-    }
-
-    /**
-     * Method to check whether the store query is an selectInsert query
-     * @return true if the store query is a selectInsert query
-     */
-    public boolean isSelectInsertQuery() {
-        return outputStream != null && outputStream instanceof InsertIntoStream;
-    }
-
     @Override
     public String toString() {
         return "StoreQuery{" +
                 "inputStore=" + inputStore +
                 ", selector=" + selector +
                 ", outputStream=" + outputStream +
+                ", type=" + type +
                 '}';
     }
 
@@ -229,5 +198,39 @@ public class StoreQuery implements SiddhiElement {
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
         queryContextEndIndex = lineAndColumn;
+    }
+
+    /**
+     * This method returns the type of given store query.
+     * @return type of given store query
+     */
+    public StoreQueryType getType() {
+        return type;
+    }
+
+    /**
+     * This method sets the type of given store query.
+     */
+    public void setType(StoreQueryType type) {
+        this.type = type;
+    }
+
+    /**
+     * This enum is used to identify the type of a store query.
+     * Type can be one of the following.
+     * - INSERT
+     * - DELETE
+     * - UPDATE
+     * - SELECT
+     * - FIND
+     * - UPDATE OR INSERT
+     */
+    public enum StoreQueryType {
+        INSERT,
+        DELETE,
+        UPDATE,
+        SELECT,
+        UPDATE_OR_INSERT,
+        FIND
     }
 }

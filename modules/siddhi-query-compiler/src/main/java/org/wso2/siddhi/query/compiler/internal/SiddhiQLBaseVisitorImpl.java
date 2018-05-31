@@ -2946,16 +2946,19 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public Object visitStore_query(SiddhiQLParser.Store_queryContext ctx) {
+        // TODO : set query type here
+        OutputStream outputStream;
         StoreQuery storeQuery = StoreQuery.query();
         if (ctx.FROM() != null) {
+            storeQuery.setType(StoreQuery.StoreQueryType.SELECT);
             storeQuery.from((InputStore) visit(ctx.store_input()));
             if (ctx.query_section() != null) {
                 storeQuery = storeQuery.select((Selector) visit(ctx.query_section()));
             }
         } else if (ctx.query_section() != null) {
             storeQuery.select((Selector) visit(ctx.query_section()));
-            OutputStream outputStream = null;
             if (ctx.UPDATE() != null && ctx.OR() != null) {
+                storeQuery.setType(StoreQuery.StoreQueryType.UPDATE_OR_INSERT);
                 Source source = (Source) visit(ctx.target());
                 if (source.isInnerStream) {
                     throw newSiddhiParserException(ctx, "UPDATE OR INTO INSERT can be only used with Tables!");
@@ -2971,18 +2974,31 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
                 }
                 storeQuery.outStream(outputStream);
             } else if (ctx.INSERT() != null) {
+                storeQuery.setType(StoreQuery.StoreQueryType.INSERT);
                 Source source = (Source) visit(ctx.target());
                 if (source.isInnerStream) {
-                    throw newSiddhiParserException(ctx, "SELECT INSERT can be only used with Tables!");
+                    throw newSiddhiParserException(ctx, "INSERT can be only used with Tables!");
                 }
                 outputStream = new InsertIntoStream(source.streamId);
                 populateQueryContext(outputStream, ctx);
                 storeQuery.outStream(outputStream);
             } else if (ctx.store_query_output() != null) {
-                storeQuery.outStream((OutputStream) visit(ctx.store_query_output()));
+                outputStream = (OutputStream) visit(ctx.store_query_output());
+                if (outputStream instanceof DeleteStream) {
+                    storeQuery.setType(StoreQuery.StoreQueryType.DELETE);
+                } else if (outputStream instanceof  UpdateStream) {
+                    storeQuery.setType(StoreQuery.StoreQueryType.UPDATE);
+                }
+                storeQuery.outStream(outputStream);
             }
         } else if (ctx.store_query_output() != null) {
-            storeQuery.outStream((OutputStream) visit(ctx.store_query_output()));
+            outputStream = (OutputStream) visit(ctx.store_query_output());
+            if (outputStream instanceof DeleteStream) {
+                storeQuery.setType(StoreQuery.StoreQueryType.DELETE);
+            } else if (outputStream instanceof  UpdateStream) {
+                storeQuery.setType(StoreQuery.StoreQueryType.UPDATE);
+            }
+            storeQuery.outStream(outputStream);
         }
         populateQueryContext(storeQuery, ctx);
         return storeQuery;
