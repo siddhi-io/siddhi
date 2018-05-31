@@ -2611,10 +2611,6 @@ public class PrimaryKeyTableTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-//        PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
-//        siddhiManager.setPersistenceStore(persistenceStore);
-//        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
-
         String streams = "" +
                 "@app:name('InMemoryTableTest') " +
                 "" +
