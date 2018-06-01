@@ -410,8 +410,7 @@ public class DefinitionParserHelper {
 
     private static String[] getTransportPropertyNames(AttributesHolder attributesHolder) {
         List<String> attributeNames = new ArrayList<>();
-        for (AttributeMapping attributeMapping : attributesHolder.transportMappings
-                ) {
+        for (AttributeMapping attributeMapping : attributesHolder.transportMappings) {
             attributeNames.add(attributeMapping.getMapping());
         }
         return attributeNames.toArray(new String[0]);
@@ -709,6 +708,12 @@ public class DefinitionParserHelper {
                             streamDefinition.getId() + "', '" + elementList.size() + "' mapping attributes are " +
                             "provided but expected attributes are '" + attributeList.size() + "'.",
                             mapAnnotation.getQueryContextStartIndex(), mapAnnotation.getQueryContextEndIndex());
+                } else {
+                    for (int i = 0; i < attributeList.size(); i++) {
+                        Attribute attribute = attributeList.get(i);
+                        String value = elementList.get(i);
+                        elementMap.put(attribute.getName(), value);
+                    }
                 }
                 for (int i = 0; i < attributeList.size(); i++) {
                     Attribute attribute = attributeList.get(i);
