@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import org.wso2.siddhi.core.exception.NoPersistenceStoreException;
+import org.wso2.siddhi.core.exception.PersistenceStoreException;
 import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
@@ -418,6 +419,7 @@ public class SnapshotService {
                 if (log.isDebugEnabled()) {
                     log.debug("No data found for revision: " + revision);
                 }
+                throw new PersistenceStoreException("No data found for revision: " + revision);
             }
         } else if (incrementalPersistenceStore != null) {
             if (log.isDebugEnabled()) {
@@ -477,6 +479,7 @@ public class SnapshotService {
                 if (log.isDebugEnabled()) {
                     log.debug("No data found for revision: " + revision);
                 }
+                throw new PersistenceStoreException("No data found for revision: " + revision);
             }
         } else {
             throw new NoPersistenceStoreException("No persistence store assigned for siddhi app " +
