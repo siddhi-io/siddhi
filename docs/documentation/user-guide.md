@@ -8,7 +8,7 @@
 
 * Refer the <a target="_blank" href="https://docs.wso2.com/display/SP400/Quick+Start+Guide">WSO2 SP Quick Start Guide</a> for more information.
  
-## **Using Siddhi as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-quckstart-4.0/#using-siddhi-as-a-java-library">java library</a>**
+## **Using Siddhi as a java library**
 
 * To embed Siddhi as a java library into your project and to get a working sample follow the bellow steps:
 

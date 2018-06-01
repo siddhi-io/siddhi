@@ -52,16 +52,17 @@ public class TestTrpInMemorySource extends InMemorySource {
     private static final String TOPIC_KEY = "topic";
     protected SourceEventListener sourceEventListener;
     protected InMemoryBroker.Subscriber subscriber;
-    private String prop1;
-    private String prop2;
+    private String symbol;
+    private String price;
     private String fail;
 
     @Override
-    public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder, String[]
-            requestedTransportPropertyNames, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+    public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+                     String[] requestedTransportPropertyNames, ConfigReader configReader,
+                     SiddhiAppContext siddhiAppContext) {
         super.init(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
-        prop1 = optionHolder.validateAndGetStaticValue("prop1");
-        prop2 = optionHolder.validateAndGetStaticValue("prop2");
+        symbol = optionHolder.validateAndGetStaticValue("prop1");
+        price = optionHolder.validateAndGetStaticValue("prop2");
         fail = optionHolder.validateAndGetStaticValue("fail", "false");
         this.sourceEventListener = sourceEventListener;
         String topic = optionHolder.validateAndGetStaticValue(TOPIC_KEY, "input inMemory source");
@@ -69,9 +70,13 @@ public class TestTrpInMemorySource extends InMemorySource {
             @Override
             public void onMessage(Object event) {
                 if (fail.equals("true")) {
-                    sourceEventListener.onEvent(event, new String[]{prop1});
+                    sourceEventListener.onEvent(event, new String[]{symbol});
                 } else {
-                    sourceEventListener.onEvent(event, new String[]{prop1, prop2});
+                    if (requestedTransportPropertyNames.length == 2 &&
+                            requestedTransportPropertyNames[0].equals("symbol") &&
+                            requestedTransportPropertyNames[1].equals("price")) {
+                        sourceEventListener.onEvent(event, new String[]{symbol, price});
+                    }
                 }
             }
 
