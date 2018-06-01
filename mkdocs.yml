@@ -35,6 +35,7 @@ pages:
   - Siddhi Architecture: documentation/siddhi-architecture.md
 - Extensions: extensions.md
 - API Docs:
+  - 4.1.29: api/4.1.29.md
   - 4.1.28: api/4.1.28.md
   - 4.1.27: api/4.1.27.md
   - 4.1.26: api/4.1.26.md
