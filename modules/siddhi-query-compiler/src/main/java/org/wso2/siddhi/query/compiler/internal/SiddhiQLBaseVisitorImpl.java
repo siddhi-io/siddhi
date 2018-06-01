@@ -2946,11 +2946,10 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public Object visitStore_query(SiddhiQLParser.Store_queryContext ctx) {
-        // TODO : set query type here
         OutputStream outputStream;
         StoreQuery storeQuery = StoreQuery.query();
         if (ctx.FROM() != null) {
-            storeQuery.setType(StoreQuery.StoreQueryType.SELECT);
+            storeQuery.setType(StoreQuery.StoreQueryType.FIND);
             storeQuery.from((InputStore) visit(ctx.store_input()));
             if (ctx.query_section() != null) {
                 storeQuery = storeQuery.select((Selector) visit(ctx.query_section()));

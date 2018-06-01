@@ -1794,6 +1794,7 @@ siddhiAppRuntime.query(<store query>);
 ### Select
 
 The `SELECT` store query retrieves one or more records that match a given condition from a specified table.
+
 **Syntax**
 
 ```sql
@@ -1852,6 +1853,7 @@ on RoomTypeTable.roomNo == 10;
 ### Update
 
 The `UPDATE` store query updates selected attributes stored in a specific table, based on a given condition.
+
 **Syntax**
 
 ```sql

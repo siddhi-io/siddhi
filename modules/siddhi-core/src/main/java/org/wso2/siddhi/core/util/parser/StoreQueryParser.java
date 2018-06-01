@@ -104,7 +104,7 @@ public class StoreQueryParser {
         SnapshotService.getSkipSnapshotableThreadLocal().set(true);
 
         switch (storeQuery.getType()) {
-            case SELECT:
+            case FIND:
                 Within within = null;
                 Expression per = null;
                 queryName = "store_select_query_" + storeQuery.getInputStore().getStoreId();
@@ -302,7 +302,7 @@ public class StoreQueryParser {
             return storeQueryRuntime;
         } else {
             switch (storeQuery.getType()) {
-                case SELECT:
+                case FIND:
                     initMetaStreamEvent(metaStreamEvent, table.getTableDefinition());
                     matchingMetaInfoHolder = generateMatchingMetaInfoHolder(metaStreamEvent,
                             table.getTableDefinition());

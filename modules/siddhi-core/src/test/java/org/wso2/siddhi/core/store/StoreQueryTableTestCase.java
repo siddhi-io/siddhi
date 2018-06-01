@@ -700,7 +700,7 @@ public class StoreQueryTableTestCase {
 
     @Test
     public void test18() throws InterruptedException {
-        log.info("Testing select insert store query : 1");
+        log.info("Testing insert store query : 1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
