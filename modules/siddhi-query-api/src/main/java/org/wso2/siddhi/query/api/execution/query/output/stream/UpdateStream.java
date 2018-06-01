@@ -23,6 +23,8 @@ import org.wso2.siddhi.query.api.expression.Expression;
  * Query output stream update events on table
  */
 public class UpdateStream extends OutputStream {
+
+    private static final long serialVersionUID = 1L;
     private Expression onUpdateExpression;
     private UpdateSet updateSetter;
 

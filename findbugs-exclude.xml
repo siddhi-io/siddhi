@@ -164,6 +164,15 @@
         <Class name="org.wso2.siddhi.core.table.holder.IndexEventHolder"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.table.holder.SnapshotableIndexEventHolder"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.siddhi.core.table.holder.ListEventHolder"/>
+        <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS"/>
+    </Match>
+
 
     <Match>
         <Package name="~org\.wso2\.siddhi\.core\.query\.output\.ratelimit\.time.*"/>
@@ -180,6 +189,10 @@
     <Match>
         <Package name="~org\.wso2\.siddhi\.core\.query\.selector\.attribute\.aggregator\.incremental.*"/>
         <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Package name="~org\.wso2\.siddhi\.core\.util\.snapshot\.*"/>
+        <Bug pattern="AT_OPERATION_SEQUENCE_ON_CONCURRENT_ABSTRACTION"/>
     </Match>
 
     <!--other-->

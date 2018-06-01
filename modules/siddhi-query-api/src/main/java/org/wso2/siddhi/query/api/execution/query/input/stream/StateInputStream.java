@@ -32,6 +32,7 @@ import java.util.List;
  */
 public class StateInputStream extends InputStream {
 
+    private static final long serialVersionUID = 1L;
     private Type stateType;
     private StateElement stateElement;
     private List<String> streamIdList;

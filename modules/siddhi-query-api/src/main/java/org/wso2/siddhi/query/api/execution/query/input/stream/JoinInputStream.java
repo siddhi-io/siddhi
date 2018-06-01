@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class JoinInputStream extends InputStream {
 
-
+    private static final long serialVersionUID = 1L;
     private final Within within;
     private final Expression per;
     private InputStream leftInputStream;

@@ -1,5 +1,5 @@
-WSO2 Siddhi 
-===========
+Siddhi 
+======
 
 Siddhi is a java library that listens to events from data streams, detects complex conditions described via a **Streaming
  SQL language**, and triggers actions. It performs both **_Stream Processing_** and **_Complex Event Processing_**.  
@@ -94,7 +94,7 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.1.26">4.1.26</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.1.27">4.1.27</a>.
 
 ## Jenkins Build Status
 

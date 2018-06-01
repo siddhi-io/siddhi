@@ -22,6 +22,7 @@ package org.wso2.siddhi.query.api.execution.query.output.ratelimit;
  */
 public class SnapshotOutputRate extends OutputRate {
 
+    private static final long serialVersionUID = 1L;
     private Long value;
     private OutputRate.Type type = OutputRate.Type.ALL;
 

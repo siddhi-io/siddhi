@@ -21,6 +21,8 @@ package org.wso2.siddhi.query.api.execution.query.output.ratelimit;
  * Rate limiting of query output based on number of events
  */
 public class EventOutputRate extends OutputRate {
+
+    private static final long serialVersionUID = 1L;
     private Integer value;
     private OutputRate.Type type = OutputRate.Type.ALL;
 
