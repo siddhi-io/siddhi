@@ -19,39 +19,126 @@ package org.wso2.siddhi.query.api.execution.query;
 
 import org.wso2.siddhi.query.api.SiddhiElement;
 import org.wso2.siddhi.query.api.execution.query.input.store.InputStore;
+import org.wso2.siddhi.query.api.execution.query.output.stream.DeleteStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.ReturnStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateSet;
+import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
+import org.wso2.siddhi.query.api.expression.Expression;
 
 /**
- * Siddhi Query
+ * This class keep information of a store query.
  */
 public class StoreQuery implements SiddhiElement {
 
     private static final long serialVersionUID = 1L;
     private InputStore inputStore;
     private Selector selector = new Selector();
+    private OutputStream outputStream = new ReturnStream();
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
+    private StoreQueryType type;
 
+    /**
+     * Builder method to get a new store query instance
+     * @return a new storeQuery instance
+     */
     public static StoreQuery query() {
         return new StoreQuery();
     }
 
+    /**
+     * Builder method to set input store to the store query
+     * @param inputStore inputStore for the store query
+     * @return updated store query
+     */
     public StoreQuery from(InputStore inputStore) {
         this.inputStore = inputStore;
         return this;
     }
 
+    /**
+     * Getter for the input store
+     * @return inputStore
+     */
     public InputStore getInputStore() {
         return inputStore;
     }
 
+    /**
+     * Builder method to set a selector to the store query
+     * @param selector selector for the store query
+     * @return updated store query
+     */
     public StoreQuery select(Selector selector) {
         this.selector = selector;
         return this;
     }
 
+    /**
+     * Builder method to set an outPutStream to the store query
+     * @param outputStream outPutStream for the store query
+     * @return updated store query
+     */
+    public StoreQuery outStream(OutputStream outputStream) {
+        this.outputStream = outputStream;
+        return this;
+    }
+
+    /**
+     * Method to set a deleteStream as the outputStream of the store query
+     * @param outputTableId id of the table which is going to be queried
+     * @param onDeletingExpression expression for the delete operation defined in the store query
+     */
+    public void deleteBy(String outputTableId, Expression onDeletingExpression) {
+        this.outputStream = new DeleteStream(outputTableId, onDeletingExpression);
+    }
+
+    /**
+     * Method to set an updateStream as the outputStream of the store query
+     * @param outputTableId id of the table which is going to be queried
+     * @param onUpdateExpression expression for the update operation defined in the store query
+     */
+    public void updateBy(String outputTableId, Expression onUpdateExpression) {
+        this.outputStream = new UpdateStream(outputTableId, onUpdateExpression);
+    }
+
+    /**
+     * Method to set an updateStream as the outputStream of the store query
+     * @param outputTableId id of the table which is going to be queried
+     * @param updateSetAttributes updateSet for the attributes which are going to be updated.
+     * @param onUpdateExpression expression for the update operation defined in the store query
+     */
+    public void updateBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+        this.outputStream = new UpdateStream(outputTableId, updateSetAttributes, onUpdateExpression);
+    }
+
+    /**
+     * Method to set an updateOrInsertStream as the outputStream of the store query
+     * @param outputTableId id of the table which is going to be queried
+     * @param updateSetAttributes updateSet for the attributes which are going to be updated.
+     * @param onUpdateExpression expression for the update or insert operation defined in the store query
+     */
+    public void updateOrInsertBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
+        this.outputStream = new UpdateOrInsertStream(outputTableId, updateSetAttributes, onUpdateExpression);
+    }
+
+    /**
+     * Getter method to get the selector of the store query
+     * @return selector of the store query
+     */
     public Selector getSelector() {
         return selector;
+    }
+
+    /**
+     * Getter method to get the outputStream of the store query
+     * @return outputStream of the store query
+     */
+    public OutputStream getOutputStream() {
+        return outputStream;
     }
 
     @Override
@@ -59,6 +146,8 @@ public class StoreQuery implements SiddhiElement {
         return "StoreQuery{" +
                 "inputStore=" + inputStore +
                 ", selector=" + selector +
+                ", outputStream=" + outputStream +
+                ", type=" + type +
                 '}';
     }
 
@@ -76,6 +165,9 @@ public class StoreQuery implements SiddhiElement {
         if (inputStore != null ? !inputStore.equals(that.inputStore) : that.inputStore != null) {
             return false;
         }
+        if (outputStream != null ? !outputStream.equals(that.outputStream) : that.outputStream != null) {
+            return false;
+        }
         return selector != null ? selector.equals(that.selector) : that.selector == null;
     }
 
@@ -83,8 +175,10 @@ public class StoreQuery implements SiddhiElement {
     public int hashCode() {
         int result = inputStore != null ? inputStore.hashCode() : 0;
         result = 31 * result + (selector != null ? selector.hashCode() : 0);
+        result = 31 * result + (outputStream != null ? outputStream.hashCode() : 0);
         return result;
     }
+
 
     @Override
     public int[] getQueryContextStartIndex() {
@@ -104,5 +198,39 @@ public class StoreQuery implements SiddhiElement {
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
         queryContextEndIndex = lineAndColumn;
+    }
+
+    /**
+     * This method returns the type of given store query.
+     * @return type of given store query
+     */
+    public StoreQueryType getType() {
+        return type;
+    }
+
+    /**
+     * This method sets the type of given store query.
+     */
+    public void setType(StoreQueryType type) {
+        this.type = type;
+    }
+
+    /**
+     * This enum is used to identify the type of a store query.
+     * Type can be one of the following.
+     * - INSERT
+     * - DELETE
+     * - UPDATE
+     * - SELECT
+     * - FIND
+     * - UPDATE OR INSERT
+     */
+    public enum StoreQueryType {
+        INSERT,
+        DELETE,
+        UPDATE,
+        SELECT,
+        UPDATE_OR_INSERT,
+        FIND
     }
 }

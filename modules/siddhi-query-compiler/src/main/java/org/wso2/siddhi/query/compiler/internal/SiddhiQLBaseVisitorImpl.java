@@ -1739,7 +1739,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         } else if (ctx.UPDATE() != null) {
             Source source = (Source) visit(ctx.target());
             if (source.isInnerStream) {
-                throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
+                throw newSiddhiParserException(ctx, "UPDATE can be only used with Tables!");
             }
             if (ctx.output_event_type() != null) {
                 if (ctx.set_clause() != null) {
@@ -1777,6 +1777,46 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
                 return outputStream;
             } else {
                 OutputStream outputStream = new ReturnStream();
+                populateQueryContext(outputStream, ctx);
+                return outputStream;
+            }
+        } else {
+            throw newSiddhiParserException(ctx);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public OutputStream visitStore_query_output(@NotNull SiddhiQLParser.Store_query_outputContext ctx) {
+        //  :DELETE target ON expression
+        //  |UPDATE target set_clause? ON expression
+        //  ;
+
+        if (ctx.DELETE() != null) {
+            Source source = (Source) visit(ctx.target());
+            if (source.isInnerStream) {
+                throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
+            }
+            OutputStream outputStream = new DeleteStream(source.streamId, (Expression) visit(ctx.expression()));
+            populateQueryContext(outputStream, ctx);
+            return outputStream;
+        } else if (ctx.UPDATE() != null) {
+            Source source = (Source) visit(ctx.target());
+            if (source.isInnerStream) {
+                throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
+            }
+            if (ctx.set_clause() != null) {
+                OutputStream outputStream = new UpdateStream(source.streamId, (UpdateSet) visit(ctx.set_clause()),
+                        (Expression) visit(ctx.expression()));
+                populateQueryContext(outputStream, ctx);
+                return outputStream;
+            } else {
+                OutputStream outputStream = new UpdateStream(source.streamId, (Expression) visit(ctx.expression()));
                 populateQueryContext(outputStream, ctx);
                 return outputStream;
             }
@@ -2906,9 +2946,58 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     @Override
     public Object visitStore_query(SiddhiQLParser.Store_queryContext ctx) {
-        StoreQuery storeQuery = StoreQuery.query().from((InputStore) visit(ctx.store_input()));
-        if (ctx.query_section() != null) {
-            storeQuery = storeQuery.select((Selector) visit(ctx.query_section()));
+        OutputStream outputStream;
+        StoreQuery storeQuery = StoreQuery.query();
+        if (ctx.FROM() != null) {
+            storeQuery.setType(StoreQuery.StoreQueryType.FIND);
+            storeQuery.from((InputStore) visit(ctx.store_input()));
+            if (ctx.query_section() != null) {
+                storeQuery = storeQuery.select((Selector) visit(ctx.query_section()));
+            }
+        } else if (ctx.query_section() != null) {
+            storeQuery.select((Selector) visit(ctx.query_section()));
+            if (ctx.UPDATE() != null && ctx.OR() != null) {
+                storeQuery.setType(StoreQuery.StoreQueryType.UPDATE_OR_INSERT);
+                Source source = (Source) visit(ctx.target());
+                if (source.isInnerStream) {
+                    throw newSiddhiParserException(ctx, "UPDATE OR INTO INSERT can be only used with Tables!");
+                }
+                if (ctx.set_clause() != null) {
+                    outputStream = new UpdateOrInsertStream(source.streamId,
+                            (UpdateSet) visit(ctx.set_clause()), (Expression) visit(ctx.expression()));
+                    populateQueryContext(outputStream, ctx);
+                } else {
+                    outputStream = new UpdateOrInsertStream(source.streamId, (Expression)
+                            visit(ctx.expression()));
+                    populateQueryContext(outputStream, ctx);
+                }
+                storeQuery.outStream(outputStream);
+            } else if (ctx.INSERT() != null) {
+                storeQuery.setType(StoreQuery.StoreQueryType.INSERT);
+                Source source = (Source) visit(ctx.target());
+                if (source.isInnerStream) {
+                    throw newSiddhiParserException(ctx, "INSERT can be only used with Tables!");
+                }
+                outputStream = new InsertIntoStream(source.streamId);
+                populateQueryContext(outputStream, ctx);
+                storeQuery.outStream(outputStream);
+            } else if (ctx.store_query_output() != null) {
+                outputStream = (OutputStream) visit(ctx.store_query_output());
+                if (outputStream instanceof DeleteStream) {
+                    storeQuery.setType(StoreQuery.StoreQueryType.DELETE);
+                } else if (outputStream instanceof  UpdateStream) {
+                    storeQuery.setType(StoreQuery.StoreQueryType.UPDATE);
+                }
+                storeQuery.outStream(outputStream);
+            }
+        } else if (ctx.store_query_output() != null) {
+            outputStream = (OutputStream) visit(ctx.store_query_output());
+            if (outputStream instanceof DeleteStream) {
+                storeQuery.setType(StoreQuery.StoreQueryType.DELETE);
+            } else if (outputStream instanceof  UpdateStream) {
+                storeQuery.setType(StoreQuery.StoreQueryType.UPDATE);
+            }
+            storeQuery.outStream(outputStream);
         }
         populateQueryContext(storeQuery, ctx);
         return storeQuery;

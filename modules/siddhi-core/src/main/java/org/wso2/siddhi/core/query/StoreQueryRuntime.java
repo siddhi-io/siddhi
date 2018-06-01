@@ -17,22 +17,113 @@
  */
 package org.wso2.siddhi.core.query;
 
+import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.event.state.StateEvent;
+import org.wso2.siddhi.core.event.state.StateEventPool;
+import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.exception.StoreQueryRuntimeException;
+import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.query.api.definition.Attribute;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Store Query Runtime Interface
  */
-public interface StoreQueryRuntime {
+public abstract class StoreQueryRuntime {
+    String queryName;
+    MetaStreamEvent.EventType eventType;
+    QuerySelector selector;
+    StateEventPool stateEventPool;
+    MetaStreamEvent metaStreamEvent;
+    Attribute[] outputAttributes;
 
-    Event[] execute();
+    /**
+     * This method initiates the execution of store query.
+     * @return an array of Events.
+     */
+    public Event[] execute() {
+        try {
+            StateEvent stateEvent = new StateEvent(1, outputAttributes.length);
+            StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getBeforeWindowData().size(),
+                    metaStreamEvent.getOnAfterWindowData().size(),
+                    metaStreamEvent.getOutputData().size());
+            stateEvent.addEvent(0, streamEvent);
 
-    void reset();
+            ComplexEventChunk complexEventChunk = new ComplexEventChunk(stateEvent, stateEvent, true);
+
+            if (eventType == MetaStreamEvent.EventType.TABLE) {
+                selector.process(complexEventChunk);
+            } else {
+                throw new StoreQueryRuntimeException("DELETE, INSERT, UPDATE and UPDATE OR INSERT store query " +
+                        "operations consume only stream events of type \"TABLE\".");
+            }
+            return new Event[]{};
+        } catch (Throwable t) {
+            throw new StoreQueryRuntimeException("Error executing '" + queryName + "', " + t.getMessage(), t);
+        }
+    }
+
+    /**
+     * This method sets a state event pool for store query runtime.
+     *
+     * @param stateEventPool stateEventPool for the store query runtime
+     */
+    public void setStateEventPool(StateEventPool stateEventPool) {
+        this.stateEventPool = stateEventPool;
+    }
+
+    /**
+     * This method sets the output attribute list of the given store query.
+     *
+     * @param outputAttributeList of the store query
+     */
+    public void setOutputAttributes(List<Attribute> outputAttributeList) {
+        this.outputAttributes = outputAttributeList.toArray(new Attribute[outputAttributeList.size()]);
+    }
 
     /**
      * This method will return the output attributes name and its types.
      *
      * @return List of output attributes
      */
-    Attribute[] getStoreQueryOutputAttributes();
+    public Attribute[] getStoreQueryOutputAttributes() {
+        return Arrays.copyOf(outputAttributes, outputAttributes.length);
+    }
+
+    /**
+     * This method sets selector for the delete store query runtime.
+     *
+     * @param selector for the store query
+     */
+    public void setSelector(QuerySelector selector) {
+        this.selector = selector;
+    }
+
+    /**
+     * This method is used to execute a store query when there is already store query runtime for that query.
+     */
+    public abstract void reset();
+
+    /**
+     * This method will return the type of the store query runtime.
+     *
+     * @return type of store query runtime. (one of the types DELETE, INSERT, SELECT, UPDATE, FIND or UPDATE OR INSERT)
+     */
+    public abstract TYPE getType();
+
+    /**
+     * This enum contains the possible types of the store query runtimes
+     */
+    enum TYPE {
+        DELETE,
+        INSERT,
+        SELECT,
+        UPDATE,
+        UPDATE_OR_INSERT,
+        FIND
+    }
 }

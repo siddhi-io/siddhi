@@ -27,19 +27,16 @@ import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * Store Query Runtime holds the runtime information needed for executing the store query.
  */
-public class SelectStoreQueryRuntime implements StoreQueryRuntime {
+public class SelectStoreQueryRuntime extends StoreQueryRuntime {
 
     private final CompiledSelection compiledSelection;
     private final CompiledCondition compiledCondition;
-    private final String queryName;
     private QueryableProcessor queryableProcessor;
-    private Attribute[] outputAttributes;
 
     public SelectStoreQueryRuntime(QueryableProcessor queryableProcessor, CompiledCondition compiledCondition,
                                    CompiledSelection compiledSelection, List<Attribute> expectedOutputAttributeList,
@@ -50,11 +47,6 @@ public class SelectStoreQueryRuntime implements StoreQueryRuntime {
         this.compiledSelection = compiledSelection;
         this.queryName = queryName;
         this.outputAttributes = expectedOutputAttributeList.toArray(new Attribute[expectedOutputAttributeList.size()]);
-    }
-
-    @Override
-    public Attribute[] getStoreQueryOutputAttributes() {
-        return Arrays.copyOf(outputAttributes, outputAttributes.length);
     }
 
     public Event[] execute() {
@@ -81,4 +73,8 @@ public class SelectStoreQueryRuntime implements StoreQueryRuntime {
 
     }
 
+    @Override
+    public TYPE getType() {
+        return TYPE.SELECT;
+    }
 }

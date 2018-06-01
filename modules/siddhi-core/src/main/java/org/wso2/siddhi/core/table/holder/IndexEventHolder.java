@@ -180,7 +180,7 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
             Object primaryKey = constructPrimaryKey(streamEvent, primaryKeyReferenceHolders);
             existingValue = primaryKeyData.putIfAbsent(primaryKey, streamEvent);
             if (existingValue != null) {
-                log.error("Siddhi App '" + siddhiAppName + "' table '" + tableName + "' drooping event : " +
+                log.error("Siddhi App '" + siddhiAppName + "' table '" + tableName + "' dropping event : " +
                         streamEvent + ", as there is already an event stored with primary key '" + primaryKey + "'");
             }
         }

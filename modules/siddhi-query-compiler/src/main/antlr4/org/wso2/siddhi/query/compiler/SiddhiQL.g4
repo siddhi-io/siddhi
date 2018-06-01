@@ -70,6 +70,9 @@ store_query_final
 
 store_query
     : FROM store_input query_section?
+    | query_section INSERT INTO target
+    | query_section UPDATE OR INSERT INTO target set_clause? ON expression
+    | query_section? store_query_output
     ;
 
 store_input
@@ -391,6 +394,11 @@ query_output
     |UPDATE OR INSERT INTO target (FOR output_event_type)? set_clause? ON expression
     |UPDATE target (FOR output_event_type)? set_clause? ON expression
     |RETURN output_event_type?
+    ;
+
+store_query_output
+    :DELETE target ON expression
+    |UPDATE target set_clause? ON expression
     ;
 
 set_clause
