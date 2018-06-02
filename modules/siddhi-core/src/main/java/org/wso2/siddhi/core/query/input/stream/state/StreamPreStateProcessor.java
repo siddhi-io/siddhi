@@ -338,7 +338,7 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
-        state.put("CurrentStateEventChunk", currentStateEventChunk.getFirst());
+        state.put("FirstEvent", currentStateEventChunk.getFirst());
         state.put("PendingStateEventList", pendingStateEventList);
         state.put("NewAndEveryStateEventList", newAndEveryStateEventList);
         return state;
