@@ -263,10 +263,11 @@ public class SnapshotService {
                     }
                 } catch (Throwable t) {
                     throw new CannotRestoreSiddhiAppStateException("Restoring of Siddhi app " + siddhiAppContext.
-                            getName() + " not completed properly because content of Siddhi app has changed since "
-                            + "last state persistence or the Siddhi app was not given a name. " +
-                            "Make sure to add a name to the Siddhi app using '@app:name('<a name>')' annotation and " +
-                            "clean the persistence store for a fresh deployment.", t);
+                            getName() + " not completed properly. This can occur if the content of Siddhi app has " +
+                            "changed since it was last state persisted, or if the Siddhi app was not given a name. " +
+                            "Make sure to provide a name to the Siddhi app by adding '@app:name('<a name>')' " +
+                            "annotation and clean the persistence store if you have done modifications " +
+                            "to the Siddhi app such that it can perform a fresh deployment.", t);
                 }
             }
 
