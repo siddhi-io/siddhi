@@ -122,7 +122,7 @@ The source syntax is as follows:
         @attributes( attributeN='attribute_mapping_N', attribute1='attribute_mapping_1')
     )
 )
-define stream stream_name (attribute1 Type1, attributeN TypeN);
+define stream StreamName (attribute1 Type1, attributeN TypeN);
 ```
 This syntax includes the following annotations.
 **Source**
@@ -217,7 +217,7 @@ annotation with the required parameter values. The sink syntax is as follows:
         @payload('payload_mapping')
     )
 )
-define stream stream_name (attribute1 Type1, attributeN TypeN);
+define stream StreamName (attribute1 Type1, attributeN TypeN);
 ```
 
 !!! Note "Dynamic Properties" 
@@ -2165,10 +2165,10 @@ The `SELECT` store query retrieves one or more records that match a given condit
 ```sql
 from <table/window/aggregation>
 select <attribute name>, <attribute name>, ...
-group_by? 
-having? 
-order_by? 
-limit?
+<group by>? 
+<having>? 
+<order by>? 
+<limit>?
 ```
 
 **Example**
