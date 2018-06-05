@@ -122,7 +122,7 @@ The source syntax is as follows:
         @attributes( attributeN='attribute_mapping_N', attribute1='attribute_mapping_1')
     )
 )
-define stream streamName (attribute1 Type1, attributeN TypeN);
+define stream StreamName (attribute1 Type1, attributeN TypeN);
 ```
 This syntax includes the following annotations.
 **Source**
@@ -217,7 +217,7 @@ annotation with the required parameter values. The sink syntax is as follows:
         @payload('payload_mapping')
     )
 )
-define stream streamName (attribute1 Type1, attributeN TypeN);
+define stream StreamName (attribute1 Type1, attributeN TypeN);
 ```
 
 !!! Note "Dynamic Properties" 
