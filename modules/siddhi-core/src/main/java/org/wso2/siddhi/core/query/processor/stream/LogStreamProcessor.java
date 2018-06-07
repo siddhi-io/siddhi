@@ -47,17 +47,20 @@ import java.util.Map;
 @Extension(
         name = "log",
         namespace = "",
-        description = "The logger stream processor logs the message with or without event for the given log priority.",
+        description = "The logger logs the message on the given priority with or without processed event.",
         parameters = {
                 @Parameter(name = "priority",
-                        description = "The priority/type of this log message.",
-                        type = {DataType.STRING}),
+                        description = "The priority/type of this log message (INFO, DEBUG, WARN," +
+                                " FATAL, ERROR, OFF, TRACE).",
+                        type = {DataType.STRING},
+                        defaultValue = "INFO", optional = true, dynamic = true),
                 @Parameter(name = "log.message",
-                        description = "This submit the log message.",
-                        type = {DataType.STRING}),
+                        description = "This message will be logged.",
+                        type = {DataType.STRING}, dynamic = true),
                 @Parameter(name = "is.event.logged",
-                        description = "Use this command to enable the logging of one or more events.",
-                        type = {DataType.BOOL})
+                        description = "To log the processed event.",
+                        type = {DataType.BOOL},
+                        defaultValue = "true", optional = true, dynamic = true)
         },
         examples = {
                 @Example(
@@ -105,8 +108,8 @@ public class LogStreamProcessor extends StreamProcessor {
      *
      * @param inputDefinition              the incoming stream definition
      * @param attributeExpressionExecutors the executors for the function parameters
-     * @param siddhiAppContext         siddhi app context
-     * @param configReader this hold the {@link LogStreamProcessor} configuration reader.
+     * @param siddhiAppContext             siddhi app context
+     * @param configReader                 this hold the {@link LogStreamProcessor} configuration reader.
      * @return the additional output attributes introduced by the function
      */
     @Override
