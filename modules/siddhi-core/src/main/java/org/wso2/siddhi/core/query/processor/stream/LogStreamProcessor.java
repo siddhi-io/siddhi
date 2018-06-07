@@ -53,14 +53,14 @@ import java.util.Map;
                         description = "The priority/type of this log message (INFO, DEBUG, WARN," +
                                 " FATAL, ERROR, OFF, TRACE).",
                         type = {DataType.STRING},
-                        defaultValue = "INFO", optional = true, dynamic = true),
+                        defaultValue = "INFO", optional = true),
                 @Parameter(name = "log.message",
                         description = "This message will be logged.",
-                        type = {DataType.STRING}, dynamic = true),
+                        type = {DataType.STRING}),
                 @Parameter(name = "is.event.logged",
                         description = "To log the processed event.",
                         type = {DataType.BOOL},
-                        defaultValue = "true", optional = true, dynamic = true)
+                        defaultValue = "true", optional = true)
         },
         examples = {
                 @Example(
