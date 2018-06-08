@@ -883,7 +883,7 @@ insert into <output stream>;
 
 **Example**
 
-The following query calculates the average temperature per per `roomNo` and `deviceID` combination for every 10 minutes, and generate output events
+The following query calculates the average temperature per `roomNo` and `deviceID` combination for every 10 minutes, and generate output events
 by ordering them in the ascending order of the room's avgTemp and then by the descending order of roomNo.
 
 ```sql
@@ -1842,7 +1842,19 @@ Item|Description
 
 **Example**
 
-This query retrieves all aggregation per day within the time range `"2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30"` (Please note that +05:30 can be omitted if timezone is GMT)
+Following aggregation definition will be used for the examples. 
+
+```sql
+define stream TradeStream (symbol string, price double, volume long, timestamp long);
+
+define aggregation TradeAggregation
+  from TradeStream
+  select symbol, avg(price) as avgPrice, sum(price) as total
+    group by symbol
+    aggregate by timestamp every sec ... year;
+```
+
+This query retrieves daily aggregations within the time range `"2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30"` (Please note that +05:30 can be omitted if timezone is GMT)
 
 ```sql
 define stream StockStream (symbol string, value int);
@@ -1855,7 +1867,7 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-This query retrieves all aggregation per hour within the day `2014-02-15` .
+This query retrieves hourly aggregations within the day `2014-02-15`.
 
 ```sql
 define stream StockStream (symbol string, value int);
@@ -1868,7 +1880,8 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
-This query retrieves all aggregation per value for an attribute of the stream  within the time period between timestamps `1496200000000` and `1596434876000`
+This query retrieves all aggregations per `perValue` stream attribute within the time period 
+between timestamps `1496200000000` and `1596434876000`.
 
 ```sql
 define stream StockStream (symbol string, value int, perValue string);
@@ -2156,14 +2169,14 @@ method of `SiddhiAppRuntime` instance as below.
 siddhiAppRuntime.query(<store query>);
 ```
 
-### Select
+### _(Table/Window)_ Select 
 
-The `SELECT` store query retrieves one or more records that match a given condition from a specified table.
+The `SELECT` store query retrieves records from the specified table or window, based on the given condition.
 
 **Syntax**
 
 ```sql
-from <table/window/aggregation>
+from <table/window>
 select <attribute name>, <attribute name>, ...
 <group by>? 
 <having>? 
@@ -2179,6 +2192,80 @@ This query retrieves room numbers and types of the rooms starting from room no 1
 from roomTypeTable
 select roomNo, type
 on roomNo >= 10;
+```
+
+### _(Aggregation)_ Select 
+
+The `SELECT` store query retrieves records from the specified aggregation, based on the given condition, time range, 
+and granularity.
+
+**Syntax**
+
+```sql
+from <aggregation>
+select <attribute name>, <attribute name>, ...
+<within>?
+<per>?
+<group by>? 
+<having>? 
+<order by>? 
+<limit>?
+```
+
+**Example**
+
+Following aggregation definition will be used for the examples. 
+
+```sql
+define stream TradeStream (symbol string, price double, volume long, timestamp long);
+
+define aggregation TradeAggregation
+  from TradeStream
+  select symbol, avg(price) as avgPrice, sum(price) as total
+    group by symbol
+    aggregate by timestamp every sec ... year;
+```
+
+This query retrieves daily aggregations within the time range `"2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30"` (Please note that +05:30 can be omitted if timezone is GMT)
+
+```sql
+from TradeAggregation
+  within "2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30" 
+  per "days" 
+select symbol, total, avgPrice 
+insert into AggregateStockStream;
+```
+
+This query retrieves hourly aggregations of "FB" symbol within the day `2014-02-15`.
+
+```sql
+from TradeAggregation
+  on symbol == "FB" 
+  within "2014-02-15 **:**:** +05:30"
+  per "hours" 
+select symbol, total, avgPrice 
+insert into AggregateStockStream;
+```
+
+### Insert
+
+This allows you to insert a new record to the table with the attribute values you define in the `select` section.
+
+**Syntax**
+
+```sql
+select <attribute name>, <attribute name>, ...
+insert into <table>;
+```
+
+**Example**
+
+This store query inserts a new record to the table `RoomOccupancyTable`, with the specified attribute values.
+
+
+```sql
+select 10 as roomNo, 2 as people
+insert into RoomOccupancyTable 
 ```
 
 ### Delete
@@ -2283,35 +2370,14 @@ operation or other. The attribute to the left (i.e., the attribute in the event 
 
 **Example**
 
-The following query update the records in the `UpdateTable` table that have room numbers that match the same in the selection. If such records are found in the event table, they are updated. If such records are not found, it is inserted from the stream.
+The following query tries to update the records in the `RoomAssigneeTable` table that have room numbers that match the
+ same in the selection. If such records are not found, it inserts a new record based on the values provided in the selection. 
 
 ```sql
-from RoomAssigneeStream
 select 10 as roomNo, "single" as type, "abc" as assignee
 update or insert into RoomAssigneeTable
     set RoomAssigneeTable.assignee = assignee
     on RoomAssigneeTable.roomNo == roomNo;
-```
-
-### Insert
-
-This allows you to insert a new record to the table with the attribute values you define in the `select` section.
-
-**Syntax**
-
-```sql
-select <attribute name>, <attribute name>, ...
-insert into <table>;
-```
-
-**Example**
-
-This store query inserts a new record to the table `RoomOccupancyTable`, with the specified attribute values.
-
-
-```sql
-select 10 as roomNo, 2 as people
-insert into RoomOccupancyTable 
 ```
 
 ## Extensions
