@@ -151,6 +151,7 @@ public class QueryRuntime implements MemoryCalculable {
             queryRuntime.outputRateLimiter.setOutputCallback(clonedQueryOutputCallback);
             queryRuntime.outputCallback = clonedQueryOutputCallback;
         }
+        queryRuntime.outputRateLimiter.start();
         return queryRuntime;
 
     }
