@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 public class TimeOutputRateLimitTestCase {
@@ -807,6 +808,61 @@ public class TimeOutputRateLimitTestCase {
         AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         AssertJUnit.assertEquals("Number of output in event value", 6, inEventCount);
         AssertJUnit.assertEquals("Number of output remove event value", 3, removeEventCount);
+
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test
+    public void testTimeOutputRateLimitQuery14() throws InterruptedException {
+        log.info("TimeOutputRateLimit test14");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "@app:name('EventOutputRateLimitTest5') " +
+                "" +
+                "define stream LoginEvents (timestamp long, ip string, symbol string);" +
+                "@info(name = 'query1') " +
+                "partition with (symbol of LoginEvents) " +
+                "begin " +
+                "from LoginEvents " +
+                "select ip " +
+                "group by symbol " +
+                "output last every 1 sec " +
+                "insert into uniqueIps; " +
+                "end;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        log.info("Running : " + siddhiAppRuntime.getName());
+
+        siddhiAppRuntime.addCallback("uniqueIps", new StreamCallback() {
+            @Override public void receive(Event[] events) {
+                EventPrinter.print(events);
+                count += events.length;
+                AssertJUnit.assertTrue("192.10.1.3".equals(events[0].getData(0))
+                                               || "192.10.1.4".equals(events[0].getData(0))
+                                               || "192.10.1.30".equals(events[0].getData(0)));
+                eventArrived = true;
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("LoginEvents");
+
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5", "WSO2"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3", "WSO2"});
+        Thread.sleep(1100);
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.9", "WSO2"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4", "WSO2"});
+        Thread.sleep(1100);
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30", "WSO2"});
+        Thread.sleep(1000);
+
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertTrue("Number of output event value", 3 == count);
 
         siddhiAppRuntime.shutdown();
 
