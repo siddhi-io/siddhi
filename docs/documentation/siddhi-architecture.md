@@ -151,7 +151,7 @@ The components that are involved in handling the events are as follows:
     
     Tables store events. By default, Siddhi uses the [InMemoryTable](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/table/InMemoryTable.java) 
     implementation to store events in-memory. When `@Store` annotation
-    is used, it loads the associated Table implantation based on the defined `store` type. Most table implementations are 
+    is used, it loads the associated Table implementation based on the defined `store` type. Most table implementations are 
     extended from the [AbstractRecordTable](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/table/record/AbstractRecordTable.java) 
     abstract class for the ease of development.
     
@@ -168,7 +168,7 @@ The components that are involved in handling the events are as follows:
      
 - [Trigger](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/trigger/Trigger.java)
  
-    A triggers triggers events at a given interval to the stream junction that has the same name as the trigger.
+    A trigger triggers events at a given interval to the stream junction that has the same name as the trigger.
     
 - [QueryCallback](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/output/callback/QueryCallback.java)
 
