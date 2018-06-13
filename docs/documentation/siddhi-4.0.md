@@ -145,6 +145,7 @@ The following is the list of source types that are currently supported:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter/">Twitter</a>
 
 #### Source Mapper
 
