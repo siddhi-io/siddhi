@@ -168,7 +168,7 @@ The components that are involved in handling the events are as follows:
      
 - [Trigger](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/trigger/Trigger.java)
  
-    A triggers triggers events at a given interval to the stream junction that has the same name as the trigger.
+    A trigger triggers events at a given interval to the stream junction that has the same name as the trigger.
     
 - [QueryCallback](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/query/output/callback/QueryCallback.java)
 
