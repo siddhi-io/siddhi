@@ -145,7 +145,7 @@ public abstract class Source implements Snapshotable {
                 backoffRetryCounter.increment();
             } catch (RuntimeException e) {
                 LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext)) +
-                        "Error while connecting at Source '" + StringUtil.removeCRLFCharacters(type) + "' at '" +
+                        " Error while connecting at Source '" + StringUtil.removeCRLFCharacters(type) + "' at '" +
                         StringUtil.removeCRLFCharacters(streamDefinition.getId()) + "'.", e);
                 throw e;
             }
