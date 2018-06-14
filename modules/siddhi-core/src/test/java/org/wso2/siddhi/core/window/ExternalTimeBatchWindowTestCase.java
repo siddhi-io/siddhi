@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.core.query.window.external;
+package org.wso2.siddhi.core.window;
 
 import org.apache.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
