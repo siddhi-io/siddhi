@@ -216,8 +216,8 @@ public class DefinitionParserHelper {
                                  ConcurrentMap<String, Window> eventWindowMap,
                                  SiddhiAppContext siddhiAppContext) {
         if (!eventWindowMap.containsKey(windowDefinition.getId())) {
-            Window table = new Window(windowDefinition, siddhiAppContext);
-            eventWindowMap.putIfAbsent(windowDefinition.getId(), table);
+            Window window = new Window(windowDefinition, siddhiAppContext);
+            eventWindowMap.putIfAbsent(windowDefinition.getId(), window);
         }
     }
 

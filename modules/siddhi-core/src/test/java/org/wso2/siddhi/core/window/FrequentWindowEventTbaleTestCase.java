@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.core.query.window.external;
+package org.wso2.siddhi.core.window;
 
 import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
@@ -29,8 +29,8 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
-public class LossyFrequentWindowTestCase {
-    private static final Logger log = Logger.getLogger(LossyFrequentWindowTestCase.class);
+public class FrequentWindowEventTbaleTestCase {
+    private static final Logger log = Logger.getLogger(FrequentWindowEventTbaleTestCase.class);
 
     private int inEventCount;
     private int removeEventCount;
@@ -44,14 +44,14 @@ public class LossyFrequentWindowTestCase {
     }
 
     @Test
-    public void testLossyFrequentUniqueWindow1() throws InterruptedException {
-        log.info("LossyFrequentWindow test1");
+    public void testFrequentUniqueWindow1() throws InterruptedException {
+        log.info("FrequentWindow test1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
                 "define stream purchase (cardNo string, price float); " +
-                "define window purchaseWindow (cardNo string, price float) lossyFrequent(0.1,0.01); ";
+                "define window purchaseWindow (cardNo string, price float) frequent(2); ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from purchase[price >= 30] " +
@@ -82,131 +82,71 @@ public class LossyFrequentWindowTestCase {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("purchase");
         siddhiAppRuntime.start();
 
-        for (int i = 0; i < 25; i++) {
+        for (int i = 0; i < 2; i++) {
             inputHandler.send(new Object[]{"3234-3244-2432-4124", 73.36f});
             inputHandler.send(new Object[]{"1234-3244-2432-123", 46.36f});
             inputHandler.send(new Object[]{"5768-3244-2432-5646", 48.36f});
             inputHandler.send(new Object[]{"9853-3244-2432-4125", 78.36f});
         }
-        inputHandler.send(new Object[]{"1124-3244-2432-4126", 78.36f});     // these events will not be picked
-        inputHandler.send(new Object[]{"1124-3244-2432-4126", 78.36f});
-
         Thread.sleep(1000);
         AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("In Event count", 100, inEventCount);
+        AssertJUnit.assertEquals("In Event count", 8, inEventCount);
+        AssertJUnit.assertEquals("Out Event count", 6, removeEventCount);
+
+        siddhiAppRuntime.shutdown();
+    }
+
+
+    @Test
+    public void testFrequentUniqueWindow2() throws InterruptedException {
+        log.info("FrequentWindow test2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream purchase (cardNo string, price float); " +
+                "define window purchaseWindow (cardNo string, price float) frequent(2, cardNo); ";
+        String query = "" +
+                "@info(name = 'query0') " +
+                "from purchase[price >= 30] " +
+                "insert into purchaseWindow; " +
+                "" +
+                "@info(name = 'query1') " +
+                "from purchaseWindow " +
+                "select cardNo, price " +
+                "insert all events into PotentialFraud ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount += inEvents.length;
+                }
+                if (removeEvents != null) {
+                    removeEventCount += removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("purchase");
+        siddhiAppRuntime.start();
+
+        for (int i = 0; i < 2; i++) {
+            inputHandler.send(new Object[]{"3234-3244-2432-4124", 73.36f});
+            inputHandler.send(new Object[]{"1234-3244-2432-123", 46.36f});
+            inputHandler.send(new Object[]{"3234-3244-2432-4124", 78.36f});
+            inputHandler.send(new Object[]{"1234-3244-2432-123", 86.36f});
+            inputHandler.send(new Object[]{"5768-3244-2432-5646", 48.36f});
+        }
+        Thread.sleep(1000);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("In Event count", 8, inEventCount);
         AssertJUnit.assertEquals("Out Event count", 0, removeEventCount);
-
-        siddhiAppRuntime.shutdown();
-
-    }
-
-
-    @Test
-    public void frequentUniqueWindowTest2() throws InterruptedException {
-        log.info("LossyFrequentWindow test2");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String cseEventStream = "" +
-                "define stream purchase (cardNo string, price float); " +
-                "define window purchaseWindow (cardNo string, price float) lossyFrequent(0.3,0.05); ";
-        String query = "" +
-                "@info(name = 'query0') " +
-                "from purchase[price >= 30] " +
-                "insert into purchaseWindow; " +
-                "" +
-                "@info(name = 'query1') " +
-                "from purchaseWindow " +
-                "select cardNo, price " +
-                "insert all events into PotentialFraud ;";
-
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    inEventCount += inEvents.length;
-                }
-                if (removeEvents != null) {
-                    removeEventCount += removeEvents.length;
-                }
-                eventArrived = true;
-            }
-
-        });
-
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("purchase");
-        siddhiAppRuntime.start();
-
-        inputHandler.send(new Object[]{"3224-3244-2432-4124", 73.36f});
-        for (int i = 0; i < 25; i++) {
-            inputHandler.send(new Object[]{"3234-3244-2432-4124", 73.36f});
-            inputHandler.send(new Object[]{"3234-3244-2432-4124", 78.36f});
-            inputHandler.send(new Object[]{"1234-3244-2432-123", 86.36f});
-            inputHandler.send(new Object[]{"5768-3244-2432-5646", 48.36f}); //this event will not include in to the
-            // window during first iteration because 1+0<5*0.25
-        }
-        Thread.sleep(1000);
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Out Event count", 1, removeEventCount);
-
-        siddhiAppRuntime.shutdown();
-
-    }
-
-    @Test
-    public void frequentUniqueWindowTest3() throws InterruptedException {
-        log.info("LossyFrequentWindow test3");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String cseEventStream = "" +
-                "define stream purchase (cardNo string, price float); " +
-                "define window purchaseWindow (cardNo string, price float) lossyFrequent(0.3,0.05,cardNo); ";
-        String query = "" +
-                "@info(name = 'query0') " +
-                "from purchase[price >= 30] " +
-                "insert into purchaseWindow; " +
-                "" +
-                "@info(name = 'query1') " +
-                "from purchaseWindow " +
-                "select cardNo, price " +
-                "insert all events into PotentialFraud ;";
-
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    inEventCount += inEvents.length;
-                }
-                if (removeEvents != null) {
-                    removeEventCount += removeEvents.length;
-                }
-                eventArrived = true;
-            }
-
-        });
-
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("purchase");
-        siddhiAppRuntime.start();
-
-        inputHandler.send(new Object[]{"3224-3244-2432-4124", 73.36f});
-        for (int i = 0; i < 25; i++) {
-            inputHandler.send(new Object[]{"3234-3244-2432-4124", 73.36f});
-            inputHandler.send(new Object[]{"3234-3244-2432-4124", 78.36f});
-            inputHandler.send(new Object[]{"1234-3244-2432-123", 86.36f});
-            inputHandler.send(new Object[]{"3234-3244-2432-4124", 48.36f}); //this event will be included because we
-            // only consider cardNo
-        }
-        Thread.sleep(1000);
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("In Event count", 101, inEventCount);
-        AssertJUnit.assertEquals("Out Event count", 1, removeEventCount);
 
         siddhiAppRuntime.shutdown();
 

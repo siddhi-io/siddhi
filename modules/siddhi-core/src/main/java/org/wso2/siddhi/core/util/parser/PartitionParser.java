@@ -45,10 +45,11 @@ import java.util.concurrent.ConcurrentMap;
 public class PartitionParser {
 
     public static PartitionRuntime parse(SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder, Partition partition,
-                                         SiddhiAppContext siddhiAppContext,
-                                         ConcurrentMap<String, AbstractDefinition> streamDefinitionMap,
-                                         int queryIndex) {
-        PartitionRuntime partitionRuntime = new PartitionRuntime(siddhiAppRuntimeBuilder.getStreamDefinitionMap(),
+                                         SiddhiAppContext siddhiAppContext, int queryIndex) {
+        ConcurrentMap<String, AbstractDefinition> streamDefinitionMap = new ConcurrentHashMap<>();
+        streamDefinitionMap.putAll(siddhiAppRuntimeBuilder.getStreamDefinitionMap());
+        streamDefinitionMap.putAll(siddhiAppRuntimeBuilder.getWindowDefinitionMap());
+        PartitionRuntime partitionRuntime = new PartitionRuntime(streamDefinitionMap,
                 siddhiAppRuntimeBuilder.getStreamJunctions(), partition, siddhiAppContext);
         validateStreamPartitions(partition.getPartitionTypeMap(), streamDefinitionMap);
         for (Query query : partition.getQueryList()) {
