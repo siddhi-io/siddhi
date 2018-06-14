@@ -2774,4 +2774,61 @@ public class AggregationTestCase {
             siddhiAppRuntime.shutdown();
         }
     }
+
+    @Test
+    public void incrementalStreamProcessorTest44() throws InterruptedException {
+        LOG.info("incrementalStreamProcessorTest44");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int, timestamp long);";
+        String query =
+                "@BufferSize('3') " +
+                        "define aggregation stockAggregation " +
+                        "from stockStream " +
+                        "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) as " +
+                        "lastTradeValue, " +
+                        "count() as count " +
+                        "aggregate by timestamp every sec...year ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+
+        try {
+            InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+            siddhiAppRuntime.start();
+
+            // Thursday, June 1, 2017 4:05:50 AM
+            stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L});
+            stockStreamInputHandler.send(new Object[]{"WSO2", 70f, null, 40L, 10, 1496289950000L});
+
+            // Thursday, June 1, 2017 4:05:51 AM
+            stockStreamInputHandler.send(new Object[]{"WSO2", 60f, 44f, 200L, 56, 1496289951000L});
+            stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 16, 1496289951011L});
+
+            // Thursday, June 1, 2017 4:05:52 AM
+            stockStreamInputHandler.send(new Object[]{"IBM", 400f, null, 200L, 9, 1496289952000L});
+
+            // Thursday, June 1, 2017 4:05:49 AM
+            stockStreamInputHandler.send(new Object[]{"IBM", 900f, null, 200L, 60, 1496289949000L});
+            stockStreamInputHandler.send(new Object[]{"IBM", 500f, null, 200L, 7, 1496289949000L});
+
+            // Thursday, June 1, 2017 4:05:53 AM
+            stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
+            stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289953000L});
+
+            Thread.sleep(100);
+
+
+            siddhiAppRuntime.query("from stockAggregation within 1496289949000L, 1496289950000L per " +
+                    "'days' select AGG_TIMESTAMP, avgPrice");
+
+            siddhiAppRuntime.query("from stockAggregation within 1496289949000L, 1496289950000L per " +
+                    "'days' select AGG_TIMESTAMP, avgPrice");
+
+
+        }  finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
 }
