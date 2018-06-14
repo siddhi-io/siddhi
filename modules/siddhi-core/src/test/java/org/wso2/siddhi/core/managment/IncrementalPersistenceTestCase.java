@@ -1242,7 +1242,7 @@ public class IncrementalPersistenceTestCase {
 
         //persisting for the second time to store the inc-snapshot
         siddhiAppRuntime.persist();
-        Thread.sleep(5000);
+        Thread.sleep(100);
 
         siddhiAppRuntime.shutdown();
         siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
@@ -1277,7 +1277,6 @@ public class IncrementalPersistenceTestCase {
         Thread.sleep(500);
         siddhiAppRuntime.shutdown();
 
-//        AssertJUnit.assertTrue(count <= (inputEventCount + 6));
         AssertJUnit.assertEquals(true, eventArrived);
     }
 }
