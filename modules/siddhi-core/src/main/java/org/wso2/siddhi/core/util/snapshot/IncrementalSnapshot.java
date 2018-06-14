@@ -26,6 +26,7 @@ import java.util.Map;
 public class IncrementalSnapshot {
     private Map<String, Map<String, byte[]>> incrementalState;
     private Map<String, Map<String, byte[]>> incrementalStateBase;
+    private Map<String, Map<String, byte[]>> periodicState;
 
 
     public Map<String, Map<String, byte[]>> getIncrementalState() {
@@ -44,11 +45,20 @@ public class IncrementalSnapshot {
         this.incrementalStateBase = incrementalStateBase;
     }
 
+    public Map<String, Map<String, byte[]>> getPeriodicState() {
+        return periodicState;
+    }
+
+    public void setPeriodicState(Map<String, Map<String, byte[]>> periodicState) {
+        this.periodicState = periodicState;
+    }
+
     @Override
     public String toString() {
         return "IncrementalSnapshot{" +
                 "incrementalState=" + (incrementalState != null) +
                 ", incrementalStateBase=" + (incrementalStateBase != null) +
+                ", periodicState=" + (periodicState != null) +
                 '}';
     }
 }

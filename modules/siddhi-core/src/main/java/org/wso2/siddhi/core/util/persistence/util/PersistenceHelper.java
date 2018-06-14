@@ -43,7 +43,7 @@ public final class PersistenceHelper {
                     Long.parseLong(items[0]), IncrementalSnapshotInfo.SnapshotType.valueOf(items[4]));
         } else if (items.length == 2) {
             return new IncrementalSnapshotInfo(items[1], null, null,
-                    Long.parseLong(items[0]), IncrementalSnapshotInfo.SnapshotType.BASE);
+                    Long.parseLong(items[0]), IncrementalSnapshotInfo.SnapshotType.PERIODIC);
         } else {
             throw new PersistenceStoreException("Invalid revision found '" + revision + "'!");
         }
@@ -62,9 +62,24 @@ public final class PersistenceHelper {
     public static PersistenceReference persist(IncrementalSnapshot serializeObj, SiddhiAppContext siddhiAppContext) {
         long revisionTime = System.currentTimeMillis();
         List<Future> incrementalFutures = new ArrayList<>();
+        //Periodic state
+        Map<String, Map<String, byte[]>> periodicStateBase = serializeObj.getPeriodicState();
+        if (periodicStateBase != null) {
+            periodicStateBase.forEach((queryName, value) -> {
+                value.forEach((elementId, value1) -> {
+                    AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
+                            AsyncIncrementalSnapshotPersistor(value1,
+                            siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
+                            new IncrementalSnapshotInfo(siddhiAppContext.getName(), queryName, elementId,
+                                    revisionTime, IncrementalSnapshotInfo.SnapshotType.PERIODIC));
+                    Future future = siddhiAppContext.getExecutorService().
+                            submit(asyncIncrementSnapshotPersistor);
+                    incrementalFutures.add(future);
+                });
+            });
+        }
         //Incremental base state
-        Map<String, Map<String, byte[]>> incrementalStateBase = serializeObj.
-                getIncrementalStateBase();
+        Map<String, Map<String, byte[]>> incrementalStateBase = serializeObj.getIncrementalStateBase();
         if (incrementalStateBase != null) {
             incrementalStateBase.forEach((queryName, value) -> {
                 value.forEach((elementId, value1) -> {
@@ -81,8 +96,7 @@ public final class PersistenceHelper {
         }
         //Next, handle the increment persistence scenarios
         //Incremental state
-        Map<String, Map<String, byte[]>> incrementalState = serializeObj.
-                getIncrementalState();
+        Map<String, Map<String, byte[]>> incrementalState = serializeObj.getIncrementalState();
         if (incrementalState != null) {
             incrementalState.forEach((queryName, value) -> {
                 value.forEach((elementId, value1) -> {

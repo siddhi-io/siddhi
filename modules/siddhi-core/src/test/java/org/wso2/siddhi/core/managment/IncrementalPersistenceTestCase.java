@@ -1187,4 +1187,97 @@ public class IncrementalPersistenceTestCase {
         AssertJUnit.assertEquals(4, wso2Count.get());
         siddhiAppRuntime.shutdown();
     }
+
+    @Test
+    public void incrementalPersistenceTest12() throws InterruptedException {
+        log.info("Incremental file persistence test 12 - length window query with max attribute aggregator");
+        final int eventWindowSize = 5;
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore(storageFilePath));
+
+        String siddhiApp = "" +
+                "@app:name('incrementalPersistenceTest12') " +
+                "" +
+                "define stream StockStream ( symbol string, price float, volume int );" +
+                "" +
+                "@info(name = 'query1')" +
+                "from StockStream#window.length(" + eventWindowSize + ") " +
+                "select symbol, price, max(volume) as maxVol " +
+                "insert into OutStream ";
+
+        QueryCallback queryCallback = new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                eventArrived = true;
+                for (Event inEvent : inEvents) {
+                    count++;
+                    AssertJUnit.assertTrue("IBM".equals(inEvent.getData(0)) ||
+                            "WSO2".equals(inEvent.getData(0)));
+                    lastValue = new Long((Integer) inEvent.getData(2));
+                }
+            }
+        };
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.addCallback("query1", queryCallback);
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{"IBM", 75.6f, 500});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 200});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 300});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 250});
+        inputHandler.send(new Object[]{"IBM", 75.6f, 150});
+
+        Thread.sleep(100);
+        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertEquals(new Long(500L), lastValue);
+
+        //persisting
+        siddhiAppRuntime.persist();
+        Thread.sleep(5000);
+
+        //persisting for the second time to store the inc-snapshot
+        siddhiAppRuntime.persist();
+        Thread.sleep(5000);
+
+        siddhiAppRuntime.shutdown();
+        siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.addCallback("query1", queryCallback);
+        inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
+        //loading
+        try {
+            siddhiAppRuntime.restoreLastRevision();
+        } catch (CannotRestoreSiddhiAppStateException e) {
+            log.error(e.getMessage(), e);
+            Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
+        }
+        siddhiAppRuntime.start();
+        Thread.sleep(5000);
+
+        inputHandler.send(new Object[]{"IBM", 100.4f, 280});
+        AssertJUnit.assertEquals((Long) 300L, lastValue);
+
+        inputHandler.send(new Object[]{"WSO2", 200.4f, 150});
+        AssertJUnit.assertEquals((Long) 300L, lastValue);
+
+        inputHandler.send(new Object[]{"IBM", 300.4f, 200});
+        AssertJUnit.assertEquals((Long) 280L, lastValue);
+
+        inputHandler.send(new Object[]{"WSO2", 400.4f, 270});
+        AssertJUnit.assertEquals((Long) 280L, lastValue);
+
+        inputHandler.send(new Object[]{"WSO2", 400.4f, 280});
+        AssertJUnit.assertEquals((Long) 280L, lastValue);
+
+        //shutdown Siddhi app
+        Thread.sleep(500);
+        siddhiAppRuntime.shutdown();
+
+//        AssertJUnit.assertTrue(count <= (inputEventCount + 6));
+        AssertJUnit.assertEquals(true, eventArrived);
+    }
 }
