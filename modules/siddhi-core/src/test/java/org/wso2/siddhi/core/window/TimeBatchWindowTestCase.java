@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 public class TimeBatchWindowTestCase {
@@ -552,6 +553,61 @@ public class TimeBatchWindowTestCase {
         inputHandler.send(new Object[]{"YY", 60.5f, 1});
         Thread.sleep(5000);
         AssertJUnit.assertEquals(3, inEventCount);
+        AssertJUnit.assertEquals(0, removeEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test
+    public void timeWindowBatchTest9() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "\n" +
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define window cacheWindow (symbol string, price float, volume int) timeBatch(3 second);\n" +
+                "\n" +
+                "partition with (symbol of cseEventStream, symbol of cacheWindow)\n" +
+                "begin\n" +
+                "     from cseEventStream \n" +
+                "     select * \n" +
+                "     insert into cacheWindow;\n" +
+                "\n" +
+                "     from cacheWindow \n" +
+                "     select * \n" +
+                "     insert into outputStream;\n" +
+                "end" +
+                "" ;
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                inEventCount+=events.length;
+                eventArrived = true;
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        // Start sending events in the beginning of a cycle
+        while (System.currentTimeMillis() % 2000 != 0) {
+
+        }
+        inputHandler.send(new Object[]{"IBM", 700f, 0});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
+        Thread.sleep(4500);
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
+        inputHandler.send(new Object[]{"II", 60.5f, 1});
+        Thread.sleep(3000);
+        inputHandler.send(new Object[]{"TT", 60.5f, 1});
+        inputHandler.send(new Object[]{"YY", 60.5f, 1});
+        Thread.sleep(5000);
+        AssertJUnit.assertEquals(6, inEventCount);
         AssertJUnit.assertEquals(0, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();

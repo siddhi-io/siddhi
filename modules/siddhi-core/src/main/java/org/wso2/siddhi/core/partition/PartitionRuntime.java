@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.query.input.stream.join.JoinStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.state.StateStreamRuntime;
 import org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertIntoWindowCallback;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper;
@@ -149,6 +150,24 @@ public class PartitionRuntime implements Snapshotable {
                 }
                 insertIntoStreamCallback.init(streamJunctionMap.get(id));
             }
+        } else if (query.getOutputStream() instanceof InsertIntoStream &&
+                metaQueryRuntime.getOutputCallback() instanceof InsertIntoWindowCallback) {
+            InsertIntoWindowCallback insertIntoWindowCallback = (InsertIntoWindowCallback)
+                    metaQueryRuntime.getOutputCallback();
+            StreamDefinition streamDefinition = insertIntoWindowCallback.getOutputStreamDefinition();
+            String id = streamDefinition.getId();
+            DefinitionParserHelper.validateOutputStream(streamDefinition, streamDefinitionMap.get(id));
+            StreamJunction outputStreamJunction = streamJunctionMap.get(id);
+
+            if (outputStreamJunction == null) {
+                outputStreamJunction = new StreamJunction(streamDefinition,
+                        siddhiAppContext.getExecutorService(),
+                        siddhiAppContext.getBufferSize(),
+                        siddhiAppContext);
+                streamJunctionMap.putIfAbsent(id, outputStreamJunction);
+            }
+            insertIntoWindowCallback.getWindow().setPublisher(streamJunctionMap.get(insertIntoWindowCallback
+                    .getOutputStreamDefinition().getId()).constructPublisher());
         }
         metaQueryRuntimeMap.put(metaQueryRuntime.getQueryId(), metaQueryRuntime);
 
