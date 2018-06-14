@@ -579,7 +579,7 @@ public class TimeBatchWindowTestCase {
                 "     select * \n" +
                 "     insert into outputStream;\n" +
                 "end" +
-                "" ;
+                "";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
 
@@ -587,7 +587,7 @@ public class TimeBatchWindowTestCase {
             @Override
             public void receive(Event[] events) {
                 EventPrinter.print(events);
-                inEventCount+=events.length;
+                inEventCount += events.length;
                 eventArrived = true;
             }
         });
