@@ -27,7 +27,7 @@ public class IncrementalSnapshotInfo {
      * Type of incremental snapshot types
      */
     public enum SnapshotType {
-        BASE, INCREMENT
+        PERIODIC, BASE, INCREMENT
     }
 
     private String siddhiAppId;

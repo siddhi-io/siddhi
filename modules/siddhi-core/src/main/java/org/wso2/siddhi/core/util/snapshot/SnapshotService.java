@@ -148,6 +148,7 @@ public class SnapshotService {
             SnapshotRequest.requestForFullSnapshot(false);
             Map<String, Map<String, byte[]>> elementSnapshotMapIncremental = new HashMap<>();
             Map<String, Map<String, byte[]>> elementSnapshotMapIncrementalBase = new HashMap<>();
+            Map<String, Map<String, byte[]>> elementSnapshotMapPeriodic = new HashMap<>();
             if (log.isDebugEnabled()) {
                 log.debug("Taking snapshot ...");
             }
@@ -156,11 +157,13 @@ public class SnapshotService {
                 for (Map.Entry<String, List<Snapshotable>> entry : snapshotableMap.entrySet()) {
                     Map<String, byte[]> elementWiseIncrementalSnapshots = new HashMap<>();
                     Map<String, byte[]> elementWiseIncrementalSnapshotsBase = new HashMap<>();
+                    Map<String, byte[]> elementWisePeriodicSnapshots = new HashMap<>();
                     for (Snapshotable snapshotableObject : entry.getValue()) {
                         Map<String, Object> currentState = snapshotableObject.currentState();
                         if (currentState != null) {
                             Map<String, Object> incrementalSnapshotableMap = new HashMap<>();
                             Map<String, Object> incrementalSnapshotableMapBase = new HashMap<>();
+                            Map<String, Object> periodicSnapshotableMap = new HashMap<>();
                             for (Map.Entry<String, Object> stateEntry : currentState.entrySet()) {
                                 String key = stateEntry.getKey();
                                 Object snapShot = stateEntry.getValue();
@@ -171,7 +174,7 @@ public class SnapshotService {
                                         incrementalSnapshotableMapBase.put(key, snapShot);
                                     }
                                 } else {
-                                    incrementalSnapshotableMapBase.put(key, snapShot);
+                                    periodicSnapshotableMap.put(key, snapShot);
                                 }
                             }
                             if (log.isDebugEnabled()) {
@@ -186,6 +189,10 @@ public class SnapshotService {
                                 elementWiseIncrementalSnapshotsBase.put(snapshotableObject.getElementId(),
                                         ByteSerializer.objectToByte(incrementalSnapshotableMapBase, siddhiAppContext));
                             }
+                            if (!periodicSnapshotableMap.isEmpty()) {
+                                elementWisePeriodicSnapshots.put(snapshotableObject.getElementId(),
+                                        ByteSerializer.objectToByte(periodicSnapshotableMap, siddhiAppContext));
+                            }
                             if (log.isDebugEnabled()) {
                                 log.debug("SnapshotState serialization finished.");
                             }
@@ -196,6 +203,9 @@ public class SnapshotService {
                     }
                     if (!elementWiseIncrementalSnapshotsBase.isEmpty()) {
                         elementSnapshotMapIncrementalBase.put(entry.getKey(), elementWiseIncrementalSnapshotsBase);
+                    }
+                    if (!elementWisePeriodicSnapshots.isEmpty()) {
+                        elementSnapshotMapPeriodic.put(entry.getKey(), elementWisePeriodicSnapshots);
                     }
                 }
             } finally {
@@ -210,6 +220,9 @@ public class SnapshotService {
             }
             if (!elementSnapshotMapIncrementalBase.isEmpty()) {
                 snapshot.setIncrementalStateBase(elementSnapshotMapIncrementalBase);
+            }
+            if (!elementSnapshotMapPeriodic.isEmpty()) {
+                snapshot.setPeriodicState(elementSnapshotMapPeriodic);
             }
             return snapshot;
         } finally {
@@ -448,17 +461,25 @@ public class SnapshotService {
                 });
                 String lastElementId = null;
                 boolean baseFound = false;
+                boolean perioicFound = false;
                 for (Iterator<IncrementalSnapshotInfo> iterator = incrementalSnapshotInfos.iterator();
                      iterator.hasNext(); ) {
                     IncrementalSnapshotInfo snapshotInfo = iterator.next();
                     if (snapshotInfo.getElementId().equals(lastElementId)) {
-                        if (baseFound) {
+                        if (baseFound && (snapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.BASE
+                                || snapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.INCREMENT)) {
+                            iterator.remove();
+                        } else if (perioicFound &&
+                                snapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.PERIODIC) {
                             iterator.remove();
                         } else if (snapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.BASE) {
                             baseFound = true;
+                        } else if (snapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.PERIODIC) {
+                            perioicFound = true;
                         }
                     } else {
                         baseFound = snapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.BASE;
+                        perioicFound = snapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.PERIODIC;
                     }
                     lastElementId = snapshotInfo.getElementId();
                 }
