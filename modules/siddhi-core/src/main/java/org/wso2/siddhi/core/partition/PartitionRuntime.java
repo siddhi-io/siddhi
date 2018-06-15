@@ -76,6 +76,7 @@ public class PartitionRuntime implements Snapshotable {
     private ConcurrentMap<String, AbstractDefinition> localStreamDefinitionMap = new ConcurrentHashMap<String,
             AbstractDefinition>(); //contains stream definition
     private ConcurrentMap<String, AbstractDefinition> streamDefinitionMap;
+    private ConcurrentMap<String, AbstractDefinition> windowDefinitionMap;
     private ConcurrentMap<String, StreamJunction> streamJunctionMap;
     private ConcurrentMap<String, QueryRuntime> metaQueryRuntimeMap = new ConcurrentHashMap<String, QueryRuntime>();
     private ConcurrentMap<String, PartitionInstanceRuntime> partitionInstanceRuntimeMap = new
@@ -85,8 +86,10 @@ public class PartitionRuntime implements Snapshotable {
     private SiddhiAppContext siddhiAppContext;
     private MemoryUsageTracker memoryUsageTracker;
 
-    public PartitionRuntime(ConcurrentMap<String, AbstractDefinition> streamDefinitionMap, ConcurrentMap<String,
-            StreamJunction> streamJunctionMap, Partition partition, SiddhiAppContext siddhiAppContext) {
+    public PartitionRuntime(ConcurrentMap<String, AbstractDefinition> streamDefinitionMap,
+                            ConcurrentMap<String, AbstractDefinition> windowDefinitionMap,
+                            ConcurrentMap<String, StreamJunction> streamJunctionMap,
+                            Partition partition, SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
         if (partition.getPartitionTypeMap().isEmpty()) {
             throw new SiddhiAppCreationException("Partition must have at least one executor. But found none.");
@@ -108,14 +111,15 @@ public class PartitionRuntime implements Snapshotable {
         elementId = "PartitionRuntime-" + siddhiAppContext.getElementIdGenerator().createNewId();
         this.partition = partition;
         this.streamDefinitionMap = streamDefinitionMap;
+        this.windowDefinitionMap = windowDefinitionMap;
         this.streamJunctionMap = streamJunctionMap;
     }
 
     public QueryRuntime addQuery(QueryRuntime metaQueryRuntime) {
         Query query = metaQueryRuntime.getQuery();
 
-        if (query.getOutputStream() instanceof InsertIntoStream && metaQueryRuntime.getOutputCallback() instanceof
-                InsertIntoStreamCallback) {
+        if (query.getOutputStream() instanceof InsertIntoStream &&
+                metaQueryRuntime.getOutputCallback() instanceof InsertIntoStreamCallback) {
             InsertIntoStreamCallback insertIntoStreamCallback = (InsertIntoStreamCallback) metaQueryRuntime
                     .getOutputCallback();
             StreamDefinition streamDefinition = insertIntoStreamCallback.getOutputStreamDefinition();
@@ -156,7 +160,7 @@ public class PartitionRuntime implements Snapshotable {
                     metaQueryRuntime.getOutputCallback();
             StreamDefinition streamDefinition = insertIntoWindowCallback.getOutputStreamDefinition();
             String id = streamDefinition.getId();
-            DefinitionParserHelper.validateOutputStream(streamDefinition, streamDefinitionMap.get(id));
+            DefinitionParserHelper.validateOutputStream(streamDefinition, windowDefinitionMap.get(id));
             StreamJunction outputStreamJunction = streamJunctionMap.get(id);
 
             if (outputStreamJunction == null) {
@@ -232,9 +236,12 @@ public class PartitionRuntime implements Snapshotable {
                                       List<PartitionExecutor> partitionExecutors) {
         if (!partitionStreamReceivers.containsKey(streamId) && !isInnerStream &&
                 metaStreamEvent.getEventType() == MetaStreamEvent.EventType.DEFAULT) {
+            StreamDefinition streamDefinition = (StreamDefinition) streamDefinitionMap.get(streamId);
+            if (streamDefinition == null) {
+                streamDefinition = (StreamDefinition) windowDefinitionMap.get(streamId);
+            }
             PartitionStreamReceiver partitionStreamReceiver = new PartitionStreamReceiver(
-                    siddhiAppContext, metaStreamEvent, (StreamDefinition) streamDefinitionMap.get(streamId),
-                    partitionExecutors, this);
+                    siddhiAppContext, metaStreamEvent, streamDefinition, partitionExecutors, this);
             partitionStreamReceivers.put(partitionStreamReceiver.getStreamId(), partitionStreamReceiver);
             streamJunctionMap.get(partitionStreamReceiver.getStreamId()).subscribe(partitionStreamReceiver);
         }
@@ -271,11 +278,14 @@ public class PartitionRuntime implements Snapshotable {
                     for (int i = 0; i < clonedQueryRuntime.getStreamRuntime().getSingleStreamRuntimes().size(); i++) {
                         String streamId = queryRuntime.getStreamRuntime().getSingleStreamRuntimes().get(i)
                                 .getProcessStreamReceiver().getStreamId();
-                        StreamDefinition streamDefinition;
+                        StreamDefinition streamDefinition = null;
                         if (streamId.startsWith("#")) {
                             streamDefinition = (StreamDefinition) localStreamDefinitionMap.get(streamId);
                         } else {
                             streamDefinition = (StreamDefinition) streamDefinitionMap.get(streamId);
+                            if (streamDefinition == null) {
+                                streamDefinition = (StreamDefinition) windowDefinitionMap.get(streamId);
+                            }
                         }
                         StreamJunction streamJunction = localStreamJunctionMap.get(streamId + key);
                         if (streamJunction == null) {

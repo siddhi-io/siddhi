@@ -46,17 +46,19 @@ public class PartitionParser {
 
     public static PartitionRuntime parse(SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder, Partition partition,
                                          SiddhiAppContext siddhiAppContext, int queryIndex) {
-        ConcurrentMap<String, AbstractDefinition> streamDefinitionMap = new ConcurrentHashMap<>();
-        streamDefinitionMap.putAll(siddhiAppRuntimeBuilder.getStreamDefinitionMap());
-        streamDefinitionMap.putAll(siddhiAppRuntimeBuilder.getWindowDefinitionMap());
-        PartitionRuntime partitionRuntime = new PartitionRuntime(streamDefinitionMap,
+        ConcurrentMap<String, AbstractDefinition> streamDefinitionMap =
+                siddhiAppRuntimeBuilder.getStreamDefinitionMap();
+        ConcurrentMap<String, AbstractDefinition> windowDefinitionMap =
+                siddhiAppRuntimeBuilder.getWindowDefinitionMap();
+        PartitionRuntime partitionRuntime = new PartitionRuntime(streamDefinitionMap, windowDefinitionMap,
                 siddhiAppRuntimeBuilder.getStreamJunctions(), partition, siddhiAppContext);
-        validateStreamPartitions(partition.getPartitionTypeMap(), streamDefinitionMap);
+        validateStreamPartitions(partition.getPartitionTypeMap(), streamDefinitionMap, windowDefinitionMap);
         for (Query query : partition.getQueryList()) {
             List<VariableExpressionExecutor> executors = new ArrayList<VariableExpressionExecutor>();
             ConcurrentMap<String, AbstractDefinition> combinedStreamMap =
                     new ConcurrentHashMap<String, AbstractDefinition>();
             combinedStreamMap.putAll(streamDefinitionMap);
+            combinedStreamMap.putAll(windowDefinitionMap);
             combinedStreamMap.putAll(partitionRuntime.getLocalStreamDefinitionMap());
             QueryRuntime queryRuntime = QueryParser.parse(query, siddhiAppContext, combinedStreamMap,
                     siddhiAppRuntimeBuilder.getTableDefinitionMap(),
@@ -84,10 +86,13 @@ public class PartitionParser {
     }
 
     private static void validateStreamPartitions(Map<String, PartitionType> partitionTypeMap,
-                                                 ConcurrentMap<String, AbstractDefinition> streamDefinitionMap) {
+                                                 ConcurrentMap<String, AbstractDefinition> streamDefinitionMap,
+                                                 ConcurrentMap<String, AbstractDefinition> windowDefinitionMap) {
         for (Map.Entry<String, PartitionType> entry : partitionTypeMap.entrySet()) {
-            if (!streamDefinitionMap.containsKey(entry.getKey())) {
-                throw new SiddhiAppCreationException("Stream with name '" + entry.getKey() + "' does not defined!",
+            if ((!streamDefinitionMap.containsKey(entry.getKey())) &&
+                    (!windowDefinitionMap.containsKey(entry.getKey()))) {
+                throw new SiddhiAppCreationException("Stream/window with name '" + entry.getKey() +
+                        "' does not defined!",
                         entry.getValue().getQueryContextStartIndex(),
                         entry.getValue().getQueryContextEndIndex());
             }
