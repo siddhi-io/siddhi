@@ -55,7 +55,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
             cleanOldRevisions(snapshotInfo);
             if (log.isDebugEnabled()) {
                 log.debug("Incremental persistence of '" + snapshotInfo.getSiddhiAppId() +
-                        "' with revision '" + snapshotInfo.getRevision() + "' persisted successfully.");
+                       "' with revision '" + snapshotInfo.getRevision() + "' persisted successfully.");
             }
         } catch (IOException e) {
             log.error("Cannot save the revision '" + snapshotInfo.getRevision() + "' of SiddhiApp: '" +

@@ -36,7 +36,7 @@ import java.util.concurrent.Future;
 public final class PersistenceHelper {
 
     public static IncrementalSnapshotInfo convertRevision(String revision) {
-        String[] items = revision.split("_");
+        String[] items = revision.split(PersistenceConstants.REVISION_SEPARATOR);
         //Note: Here we discard the (items.length == 2) scenario which is handled by the full snapshot handling
         if (items.length == 5) {
             return new IncrementalSnapshotInfo(items[1], items[2], items[3],
