@@ -63,6 +63,7 @@ import org.wso2.siddhi.query.api.execution.query.output.ratelimit.TimeOutputRate
 import org.wso2.siddhi.query.api.execution.query.output.stream.DeleteStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.InsertIntoStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
+import org.wso2.siddhi.query.api.execution.query.output.stream.ReturnStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream;
@@ -113,7 +114,7 @@ public class OutputParser {
         }
 
         //Construct CallBack
-        if (outStream instanceof InsertIntoStream) {
+        if (outStream instanceof InsertIntoStream || outStream instanceof ReturnStream) {
             if (window != null) {
                 return new InsertIntoWindowCallback(window, outputStreamDefinition, queryName);
             } else if (table != null) {
