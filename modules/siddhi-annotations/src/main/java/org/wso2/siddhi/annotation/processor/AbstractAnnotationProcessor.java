@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 public class AbstractAnnotationProcessor {
     protected static final Pattern CORE_PACKAGE_PATTERN = Pattern.compile("^org.wso2.siddhi.core.");
     protected static final Pattern PARAMETER_NAME_PATTERN = Pattern.compile("^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$");
-    protected static final Pattern CAMEL_CASE_PATTERN = Pattern.compile("^([a-z][a-z0-9]+)+([A-Z][a-z0-9]+)*$");
+    protected static final Pattern CAMEL_CASE_PATTERN = Pattern.compile("^(([a-z][a-z0-9]+)([A-Z]{0,1}[a-z0-9]*))*$");
     protected String extensionClassFullName;
 
     public AbstractAnnotationProcessor(String extensionClassFullName) {
