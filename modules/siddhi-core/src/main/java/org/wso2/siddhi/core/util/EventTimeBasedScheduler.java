@@ -58,4 +58,14 @@ public class EventTimeBasedScheduler extends Scheduler {
         scheduler.elementId = elementId + "-" + key;
         return scheduler;
     }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void stop() {
+        toNotifyQueue.clear();
+    }
 }

@@ -85,7 +85,12 @@ public abstract class Scheduler implements Snapshotable {
             elementId = "Scheduler-" + siddhiAppContext.getElementIdGenerator().createNewId();
         }
         siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
+        siddhiAppContext.addScheduler(this);
     }
+
+    public abstract void start();
+
+    public abstract void stop();
 
     @Override
     public Map<String, Object> currentState() {

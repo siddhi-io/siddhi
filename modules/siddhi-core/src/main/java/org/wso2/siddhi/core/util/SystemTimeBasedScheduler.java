@@ -36,10 +36,9 @@ public class SystemTimeBasedScheduler extends Scheduler {
     private ScheduledExecutorService scheduledExecutorService;
     private final Semaphore mutex;
 
-    public SystemTimeBasedScheduler(ScheduledExecutorService scheduledExecutorService, Schedulable
-            singleThreadEntryValve, SiddhiAppContext siddhiAppContext) {
+    public SystemTimeBasedScheduler(Schedulable singleThreadEntryValve,
+                                    SiddhiAppContext siddhiAppContext) {
         super(singleThreadEntryValve, siddhiAppContext);
-        this.scheduledExecutorService = scheduledExecutorService;
         this.eventCaller = new EventCaller();
         mutex = new Semaphore(1);
     }
@@ -71,10 +70,21 @@ public class SystemTimeBasedScheduler extends Scheduler {
 
     @Override
     public Scheduler clone(String key, EntryValveProcessor entryValveProcessor) {
-        Scheduler scheduler = new SystemTimeBasedScheduler(scheduledExecutorService, entryValveProcessor,
-                                                           siddhiAppContext);
+        Scheduler scheduler = new SystemTimeBasedScheduler(entryValveProcessor,
+                siddhiAppContext);
         scheduler.elementId = elementId + "-" + key;
         return scheduler;
+    }
+
+    @Override
+    public void start() {
+        this.scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
+    }
+
+    @Override
+    public void stop() {
+        this.toNotifyQueue.clear();
+        this.scheduledExecutorService = null;
     }
 
     private class EventCaller implements Runnable {

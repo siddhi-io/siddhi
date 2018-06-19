@@ -41,7 +41,7 @@ public class SchedulerParser {
      *
      * @param scheduledExecutorService ScheduledExecutorService
      * @param singleThreadEntryValve   Schedulable
-     * @param siddhiAppContext     SiddhiAppContext
+     * @param siddhiAppContext         SiddhiAppContext
      * @return Scheduler instance
      */
     public static Scheduler parse(ScheduledExecutorService scheduledExecutorService, Schedulable
@@ -52,8 +52,7 @@ public class SchedulerParser {
             scheduler = new EventTimeBasedScheduler(singleThreadEntryValve, siddhiAppContext);
         } else {
             // Default execution
-            scheduler = new SystemTimeBasedScheduler(siddhiAppContext.getScheduledExecutorService(),
-                    singleThreadEntryValve, siddhiAppContext);
+            scheduler = new SystemTimeBasedScheduler(singleThreadEntryValve, siddhiAppContext);
         }
 
         return scheduler;
