@@ -589,7 +589,8 @@ constant_value
 id: ID_QUOTES|ID ;
 
 keyword
-    : STREAM
+    : APP
+    | STREAM
     | DEFINE
     | TABLE
     | FROM
