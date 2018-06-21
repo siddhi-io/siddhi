@@ -13,7 +13,7 @@
     - Aggregation 
         - For long running aggregations and aggregation over windows 
         - Supporting `Avg`, `Sum`, `Min`, `Max`, etc
-        - Ability aggregate processing with `Group by` and filter aggrigated data with `Having` conditions
+        - Ability to perform aggregate processing with `Group by` and filter aggregated data with `Having` conditions
     - Incremental summarisation
         - Support for processing and retrieving long running summarisations
     - Table 
