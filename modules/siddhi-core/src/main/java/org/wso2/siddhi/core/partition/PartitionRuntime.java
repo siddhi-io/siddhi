@@ -62,7 +62,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Runtime class to handle partitioning. It will hold all information regarding current partiotns and wil create
+ * Runtime class to handle partitioning. It will hold all information regarding current partitions and wil create
  * partition dynamically during runtime.
  */
 public class PartitionRuntime implements Snapshotable {

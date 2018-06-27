@@ -114,8 +114,8 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         pendingStateEventList.clear();
         if (isStartState) {
             if (stateType == StateInputStream.Type.SEQUENCE &&
-                    thisStatePostProcessor.nextEveryStatePerProcessor == null &&
-                    !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePerProcessor)
+                    thisStatePostProcessor.nextEveryStatePreProcessor == null &&
+                    !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePreProcessor)
                             .pendingStateEventList.isEmpty()) {
                 // Sequence without 'every' keyword and the next processor has pending events to be processed
                 return;
@@ -140,7 +140,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
                 boolean initialize;
                 initialize = isStartState && newAndEveryStateEventList.isEmpty() && pendingStateEventList.isEmpty();
                 if (initialize && stateType == StateInputStream.Type.SEQUENCE &&
-                        thisStatePostProcessor.nextEveryStatePerProcessor == null && this.lastArrivalTime > 0) {
+                        thisStatePostProcessor.nextEveryStatePreProcessor == null && this.lastArrivalTime > 0) {
                     // Sequence with no every but an event arrived
                     initialize = false;
                 }
@@ -184,7 +184,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
             }
             this.lastArrivalTime = 0;
         }
-        if (thisStatePostProcessor.nextEveryStatePerProcessor == this || (notProcessed && isStartState)) {
+        if (thisStatePostProcessor.nextEveryStatePreProcessor == this || (notProcessed && isStartState)) {
             // If every or (notProcessed and startState), schedule again
             long nextBreak;
             if (lastArrivalTime == 0) {
@@ -201,11 +201,11 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         if (thisStatePostProcessor.nextProcessor != null) {
             thisStatePostProcessor.nextProcessor.process(new ComplexEventChunk<>(stateEvent, stateEvent, false));
         }
-        if (thisStatePostProcessor.nextStatePerProcessor != null) {
-            thisStatePostProcessor.nextStatePerProcessor.addState(stateEvent);
+        if (thisStatePostProcessor.nextStatePreProcessor != null) {
+            thisStatePostProcessor.nextStatePreProcessor.addState(stateEvent);
         }
-        if (thisStatePostProcessor.nextEveryStatePerProcessor != null) {
-            thisStatePostProcessor.nextEveryStatePerProcessor.addEveryState(stateEvent);
+        if (thisStatePostProcessor.nextEveryStatePreProcessor != null) {
+            thisStatePostProcessor.nextEveryStatePreProcessor.addEveryState(stateEvent);
         } else if (isStartState) {
             this.active = false;
         }

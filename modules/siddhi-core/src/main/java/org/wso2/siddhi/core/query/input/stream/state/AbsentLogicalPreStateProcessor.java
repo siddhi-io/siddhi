@@ -215,7 +215,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
             this.lock.unlock();
         }
 
-        if (thisStatePostProcessor.nextEveryStatePerProcessor != null || (notProcessed && isStartState)) {
+        if (thisStatePostProcessor.nextEveryStatePreProcessor != null || (notProcessed && isStartState)) {
             // If every or (notProcessed and startState), schedule again
             long nextBreak;
             if (lastArrivalTime == 0) {
@@ -242,11 +242,11 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
             thisStatePostProcessor.nextProcessor.process(new ComplexEventChunk<>(stateEvent,
                     stateEvent, false));
         }
-        if (thisStatePostProcessor.nextStatePerProcessor != null) {
-            thisStatePostProcessor.nextStatePerProcessor.addState(stateEvent);
+        if (thisStatePostProcessor.nextStatePreProcessor != null) {
+            thisStatePostProcessor.nextStatePreProcessor.addState(stateEvent);
         }
-        if (thisStatePostProcessor.nextEveryStatePerProcessor != null) {
-            thisStatePostProcessor.nextEveryStatePerProcessor.addEveryState(stateEvent);
+        if (thisStatePostProcessor.nextEveryStatePreProcessor != null) {
+            thisStatePostProcessor.nextEveryStatePreProcessor.addEveryState(stateEvent);
         } else if (isStartState) {
             this.active = false;
             if (logicalType == LogicalStateElement.Type.OR &&
@@ -290,7 +290,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                 process(stateEvent);
                 if (waitingTime != -1 || (stateType == StateInputStream.Type.SEQUENCE &&
                         logicalType == LogicalStateElement.Type.AND && thisStatePostProcessor
-                        .nextEveryStatePerProcessor != null)) {
+                        .nextEveryStatePreProcessor != null)) {
                     // Reset to the original state after processing
                     stateEvent.setEvent(stateId, currentStreamEvent);
                 }
@@ -370,13 +370,13 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     public boolean partnerCanProceed(StateEvent stateEvent) {
 
         boolean process;
-        if (stateType == StateInputStream.Type.SEQUENCE && thisStatePostProcessor.nextEveryStatePerProcessor == null
+        if (stateType == StateInputStream.Type.SEQUENCE && thisStatePostProcessor.nextEveryStatePreProcessor == null
                 && this.lastArrivalTime > 0) {
             process = false;
         } else {
             if (this.waitingTime == -1) {
                 // for time is not defined and event is not received by absent processor
-                if (thisStatePostProcessor.nextEveryStatePerProcessor == null) {
+                if (thisStatePostProcessor.nextEveryStatePreProcessor == null) {
                     process = stateEvent.getStreamEvent(this.stateId) == null;
                 } else {
                     // Every

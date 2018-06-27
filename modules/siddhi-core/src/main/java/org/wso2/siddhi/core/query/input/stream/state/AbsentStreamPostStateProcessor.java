@@ -46,9 +46,9 @@ public class AbsentStreamPostStateProcessor extends StreamPostStateProcessor {
         this.isEventReturned = true;
 
         if (thisStatePreProcessor.isStartState) {
-            if (nextEveryStatePerProcessor != null && nextEveryStatePerProcessor == thisStatePreProcessor) {
-                // nextEveryStatePerProcessor refers the AbsentStreamPreStateProcessor
-                nextEveryStatePerProcessor.addEveryState(stateEvent);
+            if (nextEveryStatePreProcessor != null && nextEveryStatePreProcessor == thisStatePreProcessor) {
+                // nextEveryStatePreProcessor refers the AbsentStreamPreStateProcessor
+                nextEveryStatePreProcessor.addEveryState(stateEvent);
             }
         }
 

@@ -277,7 +277,7 @@ public class StateInputStreamParser {
             for (SingleStreamRuntime singleStreamRuntime : innerStateRuntime.getSingleStreamRuntimeList()) {
                 everyInnerStateRuntime.addStreamRuntime(singleStreamRuntime);
             }
-            everyInnerStateRuntime.getLastProcessor().setNextEveryStatePerProcessor(everyInnerStateRuntime
+            everyInnerStateRuntime.getLastProcessor().setNextEveryStatePreProcessor(everyInnerStateRuntime
                     .getFirstProcessor());
             return everyInnerStateRuntime;
 
