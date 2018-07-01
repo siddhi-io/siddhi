@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.util.snapshot;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.exception.NoPersistenceStoreException;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
+import org.wso2.siddhi.core.util.persistence.util.PersistenceConstants;
 
 /**
  * {@link Runnable} which is responsible for persisting the snapshots that are taken
@@ -43,7 +44,7 @@ public class AsyncSnapshotPersistor implements Runnable {
         this.persistenceStore = persistenceStore;
         this.siddhiAppName = siddhiAppName;
         this.time = time;
-        this.revision = time + "_" + siddhiAppName;
+        this.revision = time + PersistenceConstants.REVISION_SEPARATOR + siddhiAppName;
     }
 
     public String getRevision() {

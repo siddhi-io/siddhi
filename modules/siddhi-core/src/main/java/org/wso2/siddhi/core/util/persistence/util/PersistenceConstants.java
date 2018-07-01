@@ -26,6 +26,6 @@ public class PersistenceConstants {
     public static final String STATE_PERSISTENCE_REVISIONS_TO_KEEP = "revisionsToKeep";
     public static final String STATE_PERSISTENCE_CONFIGS = "config";
     public static final String DEFAULT_FILE_PERSISTENCE_FOLDER = "siddhi-app-persistence";
-    public static final String REVISION_SEPARATOR = "_";
+    public static final String REVISION_SEPARATOR = "__";
 
 }

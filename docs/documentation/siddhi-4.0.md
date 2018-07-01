@@ -801,15 +801,15 @@ insert into AvgTempStream;
 ```
 Following are some inbuilt aggregation functions shipped with Siddhi, for more aggregation functions, see execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
 
-* avg
-* sum
-* max
-* min
-* count
-* distinctCount
-* maxForever
-* minForever
-* stdDev
++ [avg](http://wso2.github.io/siddhi/api/latest/#avg-aggregate-function)
++ [sum](http://wso2.github.io/siddhi/api/latest/#sum-aggregate-function)
++ [max](http://wso2.github.io/siddhi/api/latest/#max-aggregate-function)
++ [min](http://wso2.github.io/siddhi/api/latest/#min-aggregate-function)
++ [count](http://wso2.github.io/siddhi/api/latest/#count-aggregate-function)
++ [distinctCount](http://wso2.github.io/siddhi/api/latest/#distinctcount-aggregate-function)
++ [maxForever](http://wso2.github.io/siddhi/api/latest/#maxforever-aggregate-function)
++ [minForever](http://wso2.github.io/siddhi/api/latest/#minforever-aggregate-function)
++ [stdDev](http://wso2.github.io/siddhi/api/latest/#stddev-aggregate-function)
 
 ### Group By
 
