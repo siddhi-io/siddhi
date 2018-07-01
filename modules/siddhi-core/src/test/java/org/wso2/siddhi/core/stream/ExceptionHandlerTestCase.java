@@ -162,13 +162,12 @@ public class ExceptionHandlerTestCase {
 
         siddhiAppRuntime.start();
         sendTestInvalidEvents(inputHandler);
-        SiddhiTestHelper.waitForEvents(100, 2, failedCount, 60000);
-
+        Thread.sleep(3000);
         // No following events can be processed correctly
         AssertJUnit.assertTrue("Should properly process all the 4 valid events", eventArrived);
         AssertJUnit.assertEquals("Should properly process all the 4 valid events", 4, count.get());
-        AssertJUnit.assertTrue("Exception is properly handled thrown by 2 invalid events", failedCaught);
-        AssertJUnit.assertEquals("Exception is properly handled thrown by 2 invalid events", 2, failedCount.get());
+        AssertJUnit.assertFalse("Exception is properly handled thrown by 2 invalid events", failedCaught);
+        AssertJUnit.assertEquals("Exception is properly handled thrown by 2 invalid events", 0, failedCount.get());
         siddhiAppRuntime.shutdown();
     }
 }

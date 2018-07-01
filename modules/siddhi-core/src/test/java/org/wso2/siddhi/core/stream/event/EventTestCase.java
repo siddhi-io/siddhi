@@ -23,7 +23,6 @@ import org.wso2.siddhi.core.aggregation.AggregationRuntime;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.event.SiddhiEventFactory;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -49,6 +48,7 @@ import org.wso2.siddhi.core.stream.output.sink.Sink;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.core.util.event.handler.EventExchangeHolderFactory;
 import org.wso2.siddhi.core.util.lock.LockSynchronizer;
 import org.wso2.siddhi.core.util.parser.QueryParser;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
@@ -73,8 +73,8 @@ public class EventTestCase {
 
     @Test
     public void testEventCreation() {
-        SiddhiEventFactory siddhiEventFactory = new SiddhiEventFactory(2);
-        AssertJUnit.assertEquals(2, siddhiEventFactory.newInstance().getData().length);
+        EventExchangeHolderFactory eventExchangeHolderFactory = new EventExchangeHolderFactory(2);
+        AssertJUnit.assertEquals(2, eventExchangeHolderFactory.newInstance().getEvent().getData().length);
 
         StreamEventFactory streamEventFactory = new StreamEventFactory(2, 3, 4);
         StreamEvent streamEvent = streamEventFactory.newInstance();

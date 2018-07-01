@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -15,20 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.core.event;
+package org.wso2.siddhi.core.util.event.handler;
 
 /**
- * Event Factory to create new Events
+ * EventExchangeHolder Factory to create new EventExchangeHolders
  */
-public class SiddhiEventFactory implements com.lmax.disruptor.EventFactory<Event> {
+public class EventExchangeHolderFactory implements com.lmax.disruptor.EventFactory<EventExchangeHolder> {
 
     private int dataSize;
 
-    public SiddhiEventFactory(int dataSize) {
+    public EventExchangeHolderFactory(int dataSize) {
         this.dataSize = dataSize;
     }
 
-    public Event newInstance() {
-        return new Event(dataSize);
+    public EventExchangeHolder newInstance() {
+        return new EventExchangeHolder(dataSize);
     }
 }

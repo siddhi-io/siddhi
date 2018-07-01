@@ -29,7 +29,6 @@ import org.wso2.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,7 +44,6 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
     private MetaStreamEvent[] metaStreamEvents;
     private StreamEventPool[] streamEventPools;
     private StreamEventConverter[] streamEventConverters;
-    private List<Event> eventBuffer = new ArrayList<Event>(0);
 
     public MultiProcessStreamReceiver(String streamId, int processCount, LatencyTracker latencyTracker,
                                       String queryName, SiddhiAppContext siddhiAppContext) {
@@ -140,22 +138,18 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
     }
 
     @Override
-    public void receive(Event event, boolean endOfBatch) {
-        eventBuffer.add(event);
-        if (endOfBatch) {
-            for (Event aEvent : eventBuffer) {
-                synchronized (this) {
-                    stabilizeStates();
-                    for (int anEventSequence : eventSequence) {
-                        StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
-                        StreamEventPool aStreamEventPool = streamEventPools[anEventSequence];
-                        StreamEvent borrowedEvent = aStreamEventPool.borrowEvent();
-                        aStreamEventConverter.convertEvent(aEvent, borrowedEvent);
-                        process(anEventSequence, borrowedEvent);
-                    }
+    public void receive(List<Event> events) {
+        for (Event event : events) {
+            synchronized (this) {
+                stabilizeStates();
+                for (int anEventSequence : eventSequence) {
+                    StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
+                    StreamEventPool aStreamEventPool = streamEventPools[anEventSequence];
+                    StreamEvent borrowedEvent = aStreamEventPool.borrowEvent();
+                    aStreamEventConverter.convertEvent(event, borrowedEvent);
+                    process(anEventSequence, borrowedEvent);
                 }
             }
-            eventBuffer.clear();
         }
     }
 
