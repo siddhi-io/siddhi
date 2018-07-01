@@ -312,7 +312,7 @@ Each Siddhi query can consume one or more streams, and 0-1 tables, process the e
 
 **Purpose**
 
-A query enables you to perform complex event rrocessing and stream processing operations by processing incoming events one by one in the order they arrive.
+A query enables you to perform complex event processing and stream processing operations by processing incoming events one by one in the order they arrive.
 
 **Syntax**
 
