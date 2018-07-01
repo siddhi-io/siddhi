@@ -23,6 +23,8 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.input.SingleProcessStreamReceiver;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 
+import java.util.List;
+
 /**
  * {@link org.wso2.siddhi.core.stream.StreamJunction.Receiver} implementation to receive events into pattern queries
  * with single stream.
@@ -60,8 +62,8 @@ public class PatternSingleProcessStreamReceiver extends SingleProcessStreamRecei
     }
 
     @Override
-    public void receive(Event event, boolean endOfBatch) {
-        super.receive(event, endOfBatch);
+    public void receive(List<Event> events) {
+        super.receive(events);
     }
 
     @Override

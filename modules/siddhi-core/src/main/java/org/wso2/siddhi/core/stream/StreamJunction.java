@@ -19,7 +19,6 @@
 package org.wso2.siddhi.core.stream;
 
 import com.lmax.disruptor.BlockingWaitStrategy;
-import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
@@ -27,10 +26,13 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.event.SiddhiEventFactory;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputProcessor;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.core.util.event.handler.EventExchangeHolder;
+import org.wso2.siddhi.core.util.event.handler.EventExchangeHolderFactory;
+import org.wso2.siddhi.core.util.event.handler.StreamHandler;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.statistics.EventBufferHolder;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
@@ -57,13 +59,15 @@ public class StreamJunction implements EventBufferHolder {
     private static final Logger log = Logger.getLogger(StreamJunction.class);
     private final SiddhiAppContext siddhiAppContext;
     private final StreamDefinition streamDefinition;
+    private int batchSize;
+    private int workers = -1;
     private int bufferSize;
     private List<Receiver> receivers = new CopyOnWriteArrayList<Receiver>();
     private List<Publisher> publishers = Collections.synchronizedList(new LinkedList<>());
     private ExecutorService executorService;
     private boolean async = false;
-    private Disruptor<Event> disruptor;
-    private RingBuffer<Event> ringBuffer;
+    private Disruptor<EventExchangeHolder> disruptor;
+    private RingBuffer<EventExchangeHolder> ringBuffer;
     private ThroughputTracker throughputTracker = null;
     private boolean isTraceEnabled;
 
@@ -71,6 +75,7 @@ public class StreamJunction implements EventBufferHolder {
                           SiddhiAppContext siddhiAppContext) {
         this.streamDefinition = streamDefinition;
         this.bufferSize = bufferSize;
+        this.batchSize = bufferSize;
         this.executorService = executorService;
         this.siddhiAppContext = siddhiAppContext;
         if (siddhiAppContext.getStatisticsManager() != null) {
@@ -86,6 +91,28 @@ public class StreamJunction implements EventBufferHolder {
                 String bufferSizeString = annotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_BUFFER_SIZE);
                 if (bufferSizeString != null) {
                     this.bufferSize = Integer.parseInt(bufferSizeString);
+                }
+                String workersString = annotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_WORKERS);
+                if (workersString != null) {
+                    this.workers = Integer.parseInt(workersString);
+                    if (workers <= 0) {
+                        throw new SiddhiAppCreationException("Annotation element '" +
+                                SiddhiConstants.ANNOTATION_ELEMENT_WORKERS + "' cannot be negative or zero, " +
+                                "but found, '" + workers + "'.", annotation.getQueryContextStartIndex(),
+                                annotation.getQueryContextEndIndex(), siddhiAppContext.getName(),
+                                siddhiAppContext.getSiddhiAppString());
+                    }
+                }
+                String batchSizeString = annotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_MAX_BATCH_SIZE);
+                if (batchSizeString != null) {
+                    this.batchSize = Integer.parseInt(batchSizeString);
+                    if (batchSize <= 0) {
+                        throw new SiddhiAppCreationException("Annotation element '" +
+                                SiddhiConstants.ANNOTATION_ELEMENT_MAX_BATCH_SIZE + "' cannot be negative or zero, " +
+                                "but found, '" + batchSize + "'.", annotation.getQueryContextStartIndex(),
+                                annotation.getQueryContextEndIndex(), siddhiAppContext.getName(),
+                                siddhiAppContext.getSiddhiAppString());
+                    }
                 }
             }
 
@@ -109,8 +136,9 @@ public class StreamJunction implements EventBufferHolder {
                 }
                 long sequenceNo = ringBuffer.next();
                 try {
-                    Event existingEvent = ringBuffer.get(sequenceNo);
-                    existingEvent.copyFrom(complexEventList);
+                    EventExchangeHolder eventExchangeHolder = ringBuffer.get(sequenceNo);
+                    eventExchangeHolder.getEvent().copyFrom(complexEventList);
+                    eventExchangeHolder.getAndSetIsProcessed(false);
                 } finally {
                     ringBuffer.publish(sequenceNo);
                 }
@@ -141,8 +169,9 @@ public class StreamJunction implements EventBufferHolder {
         if (disruptor != null) {
             long sequenceNo = ringBuffer.next();
             try {
-                Event existingEvent = ringBuffer.get(sequenceNo);
-                existingEvent.copyFrom(event);
+                EventExchangeHolder eventExchangeHolder = ringBuffer.get(sequenceNo);
+                eventExchangeHolder.getEvent().copyFrom(event);
+                eventExchangeHolder.getAndSetIsProcessed(false);
             } finally {
                 ringBuffer.publish(sequenceNo);
             }
@@ -164,8 +193,9 @@ public class StreamJunction implements EventBufferHolder {
             for (Event event : events) {   // Todo : optimize for arrays
                 long sequenceNo = ringBuffer.next();
                 try {
-                    Event existingEvent = ringBuffer.get(sequenceNo);
-                    existingEvent.copyFrom(event);
+                    EventExchangeHolder eventExchangeHolder = ringBuffer.get(sequenceNo);
+                    eventExchangeHolder.getEvent().copyFrom(event);
+                    eventExchangeHolder.getAndSetIsProcessed(false);
                 } finally {
                     ringBuffer.publish(sequenceNo);
                 }
@@ -185,8 +215,9 @@ public class StreamJunction implements EventBufferHolder {
             for (Event event : events) {   // Todo : optimize for arrays
                 long sequenceNo = ringBuffer.next();
                 try {
-                    Event existingEvent = ringBuffer.get(sequenceNo);
-                    existingEvent.copyFrom(event);
+                    EventExchangeHolder eventExchangeHolder = ringBuffer.get(sequenceNo);
+                    eventExchangeHolder.getEvent().copyFrom(event);
+                    eventExchangeHolder.getAndSetIsProcessed(false);
                 } finally {
                     ringBuffer.publish(sequenceNo);
                 }
@@ -210,10 +241,11 @@ public class StreamJunction implements EventBufferHolder {
         if (disruptor != null) {
             long sequenceNo = ringBuffer.next();
             try {
-                Event existingEvent = ringBuffer.get(sequenceNo);
-                existingEvent.setTimestamp(timeStamp);
-                existingEvent.setIsExpired(false);
-                System.arraycopy(data, 0, existingEvent.getData(), 0, data.length);
+                EventExchangeHolder eventExchangeHolder = ringBuffer.get(sequenceNo);
+                eventExchangeHolder.getAndSetIsProcessed(false);
+                eventExchangeHolder.getEvent().setTimestamp(timeStamp);
+                eventExchangeHolder.getEvent().setIsExpired(false);
+                System.arraycopy(data, 0, eventExchangeHolder.getEvent().getData(), 0, data.length);
             } finally {
                 ringBuffer.publish(sequenceNo);
             }
@@ -232,7 +264,8 @@ public class StreamJunction implements EventBufferHolder {
             for (Constructor constructor : Disruptor.class.getConstructors()) {
                 if (constructor.getParameterTypes().length == 5) {      // If new disruptor classes available
                     ProducerType producerType = ProducerType.MULTI;
-                    disruptor = new Disruptor<Event>(new SiddhiEventFactory(streamDefinition.getAttributeList().size()),
+                    disruptor = new Disruptor<EventExchangeHolder>(
+                            new EventExchangeHolderFactory(streamDefinition.getAttributeList().size()),
                             bufferSize, executorService, producerType,
                             new BlockingWaitStrategy());
                     disruptor.handleExceptionsWith(siddhiAppContext.getDisruptorExceptionHandler());
@@ -240,12 +273,19 @@ public class StreamJunction implements EventBufferHolder {
                 }
             }
             if (disruptor == null) {
-                disruptor = new Disruptor<Event>(new SiddhiEventFactory(streamDefinition.getAttributeList().size()),
+                disruptor = new Disruptor<EventExchangeHolder>(
+                        new EventExchangeHolderFactory(streamDefinition.getAttributeList().size()),
                         bufferSize, executorService);
                 disruptor.handleExceptionsWith(siddhiAppContext.getDisruptorExceptionHandler());
             }
-            for (Receiver receiver : receivers) {
-                disruptor.handleEventsWith(new StreamHandler(receiver));
+            if (workers > 0) {
+                for (int i = 0; i < workers; i++) {
+                    disruptor.handleEventsWith(new StreamHandler(receivers, batchSize, streamDefinition.getId(),
+                            siddhiAppContext.getName()));
+                }
+            } else {
+                disruptor.handleEventsWith(new StreamHandler(receivers, batchSize, streamDefinition.getId(),
+                        siddhiAppContext.getName()));
             }
             ringBuffer = disruptor.start();
         } else {
@@ -315,27 +355,11 @@ public class StreamJunction implements EventBufferHolder {
 
         void receive(Event event);
 
-        void receive(Event event, boolean endOfBatch);
+        void receive(List<Event> events);
 
         void receive(long timeStamp, Object[] data);
 
         void receive(Event[] events);
-    }
-
-    /**
-     * Interface to be implemented to receive events via handlers.
-     */
-    public class StreamHandler implements EventHandler<Event> {
-
-        private Receiver receiver;
-
-        public StreamHandler(Receiver receiver) {
-            this.receiver = receiver;
-        }
-
-        public void onEvent(Event event, long sequence, boolean endOfBatch) {
-            receiver.receive(event, endOfBatch);
-        }
     }
 
     /**

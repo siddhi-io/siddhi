@@ -40,8 +40,6 @@ public abstract class StreamCallback implements StreamJunction.Receiver {
     private AbstractDefinition streamDefinition;
     private SiddhiAppContext siddhiAppContext;
 
-    private List<Event> batchingEventBuffer = new ArrayList<Event>();
-
     @Override
     public String getStreamId() {
         return streamId;
@@ -83,18 +81,8 @@ public abstract class StreamCallback implements StreamJunction.Receiver {
     }
 
     @Override
-    public void receive(Event event, boolean endOfBatch) {
-        Event[] bufferedEvents = null;
-        synchronized (this) {
-            batchingEventBuffer.add(event);
-            if (endOfBatch) {
-                bufferedEvents = batchingEventBuffer.toArray(new Event[batchingEventBuffer.size()]);
-                batchingEventBuffer.clear();
-            }
-        }
-        if (bufferedEvents != null) {
-            receiveEvents(bufferedEvents);
-        }
+    public void receive(List<Event> events) {
+        receiveEvents(events.toArray(new Event[events.size()]));
     }
 
     public void receive(long timestamp, Object[] data) {
@@ -105,7 +93,8 @@ public abstract class StreamCallback implements StreamJunction.Receiver {
         try {
             receive(events);
         } catch (RuntimeException e) {
-            log.error("Error on sending events" + Arrays.deepToString(events), e);
+            log.error("Error on sending events " + Arrays.deepToString(events) +
+                    " in the SiddhiApp '" + siddhiAppContext.getName() + "'", e);
         }
     }
 
