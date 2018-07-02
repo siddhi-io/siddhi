@@ -86,7 +86,7 @@ The following parameters are configured in a stream definition.
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
-[Threading and Asynchronous](https://wso2.github.io/siddhi/api/latest/#threading-and-asynchronous) configuration section.
+[Threading and Asynchronous](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#threading-and-asynchronous) configuration section.
 
 **Example**
 ```sql
