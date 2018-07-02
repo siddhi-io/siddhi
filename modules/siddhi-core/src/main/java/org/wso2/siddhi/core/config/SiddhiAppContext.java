@@ -21,7 +21,6 @@ package org.wso2.siddhi.core.config;
 import com.lmax.disruptor.ExceptionHandler;
 import org.wso2.siddhi.core.function.Script;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
-import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
@@ -52,8 +51,6 @@ public class SiddhiAppContext {
     private ExecutorService executorService;
     private ScheduledExecutorService scheduledExecutorService;
     private List<EternalReferencedHolder> eternalReferencedHolders;
-    private List<Scheduler> schedulers;
-
     private SnapshotService snapshotService;
 
     private ThreadBarrier threadBarrier = null;
@@ -68,7 +65,6 @@ public class SiddhiAppContext {
 
     public SiddhiAppContext() {
         this.eternalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
-        this.schedulers = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
     }
 
@@ -130,14 +126,6 @@ public class SiddhiAppContext {
 
     public synchronized void addEternalReferencedHolder(EternalReferencedHolder eternalReferencedHolder) {
         eternalReferencedHolders.add(eternalReferencedHolder);
-    }
-
-    public List<Scheduler> getSchedulers() {
-        return Collections.unmodifiableList(new ArrayList<>(schedulers));
-    }
-
-    public synchronized void addScheduler(Scheduler scheduler) {
-        schedulers.add(scheduler);
     }
 
     public List<EternalReferencedHolder> getEternalReferencedHolders() {

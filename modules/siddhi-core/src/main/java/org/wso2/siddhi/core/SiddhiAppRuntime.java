@@ -48,7 +48,6 @@ import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.table.record.RecordTableHandler;
 import org.wso2.siddhi.core.table.record.RecordTableHandlerManager;
 import org.wso2.siddhi.core.util.ExceptionUtil;
-import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.StringUtil;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
@@ -359,9 +358,6 @@ public class SiddhiAppRuntime {
             for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
                 eternalReferencedHolder.start();
             }
-            for (Scheduler scheduler : siddhiAppContext.getSchedulers()) {
-                scheduler.start();
-            }
             for (List<Sink> sinks : sinkMap.values()) {
                 for (Sink sink : sinks) {
                     sink.connectWithRetry();
@@ -461,9 +457,7 @@ public class SiddhiAppRuntime {
             }
             table.shutdown();
         }
-        for (Scheduler scheduler : siddhiAppContext.getSchedulers()) {
-            scheduler.stop();
-        }
+
         for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
             try {
                 eternalReferencedHolder.stop();
