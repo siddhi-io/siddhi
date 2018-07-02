@@ -62,6 +62,8 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_ATTRIBUTES = "Attributes";
     public static final String ANNOTATION_PAYLOAD = "Payload";
     public static final String ANNOTATION_ELEMENT_BUFFER_SIZE = "buffer.size";
+    public static final String ANNOTATION_ELEMENT_WORKERS = "workers";
+    public static final String ANNOTATION_ELEMENT_MAX_BATCH_SIZE = "batch.size.max";
     public static final String ANNOTATION_ELEMENT_IDLE_TIME = "idle.time";
     public static final String ANNOTATION_ELEMENT_INCREMENT = "increment";
     public static final String ANNOTATION_ELEMENT_TYPE = "type";

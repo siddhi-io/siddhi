@@ -25,6 +25,8 @@ import org.wso2.siddhi.core.query.input.StateMultiProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.state.StateStreamRuntime;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 
+import java.util.List;
+
 /**
  * {@link org.wso2.siddhi.core.stream.StreamJunction.Receiver} implementation to receive events into sequence queries
  * with multiple streams.
@@ -74,8 +76,8 @@ public class SequenceMultiProcessStreamReceiver extends StateMultiProcessStreamR
     }
 
     @Override
-    public void receive(Event event, boolean endOfBatch) {
-        super.receive(event, endOfBatch);
+    public void receive(List<Event> events) {
+        super.receive(events);
     }
 
     @Override

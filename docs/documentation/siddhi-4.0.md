@@ -85,13 +85,8 @@ The following parameters are configured in a stream definition.
 | `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camalCase`.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
-To improve the throughput of a stream, you can add the `@Async` annotation as shown in the extract below.
-
-```sql
-@Async(buffer.size = '1024') 
-define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
-```
-This annotation adds a disruptor to allow events in the stream to be processed in parallel via multiple threads. You can specify the number of events to be kept in the buffer before they are directed to the threads to be processed in parallel. This is done via the `buffer.size` parameter.
+To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
+[Threading and Asynchronous](https://wso2.github.io/siddhi/api/latest/#threading-and-asynchronous) configuration section.
 
 **Example**
 ```sql
@@ -2701,11 +2696,26 @@ To implement the siddhi-store extension archetype, follow the procedure below:
 
 ## Configuring and Monitoring Siddhi Applications
 
-This section explains how to use the `@app` annotation to generate statistics for Siddhi applications as well as improve the performance of Siddhi applications.
+### Threading and Asynchronous
 
-### @app:statistics
+When `@Async` annotation is added to the Streams it enable the Streams to introduce asynchronous and multi-threading 
+behaviour. 
 
-To evaluate the performance of an application, you can enable the statistics of a Siddhi application to be published. This is done via the `@app:statistics` annotation that can be added to a Siddhi application as shown in the following example.
+```sql
+@Async(buffer.size='256', workers='2', batch.size.max='5')
+define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
+```
+The following elements are configured with this annotation.
+
+|Annotation| Description| Default Value|
+| ------------- |-------------|-------------|
+|`buffer.size`|The size of the event buffer that will be used to handover the execution to other threads. | - |
+|`workers`|Number of worker threads that will be be used to process the buffered events.|`1`|
+|`batch.size.max`|The maximum number of events that will be processed together by a worker thread at a given time.| `buffer.size`|
+
+### Statistics
+
+Use `@app:statistics` app level annotation to evaluate the performance of an application, you can enable the statistics of a Siddhi application to be published. This is done via the `@app:statistics` annotation that can be added to a Siddhi application as shown in the following example.
 
 ```sql
 @app:statistics(reporter = 'console')
@@ -2743,7 +2753,6 @@ e.g., the following is a Siddhi application that includes the `@app` annotation 
 @App:name('TestMetrics')
 @App:Statistics(reporter = 'console')
 
-@Async(buffer.size='64')
 define stream TestStream (message string);
 
 @info(name='logQuery')
@@ -2804,9 +2813,9 @@ Statistics are reported for this Siddhi application as shown in the extract belo
 
 </details>
 
-### @app:playback
+### Event Playback
 
-When this annotation is included, the timestamp of the event (specified via an attribute) is treated as the current time. This results in events being processed faster.
+When `@app:playback` annotation is added to the app, the timestamp of the event (specified via an attribute) is treated as the current time. This results in events being processed faster.
 The following elements are configured with this annotation.
 
 |Annotation| Description|
