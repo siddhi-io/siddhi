@@ -191,7 +191,7 @@ Here the HTTP source is configured to receive events on all network interfaces o
 it is secured via basic authentication.
 
 ```sql
-@source(type='http', receiver.url='http://0.0.0.0:8080/foo', is.basic.auth.enabled='true', 
+@source(type='http', receiver.url='http://0.0.0.0:8080/foo', basic.auth.enabled='true', 
   @map(type='json'))
 define stream InputStream (name string, age int, country string);
 ```
