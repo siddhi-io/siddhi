@@ -356,22 +356,20 @@ public class SiddhiAppRuntime {
             if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
                 siddhiAppContext.getStatisticsManager().startReporting();
             }
-            for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
-                eternalReferencedHolder.start();
-            }
             for (Scheduler scheduler : siddhiAppContext.getSchedulers()) {
                 scheduler.start();
+            }
+            for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
+                eternalReferencedHolder.start();
             }
             for (List<Sink> sinks : sinkMap.values()) {
                 for (Sink sink : sinks) {
                     sink.connectWithRetry();
                 }
             }
-
             for (Table table : tableMap.values()) {
                 table.connectWithRetry();
             }
-
             for (StreamJunction streamJunction : streamJunctionMap.values()) {
                 streamJunction.startProcessing();
             }
@@ -380,19 +378,18 @@ public class SiddhiAppRuntime {
                     source.connectWithRetry();
                 }
             }
-
             for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
                 aggregationRuntime.getRecreateInMemoryData().recreateInMemoryData();
             }
             running = true;
         } catch (Throwable t) {
             log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', triggering shutdown process. "
-                    + t.getMessage());
+                    + t.getMessage(), t);
             try {
                 shutdown();
             } catch (Throwable t1) {
                 log.error("Error shutting down partially started Siddhi App '" + siddhiAppContext.getName() + "', "
-                        + t1.getMessage());
+                        + t1.getMessage(), t);
             }
         }
     }
@@ -461,9 +458,6 @@ public class SiddhiAppRuntime {
             }
             table.shutdown();
         }
-        for (Scheduler scheduler : siddhiAppContext.getSchedulers()) {
-            scheduler.stop();
-        }
         for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
             try {
                 eternalReferencedHolder.stop();
@@ -475,7 +469,9 @@ public class SiddhiAppRuntime {
             }
         }
         inputManager.disconnect();
-
+        for (Scheduler scheduler : siddhiAppContext.getSchedulers()) {
+            scheduler.stop();
+        }
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
