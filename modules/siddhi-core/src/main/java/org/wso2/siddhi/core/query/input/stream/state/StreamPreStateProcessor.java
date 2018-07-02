@@ -163,10 +163,10 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     }
 
     public void init() {
-        if (isStartState && (!initialized || this.thisStatePostProcessor.nextEveryStatePerProcessor != null ||
+        if (isStartState && (!initialized || this.thisStatePostProcessor.nextEveryStatePreProcessor != null ||
                 (stateType == StateInputStream.Type.SEQUENCE &&
-                        this.thisStatePostProcessor.nextStatePerProcessor instanceof AbsentPreStateProcessor))) {
-            // For 'every' sequence, the 'thisStatePostProcessor.nextEveryStatePerProcessor != null' check is not enough
+                        this.thisStatePostProcessor.nextStatePreProcessor instanceof AbsentPreStateProcessor))) {
+            // For 'every' sequence, the 'thisStatePostProcessor.nextEveryStatePreProcessor != null' check is not enough
             StateEvent stateEvent = stateEventPool.borrowEvent();
             addState(stateEvent);
             initialized = true;
@@ -255,8 +255,8 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         if (isStartState && newAndEveryStateEventList.isEmpty()) {
             //        if (isStartState && stateType == StateInputStream.Type.SEQUENCE && newAndEveryStateEventList
             // .isEmpty()) {
-            if (stateType == StateInputStream.Type.SEQUENCE && thisStatePostProcessor.nextEveryStatePerProcessor ==
-                    null && !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePerProcessor)
+            if (stateType == StateInputStream.Type.SEQUENCE && thisStatePostProcessor.nextEveryStatePreProcessor ==
+                    null && !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePreProcessor)
                     .pendingStateEventList.isEmpty()) {
                 return;
             }

@@ -27,9 +27,9 @@ public interface PostStateProcessor extends Processor {
 
     int getStateId();
 
-    void setNextStatePreProcessor(PreStateProcessor nextStatePerProcessor);
+    void setNextStatePreProcessor(PreStateProcessor nextStatePreProcessor);
 
-    void setNextEveryStatePerProcessor(PreStateProcessor nextEveryStatePerProcessor);
+    void setNextEveryStatePreProcessor(PreStateProcessor nextEveryStatePreProcessor);
 
     void setCallbackPreStateProcessor(CountPreStateProcessor callbackPreStateProcessor);
 

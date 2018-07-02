@@ -238,7 +238,7 @@ public class StateEvent implements ComplexEvent {
     @Override
     public String toString() {
         return "StateEvent{" +
-                "streamEventSize=" + Arrays.toString(streamEvents) +
+                "streamEvents=" + Arrays.toString(streamEvents) +
                 ", timestamp=" + timestamp +
                 ", type=" + type +
                 ", outputData=" + Arrays.toString(outputData) +
