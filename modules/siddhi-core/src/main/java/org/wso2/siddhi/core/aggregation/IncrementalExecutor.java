@@ -190,6 +190,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
             } else {
                 if (timestamp >= nextEmitTime) {
                     nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, timeZone);
+                    minTimestampInBuffer = nextEmitTime;
                     dispatchAggregateEvents(startTimeOfAggregates);
                     if (!isProcessingOnExternalTime) {
                         sendTimerEvent(timeZone);
@@ -536,6 +537,9 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                                                       long emitTimeOfLatestEventInTable) {
         this.isRootAndLoadedFromTable = isRootAndLoadedFromTable;
         this.nextEmitTime = emitTimeOfLatestEventInTable;
+        if (this.bufferSize == 0) {
+            this.minTimestampInBuffer = emitTimeOfLatestEventInTable;
+        }
     }
 
     @Override
