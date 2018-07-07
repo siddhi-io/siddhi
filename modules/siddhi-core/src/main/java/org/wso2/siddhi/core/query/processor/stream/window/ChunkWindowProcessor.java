@@ -36,6 +36,7 @@ import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.HashMap;
@@ -83,11 +84,11 @@ public class ChunkWindowProcessor extends WindowProcessor implements FindablePro
         if (outputExpectsExpiredEvents) {
             expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
-//        if (attributeExpressionExecutors.length != 0) {
-//            throw new SiddhiAppValidationException(
-//                    "Chunk window should not have any parameters, but found " + attributeExpressionExecutors.length +
-//                    " input attributes");
-//        }
+        if (attributeExpressionExecutors.length != 0) {
+            throw new SiddhiAppValidationException(
+                    "Chunk window should not have any parameters, but found " + attributeExpressionExecutors.length +
+                    " input attributes");
+        }
     }
 
     @Override
