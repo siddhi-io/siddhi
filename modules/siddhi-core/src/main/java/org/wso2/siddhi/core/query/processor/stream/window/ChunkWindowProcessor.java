@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of {@link WindowProcessor} which represent a Batch Window operating based on pre-defined length.
+ * Implementation of {@link WindowProcessor} which represent a Chunk Window that groups incoming events chunks.
  */
 @Extension(
         name = "chunk",
