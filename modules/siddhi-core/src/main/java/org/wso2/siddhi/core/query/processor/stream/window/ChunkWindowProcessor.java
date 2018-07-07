@@ -19,8 +19,6 @@ package org.wso2.siddhi.core.query.processor.stream.window;
 
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -50,26 +48,20 @@ import java.util.Map;
 @Extension(
         name = "chunk",
         namespace = "",
-        description = "A chunk window that holds a number of events specified as the windowLength. " +
-                      "The window is updated each time a batch of events that equals the number " +
-                      "specified as the windowLength arrives.",
+        description = "A window that holds an incoming events chunk. When a new set of events arrives the previously " +
+                      "arrived old events will be expired. Chunk window can be used to aggregate events.",
         parameters = {
-                @Parameter(name = "max.chunk.size",
-                           description = "The number of events the window should tumble.",
-                           type = {DataType.INT}),
+                // TODO: 7/7/18 Add parameter chunk.size.max
         },
         examples = {
                 @Example(
-                        syntax = "define window cseEventWindow (symbol string, price float, volume int) " +
-                                 "lengthBatch(10) output all events;\n\n" +
-                                 "@info(name = 'query0')\n" +
-                                 "from cseEventStream\n" +
-                                 "insert into cseEventWindow;\n\n" +
-                                 "@info(name = 'query1')\n" +
-                                 "from cseEventWindow\n" +
-                                 "select symbol, sum(price) as price\n" +
-                                 "insert all events into outputStream ;",
-                        description = "This will processing 10 events as a batch and out put all events."
+                        syntax =
+                                "define stream consumerItemStream (itemId string, price float)\n\n" +
+                                "from consumerItemStream#window.chunk()\n" +
+                                "select price, str:groupConcat(itemId) as itemIds\n" +
+                                "group by price\n" +
+                                "insert into outputStream;",
+                        description = "This will output comma separated items IDs that have the same price. "
                 )
         }
 )
