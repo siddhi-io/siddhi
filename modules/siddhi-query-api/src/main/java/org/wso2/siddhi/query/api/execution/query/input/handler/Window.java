@@ -29,7 +29,7 @@ import java.util.Arrays;
 public class Window implements StreamHandler, Extension, SiddhiElement {
 
     private static final long serialVersionUID = 1L;
-    private String namespace = "";
+    private String namespace;
     private String function;
     private Expression[] parameters;
     private int[] queryContextStartIndex;
