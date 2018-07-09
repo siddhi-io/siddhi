@@ -44,21 +44,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of {@link WindowProcessor} which represent a Chunk Window that groups incoming events chunks.
+ * Implementation of {@link WindowProcessor} which represent a Batch Window that aggregate batch of incoming events
+ * together.
  */
 @Extension(
-        name = "chunk",
+        name = "batch",
         namespace = "",
-        description = "A window that holds an incoming events chunk. When a new set of events arrives the previously " +
-                      "arrived old events will be expired. Chunk window can be used to aggregate events.",
+        description = "A window that holds an incoming events batch. When a new set of events arrives, the previously" +
+                      " arrived old events will be expired. Batch window can be used to aggregate events.",
         parameters = {
-                // TODO: 7/7/18 Add parameter chunk.size.max
+                // TODO: 7/7/18 Add parameter batch.size.max
         },
         examples = {
                 @Example(
                         syntax =
                                 "define stream consumerItemStream (itemId string, price float)\n\n" +
-                                "from consumerItemStream#window.chunk()\n" +
+                                "from consumerItemStream#window.batch()\n" +
                                 "select price, str:groupConcat(itemId) as itemIds\n" +
                                 "group by price\n" +
                                 "insert into outputStream;",
@@ -66,7 +67,7 @@ import java.util.Map;
                 )
         }
 )
-public class ChunkWindowProcessor extends WindowProcessor implements FindableProcessor {
+public class BatchWindowProcessor extends WindowProcessor implements FindableProcessor {
 
     private SnapshotableStreamEventQueue currentEventQueue;
     private SnapshotableStreamEventQueue expiredEventQueue = null;
@@ -86,7 +87,7 @@ public class ChunkWindowProcessor extends WindowProcessor implements FindablePro
         }
         if (attributeExpressionExecutors.length != 0) {
             throw new SiddhiAppValidationException(
-                    "Chunk window should not have any parameters, but found " + attributeExpressionExecutors.length +
+                    "Batch window should not have any parameters, but found " + attributeExpressionExecutors.length +
                     " input attributes");
         }
     }
