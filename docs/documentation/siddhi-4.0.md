@@ -2199,9 +2199,10 @@ and granularity.
 
 ```sql
 from <aggregation>
+<select condition>?
+within <time range>
+per <time granularity>
 select <attribute name>, <attribute name>, ...
-<within>?
-<per>?
 <group by>? 
 <having>? 
 <order by>? 
@@ -2228,8 +2229,7 @@ This query retrieves daily aggregations within the time range `"2014-02-15 00:00
 from TradeAggregation
   within "2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30" 
   per "days" 
-select symbol, total, avgPrice 
-insert into AggregateStockStream;
+select symbol, total, avgPrice ;
 ```
 
 This query retrieves hourly aggregations of "FB" symbol within the day `2014-02-15`.
@@ -2239,8 +2239,7 @@ from TradeAggregation
   on symbol == "FB" 
   within "2014-02-15 **:**:** +05:30"
   per "hours" 
-select symbol, total, avgPrice 
-insert into AggregateStockStream;
+select symbol, total, avgPrice;
 ```
 
 ### Insert
