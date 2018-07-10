@@ -51,7 +51,8 @@ import java.util.Map;
         name = "batch",
         namespace = "",
         description = "A window that holds an incoming events batch. When a new set of events arrives, the previously" +
-                      " arrived old events will be expired. Batch window can be used to aggregate events.",
+                      " arrived old events will be expired. Batch window can be used to aggregate events that comes " +
+                      "in batches.",
         parameters = {
                 // TODO: 7/7/18 Add parameter batch.size.max
         },
@@ -63,7 +64,8 @@ import java.util.Map;
                                 "select price, str:groupConcat(itemId) as itemIds\n" +
                                 "group by price\n" +
                                 "insert into outputStream;",
-                        description = "This will output comma separated items IDs that have the same price. "
+                        description = "This will output comma separated items IDs that have the same price for each " +
+                                      "incoming batch of events."
                 )
         }
 )
