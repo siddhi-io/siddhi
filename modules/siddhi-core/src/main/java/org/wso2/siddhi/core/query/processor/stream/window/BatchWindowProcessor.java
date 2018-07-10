@@ -69,7 +69,6 @@ import java.util.Map;
 )
 public class BatchWindowProcessor extends WindowProcessor implements FindableProcessor {
 
-    private SnapshotableStreamEventQueue currentEventQueue;
     private SnapshotableStreamEventQueue expiredEventQueue = null;
     private boolean outputExpectsExpiredEvents;
     private SiddhiAppContext siddhiAppContext;
@@ -81,7 +80,6 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
                         boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiAppContext = siddhiAppContext;
-        currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (outputExpectsExpiredEvents) {
             expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
@@ -142,7 +140,6 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
-            state.put("CurrentEventQueue", currentEventQueue.getSnapshot());
             state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
             state.put("ResetEvent", resetEvent);
         }
@@ -151,9 +148,6 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
 
     @Override
     public synchronized void restoreState(Map<String, Object> state) {
-        currentEventQueue.clear();
-        currentEventQueue.restore((SnapshotStateList) state.get("CurrentEventQueue"));
-
         if (expiredEventQueue != null) {
             expiredEventQueue.clear();
             expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
