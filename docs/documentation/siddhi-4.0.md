@@ -2173,6 +2173,7 @@ The `SELECT` store query retrieves records from the specified table or window, b
 
 ```sql
 from <table/window>
+<on condition>?
 select <attribute name>, <attribute name>, ...
 <group by>? 
 <having>? 
@@ -2186,8 +2187,8 @@ This query retrieves room numbers and types of the rooms starting from room no 1
 
 ```sql
 from roomTypeTable
-select roomNo, type
 on roomNo >= 10;
+select roomNo, type
 ```
 
 ### _(Aggregation)_ Select 
@@ -2199,9 +2200,10 @@ and granularity.
 
 ```sql
 from <aggregation>
+<on condition>?
+within <time range>
+per <time granularity>
 select <attribute name>, <attribute name>, ...
-<within>?
-<per>?
 <group by>? 
 <having>? 
 <order by>? 
@@ -2228,8 +2230,7 @@ This query retrieves daily aggregations within the time range `"2014-02-15 00:00
 from TradeAggregation
   within "2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30" 
   per "days" 
-select symbol, total, avgPrice 
-insert into AggregateStockStream;
+select symbol, total, avgPrice ;
 ```
 
 This query retrieves hourly aggregations of "FB" symbol within the day `2014-02-15`.
@@ -2239,8 +2240,7 @@ from TradeAggregation
   on symbol == "FB" 
   within "2014-02-15 **:**:** +05:30"
   per "hours" 
-select symbol, total, avgPrice 
-insert into AggregateStockStream;
+select symbol, total, avgPrice;
 ```
 
 ### Insert
