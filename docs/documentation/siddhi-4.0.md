@@ -2173,6 +2173,7 @@ The `SELECT` store query retrieves records from the specified table or window, b
 
 ```sql
 from <table/window>
+<on condition>?
 select <attribute name>, <attribute name>, ...
 <group by>? 
 <having>? 
@@ -2186,8 +2187,8 @@ This query retrieves room numbers and types of the rooms starting from room no 1
 
 ```sql
 from roomTypeTable
-select roomNo, type
 on roomNo >= 10;
+select roomNo, type
 ```
 
 ### _(Aggregation)_ Select 
@@ -2199,7 +2200,7 @@ and granularity.
 
 ```sql
 from <aggregation>
-<select condition>?
+<on condition>?
 within <time range>
 per <time granularity>
 select <attribute name>, <attribute name>, ...
