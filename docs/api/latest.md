@@ -1780,7 +1780,7 @@ insert all events into outputStream;
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@sink(type="inMemory", topic="<STRING>", @map(...)))
+@sink(type="inMemory", topic="<STRING>", @map(...))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1806,7 +1806,7 @@ insert all events into outputStream;
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-@sink(type='inMemory', @map(type='passThrough'),
+@sink(type='inMemory', @map(type='passThrough'))
 define stream BarStream (symbol string, price float, volume long)
 ```
 <p style="word-wrap: break-word">In this example BarStream uses inMemory transport which emit the Siddhi events internally without using external transport and transformation.</p>
@@ -1817,7 +1817,7 @@ define stream BarStream (symbol string, price float, volume long)
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@sink(type="log", priority="<STRING>", prefix="<STRING>", @map(...)))
+@sink(type="log", priority="<STRING>", prefix="<STRING>", @map(...))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
