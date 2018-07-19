@@ -47,7 +47,7 @@ import java.util.Map;
         parameters = @Parameter(name = "topic", type = DataType.STRING, description = "Event will be delivered to all" +
                 "the subscribers of the same topic"),
         examples = @Example(
-                syntax = "@sink(type='inMemory', @map(type='passThrough'),\n" +
+                syntax = "@sink(type='inMemory', @map(type='passThrough'))\n" +
                         "define stream BarStream (symbol string, price float, volume long)",
                 description = "In this example BarStream uses inMemory transport which emit the Siddhi " +
                         "events internally without using external transport and transformation."
