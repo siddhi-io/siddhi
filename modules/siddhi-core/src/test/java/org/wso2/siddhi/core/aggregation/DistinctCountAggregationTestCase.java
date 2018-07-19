@@ -54,8 +54,8 @@ public class DistinctCountAggregationTestCase {
     }
 
     @Test
-    public void incrementalStreamProcessorTest46() throws InterruptedException {
-        LOG.info("incrementalStreamProcessorTest46: testing distinctCount incremental aggregator");
+    public void incrementalStreamProcessorTest1() throws InterruptedException {
+        LOG.info("incrementalStreamProcessorTest1: testing distinctCount incremental aggregator");
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String stockStream =
