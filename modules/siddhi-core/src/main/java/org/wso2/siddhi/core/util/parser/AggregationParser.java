@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.util.parser;
 
 import org.wso2.siddhi.core.aggregation.AggregationRuntime;
 import org.wso2.siddhi.core.aggregation.IncrementalAggregationProcessor;
+import org.wso2.siddhi.core.aggregation.IncrementalDataPurging;
 import org.wso2.siddhi.core.aggregation.IncrementalExecutor;
 import org.wso2.siddhi.core.aggregation.RecreateInMemoryData;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
@@ -195,7 +196,9 @@ public class AggregationParser {
             QueryParserHelper.updateVariablePosition(incomingMetaStreamEvent, incomingVariableExpressionExecutors);
             QueryParserHelper.updateVariablePosition(processedMetaStreamEvent, processVariableExpressionExecutors);
 
-
+            IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
+            incrementalDataPurging.init(aggregationDefinition);
+            incrementalDataPurging.run();
             List<TimePeriod.Duration> incrementalDurations = getSortedPeriods(aggregationDefinition.getTimePeriod());
             Map<TimePeriod.Duration, Table> aggregationTables = initDefaultTables(aggregatorName, incrementalDurations,
                     processedMetaStreamEvent.getOutputStreamDefinition(), siddhiAppRuntimeBuilder,
