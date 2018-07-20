@@ -196,9 +196,6 @@ public class AggregationParser {
             QueryParserHelper.updateVariablePosition(incomingMetaStreamEvent, incomingVariableExpressionExecutors);
             QueryParserHelper.updateVariablePosition(processedMetaStreamEvent, processVariableExpressionExecutors);
 
-            IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
-            incrementalDataPurging.init(aggregationDefinition);
-            incrementalDataPurging.run();
             List<TimePeriod.Duration> incrementalDurations = getSortedPeriods(aggregationDefinition.getTimePeriod());
             Map<TimePeriod.Duration, Table> aggregationTables = initDefaultTables(aggregatorName, incrementalDurations,
                     processedMetaStreamEvent.getOutputStreamDefinition(), siddhiAppRuntimeBuilder,
@@ -283,6 +280,9 @@ public class AggregationParser {
                         SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT);
 
             }
+            IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
+            incrementalDataPurging.init(aggregationDefinition,new StreamEventPool(processedMetaStreamEvent, 10)
+                    ,aggregationTables);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(rootIncrementalExecutor,
                     incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,

@@ -4,6 +4,9 @@ import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 
 import java.util.SortedMap;
 
+/**
+ *
+ * **/
 public class IncrementalPurgeCompiledCondition implements CompiledCondition {
     private String compiledQuery;
     private SortedMap<Integer, Object> parameters;
@@ -15,8 +18,9 @@ public class IncrementalPurgeCompiledCondition implements CompiledCondition {
 
     @Override
     public CompiledCondition cloneCompilation(String key) {
-        return new IncrementalPurgeCompiledCondition(this.compiledQuery,this.parameters);
+        return new IncrementalPurgeCompiledCondition(this.compiledQuery, this.parameters);
     }
+
     public String getCompiledQuery() {
         return compiledQuery;
     }
