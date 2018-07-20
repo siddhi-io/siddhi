@@ -29,7 +29,7 @@ import java.util.Arrays;
 public class Window implements StreamHandler, Extension, SiddhiElement {
 
     private static final long serialVersionUID = 1L;
-    private String namespace = "";
+    private String namespace;
     private String function;
     private Expression[] parameters;
     private int[] queryContextStartIndex;
@@ -37,18 +37,16 @@ public class Window implements StreamHandler, Extension, SiddhiElement {
 
     public Window(String namespace, String functionName, Expression[] parameters) {
         this.function = functionName;
-        this.parameters = Arrays.copyOfRange(parameters, 0, parameters.length);
+        this.parameters = (parameters == null) ? null : Arrays.copyOfRange(parameters, 0, parameters.length);
         this.namespace = namespace;
     }
 
     public Window(String namespace, String functionName) {
-        this.function = functionName;
-        this.namespace = namespace;
+        this(namespace, functionName, null);
     }
 
     public Window(String functionName, Expression[] parameters) {
-        this.function = functionName;
-        this.parameters = Arrays.copyOfRange(parameters, 0, parameters.length);
+        this("", functionName, parameters);
     }
 
     public Window(String functionName) {
@@ -60,7 +58,7 @@ public class Window implements StreamHandler, Extension, SiddhiElement {
     }
 
     public Expression[] getParameters() {
-        return Arrays.copyOfRange(parameters, 0, parameters.length);
+        return (parameters == null) ? null : Arrays.copyOfRange(parameters, 0, parameters.length);
     }
 
     public String getNamespace() {

@@ -1785,7 +1785,7 @@ The above syntax includes the following:
 |Item                          |Description
 ---------------                |---------
 |`@BufferSize`                 |This annotation is optional. The default value is buffer size 0. <br/>It is used to identify the number of 'expired' events to retain <br/>in a buffer, to handle out of order event processing. It's an optional parameter <br/>which is applicable, only if aggregation is based on external timestamp (since events <br/>aggregated based on event arrival time cannot be out of order). An event is identified <br/>as 'expired' with relation to the latest event's timestamp and the most granular duration <br/>for which aggregation is calculated. For example, if aggregation is for sec...year, the <br/>most granular duration is seconds. Hence, if buffer size is 3 and events for 51st second, <br/>52nd second, 53rd second and 54th second arrive, all of the older aggregations (for <br/>seconds 51, 52 and 53) would be kept in the buffer (since latest event is for 54th second)
-|`@IgnoreEventsOlderThanBuffer`|This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is the default value as well), an event <br/>older than the buffer would be aggregated with the oldest event in buffer. If <br/>the value is true, an event older than the buffer would be dropped. This is an optional annotation.
+|`@IgnoreEventsOlderThanBuffer`|This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is the default value as well), an event <br/>older than the buffer would be aggregated with the oldest event in buffer. If <br/>the value is true, an event older than the buffer would be dropped. This is an optional annotation. Default value is false.
 |`@store`                      |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
 |`<aggregator name>`           |This specifies a unique name for the aggregation so that it can be referred <br/>when accessing aggregate results.
 |`<input stream>`              |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
@@ -2173,6 +2173,7 @@ The `SELECT` store query retrieves records from the specified table or window, b
 
 ```sql
 from <table/window>
+<on condition>?
 select <attribute name>, <attribute name>, ...
 <group by>? 
 <having>? 
@@ -2186,8 +2187,8 @@ This query retrieves room numbers and types of the rooms starting from room no 1
 
 ```sql
 from roomTypeTable
-select roomNo, type
 on roomNo >= 10;
+select roomNo, type
 ```
 
 ### _(Aggregation)_ Select 
@@ -2199,9 +2200,10 @@ and granularity.
 
 ```sql
 from <aggregation>
+<on condition>?
+within <time range>
+per <time granularity>
 select <attribute name>, <attribute name>, ...
-<within>?
-<per>?
 <group by>? 
 <having>? 
 <order by>? 
@@ -2228,8 +2230,7 @@ This query retrieves daily aggregations within the time range `"2014-02-15 00:00
 from TradeAggregation
   within "2014-02-15 00:00:00 +05:30", "2014-03-16 00:00:00 +05:30" 
   per "days" 
-select symbol, total, avgPrice 
-insert into AggregateStockStream;
+select symbol, total, avgPrice ;
 ```
 
 This query retrieves hourly aggregations of "FB" symbol within the day `2014-02-15`.
@@ -2239,8 +2240,7 @@ from TradeAggregation
   on symbol == "FB" 
   within "2014-02-15 **:**:** +05:30"
   per "hours" 
-select symbol, total, avgPrice 
-insert into AggregateStockStream;
+select symbol, total, avgPrice;
 ```
 
 ### Insert
