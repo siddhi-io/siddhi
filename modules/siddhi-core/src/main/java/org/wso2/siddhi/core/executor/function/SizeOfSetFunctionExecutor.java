@@ -96,6 +96,9 @@ public class SizeOfSetFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected Object execute(Object data) {
+        if (data == null) {
+            return 0;
+        }
         if (!(data instanceof Set)) {
             throw new SiddhiAppRuntimeException("Input to sizeOfSet() function should be an instance of " +
                     "java.util.Set, but found " + data.getClass().getCanonicalName());
