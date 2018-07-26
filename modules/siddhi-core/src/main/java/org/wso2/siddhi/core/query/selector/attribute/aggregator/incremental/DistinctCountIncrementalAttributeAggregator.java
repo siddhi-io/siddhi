@@ -44,8 +44,8 @@ import org.wso2.siddhi.query.api.expression.Expression;
                 type = {DataType.LONG}),
         examples = @Example(
                 syntax = " define aggregation cseEventAggregation\n from cseEventStream\n" +
-                        " select distinctcount(symbol) as countEvents,\n aggregate by timeStamp every sec ... hour;",
-                description = "distinctcount(symbol) returns the distinct count of all the symbols based on their " +
+                        " select distinctCount(symbol) as countEvents,\n aggregate by timeStamp every sec ... hour;",
+                description = "distinctCount(symbol) returns the distinct count of all the symbols based on their " +
                         "arrival and expiry. The count is calculated for sec, min and hour durations."
         )
 )
@@ -64,7 +64,7 @@ public class DistinctCountIncrementalAttributeAggregator extends IncrementalAttr
                 || attributeType.equals(Attribute.Type.INT) || attributeType.equals(Attribute.Type.LONG)
                 || attributeType.equals(Attribute.Type.STRING) || attributeType.equals(Attribute.Type.BOOL)) {
             set = new Attribute("AGG_SET_".concat(attributeName), Attribute.Type.OBJECT);
-            setInitialValue = Expression.function("initSet", Expression.variable(attributeName));
+            setInitialValue = Expression.function("createSet", Expression.variable(attributeName));
         } else {
             throw new SiddhiAppRuntimeException(
                     "Distinct count aggregation cannot be executed on attribute type " + attributeType.toString());

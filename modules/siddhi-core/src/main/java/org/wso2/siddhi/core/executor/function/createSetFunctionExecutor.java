@@ -35,10 +35,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Executor class for initSet function. Function execution logic is implemented in execute here.
+ * Executor class for createSet function. Function execution logic is implemented in execute here.
  */
 @Extension(
-        name = "initSet",
+        name = "createSet",
         namespace = "",
         description = "Includes the given input parameter in a java.util.HashSet and returns the set. " +
                 "This function executor was written to be used in distinct-set aggregate calculation hence " +
@@ -54,30 +54,30 @@ import java.util.Set;
                 type = {DataType.OBJECT}),
         examples = @Example(
                 syntax = "from stockStream \n" +
-                        "select initSet(symbol) as initialSet \n" +
+                        "select createSet(symbol) as initialSet \n" +
                         "insert into initStream;",
                 description = "For every incoming stockStream event, the initStream stream will produce a set object " +
                         "having only one element: the symbol in the incoming stockStream."
         )
 )
-public class InitSetFunctionExecutor extends FunctionExecutor {
+public class createSetFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                         SiddhiAppContext siddhiAppContext) {
         if (attributeExpressionExecutors.length != 1) {
-            throw new SiddhiAppValidationException("initSet() function has to have exactly 1 parameter, currently " +
+            throw new SiddhiAppValidationException("createSet() function has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
         }
         if (!isAttributeTypeSupported(attributeExpressionExecutors[0].getReturnType())) {
-            throw new OperationNotSupportedException("initSet() function not supported for type: " +
+            throw new OperationNotSupportedException("createSet() function not supported for type: " +
                     attributeExpressionExecutors[0].getReturnType());
         }
     }
 
     @Override
     protected Object execute(Object[] data) {
-        return null; //Since the initSet function takes in only 1 parameter, this method does not get called.
+        return null; //Since the createSet function takes in only 1 parameter, this method does not get called.
         // Hence, not implemented.
     }
 
