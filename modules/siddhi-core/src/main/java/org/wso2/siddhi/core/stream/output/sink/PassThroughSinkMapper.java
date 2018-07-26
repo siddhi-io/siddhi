@@ -38,7 +38,7 @@ import java.util.Map;
         namespace = "sinkMapper",
         description = "Pass-through mapper passed events (Event[]) through without any mapping or modifications.",
         examples = @Example(
-                syntax = "@sink(type='inMemory', @map(type='passThrough'),\n" +
+                syntax = "@sink(type='inMemory', @map(type='passThrough'))\n" +
                         "define stream BarStream (symbol string, price float, volume long);",
                 description = "In the following example BarStream uses passThrough outputmapper which emit " +
                         "Siddhi event directly without any transformation into sink."
