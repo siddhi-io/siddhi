@@ -42,11 +42,11 @@ import java.util.Set;
         description = "Aggregates sets into a union.",
         parameters =
         @Parameter(name = "set",
-                description = "The java.util.HashSet object that needs to be added into the union set.",
+                description = "The java.util.Set object that needs to be added into the union set.",
                 type = {DataType.OBJECT})
         ,
         returnAttributes = @ReturnAttribute(
-                description = "Returns a java.util.HashSet object which is the union of aggregated sets",
+                description = "Returns a java.util.Set object which is the union of aggregated sets",
                 type = {DataType.OBJECT}),
         examples = @Example(
                 syntax = "from stockStream \n" +
@@ -62,6 +62,10 @@ import java.util.Set;
 )
 public class UnionAttributeAggregator extends AttributeAggregator {
 
+    /**
+     * This map aggregates the count per each distinct element
+     */
+    private Map<Object,Integer> counter = new HashMap<>();
     private Set set = new HashSet();
 
     /**
@@ -90,9 +94,14 @@ public class UnionAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object processAdd(Object data) {
-        Set inputSet = (HashSet) data;
+        Set inputSet = (Set) data;
         for (Object o : inputSet) {
             set.add(o);
+            if (counter.get(o) == null) {
+                counter.put(o, 1);
+            } else {
+                counter.put(o, counter.get(o) + 1);
+            }
         }
         // Creating a new set object as the returned set reference is kept until the aggregated values are
         // inserted into the store
@@ -103,35 +112,24 @@ public class UnionAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object processAdd(Object[] data) {
-        for (Object obj : data) {
-            Set newSet = (HashSet) obj;
-            for (Object o : newSet) {
-                set.add(o);
-            }
-        }
-        // Creating a new set object as the returned set reference is kept until the aggregated values are
-        // inserted into the store
-        Set returnSet = new HashSet();
-        returnSet.addAll(set);
-        return returnSet;
+        //Union can have only one input parameter, hence this will not be invoked.
+        return null;
     }
 
     @Override
     public Object processRemove(Object data) {
-        Set newSet = (HashSet) data;
+        Set newSet = (Set) data;
         for (Object o : newSet) {
-            set.remove(o);
-        }
-        Set returnSet = new HashSet();
-        returnSet.addAll(set);
-        return returnSet;
-    }
-
-    @Override
-    public Object processRemove(Object[] data) {
-        for (Object obj : data) {
-            Set newSet = (HashSet) obj;
-            for (Object o : newSet) {
+            Integer currentCount = counter.get(o);
+            if (currentCount == null) {
+                //means o does not exist in the counter map or in the set hence doing nothing
+            } else if (currentCount == 0) {
+                throw new IllegalStateException("Error occurred when removing element from " +
+                        "union-set for element: " + o.toString());
+            } else  {
+                counter.put(o, counter.get(o) - 1);
+            }
+            if (counter.get(o) == 0) {
                 set.remove(o);
             }
         }
@@ -141,11 +139,16 @@ public class UnionAttributeAggregator extends AttributeAggregator {
     }
 
     @Override
+    public Object processRemove(Object[] data) {
+        //Union can have only one input parameter, hence this will not be invoked.
+        return null;
+    }
+
+    @Override
     public Object reset() {
         set.clear();
         Set returnSet = new HashSet();
-        returnSet.addAll(set);
-        return returnSet;
+        return returnSet;   // returning an empty set.
     }
 
     @Override
