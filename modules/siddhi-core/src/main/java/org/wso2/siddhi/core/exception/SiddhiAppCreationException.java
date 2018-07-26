@@ -18,6 +18,7 @@
 package org.wso2.siddhi.core.exception;
 
 import org.wso2.siddhi.core.config.SiddhiAppContext;
+import org.wso2.siddhi.query.api.SiddhiElement;
 import org.wso2.siddhi.query.api.exception.SiddhiAppContextException;
 import org.wso2.siddhi.query.api.util.ExceptionUtil;
 
@@ -64,6 +65,14 @@ public class SiddhiAppCreationException extends RuntimeException implements Sidd
         super(message);
         this.message = message;
         setQueryContextIndexIfAbsent(queryContextStartIndex, queryContextEndIndex, siddhiAppName, siddhiAppString);
+    }
+
+    public SiddhiAppCreationException(String message, SiddhiElement siddhiElement,
+                                      SiddhiAppContext siddhiAppContext) {
+        super(message);
+        this.message = message;
+        setQueryContextIndexIfAbsent(siddhiElement.getQueryContextStartIndex(), siddhiElement.getQueryContextEndIndex(),
+                siddhiAppContext.getName(), siddhiAppContext.getSiddhiAppString());
     }
 
     public SiddhiAppCreationException(String message, Throwable throwable, int[] queryContextStartIndex,
