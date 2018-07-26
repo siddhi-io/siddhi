@@ -40,9 +40,7 @@ import java.util.Set;
 @Extension(
         name = "createSet",
         namespace = "",
-        description = "Includes the given input parameter in a java.util.HashSet and returns the set. " +
-                "This function executor was written to be used in distinct-set aggregate calculation hence " +
-                "this might not be useful for a Siddhi app developer.",
+        description = "Includes the given input parameter in a java.util.HashSet and returns the set. ",
         parameters = {
                 @Parameter(name = "input",
                         description = "The input that needs to be added into the set.",
