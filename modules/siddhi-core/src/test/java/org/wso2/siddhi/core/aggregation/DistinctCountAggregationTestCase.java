@@ -65,7 +65,7 @@ public class DistinctCountAggregationTestCase {
                 "define aggregation stockAggregation " +
                         "from stockStream " +
                         "select distinctCount(symbol) as distinctCnt " +
-                        "aggregate by timestamp every day ;" +
+                        "aggregate by timestamp every sec...year ;" +
 
                         "define stream inputStream (symbol string); " +
 
