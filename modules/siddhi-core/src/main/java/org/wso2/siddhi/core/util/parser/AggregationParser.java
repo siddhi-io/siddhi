@@ -392,17 +392,13 @@ public class AggregationParser {
             List<ExpressionExecutor> incomingExpressionExecutors,
             List<IncrementalAttributeAggregator> incrementalAttributeAggregators, List<Variable> groupByVariableList,
             List<Expression> outputExpressions) {
-        ExpressionExecutor[] timeStampTimeZoneExecutors = setTimeStampTimeZoneExecutors(aggregationDefinition,
+        ExpressionExecutor timestampExecutor = setTimeStampExecutor(aggregationDefinition,
                 siddhiAppContext, tableMap, incomingVariableExpressionExecutors, aggregatorName,
                 incomingMetaStreamEvent);
-        ExpressionExecutor timestampExecutor = timeStampTimeZoneExecutors[0];
-        ExpressionExecutor timeZoneExecutor = timeStampTimeZoneExecutors[1];
+
         Attribute timestampAttribute = new Attribute("AGG_TIMESTAMP", Attribute.Type.LONG);
         incomingMetaStreamEvent.addOutputData(timestampAttribute);
         incomingExpressionExecutors.add(timestampExecutor);
-
-        incomingMetaStreamEvent.addOutputData(new Attribute("AGG_TIMEZONE", Attribute.Type.STRING));
-        incomingExpressionExecutors.add(timeZoneExecutor);
 
         AbstractDefinition incomingLastInputStreamDefinition = incomingMetaStreamEvent.getLastInputDefinition();
         for (Variable groupByVariable : groupByVariableList) {
@@ -575,23 +571,20 @@ public class AggregationParser {
         }
     }
 
-    private static ExpressionExecutor[] setTimeStampTimeZoneExecutors(
+    private static ExpressionExecutor setTimeStampExecutor(
             AggregationDefinition aggregationDefinition,
             SiddhiAppContext siddhiAppContext,
             Map<String, Table> tableMap,
             List<VariableExpressionExecutor> variableExpressionExecutors,
             String aggregatorName, MetaStreamEvent metaStreamEvent) {
         Expression timestampExpression = aggregationDefinition.getAggregateAttribute();
-        Expression timeZoneExpression;
         ExpressionExecutor timestampExecutor;
-        ExpressionExecutor timeZoneExecutor;
-        boolean isSystemTimeBased = false;
 
         // Retrieve the external timestamp. If not given, this would return null.
         // When execution is based on system time, the system's time zone would be used.
         if (timestampExpression == null) {
-            isSystemTimeBased = true;
             timestampExpression = AttributeFunction.function("currentTimeMillis", null);
+
         }
         timestampExecutor = ExpressionParser.parseExpression(timestampExpression,
                 metaStreamEvent, 0, tableMap, variableExpressionExecutors,
@@ -601,30 +594,14 @@ public class AggregationParser {
                     "timestampInMilliseconds", timestampExpression);
             timestampExecutor = ExpressionParser.parseExpression(expression, metaStreamEvent, 0, tableMap,
                     variableExpressionExecutors, siddhiAppContext, false, 0, aggregatorName);
-            timeZoneExpression = AttributeFunction.function("incrementalAggregator",
-                    "getTimeZone", timestampExpression);
-            timeZoneExecutor = ExpressionParser.parseExpression(timeZoneExpression, metaStreamEvent, 0, tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, aggregatorName);
-        } else if (timestampExecutor.getReturnType() == Attribute.Type.LONG) {
-            if (isSystemTimeBased) {
-                timeZoneExpression = AttributeFunction.function("incrementalAggregator",
-                        "getTimeZone", null);
-                timeZoneExecutor = ExpressionParser.parseExpression(timeZoneExpression, metaStreamEvent, 0, tableMap,
-                        variableExpressionExecutors, siddhiAppContext, false, 0, aggregatorName);
-            } else {
-                timeZoneExpression = Expression.value("+00:00"); //If long value is given, it's assumed that the
-                // time zone is GMT
-                timeZoneExecutor = ExpressionParser.parseExpression(timeZoneExpression, metaStreamEvent, 0, tableMap,
-                        variableExpressionExecutors, siddhiAppContext, false, 0, aggregatorName);
-            }
-        } else {
+        } else if (timestampExecutor.getReturnType() != Attribute.Type.LONG) {
             throw new SiddhiAppCreationException(
                     "AggregationDefinition '" + aggregationDefinition.getId() + "'s aggregateAttribute expects " +
                             "long or string, but found " + timestampExecutor.getReturnType() + ". " +
                             "Hence, can't create the siddhi app '" + siddhiAppContext.getName() + "'",
                     timestampExpression.getQueryContextStartIndex(), timestampExpression.getQueryContextEndIndex());
         }
-        return new ExpressionExecutor[]{timestampExecutor, timeZoneExecutor};
+        return timestampExecutor;
     }
 
     private static boolean isRange(TimePeriod timePeriod) {
