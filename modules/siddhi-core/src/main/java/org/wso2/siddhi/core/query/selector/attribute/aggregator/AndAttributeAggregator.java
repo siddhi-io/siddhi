@@ -37,7 +37,7 @@ import java.util.Map;
 @Extension(
         name = "and",
         namespace = "",
-        description = "Returns the results of AND for all the events.",
+        description = "Returns the results of AND operation for all the events.",
         parameters = {
                 @Parameter(name = "arg",
                         description = "The value that needs to be AND operation.",
