@@ -69,8 +69,6 @@ public class MaxIncrementalAttributeAggregator extends IncrementalAttributeAggre
             this.baseAttributes = new Attribute[]{new Attribute("AGG_MAX_".concat(attributeName), attributeType)};
             this.baseAttributesInitialValues = new Expression[]{Expression.variable(attributeName)};
             this.returnType = attributeType;
-
-            assert baseAttributes.length == baseAttributesInitialValues.length;
         } else {
             throw new SiddhiAppRuntimeException(
                     "Max aggregation cannot be executed on attribute type " + attributeType.toString());

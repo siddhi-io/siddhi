@@ -61,8 +61,6 @@ public class CountIncrementalAttributeAggregator extends IncrementalAttributeAgg
 
         this.baseAttributes = new Attribute[]{count};
         this.baseAttributesInitialValues = new Expression[]{countInitialValue};
-
-        assert baseAttributes.length == baseAttributesInitialValues.length;
     }
 
     @Override

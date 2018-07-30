@@ -84,8 +84,6 @@ public class SumIncrementalAttributeAggregator extends IncrementalAttributeAggre
         this.baseAttributes = new Attribute[]{sum};
         this.baseAttributesInitialValues = new Expression[]{sumInitialValue}; // Original attribute names
         // used for initial values, since those would be executed using original meta
-
-        assert baseAttributes.length == baseAttributesInitialValues.length;
     }
 
     @Override
