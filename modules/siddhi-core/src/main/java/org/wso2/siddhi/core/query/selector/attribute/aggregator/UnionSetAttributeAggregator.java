@@ -37,9 +37,10 @@ import java.util.Set;
  * {@link AttributeAggregator} to return a union of an aggregation of sets.
  */
 @Extension(
-        name = "union",
+        name = "unionSet",
         namespace = "",
-        description = "Aggregates sets into a union.",
+        description = "Union multiple sets. \n This attribute aggregator maintains a union of sets. " +
+                "The given input set is put into the union set and the union set is returned.",
         parameters =
         @Parameter(name = "set",
                 description = "The java.util.Set object that needs to be added into the union set.",
@@ -50,17 +51,17 @@ import java.util.Set;
                 type = {DataType.OBJECT}),
         examples = @Example(
                 syntax = "from stockStream \n" +
-                        "select initSet(symbol) as initialSet \n" +
+                        "select createSet(symbol) as initialSet \n" +
                         "insert into initStream \n\n" +
                         "" +
                         "from initStream#window.timeBatch(10 sec) \n" +
-                        "select union(initialSet) as distinctSymbols \n" +
+                        "select unionSet(initialSet) as distinctSymbols \n" +
                         "insert into distinctStockStream;",
                 description = "distinctStockStream will return the set object which contains the distinct set of " +
                         "stock symbols received during a sliding window of 10 seconds."
         )
 )
-public class UnionAttributeAggregator extends AttributeAggregator {
+public class UnionSetAttributeAggregator extends AttributeAggregator {
 
     /**
      * This map aggregates the count per each distinct element
@@ -79,11 +80,11 @@ public class UnionAttributeAggregator extends AttributeAggregator {
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                         SiddhiAppContext siddhiAppContext) {
         if (attributeExpressionExecutors.length != 1) {
-            throw new OperationNotSupportedException("union aggregator has to have exactly 1 parameter, currently " +
+            throw new OperationNotSupportedException("unionSet aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
         }
         if (attributeExpressionExecutors[0].getReturnType() != Attribute.Type.OBJECT) {
-            throw new OperationNotSupportedException("Parameter passed to union aggregator should be of type" +
+            throw new OperationNotSupportedException("Parameter passed to unionSet aggregator should be of type" +
                     " object but found: " + attributeExpressionExecutors[0].getReturnType());
         }
     }
@@ -97,10 +98,11 @@ public class UnionAttributeAggregator extends AttributeAggregator {
         Set inputSet = (Set) data;
         for (Object o : inputSet) {
             set.add(o);
-            if (counter.get(o) == null) {
+            Integer currentCount = counter.get(o);
+            if (currentCount == null) {
                 counter.put(o, 1);
             } else {
-                counter.put(o, counter.get(o) + 1);
+                counter.put(o, currentCount + 1);
             }
         }
         // Creating a new set object as the returned set reference is kept until the aggregated values are
@@ -112,7 +114,7 @@ public class UnionAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object processAdd(Object[] data) {
-        //Union can have only one input parameter, hence this will not be invoked.
+        //UnionSet can have only one input parameter, hence this will not be invoked.
         return null;
     }
 
@@ -127,7 +129,7 @@ public class UnionAttributeAggregator extends AttributeAggregator {
                 throw new IllegalStateException("Error occurred when removing element from " +
                         "union-set for element: " + o.toString());
             } else  {
-                counter.put(o, counter.get(o) - 1);
+                counter.put(o, currentCount - 1);
             }
             if (counter.get(o) == 0) {
                 set.remove(o);
@@ -140,7 +142,7 @@ public class UnionAttributeAggregator extends AttributeAggregator {
 
     @Override
     public Object processRemove(Object[] data) {
-        //Union can have only one input parameter, hence this will not be invoked.
+        //UnionSet can have only one input parameter, hence this will not be invoked.
         return null;
     }
 

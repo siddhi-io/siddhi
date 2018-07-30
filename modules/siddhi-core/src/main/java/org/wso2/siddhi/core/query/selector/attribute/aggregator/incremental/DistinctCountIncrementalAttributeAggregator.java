@@ -72,8 +72,6 @@ public class DistinctCountIncrementalAttributeAggregator extends IncrementalAttr
 
         this.baseAttributes = new Attribute[]{set};
         this.baseAttributesInitialValues = new Expression[]{setInitialValue};
-
-        assert baseAttributes.length == baseAttributesInitialValues.length;
     }
 
     @Override
@@ -93,7 +91,7 @@ public class DistinctCountIncrementalAttributeAggregator extends IncrementalAttr
 
     @Override
     public Expression[] getBaseAggregators() {
-        Expression setAggregator = Expression.function("union",
+        Expression setAggregator = Expression.function("unionSet",
                 Expression.variable(getBaseAttributes()[0].getName()));
         return new Expression[]{setAggregator};
     }
