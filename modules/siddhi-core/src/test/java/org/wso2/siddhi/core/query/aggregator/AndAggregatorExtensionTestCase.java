@@ -80,8 +80,6 @@ public class AndAggregatorExtensionTestCase {
         inputHandler.send(new Object[]{"messageId1", true, 35.75});
         inputHandler.send(new Object[]{"messageId1", true, 35.75});
         Thread.sleep(2000);
-
-        Thread.sleep(300);
         AssertJUnit.assertEquals(1, count);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
@@ -129,8 +127,6 @@ public class AndAggregatorExtensionTestCase {
         inputHandler.send(new Object[]{"messageId1", false, 35.75});
         inputHandler.send(new Object[]{"messageId1", false, 35.75});
         Thread.sleep(2000);
-
-        Thread.sleep(300);
         AssertJUnit.assertEquals(1, count);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
@@ -177,9 +173,56 @@ public class AndAggregatorExtensionTestCase {
         inputHandler.send(new Object[]{"messageId1", false, 35.75});
         inputHandler.send(new Object[]{"messageId1", true, 35.75});
         Thread.sleep(2000);
-
-        Thread.sleep(300);
         AssertJUnit.assertEquals(1, count);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = "testAndAggregatorTrueFalseScenario")
+    public void testAndAggregatorMoreEventsBatchScenario() throws InterruptedException {
+        log.info("AndAggregator TestCase 4");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String inStreamDefinition = "define stream cscStream(messageID string, isFraud bool, price double);";
+        String query = ("@info(name = 'query1') " +
+                "from cscStream#window.lengthBatch(2) " +
+                "select messageID, and(isFraud) as isValidTransaction " +
+                "group by messageID " +
+                "insert all events into outputStream;");
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
+
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventArrived = true;
+                for (Event event : events) {
+                    count++;
+                    switch (count) {
+                        case 1:
+                            AssertJUnit.assertEquals(false, event.getData(1));
+                            break;
+                        case 2:
+                            AssertJUnit.assertEquals(true, event.getData(1));
+                            break;
+                        default:
+                            AssertJUnit.fail();
+                    }
+                }
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cscStream");
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{"messageId1", false, 35.75});
+        inputHandler.send(new Object[]{"messageId1", true, 35.75});
+        inputHandler.send(new Object[]{"messageId1", true, 35.75});
+        inputHandler.send(new Object[]{"messageId1", true, 35.75});
+        Thread.sleep(2000);
+        AssertJUnit.assertEquals(2, count);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
