@@ -66,7 +66,7 @@ public class UnionSetAttributeAggregator extends AttributeAggregator {
     /**
      * This map aggregates the count per each distinct element
      */
-    private Map<Object,Integer> counter = new HashMap<>();
+    private Map<Object, Integer> counter = new HashMap<>();
     private Set set = new HashSet();
 
     /**
