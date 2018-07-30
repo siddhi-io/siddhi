@@ -1793,6 +1793,9 @@ The above syntax includes the following:
 |`by <timestamp attribute>`    |This clause is optional. This defines the attribute that should be used as<br/> the timestamp. If this clause is not used, the event time is used by default.<br/> The timestamp could be given as either a `string` or a `long` value. If it is a `long` value,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it is <br/>a `string` value, the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` .<br/>(e.g., `+05:30`, `-11:00`).
 |`<time periods>`              |The time periods can be given as a range separated by three dots, or as comma separated values. A range would be given as sec...year, where aggregation would be done per second, minute, hour, day, month and year. Comma separated values can be given as min, hour. However, skipping durations is not yet supported for comma separated values (e.g min, day is not a valid clause since hour duration has been skipped)
 
+!!! Note
+    Aggregation will be carried out at calendar start times for each granularity with GMT timezone
+
 **Example**
 
 This Siddhi Application defines an aggregation named `TradeAggregation` to calculate the average and sum for the `price` attribute of events arriving at the `TradeStream` stream. These aggregates are calculated per every time granularity in the range second-year.
