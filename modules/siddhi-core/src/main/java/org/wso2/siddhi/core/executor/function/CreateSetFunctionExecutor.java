@@ -58,7 +58,7 @@ import java.util.Set;
                         "having only one element: the symbol in the incoming stockStream."
         )
 )
-public class createSetFunctionExecutor extends FunctionExecutor {
+public class CreateSetFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
