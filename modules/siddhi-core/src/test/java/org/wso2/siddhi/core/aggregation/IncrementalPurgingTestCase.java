@@ -102,8 +102,8 @@ public class IncrementalPurgingTestCase {
                 "per \"seconds\"");
         AssertJUnit.assertNull(events);
         siddhiAppRuntime.shutdown();
-
     }
+
     @Test(dependsOnMethods = "incrementalPurgingTest2")
     public void incrementalPurgingTest3() throws InterruptedException {
         LOG.info("incrementalPurgingTest3");
@@ -156,6 +156,5 @@ public class IncrementalPurgingTestCase {
                 "per \"minutes\"");
         AssertJUnit.assertNull(events);
         siddhiAppRuntime.shutdown();
-
     }
 }
