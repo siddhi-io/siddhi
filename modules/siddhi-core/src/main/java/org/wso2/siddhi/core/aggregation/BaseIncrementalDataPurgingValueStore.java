@@ -23,17 +23,15 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 
 /**
- *
- * **/
+ * Store for maintain the base purging time
+ **/
 public class BaseIncrementalDataPurgingValueStore {
     private StreamEventPool streamEventPool;
     private long timestamp;
 
-    public BaseIncrementalDataPurgingValueStore(long timeStamp,
-                                                StreamEventPool streamEventPool) {
+    public BaseIncrementalDataPurgingValueStore(long timeStamp, StreamEventPool streamEventPool) {
         this.streamEventPool = streamEventPool;
         this.timestamp = timeStamp;
-
     }
 
     public StateEvent createStreamEvent(Object[] values) {

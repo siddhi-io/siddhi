@@ -248,7 +248,6 @@ public class IncrementalDataPurging implements Runnable {
             duration = durationNormalization(durationMatcher.group(0).trim());
             timeValue = Integer.parseInt(timeMatcher.group(0));
             try {
-
                 switch (duration) {
                     case SECONDS:
                         return Expression.Time.sec(timeValue).value();
