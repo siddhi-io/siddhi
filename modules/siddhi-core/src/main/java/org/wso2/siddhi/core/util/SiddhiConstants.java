@@ -114,6 +114,4 @@ public final class SiddhiConstants {
     public static final String NAMESPACE_PURGE = "purge";
     public static final String NAMESPACE_RETENTION = "retentionPeriod";
     public static final String NAMESPACE_INTERVAL = "interval";
-
-
 }
