@@ -201,8 +201,7 @@ public class IncrementalDataPurging implements Runnable {
                 BaseIncrementalDataPurgingValueStore(currentTime, streamEventPool);
 
         attribute = new Attribute(INTERNAL_AGG_TIMESTAMP_FIELD, Attribute.Type.LONG);
-        variableExpressionExecutor = new VariableExpressionExecutor(attribute,
-                0, 1);
+        variableExpressionExecutor = new VariableExpressionExecutor(attribute, 0, 1);
         variableExpressionExecutorList.add(variableExpressionExecutor);
 
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
