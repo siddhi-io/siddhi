@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.siddhi.core.aggregation;
 
 import org.apache.log4j.Logger;
@@ -179,8 +197,8 @@ public class IncrementalDataPurging implements Runnable {
         Attribute attribute;
         VariableExpressionExecutor variableExpressionExecutor;
         ComplexEventChunk<StateEvent> eventChunk = new ComplexEventChunk<>(true);
-        BaseIncrimentalDataPurgingValueStore baseIncrimentalDataPurgingValueStore = new
-                BaseIncrimentalDataPurgingValueStore(currentTime, streamEventPool);
+        BaseIncrementalDataPurgingValueStore baseIncrementalDataPurgingValueStore = new
+                BaseIncrementalDataPurgingValueStore(currentTime, streamEventPool);
 
         attribute = new Attribute(INTERNAL_AGG_TIMESTAMP_FIELD, Attribute.Type.LONG);
         variableExpressionExecutor = new VariableExpressionExecutor(attribute,
@@ -195,7 +213,7 @@ public class IncrementalDataPurging implements Runnable {
                         Compare.Operator.LESS_THAN, new Variable(INTERNAL_AGG_TIMESTAMP_FIELD));
                 purgeTime = currentTime - retentionPeriods.get(entry.getKey());
                 purgeTimes[0] = purgeTime;
-                StateEvent secEvent = baseIncrimentalDataPurgingValueStore.createStreamEvent(purgeTimes);
+                StateEvent secEvent = baseIncrementalDataPurgingValueStore.createStreamEvent(purgeTimes);
                 eventChunk.add(secEvent);
                 Table table = aggregationTables.get(entry.getKey());
                 try {
