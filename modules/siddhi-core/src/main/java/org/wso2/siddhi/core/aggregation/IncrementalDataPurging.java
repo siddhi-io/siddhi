@@ -187,7 +187,6 @@ public class IncrementalDataPurging implements Runnable {
                 0, 1);
         variableExpressionExecutorList.add(variableExpressionExecutor);
 
-
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
             if (retentionPeriods.get(entry.getKey()) != -1) {
                 Variable leftVariable = new Variable(INTERNAL_AGG_TIMESTAMP_FIELD);
@@ -215,7 +214,6 @@ public class IncrementalDataPurging implements Runnable {
                 }
             }
         }
-
     }
 
     /**
@@ -254,7 +252,6 @@ public class IncrementalDataPurging implements Runnable {
             throw new NoSuchDurationException("Provided retention parameter cannot be identified. retention period:  "
                     + value + ".");
         }
-
     }
 
     /**
@@ -316,7 +313,6 @@ public class IncrementalDataPurging implements Runnable {
         TableDefinition definition = table.getTableDefinition();
         return new MatchingMetaInfoHolder(metaStateEvent,
                 0, 1, deleteTableDefinition, definition, 0);
-
     }
 
     /**

@@ -56,7 +56,6 @@ public class BaseIncrementalValueStore implements Snapshotable {
             elementId = "IncrementalBaseStore-" + siddhiAppContext.getElementIdGenerator().createNewId();
         }
         siddhiAppContext.getSnapshotService().addSnapshotable(aggregatorName, this);
-
     }
 
     public void clearValues() {
