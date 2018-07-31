@@ -42,7 +42,7 @@ import java.util.Map;
         parameters = @Parameter(name = "topic", type = DataType.STRING, description = "Subscribes to sent on the "
                 + "given topic."),
         examples = @Example(
-                syntax = "@source(type='inMemory', @map(type='passThrough'),\n" +
+                syntax = "@source(type='inMemory', @map(type='passThrough'))\n" +
                         "define stream BarStream (symbol string, price float, volume long)",
                 description = "In this example BarStream uses inMemory transport which passes the received event " +
                         "internally without using external transport."

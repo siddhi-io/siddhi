@@ -83,8 +83,6 @@ public class AvgIncrementalAttributeAggregator extends IncrementalAttributeAggre
 
         this.baseAttributes = new Attribute[]{sum, count};
         this.baseAttributesInitialValues = new Expression[]{sumInitialValue, countInitialValue};
-
-        assert baseAttributes.length == baseAttributesInitialValues.length;
     }
 
     @Override

@@ -143,4 +143,35 @@ public class WindowDefinitionTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(query);
         siddhiAppRuntime.shutdown();
     }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void testEventWindow9() throws InterruptedException {
+        log.info("WindowDefinitionTestCase Test9");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String query = "@App:name(\"Factory-Analytics\")\n" +
+                "@App:description(\"Description of the plan\")\n" +
+                "\n" +
+                "define stream ProductionStream(name string, amount double);\n" +
+                "\n" +
+                "@sink(name='log')\n" +
+                "define stream AlertStream (amount double);\n" +
+                "\n" +
+                "-- @store(type='rdbms' , datasource='WSO2_CARBON_DB') \n" +
+                "@primaryKey('name') \n" +
+                "define table SummarizedTable (name string, total double);\n" +
+                "\n" +
+                "from ProductionStream[name == 'Coca-Cola' and amount < 12 ]\n" +
+                "select amount\n" +
+                "insert into AlertStream; \n" +
+                "\n" +
+                "from ProductionStream#window.time(5 min)\n" +
+                "select name, amount as total\n" +
+                "update or insert into SummarizedTable\n" +
+                "    on SummarizedTable.name == name;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(query);
+        siddhiAppRuntime.start();
+    }
 }
