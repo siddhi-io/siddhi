@@ -111,4 +111,7 @@ public final class SiddhiConstants {
     public static final String KEY_DELIMITER = ":-:";
     public static final String TRANSPORT_CHANNEL_CREATION_IDENTIFIER = "transportChannelCreationEnabled";
 
+    public static final String NAMESPACE_PURGE = "purge";
+    public static final String NAMESPACE_RETENTION = "retentionPeriod";
+    public static final String NAMESPACE_INTERVAL = "interval";
 }

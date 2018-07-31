@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.util.parser;
 
 import org.wso2.siddhi.core.aggregation.AggregationRuntime;
 import org.wso2.siddhi.core.aggregation.IncrementalAggregationProcessor;
+import org.wso2.siddhi.core.aggregation.IncrementalDataPurging;
 import org.wso2.siddhi.core.aggregation.IncrementalExecutor;
 import org.wso2.siddhi.core.aggregation.RecreateInMemoryData;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
@@ -103,8 +104,8 @@ public class AggregationParser {
                     aggregationDefinition.getQueryContextStartIndex(), aggregationDefinition.getQueryContextEndIndex());
         }
         if (streamDefinitionMap.get(aggregationDefinition.getBasicSingleInputStream().getStreamId()) == null) {
-           throw new SiddhiAppCreationException("Stream " + aggregationDefinition.getBasicSingleInputStream().
-                   getStreamId() + " has not been defined");
+            throw new SiddhiAppCreationException("Stream " + aggregationDefinition.getBasicSingleInputStream().
+                    getStreamId() + " has not been defined");
         }
         try {
             List<VariableExpressionExecutor> incomingVariableExpressionExecutors = new ArrayList<>();
@@ -195,7 +196,6 @@ public class AggregationParser {
             QueryParserHelper.updateVariablePosition(incomingMetaStreamEvent, incomingVariableExpressionExecutors);
             QueryParserHelper.updateVariablePosition(processedMetaStreamEvent, processVariableExpressionExecutors);
 
-
             List<TimePeriod.Duration> incrementalDurations = getSortedPeriods(aggregationDefinition.getTimePeriod());
             Map<TimePeriod.Duration, Table> aggregationTables = initDefaultTables(aggregatorName, incrementalDurations,
                     processedMetaStreamEvent.getOutputStreamDefinition(), siddhiAppRuntimeBuilder,
@@ -248,8 +248,8 @@ public class AggregationParser {
 
             //Recreate in-memory data from tables
             RecreateInMemoryData recreateInMemoryData = new RecreateInMemoryData(incrementalDurations,
-                        aggregationTables, incrementalExecutorMap, siddhiAppContext, processedMetaStreamEvent, tableMap,
-                        windowMap, aggregationMap);
+                    aggregationTables, incrementalExecutorMap, siddhiAppContext, processedMetaStreamEvent, tableMap,
+                    windowMap, aggregationMap);
 
             IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
             rootIncrementalExecutor.setScheduler(scheduler);
@@ -279,6 +279,15 @@ public class AggregationParser {
                         aggregationDefinition.getId(),
                         SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT);
 
+            }
+            //initialize incremental data purging
+            IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
+            incrementalDataPurging.init(aggregationDefinition, new StreamEventPool(processedMetaStreamEvent, 10)
+                    , aggregationTables, siddhiAppContext, tableMap);
+
+            //schedule purging if enabled
+            if (incrementalDataPurging.isPurgingEnabled()) {
+                IncrementalDataPurging.executeIncrementalDataPurging(siddhiAppContext, incrementalDataPurging);
             }
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(rootIncrementalExecutor,
