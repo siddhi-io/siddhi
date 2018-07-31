@@ -23,7 +23,7 @@ public class BaseIncrimentalDataPurgingValueStore {
         streamEvent.setTimestamp(timestamp);
         streamEvent.setOutputData(values);
 
-        StateEvent stateEvent = new StateEvent(1, 1);
+        StateEvent stateEvent = new StateEvent(2, 1);
         stateEvent.addEvent(0, streamEvent);
         return stateEvent;
     }
