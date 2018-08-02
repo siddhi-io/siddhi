@@ -23,6 +23,7 @@
     <test name="siddhi-core-tests" enabled="true" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.siddhi.core.aggregation.AggregationTestCase"/>
+            <class name="org.wso2.siddhi.core.aggregation.DistinctCountAggregationTestCase"/>
 
             <class name="org.wso2.siddhi.core.managment.AsyncTestCase"/>
             <class name="org.wso2.siddhi.core.managment.EventTestCase"/>
