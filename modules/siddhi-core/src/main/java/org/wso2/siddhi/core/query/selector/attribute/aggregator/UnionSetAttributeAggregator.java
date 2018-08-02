@@ -66,7 +66,7 @@ public class UnionSetAttributeAggregator extends AttributeAggregator {
     /**
      * This map aggregates the count per each distinct element
      */
-    private Map<Object,Integer> counter = new HashMap<>();
+    private Map<Object, Integer> counter = new HashMap<>();
     private Set set = new HashSet();
 
     /**
@@ -128,11 +128,10 @@ public class UnionSetAttributeAggregator extends AttributeAggregator {
             } else if (currentCount == 0) {
                 throw new IllegalStateException("Error occurred when removing element from " +
                         "union-set for element: " + o.toString());
+            } else if (currentCount == 1) {
+                set.remove(o);  
             } else  {
                 counter.put(o, currentCount - 1);
-            }
-            if (counter.get(o) == 0) {
-                set.remove(o);
             }
         }
         Set returnSet = new HashSet();
