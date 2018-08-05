@@ -252,6 +252,56 @@ The following is a list of currently supported sink types.
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a>
 
+#### Distributed Sink
+
+Distributed Sinks publish events from a defined stream to multiple destination endpoints using load balancing and partitioning strategies.
+
+Any ordinary sink can be used as a distributed sink. A distributed sink configuration allows you to define a common mapping to convert the Siddhi events for all its destination endpoints, 
+allows you to define a distribution strategy (e.g. `roundRobin`, `partitioned`), and configuration for each specific endpoint destination. 
+
+**Purpose**
+
+Distributed sinks provide a way to publish Siddhi events to multiple destination endpoints in the preferred data format. 
+
+**Syntax**
+
+To configure a stream to publish events via a distributed sink, add the sink configuration to a stream definition by adding the `@sink` 
+annotation and add the configuration parameters that are common of all the destination endpoints inside the `@sink` annotation 
+along with `@distribution` and `@destination` annotations providing distribution strategy and endpoint specific configurations. 
+The distributed sink syntax is as follows:
+
+*RoundRobin Distributed Sink*
+
+Publishes events to defined destinations in a round robin manner. 
+
+```sql
+@sink(type='sink_type', common_option_key1='common_option_value1', common_option_key2='{{common_option_value1}}',
+    @map(type='map_type', option_key1='option_value1', option_key2='{{option_value1}}',
+        @payload('payload_mapping')
+    )
+    @distribution(strategy='roundRobin',
+        @destination(specific_option_key1='specific_option_value1'),
+        @destination(specific_option_key1='specific_option_value2')))
+)
+define stream StreamName (attribute1 Type1, attributeN TypeN);
+```
+
+*Partitioned Distributed Sink*
+
+Publishes events to defined destinations by partitioning based on the hashcode of the events partition key. 
+
+```sql
+@sink(type='sink_type', common_option_key1='common_option_value1', common_option_key2='{{common_option_value1}}',
+    @map(type='map_type', option_key1='option_value1', option_key2='{{option_value1}}',
+        @payload('payload_mapping')
+    )
+    @distribution(strategy='partitioned', partitionKey='partition_key',
+        @destination(specific_option_key1='specific_option_value1'),
+        @destination(specific_option_key1='specific_option_value2')))
+)
+define stream StreamName (attribute1 Type1, attributeN TypeN);
+```
+
 #### Sink Mapper
 
 Each `@sink` annotation has a mapping denoted by the  `@map` annotation that converts the Siddhi event to an outgoing message format.
@@ -291,12 +341,23 @@ The following is a list of currently supported sink mapping types:
 
 **Example**
 
-This query publishes events from the `OutputStream` stream via the `HTTP` sink. Here the events are mapped to the default `JSON` payloads and sent to `http://localhost:8005/endpoint`
+Following query publishes events from the `OutputStream` stream to an `HTTP` endpoint. Here the events are mapped to the default `JSON` payloads and sent to `http://localhost:8005/endpoint`
  using the `POST` method, with the`Accept` header, and secured via basic authentication where `admin` is both the username and the password.
 ```sql
 @sink(type='http', publisher.url='http://localhost:8005/endpoint', method='POST', headers='Accept-Date:20/02/2017', 
   basic.auth.username='admin', basic.auth.password='admin', basic.auth.enabled='true',
   @map(type='json'))
+define stream OutputStream (name string, ang int, country string);
+```
+
+Following query publishes events from the `OutputStream` stream to multiple the `HTTP` endpoints using partitioning strategy. Here the events sent to either `http://localhost:8005/endpoint1`
+or `http://localhost:8006/endpoint2` based on the partitioning key `country`. It uses default `JSON` mapping, `POST` method, and used `admin` as both the username and the password when publishing to both the endpoints.
+```sql
+@sink(type='http', method='POST', basic.auth.username='admin', basic.auth.password='admin', 
+  basic.auth.enabled='true', @map(type='json'),
+  @distribution(strategy='partitioned', partitionKey='country',
+     @destination(publisher.url='http://localhost:8005/endpoint1'),
+     @destination(publisher.url='http://localhost:8006/endpoint2')))
 define stream OutputStream (name string, ang int, country string);
 ```
 
