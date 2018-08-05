@@ -141,7 +141,7 @@ The following is the list of source types that are currently supported:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter/">Twitter</a>
-
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a>
 #### Source Mapper
 
 Each `@source` configuration has a mapping denoted by the `@map` annotation that converts the incoming messages format to Siddhi events.
@@ -250,7 +250,57 @@ The following is a list of currently supported sink types.
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a>
 
+#### Distributed Sink
+
+Distributed Sinks publish events from a defined stream to multiple destination endpoints using load balancing and partitioning strategies.
+
+Any ordinary sink can be used as a distributed sink. A distributed sink configuration allows you to define a common mapping to convert the Siddhi events for all its destination endpoints, 
+allows you to define a distribution strategy (e.g. `roundRobin`, `partitioned`), and configuration for each specific endpoint destination. 
+
+**Purpose**
+
+Distributed sinks provide a way to publish Siddhi events to multiple destination endpoints in the preferred data format. 
+
+**Syntax**
+
+To configure a stream to publish events via a distributed sink, add the sink configuration to a stream definition by adding the `@sink` 
+annotation and add the configuration parameters that are common of all the destination endpoints inside the `@sink` annotation 
+along with `@distribution` and `@destination` annotations providing distribution strategy and endpoint specific configurations. 
+The distributed sink syntax is as follows:
+
+*RoundRobin Distributed Sink*
+
+Publishes events to defined destinations in a round robin manner. 
+
+```sql
+@sink(type='sink_type', common_option_key1='common_option_value1', common_option_key2='{{common_option_value1}}',
+    @map(type='map_type', option_key1='option_value1', option_key2='{{option_value1}}',
+        @payload('payload_mapping')
+    )
+    @distribution(strategy='roundRobin',
+        @destination(specific_option_key1='specific_option_value1'),
+        @destination(specific_option_key1='specific_option_value2')))
+)
+define stream StreamName (attribute1 Type1, attributeN TypeN);
+```
+
+*Partitioned Distributed Sink*
+
+Publishes events to defined destinations by partitioning based on the hashcode of the events partition key. 
+
+```sql
+@sink(type='sink_type', common_option_key1='common_option_value1', common_option_key2='{{common_option_value1}}',
+    @map(type='map_type', option_key1='option_value1', option_key2='{{option_value1}}',
+        @payload('payload_mapping')
+    )
+    @distribution(strategy='partitioned', partitionKey='partition_key',
+        @destination(specific_option_key1='specific_option_value1'),
+        @destination(specific_option_key1='specific_option_value2')))
+)
+define stream StreamName (attribute1 Type1, attributeN TypeN);
+```
 
 #### Sink Mapper
 
@@ -291,12 +341,23 @@ The following is a list of currently supported sink mapping types:
 
 **Example**
 
-This query publishes events from the `OutputStream` stream via the `HTTP` sink. Here the events are mapped to the default `JSON` payloads and sent to `http://localhost:8005/endpoint`
+Following query publishes events from the `OutputStream` stream to an `HTTP` endpoint. Here the events are mapped to the default `JSON` payloads and sent to `http://localhost:8005/endpoint`
  using the `POST` method, with the`Accept` header, and secured via basic authentication where `admin` is both the username and the password.
 ```sql
 @sink(type='http', publisher.url='http://localhost:8005/endpoint', method='POST', headers='Accept-Date:20/02/2017', 
   basic.auth.username='admin', basic.auth.password='admin', basic.auth.enabled='true',
   @map(type='json'))
+define stream OutputStream (name string, ang int, country string);
+```
+
+Following query publishes events from the `OutputStream` stream to multiple the `HTTP` endpoints using partitioning strategy. Here the events sent to either `http://localhost:8005/endpoint1`
+or `http://localhost:8006/endpoint2` based on the partitioning key `country`. It uses default `JSON` mapping, `POST` method, and used `admin` as both the username and the password when publishing to both the endpoints.
+```sql
+@sink(type='http', method='POST', basic.auth.username='admin', basic.auth.password='admin', 
+  basic.auth.enabled='true', @map(type='json'),
+  @distribution(strategy='partitioned', partitionKey='country',
+     @destination(publisher.url='http://localhost:8005/endpoint1'),
+     @destination(publisher.url='http://localhost:8006/endpoint2')))
 define stream OutputStream (name string, ang int, country string);
 ```
 
@@ -2460,7 +2521,7 @@ Siddhi supports following extension types:
     
     This allows events to be **collected, generated, dropped and expired anytime** by **altering** the event format by adding one or more attributes to it based on the given input parameters. 
     
-    Implemented by extending "org.wso2.siddhi.core.query.processor.stream.StreamProcessor".
+    Implemented by extending `org.wso2.siddhi.core.query.processor.stream.StreamProcessor`.
     
     Example :  
     
@@ -2470,57 +2531,57 @@ Siddhi supports following extension types:
 
 * **Sink**
 
-Sinks provide a way to publish Siddhi events to external systems in the preferred data format. Sinks publish events from the streams via multiple transports to external endpoints in various data formats.
+    Sinks provide a way to **publish Siddhi events to external systems** in the preferred data format. Sinks publish events from the streams via multiple transports to external endpoints in various data formats.
+    
+    Implemented by extending `org.wso2.siddhi.core.stream.output.sink.Sink`.
 
-Implemented by extending "org.wso2.siddhi.core.stream.output.sink.Sink".
-
-   Example : 
+    Example : 
 
     `@sink(type='sink_type', static_option_key1='static_option_value1')`
     
-To configure a stream to publish events via a sink, add the sink configuration to a stream definition by adding the @sink annotation with the required parameter values. The sink syntax is as above
+    To configure a stream to publish events via a sink, add the sink configuration to a stream definition by adding the @sink annotation with the required parameter values. The sink syntax is as above
 
 * **Source**
 
-Source allows Siddhi to consume events from external systems, and map the events to adhere to the associated stream. Sources receive events via multiple transports and in various data formats, and direct them into streams for processing.
-
-Implemented by extending "org.wso2.siddhi.core.stream.input.source.Source".
-
-   Example : 
-
-    `@source(type='source_type', static.option.key1='static_option_value1')`
+    Source allows Siddhi to **consume events from external systems**, and map the events to adhere to the associated stream. Sources receive events via multiple transports and in various data formats, and direct them into streams for processing.
     
-To configure a stream that consumes events via a source, add the source configuration to a stream definition by adding the @source annotation with the required parameter values. The source syntax is as above
+    Implemented by extending `org.wso2.siddhi.core.stream.input.source.Source`.
+    
+    Example : 
+    
+    `@source(type='source_type', static.option.key1='static_option_value1')`
+        
+    To configure a stream that consumes events via a source, add the source configuration to a stream definition by adding the @source annotation with the required parameter values. The source syntax is as above
 
 * **Store**
 
-You can use Store extension type to work with data/events stored in various data stores through the table abstraction. You can find more information about these extension types under the heading 'Extension types' in this document. 
-
-Implemented by extending "org.wso2.siddhi.core.table.record.AbstractRecordTable".
+    You can use Store extension type to work with data/events **stored in various data stores through the table abstraction**. You can find more information about these extension types under the heading 'Extension types' in this document. 
+    
+    Implemented by extending `org.wso2.siddhi.core.table.record.AbstractRecordTable`.
 
 * **Script**
 
-Scripts allow you to define a function operation that is not provided in Siddhi core or its extension. It is not required to write an extension to define the function logic. Scripts allow you to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function.
-
-Implemented by extending "org.wso2.siddhi.core.function.Script".
+    Scripts allow you to **define a function** operation that is not provided in Siddhi core or its extension. It is not required to write an extension to define the function logic. Scripts allow you to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function.
+    
+    Implemented by extending `org.wso2.siddhi.core.function.Script`.
 
 * **Source Mapper**
 
-Each @source configuration has a mapping denoted by the @map annotation that converts the incoming messages format to Siddhi events.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
+    Each `@source` configuration has a mapping denoted by the `@map` annotation that **converts the incoming messages format to Siddhi events**.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
+    
+    Implemented by extending `org.wso2.siddhi.core.stream.output.sink.SourceMapper`.
 
-Implemented by extending "org.wso2.siddhi.core.stream.output.sink.SourceMapper".
-
-   Example :
+    Example :
    
     `@map(type='map_type', static_option_key1='static_option_value1')`
 
 * **Sink Mapper**
 
-Each @source configuration has a mapping denoted by the @map annotation that converts the incoming messages format to Siddhi events.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
+    Each `@sink` configuration has a mapping denoted by the `@map` annotation that **converts the outgoing Siddhi events to configured messages format**.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
 
-Implemented by extending "org.wso2.siddhi.core.stream.output.sink.SinkMapper".
+    Implemented by extending `org.wso2.siddhi.core.stream.output.sink.SinkMapper`.
 
-   Example :
+    Example :
    
     `@map(type='map_type', static_option_key1='static_option_value1')`
 
@@ -2536,7 +2597,7 @@ insert into StockQuote
 
 **Available Extensions**
 
-Siddhi currently has several pre written extensions that are available <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">here</a>
+Siddhi currently has several pre written extensions that are available **<a target="_blank" href="https://wso2.github.io/siddhi/extensions/">here</a>**
  
 _We value your contribution on improving Siddhi and its extensions further._
 
