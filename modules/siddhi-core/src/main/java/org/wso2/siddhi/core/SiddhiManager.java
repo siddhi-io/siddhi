@@ -237,6 +237,16 @@ public class SiddhiManager {
         }
     }
 
+    /**
+     * Method to retrieve last revision for siddhi app by providing the name.
+     *
+     * @param siddhiAppName Name of the required Siddhi app
+     * @return revision
+     */
+    public String getLastRevision(String siddhiAppName) {
+        return siddhiContext.getPersistenceStore().getLastRevision(siddhiAppName);
+    }
+
     public void setIncrementalPersistenceStore(IncrementalPersistenceStore incrementalPersistenceStore) {
         this.siddhiContext.setIncrementalPersistenceStore(incrementalPersistenceStore);
     }
