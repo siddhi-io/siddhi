@@ -1794,7 +1794,7 @@ The above syntax includes the following:
 |`<time periods>`              |The time periods can be given as a range separated by three dots, or as comma separated values. A range would be given as sec...year, where aggregation would be done per second, minute, hour, day, month and year. Comma separated values can be given as min, hour. However, skipping durations is not yet supported for comma separated values (e.g min, day is not a valid clause since hour duration has been skipped)
 
 !!! Note
-    Aggregation will be carried out at calendar start times for each granularity with GMT timezone
+    From V4.2.0 onwards, Aggregation will be carried out at calendar start times for each granularity with GMT timezone
 
 **Example**
 
