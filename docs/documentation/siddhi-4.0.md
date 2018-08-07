@@ -82,7 +82,7 @@ The following parameters are configured in a stream definition.
 | Parameter     | Description |
 | ------------- |-------------|
 | `stream name`      | The name of the stream created. (It is recommended to define a stream name in `PascalCase`.) |
-| `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camalCase`.)|    |
+| `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camelCase`.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
