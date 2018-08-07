@@ -46,7 +46,7 @@ Add the following repository configuration to the same file.
      <repository>
          <id>wso2.releases</id>
          <name>WSO2 Repository</name>
-         <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
+         <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
          <releases>
              <enabled>true</enabled>
              <updatePolicy>daily</updatePolicy>
