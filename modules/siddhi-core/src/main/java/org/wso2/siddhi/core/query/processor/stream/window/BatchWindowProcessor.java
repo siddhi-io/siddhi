@@ -142,7 +142,7 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
-            state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
+            state.put("ExpiredEventQueue", expiredEventQueue != null ? expiredEventQueue.getSnapshot() : null);
             state.put("ResetEvent", resetEvent);
         }
         return state;
