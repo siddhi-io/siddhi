@@ -40,12 +40,11 @@ public class IncrementalPurgingTestCase {
 
         String query = "" +
                 " @info(name = 'query1') " +
-                " @purge(enable='true',interval='1 min',@retentionPeriod(sec='30 sec',min='24 h',hours='30 day'" +
-                ",days='5 year',months='10 months',years='5 years'))" +
+                " @purge(enable='true',interval='1 min',@retentionPeriod(sec='30 sec',min='24 h'))" +
                 " define aggregation stockAggregation " +
                 " from stockStream " +
                 " select sum(price) as sumPrice " +
-                " aggregate by arrival every sec ... min";
+                " aggregate by arrival every sec...min";
 
         siddhiManager.createSiddhiAppRuntime(stockStream + query);
     }
@@ -65,7 +64,7 @@ public class IncrementalPurgingTestCase {
                 "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
                 "as lastTradeValue  " +
                 "group by symbol " +
-                "aggregate every sec...hour ;";
+                "aggregate every sec...years ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
 
@@ -92,13 +91,13 @@ public class IncrementalPurgingTestCase {
         Thread.sleep(100);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
-                "within \"2018-07-** **:**:**\" " +
+                "within \"2018-**-** **:**:**\" " +
                 "per \"seconds\"");
         EventPrinter.print(events);
         AssertJUnit.assertEquals(6, events.length);
         Thread.sleep(40000);
         events = siddhiAppRuntime.query("from stockAggregation " +
-                "within \"2018-07-** **:**:**\" " +
+                "within \"2018-**-** **:**:**\" " +
                 "per \"seconds\"");
         AssertJUnit.assertNull(events);
         siddhiAppRuntime.shutdown();
@@ -119,7 +118,7 @@ public class IncrementalPurgingTestCase {
                 "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
                 "as lastTradeValue  " +
                 "group by symbol " +
-                "aggregate every sec...hour ;";
+                "aggregate every sec...years ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
 
@@ -146,13 +145,13 @@ public class IncrementalPurgingTestCase {
         Thread.sleep(70000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
-                "within \"2018-07-** **:**:**\" " +
+                "within \"2018-**-** **:**:**\" " +
                 "per \"minutes\"");
         EventPrinter.print(events);
         AssertJUnit.assertEquals(2, events.length);
         Thread.sleep(20000);
         events = siddhiAppRuntime.query("from stockAggregation " +
-                "within \"2018-07-** **:**:**\" " +
+                "within \"2018-**-** **:**:**\" " +
                 "per \"minutes\"");
         AssertJUnit.assertNull(events);
         siddhiAppRuntime.shutdown();
