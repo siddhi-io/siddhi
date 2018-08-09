@@ -39,23 +39,6 @@
    </dependency>   
 ```
   
-Add the following repository configuration to the same file.
-  
-```xml
-   <repositories>
-     <repository>
-         <id>wso2.releases</id>
-         <name>WSO2 Repository</name>
-         <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-         <releases>
-             <enabled>true</enabled>
-             <updatePolicy>daily</updatePolicy>
-             <checksumPolicy>ignore</checksumPolicy>
-         </releases>
-     </repository>
-   </repositories>
-```
-  
   **Note**: You can create the Java project using any method you prefer. The required dependencies can be downloaded from [here](http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/).
 * Create a new Java class in the Maven project.
 
