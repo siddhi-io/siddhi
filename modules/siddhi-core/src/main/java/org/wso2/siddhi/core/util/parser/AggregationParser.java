@@ -174,8 +174,11 @@ public class AggregationParser {
 
             // Create group by key generator
             GroupByKeyGenerator groupByKeyGenerator = null;
+            List<Expression> groupByExpressionsList = groupByVariableList.stream()
+                    .map(groupByVariable -> (Expression) groupByVariable)
+                    .collect(Collectors.toList());
             if (groupBy) {
-                groupByKeyGenerator = new GroupByKeyGenerator(groupByVariableList, processedMetaStreamEvent,
+                groupByKeyGenerator = new GroupByKeyGenerator(groupByExpressionsList, processedMetaStreamEvent,
                         SiddhiConstants.UNKNOWN_STATE, tableMap, processVariableExpressionExecutors, siddhiAppContext,
                         aggregatorName);
             }
