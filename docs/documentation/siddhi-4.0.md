@@ -1541,7 +1541,7 @@ The following parameters are configured in a table definition:
 | Parameter     | Description |
 | ------------- |-------------|
 | `table name`      | The name of the table defined. (`PascalCase` is used for table name as a convention.) |
-| `attribute name`   | The schema of the table is defined by its attributes with uniquely identifiable attribute names (`camalCase` is used for attribute names as a convention.)|    |
+| `attribute name`   | The schema of the table is defined by its attributes with uniquely identifiable attribute names (`camelCase` is used for attribute names as a convention.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 
@@ -1973,7 +1973,7 @@ The following parameters are configured in a table definition:
 | Parameter     | Description |
 | ------------- |-------------|
 | `window name`      | The name of the window defined. (`PascalCase` is used for window names as a convention.) |
-| `attribute name`   | The schema of the window is defined by its attributes with uniquely identifiable attribute names (`camalCase` is used for attribute names as a convention.)|    |
+| `attribute name`   | The schema of the window is defined by its attributes with uniquely identifiable attribute names (`camelCase` is used for attribute names as a convention.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 | `<window type>(<parameter>, ...)`   | The window type associated with the window and its parameters.     |
 | `output <output event type>` | This is optional. Keywords such as `current events`, `expired events` and `all events` (the default) can be used to specify when the window output should be exposed. For more information, see [output event type](#output-event-types).
@@ -2168,7 +2168,7 @@ The following parameters are configured when defining a script.
 
 | Parameter     | Description |
 | ------------- |-------------|
-| `function name`| 	The name of the function (`camalCase` is used for the function name) as a convention.|
+| `function name`| 	The name of the function (`camelCase` is used for the function name) as a convention.|
 |`language name`| The name of the programming language used to define the script, such as `javascript`, `r` and `scala`.|
 | `return type`| The attribute type of the function’s return. This can be `int`, `long`, `float`, `double`, `string`, `bool` or `object`. Here the function implementer should be responsible for returning the output attribute on the defined return type for proper functionality.
 |`operation of the function`| Here, the execution logic of the function is added. This logic should be written in the language specified under the `language name`, and it should return the output in the data type specified via the `return type` parameter.
