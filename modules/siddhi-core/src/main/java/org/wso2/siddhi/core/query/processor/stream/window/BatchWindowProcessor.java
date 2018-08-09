@@ -51,8 +51,8 @@ import java.util.Map;
         name = "batch",
         namespace = "",
         description = "A window that holds an incoming events batch. When a new set of events arrives, the previously" +
-                      " arrived old events will be expired. Batch window can be used to aggregate events that comes " +
-                      "in batches.",
+                " arrived old events will be expired. Batch window can be used to aggregate events that comes " +
+                "in batches.",
         parameters = {
                 // TODO: 7/7/18 Add parameter batch.size.max
         },
@@ -60,12 +60,12 @@ import java.util.Map;
                 @Example(
                         syntax =
                                 "define stream consumerItemStream (itemId string, price float)\n\n" +
-                                "from consumerItemStream#window.batch()\n" +
-                                "select price, str:groupConcat(itemId) as itemIds\n" +
-                                "group by price\n" +
-                                "insert into outputStream;",
+                                        "from consumerItemStream#window.batch()\n" +
+                                        "select price, str:groupConcat(itemId) as itemIds\n" +
+                                        "group by price\n" +
+                                        "insert into outputStream;",
                         description = "This will output comma separated items IDs that have the same price for each " +
-                                      "incoming batch of events."
+                                "incoming batch of events."
                 )
         }
 )
@@ -88,7 +88,7 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
         if (attributeExpressionExecutors.length != 0) {
             throw new SiddhiAppValidationException(
                     "Batch window should not have any parameters, but found " + attributeExpressionExecutors.length +
-                    " input attributes");
+                            " input attributes");
         }
     }
 
@@ -105,8 +105,6 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
                     }
                     outputStreamEventChunk.add(expiredEventQueue.getFirst());
                 }
-            }
-            if (expiredEventQueue != null) {
                 expiredEventQueue.clear();
             }
             if (resetEvent != null) {
@@ -142,7 +140,9 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
-            state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
+            if (outputExpectsExpiredEvents) {
+                state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
+            }
             state.put("ResetEvent", resetEvent);
         }
         return state;
@@ -150,7 +150,7 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
 
     @Override
     public synchronized void restoreState(Map<String, Object> state) {
-        if (expiredEventQueue != null) {
+        if (outputExpectsExpiredEvents) {
             expiredEventQueue.clear();
             expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
         }
@@ -171,7 +171,7 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
             expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
         return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
-                                                siddhiAppContext, variableExpressionExecutors, tableMap,
-                                                this.queryName);
+                siddhiAppContext, variableExpressionExecutors, tableMap,
+                this.queryName);
     }
 }
