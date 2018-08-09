@@ -25,7 +25,7 @@ import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
-import org.wso2.siddhi.query.api.expression.Variable;
+import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.List;
 import java.util.Map;
@@ -35,17 +35,17 @@ import java.util.Map;
  */
 public class GroupByKeyGenerator {
 
-    private VariableExpressionExecutor[] groupByExecutors = null;
+    private ExpressionExecutor[] groupByExecutors = null;
 
-    public GroupByKeyGenerator(List<Variable> groupByList,
+    public GroupByKeyGenerator(List<Expression> groupByList,
                                MetaComplexEvent metaComplexEvent,
                                int currentState, Map<String, Table> tableMap,
                                List<VariableExpressionExecutor> executors,
                                SiddhiAppContext siddhiContext, String queryName) {
         if (!groupByList.isEmpty()) {
-            groupByExecutors = new VariableExpressionExecutor[groupByList.size()];
+            groupByExecutors = new ExpressionExecutor[groupByList.size()];
             for (int i = 0, expressionsSize = groupByList.size(); i < expressionsSize; i++) {
-                groupByExecutors[i] = (VariableExpressionExecutor) ExpressionParser.parseExpression(
+                groupByExecutors[i] = ExpressionParser.parseExpression(
                         groupByList.get(i), metaComplexEvent, currentState, tableMap, executors,
                         siddhiContext, false, 0, queryName);
             }
