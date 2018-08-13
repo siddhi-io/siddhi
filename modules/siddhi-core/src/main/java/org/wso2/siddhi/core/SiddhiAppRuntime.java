@@ -693,4 +693,24 @@ public class SiddhiAppRuntime {
             log.debug("Siddhi App '" + getName() + "' statistics reporting not changed!");
         }
     }
+
+    /**
+     * To enable and disable Siddhi App playback mode on runtime.
+     *
+     * @param playBackEnabled whether statistics is enabled or not
+     */
+    public void enablePlayBack(boolean playBackEnabled) {
+        this.siddhiAppContext.setPlayback(playBackEnabled);
+    }
+
+    /**
+     * To provide playback options on runtime.
+     *
+     * @param playBackOptions map containing optional parameters
+     */
+    public void setPlayBackOptions(Map<String, Long> playBackOptions) {
+        this.siddhiAppContext.getTimestampGenerator().setIdleTime(playBackOptions.get("idleTime"));
+        this.siddhiAppContext.getTimestampGenerator().setIncrementInMilliseconds(playBackOptions.
+                get("IncrementInMilliseconds"));
+    }
 }

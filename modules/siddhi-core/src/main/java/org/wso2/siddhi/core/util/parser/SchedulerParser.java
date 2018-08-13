@@ -19,17 +19,13 @@
 package org.wso2.siddhi.core.util.parser;
 
 import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.util.EventTimeBasedScheduler;
 import org.wso2.siddhi.core.util.Schedulable;
 import org.wso2.siddhi.core.util.Scheduler;
-import org.wso2.siddhi.core.util.SystemTimeBasedScheduler;
 
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
- * This parser generates the scheduler based on the playback configuration. If playback is enabled, an
- * {@link EventTimeBasedScheduler} object will be returned. If the playback is disabled (default behaviour),
- * {@link SystemTimeBasedScheduler} object will be returned.
+ * This parser generates the scheduler based on the playback configuration.
  */
 public class SchedulerParser {
 
@@ -46,16 +42,6 @@ public class SchedulerParser {
      */
     public static Scheduler parse(ScheduledExecutorService scheduledExecutorService, Schedulable
             singleThreadEntryValve, SiddhiAppContext siddhiAppContext) {
-        Scheduler scheduler;
-        if (siddhiAppContext.isPlayback()) {
-            // Playback mode is enabled
-            scheduler = new EventTimeBasedScheduler(singleThreadEntryValve, siddhiAppContext);
-        } else {
-            // Default execution
-            scheduler = new SystemTimeBasedScheduler(siddhiAppContext.getScheduledExecutorService(),
-                    singleThreadEntryValve, siddhiAppContext);
-        }
-
-        return scheduler;
+        return new Scheduler(singleThreadEntryValve, siddhiAppContext);
     }
 }

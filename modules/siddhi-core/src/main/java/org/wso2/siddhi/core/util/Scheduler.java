@@ -29,39 +29,92 @@ import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import org.wso2.siddhi.core.util.timestamp.TimestampGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Scheduler implementation to take periodic snapshots
  */
-public abstract class Scheduler implements Snapshotable {
+public class Scheduler implements Snapshotable {
 
     private static final Logger log = Logger.getLogger(Scheduler.class);
-    protected final BlockingQueue<Long> toNotifyQueue = new LinkedBlockingQueue<Long>();
+    private final BlockingQueue<Long> toNotifyQueue = new LinkedBlockingQueue<Long>();
     private final ThreadBarrier threadBarrier;
     private final Schedulable singleThreadEntryValve;
-    protected SiddhiAppContext siddhiAppContext;
-    protected String elementId;
+    private SiddhiAppContext siddhiAppContext;
+    private String elementId;
     protected String queryName;
+    private LockWrapper lockWrapper;
+    private ScheduledExecutorService scheduledExecutorService;
+    private EventCaller eventCaller;
+    private final Semaphore mutex;
     private StreamEventPool streamEventPool;
     private ComplexEventChunk<StreamEvent> streamEventChunk;
     private LatencyTracker latencyTracker;
-    private LockWrapper lockWrapper;
+    private volatile boolean running = false;
 
 
     public Scheduler(Schedulable singleThreadEntryValve, SiddhiAppContext siddhiAppContext) {
         this.threadBarrier = siddhiAppContext.getThreadBarrier();
         this.siddhiAppContext = siddhiAppContext;
         this.singleThreadEntryValve = singleThreadEntryValve;
+        this.scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
+        this.eventCaller = new EventCaller();
+        mutex = new Semaphore(1);
+
+        (siddhiAppContext.getTimestampGenerator())
+                .addTimeChangeListener(new TimestampGenerator.TimeChangeListener() {
+                    @Override
+                    public void onTimeChange(long currentTimestamp) {
+                        Long lastTime = toNotifyQueue.peek();
+                        if (lastTime != null && lastTime <= currentTimestamp) {
+                            // If executed in a separate thread, while it is processing,
+                            // the new event will come into the window. As the result of it,
+                            // the window will emit the new event as an existing current event.
+                            sendTimerEvents();
+                        }
+                    }
+                });
     }
 
-    public abstract void schedule(long time);
+    public void schedule(long time) {
+        if (!siddhiAppContext.isPlayback()) {
+            if (!running && toNotifyQueue.size() == 1) {
+                try {
+                    mutex.acquire();
+                    if (!running) {
+                        running = true;
+                        long timeDiff = time - siddhiAppContext.getTimestampGenerator().currentTime();
+                        if (timeDiff > 0) {
+                            scheduledExecutorService.schedule(eventCaller, timeDiff, TimeUnit.MILLISECONDS);
+                        } else {
+                            scheduledExecutorService.schedule(eventCaller, 0, TimeUnit.MILLISECONDS);
+                        }
+                    }
 
-    public abstract Scheduler clone(String key, EntryValveProcessor entryValveProcessor);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.error("Error when scheduling System Time Based Scheduler", e);
+                } finally {
+                    mutex.release();
+                }
+            }
+        }
+    }
+
+    public Scheduler clone(String key, EntryValveProcessor entryValveProcessor) {
+        Scheduler scheduler = new Scheduler(entryValveProcessor,
+                siddhiAppContext);
+        scheduler.elementId = elementId + "-" + key;
+        return scheduler;
+    }
 
     public void notifyAt(long time) {
         try {
@@ -149,5 +202,51 @@ public abstract class Scheduler implements Snapshotable {
             toNotifyTime = toNotifyQueue.peek();
             currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
         }
+    }
+
+    private class EventCaller implements Runnable {
+        /**
+         * When an object implementing interface <code>Runnable</code> is used
+         * to create a thread, starting the thread causes the object's
+         * <code>run</code> method to be called in that separately executing
+         * thread.
+         * <p>
+         * The general contract of the method <code>run</code> is that it may
+         * take any action whatsoever.
+         *
+         * @see Thread#run()
+         */
+        @Override
+        public void run() {
+            try {
+                sendTimerEvents();
+
+                Long toNotifyTime = toNotifyQueue.peek();
+                long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                if (!siddhiAppContext.isPlayback()) {
+                    if (toNotifyTime != null) {
+                        scheduledExecutorService.schedule(eventCaller, toNotifyTime - currentTime, TimeUnit
+                                .MILLISECONDS);
+                    } else {
+                        try {
+                            mutex.acquire();
+                            running = false;
+                            if (toNotifyQueue.peek() != null) {
+                                running = true;
+                                scheduledExecutorService.schedule(eventCaller, 0, TimeUnit.MILLISECONDS);
+                            }
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            log.error("Error when scheduling System Time Based Scheduler", e);
+                        } finally {
+                            mutex.release();
+                        }
+                    }
+                }
+            } catch (Throwable t) {
+                log.error(t);
+            }
+        }
+
     }
 }

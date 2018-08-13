@@ -36,7 +36,6 @@ import org.wso2.siddhi.core.util.event.handler.StreamHandler;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.statistics.EventBufferHolder;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
-import org.wso2.siddhi.core.util.timestamp.EventTimeBasedMillisTimestampGenerator;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.exception.DuplicateAnnotationException;
@@ -232,7 +231,7 @@ public class StreamJunction implements EventBufferHolder {
     private void sendData(long timeStamp, Object[] data) {
         // Set timestamp to system if Siddhi is in playback mode
         if (siddhiAppContext.isPlayback()) {
-            ((EventTimeBasedMillisTimestampGenerator) this.siddhiAppContext.getTimestampGenerator())
+            (this.siddhiAppContext.getTimestampGenerator())
                     .setCurrentTimestamp(timeStamp);
         }
         if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
