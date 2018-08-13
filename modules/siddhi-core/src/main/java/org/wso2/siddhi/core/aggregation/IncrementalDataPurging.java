@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.exception.DataPurgingException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
@@ -139,7 +140,7 @@ public class IncrementalDataPurging implements Runnable {
                     for (Element element : elements) {
                         TimePeriod.Duration duration = normalizeDuration(element.getKey());
                         if (!aggregationTables.keySet().contains(duration)) {
-                            throw new DataPurgingException(duration + " granularity cannot be purged since " +
+                            throw new SiddhiAppCreationException(duration + " granularity cannot be purged since " +
                                     "aggregation has not performed in " + duration + " granularity");
                         }
                         if (element.getValue().equalsIgnoreCase("all")) {
@@ -166,18 +167,16 @@ public class IncrementalDataPurging implements Runnable {
         long currentTime = System.currentTimeMillis();
         long purgeTime;
         Object[] purgeTimes = new Object[1];
-        BaseIncrementalDataPurgingValueStore baseIncrementalDataPurgingValueStore = new
-                BaseIncrementalDataPurgingValueStore(currentTime, streamEventPool);
 
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
-            if (retentionPeriods.get(entry.getKey()) != RETAIN_ALL) {
+            if (retentionPeriods.get(entry.getKey()).equals(RETAIN_ALL)) {
                 Variable leftVariable = new Variable(INTERNAL_AGG_TIMESTAMP_FIELD);
                 leftVariable.setStreamId(entry.getValue().getTableDefinition().getId());
                 Compare expression = new Compare(leftVariable,
                         Compare.Operator.LESS_THAN, new Variable(INTERNAL_AGG_TIMESTAMP_FIELD));
                 purgeTime = currentTime - retentionPeriods.get(entry.getKey());
                 purgeTimes[0] = purgeTime;
-                StateEvent secEvent = baseIncrementalDataPurgingValueStore.createStreamEvent(purgeTimes);
+                StateEvent secEvent = createStreamEvent(purgeTimes, currentTime);
                 eventChunk.add(secEvent);
                 Table table = aggregationTables.get(entry.getKey());
                 try {
@@ -234,7 +233,6 @@ public class IncrementalDataPurging implements Runnable {
      **/
     public static void executeIncrementalDataPurging(SiddhiAppContext siddhiAppContext,
                                                      IncrementalDataPurging incrementalDataPurging) {
-
         if (Objects.nonNull(scheduledPurgingTaskStatus)) {
             scheduledPurgingTaskStatus.cancel(true);
             scheduledPurgingTaskStatus = siddhiAppContext.getScheduledExecutorService().
@@ -247,6 +245,18 @@ public class IncrementalDataPurging implements Runnable {
                             incrementalDataPurging.getPurgeExecutionInterval(),
                             TimeUnit.MILLISECONDS);
         }
+    }
+    /**
+     * creating stream event method
+     * **/
+    private StateEvent createStreamEvent(Object[] values, Long timestamp) {
+        StreamEvent streamEvent = streamEventPool.borrowEvent();
+        streamEvent.setTimestamp(timestamp);
+        streamEvent.setOutputData(values);
+
+        StateEvent stateEvent = new StateEvent(2, 1);
+        stateEvent.addEvent(0, streamEvent);
+        return stateEvent;
     }
 }
 

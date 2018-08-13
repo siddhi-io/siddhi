@@ -24,13 +24,14 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
 public class IncrementalPurgingTestCase {
     private static final Logger LOG = Logger.getLogger(IncrementalPurgingTestCase.class);
 
-    @Test
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void incrementalPurgingTest1() {
         LOG.info("incrementalPurgingTest1");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -40,7 +41,7 @@ public class IncrementalPurgingTestCase {
 
         String query = "" +
                 " @info(name = 'query1') " +
-                " @purge(enable='true',interval='1 min',@retentionPeriod(sec='30 sec',min='24 h'))" +
+                " @purge(enable='true',interval='1 min',@retentionPeriod(sec='30 sec',min='24 h',hours='25 h'))" +
                 " define aggregation stockAggregation " +
                 " from stockStream " +
                 " select sum(price) as sumPrice " +
@@ -99,6 +100,7 @@ public class IncrementalPurgingTestCase {
         events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2018-**-** **:**:**\" " +
                 "per \"seconds\"");
+        EventPrinter.print(events);
         AssertJUnit.assertNull(events);
         siddhiAppRuntime.shutdown();
     }
@@ -153,6 +155,7 @@ public class IncrementalPurgingTestCase {
         events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2018-**-** **:**:**\" " +
                 "per \"minutes\"");
+        EventPrinter.print(events);
         AssertJUnit.assertNull(events);
         siddhiAppRuntime.shutdown();
     }
