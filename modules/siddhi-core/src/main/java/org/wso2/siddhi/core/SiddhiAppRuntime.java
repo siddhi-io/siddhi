@@ -709,8 +709,8 @@ public class SiddhiAppRuntime {
      * @param playBackOptions map containing optional parameters
      */
     public void setPlayBackOptions(Map<String, Long> playBackOptions) {
-        this.siddhiAppContext.getTimestampGenerator().setIdleTime(playBackOptions.get("idleTime"));
+        this.siddhiAppContext.getTimestampGenerator().setIdleTime(playBackOptions.get(SiddhiConstants.IDLE_TIME));
         this.siddhiAppContext.getTimestampGenerator().setIncrementInMilliseconds(playBackOptions.
-                get("IncrementInMilliseconds"));
+                get(SiddhiConstants.INCREMENT_IN_MILLS));
     }
 }
