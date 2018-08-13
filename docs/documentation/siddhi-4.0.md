@@ -82,7 +82,7 @@ The following parameters are configured in a stream definition.
 | Parameter     | Description |
 | ------------- |-------------|
 | `stream name`      | The name of the stream created. (It is recommended to define a stream name in `PascalCase`.) |
-| `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camalCase`.)|    |
+| `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camelCase`.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
@@ -1541,7 +1541,7 @@ The following parameters are configured in a table definition:
 | Parameter     | Description |
 | ------------- |-------------|
 | `table name`      | The name of the table defined. (`PascalCase` is used for table name as a convention.) |
-| `attribute name`   | The schema of the table is defined by its attributes with uniquely identifiable attribute names (`camalCase` is used for attribute names as a convention.)|    |
+| `attribute name`   | The schema of the table is defined by its attributes with uniquely identifiable attribute names (`camelCase` is used for attribute names as a convention.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 
@@ -1832,8 +1832,6 @@ Furthermore, this ensures that the aggregations are not lost due to unexpected s
 **Syntax**
 
 ```sql
-@BufferSize("<positive integer>")
-@IgnoreEventsOlderThanBuffer("<true or false>")
 @store(type="<store type>", ...)
 define aggregation <aggregator name>
 from <input stream>
@@ -1845,14 +1843,17 @@ The above syntax includes the following:
 
 |Item                          |Description
 ---------------                |---------
-|`@BufferSize`                 |This annotation is optional. The default value is buffer size 0. <br/>It is used to identify the number of 'expired' events to retain <br/>in a buffer, to handle out of order event processing. It's an optional parameter <br/>which is applicable, only if aggregation is based on external timestamp (since events <br/>aggregated based on event arrival time cannot be out of order). An event is identified <br/>as 'expired' with relation to the latest event's timestamp and the most granular duration <br/>for which aggregation is calculated. For example, if aggregation is for sec...year, the <br/>most granular duration is seconds. Hence, if buffer size is 3 and events for 51st second, <br/>52nd second, 53rd second and 54th second arrive, all of the older aggregations (for <br/>seconds 51, 52 and 53) would be kept in the buffer (since latest event is for 54th second)
-|`@IgnoreEventsOlderThanBuffer`|This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is the default value as well), an event <br/>older than the buffer would be aggregated with the oldest event in buffer. If <br/>the value is true, an event older than the buffer would be dropped. This is an optional annotation. Default value is false.
+|`@BufferSize`                 |**DEPRECIATED FROM V4.2.0**. This annotation is optional. The default value is buffer size 0. <br/>It is used to identify the number of 'expired' events to retain <br/>in a buffer, to handle out of order event processing. It's an optional parameter <br/>which is applicable, only if aggregation is based on external timestamp (since events <br/>aggregated based on event arrival time cannot be out of order). An event is identified <br/>as 'expired' with relation to the latest event's timestamp and the most granular duration <br/>for which aggregation is calculated. For example, if aggregation is for sec...year, the <br/>most granular duration is seconds. Hence, if buffer size is 3 and events for 51st second, <br/>52nd second, 53rd second and 54th second arrive, all of the older aggregations (for <br/>seconds 51, 52 and 53) would be kept in the buffer (since latest event is for 54th second)
+|`@IgnoreEventsOlderThanBuffer`|**DEPRECIATED FROM V4.2.0**.This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is the default value as well), an event <br/>older than the buffer would be aggregated with the oldest event in buffer. If <br/>the value is true, an event older than the buffer would be dropped. This is an optional annotation. Default value is false.
 |`@store`                      |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
 |`<aggregator name>`           |This specifies a unique name for the aggregation so that it can be referred <br/>when accessing aggregate results.
 |`<input stream>`              |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
 |`group by <attribute name>`   |The `group by` clause is optional. If it is included in a Siddhi application, aggregate values <br/> are calculated per each `group by` attribute. If it is not used, all the<br/> events are aggregated together.
 |`by <timestamp attribute>`    |This clause is optional. This defines the attribute that should be used as<br/> the timestamp. If this clause is not used, the event time is used by default.<br/> The timestamp could be given as either a `string` or a `long` value. If it is a `long` value,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it is <br/>a `string` value, the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` .<br/>(e.g., `+05:30`, `-11:00`).
 |`<time periods>`              |The time periods can be given as a range separated by three dots, or as comma separated values. A range would be given as sec...year, where aggregation would be done per second, minute, hour, day, month and year. Comma separated values can be given as min, hour. However, skipping durations is not yet supported for comma separated values (e.g min, day is not a valid clause since hour duration has been skipped)
+
+!!! Note
+    From V4.2.0 onwards, Aggregation will be carried out at calendar start times for each granularity with GMT timezone
 
 **Example**
 
@@ -1896,6 +1897,9 @@ Item|Description
 `per <time granularity>`|This specifies the time granularity by which the aggregate values must be grouped and returned. e.g., If you specify `days`, the retrieved aggregate values are grouped for each day within the selected time interval.
 
 `within` and `par` clauses also accept attribute values from the stream.
+
+!!! Note
+    The timestamp of the aggregations can be accessed through the attribute AGG_TIMESTAMP
 
 **Example**
 
@@ -1969,7 +1973,7 @@ The following parameters are configured in a table definition:
 | Parameter     | Description |
 | ------------- |-------------|
 | `window name`      | The name of the window defined. (`PascalCase` is used for window names as a convention.) |
-| `attribute name`   | The schema of the window is defined by its attributes with uniquely identifiable attribute names (`camalCase` is used for attribute names as a convention.)|    |
+| `attribute name`   | The schema of the window is defined by its attributes with uniquely identifiable attribute names (`camelCase` is used for attribute names as a convention.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 | `<window type>(<parameter>, ...)`   | The window type associated with the window and its parameters.     |
 | `output <output event type>` | This is optional. Keywords such as `current events`, `expired events` and `all events` (the default) can be used to specify when the window output should be exposed. For more information, see [output event type](#output-event-types).
@@ -2164,7 +2168,7 @@ The following parameters are configured when defining a script.
 
 | Parameter     | Description |
 | ------------- |-------------|
-| `function name`| 	The name of the function (`camalCase` is used for the function name) as a convention.|
+| `function name`| 	The name of the function (`camelCase` is used for the function name) as a convention.|
 |`language name`| The name of the programming language used to define the script, such as `javascript`, `r` and `scala`.|
 | `return type`| The attribute type of the function’s return. This can be `int`, `long`, `float`, `double`, `string`, `bool` or `object`. Here the function implementer should be responsible for returning the output attribute on the defined return type for proper functionality.
 |`operation of the function`| Here, the execution logic of the function is added. This logic should be written in the language specified under the `language name`, and it should return the output in the data type specified via the `return type` parameter.
