@@ -66,27 +66,34 @@ public class IncrementalDataPurging implements Runnable {
     private StreamEventPool streamEventPool;
     private Map<TimePeriod.Duration, Table> aggregationTables;
     private SiddhiAppContext siddhiAppContext;
-    private Map<String, Table> tableMap;
     private static ScheduledFuture scheduledPurgingTaskStatus;
     private static final String INTERNAL_AGG_TIMESTAMP_FIELD = "AGG_TIMESTAMP";
+    private static final String EXTERNAL_AGG_TIMESTAMP_FIELD = "AGG_EVENT_TIMESTAMP";
+    private String purgingTimestampField;
     private static final Long RETAIN_ALL = -1L;
     private ComplexEventChunk<StateEvent> eventChunk = new ComplexEventChunk<>(true);
     private List<VariableExpressionExecutor> variableExpressionExecutorList = new ArrayList<>();
     private Attribute aggregatedTimestampAttribute;
-    private VariableExpressionExecutor variableExpressionExecutor;
+    private Map<TimePeriod.Duration, CompiledCondition> compiledConditionsHolder =
+            new EnumMap<>(TimePeriod.Duration.class);
 
 
     public void init(AggregationDefinition aggregationDefinition, StreamEventPool streamEventPool,
-                     Map<TimePeriod.Duration, Table> aggregationTables, SiddhiAppContext siddhiAppContext,
-                     Map<String, Table> tableMap) {
+                     Map<TimePeriod.Duration, Table> aggregationTables, Boolean isProcessingOnExternalTime,
+                     SiddhiAppContext siddhiAppContext, Map<String, Table> tableMap) {
         this.siddhiAppContext = siddhiAppContext;
         List<Annotation> annotations = aggregationDefinition.getAnnotations();
-        this.tableMap = tableMap;
         this.streamEventPool = streamEventPool;
         this.aggregationTables = aggregationTables;
+        if (isProcessingOnExternalTime) {
+            purgingTimestampField = EXTERNAL_AGG_TIMESTAMP_FIELD;
+        } else {
+            purgingTimestampField = INTERNAL_AGG_TIMESTAMP_FIELD;
+        }
+        aggregatedTimestampAttribute = new Attribute(purgingTimestampField, Attribute.Type.LONG);
 
-        aggregatedTimestampAttribute = new Attribute(INTERNAL_AGG_TIMESTAMP_FIELD, Attribute.Type.LONG);
-        variableExpressionExecutor = new VariableExpressionExecutor(aggregatedTimestampAttribute, 0, 1);
+        VariableExpressionExecutor variableExpressionExecutor = new VariableExpressionExecutor(
+                aggregatedTimestampAttribute, 0, 1);
         variableExpressionExecutorList.add(variableExpressionExecutor);
         for (TimePeriod.Duration duration : aggregationTables.keySet()) {
             switch (duration) {
@@ -117,7 +124,6 @@ public class IncrementalDataPurging implements Runnable {
         }
         Annotation purge = annotationTypes.get(SiddhiConstants.NAMESPACE_PURGE);
         if (Objects.nonNull(purge)) {
-
             if (Objects.nonNull(purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_ENABLE))) {
                 String enable = purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_ENABLE);
                 if (!("true".equalsIgnoreCase(enable) || "false".equalsIgnoreCase(enable))) {
@@ -152,6 +158,7 @@ public class IncrementalDataPurging implements Runnable {
                 }
             }
         }
+        compiledConditionsHolder = createCompileConditions(aggregationTables, tableMap);
     }
 
     private Long getPurgeExecutionInterval() {
@@ -166,28 +173,19 @@ public class IncrementalDataPurging implements Runnable {
     public void run() {
         long currentTime = System.currentTimeMillis();
         long purgeTime;
-        Object[] purgeTimes = new Object[1];
+        Object[] purgeTimeArray = new Object[1];
 
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
-            if (retentionPeriods.get(entry.getKey()).equals(RETAIN_ALL)) {
-                Variable leftVariable = new Variable(INTERNAL_AGG_TIMESTAMP_FIELD);
-                leftVariable.setStreamId(entry.getValue().getTableDefinition().getId());
-                Compare expression = new Compare(leftVariable,
-                        Compare.Operator.LESS_THAN, new Variable(INTERNAL_AGG_TIMESTAMP_FIELD));
+            if (!retentionPeriods.get(entry.getKey()).equals(RETAIN_ALL)) {
                 purgeTime = currentTime - retentionPeriods.get(entry.getKey());
-                purgeTimes[0] = purgeTime;
-                StateEvent secEvent = createStreamEvent(purgeTimes, currentTime);
+                purgeTimeArray[0] = purgeTime;
+                StateEvent secEvent = createStreamEvent(purgeTimeArray, currentTime);
                 eventChunk.add(secEvent);
                 Table table = aggregationTables.get(entry.getKey());
                 try {
-                    CompiledCondition compiledCondition = table.compileCondition(expression,
-                            matchingMetaInfoHolder(table, aggregatedTimestampAttribute), siddhiAppContext,
-                            variableExpressionExecutorList,
-                            tableMap, table.getTableDefinition().getId() + "DeleteQuery");
                     LOG.info("Purging data of table: " + table.getTableDefinition().getId() + " with a" +
                             " retention of timestamp : " + purgeTime);
-
-                    table.deleteEvents(eventChunk, compiledCondition, 1);
+                    table.deleteEvents(eventChunk, compiledConditionsHolder.get(entry.getKey()), 1);
                 } catch (Exception e) {
                     LOG.error("Exception occurred while deleting events from " +
                             table.getTableDefinition().getId() + " table", e);
@@ -229,10 +227,35 @@ public class IncrementalDataPurging implements Runnable {
     }
 
     /**
+     * Building the compiled conditions for purge data
+     **/
+    private Map<TimePeriod.Duration, CompiledCondition> createCompileConditions(
+            Map<TimePeriod.Duration, Table> aggregationTables, Map<String, Table> tableMap) {
+        Map<TimePeriod.Duration, CompiledCondition> compiledConditionMap = new EnumMap<>(TimePeriod.Duration.class);
+        CompiledCondition compiledCondition;
+        Table table;
+        for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
+            if (!retentionPeriods.get(entry.getKey()).equals(RETAIN_ALL)) {
+                table = aggregationTables.get(entry.getKey());
+                Variable leftVariable = new Variable(purgingTimestampField);
+                leftVariable.setStreamId(entry.getValue().getTableDefinition().getId());
+                Compare expression = new Compare(leftVariable,
+                        Compare.Operator.LESS_THAN, new Variable(purgingTimestampField));
+                compiledCondition = table.compileCondition(expression,
+                        matchingMetaInfoHolder(table, aggregatedTimestampAttribute), siddhiAppContext,
+                        variableExpressionExecutorList, tableMap, table.getTableDefinition().getId() + "DeleteQuery");
+                compiledConditionMap.put(entry.getKey(), compiledCondition);
+            }
+        }
+        return compiledConditionMap;
+    }
+
+    /**
      * Data purging task scheduler method
      **/
     public static void executeIncrementalDataPurging(SiddhiAppContext siddhiAppContext,
                                                      IncrementalDataPurging incrementalDataPurging) {
+        StringBuilder tableNames = new StringBuilder();
         if (Objects.nonNull(scheduledPurgingTaskStatus)) {
             scheduledPurgingTaskStatus.cancel(true);
             scheduledPurgingTaskStatus = siddhiAppContext.getScheduledExecutorService().
@@ -245,10 +268,16 @@ public class IncrementalDataPurging implements Runnable {
                             incrementalDataPurging.getPurgeExecutionInterval(),
                             TimeUnit.MILLISECONDS);
         }
+        for (TimePeriod.Duration duration : incrementalDataPurging.retentionPeriods.keySet()) {
+            tableNames.append(duration + ",");
+        }
+        LOG.info("Data purging has enabled for table:" + tableNames + " with an interval of " +
+                ((incrementalDataPurging.getPurgeExecutionInterval()) / 10000) + " minutes");
     }
+
     /**
      * creating stream event method
-     * **/
+     **/
     private StateEvent createStreamEvent(Object[] values, Long timestamp) {
         StreamEvent streamEvent = streamEventPool.borrowEvent();
         streamEvent.setTimestamp(timestamp);

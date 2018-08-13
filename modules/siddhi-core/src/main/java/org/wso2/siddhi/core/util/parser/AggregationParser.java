@@ -107,8 +107,8 @@ public class AggregationParser {
                     aggregationDefinition.getQueryContextStartIndex(), aggregationDefinition.getQueryContextEndIndex());
         }
         if (streamDefinitionMap.get(aggregationDefinition.getBasicSingleInputStream().getStreamId()) == null) {
-           throw new SiddhiAppCreationException("Stream " + aggregationDefinition.getBasicSingleInputStream().
-                   getStreamId() + " has not been defined");
+            throw new SiddhiAppCreationException("Stream " + aggregationDefinition.getBasicSingleInputStream().
+                    getStreamId() + " has not been defined");
         }
 
         Element userDefinedPrimaryKey = AnnotationHelper.getAnnotationElement(
@@ -262,8 +262,8 @@ public class AggregationParser {
 
             //Recreate in-memory data from tables
             RecreateInMemoryData recreateInMemoryData = new RecreateInMemoryData(incrementalDurations,
-                        aggregationTables, incrementalExecutorMap, siddhiAppContext, processedMetaStreamEvent, tableMap,
-                        windowMap, aggregationMap);
+                    aggregationTables, incrementalExecutorMap, siddhiAppContext, processedMetaStreamEvent, tableMap,
+                    windowMap, aggregationMap);
 
             IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
             rootIncrementalExecutor.setScheduler(scheduler);
@@ -297,7 +297,7 @@ public class AggregationParser {
             //initialize incremental data purging
             IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
             incrementalDataPurging.init(aggregationDefinition, new StreamEventPool(processedMetaStreamEvent, 10)
-                    , aggregationTables, siddhiAppContext, tableMap);
+                    , aggregationTables, isProcessingOnExternalTime, siddhiAppContext, tableMap);
 
             //schedule purging if enabled
             if (incrementalDataPurging.isPurgingEnabled()) {
