@@ -22,10 +22,8 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.util.Schedulable;
 import org.wso2.siddhi.core.util.Scheduler;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 /**
- * This parser generates the scheduler based on the playback configuration.
+ * This parser generates the scheduler while registering it.
  */
 public class SchedulerParser {
 
@@ -33,15 +31,16 @@ public class SchedulerParser {
     }
 
     /**
-     * Create Scheduler object based on the siddhi app playback configuration.
+     * Create Scheduler object.
      *
-     * @param scheduledExecutorService ScheduledExecutorService
      * @param singleThreadEntryValve   Schedulable
      * @param siddhiAppContext     SiddhiAppContext
      * @return Scheduler instance
      */
-    public static Scheduler parse(ScheduledExecutorService scheduledExecutorService, Schedulable
+    public static Scheduler parse(Schedulable
             singleThreadEntryValve, SiddhiAppContext siddhiAppContext) {
-        return new Scheduler(singleThreadEntryValve, siddhiAppContext);
+        Scheduler scheduler = new Scheduler(singleThreadEntryValve, siddhiAppContext);
+        siddhiAppContext.addScheduler(scheduler);
+        return scheduler;
     }
 }

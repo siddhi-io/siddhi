@@ -111,7 +111,4 @@ public final class SiddhiConstants {
     public static final String KEY_DELIMITER = ":-:";
     public static final String TRANSPORT_CHANNEL_CREATION_IDENTIFIER = "transportChannelCreationEnabled";
 
-    public static final String IDLE_TIME = "IdleTime";
-    public static final String INCREMENT_IN_MILLS = "IncrementInMilliseconds";
-
 }

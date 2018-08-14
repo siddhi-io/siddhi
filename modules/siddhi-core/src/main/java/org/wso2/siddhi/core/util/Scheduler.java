@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -59,6 +60,7 @@ public class Scheduler implements Snapshotable {
     private ComplexEventChunk<StreamEvent> streamEventChunk;
     private LatencyTracker latencyTracker;
     private volatile boolean running = false;
+    private ScheduledFuture scheduledFuture;
 
 
     public Scheduler(Schedulable singleThreadEntryValve, SiddhiAppContext siddhiAppContext) {
@@ -69,7 +71,7 @@ public class Scheduler implements Snapshotable {
         this.eventCaller = new EventCaller();
         mutex = new Semaphore(1);
 
-        (siddhiAppContext.getTimestampGenerator())
+        siddhiAppContext.getTimestampGenerator()
                 .addTimeChangeListener(new TimestampGenerator.TimeChangeListener() {
                     @Override
                     public void onTimeChange(long currentTimestamp) {
@@ -93,9 +95,11 @@ public class Scheduler implements Snapshotable {
                         running = true;
                         long timeDiff = time - siddhiAppContext.getTimestampGenerator().currentTime();
                         if (timeDiff > 0) {
-                            scheduledExecutorService.schedule(eventCaller, timeDiff, TimeUnit.MILLISECONDS);
+                            scheduledFuture = scheduledExecutorService.schedule(eventCaller,
+                                    timeDiff, TimeUnit.MILLISECONDS);
                         } else {
-                            scheduledExecutorService.schedule(eventCaller, 0, TimeUnit.MILLISECONDS);
+                            scheduledFuture = scheduledExecutorService.schedule(eventCaller,
+                                    0, TimeUnit.MILLISECONDS);
                         }
                     }
 
@@ -204,6 +208,26 @@ public class Scheduler implements Snapshotable {
         }
     }
 
+    /**
+     * Schedule events which are not scheduled in the queue when switching back from event time to system current time
+     */
+    public void handleSwitchToNonPlayBackMode() {
+        Long toNotifyTime = toNotifyQueue.peek();
+        if (toNotifyTime != null) {
+            schedule(toNotifyTime);
+        }
+    }
+
+    /**
+     * this can be used to release
+     * the acquired resources for processing.
+     */
+    public void handleSwitchToPlayBackMode() {
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(true);
+        }
+    }
+
     private class EventCaller implements Runnable {
         /**
          * When an object implementing interface <code>Runnable</code> is used
@@ -219,21 +243,23 @@ public class Scheduler implements Snapshotable {
         @Override
         public void run() {
             try {
-                sendTimerEvents();
-
-                Long toNotifyTime = toNotifyQueue.peek();
-                long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
                 if (!siddhiAppContext.isPlayback()) {
+                    sendTimerEvents();
+
+                    Long toNotifyTime = toNotifyQueue.peek();
+                    long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+
                     if (toNotifyTime != null) {
-                        scheduledExecutorService.schedule(eventCaller, toNotifyTime - currentTime, TimeUnit
-                                .MILLISECONDS);
+                        scheduledFuture = scheduledExecutorService.
+                                schedule(eventCaller, toNotifyTime - currentTime, TimeUnit.MILLISECONDS);
                     } else {
                         try {
                             mutex.acquire();
                             running = false;
                             if (toNotifyQueue.peek() != null) {
                                 running = true;
-                                scheduledExecutorService.schedule(eventCaller, 0, TimeUnit.MILLISECONDS);
+                                scheduledFuture = scheduledExecutorService.schedule(eventCaller,
+                                        0, TimeUnit.MILLISECONDS);
                             }
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
@@ -242,6 +268,8 @@ public class Scheduler implements Snapshotable {
                             mutex.release();
                         }
                     }
+                } else {
+                    running = false;
                 }
             } catch (Throwable t) {
                 log.error(t);

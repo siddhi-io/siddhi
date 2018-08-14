@@ -130,8 +130,9 @@ public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimi
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(scheduledExecutorService, this, siddhiAppContext);
-        scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
+        scheduler = SchedulerParser.parse(this, siddhiAppContext);
+        scheduler.setStreamEventPool(new StreamEventPool(0, 0,
+                0, 5));
         scheduler.init(lockWrapper, queryName);
         long currentTime = System.currentTimeMillis();
         scheduledTime = currentTime + value;
