@@ -48,6 +48,7 @@ import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.table.record.RecordTableHandler;
 import org.wso2.siddhi.core.table.record.RecordTableHandlerManager;
 import org.wso2.siddhi.core.util.ExceptionUtil;
+import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.StringUtil;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
@@ -695,22 +696,24 @@ public class SiddhiAppRuntime {
     }
 
     /**
-     * To enable and disable Siddhi App playback mode on runtime.
+     * To enable and disable Siddhi App playback mode on runtime along with optional parameters.
      *
-     * @param playBackEnabled whether statistics is enabled or not
+     * @param playBackEnabled whether playback is enabled or not
+     * @param idleTime
+     * @param incrementInMilliseconds
      */
-    public void enablePlayBack(boolean playBackEnabled) {
+    public void enablePlayBack(boolean playBackEnabled, long idleTime, long incrementInMilliseconds) {
         this.siddhiAppContext.setPlayback(playBackEnabled);
-    }
-
-    /**
-     * To provide playback options on runtime.
-     *
-     * @param playBackOptions map containing optional parameters
-     */
-    public void setPlayBackOptions(Map<String, Long> playBackOptions) {
-        this.siddhiAppContext.getTimestampGenerator().setIdleTime(playBackOptions.get(SiddhiConstants.IDLE_TIME));
-        this.siddhiAppContext.getTimestampGenerator().setIncrementInMilliseconds(playBackOptions.
-                get(SiddhiConstants.INCREMENT_IN_MILLS));
+        if (!playBackEnabled) {
+            for (Scheduler scheduler : siddhiAppContext.getSchedulerList()) {
+                scheduler.handleSwitchToNonPlayBackMode();
+            }
+        } else {
+            this.siddhiAppContext.getTimestampGenerator().setIdleTime(idleTime);
+            this.siddhiAppContext.getTimestampGenerator().setIncrementInMilliseconds(incrementInMilliseconds);
+            for (Scheduler scheduler : siddhiAppContext.getSchedulerList()) {
+                scheduler.handleSwitchToPlayBackMode();
+            }
+        }
     }
 }
