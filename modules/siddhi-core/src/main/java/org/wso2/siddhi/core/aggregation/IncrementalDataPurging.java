@@ -201,7 +201,7 @@ public class IncrementalDataPurging implements Runnable {
                     LOG.info("Purging data of table: " + table.getTableDefinition().getId() + " with a" +
                             " retention of timestamp : " + purgeTime);
                     table.deleteEvents(eventChunk, compiledConditionsHolder.get(entry.getKey()), 1);
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     LOG.error("Exception occurred while deleting events from " +
                             table.getTableDefinition().getId() + " table", e);
                     throw new DataPurgingException("Exception occurred while deleting events from " +
