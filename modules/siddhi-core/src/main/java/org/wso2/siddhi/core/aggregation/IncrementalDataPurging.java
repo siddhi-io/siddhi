@@ -70,7 +70,9 @@ public class IncrementalDataPurging implements Runnable {
     private static final String INTERNAL_AGG_TIMESTAMP_FIELD = "AGG_TIMESTAMP";
     private static final String EXTERNAL_AGG_TIMESTAMP_FIELD = "AGG_EVENT_TIMESTAMP";
     private String purgingTimestampField;
+    private Map<TimePeriod.Duration, Long> minimumDurationMap = new EnumMap<>(TimePeriod.Duration.class);
     private static final Long RETAIN_ALL = -1L;
+    private static final String RETAIN_ALL_VALUES = "all";
     private ComplexEventChunk<StateEvent> eventChunk = new ComplexEventChunk<>(true);
     private List<VariableExpressionExecutor> variableExpressionExecutorList = new ArrayList<>();
     private Attribute aggregatedTimestampAttribute;
@@ -98,22 +100,28 @@ public class IncrementalDataPurging implements Runnable {
         for (TimePeriod.Duration duration : aggregationTables.keySet()) {
             switch (duration) {
                 case SECONDS:
-                    retentionPeriods.put(duration, Expression.Time.sec(30).value());
+                    retentionPeriods.put(duration, Expression.Time.sec(120).value());
+                    minimumDurationMap.put(duration, Expression.Time.sec(120).value());
                     break;
                 case MINUTES:
                     retentionPeriods.put(duration, Expression.Time.hour(24).value());
+                    minimumDurationMap.put(duration, Expression.Time.minute(120).value());
                     break;
                 case HOURS:
                     retentionPeriods.put(duration, Expression.Time.day(30).value());
+                    minimumDurationMap.put(duration, Expression.Time.hour(25).value());
                     break;
                 case DAYS:
                     retentionPeriods.put(duration, Expression.Time.year(5).value());
+                    minimumDurationMap.put(duration, Expression.Time.day(32).value());
                     break;
                 case MONTHS:
                     retentionPeriods.put(duration, RETAIN_ALL);
+                    minimumDurationMap.put(duration, Expression.Time.day(367).value());
                     break;
                 case YEARS:
                     retentionPeriods.put(duration, RETAIN_ALL);
+                    minimumDurationMap.put(duration, 0L);
             }
         }
 
@@ -127,7 +135,7 @@ public class IncrementalDataPurging implements Runnable {
             if (Objects.nonNull(purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_ENABLE))) {
                 String enable = purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_ENABLE);
                 if (!("true".equalsIgnoreCase(enable) || "false".equalsIgnoreCase(enable))) {
-                    throw new SiddhiAppCreationException("Undefined value for enable: " + enable + "." +
+                    throw new SiddhiAppCreationException("Invalid value for enable: " + enable + "." +
                             " Please use true or false");
                 } else {
                     purgingEnabled = Boolean.parseBoolean(enable);
@@ -149,10 +157,17 @@ public class IncrementalDataPurging implements Runnable {
                             throw new SiddhiAppCreationException(duration + " granularity cannot be purged since " +
                                     "aggregation has not performed in " + duration + " granularity");
                         }
-                        if (element.getValue().equalsIgnoreCase("all")) {
+                        if (element.getValue().equalsIgnoreCase(RETAIN_ALL_VALUES)) {
                             retentionPeriods.put(duration, RETAIN_ALL);
                         } else {
-                            retentionPeriods.put(duration, timeToLong(element.getValue()));
+                            if (timeToLong(element.getValue()) >= minimumDurationMap.get(duration)) {
+                                retentionPeriods.put(duration, timeToLong(element.getValue()));
+                            } else {
+                                throw new SiddhiAppCreationException(duration + " granularity cannot be purge" +
+                                        " with a retention of '" + element.getValue() + "', minimum retention" +
+                                        " should be greater  than " + TimeUnit.MILLISECONDS.toMinutes
+                                        (minimumDurationMap.get(duration)) + " minutes");
+                            }
                         }
                     }
                 }
@@ -269,10 +284,12 @@ public class IncrementalDataPurging implements Runnable {
                             TimeUnit.MILLISECONDS);
         }
         for (TimePeriod.Duration duration : incrementalDataPurging.retentionPeriods.keySet()) {
-            tableNames.append(duration + ",");
+            if (!incrementalDataPurging.retentionPeriods.get(duration).equals(RETAIN_ALL)) {
+                tableNames.append(duration + ",");
+            }
         }
-        LOG.info("Data purging has enabled for table:" + tableNames + " with an interval of " +
-                ((incrementalDataPurging.getPurgeExecutionInterval()) / 10000) + " minutes");
+        LOG.info("Data purging has enabled for table: " + tableNames + " with an interval of " +
+                ((incrementalDataPurging.getPurgeExecutionInterval()) / 1000) + " seconds");
     }
 
     /**

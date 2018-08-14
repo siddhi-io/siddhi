@@ -249,23 +249,19 @@ public abstract class Expression implements SiddhiElement {
             if (timeMatcher.find() && durationMatcher.find()) {
                 duration = normalizeDuration(durationMatcher.group(0).trim());
                 timeValue = Integer.parseInt(timeMatcher.group(0));
-                try {
-                    switch (duration) {
-                        case SECONDS:
-                            return Expression.Time.sec(timeValue).value();
-                        case MINUTES:
-                            return Expression.Time.minute(timeValue).value();
-                        case HOURS:
-                            return Expression.Time.hour(timeValue).value();
-                        case DAYS:
-                            return Expression.Time.day(timeValue).value();
-                        case YEARS:
-                            return Expression.Time.year(timeValue).value();
-                        default:
-                            return Expression.Time.month(timeValue).value();
-                    }
-                } catch (NoSuchDurationException e) {
-                    throw new NoSuchDurationException("Duration" + timeValue + "does not exists", e);
+                switch (duration) {
+                    case SECONDS:
+                        return Expression.Time.sec(timeValue).value();
+                    case MINUTES:
+                        return Expression.Time.minute(timeValue).value();
+                    case HOURS:
+                        return Expression.Time.hour(timeValue).value();
+                    case DAYS:
+                        return Expression.Time.day(timeValue).value();
+                    case YEARS:
+                        return Expression.Time.year(timeValue).value();
+                    default:
+                        return Expression.Time.month(timeValue).value();
                 }
             } else {
                 throw new NoSuchDurationException("Provided retention parameter cannot be identified. retention " +
