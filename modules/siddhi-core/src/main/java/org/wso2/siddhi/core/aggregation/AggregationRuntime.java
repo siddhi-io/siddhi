@@ -83,7 +83,7 @@ public class AggregationRuntime implements MemoryCalculable {
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                               Map<TimePeriod.Duration, Table> aggregationTables,
                               SingleStreamRuntime singleStreamRuntime,
-                              EntryValveExecutor entryValveExecutor, List<TimePeriod.Duration> incrementalDurations,
+                              List<TimePeriod.Duration> incrementalDurations,
                               SiddhiAppContext siddhiAppContext, List<ExpressionExecutor> baseExecutors,
                               ExpressionExecutor timestampExecutor, MetaStreamEvent tableMetaStreamEvent,
                               List<ExpressionExecutor> outputExpressionExecutors,

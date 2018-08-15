@@ -301,7 +301,7 @@ public class AggregationParser {
             List<ExpressionExecutor> baseExecutors = cloneExpressionExecutors(processExpressionExecutorsList.get(0));
             ExpressionExecutor timestampExecutor = baseExecutors.remove(0);
             return new AggregationRuntime(aggregationDefinition, incrementalExecutorMap,
-                    aggregationTables, ((SingleStreamRuntime) streamRuntime), entryValveExecutor, incrementalDurations,
+                    aggregationTables, ((SingleStreamRuntime) streamRuntime), incrementalDurations,
                     siddhiAppContext, baseExecutors, timestampExecutor, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
                     isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList);

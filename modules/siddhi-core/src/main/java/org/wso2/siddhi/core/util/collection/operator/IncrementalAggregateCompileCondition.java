@@ -262,8 +262,6 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                 if (oldestEvent != -1) {
                     return oldestEvent;
                 }
-            } else {
-                continue;
             }
         }
         return -1;
