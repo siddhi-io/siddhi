@@ -64,6 +64,13 @@ public class AggregationInputStore extends ConditionInputStore {
         if (within != null ? !within.equals(that.within) : that.within != null) {
             return false;
         }
+        if (onCondition != null ? !onCondition.equals(that.onCondition) :
+                that.onCondition != null) {
+            return false;
+        }
+        if (store != null ? !store.equals(that.store) : that.store != null) {
+            return false;
+        }
         return per != null ? per.equals(that.per) : that.per == null;
     }
 
