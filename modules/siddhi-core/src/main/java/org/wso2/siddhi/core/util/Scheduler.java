@@ -226,6 +226,8 @@ public class Scheduler implements Snapshotable {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(true);
         }
+        //Make the scheduler running flag to false to make sure scheduler will schedule next time starts
+        running = false;
     }
 
     private class EventCaller implements Runnable {
