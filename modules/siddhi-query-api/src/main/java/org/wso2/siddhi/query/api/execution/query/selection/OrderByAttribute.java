@@ -68,6 +68,28 @@ public class OrderByAttribute implements SiddhiElement {
         queryContextEndIndex = lineAndColumn;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof OrderByAttribute)) {
+            return false;
+        }
+        OrderByAttribute that = (OrderByAttribute) o;
+        if (order != null ? !order.equals(that.order) : that.order != null) {
+            return false;
+        }
+        return variable != null ? variable.equals(that.variable) : that.variable == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = order != null ? order.hashCode() : 0;
+        result = 31 * result + (variable != null ? variable.hashCode() : 0);
+        return result;
+    }
+
     /**
      * enum for ascending and descending
      */
