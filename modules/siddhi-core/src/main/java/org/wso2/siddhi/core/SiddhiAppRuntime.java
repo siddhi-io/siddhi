@@ -378,7 +378,7 @@ public class SiddhiAppRuntime {
             }
 
             for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
-                aggregationRuntime.getRecreateInMemoryData().recreateInMemoryData();
+                aggregationRuntime.start();
             }
             running = true;
         } catch (Throwable t) {

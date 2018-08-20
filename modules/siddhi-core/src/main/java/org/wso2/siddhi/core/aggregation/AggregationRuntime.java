@@ -78,6 +78,7 @@ public class AggregationRuntime implements MemoryCalculable {
     private List<ExpressionExecutor> outputExpressionExecutors;
     private RecreateInMemoryData recreateInMemoryData;
     private boolean processingOnExternalTime;
+    private IncrementalDataPurging incrementalDataPurging;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -90,7 +91,8 @@ public class AggregationRuntime implements MemoryCalculable {
                               LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind,
                               RecreateInMemoryData recreateInMemoryData, boolean processingOnExternalTime,
                               List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
-                              List<GroupByKeyGenerator> groupByKeyGeneratorList) {
+                              List<GroupByKeyGenerator> groupByKeyGeneratorList,
+                              IncrementalDataPurging incrementalDataPurging) {
         this.aggregationDefinition = aggregationDefinition;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.aggregationTables = aggregationTables;
@@ -107,6 +109,7 @@ public class AggregationRuntime implements MemoryCalculable {
         this.processingOnExternalTime = processingOnExternalTime;
         this.aggregateProcessingExecutorsList = aggregateProcessingExecutorsList;
         this.groupByKeyGeneratorList = groupByKeyGeneratorList;
+        this.incrementalDataPurging = incrementalDataPurging;
 
         aggregateMetaSteamEvent = new MetaStreamEvent();
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
@@ -308,8 +311,8 @@ public class AggregationRuntime implements MemoryCalculable {
                 processingOnExternalTime);
     }
 
-    public RecreateInMemoryData getRecreateInMemoryData() {
-        return this.recreateInMemoryData;
+    public void start() {
+        recreateInMemoryData.recreateInMemoryData();
+        incrementalDataPurging.executeIncrementalDataPurging();
     }
-
 }
