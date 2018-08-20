@@ -28,17 +28,19 @@ import org.wso2.siddhi.core.util.Scheduler;
 public class SchedulerParser {
 
     private SchedulerParser() {
+
     }
 
     /**
      * Create Scheduler object.
      *
-     * @param singleThreadEntryValve   Schedulable
-     * @param siddhiAppContext     SiddhiAppContext
+     * @param singleThreadEntryValve Schedulable
+     * @param siddhiAppContext       SiddhiAppContext
      * @return Scheduler instance
      */
     public static Scheduler parse(Schedulable
-            singleThreadEntryValve, SiddhiAppContext siddhiAppContext) {
+                                          singleThreadEntryValve, SiddhiAppContext siddhiAppContext) {
+
         Scheduler scheduler = new Scheduler(singleThreadEntryValve, siddhiAppContext);
         siddhiAppContext.addScheduler(scheduler);
         return scheduler;

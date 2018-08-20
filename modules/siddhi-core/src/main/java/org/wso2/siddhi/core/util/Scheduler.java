@@ -211,7 +211,7 @@ public class Scheduler implements Snapshotable {
     /**
      * Schedule events which are not scheduled in the queue when switching back from event time to system current time
      */
-    public void handleSwitchToNonPlayBackMode() {
+    public void switchToLiveMode() {
         Long toNotifyTime = toNotifyQueue.peek();
         if (toNotifyTime != null) {
             schedule(toNotifyTime);
@@ -222,7 +222,7 @@ public class Scheduler implements Snapshotable {
      * this can be used to release
      * the acquired resources for processing.
      */
-    public void handleSwitchToPlayBackMode() {
+    public void switchToPlayBackMode() {
         if (scheduledFuture != null) {
             scheduledFuture.cancel(true);
         }

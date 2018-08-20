@@ -702,17 +702,22 @@ public class SiddhiAppRuntime {
      * @param idleTime
      * @param incrementInMilliseconds
      */
-    public void enablePlayBack(boolean playBackEnabled, long idleTime, long incrementInMilliseconds) {
+    public void enablePlayBack(boolean playBackEnabled, Long idleTime, Long incrementInMilliseconds) {
         this.siddhiAppContext.setPlayback(playBackEnabled);
         if (!playBackEnabled) {
             for (Scheduler scheduler : siddhiAppContext.getSchedulerList()) {
-                scheduler.handleSwitchToNonPlayBackMode();
+                scheduler.switchToLiveMode();
             }
         } else {
-            this.siddhiAppContext.getTimestampGenerator().setIdleTime(idleTime);
-            this.siddhiAppContext.getTimestampGenerator().setIncrementInMilliseconds(incrementInMilliseconds);
+            if (idleTime != null && incrementInMilliseconds != null) {
+                //Only use if both values are present. Else defaults will be used which got assigned when creating
+                // the siddhi app runtimes if app contained playback information
+                this.siddhiAppContext.getTimestampGenerator().setIdleTime(idleTime);
+                this.siddhiAppContext.getTimestampGenerator().setIncrementInMilliseconds(incrementInMilliseconds);
+            }
+
             for (Scheduler scheduler : siddhiAppContext.getSchedulerList()) {
-                scheduler.handleSwitchToPlayBackMode();
+                scheduler.switchToPlayBackMode();
             }
         }
     }
