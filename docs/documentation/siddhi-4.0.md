@@ -1819,9 +1819,9 @@ Incremental aggregation allows you to obtain aggregates in an incremental manner
 
 This not only allows you to calculate aggregations with varied time granularity, but also allows you to access them in an interactive
  manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**. 
- Incremental aggregation granularity data holders will be automatically purge with following retentions with a interval of 15 mins.
+ Incremental aggregation granularity data holders will be automatically purge with following retentions with a interval of 15 minutes.
  
-|Granularity           |Default retention      |Minimum retestion 
+|Granularity           |Default retention      |Minimum retention 
 ---------------        |--------------         |------------------  
 |`second`              |`120` seconds          |`120` seconds
 |`minute`              |`24`  hours            |`120` minutes
