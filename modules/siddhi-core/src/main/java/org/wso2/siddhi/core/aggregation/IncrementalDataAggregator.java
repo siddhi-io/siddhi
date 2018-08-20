@@ -106,12 +106,15 @@ public class IncrementalDataAggregator {
             ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
             baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
         }
+        baseIncrementalValueStore.setProcessed(true);
     }
 
     private ComplexEventChunk<StreamEvent> createEventChunkFromAggregatedData() {
         ComplexEventChunk<StreamEvent> processedInMemoryEventChunk = new ComplexEventChunk<>(true);
         if (this.baseIncrementalValueStoreGroupByMap.size() == 0) {
-            processedInMemoryEventChunk.add(this.baseIncrementalValueStore.createStreamEvent());
+            if (this.baseIncrementalValueStore.isProcessed()) {
+                processedInMemoryEventChunk.add(this.baseIncrementalValueStore.createStreamEvent());
+            }
         } else {
             for (Map.Entry<String, BaseIncrementalValueStore> entryAgainstGroupBy :
                     baseIncrementalValueStoreGroupByMap.entrySet()) {
