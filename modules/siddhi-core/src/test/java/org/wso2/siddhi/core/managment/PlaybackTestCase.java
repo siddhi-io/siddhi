@@ -102,7 +102,7 @@ public class PlaybackTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest1"})
     public void playbackTest2() throws InterruptedException {
         log.info("Playback Test 2: Playback with heartbeat disabled in query with start time enabled time batch " +
                 "window");
@@ -162,7 +162,7 @@ public class PlaybackTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest2"})
     public void playbackTest3() throws InterruptedException {
         log.info("Playback Test 3: Playback with heartbeat enabled");
 
@@ -219,7 +219,7 @@ public class PlaybackTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest3"})
     public void playbackTest4() throws InterruptedException {
         log.info("Playback Test 4: Playback with query joining two windows");
 
@@ -270,7 +270,7 @@ public class PlaybackTestCase {
         }
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest4"})
     public void playbackTest5() throws InterruptedException {
         log.info("Playback Test 5: Playback enabled timeLength window with no of events less than window length and " +
                 "time period less than window time");
@@ -319,7 +319,7 @@ public class PlaybackTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest5"})
     public void playbackTest6() throws InterruptedException {
         log.info("Playback Test 6: Playback with heartbeat enabled timeLength window with no of events less than " +
                 "window length and time period less than window time");
@@ -368,7 +368,7 @@ public class PlaybackTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest6"})
     public void playbackTest7() throws InterruptedException {
         log.info("Playback Test 7: Testing playback without heartbeat");
 
@@ -415,7 +415,7 @@ public class PlaybackTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest7"})
     public void playbackTest8() throws InterruptedException {
         log.info("Playback Test 8: Testing playback with heartbeat enabled");
 
@@ -462,7 +462,7 @@ public class PlaybackTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = SiddhiParserException.class)
+    @Test(dependsOnMethods = {"playbackTest8"}, expectedExceptions = SiddhiParserException.class)
     public void playbackTest9() throws InterruptedException {
         log.info("Playback Test 9: Testing playback with invalid increment time constant");
 
@@ -480,7 +480,7 @@ public class PlaybackTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
-    @Test(expectedExceptions = SiddhiParserException.class)
+    @Test(dependsOnMethods = {"playbackTest9"}, expectedExceptions = SiddhiParserException.class)
     public void playbackTest10() throws InterruptedException {
         log.info("Playback Test 10: Testing playback with invalid idle.time time constant");
 
@@ -498,7 +498,7 @@ public class PlaybackTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest10"})
     public void playbackTest11() throws InterruptedException {
         log.info("Playback Test 11: Testing playback with out of order event with less than system timestamp");
 
@@ -550,7 +550,7 @@ public class PlaybackTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest11"})
     public void playbackTest12() throws InterruptedException {
         log.info("Playback Test 12: Testing playback with out of order event with greater than system timestamp");
 
@@ -602,7 +602,7 @@ public class PlaybackTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest12"})
     public void playbackTest13() throws InterruptedException {
         log.info("Playback Test 13: Testing playback with out of order event with smaller than system timestamp after" +
                 " window expires");
@@ -654,7 +654,7 @@ public class PlaybackTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest13"})
     public void playbackTest14() throws InterruptedException {
         log.info("Playback Test 14: Switching to Playback mode in runtime with heartbeat disabled in query " +
                 "containing regular time batch window ");
@@ -710,7 +710,7 @@ public class PlaybackTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest14"})
     public void playbackTest15() throws InterruptedException {
         log.info("Playback Test 15: Switching between live mode and Playback mode with heartbeat disabled in query " +
                 "containing regular time batch window ");
@@ -766,8 +766,9 @@ public class PlaybackTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest15"})
     public void playbackTest16() throws InterruptedException {
+
         log.info("Playback Test 16: Switching between Playback mode and live mode with heartbeat disabled in query " +
                 "containing regular time batch window test both current and expired batches");
 
@@ -810,7 +811,7 @@ public class PlaybackTestCase {
         Thread.sleep(505);   // 1 sec passed
         inputHandler.send(new Object[]{"GOOGLE", 85.0f, 1});
         Thread.sleep(1000);   // Another 1 sec passed
-        inputHandler.send(new Object[]{"ORACLE", 90.5f, 1});
+        inputHandler.send(new Object[]{"ORACLE", 10000.5f, 1});
         Thread.sleep(100);
 
         AssertJUnit.assertEquals(3, inEventCount);
@@ -819,7 +820,7 @@ public class PlaybackTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest16"})
     public void playbackTest17() throws InterruptedException {
         log.info("Playback Test 17: Switching between Playback mode and live mode with heartbeat disabled in query " +
                 "containing regular time batch window test only current batch ");
@@ -868,7 +869,7 @@ public class PlaybackTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"playbackTest17"})
     public void playbackTest18() throws InterruptedException {
         log.info("Playback Test 18: Switching between Playback mode and live mode with heartbeat disabled in query " +
                 "containing regular time batch window test only current batch ");
