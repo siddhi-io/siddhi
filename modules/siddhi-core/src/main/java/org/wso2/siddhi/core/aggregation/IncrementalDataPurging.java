@@ -66,7 +66,7 @@ public class IncrementalDataPurging implements Runnable {
     private StreamEventPool streamEventPool;
     private Map<TimePeriod.Duration, Table> aggregationTables;
     private SiddhiAppContext siddhiAppContext;
-    private static ScheduledFuture scheduledPurgingTaskStatus;
+    private ScheduledFuture scheduledPurgingTaskStatus;
     private static final String INTERNAL_AGG_TIMESTAMP_FIELD = "AGG_TIMESTAMP";
     private static final String EXTERNAL_AGG_TIMESTAMP_FIELD = "AGG_EVENT_TIMESTAMP";
     private String purgingTimestampField;
@@ -78,11 +78,12 @@ public class IncrementalDataPurging implements Runnable {
     private Attribute aggregatedTimestampAttribute;
     private Map<TimePeriod.Duration, CompiledCondition> compiledConditionsHolder =
             new EnumMap<>(TimePeriod.Duration.class);
+    private Map<String, Table> tableMap = new HashMap<>();
 
 
     public void init(AggregationDefinition aggregationDefinition, StreamEventPool streamEventPool,
                      Map<TimePeriod.Duration, Table> aggregationTables, Boolean isProcessingOnExternalTime,
-                     SiddhiAppContext siddhiAppContext, Map<String, Table> tableMap) {
+                     SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
         List<Annotation> annotations = aggregationDefinition.getAnnotations();
         this.streamEventPool = streamEventPool;
@@ -97,31 +98,32 @@ public class IncrementalDataPurging implements Runnable {
         VariableExpressionExecutor variableExpressionExecutor = new VariableExpressionExecutor(
                 aggregatedTimestampAttribute, 0, 1);
         variableExpressionExecutorList.add(variableExpressionExecutor);
-        for (TimePeriod.Duration duration : aggregationTables.keySet()) {
-            switch (duration) {
+        for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
+            this.tableMap.put(entry.getValue().getTableDefinition().getId(), entry.getValue());
+            switch (entry.getKey()) {
                 case SECONDS:
-                    retentionPeriods.put(duration, Expression.Time.sec(120).value());
-                    minimumDurationMap.put(duration, Expression.Time.sec(120).value());
+                    retentionPeriods.put(entry.getKey(), Expression.Time.sec(120).value());
+                    minimumDurationMap.put(entry.getKey(), Expression.Time.sec(120).value());
                     break;
                 case MINUTES:
-                    retentionPeriods.put(duration, Expression.Time.hour(24).value());
-                    minimumDurationMap.put(duration, Expression.Time.minute(120).value());
+                    retentionPeriods.put(entry.getKey(), Expression.Time.hour(24).value());
+                    minimumDurationMap.put(entry.getKey(), Expression.Time.minute(120).value());
                     break;
                 case HOURS:
-                    retentionPeriods.put(duration, Expression.Time.day(30).value());
-                    minimumDurationMap.put(duration, Expression.Time.hour(25).value());
+                    retentionPeriods.put(entry.getKey(), Expression.Time.day(30).value());
+                    minimumDurationMap.put(entry.getKey(), Expression.Time.hour(25).value());
                     break;
                 case DAYS:
-                    retentionPeriods.put(duration, Expression.Time.year(5).value());
-                    minimumDurationMap.put(duration, Expression.Time.day(32).value());
+                    retentionPeriods.put(entry.getKey(), Expression.Time.year(1).value());
+                    minimumDurationMap.put(entry.getKey(), Expression.Time.day(32).value());
                     break;
                 case MONTHS:
-                    retentionPeriods.put(duration, RETAIN_ALL);
-                    minimumDurationMap.put(duration, Expression.Time.day(367).value());
+                    retentionPeriods.put(entry.getKey(), RETAIN_ALL);
+                    minimumDurationMap.put(entry.getKey(), Expression.Time.month(13).value());
                     break;
                 case YEARS:
-                    retentionPeriods.put(duration, RETAIN_ALL);
-                    minimumDurationMap.put(duration, 0L);
+                    retentionPeriods.put(entry.getKey(), RETAIN_ALL);
+                    minimumDurationMap.put(entry.getKey(), 0L);
             }
         }
 
@@ -174,10 +176,6 @@ public class IncrementalDataPurging implements Runnable {
             }
         }
         compiledConditionsHolder = createCompileConditions(aggregationTables, tableMap);
-    }
-
-    private Long getPurgeExecutionInterval() {
-        return purgeExecutionInterval;
     }
 
     public boolean isPurgingEnabled() {
@@ -268,28 +266,29 @@ public class IncrementalDataPurging implements Runnable {
     /**
      * Data purging task scheduler method
      **/
-    public static void executeIncrementalDataPurging(SiddhiAppContext siddhiAppContext,
-                                                     IncrementalDataPurging incrementalDataPurging) {
+    public void executeIncrementalDataPurging() {
         StringBuilder tableNames = new StringBuilder();
-        if (Objects.nonNull(scheduledPurgingTaskStatus)) {
-            scheduledPurgingTaskStatus.cancel(true);
-            scheduledPurgingTaskStatus = siddhiAppContext.getScheduledExecutorService().
-                    scheduleWithFixedDelay(incrementalDataPurging, incrementalDataPurging.getPurgeExecutionInterval(),
-                            incrementalDataPurging.getPurgeExecutionInterval(),
-                            TimeUnit.MILLISECONDS);
-        } else {
-            scheduledPurgingTaskStatus = siddhiAppContext.getScheduledExecutorService().
-                    scheduleWithFixedDelay(incrementalDataPurging, incrementalDataPurging.getPurgeExecutionInterval(),
-                            incrementalDataPurging.getPurgeExecutionInterval(),
-                            TimeUnit.MILLISECONDS);
-        }
-        for (TimePeriod.Duration duration : incrementalDataPurging.retentionPeriods.keySet()) {
-            if (!incrementalDataPurging.retentionPeriods.get(duration).equals(RETAIN_ALL)) {
-                tableNames.append(duration + ",");
+        if (isPurgingEnabled()) {
+            if (Objects.nonNull(scheduledPurgingTaskStatus)) {
+                scheduledPurgingTaskStatus.cancel(true);
+                scheduledPurgingTaskStatus = siddhiAppContext.getScheduledExecutorService().
+                        scheduleWithFixedDelay(this, purgeExecutionInterval, purgeExecutionInterval,
+                                TimeUnit.MILLISECONDS);
+            } else {
+                scheduledPurgingTaskStatus = siddhiAppContext.getScheduledExecutorService().
+                        scheduleWithFixedDelay(this, purgeExecutionInterval, purgeExecutionInterval,
+                                TimeUnit.MILLISECONDS);
             }
+            for (Map.Entry<TimePeriod.Duration, Long> entry : retentionPeriods.entrySet()) {
+                if (!retentionPeriods.get(entry.getKey()).equals(RETAIN_ALL)) {
+                    tableNames.append(entry.getKey()).append(",");
+                }
+            }
+            LOG.info("Data purging has enabled for table: " + tableNames + " with an interval of " +
+                    ((purgeExecutionInterval) / 1000) + " seconds");
+        } else {
+            LOG.debug("Purging is disabled in siddhi app: " + siddhiAppContext.getName());
         }
-        LOG.info("Data purging has enabled for table: " + tableNames + " with an interval of " +
-                ((incrementalDataPurging.getPurgeExecutionInterval()) / 1000) + " seconds");
     }
 
     /**

@@ -142,7 +142,6 @@ public class RecreateInMemoryData {
                             latestEventTimestamp, rootDuration, null);
 
                     rootIncrementalExecutor.setValuesForInMemoryRecreateFromTable(true, emitTimeOfLatestEventInTable);
-
                 }
             }
         }

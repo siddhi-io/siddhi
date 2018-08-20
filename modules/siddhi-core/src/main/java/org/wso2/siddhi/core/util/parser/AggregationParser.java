@@ -259,6 +259,9 @@ public class AggregationParser {
                     isProcessingOnExternalTime, processedMetaStreamEvent, processExpressionExecutorsList,
                     groupByKeyGeneratorList, bufferSize, ignoreEventsOlderThanBuffer, incrementalDurations,
                     aggregationTables, siddhiAppContext, aggregatorName);
+            IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
+            incrementalDataPurging.init(aggregationDefinition, new StreamEventPool(processedMetaStreamEvent, 10)
+                    , aggregationTables, isProcessingOnExternalTime, siddhiAppContext);
 
             //Recreate in-memory data from tables
             RecreateInMemoryData recreateInMemoryData = new RecreateInMemoryData(incrementalDurations,
@@ -292,16 +295,6 @@ public class AggregationParser {
                 throughputTrackerInsert = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                         aggregationDefinition.getId(),
                         SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT);
-
-            }
-            //initialize incremental data purging
-            IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
-            incrementalDataPurging.init(aggregationDefinition, new StreamEventPool(processedMetaStreamEvent, 10)
-                    , aggregationTables, isProcessingOnExternalTime, siddhiAppContext, tableMap);
-
-            //schedule purging if enabled
-            if (incrementalDataPurging.isPurgingEnabled()) {
-                IncrementalDataPurging.executeIncrementalDataPurging(siddhiAppContext, incrementalDataPurging);
             }
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(rootIncrementalExecutor,
@@ -314,7 +307,8 @@ public class AggregationParser {
                     aggregationTables, ((SingleStreamRuntime) streamRuntime), entryValveExecutor, incrementalDurations,
                     siddhiAppContext, baseExecutors, timestampExecutor, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
-                    isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList);
+                    isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList,
+                    incrementalDataPurging);
         } catch (Throwable t) {
             ExceptionUtil.populateQueryContext(t, aggregationDefinition, siddhiAppContext);
             throw t;

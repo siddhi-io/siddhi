@@ -20,7 +20,7 @@ package org.wso2.siddhi.query.api.expression;
 
 import org.wso2.siddhi.query.api.SiddhiElement;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
-import org.wso2.siddhi.query.api.exception.NoSuchDurationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.condition.And;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 import org.wso2.siddhi.query.api.expression.condition.In;
@@ -264,7 +264,7 @@ public abstract class Expression implements SiddhiElement {
                         return Expression.Time.month(timeValue).value();
                 }
             } else {
-                throw new NoSuchDurationException("Provided retention parameter cannot be identified. retention " +
+                throw new SiddhiAppValidationException("Provided retention parameter cannot be identified. retention " +
                         "period: " + value + ".");
             }
         }
@@ -293,7 +293,7 @@ public abstract class Expression implements SiddhiElement {
                 case "years":
                     return TimePeriod.Duration.YEARS;
                 default:
-                    throw new NoSuchDurationException("Duration '" + value + "' does not exists ");
+                    throw new SiddhiAppValidationException("Duration '" + value + "' does not exists ");
             }
         }
 

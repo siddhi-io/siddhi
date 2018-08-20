@@ -41,7 +41,7 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
     private Table table;
     private Window window;
     private MetaStreamEvent.EventType eventType;
-    private AggregationRuntime aggregation;;
+    private AggregationRuntime aggregation;
 
     public FindStoreQueryRuntime(Table table, CompiledCondition compiledCondition, String queryName,
                                  MetaStreamEvent metaStreamEvent) {

@@ -55,7 +55,7 @@ public class IncrementalPurgingTestCase {
         siddhiManager.createSiddhiAppRuntime(stockStream + query);
     }
 
-    @Test(dependsOnMethods = "incrementalPurgingTest1")
+    @Test
     public void incrementalPurgingTest2() throws InterruptedException {
         LOG.info("incrementalPurgingTest2");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -108,14 +108,14 @@ public class IncrementalPurgingTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(dependsOnMethods = "incrementalPurgingTest2")
+    @Test
     public void incrementalPurgingTestCase3() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String stockStream =
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long); ";
-        String query = "@purge(enable='true',interval='10 sec',@retentionPeriod(sec='120 rec',min='all',hours='all'," +
+        String query = "@purge(enable='true',interval='10 sec',@retentionPeriod(sec='120 sec',min='all',hours='all'," +
                 "days='all',months='all',years='all'))   " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
