@@ -301,7 +301,8 @@ public class AggregationParser {
                     incrementalExecutorMap, aggregationTables, ((SingleStreamRuntime) streamRuntime),
                     incrementalDurations, siddhiAppContext, baseExecutors, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
-                    isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList);
+                    isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList,
+                    incrementalDataPurging);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
                     incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,
