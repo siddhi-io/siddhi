@@ -58,6 +58,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
     private Scheduler scheduler;
     private boolean isRoot;
     private String elementId;
+    private boolean isProcessingExecutor;
 
     private BaseIncrementalValueStore baseIncrementalValueStore = null;
     private Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap = null;
@@ -74,6 +75,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
         this.baseIncrementalValueStore = new BaseIncrementalValueStore(-1, processExpressionExecutors,
                 streamEventPool, siddhiAppContext, aggregatorName);
+        this.isProcessingExecutor = false;
 
         if (groupByKeyGenerator != null) {
             this.isGroupBy = true;
@@ -111,13 +113,13 @@ public class IncrementalExecutor implements Executor, Snapshotable {
             startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(timestamp, duration);
 
             if (timestamp >= nextEmitTime) {
-                    nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null);
-                    dispatchAggregateEvents(startTimeOfAggregates);
+                nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null);
+                dispatchAggregateEvents(startTimeOfAggregates);
                 sendTimerEvent();
-                }
-                if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
-                        processAggregates(streamEvent);
-                }
+            }
+            if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
+                processAggregates(streamEvent);
+            }
         }
     }
 
@@ -170,7 +172,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                     BaseIncrementalValueStore aBaseIncrementalValueStore = baseIncrementalValueStoreGroupByMap
                                 .computeIfAbsent(groupedByKey,
                                         k -> baseIncrementalValueStore.cloneStore(k, startTimeOfAggregates));
-                        process(streamEvent, aBaseIncrementalValueStore);
+                    process(streamEvent, aBaseIncrementalValueStore);
                 } finally {
                     GroupByAggregationAttributeExecutor.getKeyThreadLocal().remove();
                 }
@@ -203,7 +205,9 @@ public class IncrementalExecutor implements Executor, Snapshotable {
             ComplexEventChunk<StreamEvent> eventChunk = new ComplexEventChunk<>(true);
             eventChunk.add(streamEvent);
             LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
-            table.addEvents(eventChunk, 1);
+            if (isProcessingExecutor) {
+                table.addEvents(eventChunk, 1);
+            }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
             }
@@ -220,7 +224,9 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                 eventChunk.add(streamEvent);
             }
             LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
-            table.addEvents(eventChunk, noOfEvents);
+            if (isProcessingExecutor) {
+                table.addEvents(eventChunk, noOfEvents);
+            }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
             }
@@ -257,6 +263,22 @@ public class IncrementalExecutor implements Executor, Snapshotable {
 
     public void setValuesForInMemoryRecreateFromTable(long emitTimeOfLatestEventInTable) {
         this.nextEmitTime = emitTimeOfLatestEventInTable;
+    }
+
+    public boolean isProcessingExecutor() {
+        return isProcessingExecutor;
+    }
+
+    public void setProcessingExecutor(boolean processingExecutor) {
+        isProcessingExecutor = processingExecutor;
+    }
+
+    public void clearExecutor() {
+        if (isGroupBy) {
+            this.baseIncrementalValueStoreGroupByMap.clear();
+        } else {
+            cleanBaseIncrementalValueStore(-1, this.baseIncrementalValueStore);
+        }
     }
 
     @Override

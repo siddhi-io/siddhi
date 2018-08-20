@@ -76,6 +76,8 @@ public class AggregationRuntime implements MemoryCalculable {
     private List<ExpressionExecutor> outputExpressionExecutors;
     private RecreateInMemoryData recreateInMemoryData;
     private boolean processingOnExternalTime;
+    private boolean isFirstEventArrived;
+    private long lastExecutorsRefreshedTime = -1;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -186,6 +188,12 @@ public class AggregationRuntime implements MemoryCalculable {
             if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
                 latencyTrackerFind.markIn();
                 throughputTrackerFind.eventIn();
+            }
+            if (!isFirstEventArrived && (
+                    lastExecutorsRefreshedTime == -1 ||
+                    System.currentTimeMillis() - lastExecutorsRefreshedTime > 1000)) {
+                recreateInMemoryData(false);
+                lastExecutorsRefreshedTime = System.currentTimeMillis();
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
@@ -305,8 +313,19 @@ public class AggregationRuntime implements MemoryCalculable {
                 processingOnExternalTime);
     }
 
-    public RecreateInMemoryData getRecreateInMemoryData() {
-        return this.recreateInMemoryData;
+    public void recreateInMemoryData(boolean isEventArrived) {
+        isFirstEventArrived = isEventArrived;
+        if (isEventArrived) {
+            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
+                    this.incrementalExecutorMap.entrySet()) {
+                durationIncrementalExecutorEntry.getValue().setProcessingExecutor(isEventArrived);
+            }
+        }
+        recreateInMemoryData.recreateInMemoryData(isEventArrived);
+    }
+
+    public IncrementalExecutor getRootExecutor() {
+        return incrementalExecutorMap.get(incrementalDurations.get(0));
     }
 
 }

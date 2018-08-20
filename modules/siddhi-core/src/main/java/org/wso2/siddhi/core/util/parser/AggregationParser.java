@@ -292,18 +292,21 @@ public class AggregationParser {
 
             }
 
-            streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(rootIncrementalExecutor,
-                    incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,
-                    throughputTrackerInsert, siddhiAppContext));
-
             List<ExpressionExecutor> baseExecutors = cloneExpressionExecutors(processExpressionExecutorsList.get(0));
             //Remove timestamp executor
             baseExecutors.remove(0);
-            return new AggregationRuntime(aggregationDefinition, incrementalExecutorMap,
-                    aggregationTables, ((SingleStreamRuntime) streamRuntime), incrementalDurations,
-                    siddhiAppContext, baseExecutors, processedMetaStreamEvent,
+            AggregationRuntime aggregationRuntime = new AggregationRuntime(aggregationDefinition,
+                    incrementalExecutorMap, aggregationTables, ((SingleStreamRuntime) streamRuntime),
+                    incrementalDurations, siddhiAppContext, baseExecutors, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
                     isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList);
+
+            streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
+                    incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,
+                    throughputTrackerInsert, siddhiAppContext));
+
+            return aggregationRuntime;
+
         } catch (Throwable t) {
             ExceptionUtil.populateQueryContext(t, aggregationDefinition, siddhiAppContext);
             throw t;

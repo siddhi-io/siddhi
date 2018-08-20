@@ -39,22 +39,22 @@ import java.util.List;
  */
 public class IncrementalAggregationProcessor implements Processor {
     private final List<ExpressionExecutor> incomingExpressionExecutors;
-    private final MetaStreamEvent processedMetaStreamEvent;
     private final StreamEventPool streamEventPool;
     private final LatencyTracker latencyTrackerInsert;
     private final ThroughputTracker throughputTrackerInsert;
     private SiddhiAppContext siddhiAppContext;
-    private IncrementalExecutor incrementalExecutor;
+    private AggregationRuntime aggregationRuntime;
+    private boolean isFirstEventArrived;
 
-    public IncrementalAggregationProcessor(IncrementalExecutor incrementalExecutor,
+    public IncrementalAggregationProcessor(AggregationRuntime aggregationRuntime,
                                            List<ExpressionExecutor> incomingExpressionExecutors,
                                            MetaStreamEvent processedMetaStreamEvent,
                                            LatencyTracker latencyTrackerInsert,
                                            ThroughputTracker throughputTrackerInsert,
                                            SiddhiAppContext siddhiAppContext) {
-        this.incrementalExecutor = incrementalExecutor;
+        this.isFirstEventArrived = false;
+        this.aggregationRuntime = aggregationRuntime;
         this.incomingExpressionExecutors = incomingExpressionExecutors;
-        this.processedMetaStreamEvent = processedMetaStreamEvent;
         this.streamEventPool = new StreamEventPool(processedMetaStreamEvent, 5);
         this.latencyTrackerInsert = latencyTrackerInsert;
         this.throughputTrackerInsert = throughputTrackerInsert;
@@ -72,6 +72,10 @@ public class IncrementalAggregationProcessor implements Processor {
             }
             while (complexEventChunk.hasNext()) {
                 ComplexEvent complexEvent = complexEventChunk.next();
+                if (!isFirstEventArrived) {
+                    aggregationRuntime.recreateInMemoryData(true);
+                    isFirstEventArrived = true;
+                }
                 StreamEvent borrowedEvent = streamEventPool.borrowEvent();
                 for (int i = 0; i < incomingExpressionExecutors.size(); i++) {
                     ExpressionExecutor expressionExecutor = incomingExpressionExecutors.get(i);
@@ -84,7 +88,7 @@ public class IncrementalAggregationProcessor implements Processor {
                 streamEventChunk.add(borrowedEvent);
                 noOfEvents++;
             }
-            incrementalExecutor.execute(streamEventChunk);
+            aggregationRuntime.getRootExecutor().execute(streamEventChunk);
             if (throughputTrackerInsert != null && siddhiAppContext.isStatsEnabled()) {
                 throughputTrackerInsert.eventsIn(noOfEvents);
             }

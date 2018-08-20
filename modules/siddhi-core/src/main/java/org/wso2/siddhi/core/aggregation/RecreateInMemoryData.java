@@ -68,10 +68,12 @@ public class RecreateInMemoryData {
         this.aggregationMap = aggregationMap;
     }
 
-    public void recreateInMemoryData() {
-        if (incrementalExecutorMap.get(incrementalDurations.get(0)).getNextEmitTime() != -1) {
+    public void recreateInMemoryData(boolean isEventArrived) {
+        IncrementalExecutor rootExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
+        if (rootExecutor.isProcessingExecutor() && rootExecutor.getNextEmitTime() != -1) {
             // If the getNextEmitTime is not -1, that implies that a snapshot of in-memory has already been
             // created. Hence this method does not have to be executed.
+            //This is only true in a processing aggregation runtime
             return;
         }
         Event[] events;
@@ -95,6 +97,10 @@ public class RecreateInMemoryData {
         for (int i = incrementalDurations.size() - 1; i > 0; i--) {
             TimePeriod.Duration recreateForDuration = incrementalDurations.get(i);
             IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
+
+            incrementalExecutor.setProcessingExecutor(isEventArrived);
+            // Reset all executors when recreating again
+            incrementalExecutor.clearExecutor();
 
             // Get the table previous to the duration for which we need to recreate (e.g. if we want to recreate
             // for minute duration, take the second table [provided that aggregation is done for seconds])

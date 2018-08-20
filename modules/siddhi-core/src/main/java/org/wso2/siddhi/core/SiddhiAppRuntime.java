@@ -376,10 +376,6 @@ public class SiddhiAppRuntime {
                     source.connectWithRetry();
                 }
             }
-
-            for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
-                aggregationRuntime.getRecreateInMemoryData().recreateInMemoryData();
-            }
             running = true;
         } catch (Throwable t) {
             log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', triggering shutdown process. "
