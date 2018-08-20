@@ -153,6 +153,7 @@ public class Selector implements SiddhiElement {
                 "selectionList=" + selectionList +
                 ", groupByList=" + groupByList +
                 ", havingExpression=" + havingExpression +
+                ", orderByList=" + orderByList +
                 '}';
     }
 
@@ -177,8 +178,7 @@ public class Selector implements SiddhiElement {
         if (selectionList != null ? !selectionList.equals(selector.selectionList) : selector.selectionList != null) {
             return false;
         }
-
-        return true;
+        return orderByList != null ? orderByList.equals(selector.orderByList) : selector.orderByList == null;
     }
 
     @Override
@@ -186,6 +186,7 @@ public class Selector implements SiddhiElement {
         int result = selectionList != null ? selectionList.hashCode() : 0;
         result = 31 * result + (groupByList != null ? groupByList.hashCode() : 0);
         result = 31 * result + (havingExpression != null ? havingExpression.hashCode() : 0);
+        result = 31 * result + (orderByList != null ? orderByList.hashCode() : 0);
         return result;
     }
 

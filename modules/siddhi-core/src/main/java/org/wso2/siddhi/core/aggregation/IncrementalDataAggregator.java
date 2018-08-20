@@ -43,7 +43,6 @@ public class IncrementalDataAggregator {
     private final List<TimePeriod.Duration> incrementalDurations;
     private final TimePeriod.Duration aggregateForDuration;
     private final ExpressionExecutor timestampExecutor;
-    private final ExpressionExecutor timeZoneExecutor;
     private final BaseIncrementalValueStore baseIncrementalValueStore;
 
     private final Map<Long, BaseIncrementalValueStore> baseIncrementalValueStoreMap;
@@ -56,7 +55,6 @@ public class IncrementalDataAggregator {
         this.incrementalDurations = incrementalDurations;
         this.aggregateForDuration = aggregateForDuration;
         this.timestampExecutor = timestampExecutor;
-        this.timeZoneExecutor = baseExecutors.get(0);
         StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         this.baseIncrementalValueStore = new BaseIncrementalValueStore(-1, baseExecutors, streamEventPool,
                 siddhiAppContext, null);
@@ -118,9 +116,8 @@ public class IncrementalDataAggregator {
     }
 
     private void processInMemoryAggregates(StreamEvent streamEvent, long timestamp, String groupByKey) {
-        String timeZone = timeZoneExecutor.execute(streamEvent).toString();
         long startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(timestamp,
-                aggregateForDuration, timeZone);
+                aggregateForDuration);
         synchronized (this) {
             if (groupByKey != null) {
                 Map<String, BaseIncrementalValueStore> aBaseIncrementalValueStoreGroupBy =
