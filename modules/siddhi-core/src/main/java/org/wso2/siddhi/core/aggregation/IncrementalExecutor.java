@@ -25,7 +25,6 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.query.selector.attribute.processor.executor.GroupByAggregationAttributeExecutor;
@@ -35,11 +34,9 @@ import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
 
 /**
  * Incremental executor class which is responsible for performing incremental aggregation.
@@ -52,77 +49,43 @@ public class IncrementalExecutor implements Executor, Snapshotable {
     private TimePeriod.Duration duration;
     private Table table;
     private GroupByKeyGenerator groupByKeyGenerator;
-    private int bufferSize;
-    private boolean ignoreEventsOlderThanBuffer;
     private StreamEventPool streamEventPool;
     private long nextEmitTime = -1;
-    private boolean isProcessingOnExternalTime;
-    private int currentBufferIndex = -1;
     private long startTimeOfAggregates = -1;
     private boolean timerStarted = false;
     private boolean isGroupBy;
     private Executor next;
     private Scheduler scheduler;
     private boolean isRoot;
-    private long millisecondsPerDuration;
-    private boolean eventOlderThanBuffer;
-    private int maxTimestampPosition;
-    private long maxTimestampInBuffer;
-    private long minTimestampInBuffer;
-    private Semaphore mutex;
-    private boolean isRootAndLoadedFromTable = false;
     private String elementId;
 
     private BaseIncrementalValueStore baseIncrementalValueStore = null;
-    private Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreMap = null;
-    private ArrayList<BaseIncrementalValueStore> baseIncrementalValueStoreList = null;
-    private ArrayList<HashMap<String, BaseIncrementalValueStore>> baseIncrementalValueGroupByStoreList = null;
+    private Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap = null;
 
     public IncrementalExecutor(TimePeriod.Duration duration, List<ExpressionExecutor> processExpressionExecutors,
-                               GroupByKeyGenerator groupByKeyGenerator, MetaStreamEvent metaStreamEvent, int bufferSize,
-                               boolean ignoreEventsOlderThanBuffer, IncrementalExecutor child, boolean isRoot,
-                               Table table, boolean isProcessingOnExternalTime, SiddhiAppContext siddhiAppContext,
-                               String aggregatorName) {
+                               GroupByKeyGenerator groupByKeyGenerator, MetaStreamEvent metaStreamEvent,
+                               IncrementalExecutor child, boolean isRoot, Table table,
+                               SiddhiAppContext siddhiAppContext, String aggregatorName) {
         this.duration = duration;
         this.next = child;
         this.isRoot = isRoot;
         this.table = table;
-        this.bufferSize = bufferSize;
-        this.ignoreEventsOlderThanBuffer = ignoreEventsOlderThanBuffer;
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
-        this.isProcessingOnExternalTime = isProcessingOnExternalTime;
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
         this.baseIncrementalValueStore = new BaseIncrementalValueStore(-1, processExpressionExecutors,
                 streamEventPool, siddhiAppContext, aggregatorName);
 
         if (groupByKeyGenerator != null) {
+            this.isGroupBy = true;
             this.groupByKeyGenerator = groupByKeyGenerator;
-            isGroupBy = true;
-            if (bufferSize > 0 && isRoot) {
-                baseIncrementalValueGroupByStoreList = new ArrayList<>(bufferSize + 1);
-                for (int i = 0; i < bufferSize + 1; i++) {
-                    baseIncrementalValueGroupByStoreList.add(new HashMap<>());
-                }
-                this.millisecondsPerDuration = IncrementalTimeConverterUtil.getMillisecondsPerDuration(duration);
-            } else {
-                baseIncrementalValueStoreMap = new HashMap<>();
-            }
+            this.baseIncrementalValueStoreGroupByMap = new HashMap<>();
         } else {
-            isGroupBy = false;
-            if (bufferSize > 0 && isRoot) {
-                baseIncrementalValueStoreList = new ArrayList<>(bufferSize + 1);
-                for (int i = 0; i < bufferSize + 1; i++) {
-                    baseIncrementalValueStoreList.add(baseIncrementalValueStore.cloneStore(null, -1));
-                }
-                this.millisecondsPerDuration = IncrementalTimeConverterUtil.getMillisecondsPerDuration(duration);
-            }
+            this.isGroupBy = false;
         }
 
         this.resetEvent = streamEventPool.borrowEvent();
         this.resetEvent.setType(ComplexEvent.Type.RESET);
         setNextExecutor(child);
-
-        mutex = new Semaphore(1);
 
         if (elementId == null) {
             elementId = "IncrementalExecutor-" + siddhiAppContext.getElementIdGenerator().createNewId();
@@ -147,60 +110,14 @@ public class IncrementalExecutor implements Executor, Snapshotable {
 
             startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(timestamp, duration);
 
-            if (isRootAndLoadedFromTable) {
-                // If events are loaded to in-memory from tables, we would not process any data until the
-                // first event that is greater than or equal to emitTimeOfLatestEventInTable arrives.
-                // Note that nextEmitTime is set to emitTimeOfLatestEventInTable with
-                // setValuesForInMemoryRecreateFromTable method.
-                // Hence, even if ignoreEventsOlderThanBuffer is false (meaning that we want old events to be processed)
-                // the first few old events would be dropped. This avoids certain issues which may
-                // arise when replaying data.
-                if (timestamp < nextEmitTime) {
-                    continue;
-                } else {
-                    isRootAndLoadedFromTable = false;
-                }
-            }
-
-            if (bufferSize > 0 && isRoot) {
-                try {
-                    mutex.acquire();
-                    dispatchBufferedAggregateEvents(startTimeOfAggregates);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new SiddhiAppRuntimeException("Error when dispatching events from buffer", e);
-                } finally {
-                    mutex.release();
-                }
-                if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
-                    if (!eventOlderThanBuffer) {
-                        processAggregates(streamEvent);
-                    } else if (!ignoreEventsOlderThanBuffer) {
-                        // Incoming event is older than buffer
-                        startTimeOfAggregates = minTimestampInBuffer;
-                        processAggregates(streamEvent);
-                    }
-                }
-            } else {
-                if (timestamp >= nextEmitTime) {
+            if (timestamp >= nextEmitTime) {
                     nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null);
-                    minTimestampInBuffer = nextEmitTime;
                     dispatchAggregateEvents(startTimeOfAggregates);
-                    if (!isProcessingOnExternalTime) {
-                        sendTimerEvent();
-                    }
+                sendTimerEvent();
                 }
                 if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
-                    if (nextEmitTime == IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null)) {
-                        // This condition checks whether incoming event belongs to current processing event's time slot
                         processAggregates(streamEvent);
-                    } else if (!ignoreEventsOlderThanBuffer) {
-                        // Incoming event is older than current processing event.
-                        startTimeOfAggregates = minTimestampInBuffer;
-                        processAggregates(streamEvent);
-                    }
                 }
-            }
         }
     }
 
@@ -220,12 +137,11 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         long timestamp;
         if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
             timestamp = (long) timestampExpressionExecutor.execute(streamEvent);
-            if (isRoot && !isProcessingOnExternalTime && !timerStarted) {
+            if (isRoot && !timerStarted) {
                 scheduler.notifyAt(IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null));
                 timerStarted = true;
             }
         } else {
-            // TIMER event has arrived. A timer event never arrives for external timeStamp based execution
             timestamp = streamEvent.getTimestamp();
             if (isRoot) {
                 // Scheduling is done by root incremental executor only
@@ -251,33 +167,15 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                 try {
                     String groupedByKey = groupByKeyGenerator.constructEventKey(streamEvent);
                     GroupByAggregationAttributeExecutor.getKeyThreadLocal().set(groupedByKey);
-                    if (baseIncrementalValueGroupByStoreList != null) {
-                        Map<String, BaseIncrementalValueStore> baseIncrementalValueGroupByStore =
-                                baseIncrementalValueGroupByStoreList.get(currentBufferIndex);
-                        BaseIncrementalValueStore aBaseIncrementalValueStore = baseIncrementalValueGroupByStore
+                    BaseIncrementalValueStore aBaseIncrementalValueStore = baseIncrementalValueStoreGroupByMap
                                 .computeIfAbsent(groupedByKey,
                                         k -> baseIncrementalValueStore.cloneStore(k, startTimeOfAggregates));
                         process(streamEvent, aBaseIncrementalValueStore);
-                    } else {
-                        BaseIncrementalValueStore aBaseIncrementalValueStore = baseIncrementalValueStoreMap
-                                .computeIfAbsent(groupedByKey,
-                                        k -> baseIncrementalValueStore.cloneStore(k, startTimeOfAggregates));
-                        process(streamEvent, aBaseIncrementalValueStore);
-                    }
                 } finally {
                     GroupByAggregationAttributeExecutor.getKeyThreadLocal().remove();
                 }
             } else {
-                if (baseIncrementalValueStoreList != null) {
-                    BaseIncrementalValueStore aBaseIncrementalValueStore = baseIncrementalValueStoreList
-                            .get(currentBufferIndex);
-                    if (!aBaseIncrementalValueStore.isProcessed()) {
-                        aBaseIncrementalValueStore.setTimestamp(startTimeOfAggregates);
-                    }
-                    process(streamEvent, aBaseIncrementalValueStore);
-                } else {
-                    process(streamEvent, baseIncrementalValueStore);
-                }
+                process(streamEvent, baseIncrementalValueStore);
             }
         }
     }
@@ -293,111 +191,9 @@ public class IncrementalExecutor implements Executor, Snapshotable {
 
     private void dispatchAggregateEvents(long startTimeOfNewAggregates) {
         if (isGroupBy) {
-            dispatchEvents(baseIncrementalValueStoreMap);
+            dispatchEvents(baseIncrementalValueStoreGroupByMap);
         } else {
             dispatchEvent(startTimeOfNewAggregates, baseIncrementalValueStore);
-        }
-    }
-
-    private void dispatchBufferedAggregateEvents(long startTimeOfNewAggregates) {
-        int lastDispatchIndex;
-        if (currentBufferIndex == -1) {
-            maxTimestampPosition = 0;
-            maxTimestampInBuffer = startTimeOfNewAggregates;
-            currentBufferIndex = 0;
-            eventOlderThanBuffer = false;
-            return;
-        }
-        if (startTimeOfNewAggregates > maxTimestampInBuffer) {
-            if ((startTimeOfNewAggregates - maxTimestampInBuffer) / millisecondsPerDuration >= bufferSize + 1) {
-                // Need to flush all events
-                if (isGroupBy) {
-                    for (int i = 0; i <= bufferSize; i++) {
-                        dispatchEvents(baseIncrementalValueGroupByStoreList.get(i));
-                    }
-                } else {
-                    for (int i = 0; i <= bufferSize; i++) {
-                        dispatchEvent(startTimeOfNewAggregates, baseIncrementalValueStoreList.get(i));
-                    }
-                }
-                currentBufferIndex = (int) (((startTimeOfNewAggregates - maxTimestampInBuffer)
-                        / millisecondsPerDuration) % (bufferSize + 1));
-                maxTimestampPosition = currentBufferIndex;
-            } else {
-                lastDispatchIndex = (maxTimestampPosition
-                        + (int) ((startTimeOfNewAggregates - maxTimestampInBuffer) / millisecondsPerDuration))
-                        % (bufferSize + 1);
-                int minTimestampIndex = maxTimestampPosition - bufferSize;
-                if (minTimestampIndex < 0) {
-                    minTimestampIndex = (bufferSize + 1) + minTimestampIndex;
-                }
-                if (isGroupBy) {
-                    while (true) {
-                        Map<String, BaseIncrementalValueStore> baseIncrementalValueGroupByStore =
-                                baseIncrementalValueGroupByStoreList.get(minTimestampIndex);
-                        if (baseIncrementalValueGroupByStore.size() > 0) {
-                            dispatchEvents(baseIncrementalValueGroupByStore);
-                        }
-                        ++minTimestampIndex;
-                        if (minTimestampIndex > bufferSize) {
-                            minTimestampIndex = 0;
-                        }
-
-                        if (lastDispatchIndex != bufferSize) {
-                            if (minTimestampIndex == lastDispatchIndex + 1) {
-                                break;
-                            }
-                        } else if (minTimestampIndex == 0) {
-                            break;
-                        }
-                    }
-                } else {
-                    while (true) {
-                        BaseIncrementalValueStore aBaseIncrementalValueStore = baseIncrementalValueStoreList
-                                .get(minTimestampIndex);
-                        if (aBaseIncrementalValueStore.isProcessed()) {
-                            dispatchEvent(startTimeOfNewAggregates, aBaseIncrementalValueStore);
-                        }
-                        ++minTimestampIndex;
-                        if (minTimestampIndex > bufferSize) {
-                            minTimestampIndex = 0;
-                        }
-
-                        if (lastDispatchIndex != bufferSize) {
-                            if (minTimestampIndex == lastDispatchIndex + 1) {
-                                break;
-                            }
-                        } else if (minTimestampIndex == 0) {
-                            break;
-                        }
-                    }
-                }
-                currentBufferIndex = lastDispatchIndex;
-                maxTimestampPosition = lastDispatchIndex;
-            }
-            maxTimestampInBuffer = startTimeOfNewAggregates;
-            eventOlderThanBuffer = false;
-        } else if ((int) ((maxTimestampInBuffer - startTimeOfNewAggregates) / millisecondsPerDuration) <= bufferSize) {
-            int tempIndex = maxTimestampPosition
-                    - (int) ((maxTimestampInBuffer - startTimeOfNewAggregates) / millisecondsPerDuration);
-            if (tempIndex >= 0) {
-                currentBufferIndex = tempIndex;
-            } else {
-                currentBufferIndex = (bufferSize + 1) + tempIndex;
-            }
-            eventOlderThanBuffer = false;
-
-        } else {
-            // Incoming event is older than buffer
-            int minTimestampPosition = maxTimestampPosition - bufferSize;
-            if (minTimestampPosition < 0) {
-                currentBufferIndex = (bufferSize + 1) + minTimestampPosition;
-            } else {
-                currentBufferIndex = minTimestampPosition; // This could actually only be 0 (since the largest value
-                // maxTimestampPosition can take equals the buffer size)
-            }
-            minTimestampInBuffer = maxTimestampInBuffer - bufferSize * millisecondsPerDuration;
-            eventOlderThanBuffer = true;
         }
     }
 
@@ -442,87 +238,25 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         }
     }
 
-    ArrayList<HashMap<String, BaseIncrementalValueStore>> getBaseIncrementalValueGroupByStoreList() {
-        return baseIncrementalValueGroupByStoreList;
-    }
 
-    Map<String, BaseIncrementalValueStore> getBaseIncrementalValueStoreMap() {
-        return baseIncrementalValueStoreMap;
-    }
-
-    ArrayList<BaseIncrementalValueStore> getBaseIncrementalValueStoreList() {
-        return baseIncrementalValueStoreList;
+    Map<String, BaseIncrementalValueStore> getBaseIncrementalValueStoreGroupByMap() {
+        return baseIncrementalValueStoreGroupByMap;
     }
 
     BaseIncrementalValueStore getBaseIncrementalValueStore() {
         return baseIncrementalValueStore;
     }
 
-    public long getOldestEventTimestamp() {
-        if (bufferSize > 0 && isRoot) { // Events are buffered
-            try {
-                mutex.acquire();
-                if (currentBufferIndex == -1) {
-                    return -1;
-                } else {
-                    return maxTimestampInBuffer - (bufferSize * millisecondsPerDuration);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new SiddhiAppRuntimeException("Error when getting the oldest in-memory event timestamp", e);
-            } finally {
-                mutex.release();
-            }
-        } else {
-            if (isGroupBy) {
-                return baseIncrementalValueStoreMap.size() != 0
-                        ? ((BaseIncrementalValueStore) baseIncrementalValueStoreMap.values().toArray()[0])
-                        .getTimestamp()
-                        : -1;
-            } else {
-                return baseIncrementalValueStore.isProcessed() ? baseIncrementalValueStore.getTimestamp() : -1;
-            }
-        }
-    }
-
-    public long getNewestEventTimestamp() {
-        if (bufferSize > 0 && isRoot) { // Events are buffered
-            try {
-                mutex.acquire();
-                if (currentBufferIndex == -1) {
-                    return -1;
-                } else {
-                    return maxTimestampInBuffer;
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new SiddhiAppRuntimeException("Error when getting the newest in-memory event timestamp", e);
-            } finally {
-                mutex.release();
-            }
-        } else {
-            if (isGroupBy) {
-                return baseIncrementalValueStoreMap.size() != 0
-                        ? ((BaseIncrementalValueStore) baseIncrementalValueStoreMap.values().toArray()[0])
-                        .getTimestamp()
-                        : -1;
-            } else {
-                return baseIncrementalValueStore.isProcessed() ? baseIncrementalValueStore.getTimestamp() : -1;
-            }
-        }
+    public long getAggregationStartTimestamp() {
+            return this.startTimeOfAggregates;
     }
 
     public long getNextEmitTime() {
         return nextEmitTime;
     }
 
-    public void setValuesForInMemoryRecreateFromTable(boolean isRootAndLoadedFromTable,
-                                                      long emitTimeOfLatestEventInTable) {
-        this.isRootAndLoadedFromTable = isRootAndLoadedFromTable;
+    public void setValuesForInMemoryRecreateFromTable(long emitTimeOfLatestEventInTable) {
         this.nextEmitTime = emitTimeOfLatestEventInTable;
-        if (this.bufferSize == 0) {
-            this.minTimestampInBuffer = emitTimeOfLatestEventInTable;
-        }
     }
 
     @Override
@@ -530,30 +264,16 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         Map<String, Object> state = new HashMap<>();
 
         state.put("NextEmitTime", nextEmitTime);
-        state.put("CurrentBufferIndex", currentBufferIndex);
         state.put("StartTimeOfAggregates", startTimeOfAggregates);
         state.put("TimerStarted", timerStarted);
-        state.put("EventOlderThanBuffer", eventOlderThanBuffer);
-        state.put("MaxTimestampPosition", maxTimestampPosition);
-        state.put("MaxTimestampInBuffer", maxTimestampInBuffer);
-        state.put("MinTimestampInBuffer", minTimestampInBuffer);
-        state.put("IsRootAndLoadedFromTable", isRootAndLoadedFromTable);
-        state.put("Mutex", mutex);
         return state;
     }
 
     @Override
     public void restoreState(Map<String, Object> state) {
         nextEmitTime = (long) state.get("NextEmitTime");
-        currentBufferIndex = (int) state.get("CurrentBufferIndex");
         startTimeOfAggregates = (long) state.get("StartTimeOfAggregates");
         timerStarted = (boolean) state.get("TimerStarted");
-        eventOlderThanBuffer = (boolean) state.get("EventOlderThanBuffer");
-        maxTimestampPosition = (int) state.get("MaxTimestampPosition");
-        maxTimestampInBuffer = (long) state.get("MaxTimestampInBuffer");
-        minTimestampInBuffer = (long) state.get("MinTimestampInBuffer");
-        isRootAndLoadedFromTable = (boolean) state.get("IsRootAndLoadedFromTable");
-        mutex = (Semaphore) state.get("Mutex");
     }
 
     @Override

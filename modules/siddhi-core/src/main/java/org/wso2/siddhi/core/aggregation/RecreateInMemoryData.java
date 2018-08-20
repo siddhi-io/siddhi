@@ -141,7 +141,7 @@ public class RecreateInMemoryData {
                     long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
                             latestEventTimestamp, rootDuration, null);
 
-                    rootIncrementalExecutor.setValuesForInMemoryRecreateFromTable(true, emitTimeOfLatestEventInTable);
+                    rootIncrementalExecutor.setValuesForInMemoryRecreateFromTable(emitTimeOfLatestEventInTable);
 
                 }
             }

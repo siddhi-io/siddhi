@@ -106,7 +106,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                             Map<TimePeriod.Duration, Table> aggregationTables,
                             List<TimePeriod.Duration> incrementalDurations,
-                            List<ExpressionExecutor> baseExecutors, ExpressionExecutor timestampExecutor,
+                            List<ExpressionExecutor> baseExecutors,
                             List<ExpressionExecutor> outputExpressionExecutors,
                             SiddhiAppContext siddhiAppContext,
                             List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
@@ -138,19 +138,14 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         complexEventChunkToHoldWithinMatches.add(withinMatchFromPersistedEvents);
 
         // Optimization step.
-        // Get the newest and oldest event timestamps from in-memory, and
-        // check whether at least one of those timestamps fall out of the given time range. If that's the case,
-        // there's no need to iterate through in-memory data.
         long oldestInMemoryEventTimestamp = getOldestInMemoryEventTimestamp(incrementalExecutorMap,
-                incrementalDurations, perValue);
-        long newestInMemoryEventTimestamp = getNewestInMemoryEventTimestamp(incrementalExecutorMap,
                 incrementalDurations, perValue);
 
         //If processing on external time, the in-memory data also needs to be queried
-        if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(
-                newestInMemoryEventTimestamp, oldestInMemoryEventTimestamp, startTimeEndTime)) {
+        if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
+                startTimeEndTime)) {
             IncrementalDataAggregator incrementalDataAggregator = new IncrementalDataAggregator(incrementalDurations,
-                    perValue, baseExecutors, timestampExecutor, tableMetaStreamEvent, siddhiAppContext);
+                    perValue, oldestInMemoryEventTimestamp, baseExecutors, tableMetaStreamEvent, siddhiAppContext);
 
             // Aggregate in-memory data and create an event chunk out of it
             ComplexEventChunk<StreamEvent> aggregatedInMemoryEventChunk = incrementalDataAggregator
@@ -213,40 +208,12 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         return aggregateSelectionComplexEventChunk;
     }
 
-    private boolean requiresAggregatingInMemoryData(long newestInMemoryEventTimestamp,
-                                                    long oldestInMemoryEventTimestamp, Long[] startTimeEndTime) {
-        if (newestInMemoryEventTimestamp == -1 && oldestInMemoryEventTimestamp == -1) {
+    private boolean requiresAggregatingInMemoryData(long oldestInMemoryEventTimestamp, Long[] startTimeEndTime) {
+        if (oldestInMemoryEventTimestamp == -1) {
             return false;
         }
-        if (oldestInMemoryEventTimestamp != -1) {
-            long endTimeForWithin = startTimeEndTime[1];
-            if (endTimeForWithin <= oldestInMemoryEventTimestamp) {
-                return false;
-            }
-        }
-        if (newestInMemoryEventTimestamp != -1) {
-            long startTimeForWithin = startTimeEndTime[0];
-            if (newestInMemoryEventTimestamp < startTimeForWithin) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private long getNewestInMemoryEventTimestamp(Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
-                                                 List<TimePeriod.Duration> incrementalDurations,
-                                                 TimePeriod.Duration perValue) {
-        long newestEvent;
-        for (TimePeriod.Duration incrementalDuration : incrementalDurations) {
-            newestEvent = incrementalExecutorMap.get(incrementalDuration).getNewestEventTimestamp();
-            if (newestEvent != -1) {
-                return newestEvent;
-            }
-            if (incrementalDuration == perValue) {
-                break;
-            }
-        }
-        return -1;
+        long endTimeForWithin = startTimeEndTime[1];
+        return endTimeForWithin > oldestInMemoryEventTimestamp;
     }
 
     private long getOldestInMemoryEventTimestamp(Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -258,7 +225,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             incrementalDuration = TimePeriod.Duration.values()[i];
             //If the reduced granularity is not configured
             if (incrementalExecutorMap.containsKey(incrementalDuration)) {
-                oldestEvent = incrementalExecutorMap.get(incrementalDuration).getOldestEventTimestamp();
+                oldestEvent = incrementalExecutorMap.get(incrementalDuration).getAggregationStartTimestamp();
                 if (oldestEvent != -1) {
                     return oldestEvent;
                 }

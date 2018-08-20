@@ -239,14 +239,12 @@ public class AggregationParser {
                     siddhiAppRuntimeBuilder, aggregationDefinition.getAnnotations(), groupByVariableList,
                     isProcessingOnExternalTime);
 
-            int bufferSize = 0;
             Element element = AnnotationHelper.getAnnotationElement(SiddhiConstants.ANNOTATION_BUFFER_SIZE, null,
                     aggregationDefinition.getAnnotations());
             if (element != null) {
                 LOG.info("@BufferSize annotation is depreciated. Out of order events are handled without buffers.");
             }
 
-            boolean ignoreEventsOlderThanBuffer = false;
             element = AnnotationHelper.getAnnotationElement(SiddhiConstants.ANNOTATION_IGNORE_EVENTS_OLDER_THAN_BUFFER,
                     null, aggregationDefinition.getAnnotations());
             if (element != null) {
@@ -255,8 +253,8 @@ public class AggregationParser {
             }
 
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = buildIncrementalExecutors(
-                    isProcessingOnExternalTime, processedMetaStreamEvent, processExpressionExecutorsList,
-                    groupByKeyGeneratorList, bufferSize, ignoreEventsOlderThanBuffer, incrementalDurations,
+                    processedMetaStreamEvent, processExpressionExecutorsList,
+                    groupByKeyGeneratorList, incrementalDurations,
                     aggregationTables, siddhiAppContext, aggregatorName);
 
             //Recreate in-memory data from tables
@@ -299,10 +297,11 @@ public class AggregationParser {
                     throughputTrackerInsert, siddhiAppContext));
 
             List<ExpressionExecutor> baseExecutors = cloneExpressionExecutors(processExpressionExecutorsList.get(0));
-            ExpressionExecutor timestampExecutor = baseExecutors.remove(0);
+            //Remove timestamp executor
+            baseExecutors.remove(0);
             return new AggregationRuntime(aggregationDefinition, incrementalExecutorMap,
                     aggregationTables, ((SingleStreamRuntime) streamRuntime), incrementalDurations,
-                    siddhiAppContext, baseExecutors, timestampExecutor, processedMetaStreamEvent,
+                    siddhiAppContext, baseExecutors, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
                     isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList);
         } catch (Throwable t) {
@@ -312,9 +311,9 @@ public class AggregationParser {
     }
 
     private static Map<TimePeriod.Duration, IncrementalExecutor> buildIncrementalExecutors(
-            boolean isProcessingOnExternalTime, MetaStreamEvent processedMetaStreamEvent,
+            MetaStreamEvent processedMetaStreamEvent,
             List<List<ExpressionExecutor>> processExpressionExecutorsList,
-            List<GroupByKeyGenerator> groupByKeyGeneratorList, int bufferSize, boolean ignoreEventsOlderThanBuffer,
+            List<GroupByKeyGenerator> groupByKeyGeneratorList,
             List<TimePeriod.Duration> incrementalDurations,
             Map<TimePeriod.Duration, Table> aggregationTables, SiddhiAppContext siddhiAppContext,
             String aggregatorName) {
@@ -332,9 +331,8 @@ public class AggregationParser {
             TimePeriod.Duration duration = incrementalDurations.get(i);
             IncrementalExecutor incrementalExecutor = new IncrementalExecutor(duration,
                     cloneExpressionExecutors(processExpressionExecutorsList.get(i)),
-                    groupByKeyGeneratorList.get(i), processedMetaStreamEvent, bufferSize, ignoreEventsOlderThanBuffer,
-                    child, isRoot, aggregationTables.get(duration), isProcessingOnExternalTime, siddhiAppContext,
-                    aggregatorName);
+                    groupByKeyGeneratorList.get(i), processedMetaStreamEvent, child, isRoot,
+                    aggregationTables.get(duration), siddhiAppContext, aggregatorName);
             incrementalExecutorMap.put(duration, incrementalExecutor);
             root = incrementalExecutor;
 

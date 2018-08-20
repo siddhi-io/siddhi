@@ -27,7 +27,6 @@ import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.util.IncrementalTimeConverterUtil;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,24 +41,19 @@ import java.util.Map;
 public class IncrementalDataAggregator {
     private final List<TimePeriod.Duration> incrementalDurations;
     private final TimePeriod.Duration aggregateForDuration;
-    private final ExpressionExecutor timestampExecutor;
     private final BaseIncrementalValueStore baseIncrementalValueStore;
-
-    private final Map<Long, BaseIncrementalValueStore> baseIncrementalValueStoreMap;
-    private final Map<Long, Map<String, BaseIncrementalValueStore>> baseIncrementalValueGroupByStoreMap;
+    private final Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap;
 
     public IncrementalDataAggregator(List<TimePeriod.Duration> incrementalDurations,
-                                     TimePeriod.Duration aggregateForDuration, List<ExpressionExecutor> baseExecutors,
-                                     ExpressionExecutor timestampExecutor, MetaStreamEvent metaStreamEvent,
-                                     SiddhiAppContext siddhiAppContext) {
+                                     TimePeriod.Duration aggregateForDuration, long oldestEventTimeStamp,
+                                     List<ExpressionExecutor> baseExecutors,
+                                     MetaStreamEvent metaStreamEvent, SiddhiAppContext siddhiAppContext) {
         this.incrementalDurations = incrementalDurations;
         this.aggregateForDuration = aggregateForDuration;
-        this.timestampExecutor = timestampExecutor;
         StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 10);
-        this.baseIncrementalValueStore = new BaseIncrementalValueStore(-1, baseExecutors, streamEventPool,
-                siddhiAppContext, null);
-        this.baseIncrementalValueStoreMap = new HashMap<>();
-        this.baseIncrementalValueGroupByStoreMap = new HashMap<>();
+        this.baseIncrementalValueStore =  new BaseIncrementalValueStore(oldestEventTimeStamp, baseExecutors,
+                streamEventPool, siddhiAppContext, null);
+        this.baseIncrementalValueStoreGroupByMap = new HashMap<>();
     }
 
     public ComplexEventChunk<StreamEvent> aggregateInMemoryData(
@@ -69,39 +63,17 @@ public class IncrementalDataAggregator {
             TimePeriod.Duration duration = incrementalDurations.get(i);
             IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(duration);
 
-            ArrayList<HashMap<String, BaseIncrementalValueStore>> baseIncrementalValueGroupByStoreList =
-                    incrementalExecutor.getBaseIncrementalValueGroupByStoreList();
-            Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreMap = incrementalExecutor
-                    .getBaseIncrementalValueStoreMap();
-            ArrayList<BaseIncrementalValueStore> baseIncrementalValueStoreList = incrementalExecutor
-                    .getBaseIncrementalValueStoreList();
+            Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap =
+                    incrementalExecutor.getBaseIncrementalValueStoreGroupByMap();
             BaseIncrementalValueStore baseIncrementalValueStore = incrementalExecutor.getBaseIncrementalValueStore();
 
-            if (baseIncrementalValueGroupByStoreList != null) {
-                for (HashMap<String, BaseIncrementalValueStore> aBaseIncrementalValueGroupByStoreList :
-                        baseIncrementalValueGroupByStoreList) {
-                    for (Map.Entry<String, BaseIncrementalValueStore> entry : aBaseIncrementalValueGroupByStoreList
-                            .entrySet()) {
-                        BaseIncrementalValueStore aBaseIncrementalValueStore = entry.getValue();
-                        if (aBaseIncrementalValueStore.isProcessed()) {
-                            processInMemoryAggregates(aBaseIncrementalValueStore.createStreamEvent(),
-                                    aBaseIncrementalValueStore.getTimestamp(), entry.getKey());
-                        }
-                    }
-                }
-            } else if (baseIncrementalValueStoreMap != null) {
-                for (Map.Entry<String, BaseIncrementalValueStore> entry : baseIncrementalValueStoreMap.entrySet()) {
+            if (baseIncrementalValueStoreGroupByMap != null) {
+                for (Map.Entry<String, BaseIncrementalValueStore> entry :
+                        baseIncrementalValueStoreGroupByMap.entrySet()) {
                     BaseIncrementalValueStore aBaseIncrementalValueStore = entry.getValue();
                     if (aBaseIncrementalValueStore.isProcessed()) {
                         processInMemoryAggregates(aBaseIncrementalValueStore.createStreamEvent(),
                                 aBaseIncrementalValueStore.getTimestamp(), entry.getKey());
-                    }
-                }
-            } else if (baseIncrementalValueStoreList != null) {
-                for (BaseIncrementalValueStore aBaseIncrementalValueStore : baseIncrementalValueStoreList) {
-                    if (aBaseIncrementalValueStore.isProcessed()) {
-                        processInMemoryAggregates(aBaseIncrementalValueStore.createStreamEvent(),
-                                aBaseIncrementalValueStore.getTimestamp(), null);
                     }
                 }
             } else if (baseIncrementalValueStore.isProcessed()) {
@@ -118,24 +90,12 @@ public class IncrementalDataAggregator {
                 aggregateForDuration);
         synchronized (this) {
             if (groupByKey != null) {
-                Map<String, BaseIncrementalValueStore> aBaseIncrementalValueStoreGroupBy =
-                        baseIncrementalValueGroupByStoreMap.get(startTimeOfAggregates);
-                if (aBaseIncrementalValueStoreGroupBy == null) {
-                    aBaseIncrementalValueStoreGroupBy = new HashMap<>();
-                    baseIncrementalValueGroupByStoreMap.put(startTimeOfAggregates, aBaseIncrementalValueStoreGroupBy);
-                }
-                BaseIncrementalValueStore aBaseIncrementalValueStore = aBaseIncrementalValueStoreGroupBy
-                        .computeIfAbsent(groupByKey,
-                                k -> baseIncrementalValueStore.cloneStore(k, startTimeOfAggregates));
+                BaseIncrementalValueStore aBaseIncrementalValueStore =
+                        this.baseIncrementalValueStoreGroupByMap.computeIfAbsent(
+                                groupByKey, k -> baseIncrementalValueStore.cloneStore(k, startTimeOfAggregates));
                 process(streamEvent, aBaseIncrementalValueStore);
             } else {
-                BaseIncrementalValueStore aBaseIncrementalValueStore = baseIncrementalValueStoreMap
-                        .get(startTimeOfAggregates);
-                if (aBaseIncrementalValueStore == null) {
-                    aBaseIncrementalValueStore = baseIncrementalValueStore.cloneStore(null, startTimeOfAggregates);
-                    baseIncrementalValueStoreMap.put(startTimeOfAggregates, aBaseIncrementalValueStore);
-                }
-                process(streamEvent, aBaseIncrementalValueStore);
+                process(streamEvent, this.baseIncrementalValueStore);
             }
         }
     }
@@ -146,25 +106,18 @@ public class IncrementalDataAggregator {
             ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
             baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
         }
-        baseIncrementalValueStore.setProcessed(true);
     }
 
     private ComplexEventChunk<StreamEvent> createEventChunkFromAggregatedData() {
         ComplexEventChunk<StreamEvent> processedInMemoryEventChunk = new ComplexEventChunk<>(true);
-        if (baseIncrementalValueStoreMap.size() > 0) {
-            for (Map.Entry<Long, BaseIncrementalValueStore> entryAgainstTime : baseIncrementalValueStoreMap
-                    .entrySet()) {
-                processedInMemoryEventChunk.add(entryAgainstTime.getValue().createStreamEvent());
-            }
+        if (this.baseIncrementalValueStoreGroupByMap.size() == 0) {
+            processedInMemoryEventChunk.add(this.baseIncrementalValueStore.createStreamEvent());
         } else {
-            for (Map.Entry<Long, Map<String, BaseIncrementalValueStore>> entryAgainstTime :
-                    baseIncrementalValueGroupByStoreMap.entrySet()) {
-                for (Map.Entry<String, BaseIncrementalValueStore> entryAgainstKey : entryAgainstTime.getValue()
-                        .entrySet()) {
-                    processedInMemoryEventChunk.add(entryAgainstKey.getValue().createStreamEvent());
+            for (Map.Entry<String, BaseIncrementalValueStore> entryAgainstGroupBy :
+                    baseIncrementalValueStoreGroupByMap.entrySet()) {
+                processedInMemoryEventChunk.add(entryAgainstGroupBy.getValue().createStreamEvent());
                 }
             }
-        }
         return processedInMemoryEventChunk;
     }
 }
