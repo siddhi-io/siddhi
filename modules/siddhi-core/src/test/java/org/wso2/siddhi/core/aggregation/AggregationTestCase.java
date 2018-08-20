@@ -3063,4 +3063,116 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             siddhiAppRuntime.shutdown();
         }
     }
+
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest48"})
+    public void incrementalStreamProcessorTest49() throws InterruptedException {
+        LOG.info("incrementalStreamProcessorTest49 - Aggregate on system timestamp and retrieval on non root duration");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int, timestamp string);";
+        String query = "" +
+                "@BufferSize('3') " +
+                "@IgnoreEventsOlderThanBuffer('true')" +
+                "define aggregation stockAggregation " +
+                "from stockStream " +
+                "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
+                "as lastTradeValue  " +
+                "aggregate every sec...year; " +
+
+                "define stream inputStream (symbol string, value int, startTime string, " +
+                "endTime string, perValue string); " +
+
+                "@info(name = 'query1') " +
+                "from inputStream join stockAggregation " +
+                "within startTime " +
+                "per perValue " +
+                "select avgPrice, totalPrice as sumPrice, lastTradeValue  " +
+                "insert all events into outputStream; ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    if (inEvents != null) {
+                        EventPrinter.print(timestamp, inEvents, removeEvents);
+                        for (Event event : inEvents) {
+                            inEventsList.add(event.getData());
+                            inEventCount.incrementAndGet();
+                        }
+                        eventArrived = true;
+                    }
+                    if (removeEvents != null) {
+                        EventPrinter.print(timestamp, inEvents, removeEvents);
+                        for (Event event : removeEvents) {
+                            removeEventsList.add(event.getData());
+                            removeEventCount.incrementAndGet();
+                        }
+                    }
+                    eventArrived = true;
+                }
+            });
+
+            InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
+            InputHandler inputStreamInputHandler = siddhiAppRuntime.getInputHandler("inputStream");
+            siddhiAppRuntime.start();
+
+            // Thursday, June 1, 2017 4:05:50 AM (add 5.30 to get corresponding IST time)
+            stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, "2017-06-01 04:05:50"});
+
+            // Thursday, June 1, 2017 4:05:51 AM
+            stockStreamInputHandler.send(new Object[]{"IBM", 50f, 60f, 90L, 6, "2017-06-01 04:05:51"});
+
+            // Thursday, June 1, 2017 4:05:52 AM
+            stockStreamInputHandler.send(new Object[]{"WSO2", 60f, 44f, 200L, 56, "2017-06-01 04:05:52"});
+            stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 16, "2017-06-01 04:05:52"});
+
+            // Thursday, June 1, 2017 4:05:50 AM (out of order. must be processed with 1st event for 50th second)
+            stockStreamInputHandler.send(new Object[]{"WSO2", 70f, null, 40L, 10, "2017-06-01 04:05:50"});
+
+            // Thursday, June 1, 2017 4:05:54 AM
+            stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, "2017-06-01 04:05:54"});
+            stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, "2017-06-01 04:05:54"});
+
+            // Thursday, June 1, 2017 4:05:50 AM (out of order. should not be processed since events for 50th second is
+            // no longer in the buffer and @IgnoreEventsOlderThanBuffer is true)
+            stockStreamInputHandler.send(new Object[]{"IBM", 50f, 60f, 90L, 6, "2017-06-01 04:05:50"});
+
+            Thread.sleep(1000);
+            // Thursday, June 1, 2017 4:05:56 AM
+            stockStreamInputHandler.send(new Object[]{"IBM", 900f, null, 200L, 60, "2017-06-01 04:05:56"});
+            stockStreamInputHandler.send(new Object[]{"IBM", 500f, null, 200L, 7, "2017-06-01 04:05:56"});
+
+            // Thursday, June 1, 2017 4:06:56 AM
+            stockStreamInputHandler.send(new Object[]{"IBM", 400f, null, 200L, 9, "2017-06-01 04:06:56"});
+
+            // Thursday, June 1, 2017 4:07:56 AM
+            stockStreamInputHandler.send(new Object[]{"IBM", 600f, null, 200L, 6, "2017-06-01 04:07:56"});
+
+            // Thursday, June 1, 2017 5:07:56 AM
+            stockStreamInputHandler.send(new Object[]{"IBM", 700f, null, 200L, 20, "2017-06-01 05:07:56"});
+
+            Thread.sleep(100);
+            LocalDate currentDate = LocalDate.now();
+            String year = String.valueOf(currentDate.getYear());
+            inputStreamInputHandler.send(new Object[]{"IBM", 1, year + "-**-** **:**:**",
+                    "2019-06-01 09:35:52 +05:30", "years"});
+            Thread.sleep(100);
+
+            List<Object[]> expected = new ArrayList<>();
+            expected.add(new Object[]{283.0769230769231, 3680.0, 14000f});
+
+            SiddhiTestHelper.waitForEvents(100, 1, inEventCount, 60000);
+            AssertJUnit.assertEquals("In events matched", true,
+                    SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
+            AssertJUnit.assertEquals("Number of success events", 1, inEventCount.get());
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
 }

@@ -64,7 +64,9 @@ public class IncrementalDataAggregator {
 
     public ComplexEventChunk<StreamEvent> aggregateInMemoryData(
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap) {
-        for (TimePeriod.Duration duration : incrementalDurations) {
+        int startIndex = incrementalDurations.indexOf(aggregateForDuration);
+        for (int i = startIndex; i >= 0; i--) {
+            TimePeriod.Duration duration = incrementalDurations.get(i);
             IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(duration);
 
             ArrayList<HashMap<String, BaseIncrementalValueStore>> baseIncrementalValueGroupByStoreList =
@@ -105,10 +107,6 @@ public class IncrementalDataAggregator {
             } else if (baseIncrementalValueStore.isProcessed()) {
                 processInMemoryAggregates(baseIncrementalValueStore.createStreamEvent(),
                         baseIncrementalValueStore.getTimestamp(), null);
-            }
-
-            if (duration == aggregateForDuration) {
-                break;
             }
         }
 
