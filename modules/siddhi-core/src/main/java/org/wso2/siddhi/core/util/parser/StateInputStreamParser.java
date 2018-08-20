@@ -175,8 +175,7 @@ public class StateInputStreamParser {
                     siddhiAppContext.addEternalReferencedHolder(absentProcessor);
                     EntryValveProcessor entryValveProcessor = new EntryValveProcessor(siddhiAppContext);
                     entryValveProcessor.setToLast(absentProcessor);
-                    Scheduler scheduler = SchedulerParser.parse(siddhiAppContext.getScheduledExecutorService(),
-                            entryValveProcessor, siddhiAppContext);
+                    Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
                     absentProcessor.setScheduler(scheduler);
 
                     // Assign the AbsentStreamPreStateProcessor to streamPreStateProcessor
@@ -303,8 +302,7 @@ public class StateInputStreamParser {
                         logicalPreStateProcessor1);
                 EntryValveProcessor entryValveProcessor = new EntryValveProcessor(siddhiAppContext);
                 entryValveProcessor.setToLast(logicalPreStateProcessor1);
-                Scheduler scheduler = SchedulerParser.parse(siddhiAppContext.getScheduledExecutorService(),
-                        entryValveProcessor, siddhiAppContext);
+                Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
                 ((SchedulingProcessor) logicalPreStateProcessor1).setScheduler(scheduler);
             } else {
                 logicalPreStateProcessor1 = new LogicalPreStateProcessor(type, stateType, clonewithinStates
@@ -328,8 +326,7 @@ public class StateInputStreamParser {
                         logicalPreStateProcessor2);
                 EntryValveProcessor entryValveProcessor = new EntryValveProcessor(siddhiAppContext);
                 entryValveProcessor.setToLast(logicalPreStateProcessor2);
-                Scheduler scheduler = SchedulerParser.parse(siddhiAppContext.getScheduledExecutorService(),
-                        entryValveProcessor, siddhiAppContext);
+                Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
                 ((SchedulingProcessor) logicalPreStateProcessor2).setScheduler(scheduler);
             } else {
                 logicalPreStateProcessor2 = new LogicalPreStateProcessor(type, stateType, clonewithinStates

@@ -133,8 +133,7 @@ public class SingleInputStreamParser {
                             processor.setToLast(entryValveProcessor);
                         }
                     }
-                    Scheduler scheduler = SchedulerParser.parse(siddhiAppContext.getScheduledExecutorService(),
-                            entryValveProcessor, siddhiAppContext);
+                    Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
                     ((SchedulingProcessor) currentProcessor).setScheduler(scheduler);
                 }
                 if (first) {

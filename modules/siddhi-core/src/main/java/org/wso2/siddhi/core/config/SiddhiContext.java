@@ -168,4 +168,5 @@ public class SiddhiContext {
     public void setRecordTableHandlerManager(RecordTableHandlerManager recordTableHandlerManager) {
         this.recordTableHandlerManager = recordTableHandlerManager;
     }
+
 }

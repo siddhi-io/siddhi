@@ -1818,7 +1818,17 @@ insert into ServerRoomTempStream;
 Incremental aggregation allows you to obtain aggregates in an incremental manner for a specified set of time periods.
 
 This not only allows you to calculate aggregations with varied time granularity, but also allows you to access them in an interactive
- manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**.
+ manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**. 
+ Incremental aggregation granularity data holders will be automatically purge with following retentions with a interval of 15 minutes.
+ 
+|Granularity           |Default retention      |Minimum retention 
+---------------        |--------------         |------------------  
+|`second`              |`120` seconds          |`120` seconds
+|`minute`              |`24`  hours            |`120` minutes
+|`hour`                |`30`  days             |`25`  hours
+|`day`                 |`1`   year             |`32`  days
+|`month`               |`All`                  |`13`  month
+|`year`                |`All`                  |`none` 
 
 **Purpose**
 
@@ -1833,6 +1843,7 @@ Furthermore, this ensures that the aggregations are not lost due to unexpected s
 
 ```sql
 @store(type="<store type>", ...)
+@purge(enable="<true or false>",interval=<purging interval>,@retentionPeriod(<granularity> = <retension period>, ...) )
 define aggregation <aggregator name>
 from <input stream>
 select <attribute name>, <aggregate function>(<attribute name>) as <attribute name>, ...
@@ -1846,6 +1857,8 @@ The above syntax includes the following:
 |`@BufferSize`                 |**DEPRECIATED FROM V4.2.0**. This annotation is optional. The default value is buffer size 0. <br/>It is used to identify the number of 'expired' events to retain <br/>in a buffer, to handle out of order event processing. It's an optional parameter <br/>which is applicable, only if aggregation is based on external timestamp (since events <br/>aggregated based on event arrival time cannot be out of order). An event is identified <br/>as 'expired' with relation to the latest event's timestamp and the most granular duration <br/>for which aggregation is calculated. For example, if aggregation is for sec...year, the <br/>most granular duration is seconds. Hence, if buffer size is 3 and events for 51st second, <br/>52nd second, 53rd second and 54th second arrive, all of the older aggregations (for <br/>seconds 51, 52 and 53) would be kept in the buffer (since latest event is for 54th second)
 |`@IgnoreEventsOlderThanBuffer`|**DEPRECIATED FROM V4.2.0**.This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is the default value as well), an event <br/>older than the buffer would be aggregated with the oldest event in buffer. If <br/>the value is true, an event older than the buffer would be dropped. This is an optional annotation. Default value is false.
 |`@store`                      |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
+|`@purge`                      |This annotation is used to configure purging in aggregation granularities.<br/> when this annotation is not provided, above mentioned default purging will be applied.
+|`@retensionPeriod`            |This annotation is used to configure the retention periods of data purging.<br/> when this annotation is not provided, default retention period will be applied.
 |`<aggregator name>`           |This specifies a unique name for the aggregation so that it can be referred <br/>when accessing aggregate results.
 |`<input stream>`              |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
 |`group by <attribute name>`   |The `group by` clause is optional. If it is included in a Siddhi application, aggregate values <br/> are calculated per each `group by` attribute. If it is not used, all the<br/> events are aggregated together.
@@ -1862,6 +1875,7 @@ This Siddhi Application defines an aggregation named `TradeAggregation` to calcu
 ```sql
 define stream TradeStream (symbol string, price double, volume long, timestamp long);
 
+@purge(enable='true', interval='10 sec',@retentionPeriod(sec='120 sec',min='24 hours',hours='30 days',days='1 year',months='all',years='all'))
 define aggregation TradeAggregation
   from TradeStream
   select symbol, avg(price) as avgPrice, sum(price) as total

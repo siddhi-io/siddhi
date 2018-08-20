@@ -341,8 +341,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         siddhiAppContext.addEternalReferencedHolder(logicalPreStateProcessor);
         EntryValveProcessor entryValveProcessor = new EntryValveProcessor(siddhiAppContext);
         entryValveProcessor.setToLast(logicalPreStateProcessor);
-        Scheduler scheduler = SchedulerParser.parse(siddhiAppContext.getScheduledExecutorService(),
-                entryValveProcessor, siddhiAppContext);
+        Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
         logicalPreStateProcessor.setScheduler(scheduler);
 
         return logicalPreStateProcessor;

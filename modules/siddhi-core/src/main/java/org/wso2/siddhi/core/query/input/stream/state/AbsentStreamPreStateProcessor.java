@@ -251,8 +251,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         siddhiAppContext.addEternalReferencedHolder(streamPreStateProcessor);
         EntryValveProcessor entryValveProcessor = new EntryValveProcessor(siddhiAppContext);
         entryValveProcessor.setToLast(streamPreStateProcessor);
-        Scheduler scheduler = SchedulerParser.parse(siddhiAppContext.getScheduledExecutorService(),
-                entryValveProcessor, siddhiAppContext);
+        Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
         streamPreStateProcessor.setScheduler(scheduler);
         return streamPreStateProcessor;
     }
