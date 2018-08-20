@@ -224,8 +224,7 @@ public class AggregationParser {
             LockWrapper lockWrapper = new LockWrapper(aggregatorName);
             lockWrapper.setLock(new ReentrantLock());
 
-            Scheduler scheduler = SchedulerParser.parse(siddhiAppContext.getScheduledExecutorService(),
-                    entryValveExecutor, siddhiAppContext);
+            Scheduler scheduler = SchedulerParser.parse(entryValveExecutor, siddhiAppContext);
             scheduler.init(lockWrapper, aggregatorName);
             scheduler.setStreamEventPool(new StreamEventPool(processedMetaStreamEvent, 10));
 

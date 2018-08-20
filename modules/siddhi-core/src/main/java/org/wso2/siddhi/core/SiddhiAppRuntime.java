@@ -48,6 +48,7 @@ import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.table.record.RecordTableHandler;
 import org.wso2.siddhi.core.table.record.RecordTableHandlerManager;
 import org.wso2.siddhi.core.util.ExceptionUtil;
+import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.StringUtil;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
@@ -691,6 +692,33 @@ public class SiddhiAppRuntime {
             }
         } else {
             log.debug("Siddhi App '" + getName() + "' statistics reporting not changed!");
+        }
+    }
+
+    /**
+     * To enable and disable Siddhi App playback mode on runtime along with optional parameters.
+     *
+     * @param playBackEnabled whether playback is enabled or not
+     * @param idleTime
+     * @param incrementInMilliseconds
+     */
+    public void enablePlayBack(boolean playBackEnabled, Long idleTime, Long incrementInMilliseconds) {
+        this.siddhiAppContext.setPlayback(playBackEnabled);
+        if (!playBackEnabled) {
+            for (Scheduler scheduler : siddhiAppContext.getSchedulerList()) {
+                scheduler.switchToLiveMode();
+            }
+        } else {
+            if (idleTime != null && incrementInMilliseconds != null) {
+                //Only use if both values are present. Else defaults will be used which got assigned when creating
+                // the siddhi app runtimes if app contained playback information
+                this.siddhiAppContext.getTimestampGenerator().setIdleTime(idleTime);
+                this.siddhiAppContext.getTimestampGenerator().setIncrementInMilliseconds(incrementInMilliseconds);
+            }
+
+            for (Scheduler scheduler : siddhiAppContext.getSchedulerList()) {
+                scheduler.switchToPlayBackMode();
+            }
         }
     }
 }
