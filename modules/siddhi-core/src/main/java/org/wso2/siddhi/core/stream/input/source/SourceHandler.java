@@ -48,7 +48,6 @@ public abstract class SourceHandler implements InputEventHandlerCallback, Snapsh
 
     @Override
     public void sendEvents(Event[] events) throws InterruptedException {
-
         sendEvent(events, inputHandler);
     }
 
