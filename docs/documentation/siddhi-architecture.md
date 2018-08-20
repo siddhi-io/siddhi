@@ -274,8 +274,7 @@ a timer event or other means, it removes the expired event from the window and p
 Join input stream query runtime is generated for join queries. This can consume events from two stream junctions and perform a join operation as depicted above. 
 It can also perform a join by consuming events from one stream junction and join against itself, or it can join against a 
 table, window or an incremental aggregation. When a join is performed with a table, window or incremental aggregation,
-the `WindowProcessor` in the image is replaced with the table, window or incremental aggregation. No  
-basic processors are used on their side. 
+the `WindowProcessor` in the image is replaced with the table, window or incremental aggregation. No basic processors are used on their side. 
 
 The joining operation is triggered by the events that arrive from the stream junction.
 Here, when an event from one stream reaches the pre `JoinProcessor`, it matches against all the available events of the other stream's `WindowProcessor`. 
