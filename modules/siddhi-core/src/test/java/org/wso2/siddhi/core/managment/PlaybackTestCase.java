@@ -695,16 +695,12 @@ public class PlaybackTestCase {
         siddhiAppRuntime.enablePlayBack(true, null, null);
         long timestamp = System.currentTimeMillis();
         inputHandler.send(timestamp, new Object[]{"IBM", 700f, 0});
-
         timestamp += 500;
         inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 1});
-
         timestamp += 500;   // 1 sec passed
         inputHandler.send(timestamp, new Object[]{"GOOGLE", 85.0f, 1});
-
         timestamp += 1000;   // Another 1 sec passed
         inputHandler.send(timestamp, new Object[]{"ORACLE", 90.5f, 1});
-
         Thread.sleep(100);
 
         AssertJUnit.assertEquals(3, inEventCount);
@@ -752,21 +748,15 @@ public class PlaybackTestCase {
 
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
-
         inputHandler.send(System.currentTimeMillis(), new Object[]{"IBM", 700f, 0});
-
         Thread.sleep(500);
         inputHandler.send(System.currentTimeMillis(), new Object[]{"WSO2", 60.5f, 1});
-
         siddhiAppRuntime.enablePlayBack(true, null, null);
         long timestamp = System.currentTimeMillis();
-
         timestamp += 500;   // 1 sec passed
         inputHandler.send(timestamp, new Object[]{"GOOGLE", 85.0f, 1});
-
         timestamp += 1000;   // Another 1 sec passed
         inputHandler.send(timestamp, new Object[]{"ORACLE", 90.5f, 1});
-
         Thread.sleep(100);
 
         AssertJUnit.assertEquals(3, inEventCount);
@@ -782,7 +772,6 @@ public class PlaybackTestCase {
                 "containing regular time batch window ");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume int);";
         String query = "" +
@@ -792,7 +781,6 @@ public class PlaybackTestCase {
                 "insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
@@ -814,29 +802,21 @@ public class PlaybackTestCase {
 
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
-
         inputHandler.send(System.currentTimeMillis(), new Object[]{"IBM", 700f, 0});
-
         Thread.sleep(500);
         inputHandler.send(System.currentTimeMillis(), new Object[]{"WSO2", 60.5f, 1});
-
         siddhiAppRuntime.enablePlayBack(true, null, null);
-
         long timestamp = System.currentTimeMillis();
         timestamp += 500;   // 1 sec passed
         inputHandler.send(timestamp, new Object[]{"GOOGLE", 85.0f, 1});
-
         timestamp += 1000;   // Another 1 sec passed
         inputHandler.send(timestamp, new Object[]{"ORACLE", 90.5f, 1});
-
         Thread.sleep(100);
-
+        
         AssertJUnit.assertEquals(3, inEventCount);
         AssertJUnit.assertEquals(2, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
-
     }
-
-
 }
+
