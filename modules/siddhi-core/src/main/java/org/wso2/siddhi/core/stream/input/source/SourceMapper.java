@@ -52,12 +52,14 @@ public abstract class SourceMapper implements SourceEventListener {
                            List<AttributeMapping> attributeMappings, String sourceType,
                            List<AttributeMapping> transportMappings, SourceHandler sourceHandler,
                            ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+
         this.streamDefinition = streamDefinition;
         this.mapType = mapType;
         this.sourceType = sourceType;
         this.transportMappings = transportMappings;
         if (sourceHandler != null) {
-            sourceHandler.initSourceHandler(siddhiAppContext.getElementIdGenerator().createNewId(), streamDefinition);
+            sourceHandler.initSourceHandler(siddhiAppContext.getName(),
+                    siddhiAppContext.getElementIdGenerator().createNewId(), streamDefinition);
         }
         this.sourceHandler = sourceHandler;
         this.siddhiAppContext = siddhiAppContext;
@@ -93,6 +95,7 @@ public abstract class SourceMapper implements SourceEventListener {
     public abstract Class[] getSupportedInputEventClasses();
 
     public final void setInputHandler(InputHandler inputHandler) {
+
         InputEventHandlerCallback inputEventHandlerCallback;
         if (sourceHandler != null) {
             sourceHandler.setInputHandler(inputHandler);
@@ -107,6 +110,7 @@ public abstract class SourceMapper implements SourceEventListener {
     }
 
     public final void onEvent(Object eventObject, String[] transportProperties) {
+
         try {
             if (eventObject != null) {
                 if (!allowNullInTransportProperties() && transportProperties != null) {
@@ -145,10 +149,12 @@ public abstract class SourceMapper implements SourceEventListener {
     }
 
     public SourceHandler getHandler() {
+
         return this.sourceHandler;
     }
 
     public final StreamDefinition getStreamDefinition() {
+
         return streamDefinition;
     }
 

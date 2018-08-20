@@ -19,6 +19,8 @@ package org.wso2.siddhi.query.api.expression;
 
 
 import org.wso2.siddhi.query.api.SiddhiElement;
+import org.wso2.siddhi.query.api.aggregation.TimePeriod;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.condition.And;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 import org.wso2.siddhi.query.api.expression.condition.In;
@@ -37,6 +39,9 @@ import org.wso2.siddhi.query.api.expression.math.Divide;
 import org.wso2.siddhi.query.api.expression.math.Mod;
 import org.wso2.siddhi.query.api.expression.math.Multiply;
 import org.wso2.siddhi.query.api.expression.math.Subtract;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Siddhi expression
@@ -232,6 +237,64 @@ public abstract class Expression implements SiddhiElement {
 
         public static TimeConstant year(int i) {
             return year((long) i);
+        }
+
+        public static Long timeToLong(String value) {
+            Pattern timeValuePattern = Pattern.compile("\\d+");
+            Pattern durationPattern = Pattern.compile("\\D+");
+            Matcher timeMatcher = timeValuePattern.matcher(value);
+            Matcher durationMatcher = durationPattern.matcher(value);
+            int timeValue;
+            TimePeriod.Duration duration;
+            if (timeMatcher.find() && durationMatcher.find()) {
+                duration = normalizeDuration(durationMatcher.group(0).trim());
+                timeValue = Integer.parseInt(timeMatcher.group(0));
+                switch (duration) {
+                    case SECONDS:
+                        return Expression.Time.sec(timeValue).value();
+                    case MINUTES:
+                        return Expression.Time.minute(timeValue).value();
+                    case HOURS:
+                        return Expression.Time.hour(timeValue).value();
+                    case DAYS:
+                        return Expression.Time.day(timeValue).value();
+                    case YEARS:
+                        return Expression.Time.year(timeValue).value();
+                    default:
+                        return Expression.Time.month(timeValue).value();
+                }
+            } else {
+                throw new SiddhiAppValidationException("Provided retention parameter cannot be identified. retention " +
+                        "period: " + value + ".");
+            }
+        }
+
+        public static TimePeriod.Duration normalizeDuration(String value) {
+            switch (value) {
+                case "sec":
+                case "seconds":
+                case "second":
+                    return TimePeriod.Duration.SECONDS;
+                case "min":
+                case "minutes":
+                case "minute":
+                    return TimePeriod.Duration.MINUTES;
+                case "h":
+                case "hour":
+                case "hours":
+                    return TimePeriod.Duration.HOURS;
+                case "days":
+                case "day":
+                    return TimePeriod.Duration.DAYS;
+                case "month":
+                case "months":
+                    return TimePeriod.Duration.MONTHS;
+                case "year":
+                case "years":
+                    return TimePeriod.Duration.YEARS;
+                default:
+                    throw new SiddhiAppValidationException("Duration '" + value + "' does not exists ");
+            }
         }
 
     }

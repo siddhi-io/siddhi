@@ -173,8 +173,7 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         EntryValveProcessor entryValveProcessor = null;
         if (internalWindowProcessor instanceof SchedulingProcessor) {
             entryValveProcessor = new EntryValveProcessor(this.siddhiAppContext);
-            Scheduler scheduler = SchedulerParser.parse(this.siddhiAppContext.getScheduledExecutorService(),
-                    entryValveProcessor, this.siddhiAppContext);
+            Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, this.siddhiAppContext);
             scheduler.init(this.lockWrapper, queryName);
             scheduler.setStreamEventPool(streamEventPool);
             ((SchedulingProcessor) internalWindowProcessor).setScheduler(scheduler);

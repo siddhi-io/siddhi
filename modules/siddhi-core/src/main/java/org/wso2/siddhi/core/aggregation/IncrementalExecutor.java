@@ -35,8 +35,6 @@ import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +49,6 @@ public class IncrementalExecutor implements Executor, Snapshotable {
 
     private final StreamEvent resetEvent;
     private final ExpressionExecutor timestampExpressionExecutor;
-    private final ExpressionExecutor timeZoneExpressionExecutor;
     private TimePeriod.Duration duration;
     private Table table;
     private GroupByKeyGenerator groupByKeyGenerator;
@@ -95,7 +92,6 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         this.isProcessingOnExternalTime = isProcessingOnExternalTime;
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
-        this.timeZoneExpressionExecutor = processExpressionExecutors.get(0);
         this.baseIncrementalValueStore = new BaseIncrementalValueStore(-1, processExpressionExecutors,
                 streamEventPool, siddhiAppContext, aggregatorName);
 
@@ -147,11 +143,9 @@ public class IncrementalExecutor implements Executor, Snapshotable {
             StreamEvent streamEvent = (StreamEvent) streamEventChunk.next();
             streamEventChunk.remove();
 
-            String timeZone = getTimeZone(streamEvent);
-            long timestamp = getTimestamp(streamEvent, timeZone);
+            long timestamp = getTimestamp(streamEvent);
 
-            startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(timestamp, duration,
-                    timeZone);
+            startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(timestamp, duration);
 
             if (isRootAndLoadedFromTable) {
                 // If events are loaded to in-memory from tables, we would not process any data until the
@@ -189,15 +183,15 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                 }
             } else {
                 if (timestamp >= nextEmitTime) {
-                    nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, timeZone);
+                    nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null);
                     minTimestampInBuffer = nextEmitTime;
                     dispatchAggregateEvents(startTimeOfAggregates);
                     if (!isProcessingOnExternalTime) {
-                        sendTimerEvent(timeZone);
+                        sendTimerEvent();
                     }
                 }
                 if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
-                    if (nextEmitTime == IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, timeZone)) {
+                    if (nextEmitTime == IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null)) {
                         // This condition checks whether incoming event belongs to current processing event's time slot
                         processAggregates(streamEvent);
                     } else if (!ignoreEventsOlderThanBuffer) {
@@ -210,24 +204,24 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         }
     }
 
-    private void sendTimerEvent(String timeZone) {
+    private void sendTimerEvent() {
         if (getNextExecutor() != null) {
             StreamEvent timerEvent = streamEventPool.borrowEvent();
             timerEvent.setType(ComplexEvent.Type.TIMER);
             timerEvent.setTimestamp(
-                    IncrementalTimeConverterUtil.getPreviousStartTime(startTimeOfAggregates, this.duration, timeZone));
+                    IncrementalTimeConverterUtil.getPreviousStartTime(startTimeOfAggregates, this.duration));
             ComplexEventChunk<StreamEvent> timerStreamEventChunk = new ComplexEventChunk<>(true);
             timerStreamEventChunk.add(timerEvent);
             next.execute(timerStreamEventChunk);
         }
     }
 
-    private long getTimestamp(StreamEvent streamEvent, String timeZone) {
+    private long getTimestamp(StreamEvent streamEvent) {
         long timestamp;
         if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
             timestamp = (long) timestampExpressionExecutor.execute(streamEvent);
             if (isRoot && !isProcessingOnExternalTime && !timerStarted) {
-                scheduler.notifyAt(IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, timeZone));
+                scheduler.notifyAt(IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null));
                 timerStarted = true;
             }
         } else {
@@ -235,21 +229,10 @@ public class IncrementalExecutor implements Executor, Snapshotable {
             timestamp = streamEvent.getTimestamp();
             if (isRoot) {
                 // Scheduling is done by root incremental executor only
-                scheduler.notifyAt(IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, timeZone));
+                scheduler.notifyAt(IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null));
             }
         }
         return timestamp;
-    }
-
-    private String getTimeZone(StreamEvent streamEvent) {
-        String timeZone;
-        if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
-            timeZone = timeZoneExpressionExecutor.execute(streamEvent).toString();
-        } else {
-            // TIMER event has arrived.
-            timeZone = ZoneOffset.systemDefault().getRules().getOffset(Instant.now()).getId();
-        }
-        return timeZone;
     }
 
     @Override

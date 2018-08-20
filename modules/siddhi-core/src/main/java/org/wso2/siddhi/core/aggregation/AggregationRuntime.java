@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
@@ -68,12 +69,16 @@ public class AggregationRuntime implements MemoryCalculable {
     private final MetaStreamEvent aggregateMetaSteamEvent;
     private final LatencyTracker latencyTrackerFind;
     private final ThroughputTracker throughputTrackerFind;
+    private final List<List<ExpressionExecutor>> aggregateProcessingExecutorsList;
+    private final List<GroupByKeyGenerator> groupByKeyGeneratorList;
     private List<TimePeriod.Duration> incrementalDurations;
     private SingleStreamRuntime singleStreamRuntime;
     private List<ExpressionExecutor> baseExecutors;
     private ExpressionExecutor timestampExecutor;
     private List<ExpressionExecutor> outputExpressionExecutors;
     private RecreateInMemoryData recreateInMemoryData;
+    private boolean processingOnExternalTime;
+    private IncrementalDataPurging incrementalDataPurging;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -84,7 +89,10 @@ public class AggregationRuntime implements MemoryCalculable {
                               ExpressionExecutor timestampExecutor, MetaStreamEvent tableMetaStreamEvent,
                               List<ExpressionExecutor> outputExpressionExecutors,
                               LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind,
-                              RecreateInMemoryData recreateInMemoryData) {
+                              RecreateInMemoryData recreateInMemoryData, boolean processingOnExternalTime,
+                              List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
+                              List<GroupByKeyGenerator> groupByKeyGeneratorList,
+                              IncrementalDataPurging incrementalDataPurging) {
         this.aggregationDefinition = aggregationDefinition;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.aggregationTables = aggregationTables;
@@ -98,6 +106,10 @@ public class AggregationRuntime implements MemoryCalculable {
         this.latencyTrackerFind = latencyTrackerFind;
         this.throughputTrackerFind = throughputTrackerFind;
         this.recreateInMemoryData = recreateInMemoryData;
+        this.processingOnExternalTime = processingOnExternalTime;
+        this.aggregateProcessingExecutorsList = aggregateProcessingExecutorsList;
+        this.groupByKeyGeneratorList = groupByKeyGeneratorList;
+        this.incrementalDataPurging = incrementalDataPurging;
 
         aggregateMetaSteamEvent = new MetaStreamEvent();
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
@@ -183,7 +195,8 @@ public class AggregationRuntime implements MemoryCalculable {
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
-                    baseExecutors, timestampExecutor, outputExpressionExecutors, siddhiAppContext);
+                    baseExecutors, timestampExecutor, outputExpressionExecutors, siddhiAppContext,
+                    aggregateProcessingExecutorsList, groupByKeyGeneratorList);
         } finally {
             SnapshotService.getSkipSnapshotableThreadLocal().set(null);
             if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
@@ -241,13 +254,18 @@ public class AggregationRuntime implements MemoryCalculable {
         }
 
         // Create within expression
+        Expression timeFilterExpression;
+        if (processingOnExternalTime) {
+            timeFilterExpression = Expression.variable("AGG_EVENT_TIMESTAMP");
+        } else {
+            timeFilterExpression = Expression.variable("AGG_TIMESTAMP");
+        }
         Expression withinExpression;
         Expression start = Expression.variable(additionalAttributes.get(0).getName());
         Expression end = Expression.variable(additionalAttributes.get(1).getName());
         Expression compareWithStartTime = Compare.compare(start, Compare.Operator.LESS_THAN_EQUAL,
-                Expression.variable("AGG_TIMESTAMP"));
-        Expression compareWithEndTime = Compare.compare(Expression.variable("AGG_TIMESTAMP"),
-                Compare.Operator.LESS_THAN, end);
+                timeFilterExpression);
+        Expression compareWithEndTime = Compare.compare(timeFilterExpression, Compare.Operator.LESS_THAN, end);
         withinExpression = Expression.and(compareWithStartTime, compareWithEndTime);
 
         // Create start and end time expression
@@ -289,11 +307,12 @@ public class AggregationRuntime implements MemoryCalculable {
 
         return new IncrementalAggregateCompileCondition(withinTableCompiledConditions, withinInMemoryCompileCondition,
                 onCompiledCondition, tableMetaStreamEvent, aggregateMetaSteamEvent, additionalAttributes,
-                alteredMatchingMetaInfoHolder, perExpressionExecutor, startTimeEndTimeExpressionExecutor);
+                alteredMatchingMetaInfoHolder, perExpressionExecutor, startTimeEndTimeExpressionExecutor,
+                processingOnExternalTime);
     }
 
-    public RecreateInMemoryData getRecreateInMemoryData() {
-        return this.recreateInMemoryData;
+    public void start() {
+        recreateInMemoryData.recreateInMemoryData();
+        incrementalDataPurging.executeIncrementalDataPurging();
     }
-
 }

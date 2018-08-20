@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,8 +19,10 @@ package org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental;
 
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
+import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.ReturnAttribute;
 import org.wso2.siddhi.annotation.util.DataType;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.Expression;
 
@@ -28,44 +30,53 @@ import org.wso2.siddhi.query.api.expression.Expression;
  * {@link IncrementalAttributeAggregator} to calculate count based on an event attribute.
  */
 @Extension(
-        name = "count",
+        name = "distinctCount",
         namespace = "incrementalAggregator",
         description = "Returns the count of all events, in incremental event processing",
-        parameters = {},
+        parameters = {
+                @Parameter(name = "arg",
+                        description = "The attribute that needs to be counted.",
+                        type = {DataType.INT, DataType.LONG, DataType.DOUBLE,
+                                DataType.FLOAT, DataType.STRING, DataType.BOOL})
+        },
         returnAttributes = @ReturnAttribute(
-                description = "Returns the event count as a long.",
+                description = "Returns the distinct event count as a long.",
                 type = {DataType.LONG}),
         examples = @Example(
                 syntax = " define aggregation cseEventAggregation\n from cseEventStream\n" +
-                        " select count() as countEvents,\n aggregate by timeStamp every sec ... hour;",
-                description = "count() returns the count of all the events based on their " +
+                        " select distinctCount(symbol) as countEvents,\n aggregate by timeStamp every sec ... hour;",
+                description = "distinctCount(symbol) returns the distinct count of all the symbols based on their " +
                         "arrival and expiry. The count is calculated for sec, min and hour durations."
         )
 )
-public class CountIncrementalAttributeAggregator extends IncrementalAttributeAggregator {
+public class DistinctCountIncrementalAttributeAggregator extends IncrementalAttributeAggregator {
 
     private Attribute[] baseAttributes;
     private Expression[] baseAttributesInitialValues;
 
     @Override
     public void init(String attributeName, Attribute.Type attributeType) {
-        Attribute count;
-        Expression countInitialValue;
+        Attribute set;
+        Expression setInitialValue;
 
-        // Since we set the initial value of count, we can simply set it as long
-        // However, since count is summed internally (in avg incremental calculation),
-        // ensure that either double or long is used here (since return value of sum is long or
-        // double. Long is chosen here)
-        count = new Attribute("AGG_COUNT", Attribute.Type.LONG);
-        countInitialValue = Expression.value(1L);
+        // distinct-count is not supported for object types.
+        if (attributeType.equals(Attribute.Type.FLOAT) || attributeType.equals(Attribute.Type.DOUBLE)
+                || attributeType.equals(Attribute.Type.INT) || attributeType.equals(Attribute.Type.LONG)
+                || attributeType.equals(Attribute.Type.STRING) || attributeType.equals(Attribute.Type.BOOL)) {
+            set = new Attribute("AGG_SET_".concat(attributeName), Attribute.Type.OBJECT);
+            setInitialValue = Expression.function("createSet", Expression.variable(attributeName));
+        } else {
+            throw new SiddhiAppRuntimeException(
+                    "Distinct count aggregation cannot be executed on attribute type " + attributeType.toString());
+        }
 
-        this.baseAttributes = new Attribute[]{count};
-        this.baseAttributesInitialValues = new Expression[]{countInitialValue};
+        this.baseAttributes = new Attribute[]{set};
+        this.baseAttributesInitialValues = new Expression[]{setInitialValue};
     }
 
     @Override
     public Expression aggregate() {
-        return Expression.variable(baseAttributes[0].getName());
+        return Expression.function("sizeOfSet", Expression.variable(baseAttributes[0].getName()));
     }
 
     @Override
@@ -80,9 +91,9 @@ public class CountIncrementalAttributeAggregator extends IncrementalAttributeAgg
 
     @Override
     public Expression[] getBaseAggregators() {
-        Expression countAggregator = Expression.function("sum",
+        Expression setAggregator = Expression.function("unionSet",
                 Expression.variable(getBaseAttributes()[0].getName()));
-        return new Expression[]{countAggregator};
+        return new Expression[]{setAggregator};
     }
 
     @Override
@@ -90,3 +101,4 @@ public class CountIncrementalAttributeAggregator extends IncrementalAttributeAgg
         return Attribute.Type.LONG;
     }
 }
+

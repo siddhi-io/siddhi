@@ -32,15 +32,17 @@ public abstract class SourceHandler implements InputEventHandlerCallback, Snapsh
     private String elementId;
     private InputHandler inputHandler;
 
-    final void initSourceHandler(String elementId, StreamDefinition streamDefinition) {
+    final void initSourceHandler(String siddhiAppName, String elementId, StreamDefinition streamDefinition) {
+
         this.elementId = elementId;
-        init(elementId, streamDefinition);
+        init(siddhiAppName, elementId, streamDefinition);
     }
 
-    public abstract void init(String elementId, StreamDefinition streamDefinition);
+    public abstract void init(String siddhiAppName, String elementId, StreamDefinition streamDefinition);
 
     @Override
     public void sendEvent(Event event) throws InterruptedException {
+
         sendEvent(event, inputHandler);
     }
 
@@ -54,14 +56,17 @@ public abstract class SourceHandler implements InputEventHandlerCallback, Snapsh
     public abstract void sendEvent(Event[] events, InputHandler inputHandler) throws InterruptedException;
 
     public String getElementId() {
+
         return elementId;
     }
 
     public void setInputHandler(InputHandler inputHandler) {
+
         this.inputHandler = inputHandler;
     }
 
     public InputHandler getInputHandler() {
+
         return inputHandler;
     }
 }
