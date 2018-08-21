@@ -88,7 +88,7 @@ public class IncrementalAggregationProcessor implements Processor {
                 streamEventChunk.add(borrowedEvent);
                 noOfEvents++;
             }
-            aggregationRuntime.getRootExecutor().execute(streamEventChunk);
+            aggregationRuntime.processEvents(streamEventChunk);
             if (throughputTrackerInsert != null && siddhiAppContext.isStatsEnabled()) {
                 throughputTrackerInsert.eventsIn(noOfEvents);
             }

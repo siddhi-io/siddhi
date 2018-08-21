@@ -328,7 +328,7 @@ public class AggregationRuntime implements MemoryCalculable {
         recreateInMemoryData.recreateInMemoryData(isEventArrived);
     }
 
-    public IncrementalExecutor getRootExecutor() {
-        return incrementalExecutorMap.get(incrementalDurations.get(0));
+    public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {
+        incrementalExecutorMap.get(incrementalDurations.get(0)).execute(streamEventComplexEventChunk);
     }
 }
