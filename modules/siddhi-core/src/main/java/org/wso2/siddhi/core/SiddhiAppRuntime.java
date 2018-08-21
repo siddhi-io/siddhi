@@ -377,7 +377,6 @@ public class SiddhiAppRuntime {
                     source.connectWithRetry();
                 }
             }
-
             for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
                 aggregationRuntime.start();
             }

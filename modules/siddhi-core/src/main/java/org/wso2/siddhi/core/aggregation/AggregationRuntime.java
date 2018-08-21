@@ -27,7 +27,6 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
-import org.wso2.siddhi.core.query.input.stream.single.EntryValveExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.table.Table;
@@ -74,19 +73,20 @@ public class AggregationRuntime implements MemoryCalculable {
     private List<TimePeriod.Duration> incrementalDurations;
     private SingleStreamRuntime singleStreamRuntime;
     private List<ExpressionExecutor> baseExecutors;
-    private ExpressionExecutor timestampExecutor;
     private List<ExpressionExecutor> outputExpressionExecutors;
     private RecreateInMemoryData recreateInMemoryData;
     private boolean processingOnExternalTime;
+    private boolean isFirstEventArrived;
+    private long lastExecutorsRefreshedTime = -1;
     private IncrementalDataPurging incrementalDataPurging;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                               Map<TimePeriod.Duration, Table> aggregationTables,
                               SingleStreamRuntime singleStreamRuntime,
-                              EntryValveExecutor entryValveExecutor, List<TimePeriod.Duration> incrementalDurations,
+                              List<TimePeriod.Duration> incrementalDurations,
                               SiddhiAppContext siddhiAppContext, List<ExpressionExecutor> baseExecutors,
-                              ExpressionExecutor timestampExecutor, MetaStreamEvent tableMetaStreamEvent,
+                              MetaStreamEvent tableMetaStreamEvent,
                               List<ExpressionExecutor> outputExpressionExecutors,
                               LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind,
                               RecreateInMemoryData recreateInMemoryData, boolean processingOnExternalTime,
@@ -100,7 +100,6 @@ public class AggregationRuntime implements MemoryCalculable {
         this.siddhiAppContext = siddhiAppContext;
         this.singleStreamRuntime = singleStreamRuntime;
         this.baseExecutors = baseExecutors;
-        this.timestampExecutor = timestampExecutor;
         this.tableMetaStreamEvent = tableMetaStreamEvent;
         this.outputExpressionExecutors = outputExpressionExecutors;
         this.latencyTrackerFind = latencyTrackerFind;
@@ -193,9 +192,15 @@ public class AggregationRuntime implements MemoryCalculable {
                 latencyTrackerFind.markIn();
                 throughputTrackerFind.eventIn();
             }
+            if (!isFirstEventArrived && (
+                    lastExecutorsRefreshedTime == -1 ||
+                    System.currentTimeMillis() - lastExecutorsRefreshedTime > 1000)) {
+                recreateInMemoryData(false);
+                lastExecutorsRefreshedTime = System.currentTimeMillis();
+            }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
-                    baseExecutors, timestampExecutor, outputExpressionExecutors, siddhiAppContext,
+                    baseExecutors, outputExpressionExecutors, siddhiAppContext,
                     aggregateProcessingExecutorsList, groupByKeyGeneratorList);
         } finally {
             SnapshotService.getSkipSnapshotableThreadLocal().set(null);
@@ -312,7 +317,21 @@ public class AggregationRuntime implements MemoryCalculable {
     }
 
     public void start() {
-        recreateInMemoryData.recreateInMemoryData();
         incrementalDataPurging.executeIncrementalDataPurging();
+    }
+
+    public void recreateInMemoryData(boolean isEventArrived) {
+        isFirstEventArrived = isEventArrived;
+        if (isEventArrived) {
+            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
+                    this.incrementalExecutorMap.entrySet()) {
+                durationIncrementalExecutorEntry.getValue().setProcessingExecutor(isEventArrived);
+            }
+        }
+        recreateInMemoryData.recreateInMemoryData();
+    }
+
+    public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {
+        incrementalExecutorMap.get(incrementalDurations.get(0)).execute(streamEventComplexEventChunk);
     }
 }
