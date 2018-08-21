@@ -316,6 +316,10 @@ public class AggregationRuntime implements MemoryCalculable {
                 processingOnExternalTime);
     }
 
+    public void start() {
+        incrementalDataPurging.executeIncrementalDataPurging();
+    }
+
     public void recreateInMemoryData(boolean isEventArrived) {
         isFirstEventArrived = isEventArrived;
         if (isEventArrived) {
@@ -323,7 +327,6 @@ public class AggregationRuntime implements MemoryCalculable {
                     this.incrementalExecutorMap.entrySet()) {
                 durationIncrementalExecutorEntry.getValue().setProcessingExecutor(isEventArrived);
             }
-            incrementalDataPurging.executeIncrementalDataPurging();
         }
         recreateInMemoryData.recreateInMemoryData(isEventArrived);
     }

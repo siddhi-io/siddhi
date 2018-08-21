@@ -377,6 +377,9 @@ public class SiddhiAppRuntime {
                     source.connectWithRetry();
                 }
             }
+            for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
+                aggregationRuntime.start();
+            }
             running = true;
         } catch (Throwable t) {
             log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', triggering shutdown process. "
