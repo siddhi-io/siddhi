@@ -328,7 +328,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 durationIncrementalExecutorEntry.getValue().setProcessingExecutor(isEventArrived);
             }
         }
-        recreateInMemoryData.recreateInMemoryData(isEventArrived);
+        recreateInMemoryData.recreateInMemoryData();
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {

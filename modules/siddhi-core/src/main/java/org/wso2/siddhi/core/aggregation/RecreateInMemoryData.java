@@ -68,7 +68,7 @@ public class RecreateInMemoryData {
         this.aggregationMap = aggregationMap;
     }
 
-    public void recreateInMemoryData(boolean isEventArrived) {
+    public void recreateInMemoryData() {
         IncrementalExecutor rootExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
         if (rootExecutor.isProcessingExecutor() && rootExecutor.getNextEmitTime() != -1) {
             // If the getNextEmitTime is not -1, that implies that a snapshot of in-memory has already been
