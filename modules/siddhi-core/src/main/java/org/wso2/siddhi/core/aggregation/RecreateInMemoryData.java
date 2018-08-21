@@ -98,7 +98,6 @@ public class RecreateInMemoryData {
             TimePeriod.Duration recreateForDuration = incrementalDurations.get(i);
             IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
 
-            incrementalExecutor.setProcessingExecutor(isEventArrived);
             // Reset all executors when recreating again
             incrementalExecutor.clearExecutor();
 
