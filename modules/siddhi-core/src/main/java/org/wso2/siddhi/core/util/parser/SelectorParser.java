@@ -117,6 +117,14 @@ public class SelectorParser {
             querySelector.setLimit(((Number)
                     (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue());
         }
+        if (selector.getOffset() != null) {
+            ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getOffset(),
+                    metaComplexEvent, SiddhiConstants.HAVING_STATE, tableMap, variableExpressionExecutors,
+                    siddhiAppContext, false, 0, queryName);
+            containsAggregatorThreadLocal.remove();
+            querySelector.setOffset(((Number)
+                    (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue());
+        }
         return querySelector;
     }
 

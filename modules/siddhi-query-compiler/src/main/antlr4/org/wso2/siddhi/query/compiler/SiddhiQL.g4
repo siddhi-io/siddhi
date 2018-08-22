@@ -361,7 +361,7 @@ group_by_query_selection
     ;
 
 query_section
-    : (SELECT ('*'| (output_attribute (',' output_attribute)* ))) group_by? having? order_by? limit?
+    : (SELECT ('*'| (output_attribute (',' output_attribute)* ))) group_by? having? order_by? limit? offset?
     ;
 
 group_by
@@ -386,6 +386,10 @@ order
 
 limit
     : LIMIT expression
+    ;
+
+offset
+    : OFFSET expression
     ;
 
 query_output
@@ -780,6 +784,7 @@ GROUP:    G R O U P;
 BY:       B Y;
 ORDER:    O R D E R;
 LIMIT:    L I M I T;
+OFFSET:   O F F S E T;
 ASC:      A S C;
 DESC:     D E S C;
 HAVING:   H A V I N G;

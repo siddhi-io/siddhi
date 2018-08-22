@@ -951,13 +951,13 @@ order by avgTemp, roomNo desc
 insert into AvgTempStream;
 ```
 
-### Limit
+### Limit & Offset
 
-Limit allows you to limit the number of events to be emitted from an aggregated results batch. Users can provide the number of events to be
-emitted.
+When events are emitted as a batch, offset allows you to offset beginning of the output event batch and limit allows you to limit the number of events in the batch from the defined offset. 
+With this users can specify which set of events need be emitted. 
 
 **Syntax**
-The syntax for the Limit clause is as follows:
+The syntax for the Limit & Offset clause is as follows:
 
 ```sql
 from <input stream>#window.<window name>( ... )
@@ -965,13 +965,16 @@ select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>
 group by <attribute1 name>, <attribute2 name> ...
 having <condition>
 order by <attribute1 name> (asc | desc)?, <attribute2 name> (<ascend/descend>)?, ...
-limit <positive interger>
+limit <positive interger>?
+offset <positive interger>?
 insert into <output stream>;
 ```
 
+Here both `limit` and `offset` are optional where `limit` by default output all the events and `offset` by default set to `0`.
+
 **Example**
 The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
-for every 10 minutes and emits two events with highest average temperature for each aggregate.
+for every 10 minutes and emits two events with highest average temperature.
 
 ```sql
 from TempStream#window.timeBatch(10 min)
@@ -979,6 +982,19 @@ select avg(temp) as avgTemp, roomNo, deviceID
 group by roomNo, deviceID
 order by avgTemp desc
 limit 2
+insert into HighestAvgTempStream;
+```
+
+The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
+for every 10 minutes and emits third, forth and fifth events when sorted in descending order based on their average temperature.
+
+```sql
+from TempStream#window.timeBatch(10 min)
+select avg(temp) as avgTemp, roomNo, deviceID
+group by roomNo, deviceID
+order by avgTemp desc
+limit 3
+offset 2
 insert into HighestAvgTempStream;
 ```
 
