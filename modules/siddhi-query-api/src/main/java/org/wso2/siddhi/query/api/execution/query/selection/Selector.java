@@ -42,6 +42,7 @@ public class Selector implements SiddhiElement {
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
     private Constant limit;
+    private Constant offset;
 
     public static Selector selector() {
         return new Selector();
@@ -116,9 +117,17 @@ public class Selector implements SiddhiElement {
             throw new UnsupportedAttributeTypeException("'limit' only supports int or long constants, but found '" +
                     constant + "'");
         }
-
     }
 
+    public Selector offset(Constant constant) {
+        if (constant instanceof IntConstant || constant instanceof LongConstant) {
+            offset = constant;
+            return this;
+        } else {
+            throw new UnsupportedAttributeTypeException("'offset' only supports int or long constants, but found '" +
+                    constant + "'");
+        }
+    }
     public List<OutputAttribute> getSelectionList() {
         return selectionList;
     }
@@ -139,6 +148,10 @@ public class Selector implements SiddhiElement {
         return limit;
     }
 
+    public Constant getOffset() {
+        return offset;
+    }
+
     public Selector addSelectionList(List<OutputAttribute> projectionList) {
         for (OutputAttribute outputAttribute : projectionList) {
             checkSelection(outputAttribute);
@@ -154,6 +167,8 @@ public class Selector implements SiddhiElement {
                 ", groupByList=" + groupByList +
                 ", havingExpression=" + havingExpression +
                 ", orderByList=" + orderByList +
+                ", limit=" + limit +
+                ", offset=" + offset +
                 '}';
     }
 
@@ -162,31 +177,39 @@ public class Selector implements SiddhiElement {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Selector)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         Selector selector = (Selector) o;
 
-        if (groupByList != null ? !groupByList.equals(selector.groupByList) : selector.groupByList != null) {
-            return false;
-        }
-        if (havingExpression != null ? !havingExpression.equals(selector.havingExpression) : selector
-                .havingExpression != null) {
-            return false;
-        }
         if (selectionList != null ? !selectionList.equals(selector.selectionList) : selector.selectionList != null) {
             return false;
         }
-        return orderByList != null ? orderByList.equals(selector.orderByList) : selector.orderByList == null;
+        if (groupByList != null ? !groupByList.equals(selector.groupByList) : selector.groupByList != null) {
+            return false;
+        }
+        if (orderByList != null ? !orderByList.equals(selector.orderByList) : selector.orderByList != null) {
+            return false;
+        }
+        if (havingExpression != null ? !havingExpression.equals(selector.havingExpression) :
+                selector.havingExpression != null) {
+            return false;
+        }
+        if (limit != null ? !limit.equals(selector.limit) : selector.limit != null) {
+            return false;
+        }
+        return offset != null ? offset.equals(selector.offset) : selector.offset == null;
     }
 
     @Override
     public int hashCode() {
         int result = selectionList != null ? selectionList.hashCode() : 0;
         result = 31 * result + (groupByList != null ? groupByList.hashCode() : 0);
-        result = 31 * result + (havingExpression != null ? havingExpression.hashCode() : 0);
         result = 31 * result + (orderByList != null ? orderByList.hashCode() : 0);
+        result = 31 * result + (havingExpression != null ? havingExpression.hashCode() : 0);
+        result = 31 * result + (limit != null ? limit.hashCode() : 0);
+        result = 31 * result + (offset != null ? offset.hashCode() : 0);
         return result;
     }
 
