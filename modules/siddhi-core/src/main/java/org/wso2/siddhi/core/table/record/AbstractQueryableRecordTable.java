@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
@@ -158,14 +159,29 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
 
         Long limit = null;
+        Long offset = null;
         if (selector.getLimit() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getLimit(),
                     matchingMetaInfoHolder.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
                     variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
             limit = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
+            if (limit < 0) {
+                throw new SiddhiAppCreationException("'limit' cannot have negative value, but found '" + limit + "'",
+                        selector, siddhiAppContext);
+            }
+        }
+        if (selector.getOffset() != null) {
+            ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getOffset(),
+                    matchingMetaInfoHolder.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
+                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+            offset = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
+            if (offset < 0) {
+                throw new SiddhiAppCreationException("'offset' cannot have negative value, but found '" + offset + "'",
+                        selector, siddhiAppContext);
+            }
         }
         CompiledSelection compiledSelection = compileSelection(selectAttributeBuilders, groupByExpressionBuilders,
-                havingExpressionBuilder, orderByAttributeBuilders, limit);
+                havingExpressionBuilder, orderByAttributeBuilders, limit, offset);
 
         Map<String, ExpressionExecutor> expressionExecutorMap = new HashMap<>();
         if (selectAttributeBuilders.size() != 0) {
@@ -199,13 +215,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
      * @param havingExpressionBuilder  helps visiting the having condition
      * @param orderByAttributeBuilders helps visiting the order by attributes in order
      * @param limit                    defines the limit level
+     * @param offset                   defines the offset level
      * @return compiled selection that can be used for retrieving events on a defined format
      */
     protected abstract CompiledSelection compileSelection(List<SelectAttributeBuilder> selectAttributeBuilders,
                                                           List<ExpressionBuilder> groupByExpressionBuilder,
                                                           ExpressionBuilder havingExpressionBuilder,
                                                           List<OrderByAttributeBuilder> orderByAttributeBuilders,
-                                                          Long limit);
+                                                          Long limit, Long offset);
 
 
     private class RecordStoreCompiledSelection implements CompiledSelection {

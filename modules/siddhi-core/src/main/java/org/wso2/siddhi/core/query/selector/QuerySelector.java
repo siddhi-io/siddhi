@@ -61,6 +61,7 @@ public class QuerySelector implements Processor {
     private StateEventPopulator eventPopulator;
     private boolean batchingEnabled = true;
     private long limit = SiddhiConstants.UNKNOWN_STATE;
+    private long offset = SiddhiConstants.UNKNOWN_STATE;
 
     public QuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, SiddhiAppContext
             siddhiAppContext) {
@@ -154,6 +155,9 @@ public class QuerySelector implements Processor {
         if (isOrderBy) {
             orderEventChunk(complexEventChunk);
         }
+        if (offset != SiddhiConstants.UNKNOWN_STATE) {
+            offsetEventChunk(complexEventChunk);
+        }
         if (limit != SiddhiConstants.UNKNOWN_STATE) {
             limitEventChunk(complexEventChunk);
         }
@@ -213,6 +217,9 @@ public class QuerySelector implements Processor {
         if (isOrderBy) {
             orderEventChunk(complexEventChunk);
         }
+        if (offset != SiddhiConstants.UNKNOWN_STATE) {
+            offsetEventChunk(complexEventChunk);
+        }
         if (limit != SiddhiConstants.UNKNOWN_STATE) {
             limitEventChunk(complexEventChunk);
         }
@@ -258,7 +265,8 @@ public class QuerySelector implements Processor {
 
         if (lastEvent != null) {
             complexEventChunk.clear();
-            if (limit == SiddhiConstants.UNKNOWN_STATE || limit > 0) {
+            if ((offset == SiddhiConstants.UNKNOWN_STATE || offset == 0) &&
+                    (limit == SiddhiConstants.UNKNOWN_STATE || limit > 0)) {
                 complexEventChunk.add(lastEvent);
             }
             return complexEventChunk;
@@ -313,6 +321,9 @@ public class QuerySelector implements Processor {
             }
             if (isOrderBy) {
                 orderEventChunk(complexEventChunk);
+            }
+            if (offset != SiddhiConstants.UNKNOWN_STATE) {
+                offsetEventChunk(complexEventChunk);
             }
             if (limit != SiddhiConstants.UNKNOWN_STATE) {
                 limitEventChunk(complexEventChunk);
@@ -397,6 +408,7 @@ public class QuerySelector implements Processor {
         clonedQuerySelector.isOrderBy = isOrderBy;
         clonedQuerySelector.orderByEventComparator = orderByEventComparator;
         clonedQuerySelector.limit = limit;
+        clonedQuerySelector.offset = offset;
         return clonedQuerySelector;
     }
 
@@ -409,7 +421,19 @@ public class QuerySelector implements Processor {
     }
 
     public void setLimit(long limit) {
+        if (limit < 0) {
+            throw new SiddhiAppCreationException("'limit' cannot have negative value, but found '" + limit + "'",
+                    selector, siddhiAppContext);
+        }
         this.limit = limit;
+    }
+
+    public void setOffset(long offset) {
+        if (offset < 0) {
+            throw new SiddhiAppCreationException("'offset' cannot have negative value, but found '" + offset + "'",
+                    selector, siddhiAppContext);
+        }
+        this.offset = offset;
     }
 
     private void orderEventChunk(ComplexEventChunk complexEventChunk) {
@@ -457,6 +481,25 @@ public class QuerySelector implements Processor {
                     limitCount++;
                 } else {
                     complexEventChunk.remove();
+                }
+            }
+        }
+    }
+
+    private void offsetEventChunk(ComplexEventChunk complexEventChunk) {
+        complexEventChunk.reset();
+        int offsetCount = 0;
+        while (complexEventChunk.hasNext()) {
+            ComplexEvent event = complexEventChunk.next();
+            if (event.getType() == StreamEvent.Type.CURRENT || event.getType() == StreamEvent.Type.EXPIRED) {
+                if (offset > offsetCount) {
+                    if ((event.getType() == StreamEvent.Type.CURRENT && currentOn) ||
+                            (event.getType() == StreamEvent.Type.EXPIRED && expiredOn)) {
+                        offsetCount++;
+                    }
+                    complexEventChunk.remove();
+                } else {
+                    break;
                 }
             }
         }
