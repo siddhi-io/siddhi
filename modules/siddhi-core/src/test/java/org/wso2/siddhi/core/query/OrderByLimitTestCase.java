@@ -528,7 +528,7 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"XYZ", 60.5f, 7});
         Thread.sleep(500);
-        AssertJUnit.assertEquals(6, inEventCount);
+        AssertJUnit.assertEquals(4, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
@@ -748,7 +748,7 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
         Thread.sleep(500);
         AssertJUnit.assertEquals(8, inEventCount);
-        AssertJUnit.assertFalse(eventArrived);
+        AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
 
