@@ -1848,7 +1848,7 @@ This not only allows you to calculate aggregations with varied time granularity,
 
 **Purpose**
 
-Incremental aggregation allows you to retrieve the aggregate value for different time durations. 
+Incremental aggregation allows you to retrieve the aggregate values for different time durations. 
 That is, it allows you to obtain aggregates such as `sum`, `count`, `avg`, `min`, `max`, `count` and `distinctCount`
 of stream attributes for durations such as `sec`, `min`, `hour`, etc.
 
