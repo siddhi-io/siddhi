@@ -465,13 +465,13 @@
         <msf4j.version>2.1.1</msf4j.version>
         <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
         <servlet-api-version>2.5</servlet-api-version>
-        <jackson-datatype-joda-version>2.4.1</jackson-datatype-joda-version>
+        <jackson-datatype-joda-version>2.9.6</jackson-datatype-joda-version>
         <maven.core.version>3.3.9</maven.core.version>
         <maven.plugin.api.version>3.0</maven.plugin.api.version>
         <maven.plugin.annotations.version>3.4</maven.plugin.annotations.version>
         <freemarker.version>2.3.25-incubating</freemarker.version>
         <commons.io.version>1.3.2</commons.io.version>
-        <snakeyaml.version>1.18</snakeyaml.version>
+        <snakeyaml.version>1.21</snakeyaml.version>
         <org.jacoco.version>0.7.9</org.jacoco.version>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <mavan.checkstyle.suppression.file>checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
