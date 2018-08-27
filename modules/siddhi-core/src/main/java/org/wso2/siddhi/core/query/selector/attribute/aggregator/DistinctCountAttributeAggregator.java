@@ -39,10 +39,10 @@ import java.util.Map;
 @Extension(
         name = "distinctCount",
         namespace = "",
-        description = "Returns the count of distinct occurrences for a given arg.",
+        description = "This returns the count of distinct occurrences for a given arg.",
         parameters = {
                 @Parameter(name = "arg",
-                        description = "The value that should be counted.",
+                        description = "The object for which the number of distinct occurences needs to be counted.",
                         type = {DataType.INT, DataType.LONG, DataType.DOUBLE, DataType.FLOAT, DataType.STRING})
         },
         returnAttributes = @ReturnAttribute(
@@ -52,13 +52,15 @@ import java.util.Map;
                 syntax = "from fooStream\n" +
                         "select distinctcount(pageID) as count\n" +
                         "insert into barStream;",
-                description = "distinctcount(pageID) for the following output returns 3.\n" +
+                description = "distinctcount(pageID) for the following output returns '3' when the available values" +
+                        " are as follows.\n" +
                         " \"WEB_PAGE_1\"\n" +
                         " \"WEB_PAGE_1\"\n" +
                         " \"WEB_PAGE_2\"\n" +
                         " \"WEB_PAGE_3\"\n" +
                         " \"WEB_PAGE_1\"\n" +
-                        " \"WEB_PAGE_2\""
+                        " \"WEB_PAGE_2\"" +
+                        " The three distinct occurences identified are 'WEB_PAGE_1', 'WEB_PAGE_2', and 'WEB_PAGE_3'."
         )
 )
 public class DistinctCountAttributeAggregator extends AttributeAggregator {
