@@ -59,7 +59,7 @@ import java.util.Map;
                         " \"WEB_PAGE_2\"\n" +
                         " \"WEB_PAGE_3\"\n" +
                         " \"WEB_PAGE_1\"\n" +
-                        " \"WEB_PAGE_2\"" +
+                        " \"WEB_PAGE_2\"\n" +
                         " The three distinct occurences identified are 'WEB_PAGE_1', 'WEB_PAGE_2', and 'WEB_PAGE_3'."
         )
 )
