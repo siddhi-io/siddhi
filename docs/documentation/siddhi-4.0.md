@@ -1834,8 +1834,9 @@ insert into ServerRoomTempStream;
 Incremental aggregation allows you to obtain aggregates in an incremental manner for a specified set of time periods.
 
 This not only allows you to calculate aggregations with varied time granularity, but also allows you to access them in an interactive
- manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**. 
- Incremental aggregation granularity data holders will be automatically purge with following retentions with a interval of 15 minutes.
+ manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**.
+ 
+ Incremental aggregation granularity data holders are automatically purged every 15 minutes. When carrying out data purging, the retention period you have specified for each granularity in the incremental aggregation query is taken into account. The retention period defined for a granularity needs to be greater than or equal to its minimum retention period as specified in the table below. If no valid retention period is defined for a granularity, the default retention period (as specified in the table below) is applied. 
  
 |Granularity           |Default retention      |Minimum retention 
 ---------------        |--------------         |------------------  
@@ -1859,7 +1860,7 @@ Furthermore, this ensures that the aggregations are not lost due to unexpected s
 
 ```sql
 @store(type="<store type>", ...)
-@purge(enable="<true or false>",interval=<purging interval>,@retentionPeriod(<granularity> = <retension period>, ...) )
+@purge(enable="<true or false>",interval=<purging interval>,@retentionPeriod(<granularity> = <retention period>, ...) )
 define aggregation <aggregator name>
 from <input stream>
 select <attribute name>, <aggregate function>(<attribute name>) as <attribute name>, ...
@@ -1871,10 +1872,10 @@ The above syntax includes the following:
 |Item                          |Description
 ---------------                |---------
 |`@BufferSize`                 |**DEPRECIATED FROM V4.2.0**. This annotation is optional. The default value is buffer size 0. <br/>It is used to identify the number of 'expired' events to retain <br/>in a buffer, to handle out of order event processing. It's an optional parameter <br/>which is applicable, only if aggregation is based on external timestamp (since events <br/>aggregated based on event arrival time cannot be out of order). An event is identified <br/>as 'expired' with relation to the latest event's timestamp and the most granular duration <br/>for which aggregation is calculated. For example, if aggregation is for sec...year, the <br/>most granular duration is seconds. Hence, if buffer size is 3 and events for 51st second, <br/>52nd second, 53rd second and 54th second arrive, all of the older aggregations (for <br/>seconds 51, 52 and 53) would be kept in the buffer (since latest event is for 54th second)
-|`@IgnoreEventsOlderThanBuffer`|**DEPRECIATED FROM V4.2.0**.This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is the default value as well), an event <br/>older than the buffer would be aggregated with the oldest event in buffer. If <br/>the value is true, an event older than the buffer would be dropped. This is an optional annotation. Default value is false.
+|`@IgnoreEventsOlderThanBuffer`|**DEPRECIATED FROM V4.2.0**.This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is default), an event <br/>older than the buffer is aggregated with the oldest event in buffer. If <br/>the value is 'true', any event older than the buffer is dropped. This is an optional annotation.
 |`@store`                      |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
-|`@purge`                      |This annotation is used to configure purging in aggregation granularities.<br/> when this annotation is not provided, above mentioned default purging will be applied.
-|`@retensionPeriod`            |This annotation is used to configure the retention periods of data purging.<br/> when this annotation is not provided, default retention period will be applied.
+|`@purge`                      |This annotation is used to configure purging in aggregation granularities.<br/> If this annotation is not provided, the default purging mentioned above is applied.
+|`@retentionPeriod`            |This annotation is used to specify the length of time the data needs to be retained when carrying out data purging.<br/> If this annotation is not provided, the default retention period is applied.
 |`<aggregator name>`           |This specifies a unique name for the aggregation so that it can be referred <br/>when accessing aggregate results.
 |`<input stream>`              |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
 |`group by <attribute name>`   |The `group by` clause is optional. If it is included in a Siddhi application, aggregate values <br/> are calculated per each `group by` attribute. If it is not used, all the<br/> events are aggregated together.
@@ -1886,7 +1887,7 @@ The above syntax includes the following:
 
 **Example**
 
-This Siddhi Application defines an aggregation named `TradeAggregation` to calculate the average and sum for the `price` attribute of events arriving at the `TradeStream` stream. These aggregates are calculated per every time granularity in the range second-year.
+This Siddhi Application defines an aggregation named `TradeAggregation` to calculate the average and sum for the `price` attribute of events arriving at the `TradeStream` stream. These aggregates are calculated per every time granularity in the second-year range.
 
 ```sql
 define stream TradeStream (symbol string, price double, volume long, timestamp long);
