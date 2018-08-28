@@ -1871,8 +1871,8 @@ The above syntax includes the following:
 
 |Item                          |Description
 ---------------                |---------
-|`@BufferSize`                 |**DEPRECIATED FROM V4.2.0**. This annotation is optional. The default value is buffer size 0. <br/>It is used to identify the number of 'expired' events to retain <br/>in a buffer, to handle out of order event processing. It's an optional parameter <br/>which is applicable, only if aggregation is based on external timestamp (since events <br/>aggregated based on event arrival time cannot be out of order). An event is identified <br/>as 'expired' with relation to the latest event's timestamp and the most granular duration <br/>for which aggregation is calculated. For example, if aggregation is for sec...year, the <br/>most granular duration is seconds. Hence, if buffer size is 3 and events for 51st second, <br/>52nd second, 53rd second and 54th second arrive, all of the older aggregations (for <br/>seconds 51, 52 and 53) would be kept in the buffer (since latest event is for 54th second)
-|`@IgnoreEventsOlderThanBuffer`|**DEPRECIATED FROM V4.2.0**.This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is default), an event <br/>older than the buffer is aggregated with the oldest event in buffer. If <br/>the value is 'true', any event older than the buffer is dropped. This is an optional annotation.
+|`@BufferSize`                 |**DEPRECIATED FROM V4.2.0**. This identifies the number of expired events to retain in a buffer in order<br/>to handle out of order event processing. This is an optional<br/>parameter that is applicable only if aggregation is based on external<br/>timestamps (because events aggregated based on event arrival<br/>time cannot be out of order). Siddhi determines whether an event is expired or not<br/>based on the timestamp of the latest event and the most granular duration for<br/>which aggregation is calculated.<br/> e.g., If the aggregation is calculated for `sec…year`, the most granular duration is seconds. Therefore, if the buffer size is `3` and events arrive during 51st, 52nd, 53rd and 54th seconds, all of the older aggregations (i.e., for 51st, 52nd and 53rd seconds) are kept in the buffer because the latest event arrived during the 54th second. <br/>The default value is `0`.
+|`@IgnoreEventsOlderThanBuffer`|**DEPRECIATED FROM V4.2.0**.This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this parameter is set to `false` (which is default), any event <br/>older than the buffer is aggregated with the oldest event in buffer. If <br/>this parameter is set to `true`, any event older than the buffer is dropped. This is an optional annotation.
 |`@store`                      |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
 |`@purge`                      |This annotation is used to configure purging in aggregation granularities.<br/> If this annotation is not provided, the default purging mentioned above is applied.
 |`@retentionPeriod`            |This annotation is used to specify the length of time the data needs to be retained when carrying out data purging.<br/> If this annotation is not provided, the default retention period is applied.
@@ -1883,7 +1883,7 @@ The above syntax includes the following:
 |`<time periods>`              |The time periods can be given as a range separated by three dots, or as comma separated values. A range would be given as sec...year, where aggregation would be done per second, minute, hour, day, month and year. Comma separated values can be given as min, hour. However, skipping durations is not yet supported for comma separated values (e.g min, day is not a valid clause since hour duration has been skipped)
 
 !!! Note
-    From V4.2.0 onwards, Aggregation will be carried out at calendar start times for each granularity with GMT timezone
+    From V4.2.0 onwards, aggregation is carried out at calendar start times for each granularity with the GMT timezone
 
 **Example**
 
@@ -1930,7 +1930,7 @@ Item|Description
 `within` and `par` clauses also accept attribute values from the stream.
 
 !!! Note
-    The timestamp of the aggregations can be accessed through the attribute AGG_TIMESTAMP
+    The timestamp of the aggregations can be accessed through the `AGG_TIMESTAMP` attribute.
 
 **Example**
 
