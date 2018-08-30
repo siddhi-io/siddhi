@@ -31,6 +31,7 @@ import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.timestamp.TimestampGenerator;
+import org.wso2.siddhi.core.util.timestamp.TimestampGeneratorImpl;
 import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.SiddhiApp;
 import org.wso2.siddhi.query.api.annotation.Annotation;
@@ -166,7 +167,7 @@ public class SiddhiAppParser {
             if (annotation != null) {
                 String idleTime = null;
                 String increment = null;
-                TimestampGenerator timestampGenerator = new TimestampGenerator(siddhiAppContext);
+                TimestampGenerator timestampGenerator = new TimestampGeneratorImpl(siddhiAppContext);
                 // Get the optional elements of playback annotation
                 for (Element e : annotation.getElements()) {
                     if (SiddhiConstants.ANNOTATION_ELEMENT_IDLE_TIME.equalsIgnoreCase(e.getKey())) {
@@ -206,7 +207,7 @@ public class SiddhiAppParser {
                 siddhiAppContext.setTimestampGenerator(timestampGenerator);
                 siddhiAppContext.setPlayback(true);
             } else {
-                siddhiAppContext.setTimestampGenerator(new TimestampGenerator(siddhiAppContext));
+                siddhiAppContext.setTimestampGenerator(new TimestampGeneratorImpl(siddhiAppContext));
             }
             siddhiAppContext.setSnapshotService(new SnapshotService(siddhiAppContext));
             siddhiAppContext.setElementIdGenerator(new ElementIdGenerator(siddhiAppContext.getName()));
