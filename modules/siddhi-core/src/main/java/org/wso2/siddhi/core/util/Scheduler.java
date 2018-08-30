@@ -29,7 +29,7 @@ import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
-import org.wso2.siddhi.core.util.timestamp.TimestampGenerator;
+import org.wso2.siddhi.core.util.timestamp.TimestampGeneratorImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,7 +72,7 @@ public class Scheduler implements Snapshotable {
         mutex = new Semaphore(1);
 
         siddhiAppContext.getTimestampGenerator()
-                .addTimeChangeListener(new TimestampGenerator.TimeChangeListener() {
+                .addTimeChangeListener(new TimestampGeneratorImpl.TimeChangeListener() {
                     @Override
                     public void onTimeChange(long currentTimestamp) {
                         Long lastTime = toNotifyQueue.peek();
