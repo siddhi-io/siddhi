@@ -122,9 +122,9 @@ public class SiddhiAppRuntime {
     private LatencyTracker storeQueryLatencyTracker;
     private SiddhiDebugger siddhiDebugger;
     private boolean running = false;
+    private boolean runningWithoutSources = false;
     private Future futureIncrementalPersistor;
-    private boolean startInvoked = false;
-    private boolean startWithoutSourcesInvoked = false;
+
 
     public SiddhiAppRuntime(Map<String, AbstractDefinition> streamDefinitionMap,
                             Map<String, AbstractDefinition> tableDefinitionMap,
@@ -355,20 +355,19 @@ public class SiddhiAppRuntime {
     }
 
     public synchronized void start() {
-        if (startInvoked) {
+        if (running) {
             log.warn("Error calling star() for Siddhi App '" + siddhiAppContext.getName() + "', " +
                     "SiddhiApp already started.");
             return;
         }
-        if (!startWithoutSourcesInvoked) {
+        if (!runningWithoutSources) {
             startWithoutSources();
         }
         startSources();
-        startInvoked = true;
     }
 
     public synchronized void startWithoutSources() {
-        if (startInvoked) {
+        if (running || runningWithoutSources) {
             log.warn("Error calling startWithoutSources() for Siddhi App '" + siddhiAppContext.getName() + "', " +
                     "SiddhiApp already started.");
         } else {
@@ -393,8 +392,7 @@ public class SiddhiAppRuntime {
                 for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
                     aggregationRuntime.start();
                 }
-                running = true;
-                startWithoutSourcesInvoked = true;
+                runningWithoutSources = true;
             } catch (Throwable t) {
                 log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', " +
                         "triggering shutdown process. " + t.getMessage());
@@ -409,10 +407,12 @@ public class SiddhiAppRuntime {
     }
 
     public synchronized void startSources() {
-        if (startInvoked) {
+        if (running) {
             log.warn("Error calling startSources() for Siddhi App '" + siddhiAppContext.getName() + "', " +
                     "SiddhiApp already started with the sources.");
-        } else if (!startWithoutSourcesInvoked) {
+            return;
+        }
+        if (!runningWithoutSources) {
             throw new SiddhiAppRuntimeException("Cannot call startSources() without calling startWithoutSources() " +
                     "for Siddhi App '" + siddhiAppContext.getName() + "'");
         } else {
@@ -422,7 +422,8 @@ public class SiddhiAppRuntime {
                         source.connectWithRetry();
                     }
                 }
-                startInvoked = true;
+                running = true;
+                runningWithoutSources = false;
             } catch (Throwable t) {
                 log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', " +
                         "triggering shutdown process. " + t.getMessage());
@@ -437,7 +438,7 @@ public class SiddhiAppRuntime {
     }
 
     public synchronized void shutdown() {
-        if (startInvoked) {
+        if (running) {
             SourceHandlerManager sourceHandlerManager = siddhiAppContext.getSiddhiContext().getSourceHandlerManager();
             for (List<Source> sources : sourceMap.values()) {
                 for (Source source : sources) {
@@ -550,8 +551,7 @@ public class SiddhiAppRuntime {
             siddhiAppContext.getStatisticsManager().cleanup();
         }
         running = false;
-        startInvoked = false;
-        startWithoutSourcesInvoked = false;
+        runningWithoutSources = false;
     }
 
     public synchronized SiddhiDebugger debug() {
@@ -571,7 +571,6 @@ public class SiddhiAppRuntime {
             callback.setSiddhiDebugger(siddhiDebugger);
         }
         start();
-        running = true;
         return siddhiDebugger;
     }
 
