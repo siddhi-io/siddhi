@@ -21,12 +21,14 @@ package org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.List;
+
 /**
- * Abstract class for incremental aggregators
+ * Abstract class for incremental aggregators.
  */
 public abstract class IncrementalAttributeAggregator {
 
-    public abstract void init(String attributeName, Attribute.Type attributeType);
+    public abstract void init(List<Attribute> attributeList);
 
     public abstract Expression aggregate();
 
