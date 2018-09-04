@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
 import org.wso2.siddhi.core.exception.QueryNotExistException;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.exception.StoreQueryCreationException;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
@@ -121,7 +122,9 @@ public class SiddhiAppRuntime {
     private LatencyTracker storeQueryLatencyTracker;
     private SiddhiDebugger siddhiDebugger;
     private boolean running = false;
+    private boolean runningWithoutSources = false;
     private Future futureIncrementalPersistor;
+
 
     public SiddhiAppRuntime(Map<String, AbstractDefinition> streamDefinitionMap,
                             Map<String, AbstractDefinition> tableDefinitionMap,
@@ -352,64 +355,108 @@ public class SiddhiAppRuntime {
     }
 
     public synchronized void start() {
-        try {
-            if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
-                siddhiAppContext.getStatisticsManager().startReporting();
-            }
-            for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
-                eternalReferencedHolder.start();
-            }
-            for (List<Sink> sinks : sinkMap.values()) {
-                for (Sink sink : sinks) {
-                    sink.connectWithRetry();
-                }
-            }
+        if (running) {
+            log.warn("Error calling star() for Siddhi App '" + siddhiAppContext.getName() + "', " +
+                    "SiddhiApp already started.");
+            return;
+        }
+        if (!runningWithoutSources) {
+            startWithoutSources();
+        }
+        startSources();
+    }
 
-            for (Table table : tableMap.values()) {
-                table.connectWithRetry();
-            }
-
-            for (StreamJunction streamJunction : streamJunctionMap.values()) {
-                streamJunction.startProcessing();
-            }
-            for (List<Source> sources : sourceMap.values()) {
-                for (Source source : sources) {
-                    source.connectWithRetry();
-                }
-            }
-            for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
-                aggregationRuntime.start();
-            }
-            running = true;
-        } catch (Throwable t) {
-            log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', triggering shutdown process. "
-                    + t.getMessage());
+    public synchronized void startWithoutSources() {
+        if (running || runningWithoutSources) {
+            log.warn("Error calling startWithoutSources() for Siddhi App '" + siddhiAppContext.getName() + "', " +
+                    "SiddhiApp already started.");
+        } else {
             try {
-                shutdown();
-            } catch (Throwable t1) {
-                log.error("Error shutting down partially started Siddhi App '" + siddhiAppContext.getName() + "', "
-                        + t1.getMessage());
+                if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
+                    siddhiAppContext.getStatisticsManager().startReporting();
+                }
+                for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
+                    eternalReferencedHolder.start();
+                }
+                for (List<Sink> sinks : sinkMap.values()) {
+                    for (Sink sink : sinks) {
+                        sink.connectWithRetry();
+                    }
+                }
+                for (Table table : tableMap.values()) {
+                    table.connectWithRetry();
+                }
+                for (StreamJunction streamJunction : streamJunctionMap.values()) {
+                    streamJunction.startProcessing();
+                }
+                for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
+                    aggregationRuntime.start();
+                }
+                runningWithoutSources = true;
+            } catch (Throwable t) {
+                log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', " +
+                        "triggering shutdown process. " + t.getMessage());
+                try {
+                    shutdown();
+                } catch (Throwable t1) {
+                    log.error("Error shutting down partially started Siddhi App '" + siddhiAppContext.getName() + "', "
+                            + t1.getMessage());
+                }
+            }
+        }
+    }
+
+    public synchronized void startSources() {
+        if (running) {
+            log.warn("Error calling startSources() for Siddhi App '" + siddhiAppContext.getName() + "', " +
+                    "SiddhiApp already started with the sources.");
+            return;
+        }
+        if (!runningWithoutSources) {
+            throw new SiddhiAppRuntimeException("Cannot call startSources() without calling startWithoutSources() " +
+                    "for Siddhi App '" + siddhiAppContext.getName() + "'");
+        } else {
+            try {
+                for (List<Source> sources : sourceMap.values()) {
+                    for (Source source : sources) {
+                        source.connectWithRetry();
+                    }
+                }
+                running = true;
+                runningWithoutSources = false;
+            } catch (Throwable t) {
+                log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', " +
+                        "triggering shutdown process. " + t.getMessage());
+                try {
+                    shutdown();
+                } catch (Throwable t1) {
+                    log.error("Error shutting down partially started Siddhi App '" + siddhiAppContext.getName() + "', "
+                            + t1.getMessage());
+                }
             }
         }
     }
 
     public synchronized void shutdown() {
-        SourceHandlerManager sourceHandlerManager = siddhiAppContext.getSiddhiContext().getSourceHandlerManager();
-        for (List<Source> sources : sourceMap.values()) {
-            for (Source source : sources) {
-                try {
-                    if (sourceHandlerManager != null) {
-                        sourceHandlerManager.unregisterSourceHandler(source.getMapper().getHandler().getElementId());
+        if (running) {
+            SourceHandlerManager sourceHandlerManager = siddhiAppContext.getSiddhiContext().getSourceHandlerManager();
+            for (List<Source> sources : sourceMap.values()) {
+                for (Source source : sources) {
+                    try {
+                        if (sourceHandlerManager != null) {
+                            sourceHandlerManager.unregisterSourceHandler(source.getMapper().getHandler().
+                                    getElementId());
+                        }
+                        source.shutdown();
+                    } catch (Throwable t) {
+                        log.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext
+                                (t, siddhiAppContext)) + " Error in shutting down source '" + StringUtil.
+                                removeCRLFCharacters(source.getType()) + "' at '" +
+                                StringUtil.removeCRLFCharacters(source.getStreamDefinition().getId()) +
+                                "' on Siddhi App '" + siddhiAppContext.getName() + "'.", t);
                     }
-                    source.shutdown();
-                } catch (Throwable t) {
-                    log.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext
-                            (t, siddhiAppContext)) + " Error in shutting down source '" + StringUtil.
-                            removeCRLFCharacters(source.getType()) + "' at '" + StringUtil.removeCRLFCharacters(source.
-                            getStreamDefinition().getId()) + "' on Siddhi App '" + siddhiAppContext.getName()
-                            + "'.", t);
-                }
 
+                }
             }
         }
 
@@ -504,6 +551,7 @@ public class SiddhiAppRuntime {
             siddhiAppContext.getStatisticsManager().cleanup();
         }
         running = false;
+        runningWithoutSources = false;
     }
 
     public synchronized SiddhiDebugger debug() {
@@ -523,7 +571,6 @@ public class SiddhiAppRuntime {
             callback.setSiddhiDebugger(siddhiDebugger);
         }
         start();
-        running = true;
         return siddhiDebugger;
     }
 
