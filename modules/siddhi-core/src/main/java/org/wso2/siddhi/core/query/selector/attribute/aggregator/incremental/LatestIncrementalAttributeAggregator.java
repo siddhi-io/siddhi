@@ -72,8 +72,8 @@ public class LatestIncrementalAttributeAggregator extends IncrementalAttributeAg
                     "no parameters are given.");
         }
         if (attributeList.size() != 2) {
-            throw new SiddhiAppCreationException("Latest Incremental attribute aggregations can be executed ONLY when " +
-                    "2 attributes are given.");
+            throw new SiddhiAppCreationException("Latest Incremental attribute aggregations can be executed ONLY " +
+                    "when 2 attributes are given.");
         }
 
         Attribute variableAttribute = attributeList.get(0);
