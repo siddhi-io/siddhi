@@ -152,7 +152,8 @@ public class AggregationParser {
             List<ExpressionExecutor> outputExpressionExecutors = new ArrayList<>(); //Expression executors to get
             // final aggregate outputs. e.g avg = sum/count
 
-            populateIncomingAggregatorsAndExecutors(aggregationDefinition, siddhiAppContext, tableMap,
+            boolean isLatestEventAdded = populateIncomingAggregatorsAndExecutors(
+                    aggregationDefinition, siddhiAppContext, tableMap,
                     incomingVariableExpressionExecutors, aggregatorName, incomingMetaStreamEvent,
                     incomingExpressionExecutors, incrementalAttributeAggregators, groupByVariableList,
                     outputExpressions, isProcessingOnExternalTime);
@@ -187,6 +188,17 @@ public class AggregationParser {
                             incrementalDuration))
                     .collect(Collectors.toList());
 
+            ExpressionExecutor shouldUpdateExpressionExecutor = null;
+            if (isLatestEventAdded) {
+                Expression shouldUpdateExp = AttributeFunction.function(
+                        "incrementalAggregator",
+                        "shouldUpdate",
+                        new Variable("AGG_LAST_EVENT_TIMESTAMP"));
+                shouldUpdateExpressionExecutor = ExpressionParser.parseExpression(shouldUpdateExp,
+                        processedMetaStreamEvent, 0, tableMap,
+                        processVariableExpressionExecutors, siddhiAppContext,
+                        false, 0, aggregatorName);
+            }
 
             outputExpressionExecutors.addAll(outputExpressions.stream().map(expression -> ExpressionParser.
                     parseExpression(expression, processedMetaStreamEvent, 0, tableMap,
@@ -255,7 +267,7 @@ public class AggregationParser {
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = buildIncrementalExecutors(
                     processedMetaStreamEvent, processExpressionExecutorsList,
                     groupByKeyGeneratorList, incrementalDurations,
-                    aggregationTables, siddhiAppContext, aggregatorName);
+                    aggregationTables, siddhiAppContext, aggregatorName, shouldUpdateExpressionExecutor);
             IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
             incrementalDataPurging.init(aggregationDefinition, new StreamEventPool(processedMetaStreamEvent, 10)
                     , aggregationTables, isProcessingOnExternalTime, siddhiAppContext);
@@ -302,7 +314,7 @@ public class AggregationParser {
                     incrementalDurations, siddhiAppContext, baseExecutors, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
                     isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList,
-                    incrementalDataPurging);
+                    incrementalDataPurging, shouldUpdateExpressionExecutor);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
                     incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,
@@ -322,7 +334,7 @@ public class AggregationParser {
             List<GroupByKeyGenerator> groupByKeyGeneratorList,
             List<TimePeriod.Duration> incrementalDurations,
             Map<TimePeriod.Duration, Table> aggregationTables, SiddhiAppContext siddhiAppContext,
-            String aggregatorName) {
+            String aggregatorName, ExpressionExecutor shouldUpdateExpressionExecutor) {
         Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap = new HashMap<>();
         // Create incremental executors
         IncrementalExecutor child;
@@ -335,14 +347,18 @@ public class AggregationParser {
             }
             child = root;
             TimePeriod.Duration duration = incrementalDurations.get(i);
+
+            ExpressionExecutor shouldUpdateExpressionExecutorClone = null;
+            if (shouldUpdateExpressionExecutor != null) {
+                shouldUpdateExpressionExecutorClone = shouldUpdateExpressionExecutor.cloneExecutor(null);
+            }
             IncrementalExecutor incrementalExecutor = new IncrementalExecutor(duration,
                     cloneExpressionExecutors(processExpressionExecutorsList.get(i)),
                     groupByKeyGeneratorList.get(i), processedMetaStreamEvent, child, isRoot,
-                    aggregationTables.get(duration), siddhiAppContext, aggregatorName);
+                    aggregationTables.get(duration), siddhiAppContext, aggregatorName,
+                    shouldUpdateExpressionExecutorClone);
             incrementalExecutorMap.put(duration, incrementalExecutor);
             root = incrementalExecutor;
-
-
         }
         return incrementalExecutorMap;
     }
@@ -370,6 +386,17 @@ public class AggregationParser {
                         tableMap, processVariableExpressionExecutors, siddhiAppContext, groupBy,
                         0, aggregatorName);
                 processExpressionExecutors.add(externalTimestampExecutor);
+            } else if (attributeList.get(i).getName().equals("AGG_LAST_EVENT_TIMESTAMP")) {
+                Expression lastTimestampExpression =
+                        AttributeFunction.function(
+                                 "max",
+                                new Variable("AGG_LAST_EVENT_TIMESTAMP")
+                        );
+                ExpressionExecutor latestTimestampExecutor = ExpressionParser.parseExpression(
+                        lastTimestampExpression, processedMetaStreamEvent, 0,
+                        tableMap, processVariableExpressionExecutors, siddhiAppContext, groupBy,
+                        0, aggregatorName);
+                processExpressionExecutors.add(latestTimestampExecutor);
             } else {
                 Attribute attribute = attributeList.get(i);
                 VariableExpressionExecutor variableExpressionExecutor = (VariableExpressionExecutor) ExpressionParser
@@ -418,13 +445,14 @@ public class AggregationParser {
         return finalBaseAggregators;
     }
 
-    private static void populateIncomingAggregatorsAndExecutors(
+    private static boolean populateIncomingAggregatorsAndExecutors(
             AggregationDefinition aggregationDefinition, SiddhiAppContext siddhiAppContext,
             Map<String, Table> tableMap, List<VariableExpressionExecutor> incomingVariableExpressionExecutors,
             String aggregatorName, MetaStreamEvent incomingMetaStreamEvent,
             List<ExpressionExecutor> incomingExpressionExecutors,
             List<IncrementalAttributeAggregator> incrementalAttributeAggregators, List<Variable> groupByVariableList,
             List<Expression> outputExpressions, boolean isProcessingOnExternalTime) {
+        boolean addAggLastEvent = false;
         ExpressionExecutor timestampExecutor = getTimeStampExecutor(siddhiAppContext, tableMap,
                 incomingVariableExpressionExecutors, aggregatorName, incomingMetaStreamEvent);
 
@@ -433,9 +461,9 @@ public class AggregationParser {
         incomingExpressionExecutors.add(timestampExecutor);
 
         Attribute externalTimestampAttribute = new Attribute("AGG_EVENT_TIMESTAMP", Attribute.Type.LONG);
+        ExpressionExecutor externalTimestampExecutor = null;
         if (isProcessingOnExternalTime) {
             Expression externalTimestampExpression = aggregationDefinition.getAggregateAttribute();
-            ExpressionExecutor externalTimestampExecutor;
             externalTimestampExecutor = ExpressionParser.parseExpression(externalTimestampExpression,
                     incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
                     siddhiAppContext, false, 0, aggregatorName);
@@ -537,6 +565,16 @@ public class AggregationParser {
                     outputExpressions.add(Expression.variable(groupByAttribute.getName()));
 
                 } else {
+                    if (isProcessingOnExternalTime) {
+                        if (!addAggLastEvent) {
+                            Attribute lastEventTimeStamp =  new Attribute("AGG_LAST_EVENT_TIMESTAMP",
+                                    Attribute.Type.LONG);
+                            incomingMetaStreamEvent.addOutputData(lastEventTimeStamp);
+                            incomingExpressionExecutors.add(externalTimestampExecutor);
+                            addAggLastEvent = true;
+                        }
+                    }
+
                     ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                             incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
                             siddhiAppContext, false, 0, aggregatorName);
@@ -549,6 +587,7 @@ public class AggregationParser {
                 }
             }
         }
+        return addAggLastEvent;
     }
 
     private static List<ExpressionExecutor> cloneExpressionExecutors(List<ExpressionExecutor> expressionExecutors) {

@@ -110,7 +110,8 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                             List<ExpressionExecutor> outputExpressionExecutors,
                             SiddhiAppContext siddhiAppContext,
                             List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
-                            List<GroupByKeyGenerator> groupbyKeyGeneratorList) {
+                            List<GroupByKeyGenerator> groupbyKeyGeneratorList,
+                            ExpressionExecutor shouldUpdateExpressionExecutor) {
 
         ComplexEventChunk<StreamEvent> complexEventChunkToHoldWithinMatches = new ComplexEventChunk<>(true);
 
@@ -141,11 +142,15 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         long oldestInMemoryEventTimestamp = getOldestInMemoryEventTimestamp(incrementalExecutorMap,
                 incrementalDurations, perValue);
 
+        ExpressionExecutor shouldUpdateExpressionExecutorClone =
+                (shouldUpdateExpressionExecutor == null) ? null : shouldUpdateExpressionExecutor.cloneExecutor(null);
+
         //If processing on external time, the in-memory data also needs to be queried
         if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
                 startTimeEndTime)) {
             IncrementalDataAggregator incrementalDataAggregator = new IncrementalDataAggregator(incrementalDurations,
-                    perValue, oldestInMemoryEventTimestamp, baseExecutors, tableMetaStreamEvent, siddhiAppContext);
+                    perValue, oldestInMemoryEventTimestamp, baseExecutors, tableMetaStreamEvent, siddhiAppContext,
+                    shouldUpdateExpressionExecutorClone);
 
             // Aggregate in-memory data and create an event chunk out of it
             ComplexEventChunk<StreamEvent> aggregatedInMemoryEventChunk = incrementalDataAggregator
@@ -163,9 +168,12 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             List<ExpressionExecutor> expressionExecutors = aggregateProcessingExecutorsList.get(durationIndex);
             GroupByKeyGenerator groupByKeyGenerator = groupbyKeyGeneratorList.get(durationIndex);
 
+            ExpressionExecutor shouldUpdateExpressionExecutorCloneExt =
+                    (shouldUpdateExpressionExecutor == null) ? null :
+                            shouldUpdateExpressionExecutor.cloneExecutor(null);
             IncrementalExternalTimestampDataAggregator incrementalExternalTimestampDataAggregator =
                     new IncrementalExternalTimestampDataAggregator(expressionExecutors, groupByKeyGenerator,
-                    tableMetaStreamEvent, siddhiAppContext);
+                    tableMetaStreamEvent, siddhiAppContext, shouldUpdateExpressionExecutorCloneExt);
             processedEvents = incrementalExternalTimestampDataAggregator
                     .aggregateData(complexEventChunkToHoldWithinMatches);
         } else {

@@ -42,16 +42,19 @@ public class BaseIncrementalValueStore implements Snapshotable {
     private String elementId;
     private SiddhiAppContext siddhiAppContext;
     private String aggregatorName;
+    private ExpressionExecutor shouldUpdateExpressionExecutor;
 
     public BaseIncrementalValueStore(long timeStamp, List<ExpressionExecutor> expressionExecutors,
                                      StreamEventPool streamEventPool,
-                                     SiddhiAppContext siddhiAppContext, String aggregatorName) {
+                                     SiddhiAppContext siddhiAppContext, String aggregatorName,
+                                     ExpressionExecutor shouldUpdateExpressionExecutor) {
         this.timestamp = timeStamp;
         this.values = new Object[expressionExecutors.size() + 1];
         this.expressionExecutors = expressionExecutors;
         this.streamEventPool = streamEventPool;
         this.siddhiAppContext = siddhiAppContext;
         this.aggregatorName = aggregatorName;
+        this.shouldUpdateExpressionExecutor = shouldUpdateExpressionExecutor;
         if (elementId == null) {
             elementId = "IncrementalBaseStore-" + siddhiAppContext.getElementIdGenerator().createNewId();
         }
@@ -100,9 +103,14 @@ public class BaseIncrementalValueStore implements Snapshotable {
         List<ExpressionExecutor> newExpressionExecutors = new ArrayList<>(expressionExecutors.size());
         expressionExecutors
                 .forEach(expressionExecutor -> newExpressionExecutors.add(expressionExecutor.cloneExecutor(key)));
+        ExpressionExecutor newShouldUpdateExpressionExecutor =
+                (shouldUpdateExpressionExecutor == null) ? null : shouldUpdateExpressionExecutor.cloneExecutor(key);
         return new BaseIncrementalValueStore(timestamp, newExpressionExecutors, streamEventPool, siddhiAppContext,
-                aggregatorName);
+                aggregatorName, newShouldUpdateExpressionExecutor);
+    }
 
+    public ExpressionExecutor getShouldUpdateExpressionExecutor() {
+        return shouldUpdateExpressionExecutor;
     }
 
     @Override

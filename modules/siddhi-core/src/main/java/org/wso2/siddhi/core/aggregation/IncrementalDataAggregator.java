@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.util.IncrementalTimeConverterUtil;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
 
@@ -47,12 +48,13 @@ public class IncrementalDataAggregator {
     public IncrementalDataAggregator(List<TimePeriod.Duration> incrementalDurations,
                                      TimePeriod.Duration aggregateForDuration, long oldestEventTimeStamp,
                                      List<ExpressionExecutor> baseExecutors,
-                                     MetaStreamEvent metaStreamEvent, SiddhiAppContext siddhiAppContext) {
+                                     MetaStreamEvent metaStreamEvent, SiddhiAppContext siddhiAppContext,
+                                     ExpressionExecutor shouldUpdateExpressionExecutor) {
         this.incrementalDurations = incrementalDurations;
         this.aggregateForDuration = aggregateForDuration;
         StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 10);
-        this.baseIncrementalValueStore =  new BaseIncrementalValueStore(oldestEventTimeStamp, baseExecutors,
-                streamEventPool, siddhiAppContext, null);
+        this.baseIncrementalValueStore = new BaseIncrementalValueStore(oldestEventTimeStamp, baseExecutors,
+                streamEventPool, siddhiAppContext, null, shouldUpdateExpressionExecutor);
         this.baseIncrementalValueStoreGroupByMap = new HashMap<>();
     }
 
@@ -81,7 +83,6 @@ public class IncrementalDataAggregator {
                         baseIncrementalValueStore.getTimestamp(), null);
             }
         }
-
         return createEventChunkFromAggregatedData();
     }
 
@@ -102,9 +103,23 @@ public class IncrementalDataAggregator {
 
     private void process(StreamEvent streamEvent, BaseIncrementalValueStore baseIncrementalValueStore) {
         List<ExpressionExecutor> expressionExecutors = baseIncrementalValueStore.getExpressionExecutors();
+        boolean shouldUpdate = true;
+        ExpressionExecutor shouldUpdateExpressionExecutor =
+                baseIncrementalValueStore.getShouldUpdateExpressionExecutor();
+        if (shouldUpdateExpressionExecutor != null) {
+            shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
+        }
+
         for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
-            ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-            baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
+            if (shouldUpdate) {
+                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+                baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
+            } else {
+                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                    baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
+                }
+            }
         }
         baseIncrementalValueStore.setProcessed(true);
     }
