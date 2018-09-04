@@ -123,9 +123,8 @@ public class SiddhiAppRuntime {
     private SiddhiDebugger siddhiDebugger;
     private boolean running = false;
     private Future futureIncrementalPersistor;
-    private boolean isStartInvoked = false;
-    private boolean isStartWithoutSourcesInvoked = false;
-    private boolean isStartSourcesInvoked = false;
+    private boolean startInvoked = false;
+    private boolean startWithoutSourcesInvoked = false;
 
     public SiddhiAppRuntime(Map<String, AbstractDefinition> streamDefinitionMap,
                             Map<String, AbstractDefinition> tableDefinitionMap,
@@ -356,17 +355,22 @@ public class SiddhiAppRuntime {
     }
 
     public synchronized void start() {
-        if (!isStartWithoutSourcesInvoked) {
+        if (startInvoked) {
+            log.warn("Error calling star() for Siddhi App '" + siddhiAppContext.getName() + "', " +
+                    "SiddhiApp already started.");
+            return;
+        }
+        if (!startWithoutSourcesInvoked) {
             startWithoutSources();
         }
         startSources();
-        isStartInvoked = true;
+        startInvoked = true;
     }
 
     public synchronized void startWithoutSources() {
-        if (isStartInvoked) {
-            log.warn("Error calling startWithoutSources for siddhi App '" + siddhiAppContext.getName() + "', " +
-                    "Start is already been invoked ");
+        if (startInvoked) {
+            log.warn("Error calling startWithoutSources() for Siddhi App '" + siddhiAppContext.getName() + "', " +
+                    "SiddhiApp already started.");
         } else {
             try {
                 if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
@@ -390,7 +394,7 @@ public class SiddhiAppRuntime {
                     aggregationRuntime.start();
                 }
                 running = true;
-                isStartWithoutSourcesInvoked = true;
+                startWithoutSourcesInvoked = true;
             } catch (Throwable t) {
                 log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', " +
                         "triggering shutdown process. " + t.getMessage());
@@ -405,12 +409,12 @@ public class SiddhiAppRuntime {
     }
 
     public synchronized void startSources() {
-        if (isStartInvoked) {
-            log.warn("Error calling startSources for siddhi App '" + siddhiAppContext.getName() + "', " +
-                    "Start is already been invoked ");
-        } else if (!isStartWithoutSourcesInvoked) {
-            throw new SiddhiAppRuntimeException("Cannot call startSources without calling startWithoutSources " +
-                    "first when starting siddhi app runtime for Siddhi App '" + siddhiAppContext.getName() + "'");
+        if (startInvoked) {
+            log.warn("Error calling startSources() for Siddhi App '" + siddhiAppContext.getName() + "', " +
+                    "SiddhiApp already started with the sources.");
+        } else if (!startWithoutSourcesInvoked) {
+            throw new SiddhiAppRuntimeException("Cannot call startSources() without calling startWithoutSources() " +
+                    "for Siddhi App '" + siddhiAppContext.getName() + "'");
         } else {
             try {
                 for (List<Source> sources : sourceMap.values()) {
@@ -418,7 +422,7 @@ public class SiddhiAppRuntime {
                         source.connectWithRetry();
                     }
                 }
-                isStartSourcesInvoked = true;
+                startInvoked = true;
             } catch (Throwable t) {
                 log.error("Error starting Siddhi App '" + siddhiAppContext.getName() + "', " +
                         "triggering shutdown process. " + t.getMessage());
@@ -433,7 +437,7 @@ public class SiddhiAppRuntime {
     }
 
     public synchronized void shutdown() {
-        if (isStartInvoked || isStartSourcesInvoked) {
+        if (startInvoked) {
             SourceHandlerManager sourceHandlerManager = siddhiAppContext.getSiddhiContext().getSourceHandlerManager();
             for (List<Source> sources : sourceMap.values()) {
                 for (Source source : sources) {
@@ -546,9 +550,8 @@ public class SiddhiAppRuntime {
             siddhiAppContext.getStatisticsManager().cleanup();
         }
         running = false;
-        isStartInvoked = false;
-        isStartWithoutSourcesInvoked = false;
-        isStartSourcesInvoked = false;
+        startInvoked = false;
+        startWithoutSourcesInvoked = false;
     }
 
     public synchronized SiddhiDebugger debug() {
