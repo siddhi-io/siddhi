@@ -27,6 +27,8 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.List;
+
 /**
  * {@link IncrementalAttributeAggregator} to calculate average based on an event attribute.
  */
@@ -55,23 +57,23 @@ public class AvgIncrementalAttributeAggregator extends IncrementalAttributeAggre
     private Expression[] baseAttributesInitialValues;
 
     @Override
-    public void init(String attributeName, Attribute.Type attributeType) {
+    public void init(List<Attribute> attributeList) {
         // Send the relevant attribute to this
         Attribute sum;
         Attribute count;
         Expression sumInitialValue;
         Expression countInitialValue;
 
-        if (attributeName == null) {
+        if (attributeList.get(0) == null) {
             throw new SiddhiAppCreationException("Average incremental attribute aggregation cannot be executed " +
                     "when no parameters are given");
         }
 
         SumIncrementalAttributeAggregator sumIncrementalAttributeAggregator = new SumIncrementalAttributeAggregator();
-        sumIncrementalAttributeAggregator.init(attributeName, attributeType);
+        sumIncrementalAttributeAggregator.init(attributeList);
         CountIncrementalAttributeAggregator countIncrementalAttributeAggregator =
                 new CountIncrementalAttributeAggregator();
-        countIncrementalAttributeAggregator.init(attributeName, attributeType);
+        countIncrementalAttributeAggregator.init(attributeList);
 
         // Only one attribute exists for sum and count
         sum = sumIncrementalAttributeAggregator.getBaseAttributes()[0];

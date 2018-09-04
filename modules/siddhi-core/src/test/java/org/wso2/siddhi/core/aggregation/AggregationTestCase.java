@@ -1015,7 +1015,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
     }
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest15"}, expectedExceptions =
-            SiddhiAppRuntimeException.class)
+            SiddhiAppRuntimeException.class, enabled = false)
     public void incrementalStreamProcessorTest16() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest16");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1042,7 +1042,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
         stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, "June 1, 2017 4:05:50 AM"});
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest16"})
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest16"}, enabled = false)
     public void incrementalStreamProcessorTest17() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest17");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1179,7 +1179,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
         }
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest17"})
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest17"}, enabled = false)
     public void incrementalStreamProcessorTest18() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest18");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1314,7 +1314,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
         }
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest18"}, expectedExceptions = SiddhiParserException.class)
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest14"}, expectedExceptions = SiddhiParserException.class)
     public void incrementalStreamProcessorTest19() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest19");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1355,7 +1355,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
     }
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest20"}, expectedExceptions =
-            StoreQueryCreationException.class)
+            StoreQueryCreationException.class, enabled = false)
     public void incrementalStreamProcessorTest21() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest21");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1424,7 +1424,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest21"})
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest21"}, enabled = false)
     public void incrementalStreamProcessorTest23() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest23");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1682,7 +1682,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
     }
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest21"}, expectedExceptions =
-            StoreQueryCreationException.class)
+            StoreQueryCreationException.class, enabled = false)
     public void incrementalStreamProcessorTest27() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest27");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1712,7 +1712,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
     }
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest27"}, expectedExceptions =
-            StoreQueryCreationException.class)
+            StoreQueryCreationException.class, enabled = false)
     public void incrementalStreamProcessorTest28() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest28");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1742,7 +1742,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
     }
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest28"}, expectedExceptions =
-            StoreQueryCreationException.class)
+            StoreQueryCreationException.class, enabled = false)
     public void incrementalStreamProcessorTest29() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest29");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1772,7 +1772,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
     }
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest29"}, expectedExceptions =
-            StoreQueryCreationException.class)
+            StoreQueryCreationException.class, enabled = false)
     public void incrementalStreamProcessorTest30() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest30");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -2094,7 +2094,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
     }
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest30"}, expectedExceptions =
-            StoreQueryCreationException.class)
+            StoreQueryCreationException.class, enabled = false)
     public void incrementalStreamProcessorTest36() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest36");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -2124,7 +2124,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
     }
 
     @Test(dependsOnMethods = {"incrementalStreamProcessorTest36"}, expectedExceptions =
-            StoreQueryCreationException.class)
+            StoreQueryCreationException.class, enabled = false)
     public void incrementalStreamProcessorTest37() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest37");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -2728,7 +2728,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
         }
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest37"})
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest37"}, enabled = false)
     public void incrementalStreamProcessorTest44() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest44");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -2786,7 +2786,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
     }
 
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest44"})
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest20"})
     public void incrementalStreamProcessorTest45() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest45 - Testing out of order events greater than buffer size with " +
                 "group by");
@@ -2837,7 +2837,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
         }
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest45"})
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest45"}, enabled = false)
     public void incrementalStreamProcessorTest46() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest46 - Two different timezones");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -2940,7 +2940,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
         }
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest46"})
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest45"})
     public void incrementalStreamProcessorTest47() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest47 - Aggregation external timestamp minute granularity");
 

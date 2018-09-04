@@ -161,7 +161,7 @@ public class AggregationParser {
 
             List<Expression> finalBaseAggregators = getFinalBaseAggregators(siddhiAppContext, tableMap,
                     incomingVariableExpressionExecutors, aggregatorName, incomingMetaStreamEvent,
-                    incomingExpressionExecutors, incrementalAttributeAggregators);
+                    incomingExpressionExecutors, incrementalAttributeAggregators, aggregationDefinition);
 
             StreamDefinition incomingOutputStreamDefinition = StreamDefinition.id("");
             incomingOutputStreamDefinition.setQueryContextStartIndex(aggregationDefinition.getQueryContextStartIndex());
@@ -393,7 +393,8 @@ public class AggregationParser {
             SiddhiAppContext siddhiAppContext, Map<String, Table> tableMap,
             List<VariableExpressionExecutor> incomingVariableExpressionExecutors, String aggregatorName,
             MetaStreamEvent incomingMetaStreamEvent, List<ExpressionExecutor> incomingExpressionExecutors,
-            List<IncrementalAttributeAggregator> incrementalAttributeAggregators) {
+            List<IncrementalAttributeAggregator> incrementalAttributeAggregators,
+            AggregationDefinition aggregationDefinition) {
         List<Attribute> finalBaseAttributes = new ArrayList<>();
         List<Expression> finalBaseAggregators = new ArrayList<>();
 
@@ -409,9 +410,28 @@ public class AggregationParser {
                     finalBaseAttributes.add(baseAttributes[i]);
                     finalBaseAggregators.add(baseAggregators[i]);
                     incomingMetaStreamEvent.addOutputData(baseAttributes[i]);
-                    incomingExpressionExecutors.add(ExpressionParser.parseExpression(baseAttributeInitialValues[i],
-                            incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
-                            siddhiAppContext, false, 0, aggregatorName));
+                    // Name is constant for latest attribute aggregator called for variables other than
+                    // groupby variables and calculations
+                    if (baseAttributes[i].getName().equals("AGG_MAX_EVENT_TIMESTAMP")) {
+                        Expression externalTimestampExpression = aggregationDefinition.getAggregateAttribute();
+                        ExpressionExecutor externalTimestampExecutor;
+                        externalTimestampExecutor = ExpressionParser.parseExpression(externalTimestampExpression,
+                                incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
+                                siddhiAppContext, false, 0, aggregatorName);
+
+                        if (externalTimestampExecutor.getReturnType() == Attribute.Type.STRING) {
+                            Expression expression = AttributeFunction.function("incrementalAggregator",
+                                    "timestampInMilliseconds", externalTimestampExpression);
+                            externalTimestampExecutor = ExpressionParser.parseExpression(expression, incomingMetaStreamEvent,
+                                    0, tableMap, incomingVariableExpressionExecutors, siddhiAppContext,
+                                    false, 0, aggregatorName);
+                        }
+                        incomingExpressionExecutors.add(externalTimestampExecutor);
+                    } else {
+                        incomingExpressionExecutors.add(ExpressionParser.parseExpression(baseAttributeInitialValues[i],
+                                incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
+                                siddhiAppContext, false, 0, aggregatorName));
+                    }
                 }
             }
         }
@@ -478,6 +498,7 @@ public class AggregationParser {
             outputExpressions.add(Expression.variable("AGG_TIMESTAMP"));
         }
 
+        boolean isLatestVariableFound = false;
         for (OutputAttribute outputAttribute : aggregationDefinition.getSelector().getSelectionList()) {
             Expression expression = outputAttribute.getExpression();
             if (expression instanceof AttributeFunction) {
@@ -537,15 +558,34 @@ public class AggregationParser {
                     outputExpressions.add(Expression.variable(groupByAttribute.getName()));
 
                 } else {
-                    ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
-                            incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
-                            siddhiAppContext, false, 0, aggregatorName);
-                    incomingExpressionExecutors.add(expressionExecutor);
-                    incomingMetaStreamEvent.addOutputData(
-                            new Attribute(outputAttribute.getRename(), expressionExecutor.getReturnType()));
-                    aggregationDefinition.getAttributeList().add(
-                            new Attribute(outputAttribute.getRename(), expressionExecutor.getReturnType()));
-                    outputExpressions.add(Expression.variable(outputAttribute.getRename()));
+                    if (!isProcessingOnExternalTime) {
+                        ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
+                                incomingMetaStreamEvent, 0, tableMap, incomingVariableExpressionExecutors,
+                                siddhiAppContext, false, 0, aggregatorName);
+                        incomingExpressionExecutors.add(expressionExecutor);
+                        incomingMetaStreamEvent.addOutputData(
+                                new Attribute(outputAttribute.getRename(), expressionExecutor.getReturnType()));
+                        aggregationDefinition.getAttributeList().add(
+                                new Attribute(outputAttribute.getRename(), expressionExecutor.getReturnType()));
+                        outputExpressions.add(Expression.variable(outputAttribute.getRename()));
+                    } else {
+                        Expression unixExternalTimestamp = Expression.variable("EVENT_TIMESTAMP");
+                        AttributeFunction latestAttributeFunction = new AttributeFunction(
+                                "incrementalAggregator", "latest",
+                                expression, unixExternalTimestamp);
+                        IncrementalAttributeAggregator latestIncrementalAttributeAggregator;
+                        latestIncrementalAttributeAggregator = (IncrementalAttributeAggregator)
+                                SiddhiClassLoader.loadExtensionImplementation(
+                                        latestAttributeFunction,
+                                        IncrementalAttributeAggregatorExtensionHolder.getInstance(siddhiAppContext));
+                        initIncrementalAttributeAggregator(incomingMetaStreamEvent.getLastInputDefinition(),
+                                latestAttributeFunction, latestIncrementalAttributeAggregator);
+                        incrementalAttributeAggregators.add(latestIncrementalAttributeAggregator);
+                        aggregationDefinition.getAttributeList().add(
+                                new Attribute(outputAttribute.getRename(),
+                                        latestIncrementalAttributeAggregator.getReturnType()));
+                        outputExpressions.add(latestIncrementalAttributeAggregator.aggregate());
+                    }
                 }
             }
         }
@@ -595,26 +635,36 @@ public class AggregationParser {
     private static void initIncrementalAttributeAggregator(
             AbstractDefinition lastInputStreamDefinition, AttributeFunction attributeFunction,
             IncrementalAttributeAggregator incrementalAttributeAggregator) {
-        String attributeName = null;
-        Attribute.Type attributeType = null;
-        if (attributeFunction.getParameters() != null && attributeFunction.getParameters()[0] != null) {
-            if (attributeFunction.getParameters().length != 1) {
-                throw new SiddhiAppCreationException("Incremental aggregator requires only on one parameter. "
+        String attributeName;
+        Attribute.Type attributeType;
+        List<Attribute> attributeList = new ArrayList<>();
+        if (attributeFunction.getParameters() != null) {
+            if (attributeFunction.getParameters().length == 0) {
+                throw new SiddhiAppCreationException("Incremental aggregator requires at least one parameter. "
                         + "Found " + attributeFunction.getParameters().length,
                         attributeFunction.getQueryContextStartIndex(), attributeFunction.getQueryContextEndIndex());
             }
-            if (!(attributeFunction.getParameters()[0] instanceof Variable)) {
-                throw new SiddhiAppCreationException("Incremental aggregator expected a variable. " +
-                        "However a parameter of type " + attributeFunction.getParameters()[0].getClass().getTypeName()
-                        + " was found",
-                        attributeFunction.getParameters()[0].getQueryContextStartIndex(),
-                        attributeFunction.getParameters()[0].getQueryContextEndIndex());
+            for (Expression expression : attributeFunction.getParameters()) {
+                if (!(expression instanceof Variable)) {
+                    throw new SiddhiAppCreationException("Incremental aggregator expected a variable. " +
+                            "However a parameter of type " +
+                            expression.getClass().getTypeName() + " was found",
+                            expression.getQueryContextStartIndex(),
+                            expression.getQueryContextEndIndex());
+                }
+                attributeName = ((Variable) expression).getAttributeName();
+                if (attributeName.equals("EVENT_TIMESTAMP")) {
+                    //This is constant since this attribute is only set in processed event
+                    // (After IncrementalAggregationProcessor)
+                    attributeType = Attribute.Type.LONG;
+                } else {
+                    attributeType = lastInputStreamDefinition.getAttributeType(attributeName);
+                }
+                attributeList.add(new Attribute(attributeName, attributeType));
             }
-            attributeName = ((Variable) attributeFunction.getParameters()[0]).getAttributeName();
-            attributeType = lastInputStreamDefinition.getAttributeType(attributeName);
         }
 
-        incrementalAttributeAggregator.init(attributeName, attributeType);
+        incrementalAttributeAggregator.init(attributeList);
 
         Attribute[] baseAttributes = incrementalAttributeAggregator.getBaseAttributes();
         Expression[] baseAttributeInitialValues = incrementalAttributeAggregator
@@ -672,17 +722,15 @@ public class AggregationParser {
     private static List<TimePeriod.Duration> sortedDurations(List<TimePeriod.Duration> durations) {
         List<TimePeriod.Duration> copyDurations = new ArrayList<>(durations);
 
-        Comparator periodComparator = new Comparator<TimePeriod.Duration>() {
-            public int compare(TimePeriod.Duration firstDuration, TimePeriod.Duration secondDuration) {
-                int firstOrdinal = firstDuration.ordinal();
-                int secondOrdinal = secondDuration.ordinal();
-                if (firstOrdinal > secondOrdinal) {
-                    return 1;
-                } else if (firstOrdinal < secondOrdinal) {
-                    return -1;
-                }
-                return 0;
+        Comparator periodComparator = (Comparator<TimePeriod.Duration>) (firstDuration, secondDuration) -> {
+            int firstOrdinal = firstDuration.ordinal();
+            int secondOrdinal = secondDuration.ordinal();
+            if (firstOrdinal > secondOrdinal) {
+                return 1;
+            } else if (firstOrdinal < secondOrdinal) {
+                return -1;
             }
+            return 0;
         };
         copyDurations.sort(periodComparator);
         return copyDurations;

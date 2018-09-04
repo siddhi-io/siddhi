@@ -28,6 +28,8 @@ import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.List;
+
 /**
  * {@link IncrementalAttributeAggregator} to calculate sum based on an event attribute.
  */
@@ -58,14 +60,16 @@ public class SumIncrementalAttributeAggregator extends IncrementalAttributeAggre
     private Attribute.Type returnType;
 
     @Override
-    public void init(String attributeName, Attribute.Type attributeType) {
+    public void init(List<Attribute> attributeList) {
         Attribute sum;
         Expression sumInitialValue;
 
-        if (attributeName == null) {
+        if (attributeList.get(0) == null) {
             throw new SiddhiAppCreationException("Sum incremental attribute aggregation cannot be executed " +
                     "when no parameters are given");
         }
+        String attributeName = attributeList.get(0).getName();
+        Attribute.Type attributeType = attributeList.get(0).getType();
 
         if (attributeType.equals(Attribute.Type.FLOAT) || attributeType.equals(Attribute.Type.DOUBLE)) {
             sum = new Attribute("AGG_SUM_".concat(attributeName), Attribute.Type.DOUBLE);

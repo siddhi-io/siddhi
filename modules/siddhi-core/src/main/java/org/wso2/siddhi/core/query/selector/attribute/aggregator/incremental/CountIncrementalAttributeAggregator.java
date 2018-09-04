@@ -24,6 +24,8 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.List;
+
 /**
  * {@link IncrementalAttributeAggregator} to calculate count based on an event attribute.
  */
@@ -48,7 +50,7 @@ public class CountIncrementalAttributeAggregator extends IncrementalAttributeAgg
     private Expression[] baseAttributesInitialValues;
 
     @Override
-    public void init(String attributeName, Attribute.Type attributeType) {
+    public void init(List<Attribute> attributeList) {
         Attribute count;
         Expression countInitialValue;
 
