@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.query.selector.attribute.processor.executor.GroupByAggregationAttributeExecutor;
 import org.wso2.siddhi.core.table.Table;
@@ -66,7 +67,8 @@ public class IncrementalExecutor implements Executor, Snapshotable {
     public IncrementalExecutor(TimePeriod.Duration duration, List<ExpressionExecutor> processExpressionExecutors,
                                GroupByKeyGenerator groupByKeyGenerator, MetaStreamEvent metaStreamEvent,
                                IncrementalExecutor child, boolean isRoot, Table table,
-                               SiddhiAppContext siddhiAppContext, String aggregatorName) {
+                               SiddhiAppContext siddhiAppContext, String aggregatorName,
+                               ExpressionExecutor shouldUpdateExpressionExecutor) {
         this.duration = duration;
         this.next = child;
         this.isRoot = isRoot;
@@ -74,7 +76,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
         this.baseIncrementalValueStore = new BaseIncrementalValueStore(-1, processExpressionExecutors,
-                streamEventPool, siddhiAppContext, aggregatorName);
+                streamEventPool, siddhiAppContext, aggregatorName, shouldUpdateExpressionExecutor);
         this.isProcessingExecutor = false;
 
         if (groupByKeyGenerator != null) {
@@ -170,8 +172,8 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                     String groupedByKey = groupByKeyGenerator.constructEventKey(streamEvent);
                     GroupByAggregationAttributeExecutor.getKeyThreadLocal().set(groupedByKey);
                     BaseIncrementalValueStore aBaseIncrementalValueStore = baseIncrementalValueStoreGroupByMap
-                                .computeIfAbsent(groupedByKey,
-                                        k -> baseIncrementalValueStore.cloneStore(k, startTimeOfAggregates));
+                            .computeIfAbsent(groupedByKey,
+                                    k -> baseIncrementalValueStore.cloneStore(k, startTimeOfAggregates));
                     process(streamEvent, aBaseIncrementalValueStore);
                 } finally {
                     GroupByAggregationAttributeExecutor.getKeyThreadLocal().remove();
@@ -184,9 +186,23 @@ public class IncrementalExecutor implements Executor, Snapshotable {
 
     private void process(StreamEvent streamEvent, BaseIncrementalValueStore baseIncrementalValueStore) {
         List<ExpressionExecutor> expressionExecutors = baseIncrementalValueStore.getExpressionExecutors();
+        boolean shouldUpdate = true;
+        ExpressionExecutor shouldUpdateExpressionExecutor =
+                baseIncrementalValueStore.getShouldUpdateExpressionExecutor();
+        if (shouldUpdateExpressionExecutor != null) {
+            shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
+        }
+
         for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
-            ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-            baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
+            if (shouldUpdate) {
+                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+                baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
+            } else {
+                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                    baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
+                }
+            }
         }
         baseIncrementalValueStore.setProcessed(true);
     }

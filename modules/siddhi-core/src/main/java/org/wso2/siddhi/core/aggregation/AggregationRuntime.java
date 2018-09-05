@@ -79,6 +79,7 @@ public class AggregationRuntime implements MemoryCalculable {
     private boolean isFirstEventArrived;
     private long lastExecutorsRefreshedTime = -1;
     private IncrementalDataPurging incrementalDataPurging;
+    private ExpressionExecutor shouldUpdateExpressionExecutor;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -92,7 +93,8 @@ public class AggregationRuntime implements MemoryCalculable {
                               RecreateInMemoryData recreateInMemoryData, boolean processingOnExternalTime,
                               List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
                               List<GroupByKeyGenerator> groupByKeyGeneratorList,
-                              IncrementalDataPurging incrementalDataPurging) {
+                              IncrementalDataPurging incrementalDataPurging,
+                              ExpressionExecutor shouldUpdateExpressionExecutor) {
         this.aggregationDefinition = aggregationDefinition;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.aggregationTables = aggregationTables;
@@ -109,6 +111,7 @@ public class AggregationRuntime implements MemoryCalculable {
         this.aggregateProcessingExecutorsList = aggregateProcessingExecutorsList;
         this.groupByKeyGeneratorList = groupByKeyGeneratorList;
         this.incrementalDataPurging = incrementalDataPurging;
+        this.shouldUpdateExpressionExecutor = shouldUpdateExpressionExecutor;
 
         aggregateMetaSteamEvent = new MetaStreamEvent();
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
@@ -201,7 +204,7 @@ public class AggregationRuntime implements MemoryCalculable {
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
                     baseExecutors, outputExpressionExecutors, siddhiAppContext,
-                    aggregateProcessingExecutorsList, groupByKeyGeneratorList);
+                    aggregateProcessingExecutorsList, groupByKeyGeneratorList, shouldUpdateExpressionExecutor);
         } finally {
             SnapshotService.getSkipSnapshotableThreadLocal().set(null);
             if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {

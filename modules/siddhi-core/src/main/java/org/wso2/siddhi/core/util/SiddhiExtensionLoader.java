@@ -27,6 +27,7 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.wiring.BundleWiring;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.core.executor.incremental.IncrementalAggregateBaseTimeFunctionExecutor;
+import org.wso2.siddhi.core.executor.incremental.IncrementalShouldUpdateFunctionExecutor;
 import org.wso2.siddhi.core.executor.incremental.IncrementalStartTimeEndTimeFunctionExecutor;
 import org.wso2.siddhi.core.executor.incremental.IncrementalTimeGetTimeZone;
 import org.wso2.siddhi.core.executor.incremental.IncrementalUnixTimeFunctionExecutor;
@@ -86,6 +87,8 @@ public class SiddhiExtensionLoader {
                 IncrementalTimeGetTimeZone.class, siddhiExtensionsMap);
         addExtensionToMap("incrementalAggregator:getAggregationStartTime",
                 IncrementalAggregateBaseTimeFunctionExecutor.class, siddhiExtensionsMap);
+        addExtensionToMap("incrementalAggregator:shouldUpdate",
+                IncrementalShouldUpdateFunctionExecutor.class, siddhiExtensionsMap);
     }
 
     /**
