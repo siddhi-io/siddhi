@@ -356,14 +356,16 @@ public class SiddhiAppRuntime {
 
     public synchronized void start() {
         if (running) {
-            log.warn("Error calling star() for Siddhi App '" + siddhiAppContext.getName() + "', " +
+            log.warn("Error calling start() for Siddhi App '" + siddhiAppContext.getName() + "', " +
                     "SiddhiApp already started.");
             return;
         }
         if (!runningWithoutSources) {
             startWithoutSources();
         }
-        startSources();
+        if (runningWithoutSources) {
+            startSources();
+        }
     }
 
     public synchronized void startWithoutSources() {
