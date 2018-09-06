@@ -440,24 +440,21 @@ public class SiddhiAppRuntime {
     }
 
     public synchronized void shutdown() {
-        if (running) {
-            SourceHandlerManager sourceHandlerManager = siddhiAppContext.getSiddhiContext().getSourceHandlerManager();
-            for (List<Source> sources : sourceMap.values()) {
-                for (Source source : sources) {
-                    try {
-                        if (sourceHandlerManager != null) {
-                            sourceHandlerManager.unregisterSourceHandler(source.getMapper().getHandler().
-                                    getElementId());
-                        }
-                        source.shutdown();
-                    } catch (Throwable t) {
-                        log.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext
-                                (t, siddhiAppContext)) + " Error in shutting down source '" + StringUtil.
-                                removeCRLFCharacters(source.getType()) + "' at '" +
-                                StringUtil.removeCRLFCharacters(source.getStreamDefinition().getId()) +
-                                "' on Siddhi App '" + siddhiAppContext.getName() + "'.", t);
+        SourceHandlerManager sourceHandlerManager = siddhiAppContext.getSiddhiContext().getSourceHandlerManager();
+        for (List<Source> sources : sourceMap.values()) {
+            for (Source source : sources) {
+                try {
+                    if (sourceHandlerManager != null) {
+                        sourceHandlerManager.unregisterSourceHandler(source.getMapper().getHandler().
+                                getElementId());
                     }
-
+                    source.shutdown();
+                } catch (Throwable t) {
+                    log.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext
+                            (t, siddhiAppContext)) + " Error in shutting down source '" + StringUtil.
+                            removeCRLFCharacters(source.getType()) + "' at '" +
+                            StringUtil.removeCRLFCharacters(source.getStreamDefinition().getId()) +
+                            "' on Siddhi App '" + siddhiAppContext.getName() + "'.", t);
                 }
             }
         }
@@ -746,7 +743,7 @@ public class SiddhiAppRuntime {
     /**
      * To enable and disable Siddhi App playback mode on runtime along with optional parameters.
      *
-     * @param playBackEnabled whether playback is enabled or not
+     * @param playBackEnabled         whether playback is enabled or not
      * @param idleTime
      * @param incrementInMilliseconds
      */

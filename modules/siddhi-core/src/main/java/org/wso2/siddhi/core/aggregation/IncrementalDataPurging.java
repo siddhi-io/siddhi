@@ -79,12 +79,14 @@ public class IncrementalDataPurging implements Runnable {
     private Map<TimePeriod.Duration, CompiledCondition> compiledConditionsHolder =
             new EnumMap<>(TimePeriod.Duration.class);
     private Map<String, Table> tableMap = new HashMap<>();
+    private AggregationDefinition aggregationDefinition;
 
 
     public void init(AggregationDefinition aggregationDefinition, StreamEventPool streamEventPool,
                      Map<TimePeriod.Duration, Table> aggregationTables, Boolean isProcessingOnExternalTime,
                      SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
+        this.aggregationDefinition = aggregationDefinition;
         List<Annotation> annotations = aggregationDefinition.getAnnotations();
         this.streamEventPool = streamEventPool;
         this.aggregationTables = aggregationTables;
@@ -182,6 +184,10 @@ public class IncrementalDataPurging implements Runnable {
         return purgingEnabled;
     }
 
+    public void setPurgingEnabled(boolean purgingEnabled) {
+        this.purgingEnabled = purgingEnabled;
+    }
+
     @Override
     public void run() {
         long currentTime = System.currentTimeMillis();
@@ -196,7 +202,7 @@ public class IncrementalDataPurging implements Runnable {
                 eventChunk.add(secEvent);
                 Table table = aggregationTables.get(entry.getKey());
                 try {
-                    LOG.info("Purging data of table: " + table.getTableDefinition().getId() + " with a" +
+                    LOG.debug("Purging data of table: " + table.getTableDefinition().getId() + " with a" +
                             " retention of timestamp : " + purgeTime);
                     table.deleteEvents(eventChunk, compiledConditionsHolder.get(entry.getKey()), 1);
                 } catch (RuntimeException e) {
@@ -284,8 +290,9 @@ public class IncrementalDataPurging implements Runnable {
                     tableNames.append(entry.getKey()).append(",");
                 }
             }
-            LOG.info("Data purging has enabled for table: " + tableNames + " with an interval of " +
-                    ((purgeExecutionInterval) / 1000) + " seconds");
+            LOG.info("Data purging has enabled for tables: " + tableNames + " with an interval of " +
+                    ((purgeExecutionInterval) / 1000) + " seconds in " + aggregationDefinition.getId() +
+                    " aggregation");
         } else {
             LOG.debug("Purging is disabled in siddhi app: " + siddhiAppContext.getName());
         }
