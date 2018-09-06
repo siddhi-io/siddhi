@@ -21,6 +21,7 @@ import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.ReturnAttribute;
 import org.wso2.siddhi.annotation.util.DataType;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.Expression;
 
@@ -51,6 +52,12 @@ public class CountIncrementalAttributeAggregator extends IncrementalAttributeAgg
     public void init(String attributeName, Attribute.Type attributeType) {
         Attribute count;
         Expression countInitialValue;
+
+        //Validation if any attribute is called in count(attribute), count is only for events and not for attributes
+        if (attributeName != null) {
+            throw new SiddhiAppCreationException("Count incremental attribute aggregation cannot be executed " +
+                    "when parameters are given. Count function is used to calculate the count of the events only.");
+        }
 
         // Since we set the initial value of count, we can simply set it as long
         // However, since count is summed internally (in avg incremental calculation),
