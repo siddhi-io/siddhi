@@ -743,7 +743,7 @@ public class SiddhiAppRuntime {
     /**
      * To enable and disable Siddhi App playback mode on runtime along with optional parameters.
      *
-     * @param playBackEnabled         whether playback is enabled or not
+     * @param playBackEnabled whether playback is enabled or not
      * @param idleTime
      * @param incrementInMilliseconds
      */
