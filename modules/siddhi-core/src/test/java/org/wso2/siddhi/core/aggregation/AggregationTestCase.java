@@ -637,7 +637,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                     SiddhiTestHelper.isEventsMatch(inEventsList, expected));
             AssertJUnit.assertEquals("Number of success events", 8, inEventCount.get());
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        }  finally {
+        } finally {
             siddhiAppRuntime.shutdown();
         }
     }
@@ -3172,4 +3172,30 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             siddhiAppRuntime.shutdown();
         }
     }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest49"},
+            expectedExceptions = StoreQueryCreationException.class)
+    public void incrementalStreamProcessorTest50() throws InterruptedException {
+        LOG.info("incrementalStreamProcessorTest50 - Retrieval query syntax validating ");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int, timestamp long);";
+        String query = " define aggregation stockAggregation " +
+                "from stockStream " +
+                "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
+                "as lastTradeValue  " +
+                "group by symbol " +
+                "aggregate by timestamp every sec...hour ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+        siddhiAppRuntime.start();
+        try {
+            siddhiAppRuntime.query("from stockAggregation  select * ");
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
+
 }
