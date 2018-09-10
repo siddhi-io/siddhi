@@ -250,15 +250,21 @@ public class AggregationRuntime implements MemoryCalculable {
                 newMetaStreamEventWithStartEnd, tableDefinition);
 
         // Create per expression executor
-        ExpressionExecutor perExpressionExecutor = ExpressionParser.parseExpression(per,
-                matchingMetaInfoHolder.getMetaStateEvent(),
-                matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, siddhiAppContext,
-                false, 0, queryName);
-        if (perExpressionExecutor.getReturnType() != Attribute.Type.STRING) {
-            throw new SiddhiAppCreationException(
-                    "Query " + queryName + "'s per value expected a string but found "
-                            + perExpressionExecutor.getReturnType(),
-                    per.getQueryContextStartIndex(), per.getQueryContextEndIndex());
+        ExpressionExecutor perExpressionExecutor;
+        if (per != null) {
+            perExpressionExecutor = ExpressionParser.parseExpression(per,
+                    matchingMetaInfoHolder.getMetaStateEvent(),
+                    matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, siddhiAppContext,
+                    false, 0, queryName);
+            if (perExpressionExecutor.getReturnType() != Attribute.Type.STRING) {
+                throw new SiddhiAppCreationException(
+                        "Query " + queryName + "'s per value expected a string but found "
+                                + perExpressionExecutor.getReturnType(),
+                        per.getQueryContextStartIndex(), per.getQueryContextEndIndex());
+            }
+        } else {
+            throw new SiddhiAppCreationException("Syntax Error: Aggregation join query must contain a `per` " +
+                    "definition for granularity");
         }
 
         // Create within expression
@@ -278,17 +284,23 @@ public class AggregationRuntime implements MemoryCalculable {
 
         // Create start and end time expression
         Expression startEndTimeExpression;
-        if (within.getTimeRange().size() == 1) {
-            startEndTimeExpression = new AttributeFunction("incrementalAggregator",
-                    "startTimeEndTime", within.getTimeRange().get(0));
-        } else { // within.getTimeRange().size() == 2
-            startEndTimeExpression = new AttributeFunction("incrementalAggregator",
-                    "startTimeEndTime", within.getTimeRange().get(0), within.getTimeRange().get(1));
+        ExpressionExecutor startTimeEndTimeExpressionExecutor;
+        if (within != null) {
+            if (within.getTimeRange().size() == 1) {
+                startEndTimeExpression = new AttributeFunction("incrementalAggregator",
+                        "startTimeEndTime", within.getTimeRange().get(0));
+            } else { // within.getTimeRange().size() == 2
+                startEndTimeExpression = new AttributeFunction("incrementalAggregator",
+                        "startTimeEndTime", within.getTimeRange().get(0), within.getTimeRange().get(1));
+            }
+            startTimeEndTimeExpressionExecutor = ExpressionParser.parseExpression(startEndTimeExpression,
+                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
+                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+        } else {
+            throw new SiddhiAppCreationException("Syntax Error : Aggregation read query must contain a `within` " +
+                    "definition for filtering of aggregation data.");
         }
 
-        ExpressionExecutor startTimeEndTimeExpressionExecutor = ExpressionParser.parseExpression(startEndTimeExpression,
-                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
 
         // Create compile condition per each table used to persist aggregates.
         // These compile conditions are used to check whether the aggregates in tables are within the given duration.
