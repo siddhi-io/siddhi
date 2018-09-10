@@ -124,6 +124,7 @@ public class SiddhiAppRuntime {
     private boolean running = false;
     private boolean runningWithoutSources = false;
     private Future futureIncrementalPersistor;
+    private boolean incrementalDataPurging = true;
 
 
     public SiddhiAppRuntime(Map<String, AbstractDefinition> streamDefinitionMap,
@@ -391,8 +392,10 @@ public class SiddhiAppRuntime {
                 for (StreamJunction streamJunction : streamJunctionMap.values()) {
                     streamJunction.startProcessing();
                 }
-                for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
-                    aggregationRuntime.start();
+                if (incrementalDataPurging) {
+                    for (AggregationRuntime aggregationRuntime : aggregationMap.values()) {
+                        aggregationRuntime.startPurging();
+                    }
                 }
                 runningWithoutSources = true;
             } catch (Throwable t) {
@@ -406,6 +409,10 @@ public class SiddhiAppRuntime {
                 }
             }
         }
+    }
+
+    public void setPurgingEnabled(boolean purgingEnabled) {
+        this.incrementalDataPurging = purgingEnabled;
     }
 
     public synchronized void startSources() {
@@ -743,7 +750,7 @@ public class SiddhiAppRuntime {
     /**
      * To enable and disable Siddhi App playback mode on runtime along with optional parameters.
      *
-     * @param playBackEnabled whether playback is enabled or not
+     * @param playBackEnabled         whether playback is enabled or not
      * @param idleTime
      * @param incrementInMilliseconds
      */
