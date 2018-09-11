@@ -331,7 +331,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 processingOnExternalTime);
     }
 
-    public void start() {
+    public void startPurging() {
         incrementalDataPurging.executeIncrementalDataPurging();
     }
 
