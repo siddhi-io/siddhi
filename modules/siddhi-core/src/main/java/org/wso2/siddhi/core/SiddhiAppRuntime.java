@@ -112,8 +112,8 @@ public class SiddhiAppRuntime {
     private Map<String, Table> tableMap = new ConcurrentHashMap<String, Table>(); // Contains event tables.
     private Map<String, PartitionRuntime> partitionMap =
             new ConcurrentHashMap<String, PartitionRuntime>(); // Contains partitions.
-    private Map<StoreQuery, StoreQueryRuntime> storeQueryRuntimeMap =
-            new ConcurrentHashMap<>(); // Contains partitions.
+    private LinkedHashMap<StoreQuery, StoreQueryRuntime> storeQueryRuntimeMap =
+            new LinkedHashMap<>(); // Contains partitions.
     private SiddhiAppContext siddhiAppContext;
     private Map<String, SiddhiAppRuntime> siddhiAppRuntimeMap;
     private MemoryUsageTracker memoryUsageTracker;
@@ -275,15 +275,20 @@ public class SiddhiAppRuntime {
             if (siddhiAppContext.isStatsEnabled() && storeQueryLatencyTracker != null) {
                 storeQueryLatencyTracker.markIn();
             }
-            StoreQueryRuntime storeQueryRuntime = storeQueryRuntimeMap.get(storeQuery);
-            if (storeQueryRuntime == null) {
-                storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
-                        aggregationMap);
+            StoreQueryRuntime storeQueryRuntime;
+            synchronized (this) {
+                storeQueryRuntime = storeQueryRuntimeMap.remove(storeQuery);
+                if (storeQueryRuntime == null) {
+                    storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
+                            aggregationMap);
+                } else {
+                    storeQueryRuntime.reset();
+                }
                 storeQueryRuntimeMap.put(storeQuery, storeQueryRuntime);
-            } else {
-                storeQueryRuntime.reset();
+                if (storeQueryRuntimeMap.size() > 50) {
+                    storeQueryRuntimeMap.entrySet().iterator().remove();
+                }
             }
-
             return storeQueryRuntime.execute();
         } catch (RuntimeException e) {
             if (e instanceof SiddhiAppContextException) {
@@ -697,7 +702,7 @@ public class SiddhiAppRuntime {
     /**
      * To enable and disable Siddhi App playback mode on runtime along with optional parameters.
      *
-     * @param playBackEnabled whether playback is enabled or not
+     * @param playBackEnabled         whether playback is enabled or not
      * @param idleTime
      * @param incrementInMilliseconds
      */
