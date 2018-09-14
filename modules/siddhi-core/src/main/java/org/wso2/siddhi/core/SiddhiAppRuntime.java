@@ -75,6 +75,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -290,7 +291,11 @@ public class SiddhiAppRuntime {
                 }
                 storeQueryRuntimeMap.put(storeQuery, storeQueryRuntime);
                 if (storeQueryRuntimeMap.size() > 50) {
-                    storeQueryRuntimeMap.entrySet().iterator().remove();
+                    Iterator i = storeQueryRuntimeMap.entrySet().iterator();
+                    if (i.hasNext()) {
+                        i.next();
+                        i.remove();
+                    }
                 }
             }
             return storeQueryRuntime.execute();
