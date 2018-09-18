@@ -76,7 +76,6 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
     private SiddhiAppContext siddhiAppContext;
     private StreamEvent resetEvent = null;
 
-
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                         boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
@@ -111,20 +110,21 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
                 outputStreamEventChunk.add(resetEvent);
             }
 
-            while (outputExpectsExpiredEvents && streamEventChunk.hasNext()) {
-                StreamEvent streamEvent = streamEventChunk.next();
-                StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
-                expiredEventQueue.add(clonedStreamEvent);
-            }
+            if (streamEventChunk.hasNext()) {
+                while (outputExpectsExpiredEvents) {
+                    StreamEvent streamEvent = streamEventChunk.next();
+                    StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                    clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
+                    expiredEventQueue.add(clonedStreamEvent);
+                }
 
-            resetEvent = streamEventCloner.copyStreamEvent(streamEventChunk.getFirst());
-            resetEvent.setType(ComplexEvent.Type.RESET);
-            outputStreamEventChunk.add(streamEventChunk.getFirst());
+                resetEvent = streamEventCloner.copyStreamEvent(streamEventChunk.getFirst());
+                resetEvent.setType(ComplexEvent.Type.RESET);
+                outputStreamEventChunk.add(streamEventChunk.getFirst());
+            }
         }
         nextProcessor.process(outputStreamEventChunk);
     }
-
 
     @Override
     public void start() {
