@@ -196,6 +196,7 @@ public class IncrementalDataPurging implements Runnable {
 
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
             if (!retentionPeriods.get(entry.getKey()).equals(RETAIN_ALL)) {
+                eventChunk.clear();
                 purgeTime = currentTime - retentionPeriods.get(entry.getKey());
                 purgeTimeArray[0] = purgeTime;
                 StateEvent secEvent = createStreamEvent(purgeTimeArray, currentTime);
