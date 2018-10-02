@@ -153,9 +153,13 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 }
             }
         } else if (isTryingToConnect.get()) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table '" +
-                    tableDefinition.getId() + "' as its still trying to reconnect!, events dropped '" +
-                    addingEventChunk + "'");
+            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
+                    addingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
+            busyWaitWhileConnect();
+            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    "' has become available for add operation for events '" + addingEventChunk + "'");
+            addEvents(addingEventChunk, noOfEvents);
         } else {
             connectWithRetry();
             addEvents(addingEventChunk, noOfEvents);
@@ -188,9 +192,13 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 }
             }
         } else if (isTryingToConnect.get()) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Find operation failed for event '" +
-                    matchingEvent + "', at Table '" + tableDefinition.getId() + "' as its still trying to reconnect!");
-            return null;
+            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing find for events '" +
+                    matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
+            busyWaitWhileConnect();
+            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    "' has become available for find operation for events '" + matchingEvent + "'");
+            return find(matchingEvent, compiledCondition);
         } else {
             connectWithRetry();
             return find(matchingEvent, compiledCondition);
@@ -224,9 +232,13 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 }
             }
         } else if (isTryingToConnect.get()) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table '" +
-                    tableDefinition.getId() + "' as its still trying to reconnect!, events dropped '" +
-                    deletingEventChunk + "'");
+            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing delete for events '" +
+                    deletingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
+            busyWaitWhileConnect();
+            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    "' has become available for delete operation for events '" + deletingEventChunk + "'");
+            deleteEvents(deletingEventChunk, compiledCondition, noOfEvents);
         } else {
             connectWithRetry();
             deleteEvents(deletingEventChunk, compiledCondition, noOfEvents);
@@ -262,9 +274,13 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 }
             }
         } else if (isTryingToConnect.get()) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table '" +
-                    tableDefinition.getId() + "' as its still trying to reconnect!, events dropped '" +
-                    updatingEventChunk + "'");
+            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing update for events '" +
+                    updatingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
+            busyWaitWhileConnect();
+            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    "' has become available for update operation for events '" + updatingEventChunk + "'");
+            updateEvents(updatingEventChunk, compiledCondition, compiledUpdateSet, noOfEvents);
         } else {
             connectWithRetry();
             updateEvents(updatingEventChunk, compiledCondition, compiledUpdateSet, noOfEvents);
@@ -304,9 +320,14 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 }
             }
         } else if (isTryingToConnect.get()) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table '" +
-                    tableDefinition.getId() + "' as its still trying to reconnect!, events dropped '" +
-                    updateOrAddingEventChunk + "'");
+            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing upsert for events '" +
+                    updateOrAddingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
+            busyWaitWhileConnect();
+            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    "' has become available for upsert operation for events '" + updateOrAddingEventChunk + "'");
+            updateOrAddEvents(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
+                    addingStreamEventExtractor, noOfEvents);
         } else {
             connectWithRetry();
             updateOrAddEvents(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
@@ -344,10 +365,13 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 }
             }
         } else if (isTryingToConnect.get()) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Table '" +
-                    tableDefinition.getId() + "' as its still trying to reconnect!, event matching failed for event '"
-                    + matchingEvent + "'.");
-            return false;
+            LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing contains check for event '" +
+                    matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
+                    "' as its trying to reconnect!");
+            busyWaitWhileConnect();
+            LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
+                    "' has become available for contains check operation for matching event '" + matchingEvent + "'");
+            return containsEvent(matchingEvent, compiledCondition);
         } else {
             connectWithRetry();
             return containsEvent(matchingEvent, compiledCondition);
@@ -363,13 +387,17 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             try {
                 connect();
                 isConnected.set(true);
-                isTryingToConnect.set(false);
+                synchronized (this) {
+                    isTryingToConnect.set(false);
+                    this.notifyAll();
+                }
                 backoffRetryCounter.reset();
             } catch (ConnectionUnavailableException e) {
-                LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext)) +
-                        " Error while connecting to Table '" + StringUtil.removeCRLFCharacters(tableDefinition.getId())
-                        + "', will retry in '" + StringUtil.removeCRLFCharacters(backoffRetryCounter.
-                        getTimeInterval()) + "'.", e);
+                LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e,
+                        siddhiAppContext)) + " Error while connecting to Table '" +
+                        StringUtil.removeCRLFCharacters(tableDefinition.getId())
+                        + "', will retry in '" + StringUtil.removeCRLFCharacters(
+                                backoffRetryCounter.getTimeInterval()) + "'.", e);
                 scheduledExecutorService.schedule(new Runnable() {
                     @Override
                     public void run() {
@@ -378,11 +406,28 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                 }, backoffRetryCounter.getTimeIntervalMillis(), TimeUnit.MILLISECONDS);
                 backoffRetryCounter.increment();
             } catch (RuntimeException e) {
-                LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext)) +
-                        " . Error while connecting to Table '" + StringUtil.removeCRLFCharacters(tableDefinition.
-                        getId()) + "'.", e);
+                LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e,
+                        siddhiAppContext)) + " . Error while connecting to Table '" +
+                        StringUtil.removeCRLFCharacters(tableDefinition.getId()) + "'.", e);
                 throw e;
             }
+        }
+    }
+
+    /**
+     * Busy wait the threads which bind to this object and control the execution flow
+     * until table connection recovered.
+     */
+    private void busyWaitWhileConnect() {
+        try {
+            synchronized (this) {
+                while (isTryingToConnect.get()) {
+                    this.wait();
+                }
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Error on SiddhiApp '" + siddhiAppContext.getName() + "', interrupted while " +
+                    "busy wait on connection retrying condition " + e.getMessage(), e);
         }
     }
 
