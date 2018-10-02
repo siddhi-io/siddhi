@@ -185,13 +185,6 @@
                 <version>${jackson-datatype-joda-version}</version>
             </dependency>
 
-            <!-- Event Tables -->
-            <dependency>
-                <groupId>com.zaxxer</groupId>
-                <artifactId>HikariCP</artifactId>
-                <version>${hikari.version}</version>
-            </dependency>
-
             <!-- Siddhi Doc Generator -->
             <dependency>
                 <groupId>org.apache.maven</groupId>
