@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -101,7 +101,6 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
                         attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
                     delayInMilliSeconds = Long.parseLong(((ConstantExpressionExecutor) attributeExpressionExecutors[0])
                             .getValue().toString());
-
                 } else {
                     throw new SiddhiAppValidationException("Delay window's parameter attribute should be either " +
                             "int or long, but found " + attributeExpressionExecutors[0].getReturnType());
