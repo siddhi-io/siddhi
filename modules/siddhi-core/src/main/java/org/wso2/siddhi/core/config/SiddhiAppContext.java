@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.config;
 import com.lmax.disruptor.ExceptionHandler;
 import org.wso2.siddhi.core.function.Script;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
+import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
@@ -62,10 +63,12 @@ public class SiddhiAppContext {
     private String siddhiAppString;
     private List<String> includedMetrics;
     private boolean transportChannelCreationEnabled;
+    private List<Scheduler> schedulerList;
 
     public SiddhiAppContext() {
         this.eternalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
+        this.schedulerList = new ArrayList<Scheduler>();
     }
 
     public SiddhiContext getSiddhiContext() {
@@ -226,5 +229,13 @@ public class SiddhiAppContext {
 
     public void setTransportChannelCreationEnabled(boolean transportChannelCreationEnabled) {
         this.transportChannelCreationEnabled = transportChannelCreationEnabled;
+    }
+
+    public void addScheduler(Scheduler scheduler) {
+        this.schedulerList.add(scheduler);
+    }
+
+    public List<Scheduler> getSchedulerList() {
+        return schedulerList;
     }
 }

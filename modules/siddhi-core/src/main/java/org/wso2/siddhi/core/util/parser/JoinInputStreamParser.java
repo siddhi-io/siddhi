@@ -218,21 +218,23 @@ public class JoinInputStreamParser {
             if (compareCondition == null) {
                 compareCondition = Expression.value(true);
             }
-
-            MatchingMetaInfoHolder rightMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
-                    (metaStateEvent, 0, rightMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
-            CompiledCondition leftCompiledCondition = rightFindableProcessor.compileCondition(compareCondition,
-                    rightMatchingMetaInfoHolder, siddhiAppContext, executors, tableMap, queryName);
-            MatchingMetaInfoHolder leftMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
-                    (metaStateEvent, 1, leftMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
-            CompiledCondition rightCompiledCondition = leftFindableProcessor.compileCondition(compareCondition,
-                    leftMatchingMetaInfoHolder, siddhiAppContext, executors, tableMap, queryName);
-
-            if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT) {
+            if (!(rightFindableProcessor instanceof TableWindowProcessor ||
+                    rightFindableProcessor instanceof AggregateWindowProcessor) &&
+                    (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.LEFT)){
+                MatchingMetaInfoHolder leftMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
+                        (metaStateEvent, 1, leftMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
+                CompiledCondition rightCompiledCondition = leftFindableProcessor.compileCondition(compareCondition,
+                        leftMatchingMetaInfoHolder, siddhiAppContext, executors, tableMap, queryName);
                 populateJoinProcessors(rightMetaStreamEvent, rightInputStreamId, rightPreJoinProcessor,
                         rightPostJoinProcessor, rightCompiledCondition);
             }
-            if (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.RIGHT) {
+            if (!(leftFindableProcessor instanceof TableWindowProcessor ||
+                    leftFindableProcessor instanceof AggregateWindowProcessor) &&
+                    (joinInputStream.getTrigger() != JoinInputStream.EventTrigger.RIGHT)){
+                MatchingMetaInfoHolder rightMatchingMetaInfoHolder = MatcherParser.constructMatchingMetaStateHolder
+                        (metaStateEvent, 0, rightMetaStreamEvent.getLastInputDefinition(), UNKNOWN_STATE);
+                CompiledCondition leftCompiledCondition = rightFindableProcessor.compileCondition(compareCondition,
+                        rightMatchingMetaInfoHolder, siddhiAppContext, executors, tableMap, queryName);
                 populateJoinProcessors(leftMetaStreamEvent, leftInputStreamId, leftPreJoinProcessor,
                         leftPostJoinProcessor, leftCompiledCondition);
             }
@@ -254,9 +256,9 @@ public class JoinInputStreamParser {
         if (windowDefinitionMap.containsKey(inputStreamId)) {
             metaStreamEvent.setEventType(WINDOW);
         } else if (tableDefinitionMap.containsKey(inputStreamId)) {
-                metaStreamEvent.setEventType(TABLE);
+            metaStreamEvent.setEventType(TABLE);
         } else if (aggregationDefinitionMap.containsKey(inputStreamId)) {
-                metaStreamEvent.setEventType(AGGREGATE);
+            metaStreamEvent.setEventType(AGGREGATE);
         } else if (!streamDefinitionMap.containsKey(inputStreamId)) {
             throw new SiddhiParserException("Definition of \"" + inputStreamId + "\" is not given");
         }

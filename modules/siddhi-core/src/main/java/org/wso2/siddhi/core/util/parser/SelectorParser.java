@@ -43,8 +43,10 @@ import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.Variable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Class to parse {@link QuerySelector}.
@@ -95,7 +97,10 @@ public class SelectorParser {
         querySelector.setHavingConditionExecutor(havingCondition, "true".equals(containsAggregatorThreadLocal.get()));
         containsAggregatorThreadLocal.remove();
         if (!selector.getGroupByList().isEmpty()) {
-            querySelector.setGroupByKeyGenerator(new GroupByKeyGenerator(selector.getGroupByList(), metaComplexEvent,
+            List<Expression> groupByExpressionList = selector.getGroupByList().stream()
+                    .map(groupByVariable -> (Expression) groupByVariable)
+                    .collect(Collectors.toList());
+            querySelector.setGroupByKeyGenerator(new GroupByKeyGenerator(groupByExpressionList, metaComplexEvent,
                     SiddhiConstants.UNKNOWN_STATE, null, variableExpressionExecutors, siddhiAppContext,
                     queryName));
         }
@@ -110,6 +115,14 @@ public class SelectorParser {
                     siddhiAppContext, false, 0, queryName);
             containsAggregatorThreadLocal.remove();
             querySelector.setLimit(((Number)
+                    (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue());
+        }
+        if (selector.getOffset() != null) {
+            ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getOffset(),
+                    metaComplexEvent, SiddhiConstants.HAVING_STATE, tableMap, variableExpressionExecutors,
+                    siddhiAppContext, false, 0, queryName);
+            containsAggregatorThreadLocal.remove();
+            querySelector.setOffset(((Number)
                     (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue());
         }
         return querySelector;

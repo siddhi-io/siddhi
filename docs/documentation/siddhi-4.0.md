@@ -82,7 +82,7 @@ The following parameters are configured in a stream definition.
 | Parameter     | Description |
 | ------------- |-------------|
 | `stream name`      | The name of the stream created. (It is recommended to define a stream name in `PascalCase`.) |
-| `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camalCase`.)|    |
+| `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camelCase`.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
@@ -141,7 +141,7 @@ The following is the list of source types that are currently supported:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter/">Twitter</a>
-
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a>
 #### Source Mapper
 
 Each `@source` configuration has a mapping denoted by the `@map` annotation that converts the incoming messages format to Siddhi events.
@@ -250,7 +250,57 @@ The following is a list of currently supported sink types.
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a>
 
+#### Distributed Sink
+
+Distributed Sinks publish events from a defined stream to multiple destination endpoints using load balancing and partitioning strategies.
+
+Any ordinary sink can be used as a distributed sink. A distributed sink configuration allows you to define a common mapping to convert the Siddhi events for all its destination endpoints, 
+allows you to define a distribution strategy (e.g. `roundRobin`, `partitioned`), and configuration for each specific endpoint destination. 
+
+**Purpose**
+
+Distributed sinks provide a way to publish Siddhi events to multiple destination endpoints in the preferred data format. 
+
+**Syntax**
+
+To configure a stream to publish events via a distributed sink, add the sink configuration to a stream definition by adding the `@sink` 
+annotation and add the configuration parameters that are common of all the destination endpoints inside the `@sink` annotation 
+along with `@distribution` and `@destination` annotations providing distribution strategy and endpoint specific configurations. 
+The distributed sink syntax is as follows:
+
+*RoundRobin Distributed Sink*
+
+Publishes events to defined destinations in a round robin manner. 
+
+```sql
+@sink(type='sink_type', common_option_key1='common_option_value1', common_option_key2='{{common_option_value1}}',
+    @map(type='map_type', option_key1='option_value1', option_key2='{{option_value1}}',
+        @payload('payload_mapping')
+    )
+    @distribution(strategy='roundRobin',
+        @destination(specific_option_key1='specific_option_value1'),
+        @destination(specific_option_key1='specific_option_value2')))
+)
+define stream StreamName (attribute1 Type1, attributeN TypeN);
+```
+
+*Partitioned Distributed Sink*
+
+Publishes events to defined destinations by partitioning based on the hashcode of the events partition key. 
+
+```sql
+@sink(type='sink_type', common_option_key1='common_option_value1', common_option_key2='{{common_option_value1}}',
+    @map(type='map_type', option_key1='option_value1', option_key2='{{option_value1}}',
+        @payload('payload_mapping')
+    )
+    @distribution(strategy='partitioned', partitionKey='partition_key',
+        @destination(specific_option_key1='specific_option_value1'),
+        @destination(specific_option_key1='specific_option_value2')))
+)
+define stream StreamName (attribute1 Type1, attributeN TypeN);
+```
 
 #### Sink Mapper
 
@@ -291,12 +341,23 @@ The following is a list of currently supported sink mapping types:
 
 **Example**
 
-This query publishes events from the `OutputStream` stream via the `HTTP` sink. Here the events are mapped to the default `JSON` payloads and sent to `http://localhost:8005/endpoint`
+Following query publishes events from the `OutputStream` stream to an `HTTP` endpoint. Here the events are mapped to the default `JSON` payloads and sent to `http://localhost:8005/endpoint`
  using the `POST` method, with the`Accept` header, and secured via basic authentication where `admin` is both the username and the password.
 ```sql
 @sink(type='http', publisher.url='http://localhost:8005/endpoint', method='POST', headers='Accept-Date:20/02/2017', 
   basic.auth.username='admin', basic.auth.password='admin', basic.auth.enabled='true',
   @map(type='json'))
+define stream OutputStream (name string, ang int, country string);
+```
+
+Following query publishes events from the `OutputStream` stream to multiple the `HTTP` endpoints using partitioning strategy. Here the events sent to either `http://localhost:8005/endpoint1`
+or `http://localhost:8006/endpoint2` based on the partitioning key `country`. It uses default `JSON` mapping, `POST` method, and used `admin` as both the username and the password when publishing to both the endpoints.
+```sql
+@sink(type='http', method='POST', basic.auth.username='admin', basic.auth.password='admin', 
+  basic.auth.enabled='true', @map(type='json'),
+  @distribution(strategy='partitioned', partitionKey='country',
+     @destination(publisher.url='http://localhost:8005/endpoint1'),
+     @destination(publisher.url='http://localhost:8006/endpoint2')))
 define stream OutputStream (name string, ang int, country string);
 ```
 
@@ -890,13 +951,13 @@ order by avgTemp, roomNo desc
 insert into AvgTempStream;
 ```
 
-### Limit
+### Limit & Offset
 
-Limit allows you to limit the number of events to be emitted from an aggregated results batch. Users can provide the number of events to be
-emitted.
+When events are emitted as a batch, offset allows you to offset beginning of the output event batch and limit allows you to limit the number of events in the batch from the defined offset. 
+With this users can specify which set of events need be emitted. 
 
 **Syntax**
-The syntax for the Limit clause is as follows:
+The syntax for the Limit & Offset clause is as follows:
 
 ```sql
 from <input stream>#window.<window name>( ... )
@@ -904,13 +965,16 @@ select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>
 group by <attribute1 name>, <attribute2 name> ...
 having <condition>
 order by <attribute1 name> (asc | desc)?, <attribute2 name> (<ascend/descend>)?, ...
-limit <positive interger>
+limit <positive interger>?
+offset <positive interger>?
 insert into <output stream>;
 ```
 
+Here both `limit` and `offset` are optional where `limit` by default output all the events and `offset` by default set to `0`.
+
 **Example**
 The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
-for every 10 minutes and emits two events with highest average temperature for each aggregate.
+for every 10 minutes and emits two events with highest average temperature.
 
 ```sql
 from TempStream#window.timeBatch(10 min)
@@ -918,6 +982,19 @@ select avg(temp) as avgTemp, roomNo, deviceID
 group by roomNo, deviceID
 order by avgTemp desc
 limit 2
+insert into HighestAvgTempStream;
+```
+
+The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `TempStream` stream
+for every 10 minutes and emits third, forth and fifth events when sorted in descending order based on their average temperature.
+
+```sql
+from TempStream#window.timeBatch(10 min)
+select avg(temp) as avgTemp, roomNo, deviceID
+group by roomNo, deviceID
+order by avgTemp desc
+limit 3
+offset 2
 insert into HighestAvgTempStream;
 ```
 
@@ -1480,7 +1557,7 @@ The following parameters are configured in a table definition:
 | Parameter     | Description |
 | ------------- |-------------|
 | `table name`      | The name of the table defined. (`PascalCase` is used for table name as a convention.) |
-| `attribute name`   | The schema of the table is defined by its attributes with uniquely identifiable attribute names (`camalCase` is used for attribute names as a convention.)|    |
+| `attribute name`   | The schema of the table is defined by its attributes with uniquely identifiable attribute names (`camelCase` is used for attribute names as a convention.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
 
@@ -1758,10 +1835,21 @@ Incremental aggregation allows you to obtain aggregates in an incremental manner
 
 This not only allows you to calculate aggregations with varied time granularity, but also allows you to access them in an interactive
  manner for reports, dashboards, and for further processing. Its schema is defined via the **aggregation definition**.
+ 
+ Incremental aggregation granularity data holders are automatically purged every 15 minutes. When carrying out data purging, the retention period you have specified for each granularity in the incremental aggregation query is taken into account. The retention period defined for a granularity needs to be greater than or equal to its minimum retention period as specified in the table below. If no valid retention period is defined for a granularity, the default retention period (as specified in the table below) is applied. 
+ 
+|Granularity           |Default retention      |Minimum retention 
+---------------        |--------------         |------------------  
+|`second`              |`120` seconds          |`120` seconds
+|`minute`              |`24`  hours            |`120` minutes
+|`hour`                |`30`  days             |`25`  hours
+|`day`                 |`1`   year             |`32`  days
+|`month`               |`All`                  |`13`  month
+|`year`                |`All`                  |`none` 
 
 **Purpose**
 
-Incremental aggregation allows you to retrieve the aggregate value for different time durations. 
+Incremental aggregation allows you to retrieve the aggregate values for different time durations. 
 That is, it allows you to obtain aggregates such as `sum`, `count`, `avg`, `min`, `max`, `count` and `distinctCount`
 of stream attributes for durations such as `sec`, `min`, `hour`, etc.
 
@@ -1771,9 +1859,8 @@ Furthermore, this ensures that the aggregations are not lost due to unexpected s
 **Syntax**
 
 ```sql
-@BufferSize("<positive integer>")
-@IgnoreEventsOlderThanBuffer("<true or false>")
 @store(type="<store type>", ...)
+@purge(enable="<true or false>",interval=<purging interval>,@retentionPeriod(<granularity> = <retention period>, ...) )
 define aggregation <aggregator name>
 from <input stream>
 select <attribute name>, <aggregate function>(<attribute name>) as <attribute name>, ...
@@ -1784,22 +1871,28 @@ The above syntax includes the following:
 
 |Item                          |Description
 ---------------                |---------
-|`@BufferSize`                 |This annotation is optional. The default value is buffer size 0. <br/>It is used to identify the number of 'expired' events to retain <br/>in a buffer, to handle out of order event processing. It's an optional parameter <br/>which is applicable, only if aggregation is based on external timestamp (since events <br/>aggregated based on event arrival time cannot be out of order). An event is identified <br/>as 'expired' with relation to the latest event's timestamp and the most granular duration <br/>for which aggregation is calculated. For example, if aggregation is for sec...year, the <br/>most granular duration is seconds. Hence, if buffer size is 3 and events for 51st second, <br/>52nd second, 53rd second and 54th second arrive, all of the older aggregations (for <br/>seconds 51, 52 and 53) would be kept in the buffer (since latest event is for 54th second)
-|`@IgnoreEventsOlderThanBuffer`|This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this value is false (which is the default value as well), an event <br/>older than the buffer would be aggregated with the oldest event in buffer. If <br/>the value is true, an event older than the buffer would be dropped. This is an optional annotation. Default value is false.
+|`@BufferSize`                 |**DEPRECIATED FROM V4.2.0**. This identifies the number of expired events to retain in a buffer in order<br/>to handle out of order event processing. This is an optional<br/>parameter that is applicable only if aggregation is based on external<br/>timestamps (because events aggregated based on event arrival<br/>time cannot be out of order). Siddhi determines whether an event is expired or not<br/>based on the timestamp of the latest event and the most granular duration for<br/>which aggregation is calculated.<br/> e.g., If the aggregation is calculated for `sec…year`, the most granular duration is seconds. Therefore, if the buffer size is `3` and events arrive during 51st, 52nd, 53rd and 54th seconds, all of the older aggregations (i.e., for 51st, 52nd and 53rd seconds) are kept in the buffer because the latest event arrived during the 54th second. <br/>The default value is `0`.
+|`@IgnoreEventsOlderThanBuffer`|**DEPRECIATED FROM V4.2.0**.This annotation specifies whether or not to aggregate events older than the <br/>buffer. If this parameter is set to `false` (which is default), any event <br/>older than the buffer is aggregated with the oldest event in buffer. If <br/>this parameter is set to `true`, any event older than the buffer is dropped. This is an optional annotation.
 |`@store`                      |This annotation is used to refer to the data store where the calculated <br/>aggregate results are stored. This annotation is optional. When <br/>no annotation is provided, the data is stored in the `in-memory` store.
+|`@purge`                      |This annotation is used to configure purging in aggregation granularities.<br/> If this annotation is not provided, the default purging mentioned above is applied.<br/> If you want to disable automatic data purging, you can use this annotation as follows:</br>'@purge(enable=false)</br>/You should disable data purging if the aggregation query in included in the Siddhi application for read-only purposes.
+|`@retentionPeriod`            |This annotation is used to specify the length of time the data needs to be retained when carrying out data purging.<br/> If this annotation is not provided, the default retention period is applied.
 |`<aggregator name>`           |This specifies a unique name for the aggregation so that it can be referred <br/>when accessing aggregate results.
 |`<input stream>`              |The stream that feeds the aggregation. **Note! this stream should be <br/>already defined.**
 |`group by <attribute name>`   |The `group by` clause is optional. If it is included in a Siddhi application, aggregate values <br/> are calculated per each `group by` attribute. If it is not used, all the<br/> events are aggregated together.
 |`by <timestamp attribute>`    |This clause is optional. This defines the attribute that should be used as<br/> the timestamp. If this clause is not used, the event time is used by default.<br/> The timestamp could be given as either a `string` or a `long` value. If it is a `long` value,<br/> the unix timestamp in milliseconds is expected (e.g. `1496289950000`). If it is <br/>a `string` value, the supported formats are `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss>` <br/>(if time is in GMT) and  `<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z>` (if time is <br/>not in GMT), here the ISO 8601 UTC offset must be provided for `<Z>` .<br/>(e.g., `+05:30`, `-11:00`).
 |`<time periods>`              |The time periods can be given as a range separated by three dots, or as comma separated values. A range would be given as sec...year, where aggregation would be done per second, minute, hour, day, month and year. Comma separated values can be given as min, hour. However, skipping durations is not yet supported for comma separated values (e.g min, day is not a valid clause since hour duration has been skipped)
 
+!!! Note
+    From V4.2.0 onwards, aggregation is carried out at calendar start times for each granularity with the GMT timezone
+
 **Example**
 
-This Siddhi Application defines an aggregation named `TradeAggregation` to calculate the average and sum for the `price` attribute of events arriving at the `TradeStream` stream. These aggregates are calculated per every time granularity in the range second-year.
+This Siddhi Application defines an aggregation named `TradeAggregation` to calculate the average and sum for the `price` attribute of events arriving at the `TradeStream` stream. These aggregates are calculated per every time granularity in the second-year range.
 
 ```sql
 define stream TradeStream (symbol string, price double, volume long, timestamp long);
 
+@purge(enable='true', interval='10 sec',@retentionPeriod(sec='120 sec',min='24 hours',hours='30 days',days='1 year',months='all',years='all'))
 define aggregation TradeAggregation
   from TradeStream
   select symbol, avg(price) as avgPrice, sum(price) as total
@@ -1835,6 +1928,9 @@ Item|Description
 `per <time granularity>`|This specifies the time granularity by which the aggregate values must be grouped and returned. e.g., If you specify `days`, the retrieved aggregate values are grouped for each day within the selected time interval.
 
 `within` and `par` clauses also accept attribute values from the stream.
+
+!!! Note
+    The timestamp of the aggregations can be accessed through the `AGG_TIMESTAMP` attribute.
 
 **Example**
 
@@ -1908,7 +2004,7 @@ The following parameters are configured in a table definition:
 | Parameter     | Description |
 | ------------- |-------------|
 | `window name`      | The name of the window defined. (`PascalCase` is used for window names as a convention.) |
-| `attribute name`   | The schema of the window is defined by its attributes with uniquely identifiable attribute names (`camalCase` is used for attribute names as a convention.)|    |
+| `attribute name`   | The schema of the window is defined by its attributes with uniquely identifiable attribute names (`camelCase` is used for attribute names as a convention.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 | `<window type>(<parameter>, ...)`   | The window type associated with the window and its parameters.     |
 | `output <output event type>` | This is optional. Keywords such as `current events`, `expired events` and `all events` (the default) can be used to specify when the window output should be exposed. For more information, see [output event type](#output-event-types).
@@ -2103,7 +2199,7 @@ The following parameters are configured when defining a script.
 
 | Parameter     | Description |
 | ------------- |-------------|
-| `function name`| 	The name of the function (`camalCase` is used for the function name) as a convention.|
+| `function name`| 	The name of the function (`camelCase` is used for the function name) as a convention.|
 |`language name`| The name of the programming language used to define the script, such as `javascript`, `r` and `scala`.|
 | `return type`| The attribute type of the function’s return. This can be `int`, `long`, `float`, `double`, `string`, `bool` or `object`. Here the function implementer should be responsible for returning the output attribute on the defined return type for proper functionality.
 |`operation of the function`| Here, the execution logic of the function is added. This logic should be written in the language specified under the `language name`, and it should return the output in the data type specified via the `return type` parameter.
@@ -2460,7 +2556,7 @@ Siddhi supports following extension types:
     
     This allows events to be **collected, generated, dropped and expired anytime** by **altering** the event format by adding one or more attributes to it based on the given input parameters. 
     
-    Implemented by extending "org.wso2.siddhi.core.query.processor.stream.StreamProcessor".
+    Implemented by extending `org.wso2.siddhi.core.query.processor.stream.StreamProcessor`.
     
     Example :  
     
@@ -2470,57 +2566,57 @@ Siddhi supports following extension types:
 
 * **Sink**
 
-Sinks provide a way to publish Siddhi events to external systems in the preferred data format. Sinks publish events from the streams via multiple transports to external endpoints in various data formats.
+    Sinks provide a way to **publish Siddhi events to external systems** in the preferred data format. Sinks publish events from the streams via multiple transports to external endpoints in various data formats.
+    
+    Implemented by extending `org.wso2.siddhi.core.stream.output.sink.Sink`.
 
-Implemented by extending "org.wso2.siddhi.core.stream.output.sink.Sink".
-
-   Example : 
+    Example : 
 
     `@sink(type='sink_type', static_option_key1='static_option_value1')`
     
-To configure a stream to publish events via a sink, add the sink configuration to a stream definition by adding the @sink annotation with the required parameter values. The sink syntax is as above
+    To configure a stream to publish events via a sink, add the sink configuration to a stream definition by adding the @sink annotation with the required parameter values. The sink syntax is as above
 
 * **Source**
 
-Source allows Siddhi to consume events from external systems, and map the events to adhere to the associated stream. Sources receive events via multiple transports and in various data formats, and direct them into streams for processing.
-
-Implemented by extending "org.wso2.siddhi.core.stream.input.source.Source".
-
-   Example : 
-
-    `@source(type='source_type', static.option.key1='static_option_value1')`
+    Source allows Siddhi to **consume events from external systems**, and map the events to adhere to the associated stream. Sources receive events via multiple transports and in various data formats, and direct them into streams for processing.
     
-To configure a stream that consumes events via a source, add the source configuration to a stream definition by adding the @source annotation with the required parameter values. The source syntax is as above
+    Implemented by extending `org.wso2.siddhi.core.stream.input.source.Source`.
+    
+    Example : 
+    
+    `@source(type='source_type', static.option.key1='static_option_value1')`
+        
+    To configure a stream that consumes events via a source, add the source configuration to a stream definition by adding the @source annotation with the required parameter values. The source syntax is as above
 
 * **Store**
 
-You can use Store extension type to work with data/events stored in various data stores through the table abstraction. You can find more information about these extension types under the heading 'Extension types' in this document. 
-
-Implemented by extending "org.wso2.siddhi.core.table.record.AbstractRecordTable".
+    You can use Store extension type to work with data/events **stored in various data stores through the table abstraction**. You can find more information about these extension types under the heading 'Extension types' in this document. 
+    
+    Implemented by extending `org.wso2.siddhi.core.table.record.AbstractRecordTable`.
 
 * **Script**
 
-Scripts allow you to define a function operation that is not provided in Siddhi core or its extension. It is not required to write an extension to define the function logic. Scripts allow you to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function.
-
-Implemented by extending "org.wso2.siddhi.core.function.Script".
+    Scripts allow you to **define a function** operation that is not provided in Siddhi core or its extension. It is not required to write an extension to define the function logic. Scripts allow you to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function.
+    
+    Implemented by extending `org.wso2.siddhi.core.function.Script`.
 
 * **Source Mapper**
 
-Each @source configuration has a mapping denoted by the @map annotation that converts the incoming messages format to Siddhi events.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
+    Each `@source` configuration has a mapping denoted by the `@map` annotation that **converts the incoming messages format to Siddhi events**.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
+    
+    Implemented by extending `org.wso2.siddhi.core.stream.output.sink.SourceMapper`.
 
-Implemented by extending "org.wso2.siddhi.core.stream.output.sink.SourceMapper".
-
-   Example :
+    Example :
    
     `@map(type='map_type', static_option_key1='static_option_value1')`
 
 * **Sink Mapper**
 
-Each @source configuration has a mapping denoted by the @map annotation that converts the incoming messages format to Siddhi events.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
+    Each `@sink` configuration has a mapping denoted by the `@map` annotation that **converts the outgoing Siddhi events to configured messages format**.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
 
-Implemented by extending "org.wso2.siddhi.core.stream.output.sink.SinkMapper".
+    Implemented by extending `org.wso2.siddhi.core.stream.output.sink.SinkMapper`.
 
-   Example :
+    Example :
    
     `@map(type='map_type', static_option_key1='static_option_value1')`
 
@@ -2536,7 +2632,7 @@ insert into StockQuote
 
 **Available Extensions**
 
-Siddhi currently has several pre written extensions that are available <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">here</a>
+Siddhi currently has several pre written extensions that are available **<a target="_blank" href="https://wso2.github.io/siddhi/extensions/">here</a>**
  
 _We value your contribution on improving Siddhi and its extensions further._
 

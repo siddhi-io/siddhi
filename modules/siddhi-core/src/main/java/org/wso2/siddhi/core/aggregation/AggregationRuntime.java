@@ -27,8 +27,8 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
-import org.wso2.siddhi.core.query.input.stream.single.EntryValveExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
@@ -68,23 +68,33 @@ public class AggregationRuntime implements MemoryCalculable {
     private final MetaStreamEvent aggregateMetaSteamEvent;
     private final LatencyTracker latencyTrackerFind;
     private final ThroughputTracker throughputTrackerFind;
+    private final List<List<ExpressionExecutor>> aggregateProcessingExecutorsList;
+    private final List<GroupByKeyGenerator> groupByKeyGeneratorList;
     private List<TimePeriod.Duration> incrementalDurations;
     private SingleStreamRuntime singleStreamRuntime;
     private List<ExpressionExecutor> baseExecutors;
-    private ExpressionExecutor timestampExecutor;
     private List<ExpressionExecutor> outputExpressionExecutors;
     private RecreateInMemoryData recreateInMemoryData;
+    private boolean processingOnExternalTime;
+    private boolean isFirstEventArrived;
+    private long lastExecutorsRefreshedTime = -1;
+    private IncrementalDataPurging incrementalDataPurging;
+    private ExpressionExecutor shouldUpdateExpressionExecutor;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                               Map<TimePeriod.Duration, Table> aggregationTables,
                               SingleStreamRuntime singleStreamRuntime,
-                              EntryValveExecutor entryValveExecutor, List<TimePeriod.Duration> incrementalDurations,
+                              List<TimePeriod.Duration> incrementalDurations,
                               SiddhiAppContext siddhiAppContext, List<ExpressionExecutor> baseExecutors,
-                              ExpressionExecutor timestampExecutor, MetaStreamEvent tableMetaStreamEvent,
+                              MetaStreamEvent tableMetaStreamEvent,
                               List<ExpressionExecutor> outputExpressionExecutors,
                               LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind,
-                              RecreateInMemoryData recreateInMemoryData) {
+                              RecreateInMemoryData recreateInMemoryData, boolean processingOnExternalTime,
+                              List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
+                              List<GroupByKeyGenerator> groupByKeyGeneratorList,
+                              IncrementalDataPurging incrementalDataPurging,
+                              ExpressionExecutor shouldUpdateExpressionExecutor) {
         this.aggregationDefinition = aggregationDefinition;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.aggregationTables = aggregationTables;
@@ -92,12 +102,16 @@ public class AggregationRuntime implements MemoryCalculable {
         this.siddhiAppContext = siddhiAppContext;
         this.singleStreamRuntime = singleStreamRuntime;
         this.baseExecutors = baseExecutors;
-        this.timestampExecutor = timestampExecutor;
         this.tableMetaStreamEvent = tableMetaStreamEvent;
         this.outputExpressionExecutors = outputExpressionExecutors;
         this.latencyTrackerFind = latencyTrackerFind;
         this.throughputTrackerFind = throughputTrackerFind;
         this.recreateInMemoryData = recreateInMemoryData;
+        this.processingOnExternalTime = processingOnExternalTime;
+        this.aggregateProcessingExecutorsList = aggregateProcessingExecutorsList;
+        this.groupByKeyGeneratorList = groupByKeyGeneratorList;
+        this.incrementalDataPurging = incrementalDataPurging;
+        this.shouldUpdateExpressionExecutor = shouldUpdateExpressionExecutor;
 
         aggregateMetaSteamEvent = new MetaStreamEvent();
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
@@ -181,9 +195,16 @@ public class AggregationRuntime implements MemoryCalculable {
                 latencyTrackerFind.markIn();
                 throughputTrackerFind.eventIn();
             }
+            if (!isFirstEventArrived && (
+                    lastExecutorsRefreshedTime == -1 ||
+                    System.currentTimeMillis() - lastExecutorsRefreshedTime > 1000)) {
+                recreateInMemoryData(false);
+                lastExecutorsRefreshedTime = System.currentTimeMillis();
+            }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
-                    baseExecutors, timestampExecutor, outputExpressionExecutors, siddhiAppContext);
+                    baseExecutors, outputExpressionExecutors, siddhiAppContext,
+                    aggregateProcessingExecutorsList, groupByKeyGeneratorList, shouldUpdateExpressionExecutor);
         } finally {
             SnapshotService.getSkipSnapshotableThreadLocal().set(null);
             if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
@@ -229,40 +250,57 @@ public class AggregationRuntime implements MemoryCalculable {
                 newMetaStreamEventWithStartEnd, tableDefinition);
 
         // Create per expression executor
-        ExpressionExecutor perExpressionExecutor = ExpressionParser.parseExpression(per,
-                matchingMetaInfoHolder.getMetaStateEvent(),
-                matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, siddhiAppContext,
-                false, 0, queryName);
-        if (perExpressionExecutor.getReturnType() != Attribute.Type.STRING) {
-            throw new SiddhiAppCreationException(
-                    "Query " + queryName + "'s per value expected a string but found "
-                            + perExpressionExecutor.getReturnType(),
-                    per.getQueryContextStartIndex(), per.getQueryContextEndIndex());
+        ExpressionExecutor perExpressionExecutor;
+        if (per != null) {
+            perExpressionExecutor = ExpressionParser.parseExpression(per,
+                    matchingMetaInfoHolder.getMetaStateEvent(),
+                    matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, siddhiAppContext,
+                    false, 0, queryName);
+            if (perExpressionExecutor.getReturnType() != Attribute.Type.STRING) {
+                throw new SiddhiAppCreationException(
+                        "Query " + queryName + "'s per value expected a string but found "
+                                + perExpressionExecutor.getReturnType(),
+                        per.getQueryContextStartIndex(), per.getQueryContextEndIndex());
+            }
+        } else {
+            throw new SiddhiAppCreationException("Syntax Error: Aggregation join query must contain a `per` " +
+                    "definition for granularity");
         }
 
         // Create within expression
+        Expression timeFilterExpression;
+        if (processingOnExternalTime) {
+            timeFilterExpression = Expression.variable("AGG_EVENT_TIMESTAMP");
+        } else {
+            timeFilterExpression = Expression.variable("AGG_TIMESTAMP");
+        }
         Expression withinExpression;
         Expression start = Expression.variable(additionalAttributes.get(0).getName());
         Expression end = Expression.variable(additionalAttributes.get(1).getName());
         Expression compareWithStartTime = Compare.compare(start, Compare.Operator.LESS_THAN_EQUAL,
-                Expression.variable("AGG_TIMESTAMP"));
-        Expression compareWithEndTime = Compare.compare(Expression.variable("AGG_TIMESTAMP"),
-                Compare.Operator.LESS_THAN, end);
+                timeFilterExpression);
+        Expression compareWithEndTime = Compare.compare(timeFilterExpression, Compare.Operator.LESS_THAN, end);
         withinExpression = Expression.and(compareWithStartTime, compareWithEndTime);
 
         // Create start and end time expression
         Expression startEndTimeExpression;
-        if (within.getTimeRange().size() == 1) {
-            startEndTimeExpression = new AttributeFunction("incrementalAggregator",
-                    "startTimeEndTime", within.getTimeRange().get(0));
-        } else { // within.getTimeRange().size() == 2
-            startEndTimeExpression = new AttributeFunction("incrementalAggregator",
-                    "startTimeEndTime", within.getTimeRange().get(0), within.getTimeRange().get(1));
+        ExpressionExecutor startTimeEndTimeExpressionExecutor;
+        if (within != null) {
+            if (within.getTimeRange().size() == 1) {
+                startEndTimeExpression = new AttributeFunction("incrementalAggregator",
+                        "startTimeEndTime", within.getTimeRange().get(0));
+            } else { // within.getTimeRange().size() == 2
+                startEndTimeExpression = new AttributeFunction("incrementalAggregator",
+                        "startTimeEndTime", within.getTimeRange().get(0), within.getTimeRange().get(1));
+            }
+            startTimeEndTimeExpressionExecutor = ExpressionParser.parseExpression(startEndTimeExpression,
+                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
+                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+        } else {
+            throw new SiddhiAppCreationException("Syntax Error : Aggregation read query must contain a `within` " +
+                    "definition for filtering of aggregation data.");
         }
 
-        ExpressionExecutor startTimeEndTimeExpressionExecutor = ExpressionParser.parseExpression(startEndTimeExpression,
-                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
 
         // Create compile condition per each table used to persist aggregates.
         // These compile conditions are used to check whether the aggregates in tables are within the given duration.
@@ -289,11 +327,26 @@ public class AggregationRuntime implements MemoryCalculable {
 
         return new IncrementalAggregateCompileCondition(withinTableCompiledConditions, withinInMemoryCompileCondition,
                 onCompiledCondition, tableMetaStreamEvent, aggregateMetaSteamEvent, additionalAttributes,
-                alteredMatchingMetaInfoHolder, perExpressionExecutor, startTimeEndTimeExpressionExecutor);
+                alteredMatchingMetaInfoHolder, perExpressionExecutor, startTimeEndTimeExpressionExecutor,
+                processingOnExternalTime);
     }
 
-    public RecreateInMemoryData getRecreateInMemoryData() {
-        return this.recreateInMemoryData;
+    public void startPurging() {
+        incrementalDataPurging.executeIncrementalDataPurging();
     }
 
+    public void recreateInMemoryData(boolean isEventArrived) {
+        isFirstEventArrived = isEventArrived;
+        if (isEventArrived) {
+            for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
+                    this.incrementalExecutorMap.entrySet()) {
+                durationIncrementalExecutorEntry.getValue().setProcessingExecutor(isEventArrived);
+            }
+        }
+        recreateInMemoryData.recreateInMemoryData();
+    }
+
+    public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {
+        incrementalExecutorMap.get(incrementalDurations.get(0)).execute(streamEventComplexEventChunk);
+    }
 }

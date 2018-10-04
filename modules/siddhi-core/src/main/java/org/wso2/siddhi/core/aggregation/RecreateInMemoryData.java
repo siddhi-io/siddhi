@@ -69,9 +69,11 @@ public class RecreateInMemoryData {
     }
 
     public void recreateInMemoryData() {
-        if (incrementalExecutorMap.get(incrementalDurations.get(0)).getNextEmitTime() != -1) {
+        IncrementalExecutor rootExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
+        if (rootExecutor.isProcessingExecutor() && rootExecutor.getNextEmitTime() != -1) {
             // If the getNextEmitTime is not -1, that implies that a snapshot of in-memory has already been
             // created. Hence this method does not have to be executed.
+            //This is only true in a processing aggregation runtime
             return;
         }
         Event[] events;
@@ -96,6 +98,9 @@ public class RecreateInMemoryData {
             TimePeriod.Duration recreateForDuration = incrementalDurations.get(i);
             IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
 
+            // Reset all executors when recreating again
+            incrementalExecutor.clearExecutor();
+
             // Get the table previous to the duration for which we need to recreate (e.g. if we want to recreate
             // for minute duration, take the second table [provided that aggregation is done for seconds])
             Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
@@ -109,7 +114,6 @@ public class RecreateInMemoryData {
 
             if (events != null) {
                 long referenceToNextLatestEvent = (Long) events[events.length - 1].getData(0);
-                String timeZoneOfNextLatestEvent = events[events.length - 1].getData(1).toString();
                 if (latestEventTimestamp != null) {
                     List<Event> eventsNewerThanLatestEventOfRecreateForDuration = new ArrayList<>();
                     for (Event event : events) {
@@ -117,7 +121,7 @@ public class RecreateInMemoryData {
                         // if each of these events were in the recreateForDuration. This helps to identify the events,
                         // which must be processed in-memory for recreateForDuration.
                         long timeBucketForNextDuration = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
-                                (Long) event.getData(0), recreateForDuration, event.getData(1).toString());
+                                (Long) event.getData(0), recreateForDuration);
                         if (timeBucketForNextDuration > latestEventTimestamp) {
                             eventsNewerThanLatestEventOfRecreateForDuration.add(event);
                         }
@@ -140,9 +144,9 @@ public class RecreateInMemoryData {
                     TimePeriod.Duration rootDuration = incrementalDurations.get(0);
                     IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
                     long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
-                            latestEventTimestamp, rootDuration, timeZoneOfNextLatestEvent);
+                            latestEventTimestamp, rootDuration, null);
 
-                    rootIncrementalExecutor.setValuesForInMemoryRecreateFromTable(true, emitTimeOfLatestEventInTable);
+                    rootIncrementalExecutor.setValuesForInMemoryRecreateFromTable(emitTimeOfLatestEventInTable);
 
                 }
             }

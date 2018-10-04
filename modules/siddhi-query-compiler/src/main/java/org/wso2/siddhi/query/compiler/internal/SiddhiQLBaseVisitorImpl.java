@@ -1576,6 +1576,9 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         if (ctx.limit() != null) {
             selector.limit((Constant) visit(ctx.limit()));
         }
+        if (ctx.offset() != null) {
+            selector.offset((Constant) visit(ctx.offset()));
+        }
         populateQueryContext(selector, ctx);
         return selector;
     }
@@ -1654,6 +1657,24 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         } else {
             throw newSiddhiParserException(ctx,
                     "'limit' only accepts int and long constants but found '" + expression + "'");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public Object visitOffset(SiddhiQLParser.OffsetContext ctx) {
+        Expression expression = (Expression) visit(ctx.expression());
+        if (expression instanceof Constant) {
+            populateQueryContext(expression, ctx);
+            return (Constant) expression;
+        } else {
+            throw newSiddhiParserException(ctx,
+                    "'offset' only accepts int and long constants but found '" + expression + "'");
         }
     }
 

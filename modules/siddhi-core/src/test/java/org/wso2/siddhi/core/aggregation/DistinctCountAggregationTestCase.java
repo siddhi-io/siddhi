@@ -71,7 +71,7 @@ public class DistinctCountAggregationTestCase {
 
                         "@info(name = 'query1') " +
                         "from inputStream as i join stockAggregation as s " +
-                        "within 1496200000000L, 1596434876000L " +
+                        "within 1496200000000L, 1596535449000L " +
                         "per \"days\" " +
                         "select AGG_TIMESTAMP, s.distinctCnt " +
                         "order by AGG_TIMESTAMP " +
@@ -169,7 +169,7 @@ public class DistinctCountAggregationTestCase {
                     new Object[]{1564790400000L, 1},
                     new Object[]{1596412800000L, 1}
             );
-            SiddhiTestHelper.waitForEvents(100, 8, inEventCount, 60000);
+            SiddhiTestHelper.waitForEvents(100, 8, inEventCount, 10000);
             AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
             AssertJUnit.assertEquals("Remove events matched", true, SiddhiTestHelper.isEventsMatch(
                     removeEventsList, expected));

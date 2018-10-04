@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.util.collection.operator;
 
 import org.wso2.siddhi.core.aggregation.IncrementalDataAggregator;
 import org.wso2.siddhi.core.aggregation.IncrementalExecutor;
+import org.wso2.siddhi.core.aggregation.IncrementalExternalTimestampDataAggregator;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -31,6 +32,7 @@ import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
 import org.wso2.siddhi.query.api.definition.AggregationDefinition;
@@ -54,6 +56,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
     private MatchingMetaInfoHolder alteredMatchingMetaInfoHolder;
     private ExpressionExecutor perExpressionExecutor;
     private ExpressionExecutor startTimeEndTimeExpressionExecutor;
+    private boolean isProcessingOnExternalTime;
 
     private final StreamEventPool streamEventPoolForTableMeta;
     private final StreamEventCloner tableEventCloner;
@@ -66,7 +69,8 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             CompiledCondition inMemoryStoreCompileCondition, CompiledCondition onCompiledCondition,
             MetaStreamEvent tableMetaStreamEvent, MetaStreamEvent aggregateMetaSteamEvent,
             List<Attribute> additionalAttributes, MatchingMetaInfoHolder alteredMatchingMetaInfoHolder,
-            ExpressionExecutor perExpressionExecutor, ExpressionExecutor startTimeEndTimeExpressionExecutor) {
+            ExpressionExecutor perExpressionExecutor, ExpressionExecutor startTimeEndTimeExpressionExecutor,
+            boolean isProcessingOnExternalTime) {
         this.withinTableCompiledConditions = withinTableCompiledConditions;
         this.inMemoryStoreCompileCondition = inMemoryStoreCompileCondition;
         this.onCompiledCondition = onCompiledCondition;
@@ -82,6 +86,7 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         this.alteredMatchingMetaInfoHolder = alteredMatchingMetaInfoHolder;
         this.perExpressionExecutor = perExpressionExecutor;
         this.startTimeEndTimeExpressionExecutor = startTimeEndTimeExpressionExecutor;
+        this.isProcessingOnExternalTime = isProcessingOnExternalTime;
     }
 
     @Override
@@ -94,16 +99,19 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                 inMemoryStoreCompileCondition.cloneCompilation(key),
                 onCompiledCondition.cloneCompilation(key), tableMetaStreamEvent, aggregateMetaStreamEvent,
                 additionalAttributes, alteredMatchingMetaInfoHolder, perExpressionExecutor,
-                startTimeEndTimeExpressionExecutor);
+                startTimeEndTimeExpressionExecutor, isProcessingOnExternalTime);
     }
 
     public StreamEvent find(StateEvent matchingEvent, AggregationDefinition aggregationDefinition,
                             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                             Map<TimePeriod.Duration, Table> aggregationTables,
                             List<TimePeriod.Duration> incrementalDurations,
-                            List<ExpressionExecutor> baseExecutors, ExpressionExecutor timestampExecutor,
+                            List<ExpressionExecutor> baseExecutors,
                             List<ExpressionExecutor> outputExpressionExecutors,
-                            SiddhiAppContext siddhiAppContext) {
+                            SiddhiAppContext siddhiAppContext,
+                            List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
+                            List<GroupByKeyGenerator> groupbyKeyGeneratorList,
+                            ExpressionExecutor shouldUpdateExpressionExecutor) {
 
         ComplexEventChunk<StreamEvent> complexEventChunkToHoldWithinMatches = new ComplexEventChunk<>(true);
 
@@ -131,18 +139,18 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         complexEventChunkToHoldWithinMatches.add(withinMatchFromPersistedEvents);
 
         // Optimization step.
-        // Get the newest and oldest event timestamps from in-memory, and
-        // check whether at least one of those timestamps fall out of the given time range. If that's the case,
-        // there's no need to iterate through in-memory data.
         long oldestInMemoryEventTimestamp = getOldestInMemoryEventTimestamp(incrementalExecutorMap,
                 incrementalDurations, perValue);
-        long newestInMemoryEventTimestamp = getNewestInMemoryEventTimestamp(incrementalExecutorMap,
-                incrementalDurations, perValue);
 
-        if (requiresAggregatingInMemoryData(newestInMemoryEventTimestamp, oldestInMemoryEventTimestamp,
+        ExpressionExecutor shouldUpdateExpressionExecutorClone =
+                (shouldUpdateExpressionExecutor == null) ? null : shouldUpdateExpressionExecutor.cloneExecutor(null);
+
+        //If processing on external time, the in-memory data also needs to be queried
+        if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
                 startTimeEndTime)) {
             IncrementalDataAggregator incrementalDataAggregator = new IncrementalDataAggregator(incrementalDurations,
-                    perValue, baseExecutors, timestampExecutor, tableMetaStreamEvent, siddhiAppContext);
+                    perValue, oldestInMemoryEventTimestamp, baseExecutors, tableMetaStreamEvent, siddhiAppContext,
+                    shouldUpdateExpressionExecutorClone);
 
             // Aggregate in-memory data and create an event chunk out of it
             ComplexEventChunk<StreamEvent> aggregatedInMemoryEventChunk = incrementalDataAggregator
@@ -154,10 +162,28 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             complexEventChunkToHoldWithinMatches.add(withinMatchFromInMemory);
         }
 
+        ComplexEventChunk<StreamEvent> processedEvents;
+        if (isProcessingOnExternalTime) {
+            int durationIndex = incrementalDurations.indexOf(perValue);
+            List<ExpressionExecutor> expressionExecutors = aggregateProcessingExecutorsList.get(durationIndex);
+            GroupByKeyGenerator groupByKeyGenerator = groupbyKeyGeneratorList.get(durationIndex);
+
+            ExpressionExecutor shouldUpdateExpressionExecutorCloneExt =
+                    (shouldUpdateExpressionExecutor == null) ? null :
+                            shouldUpdateExpressionExecutor.cloneExecutor(null);
+            IncrementalExternalTimestampDataAggregator incrementalExternalTimestampDataAggregator =
+                    new IncrementalExternalTimestampDataAggregator(expressionExecutors, groupByKeyGenerator,
+                    tableMetaStreamEvent, siddhiAppContext, shouldUpdateExpressionExecutorCloneExt);
+            processedEvents = incrementalExternalTimestampDataAggregator
+                    .aggregateData(complexEventChunkToHoldWithinMatches);
+        } else {
+            processedEvents = complexEventChunkToHoldWithinMatches;
+        }
+
         // Get the final event chunk from the data which is within given duration. This event chunk contains the values
         // in the select clause of an aggregate definition.
         ComplexEventChunk<StreamEvent> aggregateSelectionComplexEventChunk = createAggregateSelectionEventChunk(
-                complexEventChunkToHoldWithinMatches, outputExpressionExecutors);
+                processedEvents, outputExpressionExecutors);
 
         // Execute the on compile condition
         return ((Operator) onCompiledCondition).find(matchingEvent, aggregateSelectionComplexEventChunk,
@@ -190,40 +216,12 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         return aggregateSelectionComplexEventChunk;
     }
 
-    private boolean requiresAggregatingInMemoryData(long newestInMemoryEventTimestamp,
-                                                    long oldestInMemoryEventTimestamp, Long[] startTimeEndTime) {
-        if (newestInMemoryEventTimestamp == -1 && oldestInMemoryEventTimestamp == -1) {
+    private boolean requiresAggregatingInMemoryData(long oldestInMemoryEventTimestamp, Long[] startTimeEndTime) {
+        if (oldestInMemoryEventTimestamp == -1) {
             return false;
         }
-        if (oldestInMemoryEventTimestamp != -1) {
-            long endTimeForWithin = startTimeEndTime[1];
-            if (endTimeForWithin <= oldestInMemoryEventTimestamp) {
-                return false;
-            }
-        }
-        if (newestInMemoryEventTimestamp != -1) {
-            long startTimeForWithin = startTimeEndTime[0];
-            if (newestInMemoryEventTimestamp < startTimeForWithin) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private long getNewestInMemoryEventTimestamp(Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
-                                                 List<TimePeriod.Duration> incrementalDurations,
-                                                 TimePeriod.Duration perValue) {
-        long newestEvent;
-        for (TimePeriod.Duration incrementalDuration : incrementalDurations) {
-            newestEvent = incrementalExecutorMap.get(incrementalDuration).getNewestEventTimestamp();
-            if (newestEvent != -1) {
-                return newestEvent;
-            }
-            if (incrementalDuration == perValue) {
-                break;
-            }
-        }
-        return -1;
+        long endTimeForWithin = startTimeEndTime[1];
+        return endTimeForWithin > oldestInMemoryEventTimestamp;
     }
 
     private long getOldestInMemoryEventTimestamp(Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -233,9 +231,12 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         TimePeriod.Duration incrementalDuration;
         for (int i = perValue.ordinal(); i >= incrementalDurations.get(0).ordinal(); i--) {
             incrementalDuration = TimePeriod.Duration.values()[i];
-            oldestEvent = incrementalExecutorMap.get(incrementalDuration).getOldestEventTimestamp();
-            if (oldestEvent != -1) {
-                return oldestEvent;
+            //If the reduced granularity is not configured
+            if (incrementalExecutorMap.containsKey(incrementalDuration)) {
+                oldestEvent = incrementalExecutorMap.get(incrementalDuration).getAggregationStartTimestamp();
+                if (oldestEvent != -1) {
+                    return oldestEvent;
+                }
             }
         }
         return -1;
