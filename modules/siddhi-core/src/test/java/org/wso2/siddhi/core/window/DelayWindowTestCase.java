@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.window;
 
+import com.sun.org.glassfish.gmbal.Description;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
@@ -37,6 +38,10 @@ import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
 import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Delay window implementation testcase
+ */
 
 public class DelayWindowTestCase {
     private static final Logger log = Logger.getLogger(DelayWindowTestCase.class);
@@ -60,6 +65,8 @@ public class DelayWindowTestCase {
     }
 
     @Test
+    @Description("Check if Siddhi App is created successfully when only one parameter of type either " +
+            "int or long is specified")
     public void delayWindowTest0() {
         log.info("DelayWindow Test0 : Testing window parameter definition1");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -79,6 +86,7 @@ public class DelayWindowTestCase {
     }
 
     @Test
+    @Description("Check if Siddhi App Creation fails when more than one parameter is included")
     public void delayWindowTest1() {
         log.info("DelayWindow Test1 : Testing window parameter definition2");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -98,6 +106,7 @@ public class DelayWindowTestCase {
     }
 
     @Test
+    @Description("Check if Siddhi App Creation fails when the type of parameter is neither int or long")
     public void delayWindowTest2() {
         log.info("DelayWindow Test2 : Testing window parameter definition3");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -117,6 +126,7 @@ public class DelayWindowTestCase {
     }
 
     @Test
+    @Description("Check whether the events are processed when using delay window")
     public void delayWindowTest3() throws InterruptedException {
         log.info("DelayWindow Test3: Testing delay window event processing");
 
@@ -165,6 +175,7 @@ public class DelayWindowTestCase {
     }
 
     @Test
+    @Description("Check whether delay window join is working properly")
     public void delayWindowTest4() throws InterruptedException {
         log.info("DelayWindow Test4 : Testing delay window joins");
 
@@ -213,6 +224,7 @@ public class DelayWindowTestCase {
     }
 
     @Test
+    @Description("Check whether aggregations are done correctly when using delay window ")
     public void delayWindowTest5() {
         log.info("DelayWindow Test5 : Testing delay window for Aggregation");
 
@@ -276,6 +288,7 @@ public class DelayWindowTestCase {
     }
 
     @Test
+    @Description("Check whether the events are being actually delayed, for the given time period.")
     public void delayWindowTest6() throws InterruptedException {
         log.info("DelayWindow Test6: Testing delay time ");
 
@@ -335,6 +348,7 @@ public class DelayWindowTestCase {
     }
 
     @Test
+    @Description("Check if events are persisted when using delay window")
     public void delayWindowTest7() throws InterruptedException {
         log.info("DelayWindow Test7: Testing persistence ");
 
