@@ -124,11 +124,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 outputAttributes.add(new OutputAttribute(new Variable(attribute.getName())));
             }
         }
-        List<SelectAttributeBuilder> selectAttributeBuilders = new ArrayList<>(outputAttributes.size());
+        List<ExpressionBuilder> selectExpressionBuilders = new ArrayList<>(outputAttributes.size());
         for (OutputAttribute outputAttribute : outputAttributes) {
             ExpressionBuilder expressionBuilder = new ExpressionBuilder(outputAttribute.getExpression(),
                     matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
-            selectAttributeBuilders.add(new SelectAttributeBuilder(expressionBuilder, outputAttribute.getRename()));
+            selectExpressionBuilders.add(expressionBuilder);
         }
 
         List<ExpressionBuilder> groupByExpressionBuilders = null;
@@ -164,14 +164,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
             limit = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
         }
-        CompiledSelection compiledSelection = compileSelection(selectAttributeBuilders, groupByExpressionBuilders,
+        CompiledSelection compiledSelection = compileSelection(selectExpressionBuilders, groupByExpressionBuilders,
                 havingExpressionBuilder, orderByAttributeBuilders, limit);
 
         Map<String, ExpressionExecutor> expressionExecutorMap = new HashMap<>();
-        if (selectAttributeBuilders.size() != 0) {
-            for (SelectAttributeBuilder selectAttributeBuilder : selectAttributeBuilders) {
+        if (selectExpressionBuilders.size() != 0) {
+            for (ExpressionBuilder selectExpressionBuilder : selectExpressionBuilders) {
                 expressionExecutorMap.putAll(
-                        selectAttributeBuilder.getExpressionBuilder().getVariableExpressionExecutorMap());
+                        selectExpressionBuilder.getVariableExpressionExecutorMap());
             }
         }
         if (groupByExpressionBuilders != null && groupByExpressionBuilders.size() != 0) {
@@ -194,14 +194,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     /**
      * Compile the query selection
      *
-     * @param selectAttributeBuilders  helps visiting the select attributes in order
+     * @param selectExpressionBuilders  helps visiting the select attributes in order
      * @param groupByExpressionBuilder helps visiting the group by attributes in order
      * @param havingExpressionBuilder  helps visiting the having condition
      * @param orderByAttributeBuilders helps visiting the order by attributes in order
      * @param limit                    defines the limit level
      * @return compiled selection that can be used for retrieving events on a defined format
      */
-    protected abstract CompiledSelection compileSelection(List<SelectAttributeBuilder> selectAttributeBuilders,
+    protected abstract CompiledSelection compileSelection(List<ExpressionBuilder> selectExpressionBuilders,
                                                           List<ExpressionBuilder> groupByExpressionBuilder,
                                                           ExpressionBuilder havingExpressionBuilder,
                                                           List<OrderByAttributeBuilder> orderByAttributeBuilders,
@@ -228,27 +228,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 newVariableExpressionExecutorMap.put(entry.getKey(), entry.getValue().cloneExecutor(key));
             }
             return new RecordStoreCompiledSelection(newVariableExpressionExecutorMap, compiledSelection);
-        }
-    }
-
-    /**
-     * Holder of Selection attribute with renaming field
-     */
-    public class SelectAttributeBuilder {
-        private final ExpressionBuilder expressionBuilder;
-        private final String rename;
-
-        public SelectAttributeBuilder(ExpressionBuilder expressionBuilder, String rename) {
-            this.expressionBuilder = expressionBuilder;
-            this.rename = rename;
-        }
-
-        public ExpressionBuilder getExpressionBuilder() {
-            return expressionBuilder;
-        }
-
-        public String getRename() {
-            return rename;
         }
     }
 
