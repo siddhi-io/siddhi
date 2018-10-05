@@ -33,7 +33,7 @@ public class BackoffRetryCounter {
     }
 
     public synchronized void increment() {
-        if (intervalIndex < timeIntervals.length - 2) {
+        if (intervalIndex < timeIntervals.length - 1) {
             intervalIndex++;
         }
     }
