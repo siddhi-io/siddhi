@@ -62,13 +62,13 @@ import java.util.Map;
         },
         examples = {
                 @Example(
-                        syntax = "define window delayWindow(symbol string, volume int) delay(20);\n" +
-                                "define stream inputStream(symbol string, volume int);\n" +
+                        syntax = "define window delayWindow(symbol string, volume int) delay(1 hour);\n" +
+                                "define stream purchaseStream(symbol string, volume int);\n" +
                                 "define stream deliveryStream(symbol string);\n" +
                                 "define stream outputStream(symbol string);\n" +
                                 "\n" +
                                 "@info(name='query1') \n" +
-                                "from inputStream\n" +
+                                "from purchaseStream\n" +
                                 "select symbol, volume\n" +
                                 "insert into delayWindow;\n" +
                                 "\n" +
@@ -77,7 +77,7 @@ import java.util.Map;
                                 "on delayWindow.symbol == deliveryStream.symbol\n" +
                                 "select delayWindow.symbol\n" +
                                 "insert into outputStream;",
-                        description = "This will delay the events from inputStream for 20 milliseconds " +
+                        description = "This will delay the events from purchaseStream for 20 milliseconds " +
                                 "and match them with events arrived from deliveryStream  "
                 )
         }

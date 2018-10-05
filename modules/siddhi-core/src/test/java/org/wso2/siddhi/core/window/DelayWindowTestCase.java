@@ -35,6 +35,7 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -68,41 +69,32 @@ public class DelayWindowTestCase {
     public void delayWindowTest0() {
         log.info("DelayWindow Test0 : Testing window parameter definition1");
         SiddhiManager siddhiManager = new SiddhiManager();
-        String query = "define window eventWindow(symbol string, price int, volume float) delay(2 sec)";
-        SiddhiAppRuntime siddhiAppRuntime = null;
-        try {
-            siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(query);
-        } catch (SiddhiAppCreationException e) {
-            error = false;
-            log.info(e.getCause());
-        } finally {
-            if (siddhiAppRuntime != null) {
-                siddhiAppRuntime.shutdown();
-            }
-        }
-        AssertJUnit.assertTrue(error);
+        String query = "define window eventWindow(symbol string, price int, volume float) delay(1 hour)";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(query);
+        siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "Check if Siddhi App Creation fails when more than one parameter is included")
+    @Test(description = "Check if Siddhi App Creation fails when more than one parameter is included", expectedExceptions = SiddhiAppCreationException.class)
+
     public void delayWindowTest1() {
         log.info("DelayWindow Test1 : Testing window parameter definition2");
         SiddhiManager siddhiManager = new SiddhiManager();
         String query = "define window eventWindow(symbol string, price int, volume float) delay(2,3) ";
         SiddhiAppRuntime siddhiAppRuntime = null;
-        try {
+       try {
             siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(query);
-        } catch (SiddhiAppCreationException e1) {
+        } catch (SiddhiAppCreationException e) {
             error = false;
-            log.info(e1.getCause());
+            AssertJUnit.assertEquals("Delay window should only have one parameter (<int|long|time> delayTime), but found 2 input attributes", e.getCause().getMessage());
+            throw e;
         } finally {
             if (siddhiAppRuntime != null) {
                 siddhiAppRuntime.shutdown();
             }
         }
-        AssertJUnit.assertFalse(error);
     }
 
-    @Test(description = "Check if Siddhi App Creation fails when the type of parameter is neither int or long")
+    @Test(description = "Check if Siddhi App Creation fails when the type of parameter is neither int or long", expectedExceptions = SiddhiAppCreationException.class)
     public void delayWindowTest2() {
         log.info("DelayWindow Test2 : Testing window parameter definition3");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -112,13 +104,13 @@ public class DelayWindowTestCase {
             siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(query);
         } catch (SiddhiAppCreationException e) {
             error = false;
-            log.info(e.getCause());
+            AssertJUnit.assertEquals("Delay window's parameter attribute should be either int or long, but found STRING", e.getCause().getMessage());
+            throw e;
         } finally {
             if (siddhiAppRuntime != null) {
                 siddhiAppRuntime.shutdown();
             }
         }
-        AssertJUnit.assertFalse(error);
     }
 
     @Test(description = "Check whether the events are processed when using delay window")
