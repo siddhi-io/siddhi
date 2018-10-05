@@ -156,7 +156,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing add for events '" +
                     addingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
                     "' as its trying to reconnect!");
-            busyWaitWhileConnect();
+            waitWhileConnect();
             LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
                     "' has become available for add operation for events '" + addingEventChunk + "'");
             addEvents(addingEventChunk, noOfEvents);
@@ -195,7 +195,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing find for events '" +
                     matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
                     "' as its trying to reconnect!");
-            busyWaitWhileConnect();
+            waitWhileConnect();
             LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
                     "' has become available for find operation for events '" + matchingEvent + "'");
             return find(matchingEvent, compiledCondition);
@@ -235,7 +235,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing delete for events '" +
                     deletingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
                     "' as its trying to reconnect!");
-            busyWaitWhileConnect();
+            waitWhileConnect();
             LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
                     "' has become available for delete operation for events '" + deletingEventChunk + "'");
             deleteEvents(deletingEventChunk, compiledCondition, noOfEvents);
@@ -277,7 +277,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing update for events '" +
                     updatingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
                     "' as its trying to reconnect!");
-            busyWaitWhileConnect();
+            waitWhileConnect();
             LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
                     "' has become available for update operation for events '" + updatingEventChunk + "'");
             updateEvents(updatingEventChunk, compiledCondition, compiledUpdateSet, noOfEvents);
@@ -323,7 +323,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing upsert for events '" +
                     updateOrAddingEventChunk + "', operation busy waiting at Table '" + tableDefinition.getId() +
                     "' as its trying to reconnect!");
-            busyWaitWhileConnect();
+            waitWhileConnect();
             LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
                     "' has become available for upsert operation for events '" + updateOrAddingEventChunk + "'");
             updateOrAddEvents(updateOrAddingEventChunk, compiledCondition, compiledUpdateSet,
@@ -368,7 +368,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
             LOG.warn("Error on '" + siddhiAppContext.getName() + "' while performing contains check for event '" +
                     matchingEvent + "', operation busy waiting at Table '" + tableDefinition.getId() +
                     "' as its trying to reconnect!");
-            busyWaitWhileConnect();
+            waitWhileConnect();
             LOG.info("SiddhiApp '" + siddhiAppContext.getName() + "' table '" + tableDefinition.getId() +
                     "' has become available for contains check operation for matching event '" + matchingEvent + "'");
             return containsEvent(matchingEvent, compiledCondition);
@@ -418,7 +418,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
      * Busy wait the threads which bind to this object and control the execution flow
      * until table connection recovered.
      */
-    private void busyWaitWhileConnect() {
+    private void waitWhileConnect() {
         try {
             synchronized (this) {
                 while (isTryingToConnect.get()) {
