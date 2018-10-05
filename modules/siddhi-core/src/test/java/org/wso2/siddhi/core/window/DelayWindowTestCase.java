@@ -157,7 +157,7 @@ public class DelayWindowTestCase {
         input.send(new Object[]{"IBM", 800f, 0});
         input.send(new Object[]{"WSO2", 60.5f, 1});
 
-        SiddhiTestHelper.waitForEvents(100, 4, count, 2000);
+        SiddhiTestHelper.waitForEvents(100, 4, count, 4000);
         AssertJUnit.assertEquals(4, count.get());
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
@@ -203,7 +203,7 @@ public class DelayWindowTestCase {
             Thread.sleep(1100);
             cseEventStreamHandler.send(new Object[]{"WSO2", 57.6f, 100});
 
-            SiddhiTestHelper.waitForEvents(100, 2, count, 2000);
+            SiddhiTestHelper.waitForEvents(100, 2, count, 5000);
             AssertJUnit.assertEquals(2, count.get());
             AssertJUnit.assertTrue(eventArrived);
         } finally {
@@ -261,7 +261,7 @@ public class DelayWindowTestCase {
             inputHandler.send(new Object[]{1000});
             inputHandler.send(new Object[]{1500});
 
-            SiddhiTestHelper.waitForEvents(100, 2, count, 2000);
+            SiddhiTestHelper.waitForEvents(100, 2, count, 3000);
             AssertJUnit.assertEquals(2, inEventCount);
             AssertJUnit.assertEquals(0, removeEventCount);
             AssertJUnit.assertEquals(Long.valueOf(2500), lastValue);
@@ -327,7 +327,7 @@ public class DelayWindowTestCase {
         input.send(new Object[]{"IBM", 700});
         input.send(new Object[]{"WSO2", 750});
 
-        SiddhiTestHelper.waitForEvents(100, 2, count, 4000);
+        SiddhiTestHelper.waitForEvents(100, 2, count, 5000);
         AssertJUnit.assertEquals(2, count.get());
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
@@ -388,7 +388,7 @@ public class DelayWindowTestCase {
         input.send(new Object[]{"IBM", 700});
         input.send(new Object[]{"WSO2", 750});
 
-        SiddhiTestHelper.waitForEvents(100, 2, count, 2100);
+        SiddhiTestHelper.waitForEvents(100, 2, count, 4000);
 
         siddhiAppRuntime.persist();
         siddhiAppRuntime.shutdown();
@@ -403,7 +403,7 @@ public class DelayWindowTestCase {
         }
 
         input.send(new Object[]{"WSO2", 600});
-        SiddhiTestHelper.waitForEvents(100, 3, count, 2100);
+        SiddhiTestHelper.waitForEvents(100, 3, count, 4000);
 
         AssertJUnit.assertEquals(Long.valueOf(2050), lastValue);
         siddhiAppRuntime.shutdown();
