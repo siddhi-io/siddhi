@@ -77,8 +77,9 @@ import java.util.Map;
                                 "on delayWindow.symbol == deliveryStream.symbol\n" +
                                 "select delayWindow.symbol\n" +
                                 "insert into outputStream;",
-                        description = "This will delay the events from purchaseStream for 20 milliseconds " +
-                                "and match them with events arrived from deliveryStream  "
+                        description = "This will delay the events from purchaseStream for 1 hour " +
+                                "and match them with events arrived from deliveryStream to check " +
+                                "if delivery of the purchased item is done within 1 hour "
                 )
         }
 )
