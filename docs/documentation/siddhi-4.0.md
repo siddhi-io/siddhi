@@ -799,6 +799,7 @@ Following are some inbuilt windows shipped with Siddhi. For more window types, s
 * [cron](https://wso2.github.io/siddhi/api/latest/#cron-window)
 * [externalTime](https://wso2.github.io/siddhi/api/latest/#externaltime-window)
 * [externalTimeBatch](https://wso2.github.io/siddhi/api/latest/#externaltimebatch-window)
+* [delay](https://wso2.github.io/siddhi/api/latest/#delay-window)
 
 **Output event types**<a id="output-event-types" class='anchor' aria-hidden='true'></a> 
 
