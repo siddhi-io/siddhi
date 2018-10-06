@@ -124,6 +124,7 @@
             <class name="org.wso2.siddhi.core.window.TimeBatchWindowTestCase"/>
             <class name="org.wso2.siddhi.core.window.TimeLengthWindowTestCase"/>
             <class name="org.wso2.siddhi.core.window.WindowDefinitionTestCase"/>
+            <class name="org.wso2.siddhi.core.window.BatchWindowTestCase"/>
 
             <class name="org.wso2.siddhi.core.query.BooleanCompareTestCase"/>
             <class name="org.wso2.siddhi.core.query.FilterTestCase1"/>
