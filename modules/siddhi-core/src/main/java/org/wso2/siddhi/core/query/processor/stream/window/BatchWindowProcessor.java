@@ -110,14 +110,16 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
                 outputStreamEventChunk.add(resetEvent);
             }
 
+            //check whether the streamEventChunk has next event before add into output stream event chunk
             if (streamEventChunk.hasNext()) {
-                while (outputExpectsExpiredEvents) {
-                    StreamEvent streamEvent = streamEventChunk.next();
-                    StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                    clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
-                    expiredEventQueue.add(clonedStreamEvent);
+                if (outputExpectsExpiredEvents) {
+                    do {
+                        StreamEvent streamEvent = streamEventChunk.next();
+                        StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                        clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
+                        expiredEventQueue.add(clonedStreamEvent);
+                    } while (streamEventChunk.hasNext());
                 }
-
                 resetEvent = streamEventCloner.copyStreamEvent(streamEventChunk.getFirst());
                 resetEvent.setType(ComplexEvent.Type.RESET);
                 outputStreamEventChunk.add(streamEventChunk.getFirst());
