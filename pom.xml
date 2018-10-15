@@ -29,7 +29,7 @@
     <groupId>org.wso2.siddhi</groupId>
     <artifactId>siddhi</artifactId>
     <packaging>pom</packaging>
-    <version>4.2.23-SNAPSHOT</version>
+    <version>4.2.27-SNAPSHOT</version>
     <name>Siddhi</name>
     <description>Siddhi, high performing Complex Event Processing Engine</description>
 
@@ -183,13 +183,6 @@
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-joda</artifactId>
                 <version>${jackson-datatype-joda-version}</version>
-            </dependency>
-
-            <!-- Event Tables -->
-            <dependency>
-                <groupId>com.zaxxer</groupId>
-                <artifactId>HikariCP</artifactId>
-                <version>${hikari.version}</version>
             </dependency>
 
             <!-- Siddhi Doc Generator -->
