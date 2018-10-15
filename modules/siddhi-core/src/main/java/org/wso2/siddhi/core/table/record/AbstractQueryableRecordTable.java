@@ -59,7 +59,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     @Override
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
-                             CompiledSelection compiledSelection) throws ConnectionUnavailableException {
+                             CompiledSelection compiledSelection, Attribute[] outputAttributes)
+            throws ConnectionUnavailableException {
 
         RecordStoreCompiledSelection recordStoreCompiledSelection = ((RecordStoreCompiledSelection) compiledSelection);
         RecordStoreCompiledCondition recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
@@ -81,7 +82,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     recordStoreCompiledSelection.compiledSelection);
         } else {
             records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
-                    recordStoreCompiledSelection.compiledSelection);
+                    recordStoreCompiledSelection.compiledSelection, outputAttributes);
         }
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
         if (records != null) {
@@ -107,7 +108,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
      */
     protected abstract RecordIterator<Object[]> query(Map<String, Object> parameterMap,
                                                       CompiledCondition compiledCondition,
-                                                      CompiledSelection compiledSelection)
+                                                      CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException;
 
     public CompiledSelection compileSelection(Selector selector,
@@ -125,11 +126,11 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 outputAttributes.add(new OutputAttribute(new Variable(attribute.getName())));
             }
         }
-        List<ExpressionBuilder> selectExpressionBuilders = new ArrayList<>(outputAttributes.size());
+        List<SelectAttributeBuilder> selectAttributeBuilders = new ArrayList<>(outputAttributes.size());
         for (OutputAttribute outputAttribute : outputAttributes) {
             ExpressionBuilder expressionBuilder = new ExpressionBuilder(outputAttribute.getExpression(),
                     matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
-            selectExpressionBuilders.add(expressionBuilder);
+            selectAttributeBuilders.add(new SelectAttributeBuilder(expressionBuilder, outputAttribute.getRename()));
         }
 
         List<ExpressionBuilder> groupByExpressionBuilders = null;
@@ -152,7 +153,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             orderByAttributeBuilders = new ArrayList<>(selector.getOrderByList().size());
             for (OrderByAttribute orderByAttribute : selector.getOrderByList()) {
                 ExpressionBuilder expressionBuilder = new ExpressionBuilder(orderByAttribute.getVariable(),
-                        matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
+                        matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors,
+                        tableMap, queryName);
                 orderByAttributeBuilders.add(new OrderByAttributeBuilder(expressionBuilder,
                         orderByAttribute.getOrder()));
             }
@@ -180,14 +182,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                         selector, siddhiAppContext);
             }
         }
-        CompiledSelection compiledSelection = compileSelection(selectExpressionBuilders, groupByExpressionBuilders,
+        CompiledSelection compiledSelection = compileSelection(selectAttributeBuilders, groupByExpressionBuilders,
                 havingExpressionBuilder, orderByAttributeBuilders, limit, offset);
 
         Map<String, ExpressionExecutor> expressionExecutorMap = new HashMap<>();
-        if (selectExpressionBuilders.size() != 0) {
-            for (ExpressionBuilder selectExpressionBuilder : selectExpressionBuilders) {
+        if (selectAttributeBuilders.size() != 0) {
+            for (SelectAttributeBuilder selectAttributeBuilder : selectAttributeBuilders) {
                 expressionExecutorMap.putAll(
-                        selectExpressionBuilder.getVariableExpressionExecutorMap());
+                        selectAttributeBuilder.getExpressionBuilder().getVariableExpressionExecutorMap());
             }
         }
         if (groupByExpressionBuilders != null && groupByExpressionBuilders.size() != 0) {
@@ -210,7 +212,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     /**
      * Compile the query selection
      *
-     * @param selectExpressionBuilders  helps visiting the select attributes in order
+     * @param selectAttributeBuilders  helps visiting the select attributes in order
      * @param groupByExpressionBuilder helps visiting the group by attributes in order
      * @param havingExpressionBuilder  helps visiting the having condition
      * @param orderByAttributeBuilders helps visiting the order by attributes in order
@@ -218,7 +220,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
      * @param offset                   defines the offset level
      * @return compiled selection that can be used for retrieving events on a defined format
      */
-    protected abstract CompiledSelection compileSelection(List<ExpressionBuilder> selectExpressionBuilders,
+    protected abstract CompiledSelection compileSelection(List<SelectAttributeBuilder> selectAttributeBuilders,
                                                           List<ExpressionBuilder> groupByExpressionBuilder,
                                                           ExpressionBuilder havingExpressionBuilder,
                                                           List<OrderByAttributeBuilder> orderByAttributeBuilders,
@@ -245,6 +247,27 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                 newVariableExpressionExecutorMap.put(entry.getKey(), entry.getValue().cloneExecutor(key));
             }
             return new RecordStoreCompiledSelection(newVariableExpressionExecutorMap, compiledSelection);
+        }
+    }
+
+    /**
+     * Holder of Selection attribute with renaming field
+     */
+    public class SelectAttributeBuilder {
+        private final ExpressionBuilder expressionBuilder;
+        private final String rename;
+
+        public SelectAttributeBuilder(ExpressionBuilder expressionBuilder, String rename) {
+            this.expressionBuilder = expressionBuilder;
+            this.rename = rename;
+        }
+
+        public ExpressionBuilder getExpressionBuilder() {
+            return expressionBuilder;
+        }
+
+        public String getRename() {
+            return rename;
         }
     }
 

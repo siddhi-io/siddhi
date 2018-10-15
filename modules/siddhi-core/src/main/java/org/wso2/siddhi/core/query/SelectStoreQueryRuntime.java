@@ -52,7 +52,8 @@ public class SelectStoreQueryRuntime extends StoreQueryRuntime {
     public Event[] execute() {
         try {
             StateEvent stateEvent = new StateEvent(1, 0);
-            StreamEvent streamEvents = queryableProcessor.query(stateEvent, compiledCondition, compiledSelection);
+            StreamEvent streamEvents = queryableProcessor.query(stateEvent, compiledCondition,
+                    compiledSelection, outputAttributes);
             if (streamEvents == null) {
                 return null;
             } else {

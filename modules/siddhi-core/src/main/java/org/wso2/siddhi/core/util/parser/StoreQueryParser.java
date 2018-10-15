@@ -54,6 +54,7 @@ import org.wso2.siddhi.query.api.aggregation.Within;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.execution.query.StoreQuery;
 import org.wso2.siddhi.query.api.execution.query.input.store.AggregationInputStore;
 import org.wso2.siddhi.query.api.execution.query.input.store.ConditionInputStore;
@@ -64,6 +65,7 @@ import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.ReturnStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream;
+import org.wso2.siddhi.query.api.execution.query.selection.OutputAttribute;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
 
@@ -294,9 +296,16 @@ public class StoreQueryParser {
                     siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
             List<Attribute> expectedOutputAttributes = buildExpectedOutputAttributes(storeQuery, siddhiAppContext,
                     tableMap, queryName, metaPosition, matchingMetaInfoHolder);
+
+            MetaStreamEvent metaStreamEventForSelect = new MetaStreamEvent();
+            metaStreamEventForSelect.setInputReferenceId(storeQuery.getInputStore().getStoreId());
+            initMetaStreamEvent(metaStreamEventForSelect, generateTableDefinitionFromStoreQuery(storeQuery));
+
+            MatchingMetaInfoHolder matchingMetaInfoHolderForSelection = generateMatchingMetaInfoHolder(
+                    metaStreamEventForSelect, generateTableDefinitionFromStoreQuery(storeQuery));
             CompiledSelection compiledSelection = ((QueryableProcessor) table).compileSelection(
-                    storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolder, siddhiAppContext,
-                    variableExpressionExecutors, tableMap, queryName);
+                    storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolderForSelection,
+                    siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
 
             StoreQueryRuntime storeQueryRuntime =
                     new SelectStoreQueryRuntime((QueryableProcessor) table, compiledCondition,
@@ -461,6 +470,14 @@ public class StoreQueryParser {
         metaStateEvent.addEvent(metaStreamEvent);
         return new MatchingMetaInfoHolder(metaStateEvent, -1, 0, definition,
                 definition, 0);
+    }
+
+    private static AbstractDefinition generateTableDefinitionFromStoreQuery(StoreQuery storeQuery) {
+        TableDefinition tableDefinition = TableDefinition.id(storeQuery.getInputStore().getStoreId());
+        for (OutputAttribute outputAttribute : storeQuery.getSelector().getSelectionList()) {
+            tableDefinition.attribute(outputAttribute.getRename(), null);
+        }
+        return tableDefinition;
     }
 
     private static MatchingMetaInfoHolder generateMatchingMetaInfoHolder(MetaStreamEvent metaStreamEvent,
