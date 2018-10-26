@@ -602,12 +602,12 @@ public class InMemoryTransportTestCase {
         InMemoryBroker.publish("IBM", new Event(System.currentTimeMillis(), new Object[]{"IBM", 75.6f, 100L}));
         TestFailingInMemorySource.fail = true;
         TestFailingInMemorySource.connectionCallback.onError(new ConnectionUnavailableException("Connection Lost"));
-        Thread.sleep(500);
+        Thread.sleep(13000);
         InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 57.6f, 100L}));
         InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 57.6f, 100L}));
         InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 57.6f, 100L}));
         TestFailingInMemorySource.fail = false;
-        Thread.sleep(5500);
+        Thread.sleep(2000);
         InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 55.6f, 100L}));
         InMemoryBroker.publish("IBM", new Event(System.currentTimeMillis(), new Object[]{"IBM", 75.6f, 100L}));
 
