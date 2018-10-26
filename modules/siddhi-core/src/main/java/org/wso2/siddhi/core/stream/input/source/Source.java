@@ -133,6 +133,7 @@ public abstract class Source implements Snapshotable {
                 backoffRetryCounter.reset();
             } catch (ConnectionUnavailableException e) {
                 disconnect();
+                isConnected.set(false);
                 retryWithBackoff(e);
             } catch (RuntimeException e) {
                 LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext)) +
