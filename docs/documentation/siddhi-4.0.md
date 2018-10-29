@@ -1885,7 +1885,10 @@ The above syntax includes the following:
 
 !!! Note
     From V4.2.0 onwards, aggregation is carried out at calendar start times for each granularity with the GMT timezone
-
+    
+!!! Note
+    From V4.2.6 onwards, the same aggregation can be defined in multiple Siddhi apps for joining, however, *only one siddhi app should carry out the processing* (i.e. the aggregation input stream should only feed events to one aggregation definition). 
+     
 **Example**
 
 This Siddhi Application defines an aggregation named `TradeAggregation` to calculate the average and sum for the `price` attribute of events arriving at the `TradeStream` stream. These aggregates are calculated per every time granularity in the second-year range.
