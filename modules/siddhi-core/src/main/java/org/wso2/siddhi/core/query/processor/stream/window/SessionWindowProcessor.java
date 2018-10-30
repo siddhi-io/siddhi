@@ -291,6 +291,9 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
         }
     }
 
+    /**
+     * Merge previous window with the next window.
+     */
     private void mergeWindows(SessionComplexEventChunk<StreamEvent> previousWindow,
                               SessionComplexEventChunk<StreamEvent> nextWindow) {
         //merge with the next window
@@ -307,6 +310,9 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
         }
     }
 
+    /**
+     * Moves the events in the current session into previous window.
+     */
     private void moveCurrentSessionToPreviousSession() {
 
         SessionComplexEventChunk<StreamEvent> currentSession = sessionContainer.getCurrentSession();
@@ -332,6 +338,9 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
 
     }
 
+    /**
+     * Handles when the late event arrives to the system.
+     */
     private void addLateEvent(ComplexEventChunk<StreamEvent> streamEventChunk,
                               long eventTimestamp, StreamEvent streamEvent) {
 
@@ -393,6 +402,9 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
 
     }
 
+    /**
+     * Checks all the sessions and get the expired session.
+     */
     private void currentSessionTimeout(long eventTimestamp) {
         Map<String, Long> currentEndTimestamps = findAllCurrentEndTimestamps(sessionMap);
 
@@ -434,6 +446,9 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
         }
     }
 
+    /**
+     * Checks all the previous sessions and get the expired sessions.
+     */
     private void previousSessionTimeout(long eventTimestamp) {
 
         Map<String, Long> previousEndTimestamps = findAllPreviousEndTimestamps(sessionMap);
@@ -466,6 +481,11 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
 
     }
 
+    /**
+     * Gets all end timestamps of current sessions.
+     * @param sessionMap holds all the sessions with the session key
+     * @return map with the values of each current session's end timestamp and with the key as the session key
+     */
     private Map<String, Long> findAllCurrentEndTimestamps(Map<String, SessionContainer> sessionMap) {
 
         Collection<SessionContainer> sessionContainerList =  sessionMap.values();
@@ -484,6 +504,10 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
         return sessionKeyEndTimeMap;
     }
 
+    /**
+     * Gets all the end timestamps of previous sessions.
+     * @return map with the values of each previous session's end timestamp and with the key as the sesssio key
+     */
     private Map<String, Long> findAllPreviousEndTimestamps(Map<String, SessionContainer> sessionMap) {
 
         Collection<SessionContainer> sessionContainerList =  sessionMap.values();

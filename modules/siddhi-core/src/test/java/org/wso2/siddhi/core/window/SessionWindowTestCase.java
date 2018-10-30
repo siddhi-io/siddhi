@@ -392,7 +392,7 @@ public class SessionWindowTestCase {
 
     @Test(description = "This test case checks an event initiate a session and wait for session timeout")
     public void testSessionWindow11() throws InterruptedException {
-        log.info("SessionWindow Test11: Testing session window with an input event");
+        log.info("SessionWindow Test11: Testing session window with input events");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -450,7 +450,7 @@ public class SessionWindowTestCase {
     @Test(description = "This test case checks two sessions are processed which  belong to the same session key")
     public void testSessionWindow12() throws InterruptedException {
         log.info("SessionWindow Test12: Testing session window, providing events "
-                + "which are in 2 session with same session key");
+                + "which are in 2 sessions with same session key");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -522,7 +522,7 @@ public class SessionWindowTestCase {
             + " which belong to different session keys")
     public void testSessionWindow13() throws InterruptedException {
         log.info("SessionWindow Test13: Testing session window, providing events "
-                + "which are in 2 session with different session keys");
+                + "which are in 2 sessions with different session keys");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -660,11 +660,11 @@ public class SessionWindowTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(description = "This test case checks when the late event which is "
-            + "belong to the current session window without an allowedLatency")
+    @Test(description = "This test case checks when the late event which "
+            + "belongs to the current session window without an allowedLatency")
     public void testSessionWindow15() throws InterruptedException {
         log.info("SessionWindow Test15: Testing session window, "
-                + "late event comes which belong to the current session window without an allowedLatency time period");
+                + "late event comes which belongs to the current session window without an allowedLatency time period");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -795,7 +795,7 @@ public class SessionWindowTestCase {
     }
 
     @Test(description = "This test case covers when a late event belongs "
-            + "to the current session and other belongs to the previous session and the other "
+            + "to the current session and other belongs to the previous session and another "
             + "does not belong to the previous session with allowedLatency time period")
     public void testSessionWindow17() throws InterruptedException {
         log.info("SessionWindow Test17: Testing session window, "
