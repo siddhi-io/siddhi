@@ -98,8 +98,8 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
 
     private static final Logger log = Logger.getLogger(SessionWindowProcessor.class);
 
-    private long sessionGap = -1;
-    private long allowedLatency = -1;
+    private long sessionGap = 0;
+    private long allowedLatency = 0;
     private VariableExpressionExecutor sessionKeyExecutor;
     private Scheduler scheduler;
     private Map<String, SessionContainer> sessionMap;
@@ -163,6 +163,7 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
                             attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
                         allowedLatency = (Long) ((ConstantExpressionExecutor)
                                 attributeExpressionExecutors[2]).getValue();
+                        validateAllowedLatency(allowedLatency, sessionGap);
                     } else {
                         throw new SiddhiAppValidationException("Session window's allowedLatency parameter should be "
                                 + "either int or long, but found " + attributeExpressionExecutors[2].getReturnType());
@@ -188,6 +189,7 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
                             attributeExpressionExecutors[1].getReturnType() == Attribute.Type.LONG) {
                         allowedLatency = (Long) ((ConstantExpressionExecutor)
                                 attributeExpressionExecutors[1]).getValue();
+                        validateAllowedLatency(allowedLatency, sessionGap);
                     } else {
                         throw new SiddhiAppValidationException("Session window's allowedLatency parameter should be "
                                 + "either int or long, but found " + attributeExpressionExecutors[1].getReturnType());
@@ -201,18 +203,20 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
 
         }
 
+    }
+
+    private void validateAllowedLatency(long allowedLatency, long sessionGap) {
         if (allowedLatency > sessionGap) {
             throw new SiddhiAppValidationException("Session window's allowedLatency parameter value "
                     + "should not be greater than the session gap parameter value");
 
         }
-
     }
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk,
                            Processor nextProcessor, StreamEventCloner streamEventCloner) {
-        String key;
+        String key = DEFAULT_KEY;
         SessionComplexEventChunk<StreamEvent> currentSession;
 
         synchronized (this) {
@@ -226,19 +230,15 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
 
                     if (sessionKeyExecutor != null) {
                         key = (String) sessionKeyExecutor.execute(streamEvent);
-                    } else {
-                        key = DEFAULT_KEY;
                     }
 
                     //get the session configuration based on session key
                     //if the map doesn't contain key, then a new sessionContainer
                     //object needs to be created.
-                    if (sessionMap.get(key) == null) {
+                    if ((sessionContainer = sessionMap.get(key)) == null) {
                         sessionContainer = new SessionContainer(key);
-                        sessionMap.put(key, sessionContainer);
-                    } else {
-                        sessionContainer = sessionMap.get(key);
                     }
+                    sessionMap.put(key, sessionContainer);
 
                     StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
                     clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
@@ -540,8 +540,6 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
     public synchronized Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
         state.put("sessionMap", sessionMap);
-        state.put("sessionGap", sessionGap);
-        state.put("allowedLatency", allowedLatency);
         state.put("sessionContainer", sessionContainer);
         state.put("expiredEventChunk", expiredEventChunk);
         return state;
@@ -550,8 +548,6 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
     @Override
     public synchronized void restoreState(Map<String, Object> state) {
         sessionMap = (ConcurrentHashMap<String, SessionContainer>) state.get("sessionMap");
-        sessionGap = (Long) state.get("sessionGap");
-        allowedLatency = (Long) state.get("allowedLatency");
         sessionContainer = (SessionContainer) state.get("sessionContainer");
         expiredEventChunk = (SessionComplexEventChunk<StreamEvent>) state.get("expiredEventChunk");
     }

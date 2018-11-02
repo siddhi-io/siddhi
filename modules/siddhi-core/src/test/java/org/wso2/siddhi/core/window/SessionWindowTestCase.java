@@ -62,8 +62,8 @@ public class SessionWindowTestCase {
         innerAssertionsPassed = false;
         eventTimeStamp = 0;
         count.set(0);
-        averageValue = Double.valueOf(0);
-        totalValue = Double.valueOf(0);
+        averageValue = 0.0;
+        totalValue =0.0;
     }
 
     @Test(description = "This test checks if Siddhi App creation fails when more than three parameters are provided'",
@@ -504,12 +504,12 @@ public class SessionWindowTestCase {
 
         inputHandler.send(new Object[]{"user0", 101, 34.4, 5});
         inputHandler.send(new Object[]{"user0", 102, 24.5, 2});
-        Thread.sleep(1100);
+        Thread.sleep(1500);
 
         inputHandler.send(new Object[]{"user0", 103, 22.4, 1});
         inputHandler.send(new Object[]{"user0", 104, 50.0, 3});
 
-        SiddhiTestHelper.waitForEvents(100, 8, count, 4200);
+        SiddhiTestHelper.waitForEvents(100, 8, count, 4500);
         AssertJUnit.assertEquals(4, inEventCount);
         AssertJUnit.assertEquals(4, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
