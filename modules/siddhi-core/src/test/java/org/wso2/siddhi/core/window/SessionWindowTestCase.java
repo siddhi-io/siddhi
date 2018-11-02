@@ -63,7 +63,7 @@ public class SessionWindowTestCase {
         eventTimeStamp = 0;
         count.set(0);
         averageValue = 0.0;
-        totalValue =0.0;
+        totalValue = 0.0;
     }
 
     @Test(description = "This test checks if Siddhi App creation fails when more than three parameters are provided'",
