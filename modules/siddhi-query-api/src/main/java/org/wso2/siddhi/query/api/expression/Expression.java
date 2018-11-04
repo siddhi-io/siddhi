@@ -270,7 +270,7 @@ public abstract class Expression implements SiddhiElement {
         }
 
         public static TimePeriod.Duration normalizeDuration(String value) {
-            switch (value) {
+            switch (value.toLowerCase()) {
                 case "sec":
                 case "seconds":
                 case "second":

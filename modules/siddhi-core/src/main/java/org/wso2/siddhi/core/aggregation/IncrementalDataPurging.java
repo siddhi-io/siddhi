@@ -48,7 +48,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -130,29 +129,28 @@ public class IncrementalDataPurging implements Runnable {
         }
 
         Map<String, Annotation> annotationTypes = new HashMap<>();
-
         for (Annotation annotation : annotations) {
             annotationTypes.put(annotation.getName().toLowerCase(), annotation);
         }
         Annotation purge = annotationTypes.get(SiddhiConstants.NAMESPACE_PURGE);
-        if (Objects.nonNull(purge)) {
-            if (Objects.nonNull(purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_ENABLE))) {
-                String enable = purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_ENABLE);
-                if (!("true".equalsIgnoreCase(enable) || "false".equalsIgnoreCase(enable))) {
-                    throw new SiddhiAppCreationException("Invalid value for enable: " + enable + "." +
+        if (purge != null) {
+            if (purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_ENABLE) != null) {
+                String purgeEnable = purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_ENABLE);
+                if (!("true".equalsIgnoreCase(purgeEnable) || "false".equalsIgnoreCase(purgeEnable))) {
+                    throw new SiddhiAppCreationException("Invalid value for enable: " + purgeEnable + "." +
                             " Please use true or false");
                 } else {
-                    purgingEnabled = Boolean.parseBoolean(enable);
+                    purgingEnabled = Boolean.parseBoolean(purgeEnable);
                 }
             }
             if (purgingEnabled) {
                 // If interval is defined, default value of 15 min will be replaced by user input value
-                if (Objects.nonNull(purge.getElement(SiddhiConstants.NAMESPACE_INTERVAL))) {
+                if (purge.getElement(SiddhiConstants.NAMESPACE_INTERVAL) != null) {
                     String interval = purge.getElement(SiddhiConstants.NAMESPACE_INTERVAL);
                     purgeExecutionInterval = timeToLong(interval);
                 }
                 List<Annotation> retentions = purge.getAnnotations(SiddhiConstants.NAMESPACE_RETENTION);
-                if (Objects.nonNull(retentions) && !retentions.isEmpty()) {
+                if (retentions != null && !retentions.isEmpty()) {
                     Annotation retention = retentions.get(0);
                     List<Element> elements = retention.getElements();
                     for (Element element : elements) {
@@ -193,7 +191,6 @@ public class IncrementalDataPurging implements Runnable {
         long currentTime = System.currentTimeMillis();
         long purgeTime;
         Object[] purgeTimeArray = new Object[1];
-
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
             if (!retentionPeriods.get(entry.getKey()).equals(RETAIN_ALL)) {
                 eventChunk.clear();
@@ -221,29 +218,22 @@ public class IncrementalDataPurging implements Runnable {
      **/
     private MatchingMetaInfoHolder matchingMetaInfoHolder(Table table, Attribute attribute) {
         MetaStateEvent metaStateEvent = new MetaStateEvent(2);
-
         MetaStreamEvent metaStreamEventWithDeletePara = new MetaStreamEvent();
         MetaStreamEvent metaStreamEventForTable = new MetaStreamEvent();
-
         TableDefinition deleteTableDefinition = TableDefinition.id("");
         deleteTableDefinition.attribute(attribute.getName(), attribute.getType());
         metaStreamEventWithDeletePara.setEventType(MetaStreamEvent.EventType.TABLE);
         metaStreamEventWithDeletePara.addOutputData(attribute);
         metaStreamEventWithDeletePara.addInputDefinition(deleteTableDefinition);
-
-
         metaStreamEventForTable.setEventType(MetaStreamEvent.EventType.TABLE);
         for (Attribute attributes : table.getTableDefinition().getAttributeList()) {
             metaStreamEventForTable.addOutputData(attributes);
         }
         metaStreamEventForTable.addInputDefinition(table.getTableDefinition());
-
         metaStateEvent.addEvent(metaStreamEventWithDeletePara);
         metaStateEvent.addEvent(metaStreamEventForTable);
-
         TableDefinition definition = table.getTableDefinition();
-        return new MatchingMetaInfoHolder(metaStateEvent,
-                0, 1, deleteTableDefinition, definition, 0);
+        return new MatchingMetaInfoHolder(metaStateEvent, 0, 1, deleteTableDefinition, definition, 0);
     }
 
     /**
@@ -276,7 +266,7 @@ public class IncrementalDataPurging implements Runnable {
     public void executeIncrementalDataPurging() {
         StringBuilder tableNames = new StringBuilder();
         if (isPurgingEnabled()) {
-            if (Objects.nonNull(scheduledPurgingTaskStatus)) {
+            if (scheduledPurgingTaskStatus != null) {
                 scheduledPurgingTaskStatus.cancel(true);
                 scheduledPurgingTaskStatus = siddhiAppContext.getScheduledExecutorService().
                         scheduleWithFixedDelay(this, purgeExecutionInterval, purgeExecutionInterval,
@@ -306,7 +296,6 @@ public class IncrementalDataPurging implements Runnable {
         StreamEvent streamEvent = streamEventPool.borrowEvent();
         streamEvent.setTimestamp(timestamp);
         streamEvent.setOutputData(values);
-
         StateEvent stateEvent = new StateEvent(2, 1);
         stateEvent.addEvent(0, streamEvent);
         return stateEvent;

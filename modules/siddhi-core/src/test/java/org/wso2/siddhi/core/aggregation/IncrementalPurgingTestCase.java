@@ -40,18 +40,13 @@ public class IncrementalPurgingTestCase {
     public void incrementalPurgingTest1() {
         LOG.info("incrementalPurgingTest1");
         SiddhiManager siddhiManager = new SiddhiManager();
-
-        String stockStream = "" +
-                " define stream stockStream (arrival long, symbol string, price float, volume int); ";
-
-        String query = "" +
-                " @info(name = 'query1') " +
+        String stockStream = " define stream stockStream (arrival long, symbol string, price float, volume int); ";
+        String query = " @info(name = 'query1') " +
                 " @purge(enable='true',interval='1 min',@retentionPeriod(sec='120 sec',min='2 h',hours='25 h'))" +
                 " define aggregation stockAggregation " +
                 " from stockStream " +
                 " select sum(price) as sumPrice " +
                 " aggregate by arrival every sec...min";
-
         siddhiManager.createSiddhiAppRuntime(stockStream + query);
     }
 
@@ -60,9 +55,8 @@ public class IncrementalPurgingTestCase {
         LOG.info("incrementalPurgingTest2");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String stockStream =
-                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
-                        "quantity int);";
+        String stockStream = " define stream stockStream (symbol string, price float, lastClosingPrice float," +
+                " volume long ,quantity int);";
         String query = "  @purge(enable='true',interval='5 sec',@retentionPeriod(sec='120 sec',min='all',hours='all'" +
                 "                ,days='all',months='all',years='all'))  " +
                 "define aggregation stockAggregation " +
@@ -71,9 +65,7 @@ public class IncrementalPurgingTestCase {
                 "as lastTradeValue  " +
                 "group by symbol " +
                 "aggregate every sec...years ;";
-
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
-
         InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
         siddhiAppRuntime.start();
 
@@ -81,16 +73,12 @@ public class IncrementalPurgingTestCase {
         Thread.sleep(1000);
         stockStreamInputHandler.send(new Object[]{"WSO2", 70f, null, 40L, 10});
         Thread.sleep(1000);
-
         stockStreamInputHandler.send(new Object[]{"WSO2", 60f, 44f, 200L, 56});
         Thread.sleep(1000);
-
         stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 16});
         Thread.sleep(1000);
-
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26});
         Thread.sleep(1000);
-
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96});
         Thread.sleep(1000);
 
@@ -112,10 +100,9 @@ public class IncrementalPurgingTestCase {
     public void incrementalPurgingTestCase3() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String stockStream =
-                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
-                        "quantity int, timestamp long); ";
-        String query = "@purge(enable='true',interval='10 sec',@retentionPeriod(sec='120 sec',min='all',hours='all'," +
+        String stockStream = "define stream stockStream (symbol string, price float, lastClosingPrice float, " +
+                "volume long , quantity int, timestamp long); ";
+        String query = " @purge(enable='true',interval='10 sec',@retentionPeriod(sec='120 sec',min='all',hours='all'," +
                 "days='all',months='all',years='all'))   " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
@@ -124,37 +111,27 @@ public class IncrementalPurgingTestCase {
                 "aggregate by timestamp every sec...year ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
-
         try {
             InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
             siddhiAppRuntime.start();
-
             // Thursday, June 1, 2017 4:05:50 AM
             stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, 1496289950000L});
             Thread.sleep(1000);
-
             // Thursday, June 1, 2017 4:05:51 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 16, 1496289951011L});
             Thread.sleep(1000);
-
-
             // Thursday, June 1, 2017 4:05:52 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 400f, null, 200L, 9, 1496289952000L});
             Thread.sleep(1000);
-
             // Thursday, June 1, 2017 4:05:50 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 900f, null, 200L, 60, 1496289950000L});
             Thread.sleep(1000);
-
             stockStreamInputHandler.send(new Object[]{"WSO2", 500f, null, 200L, 7, 1496289951011L});
             Thread.sleep(1000);
-
             // Thursday, June 1, 2017 4:05:53 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             Thread.sleep(1000);
-
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 96, 1496289953000L});
-
             Thread.sleep(1000);
 
             Event[] events = siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
@@ -165,7 +142,6 @@ public class IncrementalPurgingTestCase {
             for (Event event : events) {
                 eventsList.add(event.getData());
             }
-
             List<Object[]> expected = Arrays.asList(
                     new Object[]{1496289950000L, "WSO2", 50.0},
                     new Object[]{1496289950000L, "IBM", 900.0},
@@ -175,17 +151,14 @@ public class IncrementalPurgingTestCase {
                     new Object[]{1496289953000L, "IBM", 100.0},
                     new Object[]{1496289953000L, "WSO2", 100.0}
             );
-
             AssertJUnit.assertTrue("Data Matched",
                     SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
             Thread.sleep(80000);
             events = siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
                     "'seconds' select AGG_TIMESTAMP, symbol, totalPrice ");
             EventPrinter.print(events);
-
         } finally {
             siddhiAppRuntime.shutdown();
         }
     }
-
 }
