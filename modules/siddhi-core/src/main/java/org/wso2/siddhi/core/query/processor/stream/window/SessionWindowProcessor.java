@@ -64,9 +64,10 @@ import static java.util.stream.Collectors.toMap;
                 "that belong to a specific session are identified by a grouping attribute (i.e., a session key). A " +
                 "session gap period is specified to determine the time period after which the session is considered " +
                 "to be expired. A new event that arrives with a specific value for the session key is matched with" +
-                " the session window with the same session key\n " +
-                " A latency period can be specified in order to include events that arrive late (i.e., after the " +
-                "expiration of the session) when performing aggregations for the relevant session.\n" +
+                " the session window with the same session key.\n " +
+                " When performing aggregations for a specific session, you can include events with the matching " +
+                "session key that arrive after the session is expired if required. This is done by specifying a " +
+                "latency time period that is less than the session gap period.\n" +
                 "To have aggregate functions with session windows, the events need to be grouped by the " +
                 "session key via a 'group by' clause.",
         parameters = {
@@ -85,7 +86,7 @@ import static java.util.stream.Collectors.toMap;
         },
         examples = {
                 @Example(
-                        syntax = "define stream purchaseEventStream "
+                        syntax = "define stream PurchaseEventStream "
                                 + "(user string, item_number int, price float, quantity int);\n"
                                 + "\n"
                                 + "@info(name='query0) \n"
