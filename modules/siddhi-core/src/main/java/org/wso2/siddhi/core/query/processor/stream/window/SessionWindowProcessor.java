@@ -62,7 +62,7 @@ import static java.util.stream.Collectors.toMap;
         namespace = "",
         description = "This is a session window that holds events that belong to a specific session. The events " +
                 "that belong to a specific session are identified by a grouping attribute (i.e., a session key). A " +
-                "session gap period is specified to determing the time period after which the session is considered " +
+                "session gap period is specified to determine the time period after which the session is considered " +
                 "to be expired. A new event that arrives with a specific value for the session key is matched with" +
                 " the session window with the same session key\n " +
                 " A latency period can be specified in order to include events that arrive late (i.e., after the " +
@@ -72,7 +72,7 @@ import static java.util.stream.Collectors.toMap;
         parameters = {
                 @Parameter(name = "window.session",
                         description = "The time period for which the session considered is valid. This is specified" +
-                                " in seconds, minutes and milliseconds. ",
+                                " in seconds, minutes, or milliseconds.",
                         type = {DataType.INT, DataType.LONG, DataType.TIME}),
                 @Parameter(name = "window.key",
                         description = "The grouping attribute for events.",
