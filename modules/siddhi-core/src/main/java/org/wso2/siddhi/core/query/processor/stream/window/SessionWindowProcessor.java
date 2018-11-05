@@ -73,7 +73,7 @@ import static java.util.stream.Collectors.toMap;
         parameters = {
                 @Parameter(name = "window.session",
                         description = "The time period for which the session considered is valid. This is specified" +
-                                " in seconds, minutes, or milliseconds.",
+                                " in seconds, minutes, or milliseconds (i.e., 'min', 'sec', or 'ms'.",
                         type = {DataType.INT, DataType.LONG, DataType.TIME}),
                 @Parameter(name = "window.key",
                         description = "The grouping attribute for events.",
