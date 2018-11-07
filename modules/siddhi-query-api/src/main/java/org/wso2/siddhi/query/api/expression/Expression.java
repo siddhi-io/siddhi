@@ -264,13 +264,13 @@ public abstract class Expression implements SiddhiElement {
                         return Expression.Time.month(timeValue).value();
                 }
             } else {
-                throw new SiddhiAppValidationException("Provided retention parameter cannot be identified. retention " +
+                throw new SiddhiAppValidationException("Provided retention value cannot be identified. retention " +
                         "period: " + value + ".");
             }
         }
 
         public static TimePeriod.Duration normalizeDuration(String value) {
-            switch (value) {
+            switch (value.toLowerCase()) {
                 case "sec":
                 case "seconds":
                 case "second":
