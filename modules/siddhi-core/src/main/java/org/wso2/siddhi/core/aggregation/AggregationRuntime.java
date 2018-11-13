@@ -278,7 +278,6 @@ public class AggregationRuntime implements MemoryCalculable {
                                     + TimePeriod.Duration.MONTHS + ", " + TimePeriod.Duration.YEARS + ".");
                 }
             }
-
         } else {
             throw new SiddhiAppCreationException("Syntax Error: Aggregation join query must contain a `per` " +
                     "definition for granularity");
