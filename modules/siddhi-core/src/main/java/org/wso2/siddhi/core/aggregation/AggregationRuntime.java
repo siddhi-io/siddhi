@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
@@ -45,6 +46,7 @@ import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.AggregationDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.AttributeFunction;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
@@ -55,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
+import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
 /**
  * Aggregation runtime managing aggregation operations for aggregation definition.
@@ -262,6 +265,20 @@ public class AggregationRuntime implements MemoryCalculable {
                                 + perExpressionExecutor.getReturnType(),
                         per.getQueryContextStartIndex(), per.getQueryContextEndIndex());
             }
+            // Additional Per time function verification at compile time if it is a constant
+            if (perExpressionExecutor instanceof ConstantExpressionExecutor) {
+                String perValue = ((ConstantExpressionExecutor) perExpressionExecutor).getValue().toString();
+                try {
+                    normalizeDuration(perValue);
+                } catch (SiddhiAppValidationException e) {
+                    throw new SiddhiAppValidationException(
+                            "Aggregation Query's per value is expected to be of a valid time function of the " +
+                                    "following " + TimePeriod.Duration.SECONDS + ", " + TimePeriod.Duration.MINUTES
+                                    + ", " + TimePeriod.Duration.HOURS + ", " + TimePeriod.Duration.DAYS + ", "
+                                    + TimePeriod.Duration.MONTHS + ", " + TimePeriod.Duration.YEARS + ".");
+                }
+            }
+
         } else {
             throw new SiddhiAppCreationException("Syntax Error: Aggregation join query must contain a `per` " +
                     "definition for granularity");

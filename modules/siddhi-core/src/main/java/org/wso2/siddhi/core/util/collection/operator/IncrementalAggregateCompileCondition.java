@@ -37,10 +37,13 @@ import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
 import org.wso2.siddhi.query.api.definition.AggregationDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
 /**
  * Defines the logic to find a matching event from an incremental aggregator (retrieval from incremental aggregator),
@@ -117,7 +120,17 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
 
         // Retrieve per value
         String perValueAsString = perExpressionExecutor.execute(matchingEvent).toString();
-        TimePeriod.Duration perValue = TimePeriod.Duration.valueOf(perValueAsString.toUpperCase());
+        TimePeriod.Duration perValue;
+        try {
+            // Per time function verification
+            perValue = normalizeDuration(perValueAsString);
+        } catch (SiddhiAppValidationException e) {
+            throw new SiddhiAppRuntimeException(
+                    "Aggregation Query's per value is expected to be of a valid time function of the " +
+                            "following " + TimePeriod.Duration.SECONDS + ", " + TimePeriod.Duration.MINUTES + ", "
+                            + TimePeriod.Duration.HOURS + ", " + TimePeriod.Duration.DAYS + ", "
+                            + TimePeriod.Duration.MONTHS + ", " + TimePeriod.Duration.YEARS + ".");
+        }
         if (!incrementalExecutorMap.keySet().contains(perValue)) {
             throw new SiddhiAppRuntimeException("The aggregate values for " + perValue.toString()
                     + " granularity cannot be provided since aggregation definition " +
