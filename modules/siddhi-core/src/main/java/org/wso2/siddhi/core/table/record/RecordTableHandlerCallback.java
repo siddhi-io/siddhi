@@ -87,4 +87,18 @@ public class RecordTableHandlerCallback {
             return null;
         }
     }
+
+    @Deprecated
+    public Iterator<Object[]> query(Map<String, Object> parameterMap, CompiledCondition compiledCondition,
+                                    CompiledSelection compiledSelection)
+            throws ConnectionUnavailableException {
+        if (abstractRecordTable instanceof AbstractQueryableRecordTable) {
+            return ((AbstractQueryableRecordTable) abstractRecordTable).query(parameterMap, compiledCondition,
+                    compiledSelection, null);
+        } else {
+            log.error("Record Table " + this.abstractRecordTable.getTableDefinition().getId() +
+                    " used is not a Queryable Record Table.");
+            return null;
+        }
+    }
 }

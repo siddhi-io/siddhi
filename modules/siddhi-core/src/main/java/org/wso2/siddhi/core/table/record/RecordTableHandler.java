@@ -20,6 +20,7 @@ import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
 import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
+import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 
 import java.util.Iterator;
@@ -188,10 +189,19 @@ public abstract class RecordTableHandler {
             throws ConnectionUnavailableException;
 
 
+    @Deprecated
     public Iterator<Object[]> query(long timestamp, Map<String, Object> parameterMap,
                                     CompiledCondition compiledCondition, CompiledSelection compiledSelection)
             throws ConnectionUnavailableException {
         return query(timestamp, parameterMap, compiledCondition, compiledSelection, recordTableHandlerCallback);
+    }
+
+    public Iterator<Object[]> query(long timestamp, Map<String, Object> parameterMap,
+                                    CompiledCondition compiledCondition, CompiledSelection compiledSelection,
+                                    Attribute[] outputAttributes)
+            throws ConnectionUnavailableException {
+        return query(timestamp, parameterMap, compiledCondition, compiledSelection, outputAttributes,
+                recordTableHandlerCallback);
     }
 
     /**
@@ -205,9 +215,17 @@ public abstract class RecordTableHandler {
      * @throws ConnectionUnavailableException
      * @return RecordIterator of matching records
      */
+    @Deprecated
     public abstract Iterator<Object[]> query(long timestamp, Map<String, Object> parameterMap,
                                              CompiledCondition compiledCondition,
                                              CompiledSelection compiledSelection,
+                                             RecordTableHandlerCallback recordTableHandlerCallback)
+            throws ConnectionUnavailableException;
+
+    public abstract Iterator<Object[]> query(long timestamp, Map<String, Object> parameterMap,
+                                             CompiledCondition compiledCondition,
+                                             CompiledSelection compiledSelection,
+                                             Attribute[] outputAttributes,
                                              RecordTableHandlerCallback recordTableHandlerCallback)
             throws ConnectionUnavailableException;
 }
