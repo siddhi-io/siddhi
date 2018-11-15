@@ -72,7 +72,6 @@ import org.wso2.siddhi.query.api.expression.Expression;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -289,7 +288,7 @@ public class StoreQueryParser {
         QuerySelector querySelector;
         metaStreamEvent.setEventType(EventType.TABLE);
 
-        if (table instanceof QueryableProcessor) {
+        if (table instanceof QueryableProcessor && storeQuery.getType() == StoreQuery.StoreQueryType.FIND) {
             initMetaStreamEvent(metaStreamEvent, table.getTableDefinition());
             matchingMetaInfoHolder = generateMatchingMetaInfoHolder(metaStreamEvent, table.getTableDefinition());
             CompiledCondition compiledCondition = table.compileCondition(onCondition, matchingMetaInfoHolder,
@@ -297,12 +296,9 @@ public class StoreQueryParser {
             List<Attribute> expectedOutputAttributes = buildExpectedOutputAttributes(storeQuery, siddhiAppContext,
                     tableMap, queryName, metaPosition, matchingMetaInfoHolder);
 
-            MetaStreamEvent metaStreamEventForSelect = new MetaStreamEvent();
-            metaStreamEventForSelect.setInputReferenceId(storeQuery.getInputStore().getStoreId());
-            initMetaStreamEvent(metaStreamEventForSelect, generateTableDefinitionFromStoreQuery(storeQuery));
-
             MatchingMetaInfoHolder matchingMetaInfoHolderForSelection = generateMatchingMetaInfoHolder(
-                    metaStreamEventForSelect, generateTableDefinitionFromStoreQuery(storeQuery));
+                    metaStreamEvent, generateTableDefinitionFromStoreQuery(storeQuery, expectedOutputAttributes),
+                    table.getTableDefinition());
             CompiledSelection compiledSelection = ((QueryableProcessor) table).compileSelection(
                     storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolderForSelection,
                     siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
@@ -472,10 +468,11 @@ public class StoreQueryParser {
                 definition, 0);
     }
 
-    private static AbstractDefinition generateTableDefinitionFromStoreQuery(StoreQuery storeQuery) {
+    private static AbstractDefinition generateTableDefinitionFromStoreQuery(StoreQuery storeQuery,
+                                                                            List<Attribute> expectedOutputAttributes) {
         TableDefinition tableDefinition = TableDefinition.id(storeQuery.getInputStore().getStoreId());
-        for (OutputAttribute outputAttribute : storeQuery.getSelector().getSelectionList()) {
-            tableDefinition.attribute(outputAttribute.getRename(), null);
+        for (Attribute attribute: expectedOutputAttributes) {
+            tableDefinition.attribute(attribute.getName(), attribute.getType());
         }
         return tableDefinition;
     }
