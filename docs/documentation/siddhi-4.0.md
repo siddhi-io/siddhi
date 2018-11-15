@@ -1216,9 +1216,9 @@ Key Word|Description
 
 Here the `not` pattern can be followed by either an `and` clause or the effective period of `not` can be concluded after a given `<time period>`. Further in Siddhi more than two streams cannot be matched with logical conditions using `and`, `or`, or `not` clauses at this point.
 
-##### Detecting non-occuring events
+##### Detecting non-occurring events
 
-Siddhi allows you to detect non-occuring events via multiple combinations of the key words specified above as shown in the table below.
+Siddhi allows you to detect non-occurring events via multiple combinations of the key words specified above as shown in the table below.
 
 In the patterns listed, P* can be either a regular event pattern, an absent event pattern or a logical pattern.
 
