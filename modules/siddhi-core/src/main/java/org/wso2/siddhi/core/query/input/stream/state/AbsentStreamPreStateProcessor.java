@@ -92,13 +92,16 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
             // 'every' keyword is not used and already a pattern is processed
             return;
         }
-        synchronized (this) {
+        lock.lock();
+        try {
             if (stateType == StateInputStream.Type.SEQUENCE) {
                 newAndEveryStateEventList.clear();
                 newAndEveryStateEventList.add(stateEvent);
             } else {
                 newAndEveryStateEventList.add(stateEvent);
             }
+        } finally {
+            lock.unlock();
         }
         // If this is the first processor, nothing to receive from previous patterns
         if (!isStartState) {
@@ -110,18 +113,23 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     @Override
     public void resetState() {
 
-        // Clear the events added by the previous processor
-        pendingStateEventList.clear();
-        if (isStartState) {
-            if (stateType == StateInputStream.Type.SEQUENCE &&
-                    thisStatePostProcessor.nextEveryStatePreProcessor == null &&
-                    !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePreProcessor)
-                            .pendingStateEventList.isEmpty()) {
-                // Sequence without 'every' keyword and the next processor has pending events to be processed
-                return;
+        lock.lock();
+        try {
+            // Clear the events added by the previous processor
+            pendingStateEventList.clear();
+            if (isStartState) {
+                if (stateType == StateInputStream.Type.SEQUENCE &&
+                        thisStatePostProcessor.nextEveryStatePreProcessor == null &&
+                        !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePreProcessor)
+                                .pendingStateEventList.isEmpty()) {
+                    // Sequence without 'every' keyword and the next processor has pending events to be processed
+                    return;
+                }
+                // Start state needs a new event
+                init();
             }
-            // Start state needs a new event
-            init();
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -135,10 +143,11 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         boolean notProcessed = true;
         long currentTime = complexEventChunk.getFirst().getTimestamp();
         if (currentTime >= this.lastArrivalTime + waitingTime) {
-            synchronized (this) {
+            lock.lock();
+            try {
                 // If the process method is called, it is guaranteed that the waitingTime is passed
-                boolean initialize;
-                initialize = isStartState && newAndEveryStateEventList.isEmpty() && pendingStateEventList.isEmpty();
+                boolean initialize = isStartState && newAndEveryStateEventList.isEmpty()
+                        && pendingStateEventList.isEmpty();
                 if (initialize && stateType == StateInputStream.Type.SEQUENCE &&
                         thisStatePostProcessor.nextEveryStatePreProcessor == null && this.lastArrivalTime > 0) {
                     // Sequence with no every but an event arrived
@@ -181,6 +190,8 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
                     retEventChunk.remove();
                     sendEvent(stateEvent);
                 }
+            } finally {
+                lock.unlock();
             }
             this.lastArrivalTime = 0;
         }

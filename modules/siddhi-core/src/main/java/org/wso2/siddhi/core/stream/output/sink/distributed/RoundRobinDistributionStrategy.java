@@ -77,11 +77,11 @@ public class RoundRobinDistributionStrategy extends DistributionStrategy {
      */
     @Override
     public List<Integer> getDestinationsToPublish(Object payload, DynamicOptions transportOptions) {
-        if (destinationIds.isEmpty()) {
+        if (activeDestinationIds.isEmpty()) {
             return DistributionStrategy.EMPTY_RETURN_VALUE;
         }
 
-        int currentDestinationCount = destinationIds.size();
+        int currentDestinationCount = activeDestinationIds.size();
         if (destinationCount != currentDestinationCount) {
             destinationCount = currentDestinationCount;
         }
@@ -91,7 +91,7 @@ public class RoundRobinDistributionStrategy extends DistributionStrategy {
         }
 
         if (destinationCount > 0) {
-            returnValue.add(destinationIds.get(count++ % destinationCount));
+            returnValue.add(activeDestinationIds.get(count++ % destinationCount));
         }
 
         return returnValue;

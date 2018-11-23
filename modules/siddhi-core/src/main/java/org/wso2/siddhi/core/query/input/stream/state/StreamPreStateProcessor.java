@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created on 12/17/14.
@@ -57,6 +58,7 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     protected ComplexEventChunk<StateEvent> currentStateEventChunk = new ComplexEventChunk<StateEvent>(false);
     protected LinkedList<StateEvent> pendingStateEventList = new LinkedList<StateEvent>();
     protected LinkedList<StateEvent> newAndEveryStateEventList = new LinkedList<StateEvent>();
+    protected ReentrantLock lock = new ReentrantLock();
 
     protected StateEventPool stateEventPool;
     //  private StreamEventPool streamEventPool;
@@ -210,19 +212,28 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         //            newAndEveryStateEventList.clear();
         //            pendingStateEventList.clear();
         //        }
-        if (stateType == StateInputStream.Type.SEQUENCE) {
-            if (newAndEveryStateEventList.isEmpty()) {
+        lock.lock();
+        try {
+            if (stateType == StateInputStream.Type.SEQUENCE) {
+                if (newAndEveryStateEventList.isEmpty()) {
+                    newAndEveryStateEventList.add(stateEvent);
+                }
+            } else {
                 newAndEveryStateEventList.add(stateEvent);
             }
-        } else {
-            newAndEveryStateEventList.add(stateEvent);
-
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
     public void addEveryState(StateEvent stateEvent) {
-        newAndEveryStateEventList.add(stateEventCloner.copyStateEvent(stateEvent));
+        lock.lock();
+        try {
+            newAndEveryStateEventList.add(stateEventCloner.copyStateEvent(stateEvent));
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void stateChanged() {
@@ -251,23 +262,33 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
 
     @Override
     public void resetState() {
-        pendingStateEventList.clear();
-        if (isStartState && newAndEveryStateEventList.isEmpty()) {
-            //        if (isStartState && stateType == StateInputStream.Type.SEQUENCE && newAndEveryStateEventList
-            // .isEmpty()) {
-            if (stateType == StateInputStream.Type.SEQUENCE && thisStatePostProcessor.nextEveryStatePreProcessor ==
-                    null && !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePreProcessor)
-                    .pendingStateEventList.isEmpty()) {
-                return;
+        lock.lock();
+        try {
+            pendingStateEventList.clear();
+            if (isStartState && newAndEveryStateEventList.isEmpty()) {
+                //        if (isStartState && stateType == StateInputStream.Type.SEQUENCE && newAndEveryStateEventList
+                // .isEmpty()) {
+                if (stateType == StateInputStream.Type.SEQUENCE && thisStatePostProcessor.nextEveryStatePreProcessor ==
+                        null && !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePreProcessor)
+                        .pendingStateEventList.isEmpty()) {
+                    return;
+                }
+                init();
             }
-            init();
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
     public void updateState() {
-        pendingStateEventList.addAll(newAndEveryStateEventList);
-        newAndEveryStateEventList.clear();
+        lock.lock();
+        try {
+            pendingStateEventList.addAll(newAndEveryStateEventList);
+            newAndEveryStateEventList.clear();
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -275,14 +296,16 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
-        for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
-            StateEvent stateEvent = iterator.next();
-            if (withinStates.size() > 0) {
-                if (isExpired(stateEvent, streamEvent.getTimestamp())) {
-                    iterator.remove();
-                    continue;
+        lock.lock();
+        try {
+            for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
+                StateEvent stateEvent = iterator.next();
+                if (withinStates.size() > 0) {
+                    if (isExpired(stateEvent, streamEvent.getTimestamp())) {
+                        iterator.remove();
+                        continue;
+                    }
                 }
-            }
 //                if (Math.abs(stateEvent.getTimestamp() - streamEvent.getTimestamp()) > withinStates) {
 //                    iterator.remove();
 ////                    switch (stateType) {
@@ -300,28 +323,31 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
 //                    continue;
 //                }
 //            }
-            stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
-            process(stateEvent);
-            if (this.thisLastProcessor.isEventReturned()) {
-                this.thisLastProcessor.clearProcessedEvent();
-                returnEventChunk.add(stateEvent);
-            }
-            if (stateChanged) {
-                iterator.remove();
-            } else {
-                switch (stateType) {
-                    case PATTERN:
-                        stateEvent.setEvent(stateId, null);
-                        break;
-                    case SEQUENCE:
-                        stateEvent.setEvent(stateId, null);
-                        iterator.remove();
-                        if (thisStatePostProcessor.callbackPreStateProcessor != null) {
-                            thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
-                        }
-                        break;
+                stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
+                process(stateEvent);
+                if (this.thisLastProcessor.isEventReturned()) {
+                    this.thisLastProcessor.clearProcessedEvent();
+                    returnEventChunk.add(stateEvent);
+                }
+                if (stateChanged) {
+                    iterator.remove();
+                } else {
+                    switch (stateType) {
+                        case PATTERN:
+                            stateEvent.setEvent(stateId, null);
+                            break;
+                        case SEQUENCE:
+                            stateEvent.setEvent(stateId, null);
+                            iterator.remove();
+                            if (thisStatePostProcessor.callbackPreStateProcessor != null) {
+                                thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
+                            }
+                            break;
+                    }
                 }
             }
+        } finally {
+            lock.unlock();
         }
         return returnEventChunk;
     }
