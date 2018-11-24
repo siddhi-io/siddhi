@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Logical and & or processor.
+ * Logical and &amp; or processor.
  */
 public class LogicalPreStateProcessor extends StreamPreStateProcessor {
 
