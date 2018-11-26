@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.StreamEventShallowCloner;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
@@ -160,7 +161,7 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         }
 
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 5);
-        StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent, this.streamEventPool);
+        StreamEventCloner streamEventCloner = new StreamEventShallowCloner(metaStreamEvent, this.streamEventPool);
         OutputStream.OutputEventType outputEventType = windowDefinition.getOutputEventType();
         boolean outputExpectsExpiredEvents = outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS;
 

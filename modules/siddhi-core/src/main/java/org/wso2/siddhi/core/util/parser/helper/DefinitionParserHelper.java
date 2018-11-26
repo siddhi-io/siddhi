@@ -22,6 +22,7 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.StreamEventShallowCloner;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.function.Script;
 import org.wso2.siddhi.core.stream.StreamJunction;
@@ -167,7 +168,7 @@ public class DefinitionParserHelper {
             }
 
             StreamEventPool tableStreamEventPool = new StreamEventPool(tableMetaStreamEvent, 10);
-            StreamEventCloner tableStreamEventCloner = new StreamEventCloner(tableMetaStreamEvent,
+            StreamEventCloner tableStreamEventCloner = new StreamEventShallowCloner(tableMetaStreamEvent,
                     tableStreamEventPool);
 
             Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_STORE,

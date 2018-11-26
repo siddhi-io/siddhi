@@ -25,8 +25,8 @@ import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.StateEventCloner;
 import org.wso2.siddhi.core.event.state.StateEventPool;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.StreamEventShallowCloner;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
 import org.wso2.siddhi.core.query.selector.attribute.processor.executor.AbstractAggregationAttributeExecutor;
@@ -133,7 +133,7 @@ public class WrappedSnapshotOutputRateLimiter extends OutputRateLimiter {
                                                                        stateEventPool));
         } else {
             StreamEventPool streamEventPool = new StreamEventPool((MetaStreamEvent) metaComplexEvent, 5);
-            outputRateLimiter.setStreamEventCloner(new StreamEventCloner((MetaStreamEvent) metaComplexEvent,
+            outputRateLimiter.setStreamEventCloner(new StreamEventShallowCloner((MetaStreamEvent) metaComplexEvent,
                                                                          streamEventPool));
         }
 

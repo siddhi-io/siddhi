@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.StreamEventShallowCloner;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
@@ -81,10 +82,11 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         this.aggregateMetaStreamEvent = aggregateMetaSteamEvent;
 
         this.streamEventPoolForTableMeta = new StreamEventPool(tableMetaStreamEvent, 10);
-        this.tableEventCloner = new StreamEventCloner(tableMetaStreamEvent, streamEventPoolForTableMeta);
+        this.tableEventCloner = new StreamEventShallowCloner(tableMetaStreamEvent, streamEventPoolForTableMeta);
 
         this.streamEventPoolForAggregateMeta = new StreamEventPool(aggregateMetaSteamEvent, 10);
-        this.aggregateEventCloner = new StreamEventCloner(aggregateMetaSteamEvent, streamEventPoolForAggregateMeta);
+        this.aggregateEventCloner = new StreamEventShallowCloner(aggregateMetaSteamEvent,
+                streamEventPoolForAggregateMeta);
         this.additionalAttributes = additionalAttributes;
         this.alteredMatchingMetaInfoHolder = alteredMatchingMetaInfoHolder;
         this.perExpressionExecutor = perExpressionExecutor;

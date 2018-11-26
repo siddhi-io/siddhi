@@ -25,8 +25,9 @@ import org.wso2.siddhi.core.event.state.MetaStateEventAttribute;
 import org.wso2.siddhi.core.event.state.StateEventCloner;
 import org.wso2.siddhi.core.event.state.StateEventPool;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import org.wso2.siddhi.core.event.stream.StreamEventDeepCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.StreamEventShallowCloner;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
@@ -44,6 +45,7 @@ import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.MemoryUsageTracker;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
+import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.List;
@@ -65,6 +67,7 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 public class QueryParserHelper {
 
     public static void reduceMetaComplexEvent(MetaComplexEvent metaComplexEvent) {
+
         if (metaComplexEvent instanceof MetaStateEvent) {
             MetaStateEvent metaStateEvent = (MetaStateEvent) metaComplexEvent;
             for (MetaStateEventAttribute attribute : metaStateEvent.getOutputDataAttributes()) {
@@ -87,6 +90,7 @@ public class QueryParserHelper {
      * @param metaStreamEvent MetaStreamEvent
      */
     private static synchronized void reduceStreamAttributes(MetaStreamEvent metaStreamEvent) {
+
         for (Attribute attribute : metaStreamEvent.getOutputData()) {
             if (metaStreamEvent.getBeforeWindowData().contains(attribute)) {
                 metaStreamEvent.getBeforeWindowData().remove(attribute);
@@ -170,12 +174,24 @@ public class QueryParserHelper {
     private static void initSingleStreamRuntime(SingleStreamRuntime singleStreamRuntime, int streamEventChainIndex,
                                                 MetaComplexEvent metaComplexEvent, StateEventPool stateEventPool,
                                                 LockWrapper lockWrapper, String queryName) {
+
         MetaStreamEvent metaStreamEvent;
+        boolean deepCopy = false;
 
         if (metaComplexEvent instanceof MetaStateEvent) {
             metaStreamEvent = ((MetaStateEvent) metaComplexEvent).getMetaStreamEvent(streamEventChainIndex);
         } else {
             metaStreamEvent = (MetaStreamEvent) metaComplexEvent;
+        }
+        outerloop:
+        for (AbstractDefinition streamDefs : metaStreamEvent.getInputDefinitions()) {
+            List<Attribute> attrTypes = streamDefs.getAttributeList();
+            for (Attribute attr : attrTypes) {
+                if (attr.getType().equals(Attribute.Type.OBJECT)) {
+                    deepCopy = true;
+                    break outerloop;
+                }
+            }
         }
         StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 5);
         ProcessStreamReceiver processStreamReceiver = singleStreamRuntime.getProcessStreamReceiver();
@@ -190,8 +206,13 @@ public class QueryParserHelper {
                 ((SchedulingProcessor) processor).getScheduler().init(lockWrapper, queryName);
             }
             if (processor instanceof AbstractStreamProcessor) {
-                ((AbstractStreamProcessor) processor)
-                        .setStreamEventCloner(new StreamEventCloner(metaStreamEvent, streamEventPool));
+                if (deepCopy) {
+                    ((AbstractStreamProcessor) processor)
+                            .setStreamEventCloner(new StreamEventDeepCloner(metaStreamEvent, streamEventPool));
+                } else {
+                    ((AbstractStreamProcessor) processor)
+                            .setStreamEventCloner(new StreamEventShallowCloner(metaStreamEvent, streamEventPool));
+                }
                 ((AbstractStreamProcessor) processor).constructStreamEventPopulater(metaStreamEvent,
                         streamEventChainIndex);
             }
@@ -211,8 +232,13 @@ public class QueryParserHelper {
             if (stateEventPool != null && processor instanceof StreamPreStateProcessor) {
                 ((StreamPreStateProcessor) processor).setStateEventPool(stateEventPool);
                 ((StreamPreStateProcessor) processor).setStreamEventPool(streamEventPool);
-                ((StreamPreStateProcessor) processor)
-                        .setStreamEventCloner(new StreamEventCloner(metaStreamEvent, streamEventPool));
+                if (deepCopy) {
+                    ((StreamPreStateProcessor) processor)
+                            .setStreamEventCloner(new StreamEventDeepCloner(metaStreamEvent, streamEventPool));
+                } else {
+                    ((StreamPreStateProcessor) processor)
+                            .setStreamEventCloner(new StreamEventShallowCloner(metaStreamEvent, streamEventPool));
+                }
                 if (metaComplexEvent instanceof MetaStateEvent) {
                     ((StreamPreStateProcessor) processor).setStateEventCloner(
                             new StateEventCloner(((MetaStateEvent) metaComplexEvent), stateEventPool));
@@ -225,6 +251,7 @@ public class QueryParserHelper {
 
     public static LatencyTracker createLatencyTracker(SiddhiAppContext siddhiAppContext, String name, String type,
                                                       String function) {
+
         LatencyTracker latencyTracker = null;
         if (siddhiAppContext.getStatisticsManager() != null) {
             String metricName =
@@ -257,6 +284,7 @@ public class QueryParserHelper {
 
     public static ThroughputTracker createThroughputTracker(SiddhiAppContext siddhiAppContext, String name,
                                                             String type, String function) {
+
         ThroughputTracker throughputTracker = null;
         if (siddhiAppContext.getStatisticsManager() != null) {
             String metricName =
@@ -288,10 +316,10 @@ public class QueryParserHelper {
         return throughputTracker;
     }
 
-
     public static void registerMemoryUsageTracking(String name, Object value, String metricInfixQueries,
                                                    SiddhiAppContext siddhiAppContext,
                                                    MemoryUsageTracker memoryUsageTracker) {
+
         String metricName = siddhiAppContext.getSiddhiContext().getStatisticsConfiguration().getMetricPrefix() +
                 SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_SIDDHI_APPS +
                 SiddhiConstants.METRIC_DELIMITER + siddhiAppContext.getName() + SiddhiConstants.METRIC_DELIMITER +

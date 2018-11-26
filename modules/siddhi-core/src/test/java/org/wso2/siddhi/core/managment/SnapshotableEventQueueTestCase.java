@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.event.stream.Operation;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.StreamEventShallowCloner;
 import org.wso2.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import org.wso2.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
@@ -59,7 +60,7 @@ public class SnapshotableEventQueueTestCase {
         metaStreamEvent.addOutputData(new Attribute("price", Attribute.Type.FLOAT));
         metaStreamEvent.addOutputData(new Attribute("volume", Attribute.Type.LONG));
 
-        StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent,
+        StreamEventCloner streamEventCloner = new StreamEventShallowCloner(metaStreamEvent,
                 new StreamEventPool(metaStreamEvent, 5));
 
         SnapshotableStreamEventQueue snapshotableStreamEventQueue =
@@ -139,7 +140,7 @@ public class SnapshotableEventQueueTestCase {
         metaStreamEvent.addOutputData(new Attribute("price", Attribute.Type.FLOAT));
         metaStreamEvent.addOutputData(new Attribute("volume", Attribute.Type.LONG));
 
-        StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent,
+        StreamEventCloner streamEventCloner = new StreamEventShallowCloner(metaStreamEvent,
                 new StreamEventPool(metaStreamEvent, 5));
 
         SnapshotableStreamEventQueue snapshotableStreamEventQueue =
@@ -198,7 +199,7 @@ public class SnapshotableEventQueueTestCase {
         metaStreamEvent.addOutputData(new Attribute("price", Attribute.Type.FLOAT));
         metaStreamEvent.addOutputData(new Attribute("volume", Attribute.Type.LONG));
 
-        StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent,
+        StreamEventCloner streamEventCloner = new StreamEventShallowCloner(metaStreamEvent,
                 new StreamEventPool(metaStreamEvent, 5));
         SnapshotableStreamEventQueue snapshotableStreamEventQueue =
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
@@ -259,7 +260,7 @@ public class SnapshotableEventQueueTestCase {
         metaStreamEvent.addOutputData(new Attribute("price", Attribute.Type.FLOAT));
         metaStreamEvent.addOutputData(new Attribute("volume", Attribute.Type.LONG));
 
-        StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent,
+        StreamEventCloner streamEventCloner = new StreamEventShallowCloner(metaStreamEvent,
                 new StreamEventPool(metaStreamEvent, 5));
         SnapshotableStreamEventQueue snapshotableStreamEventQueue =
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
@@ -322,7 +323,7 @@ public class SnapshotableEventQueueTestCase {
         metaStreamEvent.addOutputData(new Attribute("price", Attribute.Type.FLOAT));
         metaStreamEvent.addOutputData(new Attribute("volume", Attribute.Type.LONG));
 
-        StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent,
+        StreamEventCloner streamEventCloner = new StreamEventShallowCloner(metaStreamEvent,
                 new StreamEventPool(metaStreamEvent, 5));
         SnapshotableStreamEventQueue snapshotableStreamEventQueue =
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
