@@ -790,6 +790,7 @@ Following are some inbuilt windows shipped with Siddhi. For more window types, s
 
 * [time](https://wso2.github.io/siddhi/api/latest/#time-window)
 * [timeBatch](https://wso2.github.io/siddhi/api/latest/#timebatch-window)
+* [batch](https://wso2.github.io/siddhi/api/latest/#batch-window)
 * [timeLength](https://wso2.github.io/siddhi/api/latest/#timelength-window)
 * [length](https://wso2.github.io/siddhi/api/latest/#length-window)
 * [lengthBatch](https://wso2.github.io/siddhi/api/latest/#lengthbatch-window)
