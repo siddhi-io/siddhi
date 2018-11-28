@@ -39,6 +39,7 @@ import java.util.List;
  */
 public abstract class DistributedTransport extends Sink {
     private static final Logger log = Logger.getLogger(DistributedTransport.class);
+    private String type;
     protected DistributionStrategy strategy;
     protected StreamDefinition streamDefinition;
     protected SiddhiAppContext siddhiAppContext;
@@ -88,11 +89,12 @@ public abstract class DistributedTransport extends Sink {
                      List<Element> payloadElementList, ConfigReader mapperConfigReader,
                      SiddhiAppContext siddhiAppContext, List<OptionHolder> destinationOptionHolders,
                      Annotation sinkAnnotation, DistributionStrategy strategy, String[] supportedDynamicOptions) {
+        this.type = type;
         this.strategy = strategy;
         this.supportedDynamicOptions = supportedDynamicOptions;
         init(streamDefinition, type, transportOptionHolder, sinkConfigReader, sinkMapper, mapType, mapOptionHolder,
                 sinkHandler, payloadElementList, mapperConfigReader, siddhiAppContext);
-        initTransport(sinkOptionHolder, destinationOptionHolders, sinkAnnotation, sinkConfigReader,
+        initTransport(sinkOptionHolder, destinationOptionHolders, sinkAnnotation, sinkConfigReader, strategy, type,
                 siddhiAppContext);
     }
 
@@ -102,6 +104,10 @@ public abstract class DistributedTransport extends Sink {
         StringBuilder errorMessages = null;
         List<Integer> destinationsToPublish = strategy.getDestinationsToPublish(payload, transportOptions);
         int destinationsToPublishSize = destinationsToPublish.size();
+        if (destinationsToPublishSize == 0) {
+            throw new ConnectionUnavailableException("Error on '" + siddhiAppContext.getName() + "' at Sink '" + type +
+                    "' stream '" + streamDefinition.getId() + "' as no connections are available to publish data.");
+        }
         for (Integer destinationId : destinationsToPublish) {
             try {
                 publish(payload, transportOptions, destinationId);
@@ -116,13 +122,17 @@ public abstract class DistributedTransport extends Sink {
             }
         }
 
-        if (errorCount > 0) {
+        if (errorCount == destinationsToPublish.size()) {
             throw new ConnectionUnavailableException("Error on '" + siddhiAppContext.getName() + "'. " + errorCount +
-                    "/" + destinationsToPublishSize + " connections failed while trying to publish with following" +
+                    "/" + destinationsToPublish.size() + " connections failed while trying to publish with following" +
                     " error messages:" + errorMessages.toString());
         }
     }
 
+    @Override
+    public boolean isConnected() {
+        return strategy.getActiveDestinationCount() > 0;
+    }
 
     /**
      * Supported dynamic options by the transport
@@ -140,7 +150,36 @@ public abstract class DistributedTransport extends Sink {
 
     public abstract void initTransport(OptionHolder sinkOptionHolder, List<OptionHolder> destinationOptionHolders,
                                        Annotation sinkAnnotation, ConfigReader sinkConfigReader,
-                                       SiddhiAppContext siddhiAppContext);
+                                       DistributionStrategy strategy, String type, SiddhiAppContext siddhiAppContext);
 
+    public void connectWithRetry() {
+        if (!isConnected()) {
+            isTryingToConnect.set(true);
+            try {
+                connect();
+            } catch (ConnectionUnavailableException ignored) {
 
+            }
+            int retryAttempt = 0;
+            while (strategy.getActiveDestinationCount() == 0 && retryAttempt < 4) {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ignored) {
+
+                }
+                retryAttempt++;
+            }
+        }
+    }
+
+    /**
+     * Connection callback to notify DistributionStrategy about new connection initiations and failures
+     */
+    public abstract class ConnectionCallback {
+
+        public abstract void connectionEstablished();
+
+        public abstract void connectionFailed();
+    }
 }
+

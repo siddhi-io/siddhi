@@ -23,7 +23,7 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.stream.output.sink.Sink;
 import org.wso2.siddhi.core.stream.output.sink.distributed.DistributedTransport;
-import org.wso2.siddhi.core.util.ExceptionUtil;
+import org.wso2.siddhi.core.stream.output.sink.distributed.DistributionStrategy;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.config.ConfigReader;
@@ -57,13 +57,15 @@ public class MultiClientDistributedSink extends DistributedTransport {
             transport.setConnected(false);
             strategy.destinationFailed(destinationId);
             log.warn("Failed to publish payload to destination ID " + destinationId);
+            transport.connectWithRetry();
             throw e;
         }
     }
 
     @Override
     public void initTransport(OptionHolder sinkOptionHolder, List<OptionHolder> destinationOptionHolders, Annotation
-            sinkAnnotation, ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
+            sinkAnnotation, ConfigReader sinkConfigReader, DistributionStrategy strategy, String type,
+                              SiddhiAppContext siddhiAppContext) {
         String transportType = sinkOptionHolder.validateAndGetStaticValue(SiddhiConstants.ANNOTATION_ELEMENT_TYPE);
         Extension sinkExtension = DefinitionParserHelper.constructExtension
                 (streamDefinition, SiddhiConstants.ANNOTATION_SINK, transportType, sinkAnnotation, SiddhiConstants
@@ -73,7 +75,8 @@ public class MultiClientDistributedSink extends DistributedTransport {
             Sink sink = (Sink) SiddhiClassLoader.loadExtensionImplementation(
                     sinkExtension, SinkExecutorExtensionHolder.getInstance(siddhiAppContext));
             destinationOption.merge(sinkOptionHolder);
-            sink.initOnlyTransport(streamDefinition, destinationOption, sinkConfigReader, siddhiAppContext);
+            sink.initOnlyTransport(streamDefinition, destinationOption, sinkConfigReader, type,
+                    new MultiClientConnectionCallback(transports.size(), strategy), siddhiAppContext);
             transports.add(sink);
         });
     }
@@ -91,33 +94,10 @@ public class MultiClientDistributedSink extends DistributedTransport {
      */
     @Override
     public void connect() throws ConnectionUnavailableException {
-        StringBuilder errorMessages = null;
-        int errorCount = 0;
-
-        for (int i = 0; i < transports.size(); i++) {
-            try {
-                Sink transport = transports.get(i);
-                if (!transport.isConnected()) {
-                    transport.connect();
-                    transport.setConnected(true);
-                    strategy.destinationAvailable(i);
-                    log.info("Connected to destination Id " + i);
-                }
-            } catch (ConnectionUnavailableException e) {
-                errorCount++;
-                if (errorMessages == null) {
-                    errorMessages = new StringBuilder();
-                }
-                errorMessages.append("[Destination").append(i).append("]:").append(e.getMessage());
-                log.warn(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                        " Failed to Connect to destination ID " + i);
+        for (Sink transport : transports) {
+            if (!transport.isConnected()) {
+                transport.connectWithRetry();
             }
-        }
-
-        if (errorCount > 0) {
-            throw new ConnectionUnavailableException("Error on '" + siddhiAppContext.getName() + "'. " + errorCount +
-                    "/" + transports.size() + " connections failed while trying to connect with following error " +
-                    "messages:" + errorMessages.toString());
         }
     }
 
@@ -167,6 +147,28 @@ public class MultiClientDistributedSink extends DistributedTransport {
                 Map<String, Object> transportState = (Map<String, Object>) state.get(Integer.toString(i));
                 transports.get(i).restoreState(transportState);
             }
+        }
+    }
+
+    /**
+     * Connection callback to notify DistributionStrategy about new connection initiations and failures
+     */
+    public class MultiClientConnectionCallback extends DistributedTransport.ConnectionCallback {
+
+        private final int destinationId;
+        private final DistributionStrategy strategy;
+
+        private MultiClientConnectionCallback(int destinationId, DistributionStrategy strategy) {
+            this.destinationId = destinationId;
+            this.strategy = strategy;
+        }
+
+        public void connectionEstablished() {
+            strategy.destinationAvailable(destinationId);
+        }
+
+        public void connectionFailed() {
+            strategy.destinationFailed(destinationId);
         }
     }
 }
