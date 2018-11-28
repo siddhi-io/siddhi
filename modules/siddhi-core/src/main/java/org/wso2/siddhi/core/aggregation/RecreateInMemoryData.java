@@ -30,10 +30,12 @@ import org.wso2.siddhi.core.util.IncrementalTimeConverterUtil;
 import org.wso2.siddhi.core.util.parser.StoreQueryParser;
 import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
+
 import org.wso2.siddhi.query.api.execution.query.StoreQuery;
 import org.wso2.siddhi.query.api.execution.query.input.store.InputStore;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.condition.Compare;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,17 +49,20 @@ public class RecreateInMemoryData {
     private final List<TimePeriod.Duration> incrementalDurations;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
+    private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions;
     private final SiddhiAppContext siddhiAppContext;
     private final StreamEventPool streamEventPool;
     private final Map<String, Table> tableMap;
     private final Map<String, Window> windowMap;
     private final Map<String, AggregationRuntime> aggregationMap;
+    private final String nodeId;
 
     public RecreateInMemoryData(List<TimePeriod.Duration> incrementalDurations,
             Map<TimePeriod.Duration, Table> aggregationTables,
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap, SiddhiAppContext siddhiAppContext,
             MetaStreamEvent metaStreamEvent, Map<String, Table> tableMap, Map<String, Window> windowMap,
-            Map<String, AggregationRuntime> aggregationMap) {
+            Map<String, AggregationRuntime> aggregationMap, String nodeId, Map<TimePeriod.Duration,
+            IncrementalExecutor> incrementalExecutorMapForPartitions) {
         this.incrementalDurations = incrementalDurations;
         this.aggregationTables = aggregationTables;
         this.incrementalExecutorMap = incrementalExecutorMap;
@@ -66,6 +71,8 @@ public class RecreateInMemoryData {
         this.tableMap = tableMap;
         this.windowMap = windowMap;
         this.aggregationMap = aggregationMap;
+        this.nodeId = nodeId;
+        this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
     }
 
     public void recreateInMemoryData() {
@@ -105,8 +112,17 @@ public class RecreateInMemoryData {
             // for minute duration, take the second table [provided that aggregation is done for seconds])
             Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
 
-            storeQuery = StoreQuery.query().from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
-                    .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+            //Empty nodeId implies that partitonbyid() annotation is not present
+            if (nodeId != null) {
+                storeQuery = StoreQuery.query().from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
+                        .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")).having(
+                                Expression.compare(Expression.variable("NODE_ID"), Compare.Operator.EQUAL,
+                                        Expression.value(nodeId))));
+            } else {
+                storeQuery = StoreQuery.query().from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
+                        .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+            }
+
             storeQuery.setType(StoreQuery.StoreQueryType.FIND);
             storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                     aggregationMap);
@@ -143,6 +159,89 @@ public class RecreateInMemoryData {
                 if (i == 1) {
                     TimePeriod.Duration rootDuration = incrementalDurations.get(0);
                     IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
+                    long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
+                            latestEventTimestamp, rootDuration, null);
+
+                    rootIncrementalExecutor.setValuesForInMemoryRecreateFromTable(emitTimeOfLatestEventInTable);
+
+                }
+            }
+        }
+    }
+
+    public void recreateInMemoryDataForPartitions() {
+
+        Event[] events;
+        Long latestEventTimestamp = null;
+
+        // Get all events from table corresponding to max duration
+        Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
+        StoreQuery storeQuery = StoreQuery.query()
+                .from(InputStore.store(tableForMaxDuration.getTableDefinition().getId()))
+                .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+        storeQuery.setType(StoreQuery.StoreQueryType.FIND);
+        StoreQueryRuntime storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
+                aggregationMap);
+
+        // Get latest event timestamp in tableForMaxDuration
+        events = storeQueryRuntime.execute();
+        if (events != null) {
+            latestEventTimestamp = (Long) events[events.length - 1].getData(0);
+        }
+
+        for (int i = incrementalDurations.size() - 1; i > 0; i--) {
+            TimePeriod.Duration recreateForDuration = incrementalDurations.get(i);
+            IncrementalExecutor incrementalExecutor = incrementalExecutorMapForPartitions.get(recreateForDuration);
+
+            // Reset all executors when recreating again
+            incrementalExecutor.clearExecutor();
+
+            // Get the table previous to the duration for which we need to recreate (e.g. if we want to recreate
+            // for minute duration, take the second table [provided that aggregation is done for seconds])
+            Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
+
+            //Empty nodeId implies that partitonbyid() annotation is not present
+
+            storeQuery = StoreQuery.query().from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
+                        .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+
+
+            storeQuery.setType(StoreQuery.StoreQueryType.FIND);
+            storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
+                    aggregationMap);
+            events = storeQueryRuntime.execute();
+
+            if (events != null) {
+                long referenceToNextLatestEvent = (Long) events[events.length - 1].getData(0);
+                if (latestEventTimestamp != null) {
+                    List<Event> eventsNewerThanLatestEventOfRecreateForDuration = new ArrayList<>();
+                    for (Event event : events) {
+                        // After getting the events from recreateFromTable, get the time bucket it belongs to,
+                        // if each of these events were in the recreateForDuration. This helps to identify the events,
+                        // which must be processed in-memory for recreateForDuration.
+                        long timeBucketForNextDuration = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
+                                (Long) event.getData(0), recreateForDuration);
+                        if (timeBucketForNextDuration > latestEventTimestamp) {
+                            eventsNewerThanLatestEventOfRecreateForDuration.add(event);
+                        }
+                    }
+                    events = eventsNewerThanLatestEventOfRecreateForDuration.toArray(
+                            new Event[eventsNewerThanLatestEventOfRecreateForDuration.size()]);
+                }
+
+                latestEventTimestamp = referenceToNextLatestEvent;
+
+                ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
+                for (Event event : events) {
+                    StreamEvent streamEvent = streamEventPool.borrowEvent();
+                    streamEvent.setOutputData(event.getData());
+                    complexEventChunk.add(streamEvent);
+                }
+                incrementalExecutor.execute(complexEventChunk);
+
+                if (i == 1) {
+                    TimePeriod.Duration rootDuration = incrementalDurations.get(0);
+                    IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMapForPartitions.get(rootDuration);
                     long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
                             latestEventTimestamp, rootDuration, null);
 

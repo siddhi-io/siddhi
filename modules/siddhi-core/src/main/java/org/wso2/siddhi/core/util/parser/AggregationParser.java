@@ -40,6 +40,7 @@ import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
 import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.core.util.config.ConfigManager;
 import org.wso2.siddhi.core.util.extension.holder.FunctionExecutorExtensionHolder;
 import org.wso2.siddhi.core.util.extension.holder.IncrementalAttributeAggregatorExtensionHolder;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
@@ -68,6 +69,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -154,6 +156,39 @@ public class AggregationParser {
             // final aggregate outputs. e.g avg = sum/count
             List<ExpressionExecutor> outputExpressionExecutors = new ArrayList<>(); //Expression executors to get
             // final aggregate outputs. e.g avg = sum/count
+
+            String nodeId = null;
+
+            List<Annotation> annotations = aggregationDefinition.getAnnotations();
+            Map<String, Annotation> annotationTypes = new HashMap<>();
+            for (Annotation annotation : annotations) {
+                annotationTypes.put(annotation.getName().toLowerCase(), annotation);
+            }
+
+            Annotation partitionById = annotationTypes.get("partitionbyid");
+
+            if (partitionById != null) {
+                ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
+                Expression nodeIdExpression;
+                boolean clusterEnabled =
+                        Boolean.parseBoolean(configManager.generateConfigReader("cluster.config", "enabled").readConfig(
+                                "enabled", "false"));
+                if (clusterEnabled) {
+                    nodeId = configManager.generateConfigReader("cluster.config", "groupId").readConfig(
+                            "groupId", "");
+                    nodeIdExpression = Expression.value(nodeId);
+                } else {
+                    nodeId = configManager.generateConfigReader("wso2.carbon", "id")
+                            .readConfig("id", "");
+                    if (nodeId.equals("")) {
+                        Random rand = new Random();
+                        nodeId = "node-" + rand.nextInt(1000);
+                    }
+                    nodeIdExpression = Expression.value(nodeId);
+                }
+                OutputAttribute nodeIdAttribute = new OutputAttribute("NODE_ID", nodeIdExpression);
+                aggregationDefinition.getSelector().getSelectionList().add(nodeIdAttribute);
+            }
 
             boolean isLatestEventAdded = populateIncomingAggregatorsAndExecutors(
                     aggregationDefinition, siddhiAppContext, tableMap,
@@ -252,7 +287,7 @@ public class AggregationParser {
             Map<TimePeriod.Duration, Table> aggregationTables = initDefaultTables(aggregatorName,
                     incrementalDurations, processedMetaStreamEvent.getOutputStreamDefinition(),
                     siddhiAppRuntimeBuilder, aggregationDefinition.getAnnotations(), groupByVariableList,
-                    isProcessingOnExternalTime);
+                    isProcessingOnExternalTime, partitionById);
 
             Element element = AnnotationHelper.getAnnotationElement(SiddhiConstants.ANNOTATION_BUFFER_SIZE, null,
                     aggregationDefinition.getAnnotations());
@@ -271,6 +306,16 @@ public class AggregationParser {
                     processedMetaStreamEvent, processExpressionExecutorsList,
                     groupByKeyGeneratorList, incrementalDurations,
                     aggregationTables, siddhiAppContext, aggregatorName, shouldUpdateExpressionExecutor);
+            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions = null;
+
+            if (nodeId != null) {
+                incrementalExecutorMapForPartitions =
+                        buildIncrementalExecutors(
+                                processedMetaStreamEvent, processExpressionExecutorsList,
+                                groupByKeyGeneratorList, incrementalDurations,
+                                aggregationTables, siddhiAppContext, aggregatorName, shouldUpdateExpressionExecutor);
+            }
+
             IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
             incrementalDataPurging.init(aggregationDefinition, new StreamEventPool(processedMetaStreamEvent, 10)
                     , aggregationTables, isProcessingOnExternalTime, siddhiAppContext);
@@ -278,7 +323,7 @@ public class AggregationParser {
             //Recreate in-memory data from tables
             RecreateInMemoryData recreateInMemoryData = new RecreateInMemoryData(incrementalDurations,
                     aggregationTables, incrementalExecutorMap, siddhiAppContext, processedMetaStreamEvent, tableMap,
-                    windowMap, aggregationMap);
+                    windowMap, aggregationMap, nodeId, incrementalExecutorMapForPartitions);
 
             IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
             rootIncrementalExecutor.setScheduler(scheduler);
@@ -317,7 +362,8 @@ public class AggregationParser {
                     incrementalDurations, siddhiAppContext, baseExecutors, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
                     isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList,
-                    incrementalDataPurging, shouldUpdateExpressionExecutor);
+                    incrementalDataPurging, shouldUpdateExpressionExecutor, nodeId,
+                    incrementalExecutorMapForPartitions);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
                     incomingExpressionExecutors, processedMetaStreamEvent, latencyTrackerInsert,
@@ -488,7 +534,6 @@ public class AggregationParser {
             incomingMetaStreamEvent.addOutputData(externalTimestampAttribute);
             incomingExpressionExecutors.add(externalTimestampExecutor);
         }
-
         AbstractDefinition incomingLastInputStreamDefinition = incomingMetaStreamEvent.getLastInputDefinition();
         for (Variable groupByVariable : groupByVariableList) {
             incomingMetaStreamEvent.addOutputData(incomingLastInputStreamDefinition.getAttributeList()
@@ -755,12 +800,16 @@ public class AggregationParser {
     private static HashMap<TimePeriod.Duration, Table> initDefaultTables(
             String aggregatorName, List<TimePeriod.Duration> durations,
             StreamDefinition streamDefinition, SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder,
-            List<Annotation> annotations, List<Variable> groupByVariableList, boolean isProcessingOnExternalTime) {
+            List<Annotation> annotations, List<Variable> groupByVariableList, boolean isProcessingOnExternalTime, Annotation partitionById) {
 
         HashMap<TimePeriod.Duration, Table> aggregationTableMap = new HashMap<>();
         // Create annotations for primary key
         Annotation primaryKeyAnnotation = new Annotation(SiddhiConstants.ANNOTATION_PRIMARY_KEY);
         primaryKeyAnnotation.element(null, AGG_START_TIMESTAMP_COL);
+
+        if (partitionById != null) {
+            primaryKeyAnnotation.element(null, "NODE_ID");
+        }
         if (isProcessingOnExternalTime) {
             primaryKeyAnnotation.element(null, AGG_EXTERNAL_TIMESTAMP_COL);
         }

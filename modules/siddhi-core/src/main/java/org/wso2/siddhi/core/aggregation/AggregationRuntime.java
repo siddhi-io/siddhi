@@ -65,6 +65,7 @@ import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDura
 public class AggregationRuntime implements MemoryCalculable {
     private final AggregationDefinition aggregationDefinition;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
+    private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
     private final SiddhiAppContext siddhiAppContext;
     private final MetaStreamEvent tableMetaStreamEvent;
@@ -83,6 +84,7 @@ public class AggregationRuntime implements MemoryCalculable {
     private long lastExecutorsRefreshedTime = -1;
     private IncrementalDataPurging incrementalDataPurging;
     private ExpressionExecutor shouldUpdateExpressionExecutor;
+    private String nodeId;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -97,7 +99,8 @@ public class AggregationRuntime implements MemoryCalculable {
                               List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
                               List<GroupByKeyGenerator> groupByKeyGeneratorList,
                               IncrementalDataPurging incrementalDataPurging,
-                              ExpressionExecutor shouldUpdateExpressionExecutor) {
+                              ExpressionExecutor shouldUpdateExpressionExecutor, String nodeId,
+                              Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
         this.aggregationDefinition = aggregationDefinition;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.aggregationTables = aggregationTables;
@@ -115,9 +118,11 @@ public class AggregationRuntime implements MemoryCalculable {
         this.groupByKeyGeneratorList = groupByKeyGeneratorList;
         this.incrementalDataPurging = incrementalDataPurging;
         this.shouldUpdateExpressionExecutor = shouldUpdateExpressionExecutor;
-
+        this.nodeId = nodeId;
+        this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
         aggregateMetaSteamEvent = new MetaStreamEvent();
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
+
     }
 
     private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition) {
@@ -204,10 +209,14 @@ public class AggregationRuntime implements MemoryCalculable {
                 recreateInMemoryData(false);
                 lastExecutorsRefreshedTime = System.currentTimeMillis();
             }
+            if (nodeId != null) {
+                recreateInMemoryData.recreateInMemoryDataForPartitions();
+            }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
                     baseExecutors, outputExpressionExecutors, siddhiAppContext,
-                    aggregateProcessingExecutorsList, groupByKeyGeneratorList, shouldUpdateExpressionExecutor);
+                    aggregateProcessingExecutorsList, groupByKeyGeneratorList, shouldUpdateExpressionExecutor,
+                    incrementalExecutorMapForPartitions);
         } finally {
             SnapshotService.getSkipSnapshotableThreadLocal().set(null);
             if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
