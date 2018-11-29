@@ -46,9 +46,9 @@ public class Element implements SiddhiElement {
     @Override
     public String toString() {
         if (key != null) {
-            return key + " = '" + value + "'";
+            return key + " = \"" + value + "\"";
         } else {
-            return "'" + value + "'";
+            return "\"" + value + "\"";
         }
     }
 
