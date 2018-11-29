@@ -797,6 +797,7 @@ Following are some inbuilt windows shipped with Siddhi. For more window types, s
 * [sort](https://wso2.github.io/siddhi/api/latest/#sort-window)
 * [frequent](https://wso2.github.io/siddhi/api/latest/#frequent-window)
 * [lossyFrequent](https://wso2.github.io/siddhi/api/latest/#lossyfrequent-window)
+* [session](https://wso2.github.io/siddhi/api/latest/#session-window)
 * [cron](https://wso2.github.io/siddhi/api/latest/#cron-window)
 * [externalTime](https://wso2.github.io/siddhi/api/latest/#externaltime-window)
 * [externalTimeBatch](https://wso2.github.io/siddhi/api/latest/#externaltimebatch-window)
