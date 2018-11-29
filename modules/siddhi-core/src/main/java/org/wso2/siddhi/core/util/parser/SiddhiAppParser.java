@@ -117,7 +117,7 @@ public class SiddhiAppParser {
                         .createStatisticsManager(
                                 siddhiContext.getStatisticsConfiguration().getMetricPrefix(),
                                 siddhiAppContext.getName(),
-                                statisticsElements));
+                                statisticsElements, true));
             }
 
             Element statStateEnableElement = AnnotationHelper.getAnnotationElement(

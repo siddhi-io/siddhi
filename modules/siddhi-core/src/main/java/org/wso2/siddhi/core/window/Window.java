@@ -56,6 +56,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory.MetricsLogLevel.INFO;
+
 /**
  * Window implementation of SiddhiQL.
  * It can be seen as a global Window which can be accessed from multiple queries.
@@ -126,14 +128,16 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         this.lockWrapper.setLock(new ReentrantLock());
         if (siddhiAppContext.getStatisticsManager() != null) {
             latencyTrackerFind = QueryParserHelper.createLatencyTracker(siddhiAppContext, windowDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_FIND);
+                    SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_FIND, INFO);
             latencyTrackerInsert = QueryParserHelper.createLatencyTracker(siddhiAppContext, windowDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT);
+                    SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT, INFO);
 
             throughputTrackerFind = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                    windowDefinition.getId(), SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_FIND);
+                    windowDefinition.getId(), SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_FIND,
+                    INFO);
             throughputTrackerInsert = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                    windowDefinition.getId(), SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT);
+                    windowDefinition.getId(), SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT,
+                    INFO);
         }
     }
 

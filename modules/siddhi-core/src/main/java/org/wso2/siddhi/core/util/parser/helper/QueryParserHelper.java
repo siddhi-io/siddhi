@@ -43,6 +43,7 @@ import org.wso2.siddhi.core.util.collection.operator.IncrementalAggregateCompile
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.MemoryUsageTracker;
+import org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -224,7 +225,8 @@ public class QueryParserHelper {
     }
 
     public static LatencyTracker createLatencyTracker(SiddhiAppContext siddhiAppContext, String name, String type,
-                                                      String function) {
+                                                      String function,
+                                                      StatisticsTrackerFactory.MetricsLogLevel metricsLogLevel) {
         LatencyTracker latencyTracker = null;
         if (siddhiAppContext.getStatisticsManager() != null) {
             String metricName =
@@ -249,14 +251,15 @@ public class QueryParserHelper {
                 latencyTracker = siddhiAppContext.getSiddhiContext()
                         .getStatisticsConfiguration()
                         .getFactory()
-                        .createLatencyTracker(metricName, siddhiAppContext.getStatisticsManager());
+                        .createLatencyTracker(metricName, siddhiAppContext.getStatisticsManager(), metricsLogLevel);
             }
         }
         return latencyTracker;
     }
 
     public static ThroughputTracker createThroughputTracker(SiddhiAppContext siddhiAppContext, String name,
-                                                            String type, String function) {
+                                                            String type, String function,
+                                                            StatisticsTrackerFactory.MetricsLogLevel metricsLogLevel) {
         ThroughputTracker throughputTracker = null;
         if (siddhiAppContext.getStatisticsManager() != null) {
             String metricName =
@@ -282,7 +285,7 @@ public class QueryParserHelper {
                         .getSiddhiContext()
                         .getStatisticsConfiguration()
                         .getFactory()
-                        .createThroughputTracker(metricName, siddhiAppContext.getStatisticsManager());
+                        .createThroughputTracker(metricName, siddhiAppContext.getStatisticsManager(), metricsLogLevel);
             }
         }
         return throughputTracker;

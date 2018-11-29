@@ -39,6 +39,8 @@ import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
 import org.wso2.siddhi.query.api.definition.TriggerDefinition;
 
+import static org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory.MetricsLogLevel.INFO;
+
 /**
  * Implementation of {@link Trigger} which will trigger events based on a cron expression.
  */
@@ -63,7 +65,7 @@ public class CronTrigger implements Trigger, Job {
         if (siddhiAppContext.getStatisticsManager() != null) {
             this.throughputTracker = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                     triggerDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_TRIGGERS, null);
+                    SiddhiConstants.METRIC_INFIX_TRIGGERS, null, INFO);
         }
     }
 

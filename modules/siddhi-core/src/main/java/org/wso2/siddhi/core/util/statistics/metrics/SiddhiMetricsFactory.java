@@ -33,25 +33,35 @@ import java.util.List;
  */
 public class SiddhiMetricsFactory implements StatisticsTrackerFactory {
 
-    public LatencyTracker createLatencyTracker(String name, StatisticsManager statisticsManager) {
+    public LatencyTracker createLatencyTracker(String name, StatisticsManager statisticsManager,
+                                               MetricsLogLevel metricsLogLevel) {
         return new SiddhiLatencyMetric(name, ((SiddhiStatisticsManager) statisticsManager).getRegistry());
     }
 
-    public ThroughputTracker createThroughputTracker(String name, StatisticsManager statisticsManager) {
+    public ThroughputTracker createThroughputTracker(String name, StatisticsManager statisticsManager,
+                                                     MetricsLogLevel metricsLogLevel) {
         return new SiddhiThroughputMetric(name, ((SiddhiStatisticsManager) statisticsManager).getRegistry());
     }
 
-    public BufferedEventsTracker createBufferSizeTracker(StatisticsManager statisticsManager) {
+    public BufferedEventsTracker createBufferSizeTracker(StatisticsManager statisticsManager,
+                                                         MetricsLogLevel metricsLogLevel) {
         return new SiddhiBufferedEventsMetric(((SiddhiStatisticsManager) statisticsManager).getRegistry());
     }
 
-    public MemoryUsageTracker createMemoryUsageTracker(StatisticsManager statisticsManager) {
+    public MemoryUsageTracker createMemoryUsageTracker(StatisticsManager statisticsManager,
+                                                       MetricsLogLevel metricsLogLevel) {
         return new SiddhiMemoryUsageMetric(((SiddhiStatisticsManager) statisticsManager).getRegistry());
     }
 
     @Override
-    public StatisticsManager createStatisticsManager(String prefix, String siddhiAppName, List<Element> elements) {
+    public StatisticsManager createStatisticsManager(String prefix, String siddhiAppName, List<Element> elements,
+                                                     boolean isStatisticsEnabled) {
         return new SiddhiStatisticsManager(elements);
+    }
+
+    @Override
+    public Comparable getLogLevel(MetricsLogLevel metricsLogLevel) {
+        return null;
     }
 
 }

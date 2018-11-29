@@ -27,14 +27,30 @@ import java.util.List;
  */
 public interface StatisticsTrackerFactory {
 
-    LatencyTracker createLatencyTracker(String name, StatisticsManager statisticsManager);
+    LatencyTracker createLatencyTracker(String name, StatisticsManager statisticsManager,
+                                        MetricsLogLevel metricsLogLevel);
 
-    ThroughputTracker createThroughputTracker(String name, StatisticsManager statisticsManager);
+    ThroughputTracker createThroughputTracker(String name, StatisticsManager statisticsManager,
+                                              MetricsLogLevel metricsLogLevel);
 
-    BufferedEventsTracker createBufferSizeTracker(StatisticsManager statisticsManager);
+    BufferedEventsTracker createBufferSizeTracker(StatisticsManager statisticsManager, MetricsLogLevel metricsLogLevel);
 
-    MemoryUsageTracker createMemoryUsageTracker(StatisticsManager statisticsManager);
+    MemoryUsageTracker createMemoryUsageTracker(StatisticsManager statisticsManager, MetricsLogLevel metricsLogLevel);
 
-    StatisticsManager createStatisticsManager(String prefix, String siddhiAppName, List<Element> elements);
+    StatisticsManager createStatisticsManager(String prefix, String siddhiAppName, List<Element> elements,
+                                              boolean isStatisticsEnabled);
+
+    Comparable getLogLevel(MetricsLogLevel metricsLogLevel);
+
+    /**
+     * Levels of metrics
+     */
+    public enum MetricsLogLevel {
+        OFF,
+        INFO,
+        DEBUG,
+        TRACE,
+        ALL
+    }
 
 }

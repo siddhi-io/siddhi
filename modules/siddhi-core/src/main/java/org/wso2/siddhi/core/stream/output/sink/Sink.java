@@ -40,6 +40,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory.MetricsLogLevel.INFO;
+
 /**
  * This is a Sink type. these let users to publish events according to
  * some type. this type can either be local, jms or ws (or any custom extension)
@@ -73,11 +75,11 @@ public abstract class Sink implements SinkListener, Snapshotable {
         if (siddhiAppContext.getStatisticsManager() != null) {
             this.throughputTracker = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                     streamDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_SINKS, type);
+                    SiddhiConstants.METRIC_INFIX_SINKS, type, INFO);
             this.mapperLatencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext,
                     streamDefinition.getId(),
                     SiddhiConstants.METRIC_INFIX_SINK_MAPPERS,
-                    type + SiddhiConstants.METRIC_DELIMITER + mapType);
+                    type + SiddhiConstants.METRIC_DELIMITER + mapType, INFO);
         }
         init(streamDefinition, transportOptionHolder, sinkConfigReader, siddhiAppContext);
         if (sinkMapper != null) {

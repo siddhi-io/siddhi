@@ -29,6 +29,8 @@ import org.wso2.siddhi.query.api.definition.TriggerDefinition;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory.MetricsLogLevel.INFO;
+
 /**
  * Implementation of {@link Trigger} which will trigger events based on a pre-defined period.
  */
@@ -48,7 +50,7 @@ public class PeriodicTrigger implements Trigger {
         if (siddhiAppContext.getStatisticsManager() != null) {
             this.throughputTracker = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                     triggerDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_TRIGGERS, null);
+                    SiddhiConstants.METRIC_INFIX_TRIGGERS, null, INFO);
         }
     }
 

@@ -85,6 +85,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory.MetricsLogLevel.INFO;
+
 /**
  * Keep streamDefinitions, partitionRuntimes, queryRuntimes of an SiddhiApp and streamJunctions and inputHandlers used.
  */
@@ -162,7 +164,7 @@ public class SiddhiAppRuntime {
             monitorQueryMemoryUsage();
             monitorBufferedEvents();
             storeQueryLatencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, "query",
-                    SiddhiConstants.METRIC_INFIX_STORE_QUERIES, null);
+                    SiddhiConstants.METRIC_INFIX_STORE_QUERIES, null, INFO);
         }
 
         for (Map.Entry<String, List<Sink>> sinkEntries : sinkMap.entrySet()) {
@@ -663,7 +665,7 @@ public class SiddhiAppRuntime {
                 .getSiddhiContext()
                 .getStatisticsConfiguration()
                 .getFactory()
-                .createMemoryUsageTracker(siddhiAppContext.getStatisticsManager());
+                .createMemoryUsageTracker(siddhiAppContext.getStatisticsManager(), INFO);
         for (Map.Entry<String, QueryRuntime> entry : queryProcessorMap.entrySet()) {
             QueryParserHelper.registerMemoryUsageTracking(entry.getKey(), entry.getValue(),
                     SiddhiConstants.METRIC_INFIX_QUERIES, siddhiAppContext, memoryUsageTracker);
@@ -690,7 +692,7 @@ public class SiddhiAppRuntime {
                 .getSiddhiContext()
                 .getStatisticsConfiguration()
                 .getFactory()
-                .createBufferSizeTracker(siddhiAppContext.getStatisticsManager());
+                .createBufferSizeTracker(siddhiAppContext.getStatisticsManager(), INFO);
         for (Map.Entry<String, StreamJunction> entry : streamJunctionMap.entrySet()) {
             registerForBufferedEvents(entry);
         }

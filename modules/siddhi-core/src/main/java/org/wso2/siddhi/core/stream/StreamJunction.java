@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
+import static org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory.MetricsLogLevel.INFO;
+
 /**
  * Stream Junction is the place where streams are collected and distributed. There will be an Stream Junction per
  * evey event stream. {@link StreamJunction.Publisher} can be used to publish events to the junction and
@@ -80,7 +82,7 @@ public class StreamJunction implements EventBufferHolder {
         if (siddhiAppContext.getStatisticsManager() != null) {
             this.throughputTracker = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                     streamDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_STREAMS, null);
+                    SiddhiConstants.METRIC_INFIX_STREAMS, null, INFO);
         }
         try {
             Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ASYNC,

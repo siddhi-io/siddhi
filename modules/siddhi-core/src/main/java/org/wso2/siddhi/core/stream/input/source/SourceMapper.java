@@ -31,6 +31,8 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.List;
 
+import static org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory.MetricsLogLevel.INFO;
+
 /**
  * Convert custom input from {@link Source} to {@link org.wso2.siddhi.core.event.ComplexEventChunk}.
  */
@@ -66,11 +68,11 @@ public abstract class SourceMapper implements SourceEventListener {
         if (siddhiAppContext.getStatisticsManager() != null) {
             this.throughputTracker = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                     streamDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_SOURCES, sourceType);
+                    SiddhiConstants.METRIC_INFIX_SOURCES, sourceType, INFO);
             this.mapperLatencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext,
                     streamDefinition.getId(),
                     SiddhiConstants.METRIC_INFIX_SOURCE_MAPPERS,
-                    sourceType + SiddhiConstants.METRIC_DELIMITER + mapType);
+                    sourceType + SiddhiConstants.METRIC_DELIMITER + mapType, INFO);
         }
         init(streamDefinition, mapOptionHolder, attributeMappings, configReader, siddhiAppContext);
     }

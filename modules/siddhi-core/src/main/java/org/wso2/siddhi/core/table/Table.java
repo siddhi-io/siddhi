@@ -50,6 +50,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory.MetricsLogLevel.INFO;
+
 /**
  * Interface class to represent Tables in Siddhi. There are multiple implementations. Ex: {@link InMemoryTable}. Table
  * will support basic operations of add, delete, update, update or add and contains. *
@@ -89,33 +91,36 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
         this.recordTableHandler = recordTableHandler;
         if (siddhiAppContext.getStatisticsManager() != null) {
             latencyTrackerFind = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND, INFO);
             latencyTrackerInsert = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_INSERT);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_INSERT, INFO);
             latencyTrackerUpdate = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_UPDATE);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_UPDATE, INFO);
             latencyTrackerDelete = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_DELETE);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_DELETE, INFO);
             latencyTrackerUpdateOrInsert = QueryParserHelper.createLatencyTracker(siddhiAppContext,
                     tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES,
-                    SiddhiConstants.METRIC_TYPE_UPDATE_OR_INSERT);
+                    SiddhiConstants.METRIC_TYPE_UPDATE_OR_INSERT, INFO);
             latencyTrackerContains = QueryParserHelper.createLatencyTracker(siddhiAppContext, tableDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_CONTAINS);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_CONTAINS, INFO);
 
             throughputTrackerFind = QueryParserHelper.createThroughputTracker(siddhiAppContext, tableDefinition.getId(),
-                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND);
+                    SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_FIND, INFO);
             throughputTrackerInsert = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_INSERT);
+                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_INSERT,
+                    INFO);
             throughputTrackerUpdate = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_UPDATE);
+                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_UPDATE,
+                    INFO);
             throughputTrackerDelete = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_DELETE);
+                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_DELETE,
+                    INFO);
             throughputTrackerUpdateOrInsert = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                     tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES,
-                    SiddhiConstants.METRIC_TYPE_UPDATE_OR_INSERT);
+                    SiddhiConstants.METRIC_TYPE_UPDATE_OR_INSERT, INFO);
             throughputTrackerContains = QueryParserHelper.createThroughputTracker(siddhiAppContext,
-                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_CONTAINS);
-
+                    tableDefinition.getId(), SiddhiConstants.METRIC_INFIX_TABLES, SiddhiConstants.METRIC_TYPE_CONTAINS,
+                    INFO);
 
         }
         init(tableDefinition, storeEventPool, storeEventCloner, configReader, siddhiAppContext, recordTableHandler);

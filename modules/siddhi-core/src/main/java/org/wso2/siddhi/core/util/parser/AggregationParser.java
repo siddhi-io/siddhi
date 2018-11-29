@@ -45,6 +45,7 @@ import org.wso2.siddhi.core.util.extension.holder.IncrementalAttributeAggregator
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
 import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
@@ -70,6 +71,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
+
+import static org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory.MetricsLogLevel.INFO;
 
 /**
  * This is the parser class of incremental aggregation definition.
@@ -296,17 +299,17 @@ public class AggregationParser {
             if (siddhiAppContext.getStatisticsManager() != null) {
                 latencyTrackerFind = QueryParserHelper.createLatencyTracker(siddhiAppContext,
                         aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_FIND);
+                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_FIND, INFO);
                 latencyTrackerInsert = QueryParserHelper.createLatencyTracker(siddhiAppContext,
                         aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT);
+                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT, INFO);
 
                 throughputTrackerFind = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                         aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_FIND);
+                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_FIND, INFO);
                 throughputTrackerInsert = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                         aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT);
+                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT, INFO);
             }
 
             List<ExpressionExecutor> baseExecutors = cloneExpressionExecutors(processExpressionExecutorsList.get(0));

@@ -40,6 +40,7 @@ import org.wso2.siddhi.core.util.lock.LockSynchronizer;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory;
 import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.annotation.Element;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
@@ -54,8 +55,9 @@ import org.wso2.siddhi.query.api.util.AnnotationHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory.MetricsLogLevel.INFO;
 
 /**
  * Class to parse {@link QueryRuntime}.
@@ -102,7 +104,7 @@ public class QueryParser {
                 queryName = "query_" + queryIndex;
             }
             latencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, queryName,
-                    SiddhiConstants.METRIC_INFIX_QUERIES, null);
+                    SiddhiConstants.METRIC_INFIX_QUERIES, null, INFO);
             OutputStream.OutputEventType outputEventType = query.getOutputStream().getOutputEventType();
             boolean outputExpectsExpiredEvents = false;
             if (outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS) {
