@@ -416,9 +416,10 @@ public class Aggregation2TestCase {
                     siddhiAppRuntime.query("from stockAggregation within 0L, " + (System.currentTimeMillis()
                             + 1000000) + "L per 'hours' select AGG_TIMESTAMP, avgPrice, totalPrice as sumPrice");
 
-            List<Object[]> expected = new ArrayList<>();
-            expected.add(inEventsList.get(1));
-            inEventsList.remove(1);
+            List<Object[]> firstJoinEvent = new ArrayList<>();
+            List<Object[]> secondJoinEvent = new ArrayList<>();
+            firstJoinEvent.add(inEventsList.get(0));
+            secondJoinEvent.add(inEventsList.get(1));
 
             List<Object[]> storeQueryEvents1 = new ArrayList<>();
             storeQueryEvents1.add(events1[0].getData());
@@ -426,11 +427,10 @@ public class Aggregation2TestCase {
             List<Object[]> storeQueryEvents2 = new ArrayList<>();
             storeQueryEvents2.add(events2[0].getData());
 
-            //String event1 = (String) (inEventsList.get(0)[1]);
             SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
 
             AssertJUnit.assertEquals("In events matched", true,
-                    SiddhiTestHelper.isEventsMatch(inEventsList, expected));
+                    SiddhiTestHelper.isEventsMatch(firstJoinEvent, secondJoinEvent));
             AssertJUnit.assertEquals("Store Query events matched", true,
                     SiddhiTestHelper.isEventsMatch(storeQueryEvents1, storeQueryEvents2));
             AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
