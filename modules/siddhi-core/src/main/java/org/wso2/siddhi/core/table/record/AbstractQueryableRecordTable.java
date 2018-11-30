@@ -59,6 +59,12 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
 
     @Override
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                             CompiledSelection compiledSelection) throws ConnectionUnavailableException {
+        return query(matchingEvent, compiledCondition, compiledSelection, null);
+    }
+
+    @Override
+    public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
 
@@ -109,7 +115,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
      */
     protected abstract RecordIterator<Object[]> query(Map<String, Object> parameterMap,
                                                       CompiledCondition compiledCondition,
-                                                      CompiledSelection compiledSelection, Attribute[] outputAttributes)
+                                                      CompiledSelection compiledSelection,
+                                                      Attribute[] outputAttributes)
             throws ConnectionUnavailableException;
 
     public CompiledSelection compileSelection(Selector selector,
@@ -134,7 +141,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             selectAttributeBuilders.add(new SelectAttributeBuilder(expressionBuilder, outputAttribute.getRename()));
         }
 
-        MatchingMetaInfoHolder metaInfoHolderForGroupBy = new MatchingMetaInfoHolder(
+        MatchingMetaInfoHolder metaInfoHolderAfterSelect = new MatchingMetaInfoHolder(
                 matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getMatchingStreamEventIndex(),
                 matchingMetaInfoHolder.getStoreEventIndex(), matchingMetaInfoHolder.getMatchingStreamDefinition(),
                 matchingMetaInfoHolder.getMatchingStreamDefinition(), matchingMetaInfoHolder.getCurrentState());
@@ -143,14 +150,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (selector.getGroupByList().size() != 0) {
             groupByExpressionBuilders = new ArrayList<>(outputAttributes.size());
             for (Variable variable : selector.getGroupByList()) {
-                groupByExpressionBuilders.add(new ExpressionBuilder(variable, metaInfoHolderForGroupBy,
+                groupByExpressionBuilders.add(new ExpressionBuilder(variable, metaInfoHolderAfterSelect,
                         siddhiAppContext, variableExpressionExecutors, tableMap, queryName));
             }
         }
 
         ExpressionBuilder havingExpressionBuilder = null;
         if (selector.getHavingExpression() != null) {
-            havingExpressionBuilder = new ExpressionBuilder(selector.getHavingExpression(), metaInfoHolderForGroupBy,
+            havingExpressionBuilder = new ExpressionBuilder(selector.getHavingExpression(), metaInfoHolderAfterSelect,
                     siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
         }
 
@@ -159,7 +166,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             orderByAttributeBuilders = new ArrayList<>(selector.getOrderByList().size());
             for (OrderByAttribute orderByAttribute : selector.getOrderByList()) {
                 ExpressionBuilder expressionBuilder = new ExpressionBuilder(orderByAttribute.getVariable(),
-                        metaInfoHolderForGroupBy, siddhiAppContext, variableExpressionExecutors,
+                        metaInfoHolderAfterSelect, siddhiAppContext, variableExpressionExecutors,
                         tableMap, queryName);
                 orderByAttributeBuilders.add(new OrderByAttributeBuilder(expressionBuilder,
                         orderByAttribute.getOrder()));
@@ -170,7 +177,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         Long offset = null;
         if (selector.getLimit() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getLimit(),
-                    metaInfoHolderForGroupBy.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
+                    metaInfoHolderAfterSelect.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
                     variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
             limit = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
             if (limit < 0) {
@@ -180,7 +187,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
         if (selector.getOffset() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getOffset(),
-                    metaInfoHolderForGroupBy.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
+                    metaInfoHolderAfterSelect.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
                     variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
             offset = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
             if (offset < 0) {

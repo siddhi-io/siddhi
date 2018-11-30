@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.util.parser;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.aggregation.AggregationRuntime;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
@@ -27,6 +28,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent.EventType;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
+import org.wso2.siddhi.core.exception.QueryableRecordTableException;
 import org.wso2.siddhi.core.exception.StoreQueryCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.DeleteStoreQueryRuntime;
@@ -65,7 +67,6 @@ import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.ReturnStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream;
-import org.wso2.siddhi.query.api.execution.query.selection.OutputAttribute;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
 
@@ -89,6 +90,8 @@ public class StoreQueryParser {
      * @param aggregationMap   keyvalue containing aggregation runtimes.
      * @return StoreQueryRuntime
      */
+    private static final Logger log = Logger.getLogger(StoreQueryParser.class);
+
     public static StoreQueryRuntime parse(StoreQuery storeQuery, SiddhiAppContext siddhiAppContext,
                                           Map<String, Table> tableMap, Map<String, Window> windowMap,
                                           Map<String, AggregationRuntime> aggregationMap) {
@@ -274,43 +277,78 @@ public class StoreQueryParser {
     }
 
     private static StoreQueryRuntime constructStoreQueryRuntime(Table table, StoreQuery storeQuery,
-                                                                SiddhiAppContext siddhiAppContext,
-                                                                Map<String, Table> tableMap, Map<String, Window>
+                                                             SiddhiAppContext siddhiAppContext,
+                                           Map<String, Table> tableMap, Map<String, Window> windowMap,
+                                           String queryName, int metaPosition, Expression onCondition,
+                                           MetaStreamEvent metaStreamEvent,
+                                           List<VariableExpressionExecutor> variableExpressionExecutors,
+                                           LockWrapper lockWrapper) {
+        if (table instanceof QueryableProcessor && storeQuery.getType() == StoreQuery.StoreQueryType.FIND) {
+            try {
+                return constructOptimizedStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap,
+                        queryName, metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors);
+            } catch (QueryableRecordTableException e) {
+                log.warn("Failed to create optimized Store Query Runtime as no query configuration was found " +
+                        "for Store Query: " + storeQuery.toString());
+                return constructRegularStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, windowMap,
+                        queryName, metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors,
+                        lockWrapper);
+            }
+        } else {
+            return constructRegularStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, windowMap,
+                    queryName, metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors,
+                    lockWrapper);
+        }
+    }
+
+    private static StoreQueryRuntime constructOptimizedStoreQueryRuntime(Table table,
+                                                                         StoreQuery storeQuery,
+                                                                         SiddhiAppContext siddhiAppContext,
+                                                                         Map<String, Table> tableMap, String queryName,
+                                                                         int metaPosition, Expression onCondition,
+                                                                         MetaStreamEvent metaStreamEvent,
+                                                                         List<VariableExpressionExecutor>
+                                                                        variableExpressionExecutors) {
+        MatchingMetaInfoHolder matchingMetaInfoHolder;
+
+        initMetaStreamEvent(metaStreamEvent, table.getTableDefinition());
+        matchingMetaInfoHolder = generateMatchingMetaInfoHolder(metaStreamEvent, table.getTableDefinition());
+        CompiledCondition compiledCondition = table.compileCondition(onCondition, matchingMetaInfoHolder,
+                siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
+        List<Attribute> expectedOutputAttributes = buildExpectedOutputAttributes(storeQuery, siddhiAppContext,
+                tableMap, queryName, metaPosition, matchingMetaInfoHolder);
+
+        MatchingMetaInfoHolder matchingMetaInfoHolderForSelection = generateMatchingMetaInfoHolder(
+                metaStreamEvent, generateTableDefinitionFromStoreQuery(storeQuery, expectedOutputAttributes),
+                table.getTableDefinition());
+        CompiledSelection compiledSelection = ((QueryableProcessor) table).compileSelection(
+                storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolderForSelection,
+                siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
+
+        StoreQueryRuntime storeQueryRuntime =
+                new SelectStoreQueryRuntime((QueryableProcessor) table, compiledCondition,
+                        compiledSelection, expectedOutputAttributes, queryName);
+        QueryParserHelper.reduceMetaComplexEvent(matchingMetaInfoHolder.getMetaStateEvent());
+        QueryParserHelper.updateVariablePosition(matchingMetaInfoHolder.getMetaStateEvent(),
+                variableExpressionExecutors);
+        return storeQueryRuntime;
+    }
+
+    private static StoreQueryRuntime constructRegularStoreQueryRuntime(Table table, StoreQuery storeQuery,
+                                                                       SiddhiAppContext siddhiAppContext,
+                                                                       Map<String, Table> tableMap, Map<String, Window>
                                                                         windowMap, String
                                                                         queryName,
-                                                                int metaPosition, Expression onCondition,
-                                                                MetaStreamEvent metaStreamEvent,
-                                                                List<VariableExpressionExecutor>
+                                                                       int metaPosition, Expression onCondition,
+                                                                       MetaStreamEvent metaStreamEvent,
+                                                                       List<VariableExpressionExecutor>
                                                                         variableExpressionExecutors,
-                                                                LockWrapper lockWrapper) {
+                                                                       LockWrapper lockWrapper) {
         MatchingMetaInfoHolder matchingMetaInfoHolder;
         AbstractDefinition inputDefinition;
         QuerySelector querySelector;
         metaStreamEvent.setEventType(EventType.TABLE);
 
-        if (table instanceof QueryableProcessor && storeQuery.getType() == StoreQuery.StoreQueryType.FIND) {
-            initMetaStreamEvent(metaStreamEvent, table.getTableDefinition());
-            matchingMetaInfoHolder = generateMatchingMetaInfoHolder(metaStreamEvent, table.getTableDefinition());
-            CompiledCondition compiledCondition = table.compileCondition(onCondition, matchingMetaInfoHolder,
-                    siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
-            List<Attribute> expectedOutputAttributes = buildExpectedOutputAttributes(storeQuery, siddhiAppContext,
-                    tableMap, queryName, metaPosition, matchingMetaInfoHolder);
-
-            MatchingMetaInfoHolder matchingMetaInfoHolderForSelection = generateMatchingMetaInfoHolder(
-                    metaStreamEvent, generateTableDefinitionFromStoreQuery(storeQuery, expectedOutputAttributes),
-                    table.getTableDefinition());
-            CompiledSelection compiledSelection = ((QueryableProcessor) table).compileSelection(
-                    storeQuery.getSelector(), expectedOutputAttributes, matchingMetaInfoHolderForSelection,
-                    siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
-
-            StoreQueryRuntime storeQueryRuntime =
-                    new SelectStoreQueryRuntime((QueryableProcessor) table, compiledCondition,
-                    compiledSelection, expectedOutputAttributes, queryName);
-            QueryParserHelper.reduceMetaComplexEvent(matchingMetaInfoHolder.getMetaStateEvent());
-            QueryParserHelper.updateVariablePosition(matchingMetaInfoHolder.getMetaStateEvent(),
-                    variableExpressionExecutors);
-            return storeQueryRuntime;
-        } else {
             switch (storeQuery.getType()) {
                 case FIND:
                     initMetaStreamEvent(metaStreamEvent, table.getTableDefinition());
@@ -391,7 +429,6 @@ public class StoreQueryParser {
                 default:
                     return null;
             }
-        }
     }
 
     private static List<Attribute> buildExpectedOutputAttributes(
