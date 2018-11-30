@@ -369,34 +369,25 @@ public class Aggregation2TestCase {
             InputHandler inputStreamInputHandler = siddhiAppRuntime.getInputHandler("inputStream");
             siddhiAppRuntime.start();
 
-            //Wednesday, May 31, 2017 11:05:49 PM (add 5.30 to get corresponding IST time)
             stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6});
-            // Thursday, June 1, 2017 4:05:50 AM (add 5.30 to get corresponding IST time)
             stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6});
 
-            // Thursday, June 1, 2017 4:05:51 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 50f, 60f, 90L, 6});
 
-            // Thursday, June 1, 2017 4:05:52 AM
             stockStreamInputHandler.send(new Object[]{"WSO2", 60f, 44f, 200L, 56});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 16});
 
-            // Thursday, June 1, 2017 4:05:54 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26});
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96});
 
-            // Thursday, June 1, 2017 4:05:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 900f, null, 200L, 60});
             stockStreamInputHandler.send(new Object[]{"IBM", 500f, null, 200L, 7});
 
-            // Thursday, June 1, 2017 4:06:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 400f, null, 200L, 9});
             stockStreamInputHandler.send(new Object[]{"IBM", 600f, null, 200L, 6});
 
-            // Thursday, June 1, 2017 4:07:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 600f, null, 200L, 6});
 
-            // Thursday, June 1, 2017 5:07:56 AM
             stockStreamInputHandler.send(new Object[]{"IBM", 700f, null, 200L, 20});
 
             Thread.sleep(100);
