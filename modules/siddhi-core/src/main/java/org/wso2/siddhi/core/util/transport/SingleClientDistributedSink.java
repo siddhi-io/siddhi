@@ -18,10 +18,12 @@
 
 package org.wso2.siddhi.core.util.transport;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.stream.output.sink.Sink;
 import org.wso2.siddhi.core.stream.output.sink.distributed.DistributedTransport;
+import org.wso2.siddhi.core.stream.output.sink.distributed.DistributionStrategy;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.config.ConfigReader;
@@ -45,6 +47,7 @@ import java.util.Set;
  */
 public class SingleClientDistributedSink extends DistributedTransport {
 
+    private static final Logger log = Logger.getLogger(SingleClientDistributedSink.class);
     private Sink sink;
     private int destinationCount = 0;
 
@@ -57,6 +60,8 @@ public class SingleClientDistributedSink extends DistributedTransport {
         } catch (ConnectionUnavailableException e) {
             sink.setConnected(false);
             strategy.destinationFailed(destinationId);
+            log.warn("Failed to publish payload to destination ID " + destinationId + "");
+            sink.connectWithRetry();
             throw e;
         }
     }
@@ -64,7 +69,7 @@ public class SingleClientDistributedSink extends DistributedTransport {
     @Override
     public void initTransport(OptionHolder sinkOptionHolder, List<OptionHolder> destinationOptionHolders,
                               Annotation sinkAnnotation, ConfigReader sinkConfigReader,
-                              SiddhiAppContext siddhiAppContext) {
+                              DistributionStrategy strategy, String type, SiddhiAppContext siddhiAppContext) {
         final String transportType = sinkOptionHolder.validateAndGetStaticValue(SiddhiConstants
                 .ANNOTATION_ELEMENT_TYPE);
         Extension sinkExtension = DefinitionParserHelper.constructExtension
@@ -86,10 +91,10 @@ public class SingleClientDistributedSink extends DistributedTransport {
                 destinationCount++;
             });
         });
-
         this.sink = (Sink) SiddhiClassLoader.loadExtensionImplementation(
                 sinkExtension, SinkExecutorExtensionHolder.getInstance(siddhiAppContext));
-        this.sink.initOnlyTransport(streamDefinition, sinkOptionHolder, sinkConfigReader, siddhiAppContext);
+        this.sink.initOnlyTransport(streamDefinition, sinkOptionHolder, sinkConfigReader, type,
+                new SingleClientConnectionCallback(destinationCount, strategy), siddhiAppContext);
     }
 
     @Override
@@ -104,11 +109,7 @@ public class SingleClientDistributedSink extends DistributedTransport {
      */
     @Override
     public void connect() throws ConnectionUnavailableException {
-        sink.connect();
-        sink.setConnected(true);
-        for (int i = 0; i < destinationCount; i++) {
-            strategy.destinationAvailable(i);
-        }
+        sink.connectWithRetry();
     }
 
     /**
@@ -158,5 +159,31 @@ public class SingleClientDistributedSink extends DistributedTransport {
         });
 
         return dynamicOptions;
+    }
+
+    /**
+     * Connection callback to notify DistributionStrategy about new connection initiations and failures
+     */
+    public class SingleClientConnectionCallback extends DistributedTransport.ConnectionCallback {
+
+        private final int destinations;
+        private final DistributionStrategy strategy;
+
+        private SingleClientConnectionCallback(int destinations, DistributionStrategy strategy) {
+            this.destinations = destinations;
+            this.strategy = strategy;
+        }
+
+        public void connectionEstablished() {
+            for (int i = 0; i < destinations; i++) {
+                strategy.destinationAvailable(i);
+            }
+        }
+
+        public void connectionFailed() {
+            for (int i = 0; i < destinations; i++) {
+                strategy.destinationFailed(i);
+            }
+        }
     }
 }

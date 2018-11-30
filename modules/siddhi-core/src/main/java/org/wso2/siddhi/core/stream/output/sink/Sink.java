@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.stream.output.sink;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
+import org.wso2.siddhi.core.stream.output.sink.distributed.DistributedTransport;
 import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.StringUtil;
@@ -51,10 +52,11 @@ public abstract class Sink implements SinkListener, Snapshotable {
     private String type;
     private SinkMapper mapper;
     private SinkHandler handler;
+    private DistributedTransport.ConnectionCallback connectionCallback = null;
     private String elementId;
     private SiddhiAppContext siddhiAppContext;
 
-    private AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
+    protected AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
     private BackoffRetryCounter backoffRetryCounter = new BackoffRetryCounter();
     private AtomicBoolean isConnected = new AtomicBoolean(false);
     private ThreadLocal<DynamicOptions> trpDynamicOptions;
@@ -99,11 +101,16 @@ public abstract class Sink implements SinkListener, Snapshotable {
 
 
     public final void initOnlyTransport(StreamDefinition streamDefinition, OptionHolder transportOptionHolder,
-                                        ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
+                                        ConfigReader sinkConfigReader, String type,
+                                        DistributedTransport.ConnectionCallback connectionCallback,
+                                        SiddhiAppContext siddhiAppContext) {
+        this.type = type;
         this.streamDefinition = streamDefinition;
+        this.connectionCallback = connectionCallback;
         this.elementId = siddhiAppContext.getElementIdGenerator().createNewId();
         this.siddhiAppContext = siddhiAppContext;
         init(streamDefinition, transportOptionHolder, sinkConfigReader, siddhiAppContext);
+        scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
     }
 
     /**
@@ -129,7 +136,7 @@ public abstract class Sink implements SinkListener, Snapshotable {
         if (mapperLatencyTracker != null && siddhiAppContext.isStatsEnabled()) {
             mapperLatencyTracker.markOut();
         }
-        if (isConnected.get()) {
+        if (isConnected()) {
             try {
                 DynamicOptions dynamicOptions = trpDynamicOptions.get();
                 publish(payload, dynamicOptions);
@@ -137,7 +144,10 @@ public abstract class Sink implements SinkListener, Snapshotable {
                     throughputTracker.eventIn();
                 }
             } catch (ConnectionUnavailableException e) {
-                isConnected.set(false);
+                setConnected(false);
+                if (connectionCallback != null) {
+                    connectionCallback.connectionFailed();
+                }
                 LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
                         " Connection unavailable at Sink '" + type + "' at '" + streamDefinition.getId() +
                         "', will retry connection immediately.", e);
@@ -198,8 +208,11 @@ public abstract class Sink implements SinkListener, Snapshotable {
             isTryingToConnect.set(true);
             try {
                 connect();
-                isConnected.set(true);
+                setConnected(true);
                 isTryingToConnect.set(false);
+                if (connectionCallback != null) {
+                    connectionCallback.connectionEstablished();
+                }
                 backoffRetryCounter.reset();
             } catch (ConnectionUnavailableException e) {
                 LOG.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
@@ -221,15 +234,14 @@ public abstract class Sink implements SinkListener, Snapshotable {
         }
     }
 
-    public boolean isConnected() {
-        return isConnected.get();
-    }
-
     public void shutdown() {
         disconnect();
         destroy();
-        isConnected.set(false);
+        setConnected(false);
         isTryingToConnect.set(false);
+        if (connectionCallback != null) {
+            connectionCallback.connectionFailed();
+        }
     }
 
     @Override
@@ -243,6 +255,10 @@ public abstract class Sink implements SinkListener, Snapshotable {
 
     public StreamDefinition getStreamDefinition() {
         return streamDefinition;
+    }
+
+    public boolean isConnected() {
+        return isConnected.get();
     }
 
     public void setConnected(boolean connected) {

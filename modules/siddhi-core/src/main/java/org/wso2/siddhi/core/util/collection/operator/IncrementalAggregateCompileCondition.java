@@ -37,10 +37,13 @@ import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
 import org.wso2.siddhi.query.api.definition.AggregationDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
 /**
  * Defines the logic to find a matching event from an incremental aggregator (retrieval from incremental aggregator),
@@ -117,7 +120,17 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
 
         // Retrieve per value
         String perValueAsString = perExpressionExecutor.execute(matchingEvent).toString();
-        TimePeriod.Duration perValue = TimePeriod.Duration.valueOf(perValueAsString.toUpperCase());
+        TimePeriod.Duration perValue;
+        try {
+            // Per time function verification
+            perValue = normalizeDuration(perValueAsString);
+        } catch (SiddhiAppValidationException e) {
+            throw new SiddhiAppRuntimeException(
+                    "Aggregation Query's per value is expected to be of a valid time function of the " +
+                            "following " + TimePeriod.Duration.SECONDS + ", " + TimePeriod.Duration.MINUTES + ", "
+                            + TimePeriod.Duration.HOURS + ", " + TimePeriod.Duration.DAYS + ", "
+                            + TimePeriod.Duration.MONTHS + ", " + TimePeriod.Duration.YEARS + ".");
+        }
         if (!incrementalExecutorMap.keySet().contains(perValue)) {
             throw new SiddhiAppRuntimeException("The aggregate values for " + perValue.toString()
                     + " granularity cannot be provided since aggregation definition " +
@@ -148,8 +161,10 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         //If processing on external time, the in-memory data also needs to be queried
         if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
                 startTimeEndTime)) {
+            List<ExpressionExecutor> clonedBaseExecutors = baseExecutors.stream().map(expressionExecutor ->
+                    expressionExecutor.cloneExecutor("")).collect(Collectors.toList());
             IncrementalDataAggregator incrementalDataAggregator = new IncrementalDataAggregator(incrementalDurations,
-                    perValue, oldestInMemoryEventTimestamp, baseExecutors, tableMetaStreamEvent, siddhiAppContext,
+                    perValue, oldestInMemoryEventTimestamp, clonedBaseExecutors, tableMetaStreamEvent, siddhiAppContext,
                     shouldUpdateExpressionExecutorClone);
 
             // Aggregate in-memory data and create an event chunk out of it

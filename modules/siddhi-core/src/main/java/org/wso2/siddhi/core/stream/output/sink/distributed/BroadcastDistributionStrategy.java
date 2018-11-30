@@ -71,6 +71,6 @@ public class BroadcastDistributionStrategy extends DistributionStrategy {
      */
     @Override
     public List<Integer> getDestinationsToPublish(Object payload, DynamicOptions transportOptions) {
-        return destinationIds;
+        return activeDestinationIds;
     }
 }

@@ -26,7 +26,6 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Parent class for the Distributed publishing strategy extensions. Note that destinationId of the each
@@ -37,7 +36,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class DistributionStrategy {
 
     static final List<Integer> EMPTY_RETURN_VALUE = new ArrayList<>();
-    List<Integer> destinationIds = new CopyOnWriteArrayList<>();
+    List<Integer> activeDestinationIds = new ArrayList<>();
 
     /**
      * Initialize the Distribution strategy with the information it will require to make decisions.
@@ -46,7 +45,7 @@ public abstract class DistributionStrategy {
      * @param transportOptionHolder    Sink options of the sink which uses this DistributionStrategy
      * @param distributionOptionHolder The option under @destination of the relevant sink.
      * @param destinationOptionHolders The list of options under @destination of the relevant sink.
-     * @param configReader This hold the {@link DistributionStrategy} extensions configuration reader.
+     * @param configReader             This hold the {@link DistributionStrategy} extensions configuration reader.
      */
     public abstract void init(StreamDefinition streamDefinition, OptionHolder transportOptionHolder, OptionHolder
             distributionOptionHolder, List<OptionHolder> destinationOptionHolders, ConfigReader configReader);
@@ -69,8 +68,10 @@ public abstract class DistributionStrategy {
      *
      * @param destinationId the ID of the destination to be removed
      */
-    public void destinationFailed(Integer destinationId) {
-        destinationIds.remove(destinationId);
+    public synchronized void destinationFailed(Integer destinationId) {
+        ArrayList<Integer> newDestinationIds = new ArrayList<>(activeDestinationIds);
+        newDestinationIds.remove(destinationId);
+        activeDestinationIds = newDestinationIds;
     }
 
     /**
@@ -79,16 +80,28 @@ public abstract class DistributionStrategy {
      *
      * @param destinationId the ID of the destination to be check for availability.
      */
-    public void destinationAvailable(Integer destinationId) {
-        if (destinationIds.contains(destinationId)) {
+    public synchronized void destinationAvailable(Integer destinationId) {
+        if (activeDestinationIds.contains(destinationId)) {
             throw new SiddhiAppValidationException("Destination ID " + destinationId + " already registered");
         }
 
-        destinationIds.add(destinationId);
+        ArrayList<Integer> newDestinationIds = new ArrayList<>(activeDestinationIds);
+        newDestinationIds.add(destinationId);
         //Destination IDs are implied by the order they appear in @sink annotation. i.e, the first @desination appear
         // is assigned ID 0 and the second is assigned 1 and so on. IDs are not changed once assigned. Therefore,
         // sorting the Ids once a new ID is added to keep the IDs in the same order as their respective @destination
         // annotations are listed
-        Collections.sort(destinationIds);
+        Collections.sort(newDestinationIds);
+        activeDestinationIds = newDestinationIds;
     }
+
+    /**
+     * Get the active number of destinations
+     *
+     * @return The active number of destinations
+     */
+    public synchronized int getActiveDestinationCount() {
+        return activeDestinationIds.size();
+    }
+
 }
