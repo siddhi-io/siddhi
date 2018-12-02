@@ -75,7 +75,9 @@ public class InMemoryBroker {
             synchronized (mutex) {
                 if (topicSubscribers.containsKey(subscriber.getTopic())) {
                     if (!topicSubscribers.get(subscriber.getTopic()).contains(subscriber)) {
-                        topicSubscribers.get(subscriber.getTopic()).add(subscriber);
+                        List<Subscriber> list = new ArrayList<>(topicSubscribers.get(subscriber.getTopic()));
+                        list.add(subscriber);
+                        topicSubscribers.put(subscriber.getTopic(), list);
                     }
                 } else {
                     topicSubscribers.put(subscriber.getTopic(), new ArrayList<Subscriber>() {
@@ -91,7 +93,9 @@ public class InMemoryBroker {
         public void unregister(Subscriber subscriber) {
             synchronized (mutex) {
                 try {
-                    topicSubscribers.get(subscriber.getTopic()).remove(subscriber);
+                    List<Subscriber> list = new ArrayList<>(topicSubscribers.get(subscriber.getTopic()));
+                    list.remove(subscriber);
+                    topicSubscribers.put(subscriber.getTopic(), list);
                 } catch (Exception ignored) {
                 }
             }
@@ -100,15 +104,10 @@ public class InMemoryBroker {
         @Override
         public void broadcast(String topic, Object msg) {
             List<Subscriber> subscribers;
-            // synchronization is used to make sure
-            // any observer registered after message
-            // is received is not notified
-            synchronized (mutex) {
-                if (this.topicSubscribers.containsKey(topic)) {
-                    subscribers = new ArrayList<>(this.topicSubscribers.get(topic));
-                    for (Subscriber subscriber : subscribers) {
-                        subscriber.onMessage(msg);
-                    }
+            if (this.topicSubscribers.containsKey(topic)) {
+                subscribers = this.topicSubscribers.get(topic);
+                for (Subscriber subscriber : subscribers) {
+                    subscriber.onMessage(msg);
                 }
             }
         }
