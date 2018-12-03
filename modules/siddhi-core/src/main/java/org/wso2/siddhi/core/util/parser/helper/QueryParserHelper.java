@@ -67,7 +67,6 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 public class QueryParserHelper {
 
     public static void reduceMetaComplexEvent(MetaComplexEvent metaComplexEvent) {
-
         if (metaComplexEvent instanceof MetaStateEvent) {
             MetaStateEvent metaStateEvent = (MetaStateEvent) metaComplexEvent;
             for (MetaStateEventAttribute attribute : metaStateEvent.getOutputDataAttributes()) {
@@ -90,7 +89,6 @@ public class QueryParserHelper {
      * @param metaStreamEvent MetaStreamEvent
      */
     private static synchronized void reduceStreamAttributes(MetaStreamEvent metaStreamEvent) {
-
         for (Attribute attribute : metaStreamEvent.getOutputData()) {
             if (metaStreamEvent.getBeforeWindowData().contains(attribute)) {
                 metaStreamEvent.getBeforeWindowData().remove(attribute);
@@ -174,7 +172,6 @@ public class QueryParserHelper {
     private static void initSingleStreamRuntime(SingleStreamRuntime singleStreamRuntime, int streamEventChainIndex,
                                                 MetaComplexEvent metaComplexEvent, StateEventPool stateEventPool,
                                                 LockWrapper lockWrapper, String queryName) {
-
         MetaStreamEvent metaStreamEvent;
         boolean deepCopy = false;
 

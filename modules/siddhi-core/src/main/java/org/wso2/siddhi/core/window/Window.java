@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import org.wso2.siddhi.core.event.stream.StreamEventDeepCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.StreamEventShallowCloner;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
@@ -147,10 +148,17 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
      */
     public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap,
                      String queryName) {
+        StreamEventCloner streamEventCloner;
+        boolean deepCopy = false;
         if (this.windowProcessor != null) {
             return;
         }
-
+        for (Attribute attribute : windowDefinition.getAttributeList()) {
+            if (attribute.getType().equals(Attribute.Type.OBJECT)) {
+                deepCopy = true;
+                break;
+            }
+        }
         // Create and initialize MetaStreamEvent
         MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
         metaStreamEvent.addInputDefinition(windowDefinition);
@@ -161,7 +169,11 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         }
 
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 5);
-        StreamEventCloner streamEventCloner = new StreamEventShallowCloner(metaStreamEvent, this.streamEventPool);
+        if (deepCopy) {
+            streamEventCloner = new StreamEventDeepCloner(metaStreamEvent, this.streamEventPool);
+        } else {
+            streamEventCloner = new StreamEventShallowCloner(metaStreamEvent, this.streamEventPool);
+        }
         OutputStream.OutputEventType outputEventType = windowDefinition.getOutputEventType();
         boolean outputExpectsExpiredEvents = outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS;
 

@@ -32,7 +32,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Cloner class for {@link StreamEvent} to be used when creating {@link org.wso2.siddhi.core.partition.PartitionRuntime}
+ * Implementation class for Deep {@link StreamEvent} cloner to be used when creating
+ * {@link org.wso2.siddhi.core.partition.PartitionRuntime}
  */
 public class StreamEventDeepCloner implements StreamEventCloner {
 
@@ -71,12 +72,6 @@ public class StreamEventDeepCloner implements StreamEventCloner {
         return borrowedEvent;
     }
 
-    /**
-     *
-     * @param object
-     * @param <T>
-     * @return
-     */
     private static <T extends Serializable> T clone(final T object) {
         if (object == null) {
             return null;
@@ -101,22 +96,12 @@ public class StreamEventDeepCloner implements StreamEventCloner {
         }
     }
 
-    /**
-     *
-     * @param obj
-     * @return
-     */
     private static byte[] serialize(final Serializable obj) {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
         serialize(obj, baos);
         return baos.toByteArray();
     }
 
-    /**
-     *
-     * @param obj
-     * @param outputStream
-     */
     private static void serialize(final Serializable obj, final OutputStream outputStream) {
         if (outputStream != null) {
             try (ObjectOutputStream out = new ObjectOutputStream(outputStream)) {
@@ -128,13 +113,7 @@ public class StreamEventDeepCloner implements StreamEventCloner {
         }
     }
 
-    /**
-     *
-     */
     static class ClassLoaderAwareObjectInputStream extends ObjectInputStream {
-        /**
-         *
-         */
         private static final Map<String, Class<?>> primitiveTypes =
                 new HashMap<>();
         static {
@@ -190,6 +169,5 @@ public class StreamEventDeepCloner implements StreamEventCloner {
                 }
             }
         }
-
     }
 }

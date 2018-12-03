@@ -19,7 +19,8 @@
 package org.wso2.siddhi.core.event.stream;
 
 /**
- * Cloner class for {@link StreamEvent} to be used when creating {@link org.wso2.siddhi.core.partition.PartitionRuntime}
+ * Implementation class for Shallow {@link StreamEvent} cloner to be used when creating
+ * {@link org.wso2.siddhi.core.partition.PartitionRuntime}
  */
 public class StreamEventShallowCloner implements StreamEventCloner {
 
@@ -33,7 +34,6 @@ public class StreamEventShallowCloner implements StreamEventCloner {
         this.beforeWindowDataSize = metaStreamEvent.getBeforeWindowData().size();
         this.onAfterWindowDataSize = metaStreamEvent.getOnAfterWindowData().size();
         this.outputDataSize = metaStreamEvent.getOutputData().size();
-
     }
 
     /**
