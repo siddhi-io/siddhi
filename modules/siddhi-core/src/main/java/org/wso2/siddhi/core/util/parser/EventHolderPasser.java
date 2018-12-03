@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.util.parser;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.StreamEventShallowCloner;
 import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
@@ -117,7 +118,7 @@ public class EventHolderPasser {
             for (Attribute attribute : tableDefinition.getAttributeList()) {
                 metaStreamEvent.addOutputData(attribute);
             }
-            StreamEventShallowCloner streamEventCloner = new StreamEventShallowCloner(metaStreamEvent, tableStreamEventPool);
+            StreamEventCloner streamEventCloner = new StreamEventShallowCloner(metaStreamEvent, tableStreamEventPool);
             return new ListEventHolder(tableStreamEventPool, eventConverter,
                     new StreamEventClonerHolder(streamEventCloner));
         }
