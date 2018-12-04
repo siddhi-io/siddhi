@@ -30,7 +30,6 @@ import org.wso2.siddhi.core.util.IncrementalTimeConverterUtil;
 import org.wso2.siddhi.core.util.parser.StoreQueryParser;
 import org.wso2.siddhi.core.window.Window;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
-
 import org.wso2.siddhi.query.api.execution.query.StoreQuery;
 import org.wso2.siddhi.query.api.execution.query.input.store.InputStore;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
@@ -61,8 +60,8 @@ public class RecreateInMemoryData {
             Map<TimePeriod.Duration, Table> aggregationTables,
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap, SiddhiAppContext siddhiAppContext,
             MetaStreamEvent metaStreamEvent, Map<String, Table> tableMap, Map<String, Window> windowMap,
-            Map<String, AggregationRuntime> aggregationMap, String nodeId, Map<TimePeriod.Duration,
-            IncrementalExecutor> incrementalExecutorMapForPartitions) {
+            Map<String, AggregationRuntime> aggregationMap, String nodeId,
+            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
         this.incrementalDurations = incrementalDurations;
         this.aggregationTables = aggregationTables;
         this.incrementalExecutorMap = incrementalExecutorMap;
@@ -88,7 +87,6 @@ public class RecreateInMemoryData {
 
         // Get all events from table corresponding to max duration
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
-
         StoreQuery storeQuery;
         if (nodeId != null && !findForPartitionById) {
         storeQuery = StoreQuery.query().from(InputStore.store(tableForMaxDuration.getTableDefinition().getId()))

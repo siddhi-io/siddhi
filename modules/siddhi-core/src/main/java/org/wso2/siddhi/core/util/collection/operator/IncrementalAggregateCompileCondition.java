@@ -114,8 +114,8 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
                             SiddhiAppContext siddhiAppContext,
                             List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
                             List<GroupByKeyGenerator> groupbyKeyGeneratorList,
-                            ExpressionExecutor shouldUpdateExpressionExecutor, Map<TimePeriod.Duration,
-            IncrementalExecutor> incrementalExecutorMapForPartitions) {
+                            ExpressionExecutor shouldUpdateExpressionExecutor,
+                            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
 
         ComplexEventChunk<StreamEvent> complexEventChunkToHoldWithinMatches = new ComplexEventChunk<>(true);
 

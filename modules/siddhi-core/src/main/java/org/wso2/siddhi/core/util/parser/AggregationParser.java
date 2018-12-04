@@ -69,7 +69,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -310,8 +309,8 @@ public class AggregationParser {
                     processedMetaStreamEvent, processExpressionExecutorsList,
                     groupByKeyGeneratorList, incrementalDurations,
                     aggregationTables, siddhiAppContext, aggregatorName, shouldUpdateExpressionExecutor);
-            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions = null;
 
+            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions = null;
             if (nodeId != null) {
                 incrementalExecutorMapForPartitions =
                         buildIncrementalExecutors(
@@ -538,6 +537,7 @@ public class AggregationParser {
             incomingMetaStreamEvent.addOutputData(externalTimestampAttribute);
             incomingExpressionExecutors.add(externalTimestampExecutor);
         }
+
         AbstractDefinition incomingLastInputStreamDefinition = incomingMetaStreamEvent.getLastInputDefinition();
         for (Variable groupByVariable : groupByVariableList) {
             incomingMetaStreamEvent.addOutputData(incomingLastInputStreamDefinition.getAttributeList()
@@ -804,7 +804,8 @@ public class AggregationParser {
     private static HashMap<TimePeriod.Duration, Table> initDefaultTables(
             String aggregatorName, List<TimePeriod.Duration> durations,
             StreamDefinition streamDefinition, SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder,
-            List<Annotation> annotations, List<Variable> groupByVariableList, boolean isProcessingOnExternalTime, Annotation partitionById) {
+            List<Annotation> annotations, List<Variable> groupByVariableList, boolean isProcessingOnExternalTime,
+            Annotation partitionById) {
 
         HashMap<TimePeriod.Duration, Table> aggregationTableMap = new HashMap<>();
         // Create annotations for primary key

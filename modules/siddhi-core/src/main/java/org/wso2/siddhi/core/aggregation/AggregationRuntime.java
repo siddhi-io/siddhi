@@ -122,7 +122,6 @@ public class AggregationRuntime implements MemoryCalculable {
         this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
         aggregateMetaSteamEvent = new MetaStreamEvent();
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
-
     }
 
     private static void initMetaStreamEvent(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition) {

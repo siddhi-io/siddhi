@@ -32,7 +32,6 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
 
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
