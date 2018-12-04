@@ -17,7 +17,7 @@
  */
 package org.wso2.siddhi.core.event.stream;
 
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -47,7 +47,6 @@ public class StreamEventDeepCloner implements StreamEventCloner {
         this.beforeWindowDataSize = metaStreamEvent.getBeforeWindowData().size();
         this.onAfterWindowDataSize = metaStreamEvent.getOnAfterWindowData().size();
         this.outputDataSize = metaStreamEvent.getOutputData().size();
-
     }
 
     /**
@@ -90,9 +89,9 @@ public class StreamEventDeepCloner implements StreamEventCloner {
             final T readObject = (T) in.readObject();
             return readObject;
         } catch (final ClassNotFoundException ex) {
-            throw new SiddhiAppRuntimeException("ClassNotFoundException while reading cloned object data", ex);
+            throw new SiddhiAppCreationException("ClassNotFoundException while reading cloned object data", ex);
         } catch (final IOException ex) {
-            throw new SiddhiAppRuntimeException("IOException while reading or closing cloned object data", ex);
+            throw new SiddhiAppCreationException("IOException while reading or closing cloned object data", ex);
         }
     }
 
@@ -107,8 +106,7 @@ public class StreamEventDeepCloner implements StreamEventCloner {
             try (ObjectOutputStream out = new ObjectOutputStream(outputStream)) {
                 out.writeObject(obj);
             } catch (final IOException ex) {
-                throw new SiddhiAppRuntimeException(ex);
-
+                throw new SiddhiAppCreationException(ex);
             }
         }
     }

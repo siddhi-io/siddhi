@@ -174,20 +174,15 @@ public class QueryParserHelper {
                                                 LockWrapper lockWrapper, String queryName) {
         MetaStreamEvent metaStreamEvent;
         boolean deepCopy = false;
-
         if (metaComplexEvent instanceof MetaStateEvent) {
             metaStreamEvent = ((MetaStateEvent) metaComplexEvent).getMetaStreamEvent(streamEventChainIndex);
         } else {
             metaStreamEvent = (MetaStreamEvent) metaComplexEvent;
         }
-        outerloop:
         for (AbstractDefinition streamDefs : metaStreamEvent.getInputDefinitions()) {
-            List<Attribute> attrTypes = streamDefs.getAttributeList();
-            for (Attribute attr : attrTypes) {
-                if (attr.getType().equals(Attribute.Type.OBJECT)) {
-                    deepCopy = true;
-                    break outerloop;
-                }
+            if (DefinitionParserHelper.containsNonPrimitives(streamDefs)) {
+                deepCopy = true;
+                break;
             }
         }
         StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 5);

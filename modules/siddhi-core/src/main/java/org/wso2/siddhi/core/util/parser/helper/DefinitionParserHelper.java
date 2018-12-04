@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.util.parser.helper;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import org.wso2.siddhi.core.event.stream.StreamEventDeepCloner;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.event.stream.StreamEventShallowCloner;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
@@ -160,7 +161,7 @@ public class DefinitionParserHelper {
                                 SiddhiAppContext siddhiAppContext) {
 
         if (!tableMap.containsKey(tableDefinition.getId())) {
-
+            boolean deepCopy = containsNonPrimitives(tableDefinition);
             MetaStreamEvent tableMetaStreamEvent = new MetaStreamEvent();
             tableMetaStreamEvent.addInputDefinition(tableDefinition);
             for (Attribute attribute : tableDefinition.getAttributeList()) {
@@ -168,9 +169,14 @@ public class DefinitionParserHelper {
             }
 
             StreamEventPool tableStreamEventPool = new StreamEventPool(tableMetaStreamEvent, 10);
-            StreamEventCloner tableStreamEventCloner = new StreamEventShallowCloner(tableMetaStreamEvent,
-                    tableStreamEventPool);
-
+            StreamEventCloner tableStreamEventCloner;
+            if (deepCopy) {
+                tableStreamEventCloner = new StreamEventDeepCloner(tableMetaStreamEvent,
+                        tableStreamEventPool);
+            } else {
+                tableStreamEventCloner = new StreamEventShallowCloner(tableMetaStreamEvent,
+                        tableStreamEventPool);
+            }
             Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_STORE,
                     tableDefinition.getAnnotations());
 
@@ -875,6 +881,18 @@ public class DefinitionParserHelper {
             }
         }
         return annotation;
+    }
+
+    /**
+     * Util to check whether definition contains non-primitive attributes
+     */
+    public static boolean containsNonPrimitives(AbstractDefinition definition) {
+        for (Attribute attribute : definition.getAttributeList()) {
+            if (attribute.getType().equals(Attribute.Type.OBJECT)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

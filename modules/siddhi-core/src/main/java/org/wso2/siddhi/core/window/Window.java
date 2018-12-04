@@ -43,6 +43,7 @@ import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.parser.SchedulerParser;
 import org.wso2.siddhi.core.util.parser.SingleInputStreamParser;
+import org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
@@ -149,15 +150,9 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
     public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap,
                      String queryName) {
         StreamEventCloner streamEventCloner;
-        boolean deepCopy = false;
+        boolean deepCopy = DefinitionParserHelper.containsNonPrimitives(windowDefinition);
         if (this.windowProcessor != null) {
             return;
-        }
-        for (Attribute attribute : windowDefinition.getAttributeList()) {
-            if (attribute.getType().equals(Attribute.Type.OBJECT)) {
-                deepCopy = true;
-                break;
-            }
         }
         // Create and initialize MetaStreamEvent
         MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
@@ -167,7 +162,6 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         for (Attribute attribute : windowDefinition.getAttributeList()) {
             metaStreamEvent.addOutputData(attribute);
         }
-
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 5);
         if (deepCopy) {
             streamEventCloner = new StreamEventDeepCloner(metaStreamEvent, this.streamEventPool);
