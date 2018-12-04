@@ -52,34 +52,37 @@ import java.util.Map;
 @Extension(
         name = "delay",
         namespace = "",
-        description = "A delay window holds events that arrived " +
-                "for a given delay time period before processing them.",
+        description = "A delay window holds events for a specific time period that is regarded as a" +
+                " delay period before processing them.",
         parameters = {
                 @Parameter(name = "window.delay",
-                        description = "The time period(sec, min, ms) for which " +
+                        description = "The time period (specified in sec, min, ms) for which " +
                                 " the window should delay the events.",
                         type = {DataType.INT, DataType.LONG, DataType.TIME})
         },
         examples = {
                 @Example(
                         syntax = "define window delayWindow(symbol string, volume int) delay(1 hour);\n" +
-                                "define stream purchaseStream(symbol string, volume int);\n" +
-                                "define stream deliveryStream(symbol string);\n" +
-                                "define stream outputStream(symbol string);\n" +
+                                "define stream PurchaseStream(symbol string, volume int);\n" +
+                                "define stream DeliveryStream(symbol string);\n" +
+                                "define stream OutputStream(symbol string);\n" +
                                 "\n" +
                                 "@info(name='query1') \n" +
-                                "from purchaseStream\n" +
+                                "from PurchaseStream\n" +
                                 "select symbol, volume\n" +
                                 "insert into delayWindow;\n" +
                                 "\n" +
                                 "@info(name='query2') \n" +
-                                "from delayWindow join deliveryStream\n" +
-                                "on delayWindow.symbol == deliveryStream.symbol\n" +
+                                "from delayWindow join DeliveryStream\n" +
+                                "on delayWindow.symbol == DeliveryStream.symbol\n" +
                                 "select delayWindow.symbol\n" +
-                                "insert into outputStream;",
-                        description = "This will delay the events from purchaseStream for 1 hour " +
-                                "and match them with events arrived from deliveryStream to check " +
-                                "if delivery of the purchased item is done within 1 hour "
+                                "insert into OutputStream;",
+                        description = "In this example, purchase events that arrive in the 'PurchaseStream' stream" +
+                                " are directed to a delay window. At any given time, this delay window holds purchase" +
+                                " events that have arrived within the last hour. These purchase events in the " +
+                                "window are matched by the 'symbol' attribute, with delivery events that arrive in " +
+                                "the 'DeliveryStream' stream. This monitors whether the delivery of products is done" +
+                                " with a minimum delay of one hour after the purchase."
                 )
         }
 )
