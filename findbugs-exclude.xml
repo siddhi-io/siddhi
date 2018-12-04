@@ -203,5 +203,4 @@
         <Package name="~org\.wso2\.siddhi\.sample.*"/>
     </Match>
 
-
 </FindBugsFilter>

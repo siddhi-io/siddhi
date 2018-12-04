@@ -243,7 +243,6 @@ public class QueryParserHelper {
 
     public static LatencyTracker createLatencyTracker(SiddhiAppContext siddhiAppContext, String name, String type,
                                                       String function) {
-
         LatencyTracker latencyTracker = null;
         if (siddhiAppContext.getStatisticsManager() != null) {
             String metricName =
@@ -276,7 +275,6 @@ public class QueryParserHelper {
 
     public static ThroughputTracker createThroughputTracker(SiddhiAppContext siddhiAppContext, String name,
                                                             String type, String function) {
-
         ThroughputTracker throughputTracker = null;
         if (siddhiAppContext.getStatisticsManager() != null) {
             String metricName =
@@ -311,7 +309,6 @@ public class QueryParserHelper {
     public static void registerMemoryUsageTracking(String name, Object value, String metricInfixQueries,
                                                    SiddhiAppContext siddhiAppContext,
                                                    MemoryUsageTracker memoryUsageTracker) {
-
         String metricName = siddhiAppContext.getSiddhiContext().getStatisticsConfiguration().getMetricPrefix() +
                 SiddhiConstants.METRIC_DELIMITER + SiddhiConstants.METRIC_INFIX_SIDDHI_APPS +
                 SiddhiConstants.METRIC_DELIMITER + siddhiAppContext.getName() + SiddhiConstants.METRIC_DELIMITER +
