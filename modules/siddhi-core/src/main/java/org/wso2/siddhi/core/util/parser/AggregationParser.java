@@ -165,24 +165,28 @@ public class AggregationParser {
                 annotationTypes.put(annotation.getName().toLowerCase(), annotation);
             }
 
-            Annotation partitionById = annotationTypes.get("partitionbyid");
+            Annotation partitionById = annotationTypes.get(SiddhiConstants.ANNOTATION_PARTITION_BY_ID);
 
             if (partitionById != null) {
                 ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
                 Expression nodeIdExpression;
                 boolean clusterEnabled =
-                        Boolean.parseBoolean(configManager.generateConfigReader("cluster.config", "enabled").readConfig(
-                                "enabled", "false"));
+                        Boolean.parseBoolean(configManager.generateConfigReader("cluster.config",
+                                "enabled").readConfig("enabled", "false"));
                 if (clusterEnabled) {
                     nodeId = configManager.generateConfigReader("cluster.config", "groupId").readConfig(
                             "groupId", "");
+                    if (nodeId.equals("")) {
+                        throw new SiddhiAppCreationException("Configurations not provided for @partitionbyid " +
+                                "annotation");
+                    }
                     nodeIdExpression = Expression.value(nodeId);
                 } else {
                     nodeId = configManager.generateConfigReader("wso2.carbon", "id")
                             .readConfig("id", "");
                     if (nodeId.equals("")) {
-                        Random rand = new Random();
-                        nodeId = "node-" + rand.nextInt(1000);
+                        throw new SiddhiAppCreationException("Configurations not provided for @partitionbyid " +
+                                "annotation");
                     }
                     nodeIdExpression = Expression.value(nodeId);
                 }

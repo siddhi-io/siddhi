@@ -210,7 +210,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 lastExecutorsRefreshedTime = System.currentTimeMillis();
             }
             if (nodeId != null) {
-                recreateInMemoryData.recreateInMemoryDataForPartitions();
+                recreateInMemoryData.recreateInMemoryData(true);
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
@@ -368,7 +368,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 durationIncrementalExecutorEntry.getValue().setProcessingExecutor(isEventArrived);
             }
         }
-        recreateInMemoryData.recreateInMemoryData();
+        recreateInMemoryData.recreateInMemoryData(false);
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {
