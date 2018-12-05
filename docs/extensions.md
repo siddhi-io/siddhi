@@ -8,7 +8,6 @@ Following are some prewritten extensions that are supported with Siddhi;
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-string">execution string</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-math">execution math</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-time">execution time</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-json">execution json</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-streamingml">execution streamingml</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-regex">execution regex</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-markov">execution markov</a>

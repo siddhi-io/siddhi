@@ -131,10 +131,11 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
                 delayedEventQueue.reset();
                 while (delayedEventQueue.hasNext()) {
                     StreamEvent delayedEvent = delayedEventQueue.next();
-                    //check if the event has delayed expected time period
-                    if (currentTime >= delayedEvent.getTimestamp() + delayInMilliSeconds) {
+                    long timeDiff = delayedEvent.getTimestamp() - currentTime + delayInMilliSeconds;
+                    if (timeDiff <= 0) {
                         delayedEventQueue.remove();
                         //insert delayed event before the current event to stream chunk
+                        delayedEvent.setTimestamp(currentTime);
                         streamEventChunk.insertBeforeCurrent(delayedEvent);
                     } else {
                         break;
@@ -142,7 +143,8 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
                 }
 
                 if (streamEvent.getType() == StreamEvent.Type.CURRENT) {
-                    this.delayedEventQueue.add(streamEvent);
+                    StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                    this.delayedEventQueue.add(clonedEvent);
 
                     if (lastTimestamp < streamEvent.getTimestamp()) {
                         getScheduler().notifyAt(streamEvent.getTimestamp() + delayInMilliSeconds);

@@ -20,7 +20,9 @@ package org.wso2.siddhi.core.query.output.ratelimit;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.query.input.MultiProcessStreamReceiver;
 import org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback;
+import org.wso2.siddhi.core.query.output.callback.InsertIntoWindowCallback;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
@@ -49,7 +51,8 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
     public void init(SiddhiAppContext siddhiAppContext, LockWrapper lockWrapper, String queryName) {
         this.siddhiAppContext = siddhiAppContext;
         this.queryName = queryName;
-        if (outputCallback != null && (outputCallback instanceof InsertIntoStreamCallback)) {
+        if (outputCallback != null && (outputCallback instanceof InsertIntoStreamCallback ||
+                outputCallback instanceof InsertIntoWindowCallback)) {
             this.lockWrapper = lockWrapper;
         }
         if (elementId == null) {
@@ -58,7 +61,15 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
         siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
     }
 
-    protected void sendToCallBacks(ComplexEventChunk complexEventChunk) {
+    public void sendToCallBacks(ComplexEventChunk complexEventChunk) {
+        MultiProcessStreamReceiver.ReturnEventHolder returnEventHolder =
+                MultiProcessStreamReceiver.getMultiProcessReturn().get();
+        if (returnEventHolder != null) {
+            returnEventHolder.setReturnEvents(complexEventChunk);
+            return;
+        } else if (lockWrapper != null) {
+            lockWrapper.unlock();
+        }
         if (siddhiAppContext.isStatsEnabled() && latencyTracker != null) {
             latencyTracker.markOut();
         }
