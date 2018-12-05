@@ -289,7 +289,7 @@ public class StoreQueryParser {
                         queryName, metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors);
             } catch (QueryableRecordTableException e) {
                 log.warn("Failed to create optimized Store Query Runtime as no query configuration was found " +
-                        "for Store Query: " + storeQuery.toString());
+                        "for table: " + table.getTableDefinition().getId());
                 return constructRegularStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, windowMap,
                         queryName, metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors,
                         lockWrapper);
