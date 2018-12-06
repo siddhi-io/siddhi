@@ -66,10 +66,8 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
     }
 
     public MultiProcessStreamReceiver clone(String key) {
-        MultiProcessStreamReceiver clonedProcessStreamReceiver = new MultiProcessStreamReceiver(
-                streamId + key, processCount, latencyTracker, queryName, siddhiAppContext);
-        this.setOutputRateLimiter(outputRateLimiter);
-        return clonedProcessStreamReceiver;
+        return new MultiProcessStreamReceiver(streamId + key, processCount, latencyTracker, queryName,
+                siddhiAppContext);
     }
 
     private void process(int eventSequence, StreamEvent borrowedEvent) {

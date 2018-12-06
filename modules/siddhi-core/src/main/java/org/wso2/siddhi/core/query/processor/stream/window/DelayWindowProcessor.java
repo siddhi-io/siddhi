@@ -143,8 +143,7 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
                 }
 
                 if (streamEvent.getType() == StreamEvent.Type.CURRENT) {
-                    StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                    this.delayedEventQueue.add(clonedEvent);
+                    this.delayedEventQueue.add(streamEvent);
 
                     if (lastTimestamp < streamEvent.getTimestamp()) {
                         getScheduler().notifyAt(streamEvent.getTimestamp() + delayInMilliSeconds);
