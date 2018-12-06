@@ -612,7 +612,7 @@ public class CustomJoinWindowTestCase {
             @Override
             public void receive(Event[] events) {
                 EventPrinter.print(events);
-                inEventCount++;
+                inEventCount += events.length;
             }
         });
 

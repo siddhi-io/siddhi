@@ -858,10 +858,11 @@ public class PlaybackTestCase {
         siddhiAppRuntime.start();
         siddhiAppRuntime.enablePlayBack(true, null, null);
         long timestamp = System.currentTimeMillis();
-        inputHandler.send(timestamp - 500, new Object[]{"IBM", 700f, 0});
-        inputHandler.send(timestamp - 100, new Object[]{"WSO2", 60.5f, 1});
+        Event[] events = new Event[]{new Event(timestamp - 500, new Object[]{"IBM", 700f, 0}),
+                new Event(timestamp - 300, new Object[]{"WSO2", 60.5f, 1})};
+        inputHandler.send(events);
         siddhiAppRuntime.enablePlayBack(false, null, null);
-        Thread.sleep(505);   // 1 sec passed
+        Thread.sleep(805);   // 1 sec passed
 
         AssertJUnit.assertEquals(2, inEventCount);
         AssertJUnit.assertEquals(0, removeEventCount);
@@ -870,6 +871,55 @@ public class PlaybackTestCase {
     }
 
     @Test(dependsOnMethods = {"playbackTest17"})
+    public void playbackTest17_1() throws InterruptedException {
+        log.info("Playback Test 17: Switching between Playback mode and live mode with heartbeat disabled in query " +
+                "containing regular time batch window test only current batch ");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.timeBatch(1 sec) " +
+                "select * " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEventCount == 0) {
+                    AssertJUnit.assertTrue("Remove Events will only arrive after the second time period. ", removeEvents
+                            == null);
+                }
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.enablePlayBack(true, null, null);
+        long timestamp = System.currentTimeMillis();
+        inputHandler.send(timestamp - 500, new Object[]{"IBM", 700f, 0});
+        inputHandler.send(timestamp - 100, new Object[]{"WSO2", 60.5f, 1});
+        siddhiAppRuntime.enablePlayBack(false, null, null);
+        Thread.sleep(605);   // 1 sec passed
+
+        AssertJUnit.assertEquals(2, inEventCount);
+        AssertJUnit.assertEquals(0, removeEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"playbackTest17_1"})
     public void playbackTest18() throws InterruptedException {
         log.info("Playback Test 18: Switching between Playback mode and live mode with heartbeat disabled in query " +
                 "containing regular time batch window test only current batch ");

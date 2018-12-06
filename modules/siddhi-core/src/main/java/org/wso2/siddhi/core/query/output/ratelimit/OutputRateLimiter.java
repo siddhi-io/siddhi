@@ -21,8 +21,6 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.query.input.MultiProcessStreamReceiver;
-import org.wso2.siddhi.core.query.output.callback.InsertIntoStreamCallback;
-import org.wso2.siddhi.core.query.output.callback.InsertIntoWindowCallback;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
@@ -51,8 +49,7 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
     public void init(SiddhiAppContext siddhiAppContext, LockWrapper lockWrapper, String queryName) {
         this.siddhiAppContext = siddhiAppContext;
         this.queryName = queryName;
-        if (outputCallback != null && (outputCallback instanceof InsertIntoStreamCallback ||
-                outputCallback instanceof InsertIntoWindowCallback)) {
+        if (outputCallback != null) {
             this.lockWrapper = lockWrapper;
         }
         if (elementId == null) {

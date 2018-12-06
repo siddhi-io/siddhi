@@ -191,6 +191,55 @@ public class JoinTestCase {
         }
     }
 
+
+    @Test
+    public void joinTest3_1() throws InterruptedException {
+        log.info("Join test3");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream cseEventStream (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.time(500 milliseconds) as a " +
+                "join cseEventStream#window.time(500 milliseconds) as b " +
+                "on a.symbol== b.symbol " +
+                "select a.symbol as symbol, a.price as priceA, b.price as priceB " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timestamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        inEventCount.addAndGet(inEvents.length);
+                    }
+                    if (removeEvents != null) {
+                        removeEventCount.getAndAdd(removeEvents.length);
+                    }
+                    eventArrived = true;
+                }
+            });
+
+            InputHandler cseEventStreamHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+            siddhiAppRuntime.start();
+            long timestamp = System.currentTimeMillis();
+            Event[] events = new Event[]{new Event(timestamp, new Object[]{"IBM", 75.6f, 100}),
+                    new Event(timestamp, new Object[]{"WSO2", 57.6f, 100})};
+            cseEventStreamHandler.send(events);
+
+            SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
+            SiddhiTestHelper.waitForEvents(100, 2, removeEventCount, 60000);
+            AssertJUnit.assertEquals(2, inEventCount.get());
+            AssertJUnit.assertEquals(2, removeEventCount.get());
+            AssertJUnit.assertTrue(eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
+
     @Test
     public void joinTest4() throws InterruptedException {
         log.info("Join test4");

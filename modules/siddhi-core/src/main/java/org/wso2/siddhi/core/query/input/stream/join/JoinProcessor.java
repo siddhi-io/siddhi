@@ -26,7 +26,9 @@ import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
-import org.wso2.siddhi.core.util.lock.LockWrapper;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created on 12/8/14.
@@ -36,7 +38,6 @@ public class JoinProcessor implements Processor {
     private boolean leftJoinProcessor = false;
     private boolean outerJoinProcessor = false;
     private int matchingStreamIndex;
-    private LockWrapper joinLockWrapper;
     private boolean preJoinProcessor;
     private StateEventPool stateEventPool;
     private CompiledCondition compiledCondition;
@@ -60,52 +61,58 @@ public class JoinProcessor implements Processor {
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         if (trigger) {
-            ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(true);
+            List<ComplexEventChunk<StateEvent>> returnEventChunkList = new LinkedList<>();
             StateEvent joinStateEvent = new StateEvent(2, 0);
             StreamEvent nextEvent = (StreamEvent) complexEventChunk.getFirst();
             complexEventChunk.clear();
             while (nextEvent != null) {
-
                 StreamEvent streamEvent = nextEvent;
                 nextEvent = streamEvent.getNext();
                 streamEvent.setNext(null);
-                joinLockWrapper.lock();
-                try {
-                    ComplexEvent.Type eventType = streamEvent.getType();
-                    if (eventType == ComplexEvent.Type.TIMER) {
-                        continue;
-                    } else if (eventType == ComplexEvent.Type.RESET) {
-                        if (!leftJoinProcessor) {
-                            returnEventChunk.add(joinEventBuilder(null, streamEvent, eventType));
-                        } else {
-                            returnEventChunk.add(joinEventBuilder(streamEvent, null, eventType));
+                ComplexEvent.Type eventType = streamEvent.getType();
+                if (eventType == ComplexEvent.Type.TIMER) {
+                    continue;
+                } else if (eventType == ComplexEvent.Type.RESET) {
+                    if (!leftJoinProcessor) {
+                        StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
+                        returnEventChunkList.add(new ComplexEventChunk<>(
+                                outputStateEvent, outputStateEvent, true));
+                    } else {
+                        StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
+                        returnEventChunkList.add(new ComplexEventChunk<>(
+                                outputStateEvent, outputStateEvent, true));
+                    }
+                } else {
+                    joinStateEvent.setEvent(matchingStreamIndex, streamEvent);
+                    StreamEvent foundStreamEvent = findableProcessor.find(joinStateEvent, compiledCondition);
+                    joinStateEvent.setEvent(matchingStreamIndex, null);
+                    if (foundStreamEvent == null) {
+                        if (outerJoinProcessor && !leftJoinProcessor) {
+                            StateEvent outputStateEvent = joinEventBuilder(null, streamEvent, eventType);
+                            returnEventChunkList.add(new ComplexEventChunk<>(
+                                    outputStateEvent, outputStateEvent, true));
+                        } else if (outerJoinProcessor && leftJoinProcessor) {
+                            StateEvent outputStateEvent = joinEventBuilder(streamEvent, null, eventType);
+                            returnEventChunkList.add(new ComplexEventChunk<>(
+                                    outputStateEvent, outputStateEvent, true));
                         }
                     } else {
-                        joinStateEvent.setEvent(matchingStreamIndex, streamEvent);
-                        StreamEvent foundStreamEvent = findableProcessor.find(joinStateEvent, compiledCondition);
-                        joinStateEvent.setEvent(matchingStreamIndex, null);
-                        if (foundStreamEvent == null) {
-                            if (outerJoinProcessor && !leftJoinProcessor) {
-                                returnEventChunk.add(joinEventBuilder(null, streamEvent, eventType));
-                            } else if (outerJoinProcessor && leftJoinProcessor) {
-                                returnEventChunk.add(joinEventBuilder(streamEvent, null, eventType));
+                        ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<>(true);
+                        while (foundStreamEvent != null) {
+                            StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
+                            foundStreamEvent.setNext(null);
+                            if (!leftJoinProcessor) {
+                                returnEventChunk.add(joinEventBuilder(foundStreamEvent, streamEvent, eventType));
+                            } else {
+                                returnEventChunk.add(joinEventBuilder(streamEvent, foundStreamEvent, eventType));
                             }
-                        } else {
-                            while (foundStreamEvent != null) {
-                                StreamEvent nextFoundStreamEvent = foundStreamEvent.getNext();
-                                foundStreamEvent.setNext(null);
-                                if (!leftJoinProcessor) {
-                                    returnEventChunk.add(joinEventBuilder(foundStreamEvent, streamEvent, eventType));
-                                } else {
-                                    returnEventChunk.add(joinEventBuilder(streamEvent, foundStreamEvent, eventType));
-                                }
-                                foundStreamEvent = nextFoundStreamEvent;
-                            }
+                            foundStreamEvent = nextFoundStreamEvent;
                         }
+                        returnEventChunkList.add(returnEventChunk);
                     }
-                } finally {
-                    joinLockWrapper.unlock();
                 }
+            }
+            for (ComplexEventChunk<StateEvent> returnEventChunk : returnEventChunkList) {
                 if (returnEventChunk.getFirst() != null) {
                     selector.process(returnEventChunk);
                     returnEventChunk.clear();
@@ -113,12 +120,7 @@ public class JoinProcessor implements Processor {
             }
         } else {
             if (preJoinProcessor) {
-                joinLockWrapper.lock();
-                try {
-                    nextProcessor.process(complexEventChunk);
-                } finally {
-                    joinLockWrapper.unlock();
-                }
+                nextProcessor.process(complexEventChunk);
             }
         }
     }
@@ -141,10 +143,6 @@ public class JoinProcessor implements Processor {
     @Override
     public void setNextProcessor(Processor processor) {
         nextProcessor = processor;
-    }
-
-    public void setJoinLock(LockWrapper joinLockWrapper) {
-        this.joinLockWrapper = joinLockWrapper;
     }
 
     /**
