@@ -42,7 +42,7 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.stream.Collectors;
 import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
 /**
@@ -161,8 +161,10 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         //If processing on external time, the in-memory data also needs to be queried
         if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
                 startTimeEndTime)) {
+            List<ExpressionExecutor> clonedBaseExecutors = baseExecutors.stream().map(expressionExecutor ->
+                    expressionExecutor.cloneExecutor("")).collect(Collectors.toList());
             IncrementalDataAggregator incrementalDataAggregator = new IncrementalDataAggregator(incrementalDurations,
-                    perValue, oldestInMemoryEventTimestamp, baseExecutors, tableMetaStreamEvent, siddhiAppContext,
+                    perValue, oldestInMemoryEventTimestamp, clonedBaseExecutors, tableMetaStreamEvent, siddhiAppContext,
                     shouldUpdateExpressionExecutorClone);
 
             // Aggregate in-memory data and create an event chunk out of it
