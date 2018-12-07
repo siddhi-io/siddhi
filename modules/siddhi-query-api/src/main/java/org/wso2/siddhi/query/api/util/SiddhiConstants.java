@@ -31,7 +31,4 @@ public class SiddhiConstants {
     public static final String TRIGGERED_TIME = "triggered_time";
 
     public static final int LAST = -2;
-    public static final String ESCAPE_SEQUENCE = "\"\"\"";
-    public static final char DOUBLE_QUOTE = '\"';
-
 }
