@@ -37,11 +37,10 @@ public class InMemoryConfigReader implements ConfigReader {
     @Override
     public String readConfig(String name, String defaultValue) {
         String value = configs.get(keyPrefix + "." + name);
-        String value2 = configs.getOrDefault(keyPrefix, defaultValue);
         if (value != null) {
             return value;
         } else {
-            return value2;
+            return defaultValue;
         }
     }
 

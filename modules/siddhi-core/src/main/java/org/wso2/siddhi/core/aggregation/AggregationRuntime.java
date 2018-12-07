@@ -202,14 +202,14 @@ public class AggregationRuntime implements MemoryCalculable {
                 latencyTrackerFind.markIn();
                 throughputTrackerFind.eventIn();
             }
-            if (!isFirstEventArrived && (
-                    lastExecutorsRefreshedTime == -1 ||
-                    System.currentTimeMillis() - lastExecutorsRefreshedTime > 1000)) {
-                recreateInMemoryData(false);
-                lastExecutorsRefreshedTime = System.currentTimeMillis();
-            }
-            if (nodeId != null) {
-                recreateInMemoryData.recreateInMemoryData(true);
+            if (lastExecutorsRefreshedTime == -1 || System.currentTimeMillis() - lastExecutorsRefreshedTime > 1000) {
+                if (nodeId != null) {
+                    recreateInMemoryData(false, true);
+                    lastExecutorsRefreshedTime = System.currentTimeMillis();
+                } else if (!isFirstEventArrived) {
+                    recreateInMemoryData(false, false);
+                    lastExecutorsRefreshedTime = System.currentTimeMillis();
+                }
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
@@ -359,7 +359,7 @@ public class AggregationRuntime implements MemoryCalculable {
         incrementalDataPurging.executeIncrementalDataPurging();
     }
 
-    public void recreateInMemoryData(boolean isEventArrived) {
+    public void recreateInMemoryData(boolean isEventArrived, boolean refreshReadingExecutors) {
         isFirstEventArrived = isEventArrived;
         if (isEventArrived) {
             for (Map.Entry<TimePeriod.Duration, IncrementalExecutor> durationIncrementalExecutorEntry :
@@ -367,7 +367,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 durationIncrementalExecutorEntry.getValue().setProcessingExecutor(isEventArrived);
             }
         }
-        recreateInMemoryData.recreateInMemoryData(false);
+        recreateInMemoryData.recreateInMemoryData(refreshReadingExecutors);
     }
 
     public void processEvents(ComplexEventChunk<StreamEvent> streamEventComplexEventChunk) {

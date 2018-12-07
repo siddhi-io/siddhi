@@ -50,11 +50,6 @@ public class InMemoryConfigManager implements ConfigManager {
                 configs.put(config.getKey(), config.getValue());
             }
         }
-        for (Map.Entry<String, String> config : systemConfigs.entrySet()) {
-            if (config.getKey().startsWith(keyPrefix)) {
-                configs.put(config.getKey(), config.getValue());
-            }
-        }
         return new InMemoryConfigReader(keyPrefix, configs);
     }
 

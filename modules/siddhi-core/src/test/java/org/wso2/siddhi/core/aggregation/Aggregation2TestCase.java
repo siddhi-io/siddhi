@@ -440,7 +440,7 @@ public class Aggregation2TestCase {
         String stockStream =
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int);\n";
-        String query = "@partitionbyid " +
+        String query = "@PartitionById " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +

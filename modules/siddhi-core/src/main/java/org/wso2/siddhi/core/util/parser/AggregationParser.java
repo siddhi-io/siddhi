@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
@@ -81,6 +82,7 @@ public class AggregationParser {
     private static final String AGG_START_TIMESTAMP_COL = "AGG_TIMESTAMP";
     private static final String AGG_EXTERNAL_TIMESTAMP_COL = "AGG_EVENT_TIMESTAMP";
     private static final String AGG_LAST_TIMESTAMP_COL = "AGG_LAST_EVENT_TIMESTAMP";
+    private static final String NODE_ID_COL = "NODE_ID";
 
     public static AggregationRuntime parse(AggregationDefinition aggregationDefinition,
                                            SiddhiAppContext siddhiAppContext,
@@ -158,46 +160,36 @@ public class AggregationParser {
 
             String nodeId = null;
 
-            List<Annotation> annotations = aggregationDefinition.getAnnotations();
-            Map<String, Annotation> annotationTypes = new HashMap<>();
-            for (Annotation annotation : annotations) {
-                annotationTypes.put(annotation.getName().toLowerCase(), annotation);
-            }
-
-            Annotation partitionById = annotationTypes.get(SiddhiConstants.ANNOTATION_PARTITION_BY_ID);
+            Annotation partitionById = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PARTITION_BY_ID,
+                    aggregationDefinition.getAnnotations());
 
             if (partitionById != null) {
                 ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
-                Expression nodeIdExpression;
                 boolean clusterEnabled =
-                        Boolean.parseBoolean(configManager.generateConfigReader("cluster.config",
-                                "enabled").readConfig("enabled", "false"));
+                        Boolean.parseBoolean(configManager.extractSystemConfigs("cluster.config").
+                                getOrDefault("enabled","false"));
                 if (clusterEnabled) {
-                    nodeId = configManager.generateConfigReader("cluster.config", "groupId").readConfig(
-                            "groupId", "");
+                    nodeId = configManager.extractSystemConfigs("cluster.config").
+                            getOrDefault("groupId","");
                     if (nodeId.equals("")) {
                         throw new SiddhiAppCreationException("Configurations not provided for @partitionbyid " +
                                 "annotation");
                     }
-                    nodeIdExpression = Expression.value(nodeId);
                 } else {
-                    nodeId = configManager.generateConfigReader("wso2.carbon", "id")
-                            .readConfig("id", "");
+                    nodeId = configManager.extractSystemConfigs("wso2.carbon").
+                            getOrDefault("id","");
                     if (nodeId.equals("")) {
                         throw new SiddhiAppCreationException("Configurations not provided for @partitionbyid " +
                                 "annotation");
                     }
-                    nodeIdExpression = Expression.value(nodeId);
                 }
-                OutputAttribute nodeIdAttribute = new OutputAttribute("NODE_ID", nodeIdExpression);
-                aggregationDefinition.getSelector().getSelectionList().add(nodeIdAttribute);
             }
 
             boolean isLatestEventAdded = populateIncomingAggregatorsAndExecutors(
                     aggregationDefinition, siddhiAppContext, tableMap,
                     incomingVariableExpressionExecutors, aggregatorName, incomingMetaStreamEvent,
                     incomingExpressionExecutors, incrementalAttributeAggregators, groupByVariableList,
-                    outputExpressions, isProcessingOnExternalTime);
+                    outputExpressions, isProcessingOnExternalTime, nodeId);
 
             int baseAggregatorBeginIndex = incomingMetaStreamEvent.getOutputData().size();
 
@@ -503,7 +495,7 @@ public class AggregationParser {
             String aggregatorName, MetaStreamEvent incomingMetaStreamEvent,
             List<ExpressionExecutor> incomingExpressionExecutors,
             List<IncrementalAttributeAggregator> incrementalAttributeAggregators, List<Variable> groupByVariableList,
-            List<Expression> outputExpressions, boolean isProcessingOnExternalTime) {
+            List<Expression> outputExpressions, boolean isProcessingOnExternalTime, String nodeId) {
         boolean addAggLastEvent = false;
         ExpressionExecutor timestampExecutor = getTimeStampExecutor(siddhiAppContext, tableMap,
                 incomingVariableExpressionExecutors, aggregatorName, incomingMetaStreamEvent);
@@ -638,6 +630,12 @@ public class AggregationParser {
                     outputExpressions.add(Expression.variable(outputAttribute.getRename()));
                 }
             }
+        }
+
+        if (nodeId != null) {
+            ExpressionExecutor nodeIdExpressionExecutor = new ConstantExpressionExecutor(nodeId, Attribute.Type.STRING);
+            incomingExpressionExecutors.add(nodeIdExpressionExecutor);
+            incomingMetaStreamEvent.addOutputData(new Attribute(NODE_ID_COL, Attribute.Type.STRING));
         }
         return addAggLastEvent;
     }
@@ -807,19 +805,15 @@ public class AggregationParser {
             List<Annotation> annotations, List<Variable> groupByVariableList, boolean isProcessingOnExternalTime) {
 
         HashMap<TimePeriod.Duration, Table> aggregationTableMap = new HashMap<>();
-
-        Map<String, Annotation> annotationTypes = new HashMap<>();
-        for (Annotation annotation : annotations) {
-            annotationTypes.put(annotation.getName().toLowerCase(), annotation);
-        }
-        Annotation partitionById = annotationTypes.get(SiddhiConstants.ANNOTATION_PARTITION_BY_ID);
+        Annotation partitionById = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PARTITION_BY_ID,
+                annotations);
 
         // Create annotations for primary key
         Annotation primaryKeyAnnotation = new Annotation(SiddhiConstants.ANNOTATION_PRIMARY_KEY);
         primaryKeyAnnotation.element(null, AGG_START_TIMESTAMP_COL);
 
         if (partitionById != null) {
-            primaryKeyAnnotation.element(null, "NODE_ID");
+            primaryKeyAnnotation.element(null, NODE_ID_COL);
         }
         if (isProcessingOnExternalTime) {
             primaryKeyAnnotation.element(null, AGG_EXTERNAL_TIMESTAMP_COL);
