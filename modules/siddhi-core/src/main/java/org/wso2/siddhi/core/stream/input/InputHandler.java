@@ -18,6 +18,7 @@
 package org.wso2.siddhi.core.stream.input;
 
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.Event;
 
 /**
@@ -31,12 +32,15 @@ public class InputHandler {
     protected String streamId;
     protected int streamIndex;
     protected InputProcessor inputProcessor;
+    protected SiddhiAppContext siddhiAppContext;
     protected InputProcessor pausedInputPublisher;
 
-    public InputHandler(String streamId, int streamIndex, InputProcessor inputProcessor) {
+    public InputHandler(String streamId, int streamIndex, InputProcessor inputProcessor,
+                        SiddhiAppContext siddhiAppContext) {
         this.streamId = streamId;
         this.streamIndex = streamIndex;
         this.inputProcessor = inputProcessor;
+        this.siddhiAppContext = siddhiAppContext;
         this.pausedInputPublisher = this.inputProcessor;
     }
 
@@ -51,18 +55,30 @@ public class InputHandler {
     }
 
     public void send(long timestamp, Object[] data) throws InterruptedException {
+        // Set timestamp to system if Siddhi is in playback mode
+        if (siddhiAppContext.isPlayback()) {
+            this.siddhiAppContext.getTimestampGenerator().setCurrentTimestamp(timestamp);
+        }
         if (inputProcessor != null) {
             inputProcessor.send(timestamp, data, streamIndex);
         }
     }
 
     public void send(Event event) throws InterruptedException {
+        // Set timestamp to system if Siddhi is in playback mode
+        if (siddhiAppContext.isPlayback()) {
+            this.siddhiAppContext.getTimestampGenerator().setCurrentTimestamp(event.getTimestamp());
+        }
         if (inputProcessor != null) {
             inputProcessor.send(event, streamIndex);
         }
     }
 
     public void send(Event[] events) throws InterruptedException {
+        // Set timestamp to system if Siddhi is in playback mode
+        if (siddhiAppContext.isPlayback() && events.length != 0) {
+            this.siddhiAppContext.getTimestampGenerator().setCurrentTimestamp(events[events.length - 1].getTimestamp());
+        }
         if (inputProcessor != null) {
             inputProcessor.send(events, streamIndex);
         }

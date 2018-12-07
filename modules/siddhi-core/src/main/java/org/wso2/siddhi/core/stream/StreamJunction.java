@@ -229,10 +229,6 @@ public class StreamJunction implements EventBufferHolder {
     }
 
     private void sendData(long timeStamp, Object[] data) {
-        // Set timestamp to system if Siddhi is in playback mode
-        if (siddhiAppContext.isPlayback()) {
-            this.siddhiAppContext.getTimestampGenerator().setCurrentTimestamp(timeStamp);
-        }
         if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
             throughputTracker.eventIn();
         }

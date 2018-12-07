@@ -2018,7 +2018,9 @@ public class PatternPartitionTestCase {
                 "@info(name = 'query1') " +
                 "from every e1 = Stream1 -> e2 = Stream2 [e1.symbol != 'AMBA' ] <2:> -> e3 = Stream2 [volume <= 70 ] " +
                 "select e3.symbol as symbol1, e2[0].symbol as symbol2, e3.volume as volume3 " +
-                "insert into #StockQuote;         @info(name = 'query2') from #StockQuote select symbol1, symbol2, " +
+                "insert into #StockQuote;         " +
+                "@info(name = 'query2') " +
+                "from #StockQuote select symbol1, symbol2, " +
                 "volume3 insert into StockQuote;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + partitionStart

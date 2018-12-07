@@ -96,7 +96,6 @@ public class OutputParser {
         StreamEventConverter streamEventConverter = null;
         MetaStreamEvent tableMetaStreamEvent = null;
         if (table != null) {
-
             tableMetaStreamEvent = new MetaStreamEvent();
             tableMetaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
             TableDefinition matchingTableDefinition = TableDefinition.id("");
@@ -110,7 +109,6 @@ public class OutputParser {
 
             streamEventPool = new StreamEventPool(tableMetaStreamEvent, 10);
             streamEventConverter = new ZeroStreamEventConverter();
-
         }
 
         //Construct CallBack

@@ -25,7 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Class for timestamp generators. Provide two main,  event and system time generator based values.
+ * Class for timestamp generators. Provide event and system time generator based values.
  */
 public class TimestampGeneratorImpl implements TimestampGenerator {
 
