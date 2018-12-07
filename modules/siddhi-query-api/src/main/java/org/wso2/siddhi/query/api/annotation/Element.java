@@ -18,7 +18,6 @@
 package org.wso2.siddhi.query.api.annotation;
 
 import org.wso2.siddhi.query.api.SiddhiElement;
-import org.wso2.siddhi.query.api.util.SiddhiConstants;
 
 /**
  * Annotation element
@@ -26,8 +25,6 @@ import org.wso2.siddhi.query.api.util.SiddhiConstants;
 public class Element implements SiddhiElement {
 
     private static final long serialVersionUID = 1L;
-    private static final String KEY_VALUE_SEPARATOR = " = ";
-
     private final String key;
     private final String value;
     private int[] queryContextStartIndex;
@@ -49,7 +46,7 @@ public class Element implements SiddhiElement {
     @Override
     public String toString() {
         if (key != null) {
-            return key + KEY_VALUE_SEPARATOR + "\"" + value + "\"";
+            return key + " = \"" + value + "\"";
         } else {
             return "\"" + value + "\"";
         }
@@ -102,5 +99,4 @@ public class Element implements SiddhiElement {
     public void setQueryContextEndIndex(int[] lineAndColumn) {
         queryContextEndIndex = lineAndColumn;
     }
-
 }
