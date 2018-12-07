@@ -47,7 +47,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
     private MetaStreamEvent[] metaStreamEvents;
     private StreamEventPool[] streamEventPools;
     private StreamEventConverter[] streamEventConverters;
-    static ThreadLocal<ReturnEventHolder> multiProcessReturn = new ThreadLocal<>();
+    private static ThreadLocal<ReturnEventHolder> multiProcessReturn = new ThreadLocal<>();
 
 
     public MultiProcessStreamReceiver(String streamId, int processCount, LatencyTracker latencyTracker,
