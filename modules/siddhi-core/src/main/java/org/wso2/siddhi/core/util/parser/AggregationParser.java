@@ -633,7 +633,8 @@ public class AggregationParser {
         }
 
         if (nodeId != null) {
-            ExpressionExecutor nodeIdExpressionExecutor = new ConstantExpressionExecutor(nodeId, Attribute.Type.STRING);
+            ExpressionExecutor nodeIdExpressionExecutor =
+                    new ConstantExpressionExecutor(nodeId, Attribute.Type.STRING);
             incomingExpressionExecutors.add(nodeIdExpressionExecutor);
             incomingMetaStreamEvent.addOutputData(new Attribute(NODE_ID_COL, Attribute.Type.STRING));
         }

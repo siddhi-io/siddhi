@@ -165,8 +165,8 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             List<ExpressionExecutor> clonedBaseExecutors = baseExecutors.stream().map(expressionExecutor ->
                     expressionExecutor.cloneExecutor("")).collect(Collectors.toList());
             IncrementalDataAggregator incrementalDataAggregator = new IncrementalDataAggregator(incrementalDurations,
-                    perValue, oldestInMemoryEventTimestamp, clonedBaseExecutors, tableMetaStreamEvent, siddhiAppContext,
-                    shouldUpdateExpressionExecutorClone);
+                    perValue, oldestInMemoryEventTimestamp, clonedBaseExecutors, tableMetaStreamEvent,
+                    siddhiAppContext, shouldUpdateExpressionExecutorClone);
             ComplexEventChunk<StreamEvent> aggregatedInMemoryEventChunk;
             // Aggregate in-memory data and create an event chunk out of it
             if (incrementalExecutorMapForPartitions != null) {
