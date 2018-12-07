@@ -142,6 +142,7 @@ The following is the list of source types that are currently supported:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter/">Twitter</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/">CDC</a>
 #### Source Mapper
 
 Each `@source` configuration has a mapping denoted by the `@map` annotation that converts the incoming messages format to Siddhi events.
