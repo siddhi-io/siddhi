@@ -20,26 +20,37 @@
 <assembly xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
-    <id>bin</id>
-    <baseDirectory>/</baseDirectory>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <baseDirectory>siddhi-service-${project.version}</baseDirectory>
+    <id>Siddhi Service</id>
     <formats>
         <format>zip</format>
     </formats>
     <fileSets>
         <fileSet>
             <directory>target</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>.</outputDirectory>
             <includes>
                 <include>siddhi-*.jar</include>
             </includes>
         </fileSet>
         <fileSet>
-            <directory>src/main/resources</directory>
-            <outputDirectory>/</outputDirectory>
+            <directory>target/classes/dependencies</directory>
+            <outputDirectory>dependencies</outputDirectory>
+            <excludes>
+                <exclude>slf4j-simple-*.jar</exclude>
+            </excludes>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>target/classes</directory>
+            <outputDirectory>.</outputDirectory>
             <includes>
                 <include>startup.sh</include>
-                <include>dependencies</include>
             </includes>
+            <fileMode>755</fileMode>
         </fileSet>
     </fileSets>
 </assembly>

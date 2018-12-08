@@ -2,7 +2,6 @@
 
 
 # add the libraries to the SIDDHI_CLASSPATH.
-# EXEDIR is the directory where this executable is.
 SCRIPT_PATH=${0%/*}
 
 if [ "$0" != "$SCRIPT_PATH" ] && [ "$SCRIPT_PATH" != "" ]; then
@@ -20,7 +19,6 @@ do
   fi
 done
 
-echo $SIDDHI_CLASSPATH
-echo $EXEDIR
+echo classpath: $SIDDHI_CLASSPATH
 
-java -cp siddhi-service-4.0.0.jar":$SIDDHI_CLASSPATH:." org.wso2.siddhi.service.Application
+java -cp siddhi-service-${pom.version}.jar":$SIDDHI_CLASSPATH:." org.wso2.siddhi.service.api.Application
