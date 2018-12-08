@@ -39,6 +39,7 @@ Following are some prewritten extensions that are supported with Siddhi;
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket">io websocket</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs">io sqs</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter">io twitter</a>
+1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc">io cdc</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json">map json</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml">map xml</a>
 1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary">map binary</a>
