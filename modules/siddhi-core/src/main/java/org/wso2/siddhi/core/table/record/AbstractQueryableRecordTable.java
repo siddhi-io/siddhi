@@ -60,6 +60,13 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     @Override
     public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
                              CompiledSelection compiledSelection) throws ConnectionUnavailableException {
+        return query(matchingEvent, compiledCondition, compiledSelection, null);
+    }
+
+    @Override
+    public StreamEvent query(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                             CompiledSelection compiledSelection, Attribute[] outputAttributes)
+            throws ConnectionUnavailableException {
 
         RecordStoreCompiledSelection recordStoreCompiledSelection = ((RecordStoreCompiledSelection) compiledSelection);
         RecordStoreCompiledCondition recordStoreCompiledCondition = ((RecordStoreCompiledCondition) compiledCondition);
@@ -81,13 +88,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
                     recordStoreCompiledSelection.compiledSelection);
         } else {
             records = query(parameterMap, recordStoreCompiledCondition.compiledCondition,
-                    recordStoreCompiledSelection.compiledSelection);
+                    recordStoreCompiledSelection.compiledSelection, outputAttributes);
         }
         ComplexEventChunk<StreamEvent> streamEventComplexEventChunk = new ComplexEventChunk<>(true);
         if (records != null) {
             while (records.hasNext()) {
                 Object[] record = records.next();
                 StreamEvent streamEvent = storeEventPool.borrowEvent();
+                streamEvent.setOutputData(new Object[outputAttributes.length]);
                 System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
                 streamEventComplexEventChunk.add(streamEvent);
             }
@@ -107,7 +115,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
      */
     protected abstract RecordIterator<Object[]> query(Map<String, Object> parameterMap,
                                                       CompiledCondition compiledCondition,
-                                                      CompiledSelection compiledSelection)
+                                                      CompiledSelection compiledSelection,
+                                                      Attribute[] outputAttributes)
             throws ConnectionUnavailableException;
 
     public CompiledSelection compileSelection(Selector selector,
@@ -132,18 +141,23 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             selectAttributeBuilders.add(new SelectAttributeBuilder(expressionBuilder, outputAttribute.getRename()));
         }
 
+        MatchingMetaInfoHolder metaInfoHolderAfterSelect = new MatchingMetaInfoHolder(
+                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getMatchingStreamEventIndex(),
+                matchingMetaInfoHolder.getStoreEventIndex(), matchingMetaInfoHolder.getMatchingStreamDefinition(),
+                matchingMetaInfoHolder.getMatchingStreamDefinition(), matchingMetaInfoHolder.getCurrentState());
+
         List<ExpressionBuilder> groupByExpressionBuilders = null;
         if (selector.getGroupByList().size() != 0) {
             groupByExpressionBuilders = new ArrayList<>(outputAttributes.size());
             for (Variable variable : selector.getGroupByList()) {
-                groupByExpressionBuilders.add(new ExpressionBuilder(variable, matchingMetaInfoHolder, siddhiAppContext,
-                        variableExpressionExecutors, tableMap, queryName));
+                groupByExpressionBuilders.add(new ExpressionBuilder(variable, metaInfoHolderAfterSelect,
+                        siddhiAppContext, variableExpressionExecutors, tableMap, queryName));
             }
         }
 
         ExpressionBuilder havingExpressionBuilder = null;
         if (selector.getHavingExpression() != null) {
-            havingExpressionBuilder = new ExpressionBuilder(selector.getHavingExpression(), matchingMetaInfoHolder,
+            havingExpressionBuilder = new ExpressionBuilder(selector.getHavingExpression(), metaInfoHolderAfterSelect,
                     siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
         }
 
@@ -152,7 +166,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             orderByAttributeBuilders = new ArrayList<>(selector.getOrderByList().size());
             for (OrderByAttribute orderByAttribute : selector.getOrderByList()) {
                 ExpressionBuilder expressionBuilder = new ExpressionBuilder(orderByAttribute.getVariable(),
-                        matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
+                        metaInfoHolderAfterSelect, siddhiAppContext, variableExpressionExecutors,
+                        tableMap, queryName);
                 orderByAttributeBuilders.add(new OrderByAttributeBuilder(expressionBuilder,
                         orderByAttribute.getOrder()));
             }
@@ -162,7 +177,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         Long offset = null;
         if (selector.getLimit() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getLimit(),
-                    matchingMetaInfoHolder.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
+                    metaInfoHolderAfterSelect.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
                     variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
             limit = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
             if (limit < 0) {
@@ -172,7 +187,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         }
         if (selector.getOffset() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getOffset(),
-                    matchingMetaInfoHolder.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
+                    metaInfoHolderAfterSelect.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
                     variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
             offset = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
             if (offset < 0) {
