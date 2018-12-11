@@ -289,10 +289,10 @@ public class StoreQueryParser {
                         queryName, metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors);
             } catch (QueryableRecordTableException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Could not to create optimized Store Query Runtime for table: "
+                    log.debug("Could not create optimized Store Query Runtime for table: "
                             + table.getTableDefinition().getId() + ". Reason: " + e.getMessage());
                 } else {
-                    log.info("Could not to create optimized Store Query Runtime for table: "
+                    log.info("Could not create optimized Store Query Runtime for table: "
                             + table.getTableDefinition().getId());
                 }
                 return constructRegularStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, windowMap,
