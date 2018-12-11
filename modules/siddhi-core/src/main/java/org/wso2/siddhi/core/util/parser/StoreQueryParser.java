@@ -290,7 +290,7 @@ public class StoreQueryParser {
             } catch (QueryableRecordTableException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Could not to create optimized Store Query Runtime for table: "
-                            + table.getTableDefinition().getId() + ". Reason: " + e.getMessage(), e);
+                            + table.getTableDefinition().getId() + ". Reason: " + e.getMessage());
                 } else {
                     log.info("Could not to create optimized Store Query Runtime for table: "
                             + table.getTableDefinition().getId());
