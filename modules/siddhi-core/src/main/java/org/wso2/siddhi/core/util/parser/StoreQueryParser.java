@@ -290,11 +290,11 @@ public class StoreQueryParser {
             } catch (QueryableRecordTableException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Store Query optimization failed for table: "
-                            + table.getTableDefinition().getId() + " Executing in normal mode. " +
+                            + table.getTableDefinition().getId() + ". Creating Store Query runtime in normal mode. " +
                             "Reason for failure: " + e.getMessage());
                 } else {
-                    log.info("Store Query Runtime created for table: "
-                            + table.getTableDefinition().getId() + " in the normal mode.");
+                    log.info("Creating Store Query Runtime in the normal mode, for table: "
+                            + table.getTableDefinition().getId());
                 }
                 return constructRegularStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap, windowMap,
                         queryName, metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors,
