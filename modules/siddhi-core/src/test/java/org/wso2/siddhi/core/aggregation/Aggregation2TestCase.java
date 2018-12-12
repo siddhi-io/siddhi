@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.StoreQueryCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
@@ -429,5 +430,24 @@ public class Aggregation2TestCase {
         } finally {
             siddhiAppRuntime.shutdown();
         }
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest51"}, expectedExceptions =
+            SiddhiAppCreationException.class)
+    public void incrementalStreamProcessorTest52() {
+        LOG.info("incrementalStreamProcessorTest52 - Checking partitionbyid parsing");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int);\n";
+        String query = "@PartitionById " +
+                "define aggregation stockAggregation " +
+                "from stockStream " +
+                "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
+                "as lastTradeValue  " +
+                "aggregate every sec...year; ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+        siddhiAppRuntime.start();
     }
 }
