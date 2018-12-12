@@ -1917,7 +1917,15 @@ The above syntax includes the following:
     
 !!! Note
     From V4.2.6 onwards, the same aggregation can be defined in multiple Siddhi apps for joining, however, *only one siddhi app should carry out the processing* (i.e. the aggregation input stream should only feed events to one aggregation definition). 
-     
+
+**Partial Aggregation**
+
+Partial Aggregation allows you to partially process aggregations in different nodes. This allows one Siddhi app to be responsible only for a part of the aggregation.
+However for this, all the aggregations must have a store type of RDBMS and must be linked to the same database. Further,
+ a unique id should be provided for each runtime through an In Memory Manager or the deployment.yaml(if running through WSO2 Stream processor).
+
+
+
 **Example**
 
 This Siddhi Application defines an aggregation named `TradeAggregation` to calculate the average and sum for the `price` attribute of events arriving at the `TradeStream` stream. These aggregates are calculated per every time granularity in the second-year range.

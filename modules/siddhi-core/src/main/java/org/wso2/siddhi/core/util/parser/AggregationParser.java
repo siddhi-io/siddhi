@@ -82,7 +82,7 @@ public class AggregationParser {
     private static final String AGG_START_TIMESTAMP_COL = "AGG_TIMESTAMP";
     private static final String AGG_EXTERNAL_TIMESTAMP_COL = "AGG_EVENT_TIMESTAMP";
     private static final String AGG_LAST_TIMESTAMP_COL = "AGG_LAST_EVENT_TIMESTAMP";
-    private static final String NODE_ID_COL = "NODE_ID";
+    private static final String SHARD_ID_COL = "SHARD_ID";
 
     public static AggregationRuntime parse(AggregationDefinition aggregationDefinition,
                                            SiddhiAppContext siddhiAppContext,
@@ -158,30 +158,19 @@ public class AggregationParser {
             List<ExpressionExecutor> outputExpressionExecutors = new ArrayList<>(); //Expression executors to get
             // final aggregate outputs. e.g avg = sum/count
 
-            String nodeId = null;
+            String shardId = null;
 
             Annotation partitionById = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PARTITION_BY_ID,
                     aggregationDefinition.getAnnotations());
 
             if (partitionById != null) {
                 ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
-                boolean clusterEnabled =
-                        Boolean.parseBoolean(configManager.extractSystemConfigs("cluster.config").
-                                getOrDefault("enabled","false"));
-                if (clusterEnabled) {
-                    nodeId = configManager.extractSystemConfigs("cluster.config").
-                            getOrDefault("groupId","");
-                    if (nodeId.equals("")) {
-                        throw new SiddhiAppCreationException("Configurations not provided for @partitionbyid " +
-                                "annotation");
-                    }
-                } else {
-                    nodeId = configManager.extractSystemConfigs("wso2.carbon").
-                            getOrDefault("id","");
-                    if (nodeId.equals("")) {
-                        throw new SiddhiAppCreationException("Configurations not provided for @partitionbyid " +
-                                "annotation");
-                    }
+                shardId = configManager.extractSystemConfigs("shardId").
+                        getOrDefault("shardId", "");
+                if (shardId.equals("")) {
+                    throw new SiddhiAppCreationException("Configurations not provided for @partitionbyid " +
+                            "annotation");
+
                 }
             }
 
@@ -189,7 +178,7 @@ public class AggregationParser {
                     aggregationDefinition, siddhiAppContext, tableMap,
                     incomingVariableExpressionExecutors, aggregatorName, incomingMetaStreamEvent,
                     incomingExpressionExecutors, incrementalAttributeAggregators, groupByVariableList,
-                    outputExpressions, isProcessingOnExternalTime, nodeId);
+                    outputExpressions, isProcessingOnExternalTime, shardId);
 
             int baseAggregatorBeginIndex = incomingMetaStreamEvent.getOutputData().size();
 
@@ -303,7 +292,7 @@ public class AggregationParser {
                     aggregationTables, siddhiAppContext, aggregatorName, shouldUpdateExpressionExecutor);
 
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions = null;
-            if (nodeId != null) {
+            if (shardId != null) {
                 incrementalExecutorMapForPartitions =
                         buildIncrementalExecutors(
                                 processedMetaStreamEvent, processExpressionExecutorsList,
@@ -318,7 +307,7 @@ public class AggregationParser {
             //Recreate in-memory data from tables
             RecreateInMemoryData recreateInMemoryData = new RecreateInMemoryData(incrementalDurations,
                     aggregationTables, incrementalExecutorMap, siddhiAppContext, processedMetaStreamEvent, tableMap,
-                    windowMap, aggregationMap, nodeId, incrementalExecutorMapForPartitions);
+                    windowMap, aggregationMap, shardId, incrementalExecutorMapForPartitions);
 
             IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
             rootIncrementalExecutor.setScheduler(scheduler);
@@ -357,7 +346,7 @@ public class AggregationParser {
                     incrementalDurations, siddhiAppContext, baseExecutors, processedMetaStreamEvent,
                     outputExpressionExecutors, latencyTrackerFind, throughputTrackerFind, recreateInMemoryData,
                     isProcessingOnExternalTime, processExpressionExecutorsList, groupByKeyGeneratorList,
-                    incrementalDataPurging, shouldUpdateExpressionExecutor, nodeId,
+                    incrementalDataPurging, shouldUpdateExpressionExecutor, shardId,
                     incrementalExecutorMapForPartitions);
 
             streamRuntime.setCommonProcessor(new IncrementalAggregationProcessor(aggregationRuntime,
@@ -495,7 +484,7 @@ public class AggregationParser {
             String aggregatorName, MetaStreamEvent incomingMetaStreamEvent,
             List<ExpressionExecutor> incomingExpressionExecutors,
             List<IncrementalAttributeAggregator> incrementalAttributeAggregators, List<Variable> groupByVariableList,
-            List<Expression> outputExpressions, boolean isProcessingOnExternalTime, String nodeId) {
+            List<Expression> outputExpressions, boolean isProcessingOnExternalTime, String shardId) {
         boolean addAggLastEvent = false;
         ExpressionExecutor timestampExecutor = getTimeStampExecutor(siddhiAppContext, tableMap,
                 incomingVariableExpressionExecutors, aggregatorName, incomingMetaStreamEvent);
@@ -632,11 +621,11 @@ public class AggregationParser {
             }
         }
 
-        if (nodeId != null) {
+        if (shardId != null) {
             ExpressionExecutor nodeIdExpressionExecutor =
-                    new ConstantExpressionExecutor(nodeId, Attribute.Type.STRING);
+                    new ConstantExpressionExecutor(shardId, Attribute.Type.STRING);
             incomingExpressionExecutors.add(nodeIdExpressionExecutor);
-            incomingMetaStreamEvent.addOutputData(new Attribute(NODE_ID_COL, Attribute.Type.STRING));
+            incomingMetaStreamEvent.addOutputData(new Attribute(SHARD_ID_COL, Attribute.Type.STRING));
         }
         return addAggLastEvent;
     }
@@ -814,7 +803,7 @@ public class AggregationParser {
         primaryKeyAnnotation.element(null, AGG_START_TIMESTAMP_COL);
 
         if (partitionById != null) {
-            primaryKeyAnnotation.element(null, NODE_ID_COL);
+            primaryKeyAnnotation.element(null, SHARD_ID_COL);
         }
         if (isProcessingOnExternalTime) {
             primaryKeyAnnotation.element(null, AGG_EXTERNAL_TIMESTAMP_COL);

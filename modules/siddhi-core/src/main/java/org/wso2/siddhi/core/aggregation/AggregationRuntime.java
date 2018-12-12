@@ -84,7 +84,7 @@ public class AggregationRuntime implements MemoryCalculable {
     private long lastExecutorsRefreshedTime = -1;
     private IncrementalDataPurging incrementalDataPurging;
     private ExpressionExecutor shouldUpdateExpressionExecutor;
-    private String nodeId;
+    private String shardId;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
@@ -99,7 +99,7 @@ public class AggregationRuntime implements MemoryCalculable {
                               List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
                               List<GroupByKeyGenerator> groupByKeyGeneratorList,
                               IncrementalDataPurging incrementalDataPurging,
-                              ExpressionExecutor shouldUpdateExpressionExecutor, String nodeId,
+                              ExpressionExecutor shouldUpdateExpressionExecutor, String shardId,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
         this.aggregationDefinition = aggregationDefinition;
         this.incrementalExecutorMap = incrementalExecutorMap;
@@ -118,7 +118,7 @@ public class AggregationRuntime implements MemoryCalculable {
         this.groupByKeyGeneratorList = groupByKeyGeneratorList;
         this.incrementalDataPurging = incrementalDataPurging;
         this.shouldUpdateExpressionExecutor = shouldUpdateExpressionExecutor;
-        this.nodeId = nodeId;
+        this.shardId = shardId;
         this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
         aggregateMetaSteamEvent = new MetaStreamEvent();
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
@@ -203,7 +203,7 @@ public class AggregationRuntime implements MemoryCalculable {
                 throughputTrackerFind.eventIn();
             }
             if (lastExecutorsRefreshedTime == -1 || System.currentTimeMillis() - lastExecutorsRefreshedTime > 1000) {
-                if (nodeId != null) {
+                if (shardId != null) {
                     recreateInMemoryData(false, true);
                     lastExecutorsRefreshedTime = System.currentTimeMillis();
                 } else if (!isFirstEventArrived) {
