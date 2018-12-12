@@ -1918,14 +1918,6 @@ The above syntax includes the following:
 !!! Note
     From V4.2.6 onwards, the same aggregation can be defined in multiple Siddhi apps for joining, however, *only one siddhi app should carry out the processing* (i.e. the aggregation input stream should only feed events to one aggregation definition). 
 
-**Partial Aggregation**
-
-Partial Aggregation allows you to partially process aggregations in different nodes. This allows one Siddhi app to be responsible only for a part of the aggregation.
-However for this, all the aggregations must have a store type of RDBMS and must be linked to the same database. Further,
- a unique id should be provided for each runtime through an In Memory Manager or the deployment.yaml(if running through WSO2 Stream processor).
-
-
-
 **Example**
 
 This Siddhi Application defines an aggregation named `TradeAggregation` to calculate the average and sum for the `price` attribute of events arriving at the `TradeStream` stream. These aggregates are calculated per every time granularity in the second-year range.
@@ -1940,6 +1932,32 @@ define aggregation TradeAggregation
     group by symbol
     aggregate by timestamp every sec ... year;
 ```
+
+### Partial Aggregation
+
+!!! Note
+    Partial Aggregation is only supported after V4.3.0
+
+Partial Aggregation allows you to partially process aggregations in different run-times/shards. This allows one Siddhi
+app to be responsible only for processing a part of the aggregation.
+However for this, all the aggregations must have a physical database and must be linked to the same database. Further,
+ a unique id should be provided for each runtime/shard through a system parameter(Config Manager) as a `shardId`.
+
+**Syntax**
+The annotation `@PartitionById` should be added before the aggregation definition.
+
+```sql
+@store(type="<store type>", ...)
+@PartitionById
+define aggregation <aggregator name>
+from <input stream>
+select <attribute name>, <aggregate function>(<attribute name>) as <attribute name>, ...
+    group by <attribute name>
+    aggregate by <timestamp attribute> every <time periods> ;
+```
+
+!!! Note
+    ShardIds should not be changed after the first configuration in order to keep data consistency.
 
 ### Join (Aggregation)
 
