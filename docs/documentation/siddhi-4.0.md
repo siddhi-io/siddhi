@@ -243,7 +243,8 @@ The following is a list of currently supported sink types.
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
-* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#inmemory-sink">In-memory</a>     
+* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#inmemory-sink">In-memory</a>  
+* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#log-sink">Log</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> 
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> 
