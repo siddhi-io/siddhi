@@ -92,10 +92,11 @@ public class RecreateInMemoryData {
             storeQuery = StoreQuery.query().from(InputStore.store(tableForMaxDuration.getTableDefinition().getId()))
                     .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
         } else {
-            storeQuery = StoreQuery.query().from(InputStore.store(tableForMaxDuration.getTableDefinition().getId()))
-                    .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")).having(
-                            Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
-                                    Expression.value(shardId))));
+            storeQuery = StoreQuery.query().from(
+                    InputStore.store(tableForMaxDuration.getTableDefinition().getId())
+                            .on(Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
+                                    Expression.value(shardId))))
+                    .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
         }
         storeQuery.setType(StoreQuery.StoreQueryType.FIND);
         StoreQueryRuntime storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
@@ -127,10 +128,11 @@ public class RecreateInMemoryData {
                 storeQuery = StoreQuery.query().from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
                         .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
             } else {
-                storeQuery = StoreQuery.query().from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
-                        .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")).having(
-                                Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
-                                        Expression.value(shardId))));
+                storeQuery = StoreQuery.query().from(
+                        InputStore.store(recreateFromTable.getTableDefinition().getId()).on(
+                        Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
+                                Expression.value(shardId))))
+                        .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
             }
 
             storeQuery.setType(StoreQuery.StoreQueryType.FIND);
