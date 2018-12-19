@@ -42,7 +42,6 @@ import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.config.ConfigManager;
-import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.extension.holder.FunctionExecutorExtensionHolder;
 import org.wso2.siddhi.core.util.extension.holder.IncrementalAttributeAggregatorExtensionHolder;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
