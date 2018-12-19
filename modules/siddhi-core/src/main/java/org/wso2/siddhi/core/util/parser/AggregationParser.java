@@ -163,14 +163,14 @@ public class AggregationParser {
             Annotation partitionById = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PARTITION_BY_ID,
                     aggregationDefinition.getAnnotations());
 
-            if (partitionById != null) {
-                ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
-                shardId = configManager.extractSystemConfigs("shardId").
-                        getOrDefault("shardId", "");
-                if (shardId.equals("")) {
-                    throw new SiddhiAppCreationException("Configurations not provided for @partitionbyid " +
-                            "annotation");
+            ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
+            Boolean shouldPartitionById = Boolean.parseBoolean(configManager.extractProperty("partitionById"));
 
+            if (partitionById != null || shouldPartitionById) {
+                shardId = configManager.extractProperty("shardId");
+                if (shardId == null) {
+                    throw new SiddhiAppCreationException("Configuration 'shardId' not provided for @partitionbyid " +
+                            "annotation");
                 }
             }
 
