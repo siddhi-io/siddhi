@@ -191,6 +191,90 @@ public class EveryAbsentSequenceTestCase {
         siddhiAppRuntime.shutdown();
     }
 
+
+    @Test
+    public void testQueryAbsent4_1() throws InterruptedException {
+        log.info("Test the query every not e1, e2 with e1 and e2 for 1 sec where e1 filter fails");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "@app:playback(idle.time = '10 milliseconds', increment = '10 milliseconds') " +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from every not Stream1[price>20] for 1 sec, e2=Stream2[price>30] " +
+                "select e2.symbol as symbol " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        TestUtil.TestCallback callback = TestUtil.addQueryCallback(siddhiAppRuntime, "query1");
+
+        InputHandler stream1 = siddhiAppRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = siddhiAppRuntime.getInputHandler("Stream2");
+
+        siddhiAppRuntime.start();
+
+        stream1.send(1544512385000L, new Object[]{"WSO2", 25.6f, 100});
+        Thread.sleep(500);
+        stream1.send(1544512385500L, new Object[]{"WSO2", 25.6f, 100});
+        Thread.sleep(500);
+        stream1.send(1544512386000L, new Object[]{"WSO2", 25.6f, 100});
+        Thread.sleep(1100);
+        stream2.send(1544512387100L, new Object[]{"IBM", 58.7f, 100});
+        Thread.sleep(100);
+
+        callback.throwAssertionErrors();
+        AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
+        AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
+        AssertJUnit.assertTrue("Event not arrived", callback.isEventArrived());
+
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testQueryAbsent4_2() throws InterruptedException {
+        log.info("Test the query every not e1, e2 with e1 and e2 for 1 sec where e1 filter fails");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "@app:playback(idle.time = '10 milliseconds', increment = '10 milliseconds')" +
+                "define stream Stream1 (symbol string, price float, volume int); " +
+                "define stream Stream2 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from every not Stream1[price>20] for 1 sec, e2=Stream2[price>30] " +
+                "select e2.symbol as symbol " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        TestUtil.TestCallback callback = TestUtil.addQueryCallback(siddhiAppRuntime, "query1");
+
+        InputHandler stream1 = siddhiAppRuntime.getInputHandler("Stream1");
+        InputHandler stream2 = siddhiAppRuntime.getInputHandler("Stream2");
+
+        siddhiAppRuntime.start();
+        stream1.send(1544512385000L, new Object[]{"WSO2", 25.6f, 100});
+        Thread.sleep(500);
+        stream1.send(1544512385500L, new Object[]{"WSO2", 25.6f, 100});
+        Thread.sleep(500);
+        stream1.send(1544512386000L, new Object[]{"WSO2", 25.6f, 100});
+        Thread.sleep(500);
+        stream2.send(1544512386500L, new Object[]{"IBM", 58.7f, 100});
+        Thread.sleep(100);
+
+        callback.throwAssertionErrors();
+        AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
+        AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
+        AssertJUnit.assertFalse("Event not arrived", callback.isEventArrived());
+
+        siddhiAppRuntime.shutdown();
+    }
+
     @Test
     public void testQueryAbsent5() throws InterruptedException {
         log.info("Test the query every not e1, e2 with e1 and e2 for 1 sec");

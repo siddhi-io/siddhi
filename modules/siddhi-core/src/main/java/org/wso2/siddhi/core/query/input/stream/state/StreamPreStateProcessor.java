@@ -208,10 +208,6 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
 
     @Override
     public void addState(StateEvent stateEvent) {
-        //        if (stateType == StateInputStream.Type.SEQUENCE) {
-        //            newAndEveryStateEventList.clear();
-        //            pendingStateEventList.clear();
-        //        }
         lock.lock();
         try {
             if (stateType == StateInputStream.Type.SEQUENCE) {
@@ -306,23 +302,6 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
                         continue;
                     }
                 }
-//                if (Math.abs(stateEvent.getTimestamp() - streamEvent.getTimestamp()) > withinStates) {
-//                    iterator.remove();
-////                    switch (stateType) {
-////                        case PATTERN:
-////                            stateEvent.setEvent(stateId, null);
-////                            break;
-////                        case SEQUENCE:
-////                            stateEvent.setEvent(stateId, null);
-////                            iterator.remove();
-////                            if (thisStatePostProcessor.callbackPreStateProcessor != null) {
-////                                thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
-////                            }
-////                            break;
-////                    }
-//                    continue;
-//                }
-//            }
                 stateEvent.setEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
                 process(stateEvent);
                 if (this.thisLastProcessor.isEventReturned()) {
@@ -338,7 +317,9 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
                             break;
                         case SEQUENCE:
                             stateEvent.setEvent(stateId, null);
-                            iterator.remove();
+                            if (removeOnNoStateChange(stateType)) {
+                                iterator.remove();
+                            }
                             if (thisStatePostProcessor.callbackPreStateProcessor != null) {
                                 thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
                             }
@@ -350,6 +331,10 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
             lock.unlock();
         }
         return returnEventChunk;
+    }
+
+    protected boolean removeOnNoStateChange(StateInputStream.Type stateType) {
+        return stateType == StateInputStream.Type.SEQUENCE;
     }
 
     @Override
