@@ -79,6 +79,7 @@
                         <extensionRepository>siddhi-io-websocket</extensionRepository>
                         <extensionRepository>siddhi-io-sqs</extensionRepository>
                         <extensionRepository>siddhi-io-twitter</extensionRepository>
+                        <extensionRepository>siddhi-io-cdc</extensionRepository>
                         <extensionRepository>siddhi-map-json</extensionRepository>
                         <extensionRepository>siddhi-map-xml</extensionRepository>
                         <extensionRepository>siddhi-map-binary</extensionRepository>
