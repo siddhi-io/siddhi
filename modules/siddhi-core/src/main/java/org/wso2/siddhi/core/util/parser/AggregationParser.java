@@ -169,7 +169,7 @@ public class AggregationParser {
             if (partitionById != null || shouldPartitionById) {
                 shardId = configManager.extractProperty("shardId");
                 if (shardId == null) {
-                    throw new SiddhiAppCreationException("Configurations not provided for @partitionbyid " +
+                    throw new SiddhiAppCreationException("Configuration 'shardId' not provided for @partitionbyid " +
                             "annotation");
                 }
             }
