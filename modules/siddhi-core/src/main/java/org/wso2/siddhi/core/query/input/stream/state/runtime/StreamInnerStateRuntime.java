@@ -87,9 +87,7 @@ public class StreamInnerStateRuntime implements InnerStateRuntime {
     public void init() {
         singleStreamRuntimeList.get(0).getProcessStreamReceiver().setNext(firstProcessor);
         singleStreamRuntimeList.get(0).getProcessStreamReceiver().addStatefulProcessor(firstProcessor);
-        if (stateType == StateInputStream.Type.PATTERN) {
-            firstProcessor.init();
-        }
+        firstProcessor.init();
     }
 
     @Override
