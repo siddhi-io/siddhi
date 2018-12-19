@@ -37,6 +37,17 @@ public class InMemoryConfigManager implements ConfigManager {
         if (systemConfigs != null) {
             this.systemConfigs = systemConfigs;
         }
+    }
+
+    public InMemoryConfigManager(Map<String, String> extensionMasterConfigs,
+                                 Map<String, String> systemConfigs,
+                                 Map<String, String> properties) {
+        if (extensionMasterConfigs != null) {
+            this.extensionMasterConfigs = extensionMasterConfigs;
+        }
+        if (systemConfigs != null) {
+            this.systemConfigs = systemConfigs;
+        }
         if (properties != null) {
             this.properties = properties;
         }
@@ -73,7 +84,10 @@ public class InMemoryConfigManager implements ConfigManager {
      * @return value of the property as a string
      */
     public String extractProperty(String name) {
-        return properties.get(name);
+        if (properties != null) {
+            return properties.get(name);
+        }
+        return null;
     }
 }
 
