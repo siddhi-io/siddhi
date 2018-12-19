@@ -42,6 +42,7 @@ import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import org.wso2.siddhi.core.util.SiddhiClassLoader;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.config.ConfigManager;
+import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.extension.holder.FunctionExecutorExtensionHolder;
 import org.wso2.siddhi.core.util.extension.holder.IncrementalAttributeAggregatorExtensionHolder;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
@@ -163,14 +164,14 @@ public class AggregationParser {
             Annotation partitionById = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_PARTITION_BY_ID,
                     aggregationDefinition.getAnnotations());
 
-            if (partitionById != null) {
-                ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
-                shardId = configManager.extractSystemConfigs("shardId").
-                        getOrDefault("shardId", "");
-                if (shardId.equals("")) {
+            ConfigManager configManager = siddhiAppContext.getSiddhiContext().getConfigManager();
+            Boolean shouldPartitionById = Boolean.parseBoolean(configManager.extractProperty("partitionById"));
+
+            if (partitionById != null || shouldPartitionById) {
+                shardId = configManager.extractProperty("shardId");
+                if (shardId == null) {
                     throw new SiddhiAppCreationException("Configurations not provided for @partitionbyid " +
                             "annotation");
-
                 }
             }
 
