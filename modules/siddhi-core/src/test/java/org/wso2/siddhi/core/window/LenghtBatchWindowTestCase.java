@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.window;
 
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -499,5 +500,47 @@ public class LenghtBatchWindowTestCase {
         } finally {
             siddhiAppRuntime.shutdown();
         }
+    }
+
+    @Test
+    public void testLengthBatchWindow10() throws InterruptedException {
+        log.info("Testing length batch window with no of events smaller than window size");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define window cseWindow (symbol string, price float, volume int) lengthBatch(1) ; ";
+        String query = "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select symbol,price,volume " +
+                "insert into cseWindow ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from cseWindow " +
+                "insert into outputStream ;";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                Assert.assertTrue(events.length == 1);
+                inEventCount = inEventCount + events.length;
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Event[]{new Event(System.currentTimeMillis(), new Object[]{"IBM", 700f, 0}),
+                new Event(System.currentTimeMillis(), new Object[]{"WSO2", 60.5f, 1})});
+        Thread.sleep(500);
+        AssertJUnit.assertEquals(2, inEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+
     }
 }
