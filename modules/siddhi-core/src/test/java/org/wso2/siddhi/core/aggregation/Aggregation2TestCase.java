@@ -31,11 +31,14 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
+import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Aggregation2TestCase {
@@ -450,4 +453,96 @@ public class Aggregation2TestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
         siddhiAppRuntime.start();
     }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest52"}, expectedExceptions =
+            SiddhiAppCreationException.class)
+    public void incrementalStreamProcessorTest53() {
+        LOG.info("incrementalStreamProcessorTest53 - Checking partitionbyid enable=true");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int);\n";
+        String query = "@PartitionById(enable='true') " +
+                "define aggregation stockAggregation " +
+                "from stockStream " +
+                "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
+                "as lastTradeValue  " +
+                "aggregate every sec...year; ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+        siddhiAppRuntime.start();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest53"})
+    public void incrementalStreamProcessorTest54() {
+        LOG.info("incrementalStreamProcessorTest54 - Checking partitionbyid enable= false");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int);\n";
+        String query = "@PartitionById(enable='false') " +
+                "define aggregation stockAggregation " +
+                "from stockStream " +
+                "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
+                "as lastTradeValue  " +
+                "aggregate every sec...year; ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest54"}, expectedExceptions =
+            SiddhiAppCreationException.class)
+    public void incrementalStreamProcessorTest55() {
+
+        Map<String, String> propertiesMap = new HashMap<>();
+        propertiesMap.put("partitionById", "true");
+        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(null, null, propertiesMap);
+
+        LOG.info("incrementalStreamProcessorTest55 - Checking @partitionbyid overriding");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setConfigManager(inMemoryConfigManager);
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int);\n";
+        String query = "@PartitionById(enable='false') " +
+                "define aggregation stockAggregation " +
+                "from stockStream " +
+                "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
+                "as lastTradeValue  " +
+                "aggregate every sec...year; ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+        siddhiAppRuntime.start();
+    }
+
+
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest55"}, expectedExceptions =
+            SiddhiAppCreationException.class)
+    public void incrementalStreamProcessorTest56() {
+
+        Map<String, String> propertiesMap = new HashMap<>();
+        propertiesMap.put("partitionById", "true");
+        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(null, null, propertiesMap);
+
+        LOG.info("incrementalStreamProcessorTest55 - Checking partitionbyid system param overriding");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setConfigManager(inMemoryConfigManager);
+        String stockStream =
+                "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
+                        "quantity int);\n";
+        String query = "" +
+                "define aggregation stockAggregation " +
+                "from stockStream " +
+                "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
+                "as lastTradeValue  " +
+                "aggregate every sec...year; ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
+        siddhiAppRuntime.start();
+    }
+
+
 }
+
