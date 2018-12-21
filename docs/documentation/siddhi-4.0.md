@@ -1935,18 +1935,16 @@ define aggregation TradeAggregation
     aggregate by timestamp every sec ... year;
 ```
 
-### Partial Aggregation
+### Distributed Aggregation
 
 !!! Note
-    Partial Aggregation is only supported after V4.3.0
+    Distributed Aggregation is only supported after v4.3.0
 
-Partial Aggregation allows you to partially process aggregations in different run-times/shards. This allows one Siddhi
-app to be responsible only for processing a part of the aggregation.
-However for this, all the aggregations must have a physical database and must be linked to the same database. Further,
- a unique id should be provided for each runtime/shard through a system parameter(Config Manager) as a `shardId`.
+Distributed Aggregation allows you to partially process aggregations in different shards. This allows Siddhi
+app in one shard to be responsible only for processing a part of the aggregation.
+However for this, all aggregations must be based on a common physical database(@store).
 
 **Syntax**
-The annotation `@PartitionById` should be added before the aggregation definition.
 
 ```sql
 @store(type="<store type>", ...)
@@ -1957,6 +1955,20 @@ select <attribute name>, <aggregate function>(<attribute name>) as <attribute na
     group by <attribute name>
     aggregate by <timestamp attribute> every <time periods> ;
 ```
+
+Following table includes the `annotation` to be used
+Item | Description
+------|------
+`@PartitionById` | If the annotation is given, then the distributed aggregation is enabled. Further this can be disabled by using `enable` element, </br>`@PartitionById(enable='false')`.</br>
+
+
+
+System Property| Description| Possible Values | Optional | Default Value 
+---------|---------|---------|---------|------
+shardId| The id of the shard one of the distributed aggregation is running in. This should be unique to a single shard | Any string | No | <Empty_String> 
+partitionById| This allows user to enable/disable distributed aggregation for all aggregations running in one siddhi manager .(Available from v4.3.3) | true/false | Yesio | false
+
+
 
 !!! Note
     ShardIds should not be changed after the first configuration in order to keep data consistency.
