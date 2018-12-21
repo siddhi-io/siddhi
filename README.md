@@ -94,7 +94,7 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.3.7">4.3.7</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.3.8">4.3.8</a>.
 
 ## Jenkins Build Status
 
