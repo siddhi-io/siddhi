@@ -1956,12 +1956,14 @@ select <attribute name>, <aggregate function>(<attribute name>) as <attribute na
     aggregate by <timestamp attribute> every <time periods> ;
 ```
 
-Following table includes the `annotation` to be used
+Following table includes the `annotation` to be used to enable distributed aggregation, 
+
 Item | Description
 ------|------
 `@PartitionById` | If the annotation is given, then the distributed aggregation is enabled. Further this can be disabled by using `enable` element, </br>`@PartitionById(enable='false')`.</br>
 
 
+Further, following system properties are also available,
 
 System Property| Description| Possible Values | Optional | Default Value 
 ---------|---------|---------|---------|------
