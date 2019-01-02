@@ -529,4 +529,19 @@ public class SnapshotService {
         }
         return revision;
     }
+
+    public void clearAllRevisions() {
+        PersistenceStore persistenceStore = siddhiAppContext.getSiddhiContext().getPersistenceStore();
+        IncrementalPersistenceStore incrementalPersistenceStore =
+                siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore();
+        String siddhiAppName = siddhiAppContext.getName();
+        if (persistenceStore != null) {
+            persistenceStore.clearAllRevisions(siddhiAppName);
+        } else if (incrementalPersistenceStore != null) {
+            incrementalPersistenceStore.clearAllRevisions(siddhiAppName);
+        } else {
+            throw new NoPersistenceStoreException("No persistence store assigned for siddhi app " + siddhiAppName);
+        }
+    }
+
 }

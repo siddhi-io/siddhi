@@ -117,6 +117,31 @@ public class FileSystemPersistenceStore implements PersistenceStore {
         return lastRevision;
     }
 
+    @Override
+    public void clearAllRevisions(String siddhiAppName) {
+        File targetDirectory = new File(folder + File.separator + siddhiAppName);
+        File[] files = targetDirectory.listFiles();
+
+        if (files == null || files.length == 0) {
+            log.info("No revisions were found with the Siddhi App " + siddhiAppName);
+            return;
+        }
+
+        try {
+            for (File file : files) {
+                if (file.exists()) {
+                    if (!file.delete()) {
+                        log.error("file is not deleted successfully!");
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            log.error("Error deleting the revisions of the persistence store of Siddhi App " + siddhiAppName +
+                    " from file system.", e);
+        }
+    }
+
     /**
      * Method to remove revisions that are older than the user specified amount
      *

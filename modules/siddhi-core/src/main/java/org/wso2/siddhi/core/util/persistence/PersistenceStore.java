@@ -33,4 +33,6 @@ public interface PersistenceStore {
 
     String getLastRevision(String siddhiAppId);
 
+    void clearAllRevisions(String siddhiAppId);
+
 }

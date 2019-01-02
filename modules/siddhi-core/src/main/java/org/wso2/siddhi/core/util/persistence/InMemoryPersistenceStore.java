@@ -81,6 +81,11 @@ public class InMemoryPersistenceStore implements PersistenceStore {
     }
 
     @Override
+    public void clearAllRevisions(String siddhiAppId) {
+
+    }
+
+    @Override
     public void setProperties(Map properties) {
         //no properties to add
     }

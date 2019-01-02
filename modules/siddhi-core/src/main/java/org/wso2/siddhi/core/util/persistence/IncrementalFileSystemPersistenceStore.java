@@ -143,6 +143,29 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
         return null;
     }
 
+    @Override
+    public void clearAllRevisions(String siddhiAppName) {
+        File dir = new File(folder + File.separator + siddhiAppName);
+        File[] files = dir.listFiles();
+        if (files == null || files.length == 0) {
+            log.info("No revisions were found with the Siddhi App " + siddhiAppName);
+            return;
+        }
+        try {
+            for (File file : files) {
+                if (file.exists()) {
+                    if (!file.delete()) {
+                        log.error("file is not deleted successfully!");
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            log.error("Error deleting all the revisions of the persistence store of Siddhi App " + siddhiAppName +
+                    " from file system.", e);
+        }
+    }
+
     private void cleanOldRevisions(IncrementalSnapshotInfo incrementalSnapshotInfo) {
         if (incrementalSnapshotInfo.getType() != IncrementalSnapshotInfo.SnapshotType.INCREMENT) {
             File dir = new File(folder + File.separator + incrementalSnapshotInfo.getSiddhiAppId());

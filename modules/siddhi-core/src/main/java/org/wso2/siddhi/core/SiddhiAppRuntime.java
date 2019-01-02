@@ -658,6 +658,18 @@ public class SiddhiAppRuntime {
         return revision;
     }
 
+    public void clearAllRevisionsOfSiddhiAppInPersistenceStore() {
+        try {
+            // first, pause all the event sources
+            sourceMap.values().forEach(list -> list.forEach(Source::pause));
+            // start the restoring process
+            siddhiAppContext.getSnapshotService().clearAllRevisions();
+        } finally {
+            // at the end, resume the event sources
+            sourceMap.values().forEach(list -> list.forEach(Source::resume));
+        }
+    }
+
     private void monitorQueryMemoryUsage() {
         memoryUsageTracker = siddhiAppContext
                 .getSiddhiContext()
