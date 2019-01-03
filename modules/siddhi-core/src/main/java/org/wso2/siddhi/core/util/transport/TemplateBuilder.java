@@ -109,7 +109,7 @@ public class TemplateBuilder {
                             m.group(1), streamDefinition));
                 }
             } else {
-                m.appendReplacement(result, "' " + m.group() + "' ");
+                m.appendReplacement(result, " '" + m.group() + "' ");
             }
         }
         m.appendTail(result);

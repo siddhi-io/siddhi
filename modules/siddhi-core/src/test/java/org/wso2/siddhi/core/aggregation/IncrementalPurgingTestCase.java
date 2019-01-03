@@ -31,6 +31,7 @@ import org.wso2.siddhi.core.util.SiddhiTestHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 public class IncrementalPurgingTestCase {
@@ -83,13 +84,13 @@ public class IncrementalPurgingTestCase {
         Thread.sleep(1000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
-                "within \"2018-**-** **:**:**\" " +
+                "within \"" + Calendar.getInstance().get(Calendar.YEAR) + "-**-** **:**:**\" " +
                 "per \"seconds\"");
         EventPrinter.print(events);
         AssertJUnit.assertEquals(6, events.length);
         Thread.sleep(120000);
         events = siddhiAppRuntime.query("from stockAggregation " +
-                "within \"2018-**-** **:**:**\" " +
+                "within \"" + Calendar.getInstance().get(Calendar.YEAR) + "-**-** **:**:**\" " +
                 "per \"seconds\"");
         EventPrinter.print(events);
         AssertJUnit.assertNull(events);
