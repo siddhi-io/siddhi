@@ -59,35 +59,40 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
-        for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
-            StateEvent stateEvent = iterator.next();
-            if (removeIfNextStateProcessed(stateEvent, iterator, stateId + 1)) {
-                continue;
-            }
-            if (removeIfNextStateProcessed(stateEvent, iterator, stateId + 2)) {
-                continue;
-            }
-            stateEvent.addEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
-            successCondition = false;
-            process(stateEvent);
-            if (this.thisLastProcessor.isEventReturned()) {
-                this.thisLastProcessor.clearProcessedEvent();
-                returnEventChunk.add(stateEvent);
-            }
-            if (stateChanged) {
-                iterator.remove();
-            }
-            if (!successCondition) {
-                switch (stateType) {
-                    case PATTERN:
-                        stateEvent.removeLastEvent(stateId);
-                        break;
-                    case SEQUENCE:
-                        stateEvent.removeLastEvent(stateId);
-                        iterator.remove();
-                        break;
+        lock.lock();
+        try {
+            for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
+                StateEvent stateEvent = iterator.next();
+                if (removeIfNextStateProcessed(stateEvent, iterator, stateId + 1)) {
+                    continue;
+                }
+                if (removeIfNextStateProcessed(stateEvent, iterator, stateId + 2)) {
+                    continue;
+                }
+                stateEvent.addEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
+                successCondition = false;
+                process(stateEvent);
+                if (this.thisLastProcessor.isEventReturned()) {
+                    this.thisLastProcessor.clearProcessedEvent();
+                    returnEventChunk.add(stateEvent);
+                }
+                if (stateChanged) {
+                    iterator.remove();
+                }
+                if (!successCondition) {
+                    switch (stateType) {
+                        case PATTERN:
+                            stateEvent.removeLastEvent(stateId);
+                            break;
+                        case SEQUENCE:
+                            stateEvent.removeLastEvent(stateId);
+                            iterator.remove();
+                            break;
+                    }
                 }
             }
+        } finally {
+            lock.unlock();
         }
         return returnEventChunk;
     }
@@ -111,12 +116,17 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
         //            newAndEveryStateEventList.clear();
         //            pendingStateEventList.clear();
         //        }
-        if (stateType == StateInputStream.Type.SEQUENCE) {
-            if (newAndEveryStateEventList.isEmpty()) {
+        lock.lock();
+        try {
+            if (stateType == StateInputStream.Type.SEQUENCE) {
+                if (newAndEveryStateEventList.isEmpty()) {
+                    newAndEveryStateEventList.add(stateEvent);
+                }
+            } else {
                 newAndEveryStateEventList.add(stateEvent);
             }
-        } else {
-            newAndEveryStateEventList.add(stateEvent);
+        } finally {
+            lock.unlock();
         }
         if (minCount == 0 && stateEvent.getStreamEvent(stateId) == null) {
             currentStateEventChunk.clear();

@@ -34,6 +34,7 @@ import org.wso2.siddhi.query.api.execution.query.StoreQuery;
 import org.wso2.siddhi.query.api.execution.query.input.store.InputStore;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.condition.Compare;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,17 +48,20 @@ public class RecreateInMemoryData {
     private final List<TimePeriod.Duration> incrementalDurations;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
+    private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions;
     private final SiddhiAppContext siddhiAppContext;
     private final StreamEventPool streamEventPool;
     private final Map<String, Table> tableMap;
     private final Map<String, Window> windowMap;
     private final Map<String, AggregationRuntime> aggregationMap;
+    private final String shardId;
 
     public RecreateInMemoryData(List<TimePeriod.Duration> incrementalDurations,
             Map<TimePeriod.Duration, Table> aggregationTables,
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap, SiddhiAppContext siddhiAppContext,
             MetaStreamEvent metaStreamEvent, Map<String, Table> tableMap, Map<String, Window> windowMap,
-            Map<String, AggregationRuntime> aggregationMap) {
+            Map<String, AggregationRuntime> aggregationMap, String shardId,
+            Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
         this.incrementalDurations = incrementalDurations;
         this.aggregationTables = aggregationTables;
         this.incrementalExecutorMap = incrementalExecutorMap;
@@ -66,11 +70,13 @@ public class RecreateInMemoryData {
         this.tableMap = tableMap;
         this.windowMap = windowMap;
         this.aggregationMap = aggregationMap;
+        this.shardId = shardId;
+        this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
     }
 
-    public void recreateInMemoryData() {
+    public void recreateInMemoryData(boolean refreshReadingExecutors) {
         IncrementalExecutor rootExecutor = incrementalExecutorMap.get(incrementalDurations.get(0));
-        if (rootExecutor.isProcessingExecutor() && rootExecutor.getNextEmitTime() != -1) {
+        if (rootExecutor.isProcessingExecutor() && rootExecutor.getNextEmitTime() != -1 && !refreshReadingExecutors) {
             // If the getNextEmitTime is not -1, that implies that a snapshot of in-memory has already been
             // created. Hence this method does not have to be executed.
             //This is only true in a processing aggregation runtime
@@ -81,9 +87,17 @@ public class RecreateInMemoryData {
 
         // Get all events from table corresponding to max duration
         Table tableForMaxDuration = aggregationTables.get(incrementalDurations.get(incrementalDurations.size() - 1));
-        StoreQuery storeQuery = StoreQuery.query()
-                .from(InputStore.store(tableForMaxDuration.getTableDefinition().getId()))
-                .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+        StoreQuery storeQuery;
+        if (shardId == null || refreshReadingExecutors) {
+            storeQuery = StoreQuery.query().from(InputStore.store(tableForMaxDuration.getTableDefinition().getId()))
+                    .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+        } else {
+            storeQuery = StoreQuery.query().from(
+                    InputStore.store(tableForMaxDuration.getTableDefinition().getId())
+                            .on(Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
+                                    Expression.value(shardId))))
+                    .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+        }
         storeQuery.setType(StoreQuery.StoreQueryType.FIND);
         StoreQueryRuntime storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                 aggregationMap);
@@ -96,8 +110,13 @@ public class RecreateInMemoryData {
 
         for (int i = incrementalDurations.size() - 1; i > 0; i--) {
             TimePeriod.Duration recreateForDuration = incrementalDurations.get(i);
-            IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
+            IncrementalExecutor incrementalExecutor;
 
+            if (refreshReadingExecutors) {
+                incrementalExecutor = incrementalExecutorMapForPartitions.get(recreateForDuration);
+            } else {
+                incrementalExecutor = incrementalExecutorMap.get(recreateForDuration);
+            }
             // Reset all executors when recreating again
             incrementalExecutor.clearExecutor();
 
@@ -105,8 +124,17 @@ public class RecreateInMemoryData {
             // for minute duration, take the second table [provided that aggregation is done for seconds])
             Table recreateFromTable = aggregationTables.get(incrementalDurations.get(i - 1));
 
-            storeQuery = StoreQuery.query().from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
-                    .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+            if (shardId == null || refreshReadingExecutors) {
+                storeQuery = StoreQuery.query().from(InputStore.store(recreateFromTable.getTableDefinition().getId()))
+                        .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+            } else {
+                storeQuery = StoreQuery.query().from(
+                        InputStore.store(recreateFromTable.getTableDefinition().getId()).on(
+                        Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
+                                Expression.value(shardId))))
+                        .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
+            }
+
             storeQuery.setType(StoreQuery.StoreQueryType.FIND);
             storeQueryRuntime = StoreQueryParser.parse(storeQuery, siddhiAppContext, tableMap, windowMap,
                     aggregationMap);
@@ -142,7 +170,12 @@ public class RecreateInMemoryData {
 
                 if (i == 1) {
                     TimePeriod.Duration rootDuration = incrementalDurations.get(0);
-                    IncrementalExecutor rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
+                    IncrementalExecutor rootIncrementalExecutor;
+                    if (refreshReadingExecutors) {
+                        rootIncrementalExecutor = incrementalExecutorMapForPartitions.get(rootDuration);
+                    } else {
+                        rootIncrementalExecutor = incrementalExecutorMap.get(rootDuration);
+                    }
                     long emitTimeOfLatestEventInTable = IncrementalTimeConverterUtil.getNextEmitTime(
                             latestEventTimestamp, rootDuration, null);
 

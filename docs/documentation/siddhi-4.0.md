@@ -142,6 +142,7 @@ The following is the list of source types that are currently supported:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter/">Twitter</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/">CDC</a>
 #### Source Mapper
 
 Each `@source` configuration has a mapping denoted by the `@map` annotation that converts the incoming messages format to Siddhi events.
@@ -242,7 +243,8 @@ The following is a list of currently supported sink types.
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
-* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#inmemory-sink">In-memory</a>     
+* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#inmemory-sink">In-memory</a>  
+* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#log-sink">Log</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> 
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> 
@@ -790,12 +792,14 @@ Following are some inbuilt windows shipped with Siddhi. For more window types, s
 
 * [time](https://wso2.github.io/siddhi/api/latest/#time-window)
 * [timeBatch](https://wso2.github.io/siddhi/api/latest/#timebatch-window)
+* [batch](https://wso2.github.io/siddhi/api/latest/#batch-window)
 * [timeLength](https://wso2.github.io/siddhi/api/latest/#timelength-window)
 * [length](https://wso2.github.io/siddhi/api/latest/#length-window)
 * [lengthBatch](https://wso2.github.io/siddhi/api/latest/#lengthbatch-window)
 * [sort](https://wso2.github.io/siddhi/api/latest/#sort-window)
 * [frequent](https://wso2.github.io/siddhi/api/latest/#frequent-window)
 * [lossyFrequent](https://wso2.github.io/siddhi/api/latest/#lossyfrequent-window)
+* [session](https://wso2.github.io/siddhi/api/latest/#session-window)
 * [cron](https://wso2.github.io/siddhi/api/latest/#cron-window)
 * [externalTime](https://wso2.github.io/siddhi/api/latest/#externaltime-window)
 * [externalTimeBatch](https://wso2.github.io/siddhi/api/latest/#externaltimebatch-window)
@@ -1215,6 +1219,33 @@ Key Word|Description
 `not <condition> for <time period>`| When `not` is included with `for`, it allows you to identify a situation where no event that matches `<condition1>` arrives during the specified `<time period>`.  e.g.,`from not TemperatureStream[temp > 60] for 5 sec`. 
 
 Here the `not` pattern can be followed by either an `and` clause or the effective period of `not` can be concluded after a given `<time period>`. Further in Siddhi more than two streams cannot be matched with logical conditions using `and`, `or`, or `not` clauses at this point.
+
+##### Detecting Non-occurring Events
+
+Siddhi allows you to detect non-occurring events via multiple combinations of the key words specified above as shown in the table below.
+
+In the patterns listed, P* can be either a regular event pattern, an absent event pattern or a logical pattern.
+
+Pattern|Detected Scenario
+---------|---------
+`not A for <time period>`|The non-occurrence of event A within `<time period>` after system start up.<br/> e.g., Generating an alert if a taxi has not reached its destination within 30 minutes, to indicate that the passenger might be in danger.
+`not A for <time period> and B`|After system start up, event A does not occur within `time period`, but event B occurs at some point in time. <br/> e.g., Generating an alert if a taxi has not reached its destination within 30 minutes, and the passenger marked that he/she is in danger at some point in time. 
+`not A for <time period 1> and not B for <time period 2>`|After system start up, event A doess not occur within `time period 1`, and event B also does not occur within `<time period 2>`. <br/> e.g., Generating an alert if the driver of a taxi has not reached the destination within 30 minutes, and the passenger has not marked himself/herself to be in danger within that same time period. 
+`not A for <time period> or B`|After system start up, either event A does not occur within `<time period>`, or event B occurs at some point in time. <br/> e.g., Generating an alert if the taxi has not reached its destination within 30 minutes, or if the passenger has marked that he/she is in danger at some point in time.
+`not A for <time period 1> or not B for <time period 2>`|After system start up, either event A does not occur within `<time period 1>`, or event B occurs within `<time period 2>`. <br/> e.g., Generating an alert to indicate that the driver is not on an expected route if the taxi has not reached destination A within 20 minutes, or reached destination B within 30 minutes.
+`A → not B for <time period>`|Event B does not occur within `<time period>` after the occurrence of event A. e.g., Generating an alert if the taxi has reached its destination, but this was not followed by a payment record.
+`P* → not A for <time period> and B`|After the occurrence of P*, event A does not occur within `<time period>`, and event B occurs at some point in time. <br/> 
+`P* → not A for <time period 1> and not B for <time period 2>`|After the occurrence of P*, event A does not occur within `<time period 1>`, and event B does not occur within `<time period 2>`.
+`P* → not A for <time period> or B`|After the occurrence of P*, either event A does not occur within `<time period>`, or event B occurs at some point in time.
+`P* → not A for <time period 1> or not B for <time period 2>`|After the occurrence of P*, either event A does not occur within `<time period 1>`, or event B does not occur within `<time period 2>`.
+`not A for <time period> → B`|Event A does occur within `<time period>` after the system start up, but event B occurs after that `<time period>` has elapsed.
+`not A for <time period> and B → P*`|Event A does not occur within `<time period>`, and event B occurs at some point in time. Then P* occurs after the `<time period>` has elapsed, and after B has occurred.
+`not A for <time period 1> and not B for <time period 2> → P*`|After system start up, event A does not occur within `<time period 1>`, and event B does not occur within `<time period 2>`. However, P* occurs after both A and B.
+`not A for <time period> or B → P*`|After system start up, event A does not occur within `<time period>` or event B occurs at some point in time. The P* occurs after `<time period>` has elapsed, or after B has occurred.
+`not A for <time period 1> or not B for <time period 2> → P*`|After system start up, either event A does not occur within `<time period 1>`, or event B does not occur within `<time period 2>`. Then P*  occurs after both `<time period 1>` and `<time period 2>` have elapsed.
+`not A and B`|Event A does not occur before event B.
+`A and not B`|Event B does not occur before event A.
+
 
 **Example**
 
@@ -1888,7 +1919,7 @@ The above syntax includes the following:
     
 !!! Note
     From V4.2.6 onwards, the same aggregation can be defined in multiple Siddhi apps for joining, however, *only one siddhi app should carry out the processing* (i.e. the aggregation input stream should only feed events to one aggregation definition). 
-     
+
 **Example**
 
 This Siddhi Application defines an aggregation named `TradeAggregation` to calculate the average and sum for the `price` attribute of events arriving at the `TradeStream` stream. These aggregates are calculated per every time granularity in the second-year range.
@@ -1903,6 +1934,46 @@ define aggregation TradeAggregation
     group by symbol
     aggregate by timestamp every sec ... year;
 ```
+
+### Distributed Aggregation
+
+!!! Note
+    Distributed Aggregation is only supported after v4.3.0
+
+Distributed Aggregation allows you to partially process aggregations in different shards. This allows Siddhi
+app in one shard to be responsible only for processing a part of the aggregation.
+However for this, all aggregations must be based on a common physical database(@store).
+
+**Syntax**
+
+```sql
+@store(type="<store type>", ...)
+@PartitionById
+define aggregation <aggregator name>
+from <input stream>
+select <attribute name>, <aggregate function>(<attribute name>) as <attribute name>, ...
+    group by <attribute name>
+    aggregate by <timestamp attribute> every <time periods> ;
+```
+
+Following table includes the `annotation` to be used to enable distributed aggregation, 
+
+Item | Description
+------|------
+`@PartitionById` | If the annotation is given, then the distributed aggregation is enabled. Further this can be disabled by using `enable` element, </br>`@PartitionById(enable='false')`.</br>
+
+
+Further, following system properties are also available,
+
+System Property| Description| Possible Values | Optional | Default Value 
+---------|---------|---------|---------|------
+shardId| The id of the shard one of the distributed aggregation is running in. This should be unique to a single shard | Any string | No | <Empty_String> 
+partitionById| This allows user to enable/disable distributed aggregation for all aggregations running in one siddhi manager .(Available from v4.3.3) | true/false | Yesio | false
+
+
+
+!!! Note
+    ShardIds should not be changed after the first configuration in order to keep data consistency.
 
 ### Join (Aggregation)
 

@@ -19,7 +19,9 @@ package org.wso2.siddhi.core.query;
 
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
+import org.wso2.siddhi.core.query.input.MultiProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
+import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
@@ -67,7 +69,6 @@ public class QueryRuntime implements MemoryCalculable {
         this.outputCallback = outputCallback;
         this.synchronised = synchronised;
         this.queryId = queryName;
-
         outputRateLimiter.setOutputCallback(outputCallback);
         setOutputRateLimiter(outputRateLimiter);
         setMetaComplexEvent(metaComplexEvent);
@@ -184,6 +185,12 @@ public class QueryRuntime implements MemoryCalculable {
 
     public void init() {
         streamRuntime.setCommonProcessor(selector);
+        for (SingleStreamRuntime singleStreamRuntime : streamRuntime.getSingleStreamRuntimes()) {
+            if (singleStreamRuntime.getProcessStreamReceiver() instanceof MultiProcessStreamReceiver) {
+                ((MultiProcessStreamReceiver) singleStreamRuntime.getProcessStreamReceiver())
+                        .setOutputRateLimiter(outputRateLimiter);
+            }
+        }
     }
 
     public QuerySelector getSelector() {

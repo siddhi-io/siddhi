@@ -72,6 +72,7 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_ELEMENT_REF = "ref";
     public static final String ANNOTATION_ELEMENT_ENABLE = "enable";
     public static final String ANNOTATION_ELEMENT_INCLUDE = "include";
+    public static final String ANNOTATION_PARTITION_BY_ID = "PartitionById";
 
     public static final String TRUE = "true";
     public static final String TRIGGER_START = "start";

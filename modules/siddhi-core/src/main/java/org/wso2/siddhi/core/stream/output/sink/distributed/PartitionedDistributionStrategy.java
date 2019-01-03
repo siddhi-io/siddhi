@@ -99,7 +99,7 @@ public class PartitionedDistributionStrategy extends DistributionStrategy {
         String partitionKeyValue = partitionOption.getValue(transportOptions);
         int destinationId = Math.abs(partitionKeyValue.hashCode() % totalDestinationCount);
 
-        if (destinationIds.contains(destinationId)) {
+        if (activeDestinationIds.contains(destinationId)) {
             returnValue.clear();
             returnValue.add(destinationId);
             return returnValue;

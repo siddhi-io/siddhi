@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Logical not processor.
@@ -55,11 +54,6 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     private volatile long lastArrivalTime;
 
     /**
-     * Lock to synchronize the both {@link AbsentLogicalPreStateProcessor}s in the pattern.
-     */
-    private ReentrantLock lock;
-
-    /**
      * This flag turns to false after processing the first event if 'every' is not used.
      */
     private boolean active = true;
@@ -75,18 +69,6 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         if (waitingTime != null) {
             this.waitingTime = waitingTime.value();
             this.waitingTimeConstant = waitingTime;
-        }
-    }
-
-    @Override
-    public void setPartnerStatePreProcessor(LogicalPreStateProcessor partnerStatePreProcessor) {
-        super.setPartnerStatePreProcessor(partnerStatePreProcessor);
-        if (this.lock == null) {
-            this.lock = new ReentrantLock();
-        }
-        if (partnerStatePreProcessor instanceof AbsentLogicalPreStateProcessor && ((AbsentLogicalPreStateProcessor)
-                partnerStatePreProcessor).lock == null) {
-            ((AbsentLogicalPreStateProcessor) partnerStatePreProcessor).lock = this.lock;
         }
     }
 
@@ -146,13 +128,13 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         if (!this.active) {
             return;
         }
-        this.lock.lock();
         boolean notProcessed = true;
+        ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);
+        this.lock.lock();
         try {
             long currentTime = complexEventChunk.getFirst().getTimestamp();
             if (currentTime >= this.lastArrivalTime + waitingTime) {
 
-                ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);
 
                 Iterator<StateEvent> iterator;
                 if (isStartState && stateType == StateInputStream.Type.SEQUENCE && newAndEveryStateEventList.isEmpty()

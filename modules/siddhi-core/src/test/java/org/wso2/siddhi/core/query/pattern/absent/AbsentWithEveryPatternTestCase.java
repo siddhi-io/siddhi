@@ -272,4 +272,39 @@ public class AbsentWithEveryPatternTestCase {
 
         siddhiAppRuntime.shutdown();
     }
+
+    @Test
+    public void testQuery7() throws InterruptedException {
+        log.info("Test the query every e1 -> not e1 for 1 sec with e1 only");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "@app:playback(idle.time = '10 milliseconds', increment = '10 milliseconds') " +
+                "define stream Stream1 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from every e1=Stream1[price>20] -> not Stream1[symbol==e1.symbol and price>e1.price] for 1sec " +
+                "select e1.symbol as symbol " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        TestUtil.TestCallback callback = TestUtil.addQueryCallback(siddhiAppRuntime, "query1", new Object[]{"GOOG"});
+
+        InputHandler stream1 = siddhiAppRuntime.getInputHandler("Stream1");
+
+        siddhiAppRuntime.start();
+
+        stream1.send(1544512385000L, new Object[]{"WSO2", 55.6f, 100});
+        stream1.send(1544512385100L, new Object[]{"GOOG", 55.6f, 100});
+        stream1.send(1544512385800L, new Object[]{"WSO2", 55.7f, 100});
+        stream1.send(1544512386200L, new Object[]{"GOOG", 55.6f, 100});
+
+        callback.throwAssertionErrors();
+        AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
+        AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
+        AssertJUnit.assertTrue("Event arrived", callback.isEventArrived());
+
+        siddhiAppRuntime.shutdown();
+    }
 }

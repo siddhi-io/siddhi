@@ -154,6 +154,7 @@ public class LengthBatchWindowProcessor extends WindowProcessor implements Finda
                     count = 0;
                     if (outputStreamEventChunk.getFirst() != null) {
                         streamEventChunks.add(outputStreamEventChunk);
+                        outputStreamEventChunk = new ComplexEventChunk<StreamEvent>(true);
                     }
                 }
             }

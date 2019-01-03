@@ -27,6 +27,7 @@ import java.util.Map;
 public class InMemoryConfigManager implements ConfigManager {
     private Map<String, String> extensionMasterConfigs = new HashMap<>();
     private Map<String, String> systemConfigs = new HashMap<>();
+    private Map<String, String> properties = new HashMap<>();
 
     public InMemoryConfigManager(Map<String, String> extensionMasterConfigs,
                                  Map<String, String> systemConfigs) {
@@ -35,6 +36,20 @@ public class InMemoryConfigManager implements ConfigManager {
         }
         if (systemConfigs != null) {
             this.systemConfigs = systemConfigs;
+        }
+    }
+
+    public InMemoryConfigManager(Map<String, String> extensionMasterConfigs,
+                                 Map<String, String> systemConfigs,
+                                 Map<String, String> properties) {
+        if (extensionMasterConfigs != null) {
+            this.extensionMasterConfigs = extensionMasterConfigs;
+        }
+        if (systemConfigs != null) {
+            this.systemConfigs = systemConfigs;
+        }
+        if (properties != null) {
+            this.properties = properties;
         }
     }
 
@@ -61,6 +76,18 @@ public class InMemoryConfigManager implements ConfigManager {
             }
         }
         return configs;
+    }
+
+    /**
+     * Returns the value of a given property
+     * @param name Name of the property which needs to be extracted
+     * @return value of the property as a string
+     */
+    public String extractProperty(String name) {
+        if (properties != null) {
+            return properties.get(name);
+        }
+        return null;
     }
 }
 

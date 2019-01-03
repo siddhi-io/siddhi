@@ -206,7 +206,6 @@ public class QueryParserHelper {
 
                 }
                 ((JoinProcessor) processor).setStateEventPool(stateEventPool);
-                ((JoinProcessor) processor).setJoinLock(lockWrapper);
             }
             if (stateEventPool != null && processor instanceof StreamPreStateProcessor) {
                 ((StreamPreStateProcessor) processor).setStateEventPool(stateEventPool);

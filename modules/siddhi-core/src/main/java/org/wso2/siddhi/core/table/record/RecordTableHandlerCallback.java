@@ -21,6 +21,7 @@ import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
 import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
+import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.Iterator;
 import java.util.List;
@@ -75,15 +76,22 @@ public class RecordTableHandlerCallback {
     }
 
     public Iterator<Object[]> query(Map<String, Object> parameterMap, CompiledCondition compiledCondition,
-                                    CompiledSelection compiledSelection)
+                                    CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
         if (abstractRecordTable instanceof AbstractQueryableRecordTable) {
             return ((AbstractQueryableRecordTable) abstractRecordTable).query(parameterMap, compiledCondition,
-                    compiledSelection);
+                    compiledSelection, outputAttributes);
         } else {
             log.error("Record Table " + this.abstractRecordTable.getTableDefinition().getId() +
                     " used is not a Queryable Record Table.");
             return null;
         }
+    }
+
+    @Deprecated
+    public Iterator<Object[]> query(Map<String, Object> parameterMap, CompiledCondition compiledCondition,
+                                    CompiledSelection compiledSelection)
+            throws ConnectionUnavailableException {
+        return query(parameterMap, compiledCondition, compiledSelection, null);
     }
 }
