@@ -182,8 +182,9 @@ public class Aggregation2TestCase {
         }
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest48"})
+    @Test(enabled = false, dependsOnMethods = {"incrementalStreamProcessorTest48"})
     public void incrementalStreamProcessorTest49() throws InterruptedException {
+        // Disabling test case until https://github.com/wso2/siddhi/issues/985 is fixed
         LOG.info("incrementalStreamProcessorTest49 - Aggregate on system timestamp and retrieval on non root duration");
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -293,7 +294,7 @@ public class Aggregation2TestCase {
         }
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest49"},
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest48"},
             expectedExceptions = StoreQueryCreationException.class)
     public void incrementalStreamProcessorTest50() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest50 - Retrieval query syntax validating ");
