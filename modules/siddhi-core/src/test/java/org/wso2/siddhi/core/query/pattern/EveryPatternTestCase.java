@@ -534,5 +534,68 @@ public class EveryPatternTestCase {
         siddhiAppRuntime.shutdown();
     }
 
+    @Test
+    public void testQuery9() throws InterruptedException {
+        log.info("testPatternEvery9 - OUT 2");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String streams = "" +
+                "define stream Stream1 (symbol string, price float, volume int); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from every e1=Stream1[symbol == 'MSFT'] -> e1=Stream1[symbol == 'WSO2'] " +
+                "select e1.price as price1 " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                AssertJUnit.assertArrayEquals(new Object[]{55.6f}, event.getData());
+                                break;
+                            case 2:
+                                AssertJUnit.assertArrayEquals(new Object[]{77.6f}, event.getData());
+                                break;
+                            default:
+                                AssertJUnit.assertSame(2, inEventCount);
+                        }
+
+                    }
+                    eventArrived = true;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler stream1 = siddhiAppRuntime.getInputHandler("Stream1");
+
+        siddhiAppRuntime.start();
+
+        stream1.send(new Object[]{"MSFT", 55.6f, 100});
+        Thread.sleep(100);
+        stream1.send(new Object[]{"MSFT", 77.6f, 100});
+        Thread.sleep(100);
+        stream1.send(new Object[]{"WSO2", 57.6f, 100});
+        Thread.sleep(100);
+
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount);
+        AssertJUnit.assertEquals("Number of remove events", 0, removeEventCount);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+
+        siddhiAppRuntime.shutdown();
+    }
+
 
 }

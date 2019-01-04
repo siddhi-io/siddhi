@@ -378,7 +378,9 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
         ComplexEventChunk complexEventChunk;
 
         public void setReturnEvents(ComplexEventChunk complexEventChunk) {
-            this.complexEventChunk = new ComplexEventChunk(complexEventChunk.isBatch());
+            if (this.complexEventChunk == null) {
+                this.complexEventChunk = new ComplexEventChunk(complexEventChunk.isBatch());
+            }
             this.complexEventChunk.add(complexEventChunk.getFirst());
         }
     }
