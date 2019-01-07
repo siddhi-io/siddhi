@@ -179,6 +179,7 @@ The following is a list of currently supported source mapping types:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/">Avro</a>
 
 **Example**
 
@@ -339,6 +340,7 @@ The following is a list of currently supported sink mapping types:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/">Avro</a>
 
 
 **Example**
