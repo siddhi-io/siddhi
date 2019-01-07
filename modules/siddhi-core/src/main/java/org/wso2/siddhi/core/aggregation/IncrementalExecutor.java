@@ -104,7 +104,9 @@ public class IncrementalExecutor implements Executor, Snapshotable {
 
     @Override
     public void execute(ComplexEventChunk streamEventChunk) {
-        LOG.debug("Event Chunk received by " + this.duration + " incremental executor: " + streamEventChunk.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Event Chunk received by " + this.duration + " incremental executor: " + streamEventChunk.toString());
+        }
         streamEventChunk.reset();
         while (streamEventChunk.hasNext()) {
             StreamEvent streamEvent = (StreamEvent) streamEventChunk.next();
@@ -220,7 +222,9 @@ public class IncrementalExecutor implements Executor, Snapshotable {
             StreamEvent streamEvent = aBaseIncrementalValueStore.createStreamEvent();
             ComplexEventChunk<StreamEvent> eventChunk = new ComplexEventChunk<>(true);
             eventChunk.add(streamEvent);
-            LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
+            }
             if (isProcessingExecutor) {
                 table.addEvents(eventChunk, 1);
             }
@@ -239,7 +243,9 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                 StreamEvent streamEvent = aBaseIncrementalValueStore.createStreamEvent();
                 eventChunk.add(streamEvent);
             }
-            LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
+            }
             if (isProcessingExecutor) {
                 table.addEvents(eventChunk, noOfEvents);
             }

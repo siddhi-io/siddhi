@@ -247,7 +247,9 @@ public class SnapshotService {
         } finally {
             threadBarrier.unlock();
         }
-        log.debug("Taking snapshot finished.");
+        if (log.isDebugEnabled()) {
+            log.debug("Taking snapshot finished.");
+        }
         return state;
     }
 

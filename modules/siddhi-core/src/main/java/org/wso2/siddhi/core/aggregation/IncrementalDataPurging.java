@@ -200,8 +200,10 @@ public class IncrementalDataPurging implements Runnable {
                 eventChunk.add(secEvent);
                 Table table = aggregationTables.get(entry.getKey());
                 try {
-                    LOG.debug("Purging data of table: " + table.getTableDefinition().getId() + " with a" +
-                            " retention of timestamp : " + purgeTime);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Purging data of table: " + table.getTableDefinition().getId() + " with a" +
+                                " retention of timestamp : " + purgeTime);
+                    }
                     table.deleteEvents(eventChunk, compiledConditionsHolder.get(entry.getKey()), 1);
                 } catch (RuntimeException e) {
                     LOG.error("Exception occurred while deleting events from " +
@@ -285,7 +287,9 @@ public class IncrementalDataPurging implements Runnable {
                     ((purgeExecutionInterval) / 1000) + " seconds in " + aggregationDefinition.getId() +
                     " aggregation");
         } else {
-            LOG.debug("Purging is disabled in siddhi app: " + siddhiAppContext.getName());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Purging is disabled in siddhi app: " + siddhiAppContext.getName());
+            }
         }
     }
 
