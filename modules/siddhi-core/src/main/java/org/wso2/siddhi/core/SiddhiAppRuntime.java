@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.aggregation.AggregationRuntime;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.debugger.SiddhiDebugger;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.exception.CannotClearSiddhiAppStateException;
 import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import org.wso2.siddhi.core.exception.DefinitionNotExistException;
 import org.wso2.siddhi.core.exception.QueryNotExistException;
@@ -658,7 +659,7 @@ public class SiddhiAppRuntime {
         return revision;
     }
 
-    public void clearAllRevisionsOfSiddhiAppInPersistenceStore() {
+    public void clearAllRevisionsOfSiddhiAppInPersistenceStore() throws CannotClearSiddhiAppStateException {
         try {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));

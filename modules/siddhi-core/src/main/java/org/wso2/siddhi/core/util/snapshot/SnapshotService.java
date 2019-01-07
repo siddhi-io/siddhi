@@ -19,6 +19,7 @@ package org.wso2.siddhi.core.util.snapshot;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
+import org.wso2.siddhi.core.exception.CannotClearSiddhiAppStateException;
 import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import org.wso2.siddhi.core.exception.NoPersistenceStoreException;
 import org.wso2.siddhi.core.exception.PersistenceStoreException;
@@ -530,7 +531,10 @@ public class SnapshotService {
         return revision;
     }
 
-    public void clearAllRevisions() {
+    /**
+     * Clear all the revisions of persistence store of Siddhi App
+     */
+    public void clearAllRevisions() throws CannotClearSiddhiAppStateException {
         PersistenceStore persistenceStore = siddhiAppContext.getSiddhiContext().getPersistenceStore();
         IncrementalPersistenceStore incrementalPersistenceStore =
                 siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore();

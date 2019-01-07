@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.util.persistence;
 
 import com.google.common.io.Files;
 import org.apache.log4j.Logger;
+import org.wso2.siddhi.core.exception.CannotClearSiddhiAppStateException;
 import org.wso2.siddhi.core.util.persistence.util.PersistenceConstants;
 
 import java.io.File;
@@ -127,18 +128,15 @@ public class FileSystemPersistenceStore implements PersistenceStore {
             return;
         }
 
-        try {
-            for (File file : files) {
-                if (file.exists()) {
-                    if (!file.delete()) {
-                        log.error("file is not deleted successfully!");
-                    }
+        for (File file : files) {
+            if (file.exists()) {
+                if (!file.delete()) {
+                    log.error("file is not deleted successfully!");
+                    throw new CannotClearSiddhiAppStateException("Persistence state " +
+                            "file is not deleted : " + file.getPath());
                 }
-
             }
-        } catch (Exception e) {
-            log.error("Error deleting the revisions of the persistence store of Siddhi App " + siddhiAppName +
-                    " from file system.", e);
+
         }
     }
 
