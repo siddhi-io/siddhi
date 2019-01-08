@@ -129,8 +129,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         if (getNextExecutor() != null) {
             StreamEvent timerEvent = streamEventPool.borrowEvent();
             timerEvent.setType(ComplexEvent.Type.TIMER);
-            timerEvent.setTimestamp(
-                    IncrementalTimeConverterUtil.getPreviousStartTime(startTimeOfAggregates, this.duration));
+            timerEvent.setTimestamp(startTimeOfAggregates);
             ComplexEventChunk<StreamEvent> timerStreamEventChunk = new ComplexEventChunk<>(true);
             timerStreamEventChunk.add(timerEvent);
             next.execute(timerStreamEventChunk);
