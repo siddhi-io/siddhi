@@ -37,4 +37,10 @@ public interface IncrementalPersistenceStore {
     List<IncrementalSnapshotInfo> getListOfRevisionsToLoad(long restoreTime, String siddhiAppName);
 
     String getLastRevision(String siddhiAppId);
+
+    /**
+     * Clear all the revisions of Persistence Store
+     * of given Siddhi App
+     */
+    void clearAllRevisions(String siddhiAppId);
 }

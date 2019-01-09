@@ -81,6 +81,16 @@ public class InMemoryPersistenceStore implements PersistenceStore {
     }
 
     @Override
+    public void clearAllRevisions(String siddhiAppId) {
+        List<String> revisionList = revisionMap.remove(siddhiAppId);
+        if (revisionList == null) {
+            log.info("No revisions were found to delete for the Siddhi App " + siddhiAppId);
+            return;
+        }
+        log.info("All revisions were deleted for the Siddhi App " + siddhiAppId);
+    }
+
+    @Override
     public void setProperties(Map properties) {
         //no properties to add
     }
