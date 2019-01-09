@@ -659,7 +659,7 @@ public class SiddhiAppRuntime {
         return revision;
     }
 
-    public void clearAllRevisionsOfSiddhiAppInPersistenceStore() throws CannotClearSiddhiAppStateException {
+    public void clearAllRevisions() throws CannotClearSiddhiAppStateException {
         try {
             // first, pause all the event sources
             sourceMap.values().forEach(list -> list.forEach(Source::pause));

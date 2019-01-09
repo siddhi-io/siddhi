@@ -149,7 +149,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
         File dir = new File(folder + File.separator + siddhiAppName);
         File[] files = dir.listFiles();
         if (files == null || files.length == 0) {
-            log.info("No revisions were found with the Siddhi App " + siddhiAppName);
+            log.info("No revisions were found to delete for the Siddhi App " + siddhiAppName);
             return;
         }
 
@@ -158,7 +158,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                 if (!file.delete()) {
                     log.error("file is not deleted successfully!");
                     throw new CannotClearSiddhiAppStateException("Persistence state " +
-                            "file is not deleted : " + file.getPath());
+                            "file is not deleted : " + file.getName());
                 }
             }
 
