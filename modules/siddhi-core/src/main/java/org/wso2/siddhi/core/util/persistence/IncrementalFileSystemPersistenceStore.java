@@ -156,7 +156,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
         for (File file : files) {
             if (file.exists()) {
                 if (!file.delete()) {
-                    log.error("file is not deleted successfully!");
+                    log.error("file is not deleted successfully : " + file.getName());
                     throw new CannotClearSiddhiAppStateException("Persistence state " +
                             "file is not deleted : " + file.getName());
                 }
