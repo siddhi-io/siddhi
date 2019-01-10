@@ -143,6 +143,13 @@ public class DefinitionParserHelper {
                     siddhiAppContext.getBufferSize(), siddhiAppContext);
             streamJunctionMap.putIfAbsent(streamDefinition.getId(), streamJunction);
         }
+        if (AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR, streamDefinition.getAnnotations())
+                != null) {
+            StreamJunction faultStreamJunction = new StreamJunction(streamDefinition,
+                    siddhiAppContext.getExecutorService(),
+                    siddhiAppContext.getBufferSize(), siddhiAppContext);
+            siddhiAppContext.addFaultStreamJunction(streamDefinition.getId(), faultStreamJunction);
+        }
     }
 
     public static void validateOutputStream(StreamDefinition outputStreamDefinition,
