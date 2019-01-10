@@ -37,7 +37,7 @@ public class InMemoryBroker {
         broker.unregister(subscriber);
     }
 
-    public static void publish(String topic, Object message) {
+    public static void publish(String topic, Object message) throws SubscriberUnAvailableException {
         broker.publish(topic, message);
     }
 
@@ -46,7 +46,7 @@ public class InMemoryBroker {
 
         void unregister(Subscriber subscriber);
 
-        void broadcast(String topic, Object msg);
+        void broadcast(String topic, Object msg) throws SubscriberUnAvailableException;
     }
 
     /**
@@ -102,19 +102,20 @@ public class InMemoryBroker {
         }
 
         @Override
-        public void broadcast(String topic, Object msg) {
+        public void broadcast(String topic, Object msg) throws SubscriberUnAvailableException {
             List<Subscriber> subscribers;
-            if (this.topicSubscribers.containsKey(topic)) {
+            if (this.topicSubscribers.containsKey(topic) && !this.topicSubscribers.get(topic).isEmpty()) {
                 subscribers = this.topicSubscribers.get(topic);
                 for (Subscriber subscriber : subscribers) {
                     subscriber.onMessage(msg);
                 }
+            } else {
+                throw new SubscriberUnAvailableException("Subscriber for topic '" + topic + "' is unavailable.");
             }
         }
 
-        public void publish(String topic, Object msg) {
+        public void publish(String topic, Object msg) throws SubscriberUnAvailableException {
             broadcast(topic, msg);
         }
-
     }
 }

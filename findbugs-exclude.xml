@@ -133,7 +133,7 @@
         <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.transport.InMemoryBroker$Subscriber"/>
+        <Class name="org.wso2.siddhi.core.util.transport.InMemoryBroker$MessageBroker"/>
         <Bug pattern="DE_MIGHT_IGNORE"/>
     </Match>
     <Match>
