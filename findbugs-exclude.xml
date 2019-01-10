@@ -137,10 +137,6 @@
         <Bug pattern="DE_MIGHT_IGNORE"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.transport.InMemoryBroker$MessageBroker"/>
-        <Bug pattern="DE_MIGHT_IGNORE"/>
-    </Match>
-    <Match>
         <Class name="org.wso2.siddhi.core.util.parser.JoinInputStreamParser"/>
         <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
     </Match>
