@@ -570,8 +570,8 @@ public class InMemoryTransportTestCase {
         InMemoryBroker.unsubscribe(subscriptionIBM);
     }
 
-//    @Test
-    public void inMemoryWithFailingSource() throws InterruptedException, SubscriberUnAvailableException {
+    @Test
+    public void inMemoryWithFailingSource() throws InterruptedException {
         log.info("Test failing inMemorySource");
 
         String streams = "" +
@@ -591,6 +591,7 @@ public class InMemoryTransportTestCase {
         siddhiAppRuntime.addCallback("BarStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+
                 EventPrinter.print(events);
                 for (Event event : events) {
                     wso2Count.incrementAndGet();
@@ -599,20 +600,27 @@ public class InMemoryTransportTestCase {
         });
 
         siddhiAppRuntime.start();
-
-        InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 55.6f, 100L}));
-        InMemoryBroker.publish("IBM", new Event(System.currentTimeMillis(), new Object[]{"IBM", 75.6f, 100L}));
+        try {
+            InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 55.6f, 100L}));
+        } catch (SubscriberUnAvailableException e) {
+            AssertJUnit.fail();
+        }
         TestFailingInMemorySource.fail = true;
         TestFailingInMemorySource.connectionCallback.onError(new ConnectionUnavailableException("Connection Lost"));
         Thread.sleep(6000);
-        InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 57.6f, 100L}));
-        InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 57.6f, 100L}));
-        InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 57.6f, 100L}));
+        try {
+            InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 57.6f, 100L}));
+            AssertJUnit.fail();
+        } catch (Throwable e) {
+            AssertJUnit.assertTrue(e instanceof SubscriberUnAvailableException);
+        }
         TestFailingInMemorySource.fail = false;
         Thread.sleep(10000);
-        InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 55.6f, 100L}));
-        InMemoryBroker.publish("IBM", new Event(System.currentTimeMillis(), new Object[]{"IBM", 75.6f, 100L}));
-
+        try {
+            InMemoryBroker.publish("WSO2", new Event(System.currentTimeMillis(), new Object[]{"WSO2", 55.6f, 100L}));
+        } catch (SubscriberUnAvailableException e) {
+            AssertJUnit.fail();
+        }
         //assert event count
         AssertJUnit.assertEquals("Number of WSO2 events", 2, wso2Count.get());
         AssertJUnit.assertEquals("Number of errors", 1, TestFailingInMemorySource.numberOfErrorOccurred);
