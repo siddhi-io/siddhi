@@ -30,7 +30,6 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
-import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
@@ -121,13 +120,7 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
 
     public void process(ComplexEventChunk streamEventChunk) {
         streamEventChunk.reset();
-        try {
-            processEventChunk(streamEventChunk, nextProcessor, streamEventCloner, complexEventPopulater);
-        } catch (RuntimeException e) {
-            log.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                    " Dropping event chunk " + streamEventChunk + ", error in processing " + this.getClass()
-                    .getCanonicalName() + ".", e);
-        }
+        processEventChunk(streamEventChunk, nextProcessor, streamEventCloner, complexEventPopulater);
     }
 
     /**
