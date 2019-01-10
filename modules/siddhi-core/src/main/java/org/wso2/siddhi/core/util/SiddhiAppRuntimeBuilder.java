@@ -180,16 +180,20 @@ public class SiddhiAppRuntimeBuilder {
         for (SingleStreamRuntime singleStreamRuntime : streamRuntime.getSingleStreamRuntimes()) {
             ProcessStreamReceiver processStreamReceiver = singleStreamRuntime.getProcessStreamReceiver();
             if (processStreamReceiver.toStream()) {
-                StreamJunction streamJuction = streamJunctionMap.get(processStreamReceiver.getStreamId());
-                if (streamJuction != null) {
-                    streamJuction.subscribe(processStreamReceiver);
+                StreamJunction streamJunction;
+                if (processStreamReceiver.getStreamId().contains(SiddhiConstants.FAULT_STREAM_PREFIX)) {
+                    streamJunction = siddhiAppContext.getFaultStreamJunction(processStreamReceiver.getStreamId());
+                } else {
+                    streamJunction = streamJunctionMap.get(processStreamReceiver.getStreamId());
+                }
+                if (streamJunction != null) {
+                    streamJunction.subscribe(processStreamReceiver);
                 } else {
                     throw new SiddhiAppCreationException("Expecting a stream, but provided '"
                             + processStreamReceiver.getStreamId() + "' is not a stream");
                 }
             }
         }
-
         OutputCallback outputCallback = queryRuntime.getOutputCallback();
 
         if (outputCallback != null && outputCallback instanceof InsertIntoStreamCallback) {

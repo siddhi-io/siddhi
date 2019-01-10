@@ -37,6 +37,7 @@ import org.wso2.siddhi.query.api.SiddhiApp;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
 import org.wso2.siddhi.query.api.definition.AggregationDefinition;
+import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -305,11 +306,33 @@ public class SiddhiAppParser {
         for (StreamDefinition definition : streamDefinitionMap.values()) {
             try {
                 siddhiAppRuntimeBuilder.defineStream(definition);
+                if (AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR, definition.getAnnotations())
+                        != null) {
+                    siddhiAppRuntimeBuilder.defineStream(createFaultStreamDefinition(definition));
+                }
             } catch (Throwable t) {
                 ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext);
                 throw t;
             }
         }
+    }
+
+    private static StreamDefinition createFaultStreamDefinition(StreamDefinition streamDefinition){
+        String faultStreamName = SiddhiConstants.FAULT_STREAM_PREFIX.concat(streamDefinition.getId());
+        Annotation onErrorAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR,
+                streamDefinition.getAnnotations());
+        List<Attribute> attributeList = streamDefinition.getAttributeList();
+        // TODO: 1/10/19 Check adding Exception attribute for Fault Streams
+        //attributeList.add(new Attribute("Exception", Attribute.Type.OBJECT));
+        StreamDefinition faultStreamDefinition = new StreamDefinition();
+        faultStreamDefinition.annotation(onErrorAnnotation);
+        faultStreamDefinition.setId(faultStreamName);
+        for (Attribute attribute : attributeList) {
+            faultStreamDefinition.attribute(attribute.getName(), attribute.getType());
+        }
+        faultStreamDefinition.setQueryContextStartIndex(streamDefinition.getQueryContextStartIndex());
+        faultStreamDefinition.setQueryContextEndIndex(streamDefinition.getQueryContextEndIndex());
+        return faultStreamDefinition;
     }
 
     private static void defineTableDefinitions(SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder,
