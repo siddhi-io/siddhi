@@ -330,17 +330,17 @@ public class AggregationParser {
             if (siddhiAppContext.getStatisticsManager() != null) {
                 latencyTrackerFind = QueryParserHelper.createLatencyTracker(siddhiAppContext,
                         aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_FIND);
+                        SiddhiConstants.METRIC_INFIX_AGGREGATIONS, SiddhiConstants.METRIC_TYPE_FIND);
                 latencyTrackerInsert = QueryParserHelper.createLatencyTracker(siddhiAppContext,
                         aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT);
+                        SiddhiConstants.METRIC_INFIX_AGGREGATIONS, SiddhiConstants.METRIC_TYPE_INSERT);
 
                 throughputTrackerFind = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                         aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_FIND);
+                        SiddhiConstants.METRIC_INFIX_AGGREGATIONS, SiddhiConstants.METRIC_TYPE_FIND);
                 throughputTrackerInsert = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                         aggregationDefinition.getId(),
-                        SiddhiConstants.METRIC_INFIX_WINDOWS, SiddhiConstants.METRIC_TYPE_INSERT);
+                        SiddhiConstants.METRIC_INFIX_AGGREGATIONS, SiddhiConstants.METRIC_TYPE_INSERT);
             }
 
             List<ExpressionExecutor> baseExecutors = cloneExpressionExecutors(processExpressionExecutorsList.get(0));
