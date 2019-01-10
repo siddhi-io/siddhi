@@ -55,9 +55,11 @@ public abstract class Sink implements SinkListener, Snapshotable {
     private DistributedTransport.ConnectionCallback connectionCallback = null;
     private String elementId;
     private SiddhiAppContext siddhiAppContext;
+    private OnErrorAction onErrorAction;
 
     protected AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
     private BackoffRetryCounter backoffRetryCounter = new BackoffRetryCounter();
+    private BackoffRetryCounter backoffPublishRetryCounter = new BackoffRetryCounter();
     private AtomicBoolean isConnected = new AtomicBoolean(false);
     private ThreadLocal<DynamicOptions> trpDynamicOptions;
     private ScheduledExecutorService scheduledExecutorService;
@@ -72,6 +74,9 @@ public abstract class Sink implements SinkListener, Snapshotable {
         this.type = type;
         this.elementId = siddhiAppContext.getElementIdGenerator().createNewId();
         this.siddhiAppContext = siddhiAppContext;
+        this.onErrorAction = OnErrorAction.valueOf(transportOptionHolder
+                .getOrCreateOption(SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR, "LOG")
+                .getValue().toUpperCase());
         if (siddhiAppContext.getStatisticsManager() != null) {
             this.throughputTracker = QueryParserHelper.createThroughputTracker(siddhiAppContext,
                     streamDefinition.getId(),
@@ -155,8 +160,7 @@ public abstract class Sink implements SinkListener, Snapshotable {
                 publish(payload);
             }
         } else if (isTryingToConnect.get()) {
-            LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '" + type + "' at '" +
-                    streamDefinition.getId() + "' as its still trying to reconnect!, events dropped '" + payload + "'");
+            onError(payload);
         } else {
             connectWithRetry();
             publish(payload);
@@ -263,5 +267,34 @@ public abstract class Sink implements SinkListener, Snapshotable {
 
     public void setConnected(boolean connected) {
         isConnected.set(connected);
+    }
+
+    void onError(Object payload) {
+        switch (onErrorAction) {
+            case LOG:
+                LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
+                        + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
+                        + "events dropped '" + payload + "'");
+                break;
+            case WAIT:
+                retryWait(backoffPublishRetryCounter.getTimeIntervalMillis());
+                backoffPublishRetryCounter.increment();
+                publish(payload);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private enum OnErrorAction {
+        LOG,
+        WAIT
+    }
+
+    private void retryWait(long waitTime) {
+        try {
+            Thread.sleep(waitTime);
+        } catch (InterruptedException ignored) {
+        }
     }
 }
