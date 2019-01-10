@@ -37,14 +37,18 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
     private final String siddhiAppName;
     private List<Event> eventBuffer = new LinkedList<>();
     private static final Logger log = Logger.getLogger(StreamHandler.class);
-
+    private final StreamJunction faultStreamJunction;
+    private final StreamJunction.FaultAction faultAction;
 
     public StreamHandler(List<StreamJunction.Receiver> receivers, int batchSize,
-                         String streamName, String siddhiAppName) {
+                         String streamName, String siddhiAppName, StreamJunction faultStreamJunction,
+                         StreamJunction.FaultAction faultAction) {
         this.receivers = receivers;
         this.batchSize = batchSize;
         this.streamName = streamName;
         this.siddhiAppName = siddhiAppName;
+        this.faultStreamJunction = faultStreamJunction;
+        this.faultAction = faultAction;
     }
 
     public void onEvent(EventExchangeHolder eventExchangeHolder, long sequence, boolean endOfBatch) {
@@ -56,9 +60,7 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
                     try {
                         receiver.receive(eventBuffer);
                     } catch (Throwable t) {
-                        log.error("Error in SiddhiApp '" + siddhiAppName +
-                                "' after consuming events from Stream " +
-                                "'" + streamName + "', " + t.getMessage(), t);
+                        onError(eventBuffer, t);
                     }
                 }
                 eventBuffer.clear();
@@ -69,14 +71,40 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
                     try {
                         receiver.receive(eventBuffer);
                     } catch (Throwable t) {
-                        log.error("Error in SiddhiApp '" + siddhiAppName +
-                                "' after consuming events from Stream " +
-                                "'" + streamName + "', " + t.getMessage(), t);
+                        onError(eventBuffer, t);
                     }
                 }
                 eventBuffer.clear();
             }
         }
 
+    }
+
+    private void onError(List<Event> eventBuffer, Throwable t) {
+        switch (faultAction) {
+            case LOG:
+                for (Event event : eventBuffer) {
+                    log.error("Error in SiddhiApp '" + siddhiAppName +
+                            "' after consuming events from Stream " +
+                            "'" + streamName + "', " + t.getMessage() + ". Hence, dropping event '"
+                            + event.toString() + "'", t);
+                }
+                break;
+            case STREAM:
+                for (Event event : eventBuffer) {
+                    if (faultStreamJunction != null) {
+                        faultStreamJunction.sendEvent(event);
+                    } else {
+                        log.error("Error in SiddhiApp '" + siddhiAppName +
+                                "' after consuming events from Stream " +
+                                "'" + streamName + "', " + t.getMessage()
+                                + ". Siddhi Fault Stream for '" + streamName + "' is not defined. "
+                                + "Hence dropping the event '" + event.toString() + "'", t);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
 }
