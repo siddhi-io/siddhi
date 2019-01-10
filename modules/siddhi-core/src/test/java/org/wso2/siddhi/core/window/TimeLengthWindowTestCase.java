@@ -316,7 +316,7 @@ public class TimeLengthWindowTestCase {
                         AssertJUnit.assertEquals("5", removeEvents[0].getData(1).toString());
                     }
                     if (removeEvents[0].getData(0).toString().equals("id3")) {
-                        AssertJUnit.assertEquals("3", removeEvents[0].getData(1).toString());
+                        AssertJUnit.assertEquals("5", removeEvents[0].getData(1).toString());
                     }
                     removeEventCount++;
                 }
@@ -345,7 +345,7 @@ public class TimeLengthWindowTestCase {
         Thread.sleep(1000);
 
         AssertJUnit.assertEquals(8, inEventCount);
-        AssertJUnit.assertEquals(2, removeEventCount);
+        AssertJUnit.assertEquals(4, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
