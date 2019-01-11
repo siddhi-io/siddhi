@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.statistics.StatisticsManager;
 import org.wso2.siddhi.core.util.timestamp.TimestampGenerator;
 
+import java.beans.ExceptionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,6 +63,7 @@ public class SiddhiAppContext {
     private Map<String, Script> scriptFunctionMap;
     private Map<String, StreamJunction> faultStreamMap =  new ConcurrentHashMap<String, StreamJunction>();;
     private ExceptionHandler<Object> disruptorExceptionHandler;
+    private ExceptionListener runtimeExceptionHandler;
     private int bufferSize;
     private String siddhiAppString;
     private List<String> includedMetrics;
@@ -200,6 +202,14 @@ public class SiddhiAppContext {
 
     public void setDisruptorExceptionHandler(ExceptionHandler<Object> disruptorExceptionHandler) {
         this.disruptorExceptionHandler = disruptorExceptionHandler;
+    }
+
+    public ExceptionListener getRuntimeExceptionHandler() {
+        return runtimeExceptionHandler;
+    }
+
+    public void setRuntimeExceptionHandler(ExceptionListener runtimeExceptionHandler) {
+        this.runtimeExceptionHandler = runtimeExceptionHandler;
     }
 
     public int getBufferSize() {

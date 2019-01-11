@@ -72,6 +72,7 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppContextException;
 import org.wso2.siddhi.query.api.execution.query.StoreQuery;
 import org.wso2.siddhi.query.compiler.SiddhiCompiler;
 
+import java.beans.ExceptionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -739,6 +740,10 @@ public class SiddhiAppRuntime {
 
     public void handleExceptionWith(ExceptionHandler<Object> exceptionHandler) {
         siddhiAppContext.setDisruptorExceptionHandler(exceptionHandler);
+    }
+
+    public void handleRuntimeExceptionWith(ExceptionListener exceptionHandler) {
+        siddhiAppContext.setRuntimeExceptionHandler(exceptionHandler);
     }
 
     /**

@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.StreamJunction;
 
+import java.beans.ExceptionListener;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,16 +40,18 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
     private static final Logger log = Logger.getLogger(StreamHandler.class);
     private final StreamJunction faultStreamJunction;
     private final StreamJunction.FaultAction faultAction;
+    private final ExceptionListener exceptionListener;
 
     public StreamHandler(List<StreamJunction.Receiver> receivers, int batchSize,
                          String streamName, String siddhiAppName, StreamJunction faultStreamJunction,
-                         StreamJunction.FaultAction faultAction) {
+                         StreamJunction.FaultAction faultAction, ExceptionListener exceptionListener) {
         this.receivers = receivers;
         this.batchSize = batchSize;
         this.streamName = streamName;
         this.siddhiAppName = siddhiAppName;
         this.faultStreamJunction = faultStreamJunction;
         this.faultAction = faultAction;
+        this.exceptionListener = exceptionListener;
     }
 
     public void onEvent(EventExchangeHolder eventExchangeHolder, long sequence, boolean endOfBatch) {
@@ -59,8 +62,8 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
                 for (StreamJunction.Receiver receiver : receivers) {
                     try {
                         receiver.receive(eventBuffer);
-                    } catch (Throwable t) {
-                        onError(eventBuffer, t);
+                    } catch (Exception e) {
+                        onError(eventBuffer, e);
                     }
                 }
                 eventBuffer.clear();
@@ -70,8 +73,8 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
                 for (StreamJunction.Receiver receiver : receivers) {
                     try {
                         receiver.receive(eventBuffer);
-                    } catch (Throwable t) {
-                        onError(eventBuffer, t);
+                    } catch (Exception e) {
+                        onError(eventBuffer, e);
                     }
                 }
                 eventBuffer.clear();
@@ -80,14 +83,17 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
 
     }
 
-    private void onError(List<Event> eventBuffer, Throwable t) {
+    private void onError(List<Event> eventBuffer, Exception e) {
+        if (exceptionListener != null) {
+            exceptionListener.exceptionThrown(e);
+        }
         switch (faultAction) {
             case LOG:
                 for (Event event : eventBuffer) {
                     log.error("Error in SiddhiApp '" + siddhiAppName +
                             "' after consuming events from Stream " +
-                            "'" + streamName + "', " + t.getMessage() + ". Hence, dropping event '"
-                            + event.toString() + "'", t);
+                            "'" + streamName + "', " + e.getMessage() + ". Hence, dropping event '"
+                            + event.toString() + "'", e);
                 }
                 break;
             case STREAM:
@@ -97,9 +103,9 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
                     } else {
                         log.error("Error in SiddhiApp '" + siddhiAppName +
                                 "' after consuming events from Stream " +
-                                "'" + streamName + "', " + t.getMessage()
+                                "'" + streamName + "', " + e.getMessage()
                                 + ". Siddhi Fault Stream for '" + streamName + "' is not defined. "
-                                + "Hence dropping the event '" + event.toString() + "'", t);
+                                + "Hence dropping the event '" + event.toString() + "'", e);
                     }
                 }
                 break;
