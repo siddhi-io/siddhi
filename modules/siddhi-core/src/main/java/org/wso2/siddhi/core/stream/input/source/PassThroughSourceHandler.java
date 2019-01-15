@@ -31,12 +31,12 @@ public class PassThroughSourceHandler implements InputEventHandlerCallback {
     }
 
     @Override
-    public void sendEvent(Event event) throws InterruptedException {
+    public void sendEvent(Event event, String[] transportSyncProperties) throws InterruptedException {
         inputHandler.send(event);
     }
 
     @Override
-    public void sendEvents(Event[] events) throws InterruptedException {
+    public void sendEvents(Event[] events, String[] transportSyncProperties) throws InterruptedException {
         inputHandler.send(events);
     }
 }
