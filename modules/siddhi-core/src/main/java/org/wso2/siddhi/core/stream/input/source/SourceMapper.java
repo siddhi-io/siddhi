@@ -38,6 +38,7 @@ public abstract class SourceMapper implements SourceEventListener {
 
     private static final Logger log = Logger.getLogger(SourceMapper.class);
     private final ThreadLocal<String[]> trpProperties = new ThreadLocal<>();
+    private final ThreadLocal<String[]> trpSyncProperties = new ThreadLocal<>();
     private InputEventHandler inputEventHandler;
     private StreamDefinition streamDefinition;
     private String mapType;
@@ -50,15 +51,15 @@ public abstract class SourceMapper implements SourceEventListener {
 
     public final void init(StreamDefinition streamDefinition, String mapType, OptionHolder mapOptionHolder,
                            List<AttributeMapping> attributeMappings, String sourceType,
-                           List<AttributeMapping> transportMappings, SourceHandler sourceHandler,
-                           ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+                           SourceSyncCallback sourceSyncCallback, List<AttributeMapping> transportMappings,
+                           SourceHandler sourceHandler, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
 
         this.streamDefinition = streamDefinition;
         this.mapType = mapType;
         this.sourceType = sourceType;
         this.transportMappings = transportMappings;
         if (sourceHandler != null) {
-            sourceHandler.initSourceHandler(siddhiAppContext.getName(),
+            sourceHandler.initSourceHandler(siddhiAppContext.getName(), sourceSyncCallback,
                     siddhiAppContext.getElementIdGenerator().createNewId(), streamDefinition);
         }
         this.sourceHandler = sourceHandler;
@@ -105,11 +106,15 @@ public abstract class SourceMapper implements SourceEventListener {
         }
         LatencyTracker mapperLatencyTracker = null;
         this.inputEventHandler = new InputEventHandler(inputHandler, transportMappings,
-                trpProperties, sourceType, mapperLatencyTracker, siddhiAppContext,
+                trpProperties, trpSyncProperties, sourceType, mapperLatencyTracker, siddhiAppContext,
                 inputEventHandlerCallback);
     }
 
     public final void onEvent(Object eventObject, String[] transportProperties) {
+        onEvent(eventObject, transportProperties, null);
+    }
+
+    public final void onEvent(Object eventObject, String[] transportProperties, String[] transportSyncProperties) {
 
         try {
             if (eventObject != null) {
@@ -128,6 +133,9 @@ public abstract class SourceMapper implements SourceEventListener {
                     }
                 }
                 trpProperties.set(transportProperties);
+                if (transportSyncProperties != null) {
+                    trpSyncProperties.set(transportSyncProperties);
+                }
                 try {
                     if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
                         throughputTracker.eventIn();
@@ -145,6 +153,9 @@ public abstract class SourceMapper implements SourceEventListener {
                     "' for the stream '" + streamDefinition.getId() + "'");
         } finally {
             trpProperties.remove();
+            if (transportSyncProperties != null) {
+                trpSyncProperties.remove();
+            }
         }
     }
 

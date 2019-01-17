@@ -23,7 +23,7 @@ import org.wso2.siddhi.core.event.Event;
  */
 public interface InputEventHandlerCallback {
 
-    void sendEvent(Event event) throws InterruptedException;
+    void sendEvent(Event event, String[] transportSyncProperties) throws InterruptedException;
 
-    void sendEvents(Event[] events) throws InterruptedException;
+    void sendEvents(Event[] events, String[] transportSyncProperties) throws InterruptedException;
 }
