@@ -32,40 +32,41 @@ public abstract class SourceHandler implements InputEventHandlerCallback, Snapsh
     private String elementId;
     private InputHandler inputHandler;
 
-    final void initSourceHandler(String siddhiAppName, SourceSyncCallback sourceSyncCallback, String elementId,
-                                 StreamDefinition streamDefinition) {
+    final void initSourceHandler(String siddhiAppName, String elementId, StreamDefinition streamDefinition) {
+
         this.elementId = elementId;
-        init(siddhiAppName, sourceSyncCallback, elementId, streamDefinition);
+        init(siddhiAppName, elementId, streamDefinition);
     }
 
-    public abstract void init(String siddhiAppName, SourceSyncCallback sourceSyncCallback, String elementId,
-                              StreamDefinition streamDefinition);
+    public abstract void init(String siddhiAppName, String elementId, StreamDefinition streamDefinition);
 
     @Override
-    public void sendEvent(Event event, String[] transportSyncProperties) throws InterruptedException {
-        sendEvent(event, transportSyncProperties, inputHandler);
+    public void sendEvent(Event event) throws InterruptedException {
+
+        sendEvent(event, inputHandler);
     }
 
     @Override
-    public void sendEvents(Event[] events, String[] transportSyncProperties) throws InterruptedException {
-        sendEvent(events, transportSyncProperties, inputHandler);
+    public void sendEvents(Event[] events) throws InterruptedException {
+        sendEvent(events, inputHandler);
     }
 
-    public abstract void sendEvent(Event event, String[] transportSyncProperties, InputHandler inputHandler)
-            throws InterruptedException;
+    public abstract void sendEvent(Event event, InputHandler inputHandler) throws InterruptedException;
 
-    public abstract void sendEvent(Event[] events, String[] transportSyncProperties, InputHandler inputHandler)
-            throws InterruptedException;
+    public abstract void sendEvent(Event[] events, InputHandler inputHandler) throws InterruptedException;
 
     public String getElementId() {
+
         return elementId;
     }
 
     public void setInputHandler(InputHandler inputHandler) {
+
         this.inputHandler = inputHandler;
     }
 
     public InputHandler getInputHandler() {
+
         return inputHandler;
     }
 }
