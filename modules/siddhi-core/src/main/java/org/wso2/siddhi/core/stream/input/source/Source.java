@@ -60,9 +60,7 @@ public abstract class Source implements Snapshotable {
                            SourceHandler sourceHandler, StreamDefinition streamDefinition,
                            SiddhiAppContext siddhiAppContext) {
         this.type = sourceType;
-
-        sourceMapper.init(streamDefinition, mapType, mapOptionHolder, attributeMappings, sourceType,
-                (this instanceof SourceSyncCallback) ? (SourceSyncCallback) this : null, transportMappings,
+        sourceMapper.init(streamDefinition, mapType, mapOptionHolder, attributeMappings, sourceType, transportMappings,
                 sourceHandler, mapperConfigReader, siddhiAppContext);
         this.mapper = sourceMapper;
         this.streamDefinition = streamDefinition;
