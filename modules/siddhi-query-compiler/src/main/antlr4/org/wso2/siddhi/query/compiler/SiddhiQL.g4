@@ -519,7 +519,7 @@ alias
     ;
 
 property_name
-    : name (property_separator name )*
+    : name (property_separator name )* | string_value
     ;
 
 attribute_name

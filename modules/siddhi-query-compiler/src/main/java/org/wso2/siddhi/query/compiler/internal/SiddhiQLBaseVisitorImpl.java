@@ -2366,14 +2366,17 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
         StringBuilder stringBuilder = new StringBuilder();
         List<SiddhiQLParser.NameContext> propertyNameList = ctx.name();
-        List<SiddhiQLParser.Property_separatorContext> propertySeparator = ctx.property_separator();
-        for (int i = 0; i < propertyNameList.size(); i++) {
-            stringBuilder.append(visit(propertyNameList.get(i)));
-            if (i < propertySeparator.size()) {
-                stringBuilder.append(propertySeparator.get(i).getText());
+        if (propertyNameList.size() > 0) {
+            List<SiddhiQLParser.Property_separatorContext> propertySeparator = ctx.property_separator();
+            for (int i = 0; i < propertyNameList.size(); i++) {
+                stringBuilder.append(visit(propertyNameList.get(i)));
+                if (i < propertySeparator.size()) {
+                    stringBuilder.append(propertySeparator.get(i).getText());
+                }
             }
+            return stringBuilder.toString();
         }
-        return stringBuilder.toString();
+        return visitString_value(ctx.string_value()).getValue();
     }
 
     /**
