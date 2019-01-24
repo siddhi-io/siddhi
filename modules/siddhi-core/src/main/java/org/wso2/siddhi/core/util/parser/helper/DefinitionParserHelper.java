@@ -138,17 +138,12 @@ public class DefinitionParserHelper {
                                          ConcurrentMap<String, StreamJunction> streamJunctionMap,
                                          SiddhiAppContext siddhiAppContext) {
         if (!streamJunctionMap.containsKey(streamDefinition.getId())) {
+            StreamJunction faultStreamJunction = streamJunctionMap.get(SiddhiConstants.FAULT_STREAM_PREFIX.
+                    concat(streamDefinition.getId()));
             StreamJunction streamJunction = new StreamJunction(streamDefinition,
                     siddhiAppContext.getExecutorService(),
-                    siddhiAppContext.getBufferSize(), siddhiAppContext);
+                    siddhiAppContext.getBufferSize(), faultStreamJunction, siddhiAppContext);
             streamJunctionMap.putIfAbsent(streamDefinition.getId(), streamJunction);
-        }
-        if (AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR, streamDefinition.getAnnotations())
-                != null) {
-            StreamJunction faultStreamJunction = new StreamJunction(streamDefinition,
-                    siddhiAppContext.getExecutorService(),
-                    siddhiAppContext.getBufferSize(), siddhiAppContext);
-            siddhiAppContext.addFaultStreamJunction(streamDefinition.getId(), faultStreamJunction);
         }
     }
 

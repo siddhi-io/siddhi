@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
+import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
@@ -72,10 +73,10 @@ public class SiddhiAppParser {
      * @param siddhiApp       plan to be parsed
      * @param siddhiAppString content of Siddhi application as string
      * @param siddhiContext   SiddhiContext  @return SiddhiAppRuntime
-     *
      * @return SiddhiAppRuntimeBuilder
      */
-    public static SiddhiAppRuntimeBuilder parse(SiddhiApp siddhiApp, String siddhiAppString, SiddhiContext siddhiContext) {
+    public static SiddhiAppRuntimeBuilder parse(SiddhiApp siddhiApp, String siddhiAppString,
+                                                SiddhiContext siddhiContext) {
 
         SiddhiAppContext siddhiAppContext = new SiddhiAppContext();
         siddhiAppContext.setSiddhiContext(siddhiContext);
@@ -305,11 +306,17 @@ public class SiddhiAppParser {
                                                 SiddhiAppContext siddhiAppContext) {
         for (StreamDefinition definition : streamDefinitionMap.values()) {
             try {
-                siddhiAppRuntimeBuilder.defineStream(definition);
-                if (AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR, definition.getAnnotations())
-                        != null) {
-                    siddhiAppRuntimeBuilder.defineStream(createFaultStreamDefinition(definition));
+                Annotation onErrorAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR,
+                        definition.getAnnotations());
+                if (onErrorAnnotation != null) {
+                    StreamJunction.FaultAction faultAction = StreamJunction.FaultAction.valueOf(onErrorAnnotation
+                            .getElement(SiddhiConstants.ANNOTATION_ELEMENT_ACTION).toUpperCase());
+                    if (faultAction == StreamJunction.FaultAction.STREAM) {
+                        StreamDefinition faultStreamDefinition = createFaultStreamDefinition(definition);
+                        siddhiAppRuntimeBuilder.defineStream(faultStreamDefinition);
+                    }
                 }
+                siddhiAppRuntimeBuilder.defineStream(definition);
             } catch (Throwable t) {
                 ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext);
                 throw t;
@@ -317,19 +324,16 @@ public class SiddhiAppParser {
         }
     }
 
-    private static StreamDefinition createFaultStreamDefinition(StreamDefinition streamDefinition){
-        String faultStreamName = SiddhiConstants.FAULT_STREAM_PREFIX.concat(streamDefinition.getId());
-        Annotation onErrorAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR,
-                streamDefinition.getAnnotations());
+    private static StreamDefinition createFaultStreamDefinition(StreamDefinition streamDefinition) {
+
         List<Attribute> attributeList = streamDefinition.getAttributeList();
-        // TODO: 1/10/19 Check adding Exception attribute for Fault Streams
-        //attributeList.add(new Attribute("Exception", Attribute.Type.OBJECT));
         StreamDefinition faultStreamDefinition = new StreamDefinition();
-        faultStreamDefinition.annotation(onErrorAnnotation);
-        faultStreamDefinition.setId(faultStreamName);
+        faultStreamDefinition.setId(SiddhiConstants.FAULT_STREAM_PREFIX.concat(streamDefinition.getId()));
         for (Attribute attribute : attributeList) {
             faultStreamDefinition.attribute(attribute.getName(), attribute.getType());
         }
+        faultStreamDefinition.attribute("_error", Attribute.Type.OBJECT);
+
         faultStreamDefinition.setQueryContextStartIndex(streamDefinition.getQueryContextStartIndex());
         faultStreamDefinition.setQueryContextEndIndex(streamDefinition.getQueryContextEndIndex());
         return faultStreamDefinition;

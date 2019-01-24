@@ -50,7 +50,7 @@ public final class SiddhiConstants {
     public static final String ANNOTATION_ASYNC = "Async";
 
     public static final String ANNOTATION_ON_ERROR = "OnError";
-    public static final String FAULT_STREAM_PREFIX = "error_";
+    public static final String FAULT_STREAM_PREFIX = "!";
     public static final String ANNOTATION_ELEMENT_ACTION = "action";
     public static final String ANNOTATION_ELEMENT_ON_ERROR = "on.error";
 

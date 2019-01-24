@@ -20,7 +20,6 @@ package org.wso2.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
 import org.wso2.siddhi.core.function.Script;
-import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.ThreadBarrier;
@@ -36,7 +35,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -61,9 +59,8 @@ public class SiddhiAppContext {
     private TimestampGenerator timestampGenerator = null;
     private ElementIdGenerator elementIdGenerator;
     private Map<String, Script> scriptFunctionMap;
-    private Map<String, StreamJunction> faultStreamMap =  new ConcurrentHashMap<String, StreamJunction>();;
     private ExceptionHandler<Object> disruptorExceptionHandler;
-    private ExceptionListener runtimeExceptionHandler;
+    private ExceptionListener runtimeExceptionListener;
     private int bufferSize;
     private String siddhiAppString;
     private List<String> includedMetrics;
@@ -204,12 +201,12 @@ public class SiddhiAppContext {
         this.disruptorExceptionHandler = disruptorExceptionHandler;
     }
 
-    public ExceptionListener getRuntimeExceptionHandler() {
-        return runtimeExceptionHandler;
+    public ExceptionListener getRuntimeExceptionListener() {
+        return runtimeExceptionListener;
     }
 
-    public void setRuntimeExceptionHandler(ExceptionListener runtimeExceptionHandler) {
-        this.runtimeExceptionHandler = runtimeExceptionHandler;
+    public void setRuntimeExceptionListener(ExceptionListener runtimeExceptionListener) {
+        this.runtimeExceptionListener = runtimeExceptionListener;
     }
 
     public int getBufferSize() {
@@ -246,14 +243,6 @@ public class SiddhiAppContext {
 
     public void addScheduler(Scheduler scheduler) {
         this.schedulerList.add(scheduler);
-    }
-
-    public void addFaultStreamJunction(String faultStreamName, StreamJunction streamJunction) {
-        faultStreamMap.put(faultStreamName, streamJunction);
-    }
-
-    public StreamJunction getFaultStreamJunction(String faultStreamName) {
-        return faultStreamMap.get(faultStreamName);
     }
 
     public List<Scheduler> getSchedulerList() {

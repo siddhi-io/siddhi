@@ -71,8 +71,7 @@ public class InMemorySink extends Sink {
 
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                        ConfigReader sinkConfigReader, SiddhiAppContext
-            siddhiAppContext) {
+                        ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
         topicOption = optionHolder.validateAndGetOption(TOPIC_KEY);
     }
 
@@ -96,7 +95,6 @@ public class InMemorySink extends Sink {
         try {
             InMemoryBroker.publish(topicOption.getValue(dynamicOptions), payload);
         } catch (SubscriberUnAvailableException e) {
-            log.error("Handling error while publishing. " + e.getMessage());
             onError(payload);
         }
     }

@@ -742,8 +742,8 @@ public class SiddhiAppRuntime {
         siddhiAppContext.setDisruptorExceptionHandler(exceptionHandler);
     }
 
-    public void handleRuntimeExceptionWith(ExceptionListener exceptionHandler) {
-        siddhiAppContext.setRuntimeExceptionHandler(exceptionHandler);
+    public void handleRuntimeExceptionWith(ExceptionListener exceptionListener) {
+        siddhiAppContext.setRuntimeExceptionListener(exceptionListener);
     }
 
     /**

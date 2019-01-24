@@ -180,12 +180,7 @@ public class SiddhiAppRuntimeBuilder {
         for (SingleStreamRuntime singleStreamRuntime : streamRuntime.getSingleStreamRuntimes()) {
             ProcessStreamReceiver processStreamReceiver = singleStreamRuntime.getProcessStreamReceiver();
             if (processStreamReceiver.toStream()) {
-                StreamJunction streamJunction;
-                if (processStreamReceiver.getStreamId().contains(SiddhiConstants.FAULT_STREAM_PREFIX)) {
-                    streamJunction = siddhiAppContext.getFaultStreamJunction(processStreamReceiver.getStreamId());
-                } else {
-                    streamJunction = streamJunctionMap.get(processStreamReceiver.getStreamId());
-                }
+                StreamJunction streamJunction = streamJunctionMap.get(processStreamReceiver.getStreamId());
                 if (streamJunction != null) {
                     streamJunction.subscribe(processStreamReceiver);
                 } else {
@@ -207,7 +202,7 @@ public class SiddhiAppRuntimeBuilder {
             if (outputStreamJunction == null) {
                 outputStreamJunction = new StreamJunction(streamDefinition,
                         siddhiAppContext.getExecutorService(),
-                        siddhiAppContext.getBufferSize(), siddhiAppContext);
+                        siddhiAppContext.getBufferSize(), null, siddhiAppContext);
                 streamJunctionMap.putIfAbsent(streamDefinition.getId(), outputStreamJunction);
             }
             insertIntoStreamCallback.init(streamJunctionMap.get(insertIntoStreamCallback.getOutputStreamDefinition()
@@ -223,7 +218,7 @@ public class SiddhiAppRuntimeBuilder {
             if (outputStreamJunction == null) {
                 outputStreamJunction = new StreamJunction(streamDefinition,
                         siddhiAppContext.getExecutorService(),
-                        siddhiAppContext.getBufferSize(), siddhiAppContext);
+                        siddhiAppContext.getBufferSize(), null, siddhiAppContext);
                 streamJunctionMap.putIfAbsent(streamDefinition.getId(), outputStreamJunction);
             }
             insertIntoWindowCallback.getWindow().setPublisher(streamJunctionMap.get(insertIntoWindowCallback

@@ -305,7 +305,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
 
     private StreamJunction createStreamJunction() {
         return new StreamJunction(streamDefinition, siddhiAppContext.getExecutorService(),
-                siddhiAppContext.getBufferSize(), siddhiAppContext);
+                siddhiAppContext.getBufferSize(), null, siddhiAppContext);
     }
 
     private synchronized StreamEvent borrowEvent() {
