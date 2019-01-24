@@ -433,4 +433,40 @@ public class SimpleQueryTestCase {
 
     }
 
+    @Test
+    public void testCreatingFilterQueryWithFaultStream() {
+        Query query = Query.query();
+        query.from(
+                InputStream.faultStream("StockStream").
+                        filter(
+                                Expression.and(
+                                        Expression.compare(
+                                                Expression.add(Expression.value(7), Expression.value(9.5)),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price")),
+                                        Expression.compare(
+                                                Expression.value(100),
+                                                Compare.Operator.GREATER_THAN_EQUAL,
+                                                Expression.variable("volume")
+                                        )
+                                )
+                        )
+        );
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("symbol"))).
+                        groupBy(Expression.variable("symbol")).
+                        having(Expression.compare(Expression.variable("avgPrice"),
+                                Compare.Operator.GREATER_THAN_EQUAL,
+                                Expression.value(50)
+                        ))
+        );
+        query.insertIntoFault("OutStockStream");
+
+        SiddhiApp.siddhiApp("test").addQuery(query);
+
+    }
+
+
 }

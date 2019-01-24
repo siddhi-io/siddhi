@@ -97,11 +97,19 @@ public abstract class InputStream implements SiddhiElement {
     }
 
     public static BasicSingleInputStream innerStream(String streamId) {
-        return new BasicSingleInputStream(null, streamId, true);
+        return new BasicSingleInputStream(null, streamId, true, false);
     }
 
     public static BasicSingleInputStream innerStream(String streamReferenceId, String streamId) {
-        return new BasicSingleInputStream(streamReferenceId, streamId, true);
+        return new BasicSingleInputStream(streamReferenceId, streamId, true, false);
+    }
+
+    public static BasicSingleInputStream faultStream(String streamId) {
+        return new BasicSingleInputStream(null, streamId, false, true);
+    }
+
+    public static BasicSingleInputStream faultStream(String streamReferenceId, String streamId) {
+        return new BasicSingleInputStream(streamReferenceId, streamId, false, true);
     }
 
     public static BasicSingleInputStream stream(String streamId) {

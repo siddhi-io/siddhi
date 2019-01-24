@@ -186,6 +186,9 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         if (source.isInnerStream) {
             throw newSiddhiParserException(ctx, " InnerStreams cannot be defined!");
         }
+        if (source.isFaultStream) {
+            throw newSiddhiParserException(ctx, " FaultStreams cannot be explicitly defined!");
+        }
         try {
             StreamDefinition streamDefinition = StreamDefinition.id(source.streamId);
             populateQueryContext(streamDefinition, ctx);
@@ -335,8 +338,12 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
         Source source = (Source) visit(ctx.source());
         if (source.isInnerStream) {
-            throw newSiddhiParserException(ctx, "'#' cannot be used, because Tables can't be defined as " +
+            throw newSiddhiParserException(ctx, " '#' cannot be used, because Tables can't be defined as " +
                     "InnerStream!");
+        }
+        if (source.isFaultStream) {
+            throw newSiddhiParserException(ctx, " '!' cannot be used, because Tables can't be defined as " +
+                    "FaultStream!");
         }
         TableDefinition tableDefinition = TableDefinition.id(source.streamId);
         List<SiddhiQLParser.Attribute_nameContext> attribute_names = ctx.attribute_name();
@@ -365,7 +372,12 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     public Object visitDefinition_window(@NotNull SiddhiQLParser.Definition_windowContext ctx) {
         Source source = (Source) visit(ctx.source());
         if (source.isInnerStream) {
-            throw newSiddhiParserException(ctx, "'#' cannot be used, because Windows can't be defined as InnerStream!");
+            throw newSiddhiParserException(ctx, " '#' cannot be used, because Windows can't be defined " +
+                    "as InnerStream!");
+        }
+        if (source.isFaultStream) {
+            throw newSiddhiParserException(ctx, " '!' cannot be used, because Windows can't be defined " +
+                    "as FaultStream!");
         }
         WindowDefinition windowDefinition = WindowDefinition.id(source.streamId);
         List<SiddhiQLParser.Attribute_nameContext> attribute_names = ctx.attribute_name();
@@ -622,7 +634,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         Source source = (Source) visit(ctx.source());
 
         BasicSingleInputStream basicSingleInputStream = new BasicSingleInputStream(null, source.streamId,
-                source.isInnerStream);
+                source.isInnerStream, source.isFaultStream);
 
         if (ctx.pre_window_handlers != null) {
             basicSingleInputStream.addStreamHandlers((List<StreamHandler>) visit(ctx.pre_window_handlers));
@@ -721,7 +733,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             activeStreams.add(streamAlias);
         }
         BasicSingleInputStream basicSingleInputStream = new BasicSingleInputStream(streamAlias, source.streamId,
-                source.isInnerStream);
+                source.isInnerStream, source.isFaultStream);
 
         if (ctx.basic_source_stream_handlers() != null) {
             basicSingleInputStream.addStreamHandlers((List<StreamHandler>) visit(ctx.basic_source_stream_handlers()));
@@ -1311,7 +1323,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         Source source = (Source) visit(ctx.source());
 
         BasicSingleInputStream basicSingleInputStream =
-                new BasicSingleInputStream(null, source.streamId, source.isInnerStream);
+                new BasicSingleInputStream(null, source.streamId, source.isInnerStream, source.isFaultStream);
 
         if (ctx.basic_source_stream_handlers() != null) {
             basicSingleInputStream.addStreamHandlers((List<StreamHandler>) visit(ctx.basic_source_stream_handlers()));
@@ -1371,6 +1383,8 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         if (ctx.event() != null) {
             if (basicSingleInputStream.isInnerStream()) {
                 activeStreams.remove("#" + basicSingleInputStream.getStreamId());
+            } else if (basicSingleInputStream.isFaultStream()) {
+                activeStreams.remove("!" + basicSingleInputStream.getStreamId());
             } else {
                 activeStreams.remove(basicSingleInputStream.getStreamId());
             }
@@ -1662,7 +1676,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
@@ -1698,7 +1712,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         if (ctx.INSERT() != null) {
             Source source = (Source) visit(ctx.target());
             if (ctx.UPDATE() != null && ctx.OR() != null) {
-                if (source.isInnerStream) {
+                if (source.isInnerStream || source.isFaultStream) {
                     throw newSiddhiParserException(ctx, "UPDATE OR INTO INSERT be only used with Tables!");
                 }
                 if (ctx.output_event_type() != null) {
@@ -1732,18 +1746,20 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             } else {
                 if (ctx.output_event_type() != null) {
                     OutputStream outputStream = new InsertIntoStream(source.streamId, source.isInnerStream,
+                            source.isFaultStream,
                             (OutputStream.OutputEventType) visit(ctx.output_event_type()));
                     populateQueryContext(outputStream, ctx);
                     return outputStream;
                 } else {
-                    OutputStream outputStream = new InsertIntoStream(source.streamId, source.isInnerStream);
+                    OutputStream outputStream = new InsertIntoStream(source.streamId, source.isInnerStream,
+                            source.isFaultStream);
                     populateQueryContext(outputStream, ctx);
                     return outputStream;
                 }
             }
         } else if (ctx.DELETE() != null) {
             Source source = (Source) visit(ctx.target());
-            if (source.isInnerStream) {
+            if (source.isInnerStream || source.isFaultStream) {
                 throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
             }
             if (ctx.output_event_type() != null) {
@@ -1759,7 +1775,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             }
         } else if (ctx.UPDATE() != null) {
             Source source = (Source) visit(ctx.target());
-            if (source.isInnerStream) {
+            if (source.isInnerStream || source.isFaultStream) {
                 throw newSiddhiParserException(ctx, "UPDATE can be only used with Tables!");
             }
             if (ctx.output_event_type() != null) {
@@ -1808,7 +1824,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
@@ -1820,7 +1836,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
 
         if (ctx.DELETE() != null) {
             Source source = (Source) visit(ctx.target());
-            if (source.isInnerStream) {
+            if (source.isInnerStream || source.isFaultStream) {
                 throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
             }
             OutputStream outputStream = new DeleteStream(source.streamId, (Expression) visit(ctx.expression()));
@@ -1828,7 +1844,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             return outputStream;
         } else if (ctx.UPDATE() != null) {
             Source source = (Source) visit(ctx.target());
-            if (source.isInnerStream) {
+            if (source.isInnerStream || source.isFaultStream) {
                 throw newSiddhiParserException(ctx, "DELETE can be only used with Tables!");
             }
             if (ctx.set_clause() != null) {
@@ -2239,11 +2255,19 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
                     expression = Expression.isNullInnerStream(streamReference.streamId);
                 }
             } else {
-                if (activeStreams.contains(streamReference.streamId)) { //Stream
+                if (!streamReference.isFaultStream && activeStreams.contains(streamReference.streamId)) { //Stream
                     if (streamReference.streamIndex != null) {
                         expression = Expression.isNullStream(streamReference.streamId, streamReference.streamIndex);
                     } else {
                         expression = Expression.isNullStream(streamReference.streamId);
+                    }
+                } else if (streamReference.isFaultStream && activeStreams.contains(SiddhiConstants.FAULT_STREAM_FLAG
+                        + streamReference.streamId)) {  //FaultStream
+                    if (streamReference.streamIndex != null) {
+                        expression = Expression.isNullFaultStream(streamReference.streamId,
+                                streamReference.streamIndex);
+                    } else {
+                        expression = Expression.isNullFaultStream(streamReference.streamId);
                     }
                 } else { //Attribute
                     expression = Expression.isNull(Expression.variable(streamReference.streamId));
@@ -2271,6 +2295,13 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         if (ctx.hash != null) {
             streamReference.isInnerStream = true;
         }
+        if (ctx.not != null) {
+            streamReference.isFaultStream = true;
+        }
+        if (streamReference.isFaultStream && streamReference.isInnerStream) {
+            throw newSiddhiParserException(ctx, "Found '" + ctx.getText() + "', but only inner or fault " +
+                    "can be supported at one!");
+        }
         streamReference.streamId = (String) visit(ctx.name());
         if (ctx.attribute_index() != null) {
             streamReference.streamIndex = (Integer) visit(ctx.attribute_index());
@@ -2297,7 +2328,8 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         Variable variable = Expression.variable((String) visit(ctx.attribute_name()));
 
         if (ctx.name1 != null && ctx.name2 != null) { //Stream and Function
-            variable.setStreamId(ctx.hash1 != null, (String) visit(ctx.name1));
+            variable.setStreamId(ctx.hash1 != null, ctx.not != null,
+                    (String) visit(ctx.name1));
             if (ctx.attribute_index1 != null) {
                 variable.setStreamIndex((Integer) visit(ctx.attribute_index1));
             }
@@ -2308,14 +2340,18 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             }
         } else if (ctx.name1 != null) {   //name2 == null
             if (ctx.hash1 == null) {   //Stream
-                variable.setStreamId((String) visit(ctx.name1));
+                variable.setStreamId(false, ctx.not != null, (String) visit(ctx.name1));
                 if (ctx.attribute_index1 != null) {
                     variable.setStreamIndex((Integer) visit(ctx.attribute_index1));
                 }
             } else {  //InnerStream or Function
                 String name = (String) visit(ctx.name1);
 
-                if (activeStreams.contains("#" + name)) { //InnerStream
+                if (ctx.not != null) {
+                    throw newSiddhiParserException(ctx, "Found '" + ctx.getText() + "', but only inner or fault " +
+                            "can be supported at one!");
+                }
+                if (activeStreams.contains(SiddhiConstants.INNER_STREAM_FLAG + name)) { //InnerStream
                     variable.setStreamId(true, name);
                     if (ctx.attribute_index1 != null) {
                         variable.setStreamIndex((Integer) visit(ctx.attribute_index1));
@@ -2391,7 +2427,11 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
         Source source = new Source();
         source.streamId = (String) visit(ctx.stream_id());
         source.isInnerStream = ctx.inner != null;
-
+        source.isFaultStream = ctx.fault != null;
+        if (source.isFaultStream && source.isInnerStream) {
+            throw newSiddhiParserException(ctx, "Found '" + ctx.getText() + "', but only inner or fault " +
+                    "can be supported at one!");
+        }
         activeStreams.add(ctx.getText());
 
         return source;
@@ -2983,7 +3023,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             if (ctx.UPDATE() != null && ctx.OR() != null) {
                 storeQuery.setType(StoreQuery.StoreQueryType.UPDATE_OR_INSERT);
                 Source source = (Source) visit(ctx.target());
-                if (source.isInnerStream) {
+                if (source.isInnerStream || source.isFaultStream) {
                     throw newSiddhiParserException(ctx, "UPDATE OR INTO INSERT can be only used with Tables!");
                 }
                 if (ctx.set_clause() != null) {
@@ -2999,7 +3039,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             } else if (ctx.INSERT() != null) {
                 storeQuery.setType(StoreQuery.StoreQueryType.INSERT);
                 Source source = (Source) visit(ctx.target());
-                if (source.isInnerStream) {
+                if (source.isInnerStream || source.isFaultStream) {
                     throw newSiddhiParserException(ctx, "INSERT can be only used with Tables!");
                 }
                 outputStream = new InsertIntoStream(source.streamId);
@@ -3009,7 +3049,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
                 outputStream = (OutputStream) visit(ctx.store_query_output());
                 if (outputStream instanceof DeleteStream) {
                     storeQuery.setType(StoreQuery.StoreQueryType.DELETE);
-                } else if (outputStream instanceof  UpdateStream) {
+                } else if (outputStream instanceof UpdateStream) {
                     storeQuery.setType(StoreQuery.StoreQueryType.UPDATE);
                 }
                 storeQuery.outStream(outputStream);
@@ -3018,7 +3058,7 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
             outputStream = (OutputStream) visit(ctx.store_query_output());
             if (outputStream instanceof DeleteStream) {
                 storeQuery.setType(StoreQuery.StoreQueryType.DELETE);
-            } else if (outputStream instanceof  UpdateStream) {
+            } else if (outputStream instanceof UpdateStream) {
                 storeQuery.setType(StoreQuery.StoreQueryType.UPDATE);
             }
             storeQuery.outStream(outputStream);
@@ -3063,11 +3103,13 @@ public class SiddhiQLBaseVisitorImpl extends SiddhiQLBaseVisitor {
     private static class Source {
         private String streamId;
         private boolean isInnerStream;
+        private boolean isFaultStream;
     }
 
     private static class StreamReference {
         private String streamId;
         private boolean isInnerStream;
+        private boolean isFaultStream;
         private Integer streamIndex;
     }
 }
