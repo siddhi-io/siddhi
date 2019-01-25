@@ -305,7 +305,8 @@ public class ExpressionParser {
                 }
 
             } else if (expression instanceof Variable) {
-                return parseVariable((Variable) expression, metaEvent, currentState, executorList, defaultStreamEventIndex);
+                return parseVariable((Variable) expression, metaEvent, currentState, executorList,
+                        defaultStreamEventIndex, siddhiAppContext);
 
             } else if (expression instanceof Multiply) {
                 ExpressionExecutor left = parseExpression(((Multiply) expression).getLeftValue(), metaEvent, currentState,
@@ -1213,16 +1214,18 @@ public class ExpressionParser {
     /**
      * Parse and validate the given Siddhi variable and return a VariableExpressionExecutor
      *
-     * @param variable     Variable to be parsed
-     * @param metaEvent    Meta event used to collect execution info of stream associated with query
-     * @param currentState Current State Number
-     * @param executorList List to hold VariableExpressionExecutors to update after query parsing @return
-     *                     VariableExpressionExecutor representing given variable
+     * @param variable         Variable to be parsed
+     * @param metaEvent        Meta event used to collect execution info of stream associated with query
+     * @param currentState     Current State Number
+     * @param executorList     List to hold VariableExpressionExecutors to update after query parsing @return
+     * @param siddhiAppContext Siddhi App Context
+     * @return VariableExpressionExecutor representing given variable
      */
     private static ExpressionExecutor parseVariable(Variable variable, MetaComplexEvent metaEvent,
                                                     int currentState,
                                                     List<VariableExpressionExecutor> executorList,
-                                                    int defaultStreamEventIndex) {
+                                                    int defaultStreamEventIndex,
+                                                    SiddhiAppContext siddhiAppContext) {
         String attributeName = variable.getAttributeName();
         int[] eventPosition = new int[2];
         if (variable.getStreamIndex() != null) {
@@ -1247,6 +1250,11 @@ public class ExpressionParser {
                 abstractDefinition = metaStreamEvent.getLastInputDefinition();
                 type = abstractDefinition.getAttributeType(attributeName);
                 ((MetaStreamEvent) metaEvent).addData(new Attribute(attributeName, type));
+            }
+            if (variable.getStreamId() != null && !variable.getStreamId().equals(abstractDefinition.getId())) {
+                throw new SiddhiAppCreationException("Id '" + variable.getStreamId() + "' not defined within the " +
+                        "current scope",
+                        variable, siddhiAppContext);
             }
             VariableExpressionExecutor variableExpressionExecutor = new VariableExpressionExecutor(
                     new Attribute(attributeName, type), eventPosition[STREAM_EVENT_CHAIN_INDEX],
