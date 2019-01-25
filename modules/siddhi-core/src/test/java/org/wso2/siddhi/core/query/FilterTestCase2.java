@@ -1759,7 +1759,6 @@ public class FilterTestCase2 {
         log.info("filter test122");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
         String query = "@info(name = 'query1') " +
                 "from cseEventStream[150 > a.volume] " +
