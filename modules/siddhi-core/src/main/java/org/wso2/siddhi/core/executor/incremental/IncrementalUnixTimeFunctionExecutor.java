@@ -98,9 +98,9 @@ public class IncrementalUnixTimeFunctionExecutor extends FunctionExecutor {
                             Integer.parseInt(splitTime[2]), 0, ZoneId.ofOffset("GMT", ZoneOffset.of(dateTimeZone[2])))
                     .toEpochSecond() * 1000;
         }
-        throw new SiddhiAppRuntimeException("Timestamp " + stringTimeStamp + "doesn't match "
+        throw new SiddhiAppRuntimeException("Timestamp '" + stringTimeStamp + "' doesn't match "
                 + "the supported formats <yyyy>-<MM>-<dd> <HH>:<mm>:<ss> (for GMT time zone) or " +
                 "<yyyy>-<MM>-<dd> <HH>:<mm>:<ss> <Z> (for non GMT time zone). The ISO 8601 UTC offset must be "
-                + "provided for <Z> (ex. +05:30, -11:00");
+                + "provided for <Z> (ex. +05:30, -11:00)");
     }
 }
