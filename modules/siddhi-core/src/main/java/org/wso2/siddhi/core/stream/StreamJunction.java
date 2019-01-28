@@ -26,6 +26,9 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.converter.FaultStreamEventConverter;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputProcessor;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
@@ -72,6 +75,7 @@ public class StreamJunction implements EventBufferHolder {
     private ThroughputTracker throughputTracker = null;
     private boolean isTraceEnabled;
     private StreamJunction faultStreamJunction = null;
+    private FaultStreamEventConverter faultStreamEventChunk = null;
     private FaultAction faultAction = FaultAction.LOG;
     private ExceptionListener exceptionListener;
 
@@ -89,6 +93,13 @@ public class StreamJunction implements EventBufferHolder {
         }
         this.exceptionListener = siddhiAppContext.getRuntimeExceptionListener();
         this.faultStreamJunction = faultStreamJunction;
+        if (faultStreamJunction != null) {
+            StreamDefinition faultStreamDefinition = faultStreamJunction.getStreamDefinition();
+            StreamEventPool faultStreamEventPool = new StreamEventPool(0, 0, faultStreamDefinition.getAttributeList().size(), 5);
+            faultStreamEventPool.borrowEvent();
+            faultStreamEventChunk = new FaultStreamEventConverter(faultStreamEventPool);
+
+        }
         try {
             Annotation asyncAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ASYNC,
                     streamDefinition.getAnnotations());
@@ -442,19 +453,32 @@ public class StreamJunction implements EventBufferHolder {
             switch (faultAction) {
                 case LOG:
                     log.error("Error in '" + siddhiAppContext.getName() + "' after consuming events "
-                            + "from Stream '" + streamDefinition.getId() + "' , " + e.getMessage()
+                            + "from Stream '" + streamDefinition.getId() + "', " + e.getMessage()
                             + ". Hence, dropping event '" + event.toString() + "'", e);
                     break;
                 case STREAM:
                     if (faultStreamJunction != null) {
+                        StreamEvent streamEvent = null;
                         if (event instanceof ComplexEvent) {
-                            faultStreamJunction.sendEvent((ComplexEvent) event);
+                            synchronized (this) {
+                                streamEvent = faultStreamEventChunk.convert((ComplexEvent) event, e);
+                            }
+                            faultStreamJunction.sendEvent(streamEvent);
                         } else if (event instanceof Event) {
-                            faultStreamJunction.sendEvent((Event) event);
+                            synchronized (this) {
+                                streamEvent = faultStreamEventChunk.convert((Event) event, e);
+                            }
+                            faultStreamJunction.sendEvent(streamEvent);
                         } else if (event instanceof Event[]) {
-                            faultStreamJunction.sendEvent((Event[]) event);
+                            synchronized (this) {
+                                streamEvent = faultStreamEventChunk.convert((Event[]) event, e);
+                            }
+                            faultStreamJunction.sendEvent(streamEvent);
                         } else if (event instanceof List) {
-                            faultStreamJunction.sendEvent((List<Event>) event);
+                            synchronized (this) {
+                                streamEvent = faultStreamEventChunk.convert((List<Event>) event, e);
+                            }
+                            faultStreamJunction.sendEvent(streamEvent);
                         }
                     } else {
                         log.error("Error in SiddhiApp '" + siddhiAppContext.getName() +
@@ -480,7 +504,11 @@ public class StreamJunction implements EventBufferHolder {
                     break;
                 case STREAM:
                     if (faultStreamJunction != null) {
-                        faultStreamJunction.sendData(timeStamp, data);
+                        StreamEvent streamEvent = null;
+                        synchronized (this) {
+                            streamEvent = faultStreamEventChunk.convert(timeStamp, data, e);
+                        }
+                        faultStreamJunction.sendEvent(streamEvent);
                     } else {
                         log.error("Error in SiddhiApp '" + siddhiAppContext.getName() +
                                 "' after consuming events from Stream " + "'" + streamDefinition.getId()

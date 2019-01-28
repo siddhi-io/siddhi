@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.stream.output.sink;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.output.sink.distributed.DistributedTransport;
 import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.SiddhiConstants;
@@ -271,24 +272,28 @@ public abstract class Sink implements SinkListener, Snapshotable {
 
     void onError(Object payload) {
         switch (onErrorAction) {
-            case LOG:
-                LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
+            case STREAM:
+                throw  new SiddhiAppRuntimeException("Dropping event at Sink '"
                         + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
-                        + "events dropped '" + payload + "'");
-                break;
+                        + "event dropped '" + payload + "'");
             case WAIT:
                 retryWait(backoffPublishRetryCounter.getTimeIntervalMillis());
                 backoffPublishRetryCounter.increment();
                 publish(payload);
                 break;
+            case LOG:
             default:
+                LOG.error("Error on '" + siddhiAppContext.getName() + "'. Dropping event at Sink '"
+                        + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
+                        + "events dropped '" + payload + "'");
                 break;
         }
     }
 
     private enum OnErrorAction {
         LOG,
-        WAIT
+        WAIT,
+        STREAM
     }
 
     private void retryWait(long waitTime) {
