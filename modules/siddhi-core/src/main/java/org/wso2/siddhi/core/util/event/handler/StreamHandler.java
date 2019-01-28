@@ -39,18 +39,18 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
     private List<Event> eventBuffer = new LinkedList<>();
     private static final Logger log = Logger.getLogger(StreamHandler.class);
     private final StreamJunction faultStreamJunction;
-    private final StreamJunction.FaultAction faultAction;
+    private final StreamJunction.OnErrorAction onErrorAction;
     private final ExceptionListener exceptionListener;
 
     public StreamHandler(List<StreamJunction.Receiver> receivers, int batchSize,
                          String streamName, String siddhiAppName, StreamJunction faultStreamJunction,
-                         StreamJunction.FaultAction faultAction, ExceptionListener exceptionListener) {
+                         StreamJunction.OnErrorAction onErrorAction, ExceptionListener exceptionListener) {
         this.receivers = receivers;
         this.batchSize = batchSize;
         this.streamName = streamName;
         this.siddhiAppName = siddhiAppName;
         this.faultStreamJunction = faultStreamJunction;
-        this.faultAction = faultAction;
+        this.onErrorAction = onErrorAction;
         this.exceptionListener = exceptionListener;
     }
 
@@ -87,7 +87,7 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
         if (exceptionListener != null) {
             exceptionListener.exceptionThrown(e);
         }
-        switch (faultAction) {
+        switch (onErrorAction) {
             case LOG:
                 for (Event event : eventBuffer) {
                     log.error("Error in SiddhiApp '" + siddhiAppName +

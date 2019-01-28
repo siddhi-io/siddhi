@@ -95,7 +95,7 @@ public class InMemorySink extends Sink {
         try {
             InMemoryBroker.publish(topicOption.getValue(dynamicOptions), payload);
         } catch (SubscriberUnAvailableException e) {
-            onError(payload);
+            onError(payload, e);
         }
     }
 

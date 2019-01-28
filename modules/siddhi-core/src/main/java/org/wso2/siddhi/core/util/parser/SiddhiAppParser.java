@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.stream.StreamJunction;
+import org.wso2.siddhi.core.stream.output.sink.Sink;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
@@ -309,9 +310,20 @@ public class SiddhiAppParser {
                 Annotation onErrorAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR,
                         definition.getAnnotations());
                 if (onErrorAnnotation != null) {
-                    StreamJunction.FaultAction faultAction = StreamJunction.FaultAction.valueOf(onErrorAnnotation
+                    StreamJunction.OnErrorAction onErrorAction = StreamJunction.OnErrorAction.valueOf(onErrorAnnotation
                             .getElement(SiddhiConstants.ANNOTATION_ELEMENT_ACTION).toUpperCase());
-                    if (faultAction == StreamJunction.FaultAction.STREAM) {
+                    if (onErrorAction == StreamJunction.OnErrorAction.STREAM) {
+                        StreamDefinition faultStreamDefinition = createFaultStreamDefinition(definition);
+                        siddhiAppRuntimeBuilder.defineStream(faultStreamDefinition);
+                    }
+                }
+                Annotation sinkAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_SINK,
+                        definition.getAnnotations());
+                if (sinkAnnotation != null && sinkAnnotation
+                        .getElement(SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR) != null) {
+                    Sink.OnErrorAction onErrorAction = Sink.OnErrorAction.valueOf(sinkAnnotation
+                            .getElement(SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR).toUpperCase());
+                    if (onErrorAction == Sink.OnErrorAction.STREAM) {
                         StreamDefinition faultStreamDefinition = createFaultStreamDefinition(definition);
                         siddhiAppRuntimeBuilder.defineStream(faultStreamDefinition);
                     }

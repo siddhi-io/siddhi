@@ -432,6 +432,7 @@ public class DefinitionParserHelper {
 
     public static void addEventSink(StreamDefinition streamDefinition,
                                     ConcurrentMap<String, List<Sink>> eventSinkMap,
+                                    ConcurrentMap<String, StreamJunction> streamJunctionMap,
                                     SiddhiAppContext siddhiAppContext) {
         for (Annotation sinkAnnotation : streamDefinition.getAnnotations()) {
             if (SiddhiConstants.ANNOTATION_SINK.equalsIgnoreCase(sinkAnnotation.getName())) {
@@ -544,9 +545,11 @@ public class DefinitionParserHelper {
                             }
                         } else {
                             try {
+                                StreamJunction faultStreamJunction = streamJunctionMap.get
+                                        (SiddhiConstants.FAULT_STREAM_PREFIX.concat(streamDefinition.getId()));
                                 sink.init(streamDefinition, sinkType, transportOptionHolder, sinkConfigReader,
                                         sinkMapper, mapType, mapOptionHolder, sinkHandler, payloadElementList,
-                                        mapperConfigReader, siddhiAppContext);
+                                        mapperConfigReader, faultStreamJunction, siddhiAppContext);
                             } catch (Throwable t) {
                                 ExceptionUtil.populateQueryContext(t, sinkAnnotation, siddhiAppContext);
                                 throw t;
