@@ -37,6 +37,7 @@ public class InputEventHandler {
 
     private final ThreadLocal<String[]> trpProperties;
     private final TimestampGenerator timestampGenerator;
+    private ThreadLocal<String[]> trpSyncProperties;
     private String sourceType;
     private LatencyTracker latencyTracker;
     private SiddhiAppContext siddhiAppContext;
@@ -45,12 +46,13 @@ public class InputEventHandler {
     private InputEventHandlerCallback inputEventHandlerCallback;
 
     InputEventHandler(InputHandler inputHandler, List<AttributeMapping> transportMapping,
-                      ThreadLocal<String[]> trpProperties, String sourceType,
+                      ThreadLocal<String[]> trpProperties, ThreadLocal<String[]> trpSyncProperties, String sourceType,
                       LatencyTracker latencyTracker, SiddhiAppContext siddhiAppContext,
                       InputEventHandlerCallback inputEventHandlerCallback) {
         this.inputHandler = inputHandler;
         this.transportMapping = transportMapping;
         this.trpProperties = trpProperties;
+        this.trpSyncProperties = trpSyncProperties;
         this.sourceType = sourceType;
         this.latencyTracker = latencyTracker;
         this.siddhiAppContext = siddhiAppContext;
@@ -65,6 +67,8 @@ public class InputEventHandler {
             }
             String[] transportProperties = trpProperties.get();
             trpProperties.remove();
+            String[] transportSyncProperties = trpSyncProperties.get();
+            trpSyncProperties.remove();
             if (event.getTimestamp() == -1) {
                 long currentTimestamp = timestampGenerator.currentTime();
                 event.setTimestamp(currentTimestamp);
@@ -73,13 +77,14 @@ public class InputEventHandler {
                 AttributeMapping attributeMapping = transportMapping.get(i);
                 event.getData()[attributeMapping.getPosition()] = transportProperties[i];
             }
-            inputEventHandlerCallback.sendEvent(event);
+            inputEventHandlerCallback.sendEvent(event, transportSyncProperties);
         } catch (RuntimeException e) {
             LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
                     " Error in applying transport property mapping for '" + sourceType
                     + "' source at '" + inputHandler.getStreamId() + "' stream.", e);
         } finally {
             trpProperties.remove();
+            trpSyncProperties.remove();
         }
     }
 
@@ -90,6 +95,8 @@ public class InputEventHandler {
             }
             String[] transportProperties = trpProperties.get();
             trpProperties.remove();
+            String[] transportSyncProperties = trpSyncProperties.get();
+            trpSyncProperties.remove();
             long currentTimestamp = timestampGenerator.currentTime();
             for (Event event : events) {
                 if (event.getTimestamp() == -1) {
@@ -100,13 +107,14 @@ public class InputEventHandler {
                     event.getData()[attributeMapping.getPosition()] = transportProperties[i];
                 }
             }
-            inputEventHandlerCallback.sendEvents(events);
+            inputEventHandlerCallback.sendEvents(events, transportSyncProperties);
         } catch (RuntimeException e) {
             LOG.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
                     " Error in applying transport property mapping for '" + sourceType
                     + "' source at '" + inputHandler.getStreamId() + "' stream.", e);
         } finally {
             trpProperties.remove();
+            trpSyncProperties.remove();
         }
     }
 }
