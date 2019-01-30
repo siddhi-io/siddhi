@@ -95,7 +95,8 @@ public class StreamJunction implements EventBufferHolder {
         this.faultStreamJunction = faultStreamJunction;
         if (faultStreamJunction != null) {
             StreamDefinition faultStreamDefinition = faultStreamJunction.getStreamDefinition();
-            StreamEventPool faultStreamEventPool = new StreamEventPool(0, 0, faultStreamDefinition.getAttributeList().size(), 5);
+            StreamEventPool faultStreamEventPool = new StreamEventPool(0, 0,
+                    faultStreamDefinition.getAttributeList().size(), 5);
             faultStreamEventPool.borrowEvent();
             faultStreamEventChunk = new FaultStreamEventConverter(faultStreamEventPool);
 

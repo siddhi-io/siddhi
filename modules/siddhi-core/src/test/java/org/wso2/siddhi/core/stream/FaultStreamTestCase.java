@@ -86,8 +86,8 @@ public class FaultStreamTestCase {
         logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{"IBM", 0f, 100L});
-            AssertJUnit.assertTrue(appender.getMessages().contains("Error when running faultAdd(). Exception on class " +
-                    "'org.wso2.siddhi.core.stream.FaultFunctionExtension'"));
+            AssertJUnit.assertTrue(appender.getMessages().contains("Error when running faultAdd(). Exception on " +
+                    "class 'org.wso2.siddhi.core.stream.FaultFunctionExtension'"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {
@@ -515,7 +515,7 @@ public class FaultStreamTestCase {
         }
 
         Assert.assertTrue(eventArrived);
-        Assert.assertEquals(count.get(),1);
+        Assert.assertEquals(count.get(), 1);
     }
 
     @Test
@@ -553,8 +553,8 @@ public class FaultStreamTestCase {
         logger.addAppender(appender);
         try {
             inputHandler.send(new Object[]{"IBM", 0f, 100L});
-            AssertJUnit.assertTrue(appender.getMessages().contains("Error when running faultAdd(). Exception on class " +
-                    "'org.wso2.siddhi.core.stream.FaultFunctionExtension'"));
+            AssertJUnit.assertTrue(appender.getMessages().contains("Error when running faultAdd(). Exception on " +
+                    "class 'org.wso2.siddhi.core.stream.FaultFunctionExtension'"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);
         } finally {

@@ -330,7 +330,8 @@ There are two ways you can configure the `@payload` annotation.
 1. Some mappers such as `XML`, `JSON`, and `Test` accept only one output payload using the following format: <br/>
 ```@payload( 'This is a test message from {{user}}.' )``` 
 2. Some mappers such `key-value` accept series of mapping values defined as follows: <br/>
-```@payload( key1='mapping_1', key2='user : {{user}}')``` 
+```@payload( key1='mapping_1', 'key2'='user : {{user}}')``` <br/>
+Here, apart from the dotted key names sush as ```a.b.c```, any constant string value such as ```'$abc'``` can also by used as a key. 
 
 **Supported Mapping Types**
 

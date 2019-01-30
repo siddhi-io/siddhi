@@ -62,38 +62,41 @@ public class TimeLengthWindowTestCase {
                 "volume insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    inEventCount = inEventCount + inEvents.length;
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timestamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        inEventCount = inEventCount + inEvents.length;
+                    }
+                    if (removeEvents != null) {
+                        AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
+                        removeEventCount = removeEventCount + removeEvents.length;
+                    }
+                    eventArrived = true;
                 }
-                if (removeEvents != null) {
-                    AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
-                    removeEventCount = removeEventCount + removeEvents.length;
-                }
-                eventArrived = true;
-            }
 
-        });
+            });
 
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
-        siddhiAppRuntime.start();
-        inputHandler.send(new Object[]{"IBM", 700f, 1});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"IBM", 700f, 3});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
-        Thread.sleep(5000);
+            InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+            siddhiAppRuntime.start();
+            inputHandler.send(new Object[]{"IBM", 700f, 1});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"IBM", 700f, 3});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+            Thread.sleep(5000);
 
-        AssertJUnit.assertEquals(4, inEventCount);
-        AssertJUnit.assertEquals(4, removeEventCount);
-        AssertJUnit.assertTrue(eventArrived);
-        siddhiAppRuntime.shutdown();
+            AssertJUnit.assertEquals(4, inEventCount);
+            AssertJUnit.assertEquals(4, removeEventCount);
+            AssertJUnit.assertTrue(eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+
     }
 
     /*
@@ -115,37 +118,39 @@ public class TimeLengthWindowTestCase {
                 "insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    inEventCount = inEventCount + inEvents.length;
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timestamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        inEventCount = inEventCount + inEvents.length;
+                    }
+                    if (removeEvents != null) {
+                        AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
+                        removeEventCount = removeEventCount + removeEvents.length;
+                    }
+                    eventArrived = true;
                 }
-                if (removeEvents != null) {
-                    AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
-                    removeEventCount = removeEventCount + removeEvents.length;
-                }
-                eventArrived = true;
-            }
 
-        });
+            });
 
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
-        siddhiAppRuntime.start();
-        inputHandler.send(new Object[]{"IBM", 700f, 0});
-        Thread.sleep(1200);
-        inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
-        Thread.sleep(1200);
-        inputHandler.send(new Object[]{"Google", 80.5f, 2});
-        Thread.sleep(1200);
-        inputHandler.send(new Object[]{"Yahoo", 90.5f, 3});
-        Thread.sleep(4000);
-        AssertJUnit.assertEquals(4, inEventCount);
-        AssertJUnit.assertEquals(4, removeEventCount);
-        AssertJUnit.assertTrue(eventArrived);
-        siddhiAppRuntime.shutdown();
+            InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+            siddhiAppRuntime.start();
+            inputHandler.send(new Object[]{"IBM", 700f, 0});
+            Thread.sleep(1200);
+            inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
+            Thread.sleep(1200);
+            inputHandler.send(new Object[]{"Google", 80.5f, 2});
+            Thread.sleep(1200);
+            inputHandler.send(new Object[]{"Yahoo", 90.5f, 3});
+            Thread.sleep(4000);
+            AssertJUnit.assertEquals(4, inEventCount);
+            AssertJUnit.assertEquals(4, removeEventCount);
+            AssertJUnit.assertTrue(eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
 
     }
 
@@ -168,47 +173,49 @@ public class TimeLengthWindowTestCase {
                 " select id,sensorValue" +
                 " insert all events into outputStream ;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(sensorStream + query);
-
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    inEventCount = inEventCount + inEvents.length;
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timestamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        inEventCount = inEventCount + inEvents.length;
+                    }
+                    if (removeEvents != null) {
+                        AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
+                        removeEventCount = removeEventCount + removeEvents.length;
+                    }
+                    eventArrived = true;
                 }
-                if (removeEvents != null) {
-                    AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
-                    removeEventCount = removeEventCount + removeEvents.length;
-                }
-                eventArrived = true;
-            }
-        });
+            });
 
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("sensorStream");
-        siddhiAppRuntime.start();
+            InputHandler inputHandler = siddhiAppRuntime.getInputHandler("sensorStream");
+            siddhiAppRuntime.start();
 
-        inputHandler.send(new Object[]{"id1", 10d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id2", 20d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id3", 30d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id4", 40d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id5", 50d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id6", 60d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id7", 70d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id8", 80d});
+            inputHandler.send(new Object[]{"id1", 10d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id2", 20d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id3", 30d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id4", 40d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id5", 50d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id6", 60d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id7", 70d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id8", 80d});
 
-        Thread.sleep(2000);
+            Thread.sleep(2000);
 
-        AssertJUnit.assertEquals(8, inEventCount);
-        AssertJUnit.assertEquals(4, removeEventCount);
-        AssertJUnit.assertTrue(eventArrived);
-        siddhiAppRuntime.shutdown();
+            AssertJUnit.assertEquals(8, inEventCount);
+            AssertJUnit.assertEquals(4, removeEventCount);
+            AssertJUnit.assertTrue(eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
     }
 
     /*
@@ -232,42 +239,44 @@ public class TimeLengthWindowTestCase {
                 " insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(sensorStream + query);
-
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    inEventCount = inEventCount + inEvents.length;
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timestamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        inEventCount = inEventCount + inEvents.length;
+                    }
+                    if (removeEvents != null) {
+                        AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
+                        removeEventCount = removeEventCount + removeEvents.length;
+                    }
+                    eventArrived = true;
                 }
-                if (removeEvents != null) {
-                    AssertJUnit.assertTrue("InEvents arrived before RemoveEvents", inEventCount > removeEventCount);
-                    removeEventCount = removeEventCount + removeEvents.length;
-                }
-                eventArrived = true;
-            }
-        });
+            });
 
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("sensorStream");
-        siddhiAppRuntime.start();
-        inputHandler.send(new Object[]{"id1", 10d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id2", 20d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id3", 30d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id4", 40d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id5", 50d});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"id6", 60d});
+            InputHandler inputHandler = siddhiAppRuntime.getInputHandler("sensorStream");
+            siddhiAppRuntime.start();
+            inputHandler.send(new Object[]{"id1", 10d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id2", 20d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id3", 30d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id4", 40d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id5", 50d});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"id6", 60d});
 
-        Thread.sleep(2100);
+            Thread.sleep(2100);
 
-        AssertJUnit.assertEquals(6, inEventCount);
-        AssertJUnit.assertEquals(6, removeEventCount);
-        AssertJUnit.assertTrue(eventArrived);
-        siddhiAppRuntime.shutdown();
+            AssertJUnit.assertEquals(6, inEventCount);
+            AssertJUnit.assertEquals(6, removeEventCount);
+            AssertJUnit.assertTrue(eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
     }
 
     /*
@@ -290,64 +299,67 @@ public class TimeLengthWindowTestCase {
                 " insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(sensorStream + query);
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timestamp, inEvents, removeEvents);
 
-                if (inEvents != null) {
-                    if (inEvents[0].getData(0).toString().equals("id6")) {
-                        AssertJUnit.assertEquals("6", inEvents[0].getData(1).toString());
+                    if (inEvents != null) {
+                        if (inEvents[0].getData(0).toString().equals("id6")) {
+                            AssertJUnit.assertEquals("6", inEvents[0].getData(1).toString());
+                        }
+                        if (inEvents[0].getData(0).toString().equals("id7")) {
+                            AssertJUnit.assertEquals("6", inEvents[0].getData(1).toString());
+                        }
+                        if (inEvents[0].getData(0).toString().equals("id8")) {
+                            AssertJUnit.assertEquals("6", inEvents[0].getData(1).toString());
+                        }
+                        inEventCount++;
                     }
-                    if (inEvents[0].getData(0).toString().equals("id7")) {
-                        AssertJUnit.assertEquals("6", inEvents[0].getData(1).toString());
+
+                    if (removeEvents != null) {
+                        if (removeEvents[0].getData(0).toString().equals("id1")) {
+                            AssertJUnit.assertEquals("5", removeEvents[0].getData(1).toString());
+                        }
+                        if (removeEvents[0].getData(0).toString().equals("id2")) {
+                            AssertJUnit.assertEquals("5", removeEvents[0].getData(1).toString());
+                        }
+                        if (removeEvents[0].getData(0).toString().equals("id3")) {
+                            AssertJUnit.assertEquals("5", removeEvents[0].getData(1).toString());
+                        }
+                        removeEventCount++;
                     }
-                    if (inEvents[0].getData(0).toString().equals("id8")) {
-                        AssertJUnit.assertEquals("6", inEvents[0].getData(1).toString());
-                    }
-                    inEventCount++;
+                    eventArrived = true;
                 }
+            });
 
-                if (removeEvents != null) {
-                    if (removeEvents[0].getData(0).toString().equals("id1")) {
-                        AssertJUnit.assertEquals("5", removeEvents[0].getData(1).toString());
-                    }
-                    if (removeEvents[0].getData(0).toString().equals("id2")) {
-                        AssertJUnit.assertEquals("5", removeEvents[0].getData(1).toString());
-                    }
-                    if (removeEvents[0].getData(0).toString().equals("id3")) {
-                        AssertJUnit.assertEquals("5", removeEvents[0].getData(1).toString());
-                    }
-                    removeEventCount++;
-                }
-                eventArrived = true;
-            }
-        });
+            InputHandler inputHandler = siddhiAppRuntime.getInputHandler("sensorStream");
+            siddhiAppRuntime.start();
+            inputHandler.send(new Object[]{"id1", 1});
+            Thread.sleep(520);
+            inputHandler.send(new Object[]{"id2", 1});
+            Thread.sleep(520);
+            inputHandler.send(new Object[]{"id3", 1});
+            Thread.sleep(520);
+            inputHandler.send(new Object[]{"id4", 1});
+            Thread.sleep(520);
+            inputHandler.send(new Object[]{"id5", 1});
+            Thread.sleep(520);
+            inputHandler.send(new Object[]{"id6", 1});
+            Thread.sleep(520);
+            inputHandler.send(new Object[]{"id7", 1});
+            Thread.sleep(520);
+            inputHandler.send(new Object[]{"id8", 1});
 
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("sensorStream");
-        siddhiAppRuntime.start();
-        inputHandler.send(new Object[]{"id1", 1});
-        Thread.sleep(520);
-        inputHandler.send(new Object[]{"id2", 1});
-        Thread.sleep(520);
-        inputHandler.send(new Object[]{"id3", 1});
-        Thread.sleep(520);
-        inputHandler.send(new Object[]{"id4", 1});
-        Thread.sleep(520);
-        inputHandler.send(new Object[]{"id5", 1});
-        Thread.sleep(520);
-        inputHandler.send(new Object[]{"id6", 1});
-        Thread.sleep(520);
-        inputHandler.send(new Object[]{"id7", 1});
-        Thread.sleep(520);
-        inputHandler.send(new Object[]{"id8", 1});
+            Thread.sleep(1000);
 
-        Thread.sleep(1000);
-
-        AssertJUnit.assertEquals(8, inEventCount);
-        AssertJUnit.assertEquals(4, removeEventCount);
-        AssertJUnit.assertTrue(eventArrived);
-        siddhiAppRuntime.shutdown();
+            AssertJUnit.assertEquals(8, inEventCount);
+            AssertJUnit.assertEquals(4, removeEventCount);
+            AssertJUnit.assertTrue(eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
     }
 
 
@@ -371,32 +383,35 @@ public class TimeLengthWindowTestCase {
                 " insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(sensorStream + query);
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                AssertJUnit.assertEquals((long) count + 1, (inEvents[0].getData(1)));
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timestamp, inEvents, removeEvents);
+                    AssertJUnit.assertEquals((long) count + 1, (inEvents[0].getData(1)));
 
-                count++;
-                eventArrived = true;
-            }
-        });
+                    count++;
+                    eventArrived = true;
+                }
+            });
 
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("sensorStream");
-        siddhiAppRuntime.start();
-        inputHandler.send(new Object[]{"id1", 1});
-        Thread.sleep(100);
-        inputHandler.send(new Object[]{"id2", 1});
-        Thread.sleep(100);
-        inputHandler.send(new Object[]{"id3", 1});
-        Thread.sleep(100);
-        inputHandler.send(new Object[]{"id4", 1});
+            InputHandler inputHandler = siddhiAppRuntime.getInputHandler("sensorStream");
+            siddhiAppRuntime.start();
+            inputHandler.send(new Object[]{"id1", 1});
+            Thread.sleep(100);
+            inputHandler.send(new Object[]{"id2", 1});
+            Thread.sleep(100);
+            inputHandler.send(new Object[]{"id3", 1});
+            Thread.sleep(100);
+            inputHandler.send(new Object[]{"id4", 1});
 
-        Thread.sleep(1000);
+            Thread.sleep(1000);
 
-        AssertJUnit.assertEquals(4, count);
-        AssertJUnit.assertTrue(eventArrived);
-        siddhiAppRuntime.shutdown();
+            AssertJUnit.assertEquals(4, count);
+            AssertJUnit.assertTrue(eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
     }
 
 
@@ -421,54 +436,57 @@ public class TimeLengthWindowTestCase {
                 " insert all events into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                if (inEvents != null) {
-                    for (Event event : inEvents) {
-                        if (event.isExpired()) {
-                            removeEventCount++;
-                        } else {
-                            inEventCount++;
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timestamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        for (Event event : inEvents) {
+                            if (event.isExpired()) {
+                                removeEventCount++;
+                            } else {
+                                inEventCount++;
+                            }
                         }
                     }
-                }
-                if (removeEvents != null) {
-                    for (Event event : removeEvents) {
-                        if (event.isExpired()) {
-                            removeEventCount++;
-                        } else {
-                            inEventCount++;
+                    if (removeEvents != null) {
+                        for (Event event : removeEvents) {
+                            if (event.isExpired()) {
+                                removeEventCount++;
+                            } else {
+                                inEventCount++;
+                            }
                         }
                     }
+                    eventArrived = true;
                 }
-                eventArrived = true;
-            }
 
-        });
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
-        siddhiAppRuntime.start();
-        inputHandler.send(new Object[]{"IBM", 700f, 10});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"WSO2", 60.5f, 20});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"IBM", 700f, 20});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"WSO2", 60.5f, 40});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"IBM", 700f, 50});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"WSO2", 60.5f, 60});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"IBM", 700f, 70});
-        Thread.sleep(500);
-        inputHandler.send(new Object[]{"WSO2", 60.5f, 80});
-        Thread.sleep(5000);
-        AssertJUnit.assertEquals("In event count", 8, inEventCount);
-        AssertJUnit.assertEquals("Remove event count", 3, removeEventCount);
-        AssertJUnit.assertTrue(eventArrived);
-        siddhiAppRuntime.shutdown();
+            });
+            InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+            siddhiAppRuntime.start();
+            inputHandler.send(new Object[]{"IBM", 700f, 10});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"WSO2", 60.5f, 20});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"IBM", 700f, 20});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"WSO2", 60.5f, 40});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"IBM", 700f, 50});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"WSO2", 60.5f, 60});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"IBM", 700f, 70});
+            Thread.sleep(500);
+            inputHandler.send(new Object[]{"WSO2", 60.5f, 80});
+            Thread.sleep(5000);
+            AssertJUnit.assertEquals("In event count", 8, inEventCount);
+            AssertJUnit.assertEquals("Remove event count", 3, removeEventCount);
+            AssertJUnit.assertTrue(eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+
     }
 }
