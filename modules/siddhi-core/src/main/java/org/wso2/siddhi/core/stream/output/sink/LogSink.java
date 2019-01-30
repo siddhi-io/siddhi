@@ -62,26 +62,26 @@ import java.util.Map;
         },
         examples = {
                 @Example(
-                        syntax = "@sink(type='log', prefix='My Log', priority='DEBUG'),\n" +
+                        syntax = "@sink(type='log', prefix='My Log', priority='DEBUG') \n" +
                                 "define stream BarStream (symbol string, price float, volume long)",
                         description = "In this example BarStream uses log sink and the prefix is given as My Log. " +
                                 "Also the priority is set to DEBUG."
                 ),
                 @Example(
-                        syntax = "@sink(type='log', priority='DEBUG'),\n" +
+                        syntax = "@sink(type='log', priority='DEBUG') \n" +
                                 "define stream BarStream (symbol string, price float, volume long)",
                         description = "In this example BarStream uses log sink and the priority is set to DEBUG. " +
                                 "User has not specified prefix so the default prefix will be in the form " +
                                 "<Siddhi App Name> : <Stream Name>"
                 ),
                 @Example(
-                        syntax = "@sink(type='log', prefix='My Log'),\n" +
+                        syntax = "@sink(type='log', prefix='My Log') \n" +
                                 "define stream BarStream (symbol string, price float, volume long)",
                         description = "In this example BarStream uses log sink and the prefix is given as My Log. " +
                                 "User has not given a priority so it will be set to default INFO."
                 ),
                 @Example(
-                        syntax = "@sink(type='log'),\n" +
+                        syntax = "@sink(type='log') \n" +
                                 "define stream BarStream (symbol string, price float, volume long)",
                         description = "In this example BarStream uses log sink. The user has not given prefix or " +
                                 "priority so they will be set to their default values."
