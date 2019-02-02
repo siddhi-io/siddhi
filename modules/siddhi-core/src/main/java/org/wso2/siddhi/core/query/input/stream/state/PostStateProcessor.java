@@ -27,6 +27,8 @@ public interface PostStateProcessor extends Processor {
 
     int getStateId();
 
+    void setGroupedPreprocessor(boolean groupedPreprocessor);
+
     void setNextStatePreProcessor(PreStateProcessor nextStatePreProcessor);
 
     void setNextEveryStatePreProcessor(PreStateProcessor nextEveryStatePreProcessor);
