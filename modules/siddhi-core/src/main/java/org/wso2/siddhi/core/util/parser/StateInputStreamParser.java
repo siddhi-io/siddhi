@@ -221,6 +221,8 @@ public class StateInputStreamParser {
                     siddhiAppContext, variableExpressionExecutors,
                     processStreamReceiverMap,
                     streamPreStateProcessor, streamPostStateProcessor,
+                    //TODO Empty arraylist added as temp fix, this should be corrected once proper impl is done for
+                    // intermediate grouped states
                     stateType, new ArrayList<>(), latencyTracker, queryName);
 
             if (stateElement.getWithin() != null) {

@@ -299,9 +299,7 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
                         PreStateProcessor nextEveryStatePreProcessor = thisStatePostProcessor.
                                 getNextEveryStatePreProcessor();
                         if (nextEveryStatePreProcessor != null) {
-                            StateEvent nextEveryStateEvent = stateEventPool.borrowEvent();
-                            nextEveryStateEvent.setEvent(0, streamEvent);
-                            nextEveryStatePreProcessor.addEveryState(nextEveryStateEvent);
+                            nextEveryStatePreProcessor.addEveryState(stateEvent);
                             nextEveryStatePreProcessor.updateState();
                         }
                         continue;
