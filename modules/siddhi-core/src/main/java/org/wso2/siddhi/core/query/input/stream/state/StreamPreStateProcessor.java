@@ -61,7 +61,6 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     protected ReentrantLock lock = new ReentrantLock();
 
     protected StateEventPool stateEventPool;
-    //  private StreamEventPool streamEventPool;
     protected StreamEventCloner streamEventCloner;
     protected StateEventCloner stateEventCloner;
     protected StreamEventPool streamEventPool;
@@ -262,8 +261,6 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         try {
             pendingStateEventList.clear();
             if (isStartState && newAndEveryStateEventList.isEmpty()) {
-                //        if (isStartState && stateType == StateInputStream.Type.SEQUENCE && newAndEveryStateEventList
-                // .isEmpty()) {
                 if (stateType == StateInputStream.Type.SEQUENCE && thisStatePostProcessor.nextEveryStatePreProcessor ==
                         null && !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePreProcessor)
                         .pendingStateEventList.isEmpty()) {
@@ -299,6 +296,12 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
                 if (withinStates.size() > 0) {
                     if (isExpired(stateEvent, streamEvent.getTimestamp())) {
                         iterator.remove();
+                        PreStateProcessor nextEveryStatePreProcessor = thisStatePostProcessor.
+                                getNextEveryStatePreProcessor();
+                        if (nextEveryStatePreProcessor != null) {
+                            nextEveryStatePreProcessor.addEveryState(stateEvent);
+                            nextEveryStatePreProcessor.updateState();
+                        }
                         continue;
                     }
                 }

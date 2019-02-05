@@ -221,7 +221,9 @@ public class StateInputStreamParser {
                     siddhiAppContext, variableExpressionExecutors,
                     processStreamReceiverMap,
                     streamPreStateProcessor, streamPostStateProcessor,
-                    stateType, withinStates, latencyTracker, queryName);
+                    //TODO Empty arraylist added as temp fix, this should be corrected once proper impl is done for
+                    // intermediate grouped states
+                    stateType, new ArrayList<>(), latencyTracker, queryName);
 
             if (stateElement.getWithin() != null) {
                 Set<Integer> withinStateSet = new HashSet<Integer>();
@@ -241,7 +243,6 @@ public class StateInputStreamParser {
             if (stateElement.getWithin() != null) {
                 withinStates.remove(0);
             }
-//            currentInnerStateRuntime.getFirstProcessor().getStateId()
             currentInnerStateRuntime.getLastProcessor().setNextStatePreProcessor(nextInnerStateRuntime
                     .getFirstProcessor());
 
@@ -262,11 +263,23 @@ public class StateInputStreamParser {
         } else if (stateElement instanceof EveryStateElement) {
 
             StateElement currentElement = ((EveryStateElement) stateElement).getStateElement();
+
+            if (stateElement.getWithin() != null) {
+                Set<Integer> withinStateset = new HashSet<Integer>();
+                withinStateset.add(SiddhiConstants.ANY);
+                withinStates.add(0, new AbstractMap.SimpleEntry<Long, Set<Integer>>(stateElement.getWithin().getValue
+                        (), withinStateset));
+            }
+
             InnerStateRuntime innerStateRuntime = parse(currentElement, streamDefinitionMap, tableDefinitionMap,
                     windowDefinitionMap, aggregationDefinitionMap, tableMap, metaStateEvent,
                     siddhiAppContext, variableExpressionExecutors, processStreamReceiverMap,
                     streamPreStateProcessor,
                     streamPostStateProcessor, stateType, withinStates, latencyTracker, queryName);
+
+            if (stateElement.getWithin() != null) {
+                withinStates.remove(0);
+            }
 
             EveryInnerStateRuntime everyInnerStateRuntime = new EveryInnerStateRuntime(innerStateRuntime, stateType);
 
@@ -358,8 +371,7 @@ public class StateInputStreamParser {
                     windowDefinitionMap, aggregationDefinitionMap, tableMap, metaStateEvent,
                     siddhiAppContext, variableExpressionExecutors, processStreamReceiverMap,
                     logicalPreStateProcessor2, logicalPostStateProcessor2,
-                    stateType, withinStates, latencyTracker,
-                    queryName);
+                    stateType, withinStates, latencyTracker, queryName);
 
             StateElement stateElement1 = ((LogicalStateElement) stateElement).getStreamStateElement1();
             InnerStateRuntime innerStateRuntime1 = parse(stateElement1, streamDefinitionMap, tableDefinitionMap,
