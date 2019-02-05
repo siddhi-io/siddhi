@@ -161,7 +161,8 @@ public abstract class Sink implements SinkListener, Snapshotable {
                 publish(payload);
             }
         } else if (isTryingToConnect.get()) {
-            onError(payload);
+            onError(payload, new SiddhiAppRuntimeException("Connection unavailable at Sink '" + type + "' at '"
+                    + streamDefinition.getId() + "'. Connection retrying is in progress from a different thread."));
         } else {
             connectWithRetry();
             publish(payload);
@@ -270,12 +271,12 @@ public abstract class Sink implements SinkListener, Snapshotable {
         isConnected.set(connected);
     }
 
-    void onError(Object payload) {
+    void onError(Object payload, Exception e) {
         switch (onErrorAction) {
             case STREAM:
                 throw  new SiddhiAppRuntimeException("Dropping event at Sink '"
                         + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
-                        + "event dropped '" + payload + "'");
+                        + "event dropped '" + payload + "'", e);
             case WAIT:
                 retryWait(backoffPublishRetryCounter.getTimeIntervalMillis());
                 backoffPublishRetryCounter.increment();
@@ -290,7 +291,10 @@ public abstract class Sink implements SinkListener, Snapshotable {
         }
     }
 
-    private enum OnErrorAction {
+    /**
+     * Different Type of On Error Actions
+     */
+    public enum OnErrorAction {
         LOG,
         WAIT,
         STREAM

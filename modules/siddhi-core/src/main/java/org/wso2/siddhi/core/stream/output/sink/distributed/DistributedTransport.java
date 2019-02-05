@@ -93,7 +93,7 @@ public abstract class DistributedTransport extends Sink {
         this.strategy = strategy;
         this.supportedDynamicOptions = supportedDynamicOptions;
         init(streamDefinition, type, transportOptionHolder, sinkConfigReader, sinkMapper, mapType, mapOptionHolder,
-                sinkHandler, payloadElementList, mapperConfigReader, null, siddhiAppContext);
+                sinkHandler, payloadElementList, mapperConfigReader, siddhiAppContext);
         initTransport(sinkOptionHolder, destinationOptionHolders, sinkAnnotation, sinkConfigReader, strategy, type,
                 siddhiAppContext);
     }

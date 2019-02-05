@@ -317,17 +317,6 @@ public class SiddhiAppParser {
                         siddhiAppRuntimeBuilder.defineStream(faultStreamDefinition);
                     }
                 }
-                Annotation sinkAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_SINK,
-                        definition.getAnnotations());
-                if (sinkAnnotation != null && sinkAnnotation
-                        .getElement(SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR) != null) {
-                    Sink.OnErrorAction onErrorAction = Sink.OnErrorAction.valueOf(sinkAnnotation
-                            .getElement(SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR).toUpperCase());
-                    if (onErrorAction == Sink.OnErrorAction.STREAM) {
-                        StreamDefinition faultStreamDefinition = createFaultStreamDefinition(definition);
-                        siddhiAppRuntimeBuilder.defineStream(faultStreamDefinition);
-                    }
-                }
                 siddhiAppRuntimeBuilder.defineStream(definition);
             } catch (Throwable t) {
                 ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext);

@@ -76,7 +76,7 @@ public class StreamJunction implements EventBufferHolder {
     private boolean isTraceEnabled;
     private StreamJunction faultStreamJunction = null;
     private FaultStreamEventConverter faultStreamEventChunk = null;
-    private FaultAction faultAction = FaultAction.LOG;
+    private OnErrorAction onErrorAction = OnErrorAction.LOG;
     private ExceptionListener exceptionListener;
 
     public StreamJunction(StreamDefinition streamDefinition, ExecutorService executorService, int bufferSize,
@@ -136,7 +136,7 @@ public class StreamJunction implements EventBufferHolder {
             Annotation onErrorAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR,
                     streamDefinition.getAnnotations());
             if (onErrorAnnotation != null) {
-                this.faultAction = FaultAction.valueOf(onErrorAnnotation
+                this.onErrorAction = OnErrorAction.valueOf(onErrorAnnotation
                         .getElement(SiddhiConstants.ANNOTATION_ELEMENT_ACTION).toUpperCase());
             }
         } catch (DuplicateAnnotationException e) {
@@ -299,11 +299,11 @@ public class StreamJunction implements EventBufferHolder {
             if (workers > 0) {
                 for (int i = 0; i < workers; i++) {
                     disruptor.handleEventsWith(new StreamHandler(receivers, batchSize, streamDefinition.getId(),
-                            siddhiAppContext.getName(), faultStreamJunction, faultAction, exceptionListener));
+                            siddhiAppContext.getName(), faultStreamJunction, onErrorAction, exceptionListener));
                 }
             } else {
                 disruptor.handleEventsWith(new StreamHandler(receivers, batchSize, streamDefinition.getId(),
-                        siddhiAppContext.getName(), faultStreamJunction, faultAction, exceptionListener));
+                        siddhiAppContext.getName(), faultStreamJunction, onErrorAction, exceptionListener));
             }
             ringBuffer = disruptor.start();
         } else {
@@ -363,9 +363,9 @@ public class StreamJunction implements EventBufferHolder {
     }
 
     /**
-     * Different Type of Fault Actions
+     * Different Type of On Error Actions
      */
-    public enum FaultAction {
+    public enum OnErrorAction {
         LOG,
         STREAM
     }
@@ -451,7 +451,7 @@ public class StreamJunction implements EventBufferHolder {
             if (exceptionListener != null) {
                 exceptionListener.exceptionThrown(e);
             }
-            switch (faultAction) {
+            switch (onErrorAction) {
                 case LOG:
                     log.error("Error in '" + siddhiAppContext.getName() + "' after consuming events "
                             + "from Stream '" + streamDefinition.getId() + "', " + e.getMessage()
@@ -497,7 +497,7 @@ public class StreamJunction implements EventBufferHolder {
             if (exceptionListener != null) {
                 exceptionListener.exceptionThrown(e);
             }
-            switch (faultAction) {
+            switch (onErrorAction) {
                 case LOG:
                     log.error("Error in '" + siddhiAppContext.getName() + "' after consuming events "
                             + "from Stream '" + streamDefinition.getId() + "' , " + e.getMessage()

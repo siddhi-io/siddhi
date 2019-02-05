@@ -432,7 +432,6 @@ public class DefinitionParserHelper {
 
     public static void addEventSink(StreamDefinition streamDefinition,
                                     ConcurrentMap<String, List<Sink>> eventSinkMap,
-                                    ConcurrentMap<String, StreamJunction> streamJunctionMap,
                                     SiddhiAppContext siddhiAppContext) {
         for (Annotation sinkAnnotation : streamDefinition.getAnnotations()) {
             if (SiddhiConstants.ANNOTATION_SINK.equalsIgnoreCase(sinkAnnotation.getName())) {
@@ -455,7 +454,6 @@ public class DefinitionParserHelper {
                                 sinkAnnotation.getAnnotations());
 
                 if (mapAnnotation != null) {
-
                     String[] supportedDynamicOptions = null;
                     List<OptionHolder> destinationOptHolders = new ArrayList<>();
                     Extension sinkExtension = constructExtension(streamDefinition, SiddhiConstants.ANNOTATION_SINK,
@@ -545,11 +543,9 @@ public class DefinitionParserHelper {
                             }
                         } else {
                             try {
-                                StreamJunction faultStreamJunction = streamJunctionMap.get
-                                        (SiddhiConstants.FAULT_STREAM_PREFIX.concat(streamDefinition.getId()));
                                 sink.init(streamDefinition, sinkType, transportOptionHolder, sinkConfigReader,
                                         sinkMapper, mapType, mapOptionHolder, sinkHandler, payloadElementList,
-                                        mapperConfigReader, faultStreamJunction, siddhiAppContext);
+                                        mapperConfigReader, siddhiAppContext);
                             } catch (Throwable t) {
                                 ExceptionUtil.populateQueryContext(t, sinkAnnotation, siddhiAppContext);
                                 throw t;
