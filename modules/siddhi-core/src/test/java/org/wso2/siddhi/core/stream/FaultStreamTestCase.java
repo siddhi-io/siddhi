@@ -53,8 +53,8 @@ public class FaultStreamTestCase {
 
 
     @Test
-    public void faultTest1() throws InterruptedException {
-        log.info("fault test1");
+    public void faultStreamTest1() throws InterruptedException {
+        log.info("faultStreamTest1-Tests logging by default when fault handling is not configured explicitly.");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
@@ -101,8 +101,57 @@ public class FaultStreamTestCase {
     }
 
     @Test
-    public void faultTest2() throws InterruptedException {
-        log.info("fault test2");
+    public void faultStreamTest2() throws InterruptedException {
+        log.info("faultStreamTest2-Tests logging when fault handling is set to log.");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
+
+        String siddhiApp = "" +
+                "@OnError(action='log')" +
+                "define stream cseEventStream (symbol string, price float, volume long);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream[custom:fault() > volume] " +
+                "select symbol, price , symbol as sym1 " +
+                "insert into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                count.addAndGet(inEvents.length);
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+
+        Logger logger = Logger.getLogger(StreamJunction.class);
+        UnitTestAppender appender = new UnitTestAppender();
+        logger.addAppender(appender);
+        try {
+            inputHandler.send(new Object[]{"IBM", 0f, 100L});
+            AssertJUnit.assertTrue(appender.getMessages().contains("Error when running faultAdd(). Exception on " +
+                    "class 'org.wso2.siddhi.core.stream.FaultFunctionExtension'"));
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception occurred when testing.", e);
+        } finally {
+            logger.removeAppender(appender);
+            siddhiAppRuntime.shutdown();
+        }
+
+        AssertJUnit.assertEquals(0, count.get());
+        AssertJUnit.assertFalse(eventArrived);
+    }
+
+    @Test
+    public void faultStreamTest3() throws InterruptedException {
+        log.info("faultStreamTest3-Tests fault handling when it's set to stream. " +
+                "No errors would be logged since exceptions are being gracefully handled.");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
@@ -149,8 +198,9 @@ public class FaultStreamTestCase {
     }
 
     @Test
-    public void faultTest3() throws InterruptedException {
-        log.info("fault test3");
+    public void faultStreamTest4() throws InterruptedException {
+        log.info("faultStreamTest4-Tests fault handling when it's set to stream. " +
+                "Events would be available in the corresponding fault stream");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
@@ -200,8 +250,9 @@ public class FaultStreamTestCase {
     }
 
     @Test
-    public void faultTest4() throws InterruptedException {
-        log.info("fault test4");
+    public void faultStreamTest5() throws InterruptedException {
+        log.info("faultStreamTest5-Tests fault handling when it's set to stream. " +
+                "Events would be available in the corresponding fault stream");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
@@ -249,8 +300,9 @@ public class FaultStreamTestCase {
 
 
     @Test
-    public void faultTest5() throws InterruptedException {
-        log.info("fault test5");
+    public void faultStreamTest6() throws InterruptedException {
+        log.info("faultStreamTest6-Tests logging by default when fault handling is not configured "
+                + "explicitly at sink level during publishing failures.");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -295,8 +347,9 @@ public class FaultStreamTestCase {
     }
 
     @Test
-    public void faultTest6() throws InterruptedException {
-        log.info("fault test6");
+    public void faultStreamTest7() throws InterruptedException {
+        log.info("faultStreamTest7-Tests fault handling when it's set to log. " +
+                "Events would be logged and dropped during publishing failure at Sink");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -340,8 +393,9 @@ public class FaultStreamTestCase {
     }
 
     @Test
-    public void faultTest7() throws InterruptedException {
-        log.info("fault test7");
+    public void faultStreamTest8() throws InterruptedException {
+        log.info("faultStreamTest8-Tests fault handling when it's set to wait. " +
+                "Thread would be waiting until Sink reconnects.");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -395,8 +449,9 @@ public class FaultStreamTestCase {
     }
 
     @Test
-    public void faultTest8() throws InterruptedException {
-        log.info("fault test8");
+    public void faultStreamTest9() throws InterruptedException {
+        log.info("faultStreamTest9-Tests fault handling when it's set to stream at Sink but, " +
+                "the fault stream is not configured. Events will be logged and dropped.");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -455,8 +510,9 @@ public class FaultStreamTestCase {
     }
 
     @Test
-    public void faultTest9() throws InterruptedException {
-        log.info("fault test9");
+    public void faultStreamTest10() throws InterruptedException {
+        log.info("faultStreamTest10-Tests fault handling when it's set to stream at Sink. " +
+                "The events will be available in the corresponding fault stream.");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -516,54 +572,5 @@ public class FaultStreamTestCase {
 
         Assert.assertTrue(eventArrived);
         Assert.assertEquals(count.get(), 1);
-    }
-
-    @Test
-    public void faultTest10() throws InterruptedException {
-        log.info("fault test10");
-
-        SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setExtension("custom:fault", FaultFunctionExtension.class);
-
-        String siddhiApp = "" +
-                "@OnError(action='log')" +
-                "define stream cseEventStream (symbol string, price float, volume long);" +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream[custom:fault() > volume] " +
-                "select symbol, price , symbol as sym1 " +
-                "insert into outputStream ;";
-
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count.addAndGet(inEvents.length);
-                eventArrived = true;
-            }
-
-        });
-
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
-        siddhiAppRuntime.start();
-
-        Logger logger = Logger.getLogger(StreamJunction.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
-        try {
-            inputHandler.send(new Object[]{"IBM", 0f, 100L});
-            AssertJUnit.assertTrue(appender.getMessages().contains("Error when running faultAdd(). Exception on " +
-                    "class 'org.wso2.siddhi.core.stream.FaultFunctionExtension'"));
-        } catch (Exception e) {
-            Assert.fail("Unexpected exception occurred when testing.", e);
-        } finally {
-            logger.removeAppender(appender);
-            siddhiAppRuntime.shutdown();
-        }
-
-        AssertJUnit.assertEquals(0, count.get());
-        AssertJUnit.assertFalse(eventArrived);
-
     }
 }

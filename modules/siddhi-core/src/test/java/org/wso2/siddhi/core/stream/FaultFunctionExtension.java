@@ -42,7 +42,7 @@ import java.util.Map;
                 syntax = "from fooStream\n" +
                         "select custom:fault() as total\n" +
                         "insert into barStream",
-                description = "This will return value 20.0 as total."
+                description = "This throws an Runtime exception."
         )
 )
 public class FaultFunctionExtension extends FunctionExecutor {
