@@ -296,9 +296,13 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
                 if (withinStates.size() > 0) {
                     if (isExpired(stateEvent, streamEvent.getTimestamp())) {
                         iterator.remove();
-                        if(thisStatePostProcessor != null && thisStatePostProcessor.isGroupedPreprocessor) {
-                            thisStatePostProcessor.getNextEveryStatePreProcessor().
-                                    addEveryState(stateEventPool.borrowEvent());
+                        PreStateProcessor nextEveryStatePreProcessor = thisStatePostProcessor.
+                                getNextEveryStatePreProcessor();
+                        if (nextEveryStatePreProcessor != null) {
+                            StateEvent nextEveryStateEvent = stateEventPool.borrowEvent();
+                            nextEveryStateEvent.setEvent(0, streamEvent);
+                            nextEveryStatePreProcessor.addEveryState(nextEveryStateEvent);
+                            nextEveryStatePreProcessor.updateState();
                         }
                         continue;
                     }

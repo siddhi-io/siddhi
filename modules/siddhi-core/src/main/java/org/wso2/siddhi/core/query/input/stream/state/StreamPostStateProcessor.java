@@ -34,7 +34,6 @@ public class StreamPostStateProcessor implements PostStateProcessor {
     protected int stateId;
     protected CountPreStateProcessor callbackPreStateProcessor;
     protected boolean isEventReturned;
-    protected boolean isGroupedPreprocessor;
 
     /**
      * Process the handed StreamEvent
@@ -65,12 +64,7 @@ public class StreamPostStateProcessor implements PostStateProcessor {
             nextStatePreProcessor.addState(stateEvent);
         }
         if (nextEveryStatePreProcessor != null) {
-            if (isGroupedPreprocessor) {
-                nextEveryStatePreProcessor.addEveryState(((StreamPreStateProcessor) nextEveryStatePreProcessor).
-                        stateEventPool.borrowEvent());
-            } else {
-                nextEveryStatePreProcessor.addEveryState(stateEvent);
-            }
+            nextEveryStatePreProcessor.addEveryState(stateEvent);
         }
         if (callbackPreStateProcessor != null) {
             callbackPreStateProcessor.startStateReset();
@@ -134,7 +128,6 @@ public class StreamPostStateProcessor implements PostStateProcessor {
 
     protected void cloneProperties(StreamPostStateProcessor streamPostStateProcessor) {
         streamPostStateProcessor.stateId = stateId;
-        streamPostStateProcessor.isGroupedPreprocessor = isGroupedPreprocessor;
     }
 
     public void setNextStatePreProcessor(PreStateProcessor preStateProcessor) {
@@ -172,10 +165,5 @@ public class StreamPostStateProcessor implements PostStateProcessor {
     @Override
     public void setCallbackPreStateProcessor(CountPreStateProcessor callbackPreStateProcessor) {
         this.callbackPreStateProcessor = callbackPreStateProcessor;
-    }
-
-    @Override
-    public void setGroupedPreprocessor(boolean groupedPreprocessor) {
-        isGroupedPreprocessor = groupedPreprocessor;
     }
 }

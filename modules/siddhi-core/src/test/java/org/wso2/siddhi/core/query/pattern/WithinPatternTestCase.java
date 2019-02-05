@@ -232,7 +232,7 @@ public class WithinPatternTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
-                    AssertJUnit.assertArrayEquals(new Object[]{"WSO2", 200, "WSO2", 250}, inEvents[0].getData());
+                    AssertJUnit.assertArrayEquals(new Object[]{"WSO2", 150, "WSO2", 200}, inEvents[0].getData());
                     eventArrived = true;
                 }
                 if (removeEvents != null) {
@@ -287,7 +287,7 @@ public class WithinPatternTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
-                    AssertJUnit.assertArrayEquals(new Object[]{"WSO2", 250, "WSO2", 300, "WSO2", 350},
+                    AssertJUnit.assertArrayEquals(new Object[]{"WSO2", 200, "WSO2", 250, "WSO2", 300},
                             inEvents[0].getData());
                     eventArrived = true;
                 }

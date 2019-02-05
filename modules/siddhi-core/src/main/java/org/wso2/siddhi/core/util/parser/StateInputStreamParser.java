@@ -277,7 +277,6 @@ public class StateInputStreamParser {
 
             if (stateElement.getWithin() != null) {
                 withinStates.remove(0);
-                innerStateRuntime.getLastProcessor().setGroupedPreprocessor(true);
             }
 
             EveryInnerStateRuntime everyInnerStateRuntime = new EveryInnerStateRuntime(innerStateRuntime, stateType);
