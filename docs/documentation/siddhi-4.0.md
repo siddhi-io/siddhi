@@ -2890,6 +2890,53 @@ The following elements are configured with this annotation.
 |`workers`|Number of worker threads that will be be used to process the buffered events.|`1`|
 |`batch.size.max`|The maximum number of events that will be processed together by a worker thread at a given time.| `buffer.size`|
 
+### Fault Streams
+
+When `@OnError` annotations is added to the Streams, it provides a way to gracefully handle failure scenarios during runtime.
+
+```sql
+@OnError(action='on_error_action')
+define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
+```
+
+The action parameter of the `@OnError` annotation defines the action to be executed during failure scenarios. 
+
+Following action types can be used with `@OnError` annotation while defining a stream. Default action would be `LOG`
+
+* `LOG` : Logs the event along with the error and drop the event.
+* `STREAM`: A fault stream corresponding to the base stream will be automatically created together with the base stream's attributes and _error attribute. 
+The events would be inserted to the fault stream during a failure. _error attribute would contain the exception that was caught.
+ 
+e.g., the following is a Siddhi application that includes the `@OnError` annotation to to handle failures during runtime.
+
+```sql
+@OnError(name='STREAM')
+define stream StreamA (symbol string, volume long);
+
+from StreamA[custom:fault() > volume] 
+insert into StreamB;
+
+from !StreamA#log("Error Occured")
+insert into tempStream;
+``` 
+
+`!StreamA`, fault stream will be automatically created when you add the `@OnError` annotation. Following is the definition of the corresponding fault stream.
+```sql
+!StreamA(symbol string, volume long, _error object)
+``` 
+
+When `on.error` parameter is introduced while configuring `Sink`, it provides capability to handle failures while publishing from `Sink`.
+```sql
+@sink(type='sink_type', on.error='on.error.action')
+define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
+```  
+
+Following action types can be used with `on.error` parameter while configuring a `Sink`. Default action would be `LOG`.
+
+* `LOG` : Logs the event along with the error and drop the event.
+* `WAIT` : The thread waits on back-off and re-trying state till the connection comes back.
+* `STREAM`: Corresponding fault stream would be populated with the failed event and the error while publishing. 
+
 ### Statistics
 
 Use `@app:statistics` app level annotation to evaluate the performance of an application, you can enable the statistics of a Siddhi application to be published. This is done via the `@app:statistics` annotation that can be added to a Siddhi application as shown in the following example.
