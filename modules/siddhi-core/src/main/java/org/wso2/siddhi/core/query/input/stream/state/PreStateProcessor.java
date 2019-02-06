@@ -41,6 +41,8 @@ public interface PreStateProcessor extends Processor {
 
     void setStartState(boolean isStartState);
 
+    void setWithinEveryPreStateProcessor(PreStateProcessor withinEveryPreStateProcessor);
+
     void updateState();
 
     StreamPostStateProcessor getThisStatePostProcessor();

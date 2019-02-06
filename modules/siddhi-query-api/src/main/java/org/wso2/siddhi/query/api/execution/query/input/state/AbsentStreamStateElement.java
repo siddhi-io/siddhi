@@ -31,17 +31,9 @@ public class AbsentStreamStateElement extends StreamStateElement {
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
 
-    public AbsentStreamStateElement(BasicSingleInputStream basicSingleInputStream) {
+    public AbsentStreamStateElement(BasicSingleInputStream basicSingleInputStream, TimeConstant waitingTime) {
         super(basicSingleInputStream);
-    }
-
-    public AbsentStreamStateElement(BasicSingleInputStream basicSingleInputStream, TimeConstant within) {
-        super(basicSingleInputStream, within);
-    }
-
-    public AbsentStreamStateElement waitingTime(TimeConstant waitingTime) {
         this.waitingTime = waitingTime;
-        return this;
     }
 
     public TimeConstant getWaitingTime() {

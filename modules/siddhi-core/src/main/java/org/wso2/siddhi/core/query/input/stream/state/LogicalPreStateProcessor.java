@@ -25,9 +25,6 @@ import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Logical and &amp; or processor.
@@ -37,9 +34,9 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
     protected LogicalStateElement.Type logicalType;
     protected LogicalPreStateProcessor partnerStatePreProcessor;
 
-    public LogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType, List<Map
-            .Entry<Long, Set<Integer>>> withinStates) {
-        super(stateType, withinStates);
+    public LogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType,
+                                    Long withinTime) {
+        super(stateType, withinTime);
         this.logicalType = type;
     }
 
@@ -52,7 +49,7 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
     @Override
     public PreStateProcessor cloneProcessor(String key) {
         LogicalPreStateProcessor logicalPreStateProcessor = new LogicalPreStateProcessor(logicalType, stateType,
-                withinStates);
+                withinTime);
         cloneProperties(logicalPreStateProcessor, key);
         logicalPreStateProcessor.init(siddhiAppContext, queryName);
         return logicalPreStateProcessor;
@@ -83,6 +80,12 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
     @Override
     public void addEveryState(StateEvent stateEvent) {
         StateEvent clonedEvent = stateEventCloner.copyStateEvent(stateEvent);
+        // Set the timestamp of the last arrived event
+        if (clonedEvent.getStreamEvent(stateId) != null) {
+            clonedEvent.setTimestamp(clonedEvent.getStreamEvent(stateId).getTimestamp());
+        } else if(clonedEvent.getStreamEvent(partnerStatePreProcessor.stateId) != null) {
+            clonedEvent.setTimestamp(clonedEvent.getStreamEvent(partnerStatePreProcessor.stateId).getTimestamp());
+        }
         clonedEvent.setEvent(stateId, null);
         lock.lock();
         try {
@@ -98,8 +101,10 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
 
     public void setStartState(boolean isStartState) {
         this.isStartState = isStartState;
+        this.getThisStatePostProcessor().setStartState(isStartState);
         if (partnerStatePreProcessor.isStartState != this.isStartState) {
             partnerStatePreProcessor.isStartState = isStartState;
+            partnerStatePreProcessor.getThisStatePostProcessor().setStartState(isStartState);
         }
     }
 
@@ -150,11 +155,13 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
         try {
             for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
-                if (withinStates.size() > 0) {
-                    if (isExpired(stateEvent, streamEvent.getTimestamp())) {
-                        iterator.remove();
-                        continue;
+                if (isExpired(stateEvent, streamEvent.getTimestamp())) {
+                    if (withinEveryPreStateProcessor != null) {
+                        withinEveryPreStateProcessor.addEveryState(stateEvent);
+                        withinEveryPreStateProcessor.updateState();
                     }
+                    iterator.remove();
+                    continue;
                 }
                 if (logicalType == LogicalStateElement.Type.OR &&
                         stateEvent.getStreamEvent(partnerStatePreProcessor.getStateId()) != null) {

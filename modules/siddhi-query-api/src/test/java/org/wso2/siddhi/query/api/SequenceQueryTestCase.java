@@ -38,14 +38,42 @@ public class SequenceQueryTestCase {
 //    having avgPrice>50;
 
     @Test
-    public void testCreatingFilterPatternQuery() {
+    public void testSequenceQuery() {
         Query query = Query.query();
         query.from(
                 InputStream.sequenceStream(
                         State.next(State.stream(InputStream.stream("e1", "Stream1")),
-                                State.stream(InputStream.stream("e2", "Stream1")),
-                                Expression.Time.day(1)
+                                State.stream(InputStream.stream("e2", "Stream1"))
                         )));
+        query.insertInto("OutputStream");
+        query.select(
+                Selector.selector().
+                        select("symbol", Expression.variable("symbol").ofStream("e1")).
+                        select("avgPrice", Expression.function("avg", Expression.variable("price").ofStream("e2", 0))).
+                        groupBy(Expression.variable("symbol").ofStream("e1")).
+                        having(Expression.compare(Expression.variable("avgPrice"),
+                                Compare.Operator.GREATER_THAN,
+                                Expression.value(50)))
+
+
+        );
+
+    }
+
+//    from e1=Stream1[price >= 20] , e2=Stream2[ price >= e1.price] within 1 day
+//    select e1.symbol, avg(e2.price ) as avgPrice
+//    insert into OutputStream
+//    group by e1.symbol
+//    having avgPrice>50;
+
+    @Test
+    public void testSequenceQueryWithWithin() {
+        Query query = Query.query();
+        query.from(
+                InputStream.sequenceStream(
+                        State.next(State.stream(InputStream.stream("e1", "Stream1")),
+                                State.stream(InputStream.stream("e2", "Stream1"))
+                        ), Expression.Time.day(1)));
         query.insertInto("OutputStream");
         query.select(
                 Selector.selector().

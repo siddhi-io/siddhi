@@ -269,7 +269,7 @@ public class PatternQueryTestCase {
     }
 
 
-//    from every (e1=Stream1[price >= 30]) -> e2=Stream1[ price >= 20] or e3=Stream2[ price >= e1.price] within 3 min
+//    from every (e1=Stream1[price >= 30]) -> e2=Stream1[ price >= 20] or e3=Stream2[ price >= e1.price]
 // -> e4=Stream3[price>74] within 2 min
 //    select e1.symbol, avg(e2.price ) as avgPrice
 //    insert into OutputStream
@@ -294,15 +294,14 @@ public class PatternQueryTestCase {
                                                 State.stream(InputStream.stream("e3", "Stream2").filter(Expression
                                                         .compare(Expression.variable("price"),
                                                                 Compare.Operator.GREATER_THAN_EQUAL,
-                                                                Expression.variable("price").ofStream("e1")))),
-                                                Expression.Time.minute(3))
+                                                                Expression.variable("price").ofStream("e1")))))
                                         ,
                                         State.stream(InputStream.stream("e4", "Stream3").filter(Expression.compare
                                                 (Expression.variable("price"),
                                                         Compare.Operator.GREATER_THAN,
                                                         Expression.value(74)))))
 
-                        )
+                        ), Expression.Time.minute(3)
                 )
         );
         query.select(
@@ -411,8 +410,8 @@ public class PatternQueryTestCase {
     }
 
 
-//    from every (e1=Stream1[price >= 30]) -> e2=Stream1[ prev.price >= 20]<5:> within 3 min -> e3=Stream2[ price >=
-// e1.price] -> e4=Stream3[price>74]
+//    from every (e1=Stream1[price >= 30]) -> e2=Stream1[ prev.price >= 20]<5:> -> e3=Stream2[ price >=
+// e1.price] -> e4=Stream3[price>74] within 3 min
 //    select e1.symbol, avg(e2.price ) as avgPrice
 //    insert into OutputStream
 
@@ -434,7 +433,7 @@ public class PatternQueryTestCase {
                                                                         .LAST),
                                                                 Compare.Operator.GREATER_THAN_EQUAL,
                                                                 Expression.value(20)))),
-                                                5, Expression.Time.minute(3)),
+                                                5),
                                         State.next(
                                                 State.stream(InputStream.stream("e3", "Stream2").filter(Expression
                                                         .compare(Expression.variable("price"),
@@ -445,7 +444,7 @@ public class PatternQueryTestCase {
                                                                 Compare.Operator.GREATER_THAN,
                                                                 Expression.value(74)))))
                                 )
-                        )
+                        ), Expression.Time.minute(3)
                 )
         );
         query.select(
@@ -460,7 +459,7 @@ public class PatternQueryTestCase {
 
 
 //    from every (e1=Stream1[price >= 30]) -> (e2=Stream1[ prev.price >= 20] -> e3=Stream2[ price >= e1.price])
-// within 4 min -> e4=Stream3[price>74]
+//      -> e4=Stream3[price>74] within 4 min
 //    select e1.symbol, avg(e2.price ) as avgPrice
 //    insert into OutputStream
 
@@ -485,14 +484,13 @@ public class PatternQueryTestCase {
                                                 State.stream(InputStream.stream("e3", "Stream2").filter(Expression
                                                         .compare(Expression.variable("price"),
                                                                 Compare.Operator.GREATER_THAN_EQUAL,
-                                                                Expression.variable("price").ofStream("e1")))),
-                                                Expression.Time.minute(4)),
+                                                                Expression.variable("price").ofStream("e1"))))),
                                         State.stream(InputStream.stream("e4", "Stream3").filter(Expression.compare
                                                 (Expression.variable("price"),
                                                         Compare.Operator.GREATER_THAN,
                                                         Expression.value(74))))
                                 )
-                        )
+                        ), Expression.Time.minute(4)
                 )
         );
         query.select(

@@ -198,33 +198,33 @@ join_source
     ;
 
 pattern_stream
-    : every_pattern_source_chain
-    | absent_pattern_source_chain
+    : every_pattern_source_chain within_time?
+    | absent_pattern_source_chain within_time?
     ;
 
 every_pattern_source_chain
-    : '('every_pattern_source_chain')' within_time? 
-    | EVERY '('pattern_source_chain ')' within_time?   
+    : '('every_pattern_source_chain')' 
+    | EVERY '('pattern_source_chain ')'   
     | every_pattern_source_chain  '->' every_pattern_source_chain
     | pattern_source_chain
-    | EVERY pattern_source within_time? 
+    | EVERY pattern_source 
     ;
 
 pattern_source_chain
-    : '('pattern_source_chain')' within_time?
+    : '('pattern_source_chain')'
     | pattern_source_chain  '->' pattern_source_chain
-    | pattern_source within_time?
+    | pattern_source
     ;
 
 absent_pattern_source_chain
-    : EVERY? '('absent_pattern_source_chain')' within_time?
+    : EVERY? '('absent_pattern_source_chain')'
     | every_absent_pattern_source
     | left_absent_pattern_source
     | right_absent_pattern_source
     ;
 
 left_absent_pattern_source
-    : EVERY? '('left_absent_pattern_source')' within_time?
+    : EVERY? '('left_absent_pattern_source')'
     | every_absent_pattern_source '->' every_pattern_source_chain
     | left_absent_pattern_source '->' left_absent_pattern_source
     | left_absent_pattern_source '->' every_absent_pattern_source
@@ -232,7 +232,7 @@ left_absent_pattern_source
     ;
 
 right_absent_pattern_source
-    : EVERY? '('right_absent_pattern_source')' within_time?
+    : EVERY? '('right_absent_pattern_source')'
     | every_pattern_source_chain '->' every_absent_pattern_source
     | right_absent_pattern_source '->' right_absent_pattern_source
     | every_absent_pattern_source '->' right_absent_pattern_source
@@ -289,28 +289,28 @@ basic_source_stream_handler
     ;
 
 sequence_stream
-    :every_sequence_source_chain
-    |every_absent_sequence_source_chain
+    :every_sequence_source_chain within_time?
+    |every_absent_sequence_source_chain within_time?
     ;
 
 every_sequence_source_chain
-    : EVERY? sequence_source  within_time?  ',' sequence_source_chain
+    : EVERY? sequence_source ',' sequence_source_chain
     ;
 
 every_absent_sequence_source_chain
-    : EVERY? absent_sequence_source_chain  within_time? ',' sequence_source_chain
-    | EVERY? sequence_source  within_time? ',' absent_sequence_source_chain
+    : EVERY? absent_sequence_source_chain  ',' sequence_source_chain
+    | EVERY? sequence_source ',' absent_sequence_source_chain
     ;
 
 absent_sequence_source_chain
-    : '('absent_sequence_source_chain')' within_time?
+    : '('absent_sequence_source_chain')'
     | basic_absent_pattern_source
     | left_absent_sequence_source
     | right_absent_sequence_source
     ;
 
 left_absent_sequence_source
-    : '('left_absent_sequence_source')' within_time?
+    : '('left_absent_sequence_source')'
     | basic_absent_pattern_source ',' sequence_source_chain
     | left_absent_sequence_source ',' left_absent_sequence_source
     | left_absent_sequence_source ',' basic_absent_pattern_source
@@ -318,7 +318,7 @@ left_absent_sequence_source
     ;
 
 right_absent_sequence_source
-    : '('right_absent_sequence_source')' within_time?
+    : '('right_absent_sequence_source')'
     | sequence_source_chain ',' basic_absent_pattern_source
     | right_absent_sequence_source ',' right_absent_sequence_source
     | basic_absent_pattern_source ',' right_absent_sequence_source
@@ -326,9 +326,9 @@ right_absent_sequence_source
     ;
 
 sequence_source_chain
-    :'('sequence_source_chain ')' within_time? 
+    :'('sequence_source_chain ')' 
     | sequence_source_chain ',' sequence_source_chain
-    | sequence_source  within_time? 
+    | sequence_source  
     ;
 
 sequence_source

@@ -34,6 +34,7 @@ public class StreamPostStateProcessor implements PostStateProcessor {
     protected int stateId;
     protected CountPreStateProcessor callbackPreStateProcessor;
     protected boolean isEventReturned;
+    protected boolean isStartState;
 
     /**
      * Process the handed StreamEvent
@@ -165,5 +166,9 @@ public class StreamPostStateProcessor implements PostStateProcessor {
     @Override
     public void setCallbackPreStateProcessor(CountPreStateProcessor callbackPreStateProcessor) {
         this.callbackPreStateProcessor = callbackPreStateProcessor;
+    }
+
+    public void setStartState(boolean isStartState) {
+        this.isStartState = isStartState;
     }
 }
