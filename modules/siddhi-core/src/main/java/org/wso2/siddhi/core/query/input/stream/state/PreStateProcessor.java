@@ -41,6 +41,8 @@ public interface PreStateProcessor extends Processor {
 
     void setStartState(boolean isStartState);
 
+    boolean isStartState();
+
     void setWithinEveryPreStateProcessor(PreStateProcessor withinEveryPreStateProcessor);
 
     void updateState();
@@ -48,6 +50,10 @@ public interface PreStateProcessor extends Processor {
     StreamPostStateProcessor getThisStatePostProcessor();
 
     void resetState();
+
+    void setWithinTime(long withinTime);
+
+    void setStartStateIds(int[] stateIds);
 
     PreStateProcessor cloneProcessor(String key);
 

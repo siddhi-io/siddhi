@@ -39,11 +39,6 @@ public class EveryInnerStateRuntime extends StreamInnerStateRuntime {
     }
 
     @Override
-    public void setStartState() {
-        innerStateRuntime.setStartState();
-    }
-
-    @Override
     public void init() {
         innerStateRuntime.init();
     }

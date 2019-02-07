@@ -24,7 +24,6 @@ import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.parser.SchedulerParser;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
-import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
 import java.util.Iterator;
 
@@ -58,12 +57,11 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
      * Construct an AbsentStreamPreStateProcessor object.
      *
      * @param stateType   PATTERN or SEQUENCE
-     * @param withinTime  the time defined by 'within' keyword
      * @param waitingTime the waiting time defined by 'for' keyword
      */
-    public AbsentStreamPreStateProcessor(StateInputStream.Type stateType, Long withinTime,
+    public AbsentStreamPreStateProcessor(StateInputStream.Type stateType,
                                          long waitingTime) {
-        super(stateType, withinTime);
+        super(stateType);
         // Not operator always has 'for' time
         this.waitingTime = waitingTime;
     }
@@ -102,26 +100,18 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         }
     }
 
-    private void addSelfEveryState(StateEvent stateEvent, long currentTime) {
+    @Override
+    public void addEveryState(StateEvent stateEvent) {
         lock.lock();
         try {
             StateEvent clonedEvent = stateEventCloner.copyStateEvent(stateEvent);
-            // Set the timestamp of the last arrived event
-            if (clonedEvent.getStreamEvent(stateId) != null) {
-                clonedEvent.setTimestamp(clonedEvent.getStreamEvent(stateId).getTimestamp());
-            }
             newAndEveryStateEventList.add(clonedEvent);
             // Start the scheduler
-            lastScheduledTime = currentTime + waitingTime;
+            lastScheduledTime = stateEvent.getTimestamp() + waitingTime;
             scheduler.notifyAt(lastScheduledTime);
         } finally {
             lock.unlock();
         }
-    }
-
-    @Override
-    public void addEveryState(StateEvent stateEvent) {
-        addSelfEveryState(stateEvent, stateEvent.getTimestamp());
     }
 
     @Override
@@ -149,100 +139,89 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
+        if (!this.active) {
+            // Every keyword is not used and already a pattern is processed
+            return;
+        }
+        boolean notProcessed = true;
+        long currentTime = complexEventChunk.getFirst().getTimestamp();
+        ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);
+        lock.lock();
         try {
-            if (!this.active) {
-                // Every keyword is not used and already a pattern is processed
-                return;
+            // If the process method is called, it is guaranteed that the waitingTime is passed
+            boolean initialize = isStartState && newAndEveryStateEventList.isEmpty()
+                    && pendingStateEventList.isEmpty();
+            if (initialize && stateType == StateInputStream.Type.SEQUENCE &&
+                    thisStatePostProcessor.nextEveryStatePreProcessor == null && this.lastScheduledTime > 0) {
+                // Sequence with no every but an event arrived
+                initialize = false;
             }
-            boolean notProcessed = true;
-            long currentTime = complexEventChunk.getFirst().getTimestamp();
-            ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);
-            lock.lock();
-            try {
-                // If the process method is called, it is guaranteed that the waitingTime is passed
-                boolean initialize = isStartState && newAndEveryStateEventList.isEmpty()
-                        && pendingStateEventList.isEmpty();
-                if (initialize && stateType == StateInputStream.Type.SEQUENCE &&
-                        thisStatePostProcessor.nextEveryStatePreProcessor == null && this.lastScheduledTime > 0) {
-                    // Sequence with no every but an event arrived
-                    initialize = false;
-                }
 
-                if (initialize) {
-                    // This is the first processor and no events received so far
-                    StateEvent stateEvent = stateEventPool.borrowEvent();
-                    addState(stateEvent);
-                } else if (stateType == StateInputStream.Type.SEQUENCE && !newAndEveryStateEventList.isEmpty()) {
-                    this.resetState();
-                }
-                this.updateState();
+            if (initialize) {
+                // This is the first processor and no events received so far
+                StateEvent stateEvent = stateEventPool.borrowEvent();
+                addState(stateEvent);
+            } else if (stateType == StateInputStream.Type.SEQUENCE && !newAndEveryStateEventList.isEmpty()) {
+                this.resetState();
+            }
+            this.updateState();
 
-                Iterator<StateEvent> iterator = pendingStateEventList.iterator();
-                while (iterator.hasNext()) {
-                    StateEvent event = iterator.next();
-                    // Remove expired events based on within
-                    if (isExpired(event, currentTime)) {
-                        if (withinEveryPreStateProcessor != null) {
-                            if (thisStatePostProcessor.nextEveryStatePreProcessor != this) {
-                                thisStatePostProcessor.nextEveryStatePreProcessor.addEveryState(event);
-                            }
-                        }
-                        iterator.remove();
-                        continue;
+            Iterator<StateEvent> iterator = pendingStateEventList.iterator();
+            while (iterator.hasNext()) {
+                StateEvent event = iterator.next();
+                // Remove expired events based on within
+                if (isExpired(event, currentTime)) {
+                    iterator.remove();
+                    if (withinEveryPreStateProcessor != null
+                            && thisStatePostProcessor.nextEveryStatePreProcessor != this) {
+                        thisStatePostProcessor.nextEveryStatePreProcessor.addEveryState(event);
                     }
-                    // Collect the events that came before the waiting time
-                    if (event.getTimestamp() == -1 && currentTime >= lastScheduledTime ||
-                            event.getTimestamp() != -1 && currentTime >= event.getTimestamp() + waitingTime) {
-                        System.out.println("aa " + (currentTime >= event.getTimestamp() + waitingTime));
-                        iterator.remove();
-                        retEventChunk.add(event);
-                    }
+                    continue;
                 }
-                if (withinEveryPreStateProcessor != null) {
-                    withinEveryPreStateProcessor.updateState();
+                // Collect the events that came before the waiting time
+                if (event.getTimestamp() == -1 && currentTime >= lastScheduledTime ||
+                        event.getTimestamp() != -1 && currentTime >= event.getTimestamp() + waitingTime) {
+                    iterator.remove();
+                    event.setTimestamp(currentTime);
+                    retEventChunk.add(event);
                 }
-            } finally {
-                lock.unlock();
             }
-            notProcessed = retEventChunk.getFirst() == null;
-            while (retEventChunk.hasNext()) {
-                StateEvent stateEvent = retEventChunk.next();
-                retEventChunk.remove();
-                sendEvent(stateEvent, currentTime);
+            if (withinEveryPreStateProcessor != null) {
+                withinEveryPreStateProcessor.updateState();
             }
+        } finally {
+            lock.unlock();
+        }
+        notProcessed = retEventChunk.getFirst() == null;
+        while (retEventChunk.hasNext()) {
+            StateEvent stateEvent = retEventChunk.next();
+            retEventChunk.remove();
+            sendEvent(stateEvent);
+        }
 
-            long actualCurrentTime = siddhiAppContext.getTimestampGenerator().currentTime();
-            if (actualCurrentTime > waitingTime + currentTime) {
-                lastScheduledTime = actualCurrentTime + waitingTime;
-            }
-            if (notProcessed && lastScheduledTime < currentTime) {
-                lastScheduledTime = currentTime + waitingTime;
-                this.scheduler.notifyAt(lastScheduledTime);
-            }
-        } catch (Throwable t) {
-            t.printStackTrace();
+        long actualCurrentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+        if (actualCurrentTime > waitingTime + currentTime) {
+            lastScheduledTime = actualCurrentTime + waitingTime;
+        }
+        if (notProcessed && lastScheduledTime < currentTime) {
+            lastScheduledTime = currentTime + waitingTime;
+            this.scheduler.notifyAt(lastScheduledTime);
         }
     }
 
-    private void sendEvent(StateEvent stateEvent, long currentTime) {
-
+    private void sendEvent(StateEvent stateEvent) {
+        if (thisStatePostProcessor.nextProcessor != null) {
+            thisStatePostProcessor.nextProcessor.process(new ComplexEventChunk<>(stateEvent, stateEvent, false));
+        }
         if (thisStatePostProcessor.nextStatePreProcessor != null) {
             thisStatePostProcessor.nextStatePreProcessor.addState(stateEvent);
         }
         if (thisStatePostProcessor.nextEveryStatePreProcessor != null) {
-            if (thisStatePostProcessor.nextEveryStatePreProcessor == this) {
-                addSelfEveryState(stateEvent, currentTime);
-                stateEvent.setTimestamp(currentTime);
-            } else {
-                stateEvent.setTimestamp(currentTime);
-                thisStatePostProcessor.nextEveryStatePreProcessor.addEveryState(stateEvent);
-            }
+            thisStatePostProcessor.nextEveryStatePreProcessor.addEveryState(stateEvent);
         } else if (isStartState) {
             this.active = false;
         }
-        if (thisStatePostProcessor.nextProcessor != null) {
-            thisStatePostProcessor.nextProcessor.process(new ComplexEventChunk<>(stateEvent, stateEvent, false));
-        }
+
         if (thisStatePostProcessor.callbackPreStateProcessor != null) {
             thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
         }
@@ -281,7 +260,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     @Override
     public PreStateProcessor cloneProcessor(String key) {
         AbsentStreamPreStateProcessor streamPreStateProcessor = new AbsentStreamPreStateProcessor(stateType,
-                withinTime, waitingTime);
+                waitingTime);
         cloneProperties(streamPreStateProcessor, key);
         streamPreStateProcessor.init(siddhiAppContext, queryName);
 

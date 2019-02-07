@@ -61,9 +61,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     private TimeConstant waitingTimeConstant;
 
     public AbsentLogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType,
-                                          Long withinTime,
                                           TimeConstant waitingTime) {
-        super(type, stateType, withinTime);
+        super(type, stateType);
         if (waitingTime != null) {
             this.waitingTime = waitingTime.value();
             this.waitingTimeConstant = waitingTime;
@@ -152,11 +151,11 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
 
                     // Remove expired events based on within
                     if (isExpired(stateEvent, currentTime)) {
+                        iterator.remove();
                         if (withinEveryPreStateProcessor != null) {
                             withinEveryPreStateProcessor.addEveryState(stateEvent);
                             withinEveryPreStateProcessor.updateState();
                         }
-                        iterator.remove();
                         continue;
                     }
 
@@ -317,7 +316,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     @Override
     public PreStateProcessor cloneProcessor(String key) {
         AbsentLogicalPreStateProcessor logicalPreStateProcessor = new AbsentLogicalPreStateProcessor(logicalType,
-                stateType, withinTime, waitingTimeConstant);
+                stateType, waitingTimeConstant);
         cloneProperties(logicalPreStateProcessor, key);
         logicalPreStateProcessor.init(siddhiAppContext, queryName);
 

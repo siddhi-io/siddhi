@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.core.util.parser;
 
+import com.google.common.primitives.Ints;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
@@ -61,7 +62,6 @@ import org.wso2.siddhi.query.api.execution.query.input.state.StateElement;
 import org.wso2.siddhi.query.api.execution.query.input.state.StreamStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.stream.BasicSingleInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
-import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,16 +113,29 @@ public class StateInputStreamParser {
         }
 
         StateElement stateElement = stateInputStream.getStateElement();
-
+        List<PreStateProcessor> preStateProcessors = new ArrayList<>();
         InnerStateRuntime innerStateRuntime = parse(stateElement, streamDefinitionMap, tableDefinitionMap,
                 windowDefinitionMap, aggregationDefinitionMap, tableMap, metaStateEvent,
-                siddhiAppContext, variableExpressionExecutors, processStreamReceiverMap, null, null,
+                siddhiAppContext, variableExpressionExecutors, processStreamReceiverMap,
+                null, null,
                 stateInputStream.getStateType(),
-                stateInputStream.getWithinTime() != null ? stateInputStream.getWithinTime().value() : null,
-                null, latencyTracker, queryName);
+                preStateProcessors, true, latencyTracker, queryName);
 
         stateStreamRuntime.setInnerStateRuntime(innerStateRuntime);
 
+        if (stateInputStream.getWithinTime() != null) {
+            List<Integer> startStateIdList = new ArrayList<>();
+            for (PreStateProcessor preStateProcessor : preStateProcessors) {
+                if (preStateProcessor.isStartState()) {
+                    startStateIdList.add(preStateProcessor.getStateId());
+                }
+            }
+            int[] startStateIds = Ints.toArray(startStateIdList);
+            for (PreStateProcessor preStateProcessor : preStateProcessors) {
+                preStateProcessor.setStartStateIds(startStateIds);
+                preStateProcessor.setWithinTime(stateInputStream.getWithinTime().value());
+            }
+        }
         ((StreamPreStateProcessor) innerStateRuntime.getFirstProcessor()).setThisLastProcessor(
                 (StreamPostStateProcessor) innerStateRuntime.getLastProcessor());
 
@@ -141,8 +154,8 @@ public class StateInputStreamParser {
                                            StreamPreStateProcessor streamPreStateProcessor,
                                            StreamPostStateProcessor streamPostStateProcessor,
                                            StateInputStream.Type stateType,
-                                           Long withinTime,
-                                           List<PreStateProcessor> preStateProcessors, LatencyTracker latencyTracker, String queryName) {
+                                           List<PreStateProcessor> preStateProcessors,
+                                           boolean isStartState, LatencyTracker latencyTracker, String queryName) {
 
 
         if (stateElement instanceof StreamStateElement) {
@@ -161,7 +174,7 @@ public class StateInputStreamParser {
                 if (stateElement instanceof AbsentStreamStateElement) {
 
                     AbsentStreamPreStateProcessor absentProcessor = new AbsentStreamPreStateProcessor(stateType,
-                            withinTime, ((AbsentStreamStateElement) stateElement).getWaitingTime().value());
+                            ((AbsentStreamStateElement) stateElement).getWaitingTime().value());
 
                     // Set the scheduler
                     siddhiAppContext.addEternalReferencedHolder(absentProcessor);
@@ -173,11 +186,12 @@ public class StateInputStreamParser {
                     // Assign the AbsentStreamPreStateProcessor to streamPreStateProcessor
                     streamPreStateProcessor = absentProcessor;
                 } else {
-                    streamPreStateProcessor = new StreamPreStateProcessor(stateType, withinTime);
+                    streamPreStateProcessor = new StreamPreStateProcessor(stateType);
                 }
                 streamPreStateProcessor.init(siddhiAppContext, queryName);
             }
             streamPreStateProcessor.setStateId(stateIndex);
+            streamPreStateProcessor.setStartState(isStartState);
             streamPreStateProcessor.setNextProcessor(singleStreamRuntime.getProcessorChain());
             singleStreamRuntime.setProcessorChain(streamPreStateProcessor);
             if (streamPostStateProcessor == null) {
@@ -198,9 +212,7 @@ public class StateInputStreamParser {
             innerStateRuntime.setFirstProcessor(streamPreStateProcessor);
             innerStateRuntime.setLastProcessor(streamPostStateProcessor);
             innerStateRuntime.addStreamRuntime(singleStreamRuntime);
-            if (preStateProcessors != null) {
-                preStateProcessors.add(streamPreStateProcessor);
-            }
+            preStateProcessors.add(streamPreStateProcessor);
             return innerStateRuntime;
 
         } else if (stateElement instanceof NextStateElement) {
@@ -211,14 +223,14 @@ public class StateInputStreamParser {
                     siddhiAppContext, variableExpressionExecutors,
                     processStreamReceiverMap,
                     streamPreStateProcessor, streamPostStateProcessor,
-                    stateType, withinTime, preStateProcessors, latencyTracker, queryName);
+                    stateType, preStateProcessors, isStartState, latencyTracker, queryName);
 
             StateElement nextElement = ((NextStateElement) stateElement).getNextStateElement();
             InnerStateRuntime nextInnerStateRuntime = parse(nextElement, streamDefinitionMap, tableDefinitionMap,
                     windowDefinitionMap, aggregationDefinitionMap, tableMap, metaStateEvent,
                     siddhiAppContext, variableExpressionExecutors, processStreamReceiverMap,
-                    streamPreStateProcessor,
-                    streamPostStateProcessor, stateType, withinTime, preStateProcessors, latencyTracker, queryName);
+                    streamPreStateProcessor, streamPostStateProcessor, stateType, preStateProcessors,
+                    false, latencyTracker, queryName);
 
             currentInnerStateRuntime.getLastProcessor().setNextStatePreProcessor(nextInnerStateRuntime
                     .getFirstProcessor());
@@ -245,8 +257,8 @@ public class StateInputStreamParser {
             InnerStateRuntime innerStateRuntime = parse(currentElement, streamDefinitionMap, tableDefinitionMap,
                     windowDefinitionMap, aggregationDefinitionMap, tableMap, metaStateEvent,
                     siddhiAppContext, variableExpressionExecutors, processStreamReceiverMap,
-                    streamPreStateProcessor, streamPostStateProcessor, stateType, withinTime,
-                    withinEveryPreStateProcessors, latencyTracker, queryName);
+                    streamPreStateProcessor, streamPostStateProcessor, stateType,
+                    withinEveryPreStateProcessors, isStartState, latencyTracker, queryName);
 
             EveryInnerStateRuntime everyInnerStateRuntime = new EveryInnerStateRuntime(innerStateRuntime, stateType);
 
@@ -262,6 +274,7 @@ public class StateInputStreamParser {
             for (PreStateProcessor preStateProcessor : withinEveryPreStateProcessors) {
                 preStateProcessor.setWithinEveryPreStateProcessor(everyInnerStateRuntime.getFirstProcessor());
             }
+            preStateProcessors.addAll(withinEveryPreStateProcessors);
             return everyInnerStateRuntime;
 
         } else if (stateElement instanceof LogicalStateElement) {
@@ -270,7 +283,7 @@ public class StateInputStreamParser {
 
             LogicalPreStateProcessor logicalPreStateProcessor1;
             if (((LogicalStateElement) stateElement).getStreamStateElement1() instanceof AbsentStreamStateElement) {
-                logicalPreStateProcessor1 = new AbsentLogicalPreStateProcessor(type, stateType, withinTime,
+                logicalPreStateProcessor1 = new AbsentLogicalPreStateProcessor(type, stateType,
                         ((AbsentStreamStateElement) ((LogicalStateElement) stateElement)
                                 .getStreamStateElement1()).getWaitingTime());
 
@@ -282,7 +295,7 @@ public class StateInputStreamParser {
                 Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
                 ((SchedulingProcessor) logicalPreStateProcessor1).setScheduler(scheduler);
             } else {
-                logicalPreStateProcessor1 = new LogicalPreStateProcessor(type, stateType, withinTime);
+                logicalPreStateProcessor1 = new LogicalPreStateProcessor(type, stateType);
             }
             logicalPreStateProcessor1.init(siddhiAppContext, queryName);
             LogicalPostStateProcessor logicalPostStateProcessor1;
@@ -294,7 +307,7 @@ public class StateInputStreamParser {
 
             LogicalPreStateProcessor logicalPreStateProcessor2;
             if (((LogicalStateElement) stateElement).getStreamStateElement2() instanceof AbsentStreamStateElement) {
-                logicalPreStateProcessor2 = new AbsentLogicalPreStateProcessor(type, stateType, withinTime,
+                logicalPreStateProcessor2 = new AbsentLogicalPreStateProcessor(type, stateType,
                         ((AbsentStreamStateElement) ((LogicalStateElement) stateElement).getStreamStateElement2())
                                 .getWaitingTime());
                 siddhiAppContext.addEternalReferencedHolder((AbsentLogicalPreStateProcessor)
@@ -304,8 +317,7 @@ public class StateInputStreamParser {
                 Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
                 ((SchedulingProcessor) logicalPreStateProcessor2).setScheduler(scheduler);
             } else {
-                logicalPreStateProcessor2 = new LogicalPreStateProcessor(type, stateType, withinTime
-                );
+                logicalPreStateProcessor2 = new LogicalPreStateProcessor(type, stateType);
             }
             logicalPreStateProcessor2.init(siddhiAppContext, queryName);
             LogicalPostStateProcessor logicalPostStateProcessor2;
@@ -329,14 +341,14 @@ public class StateInputStreamParser {
                     windowDefinitionMap, aggregationDefinitionMap, tableMap, metaStateEvent,
                     siddhiAppContext, variableExpressionExecutors, processStreamReceiverMap,
                     logicalPreStateProcessor2, logicalPostStateProcessor2,
-                    stateType, withinTime, preStateProcessors, latencyTracker, queryName);
+                    stateType, preStateProcessors, isStartState, latencyTracker, queryName);
 
             StateElement stateElement1 = ((LogicalStateElement) stateElement).getStreamStateElement1();
             InnerStateRuntime innerStateRuntime1 = parse(stateElement1, streamDefinitionMap, tableDefinitionMap,
                     windowDefinitionMap, aggregationDefinitionMap, tableMap, metaStateEvent,
                     siddhiAppContext, variableExpressionExecutors, processStreamReceiverMap,
-                    logicalPreStateProcessor1, logicalPostStateProcessor1, stateType, withinTime,
-                    preStateProcessors, latencyTracker, queryName);
+                    logicalPreStateProcessor1, logicalPostStateProcessor1, stateType,
+                    preStateProcessors, isStartState, latencyTracker, queryName);
 
 
             LogicalInnerStateRuntime logicalInnerStateRuntime = new LogicalInnerStateRuntime(
@@ -366,8 +378,7 @@ public class StateInputStreamParser {
                 maxCount = Integer.MAX_VALUE;
             }
 
-            CountPreStateProcessor countPreStateProcessor = new CountPreStateProcessor(minCount, maxCount, stateType,
-                    withinTime);
+            CountPreStateProcessor countPreStateProcessor = new CountPreStateProcessor(minCount, maxCount, stateType);
             countPreStateProcessor.init(siddhiAppContext, queryName);
             CountPostStateProcessor countPostStateProcessor = new CountPostStateProcessor(minCount, maxCount);
 
@@ -376,11 +387,10 @@ public class StateInputStreamParser {
             InnerStateRuntime innerStateRuntime = parse(currentElement, streamDefinitionMap, tableDefinitionMap,
                     windowDefinitionMap, aggregationDefinitionMap, tableMap, metaStateEvent,
                     siddhiAppContext, variableExpressionExecutors, processStreamReceiverMap,
-                    countPreStateProcessor, countPostStateProcessor, stateType, withinTime,
-                    preStateProcessors, latencyTracker, queryName);
+                    countPreStateProcessor, countPostStateProcessor, stateType,
+                    preStateProcessors, isStartState, latencyTracker, queryName);
 
             return new CountInnerStateRuntime((StreamInnerStateRuntime) innerStateRuntime);
-
         } else {
             throw new OperationNotSupportedException();
         }

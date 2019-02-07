@@ -44,11 +44,6 @@ public class NextInnerStateRuntime extends StreamInnerStateRuntime {
     }
 
     @Override
-    public void setStartState() {
-        currentInnerStateRuntime.setStartState();
-    }
-
-    @Override
     public void init() {
         currentInnerStateRuntime.init();
         nextInnerStateRuntime.init();
