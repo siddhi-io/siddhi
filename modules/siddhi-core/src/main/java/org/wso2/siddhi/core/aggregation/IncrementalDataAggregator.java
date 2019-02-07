@@ -65,10 +65,12 @@ public class IncrementalDataAggregator {
             TimePeriod.Duration duration = incrementalDurations.get(i);
             IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(duration);
 
-            Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap =
-                    incrementalExecutor.getBaseIncrementalValueStoreGroupByMap();
             BaseIncrementalValueStore baseIncrementalValueStore = incrementalExecutor.getBaseIncrementalValueStore();
-
+            Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap = null;
+            if (incrementalExecutor.getBaseIncrementalValueStoreGroupByMap() != null) {
+                baseIncrementalValueStoreGroupByMap
+                        = new HashMap<>(incrementalExecutor.getBaseIncrementalValueStoreGroupByMap());
+            }
             if (baseIncrementalValueStoreGroupByMap != null) {
                 for (Map.Entry<String, BaseIncrementalValueStore> entry :
                         baseIncrementalValueStoreGroupByMap.entrySet()) {
