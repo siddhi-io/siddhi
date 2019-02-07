@@ -2892,7 +2892,7 @@ The following elements are configured with this annotation.
 
 ### Fault Streams
 
-When `@OnError` annotations is added to the Streams, it provides a way to gracefully handle failure scenarios during runtime.
+When the `@OnError` annotation is added to a stream definition, it handles failover scenarios that occur during runtime gracefully.
 
 ```sql
 @OnError(action='on_error_action')
@@ -2901,13 +2901,13 @@ define stream <stream name> (<attribute name> <attribute type>, <attribute name>
 
 The action parameter of the `@OnError` annotation defines the action to be executed during failure scenarios. 
 
-Following action types can be used with `@OnError` annotation while defining a stream. Default action would be `LOG`
+The following action types can be specified via the `@OnError` annotation when defining a stream. If this annotation is not added, `LOG` is the action type by default.
 
-* `LOG` : Logs the event along with the error and drop the event.
-* `STREAM`: A fault stream corresponding to the base stream will be automatically created together with the base stream's attributes and _error attribute. 
-The events would be inserted to the fault stream during a failure. _error attribute would contain the exception that was caught.
+* `LOG` : Logs the event with an error, and then drops the event.
+* `STREAM`: A fault stream is automatically created for the base stream. The definition of the fault stream includes all the attributes of the base stream as well as an additional attribute named `_error`.
+The events are inserted into the fault stream during a failure. The error identified is captured as the value for the `_error` attribute.
  
-e.g., the following is a Siddhi application that includes the `@OnError` annotation to to handle failures during runtime.
+e.g., the following is a Siddhi application that includes the `@OnError` annotation to handle failures during runtime.
 
 ```sql
 @OnError(name='STREAM')
@@ -2920,22 +2920,22 @@ from !StreamA#log("Error Occured")
 insert into tempStream;
 ``` 
 
-`!StreamA`, fault stream will be automatically created when you add the `@OnError` annotation. Following is the definition of the corresponding fault stream.
+`!StreamA`, fault stream is automatically created when you add the `@OnError` annotation. The definition of the corresponding fault stream is as follows.
 ```sql
 !StreamA(symbol string, volume long, _error object)
 ``` 
 
-When `on.error` parameter is introduced while configuring `Sink`, it provides capability to handle failures while publishing from `Sink`.
+If you include the `on.error` parameter in the sink configuration, failures are handled by Siddhi at the time the events are published from the `Sink`.
 ```sql
 @sink(type='sink_type', on.error='on.error.action')
 define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
 ```  
 
-Following action types can be used with `on.error` parameter while configuring a `Sink`. Default action would be `LOG`.
+The action types that can be specified via the `on.error` parameter when configuring a sink are as follows. If this parameter is not included in the sink configuration, `LOG` is the action type by default.
 
-* `LOG` : Logs the event along with the error and drop the event.
-* `WAIT` : The thread waits on back-off and re-trying state till the connection comes back.
-* `STREAM`: Corresponding fault stream would be populated with the failed event and the error while publishing. 
+* `LOG` : Logs the event with the error, and then drops the event.
+* `WAIT` : The thread waits in the `back-off and re-trying` state, and reconnects once the connection is re-established.
+* `STREAM`: Corresponding fault stream is populated with the failed event and the error while publishing. 
 
 ### Statistics
 
