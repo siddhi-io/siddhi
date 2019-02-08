@@ -81,9 +81,15 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
     public void receive(ComplexEvent complexEvent) {
 
         if (partitionExecutors.size() == 0) {
-            StreamEvent borrowedEvent = borrowEvent();
-            streamEventConverter.convertComplexEvent(complexEvent, borrowedEvent);
-            send(borrowedEvent);
+            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+            ComplexEvent aComplexEvent = complexEvent;
+            while (aComplexEvent != null) {
+                StreamEvent borrowedEvent = borrowEvent();
+                streamEventConverter.convertComplexEvent(aComplexEvent, borrowedEvent);
+                outputEventChunk.add(borrowedEvent);
+                aComplexEvent = aComplexEvent.getNext();
+            }
+            send(outputEventChunk.getFirst());
         } else {
             if (complexEvent.getNext() == null) {
                 for (PartitionExecutor partitionExecutor : partitionExecutors) {
@@ -294,8 +300,8 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
         for (QueryRuntime queryRuntime : queryRuntimeList) {
             StreamRuntime streamRuntime = queryRuntime.getStreamRuntime();
             for (int i = 0; i < queryRuntime.getInputStreamId().size(); i++) {
-                if ((streamRuntime.getSingleStreamRuntimes().get(i)).getProcessStreamReceiver().getStreamId().equals
-                        (streamId + key)) {
+                if ((streamRuntime.getSingleStreamRuntimes().get(i)).
+                        getProcessStreamReceiver().getStreamId().equals(streamId + key)) {
                     streamJunction.subscribe((streamRuntime.getSingleStreamRuntimes().get(i))
                             .getProcessStreamReceiver());
                 }
