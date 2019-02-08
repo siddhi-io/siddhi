@@ -24,12 +24,8 @@ import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.parser.SchedulerParser;
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
-import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Pre processor of not operator.
@@ -58,24 +54,16 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     private boolean active = true;
 
     /**
-     * TimeConstant to be used by cloneProcessor method.
-     */
-    private TimeConstant waitingTimeConstant;
-
-
-    /**
      * Construct an AbsentStreamPreStateProcessor object.
      *
-     * @param stateType    PATTERN or SEQUENCE
-     * @param withinStates the time defined by 'within' keyword
-     * @param waitingTime  the waiting time defined by 'for' keyword
+     * @param stateType   PATTERN or SEQUENCE
+     * @param waitingTime the waiting time defined by 'for' keyword
      */
-    public AbsentStreamPreStateProcessor(StateInputStream.Type stateType, List<Map.Entry<Long, Set<Integer>>>
-            withinStates, TimeConstant waitingTime) {
-        super(stateType, withinStates);
+    public AbsentStreamPreStateProcessor(StateInputStream.Type stateType,
+                                         long waitingTime) {
+        super(stateType);
         // Not operator always has 'for' time
-        this.waitingTime = waitingTime.value();
-        this.waitingTimeConstant = waitingTime;
+        this.waitingTime = waitingTime;
     }
 
     @Override
@@ -116,7 +104,8 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     public void addEveryState(StateEvent stateEvent) {
         lock.lock();
         try {
-            newAndEveryStateEventList.add(stateEventCloner.copyStateEvent(stateEvent));
+            StateEvent clonedEvent = stateEventCloner.copyStateEvent(stateEvent);
+            newAndEveryStateEventList.add(clonedEvent);
             // Start the scheduler
             lastScheduledTime = stateEvent.getTimestamp() + waitingTime;
             scheduler.notifyAt(lastScheduledTime);
@@ -181,11 +170,13 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
             while (iterator.hasNext()) {
                 StateEvent event = iterator.next();
                 // Remove expired events based on within
-                if (withinStates.size() > 0) {
-                    if (isExpired(event, currentTime)) {
-                        iterator.remove();
-                        continue;
+                if (isExpired(event, currentTime)) {
+                    iterator.remove();
+                    if (withinEveryPreStateProcessor != null
+                            && thisStatePostProcessor.nextEveryStatePreProcessor != this) {
+                        thisStatePostProcessor.nextEveryStatePreProcessor.addEveryState(event);
                     }
+                    continue;
                 }
                 // Collect the events that came before the waiting time
                 if (event.getTimestamp() == -1 && currentTime >= lastScheduledTime ||
@@ -194,6 +185,9 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
                     event.setTimestamp(currentTime);
                     retEventChunk.add(event);
                 }
+            }
+            if (withinEveryPreStateProcessor != null) {
+                withinEveryPreStateProcessor.updateState();
             }
         } finally {
             lock.unlock();
@@ -227,6 +221,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         } else if (isStartState) {
             this.active = false;
         }
+
         if (thisStatePostProcessor.callbackPreStateProcessor != null) {
             thisStatePostProcessor.callbackPreStateProcessor.startStateReset();
         }
@@ -265,7 +260,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     @Override
     public PreStateProcessor cloneProcessor(String key) {
         AbsentStreamPreStateProcessor streamPreStateProcessor = new AbsentStreamPreStateProcessor(stateType,
-                withinStates, waitingTimeConstant);
+                waitingTime);
         cloneProperties(streamPreStateProcessor, key);
         streamPreStateProcessor.init(siddhiAppContext, queryName);
 

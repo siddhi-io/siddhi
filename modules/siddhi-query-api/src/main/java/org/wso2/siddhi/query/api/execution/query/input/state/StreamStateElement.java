@@ -18,7 +18,6 @@
 package org.wso2.siddhi.query.api.execution.query.input.state;
 
 import org.wso2.siddhi.query.api.execution.query.input.stream.BasicSingleInputStream;
-import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
 /**
  * State element containing the event stream
@@ -27,15 +26,8 @@ public class StreamStateElement implements StateElement {
 
     private static final long serialVersionUID = 1L;
     private final BasicSingleInputStream basicSingleInputStream;
-    private TimeConstant within;
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
-
-    public StreamStateElement(BasicSingleInputStream basicSingleInputStream, TimeConstant within) {
-
-        this.basicSingleInputStream = basicSingleInputStream;
-        this.within = within;
-    }
 
     public StreamStateElement(BasicSingleInputStream basicSingleInputStream) {
 
@@ -47,19 +39,9 @@ public class StreamStateElement implements StateElement {
     }
 
     @Override
-    public TimeConstant getWithin() {
-        return within;
-    }
-
-    public void setWithin(TimeConstant within) {
-        this.within = within;
-    }
-
-    @Override
     public String toString() {
         return "StreamStateElement{" +
                 "basicSingleInputStream=" + basicSingleInputStream +
-                ", within=" + within +
                 '}';
     }
 
@@ -78,18 +60,13 @@ public class StreamStateElement implements StateElement {
                 .basicSingleInputStream != null) {
             return false;
         }
-        if (within != null ? !within.equals(that.within) : that.within != null) {
-            return false;
-        }
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = basicSingleInputStream != null ? basicSingleInputStream.hashCode() : 0;
-        result = 31 * result + (within != null ? within.hashCode() : 0);
-        return result;
+        return basicSingleInputStream != null ? basicSingleInputStream.hashCode() : 0;
     }
 
     @Override

@@ -43,8 +43,6 @@ public interface InnerStateRuntime {
 
     void setQuerySelector(Processor commonProcessor);
 
-    void setStartState();
-
     void init();
 
     void reset();

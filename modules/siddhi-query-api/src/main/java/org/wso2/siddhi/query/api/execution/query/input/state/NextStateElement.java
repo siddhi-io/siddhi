@@ -17,8 +17,6 @@
  */
 package org.wso2.siddhi.query.api.execution.query.input.state;
 
-import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
-
 /**
  * Next state element used in patterns to link states
  */
@@ -27,20 +25,12 @@ public class NextStateElement implements StateElement {
     private static final long serialVersionUID = 1L;
     private StateElement stateElement;
     private StateElement nextStateElement;
-    private TimeConstant within;
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
 
-    public NextStateElement(StateElement stateElement,
-                            StateElement nextStateElement, TimeConstant within) {
+    public NextStateElement(StateElement stateElement, StateElement nextStateElement) {
         this.stateElement = stateElement;
         this.nextStateElement = nextStateElement;
-        this.within = within;
-    }
-
-    public NextStateElement(StateElement stateElement,
-                            StateElement nextStateElement) {
-        this(stateElement, nextStateElement, null);
     }
 
     public StateElement getStateElement() {
@@ -51,20 +41,11 @@ public class NextStateElement implements StateElement {
         return nextStateElement;
     }
 
-    public TimeConstant getWithin() {
-        return within;
-    }
-
-    public void setWithin(TimeConstant within) {
-        this.within = within;
-    }
-
     @Override
     public String toString() {
         return "NextStateElement{" +
                 "stateElement=" + stateElement +
                 ", nextStateElement=" + nextStateElement +
-                ", within=" + within +
                 '}';
     }
 
@@ -86,10 +67,6 @@ public class NextStateElement implements StateElement {
                 null) {
             return false;
         }
-        if (within != null ? !within.equals(that.within) : that.within != null) {
-            return false;
-        }
-
         return true;
     }
 
@@ -97,7 +74,6 @@ public class NextStateElement implements StateElement {
     public int hashCode() {
         int result = stateElement != null ? stateElement.hashCode() : 0;
         result = 31 * result + (nextStateElement != null ? nextStateElement.hashCode() : 0);
-        result = 31 * result + (within != null ? within.hashCode() : 0);
         return result;
     }
 

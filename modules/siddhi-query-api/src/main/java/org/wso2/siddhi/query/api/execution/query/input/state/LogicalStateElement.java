@@ -17,8 +17,6 @@
  */
 package org.wso2.siddhi.query.api.execution.query.input.state;
 
-import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
-
 /**
  * Logical state element used in pattern to handle logical operations
  */
@@ -28,7 +26,6 @@ public class LogicalStateElement implements StateElement {
     protected StreamStateElement streamStateElement1;
     protected Type type;
     protected StreamStateElement streamStateElement2;
-    protected TimeConstant within;
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
 
@@ -37,14 +34,6 @@ public class LogicalStateElement implements StateElement {
         this.streamStateElement1 = streamStateElement1;
         this.type = type;
         this.streamStateElement2 = streamStateElement2;
-    }
-
-    public LogicalStateElement(StreamStateElement streamStateElement1, Type type, StreamStateElement
-            streamStateElement2, TimeConstant within) {
-        this.streamStateElement1 = streamStateElement1;
-        this.type = type;
-        this.streamStateElement2 = streamStateElement2;
-        this.within = within;
     }
 
     public StreamStateElement getStreamStateElement1() {
@@ -60,22 +49,11 @@ public class LogicalStateElement implements StateElement {
     }
 
     @Override
-    public TimeConstant getWithin() {
-        return within;
-    }
-
-    @Override
-    public void setWithin(TimeConstant within) {
-        this.within = within;
-    }
-
-    @Override
     public String toString() {
         return "LogicalStateElement{" +
                 "streamStateElement1=" + streamStateElement1 +
                 ", type=" + type +
                 ", streamStateElement2=" + streamStateElement2 +
-                ", within=" + within +
                 '}';
     }
 
@@ -101,10 +79,6 @@ public class LogicalStateElement implements StateElement {
         if (type != that.type) {
             return false;
         }
-        if (within != null ? !within.equals(that.within) : that.within != null) {
-            return false;
-        }
-
         return true;
     }
 
@@ -113,7 +87,6 @@ public class LogicalStateElement implements StateElement {
         int result = streamStateElement1 != null ? streamStateElement1.hashCode() : 0;
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (streamStateElement2 != null ? streamStateElement2.hashCode() : 0);
-        result = 31 * result + (within != null ? within.hashCode() : 0);
         return result;
     }
 

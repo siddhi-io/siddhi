@@ -25,9 +25,6 @@ import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement
 import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Logical and &amp; or processor.
@@ -37,9 +34,8 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
     protected LogicalStateElement.Type logicalType;
     protected LogicalPreStateProcessor partnerStatePreProcessor;
 
-    public LogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType, List<Map
-            .Entry<Long, Set<Integer>>> withinStates) {
-        super(stateType, withinStates);
+    public LogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType) {
+        super(stateType);
         this.logicalType = type;
     }
 
@@ -51,8 +47,7 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
      */
     @Override
     public PreStateProcessor cloneProcessor(String key) {
-        LogicalPreStateProcessor logicalPreStateProcessor = new LogicalPreStateProcessor(logicalType, stateType,
-                withinStates);
+        LogicalPreStateProcessor logicalPreStateProcessor = new LogicalPreStateProcessor(logicalType, stateType);
         cloneProperties(logicalPreStateProcessor, key);
         logicalPreStateProcessor.init(siddhiAppContext, queryName);
         return logicalPreStateProcessor;
@@ -93,13 +88,6 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
             }
         } finally {
             lock.unlock();
-        }
-    }
-
-    public void setStartState(boolean isStartState) {
-        this.isStartState = isStartState;
-        if (partnerStatePreProcessor.isStartState != this.isStartState) {
-            partnerStatePreProcessor.isStartState = isStartState;
         }
     }
 
@@ -150,11 +138,13 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
         try {
             for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
-                if (withinStates.size() > 0) {
-                    if (isExpired(stateEvent, streamEvent.getTimestamp())) {
-                        iterator.remove();
-                        continue;
+                if (isExpired(stateEvent, streamEvent.getTimestamp())) {
+                    iterator.remove();
+                    if (withinEveryPreStateProcessor != null) {
+                        withinEveryPreStateProcessor.addEveryState(stateEvent);
+                        withinEveryPreStateProcessor.updateState();
                     }
+                    continue;
                 }
                 if (logicalType == LogicalStateElement.Type.OR &&
                         stateEvent.getStreamEvent(partnerStatePreProcessor.getStateId()) != null) {

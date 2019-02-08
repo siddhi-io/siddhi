@@ -23,6 +23,7 @@ import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement
 import org.wso2.siddhi.query.api.execution.query.input.state.NextStateElement;
 import org.wso2.siddhi.query.api.execution.query.input.state.StateElement;
 import org.wso2.siddhi.query.api.execution.query.input.state.StreamStateElement;
+import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,11 +37,13 @@ public class StateInputStream extends InputStream {
     private Type stateType;
     private StateElement stateElement;
     private List<String> streamIdList;
+    private TimeConstant withinTime;
 
-    public StateInputStream(Type stateType, StateElement stateElement) {
+    public StateInputStream(Type stateType, StateElement stateElement, TimeConstant withinTime) {
         this.stateType = stateType;
         this.stateElement = stateElement;
         this.streamIdList = collectStreamIds(stateElement, new ArrayList<String>());
+        this.withinTime = withinTime;
     }
 
     public StateElement getStateElement() {
@@ -97,12 +100,17 @@ public class StateInputStream extends InputStream {
         return count;
     }
 
+    public TimeConstant getWithinTime() {
+        return withinTime;
+    }
+
     @Override
     public String toString() {
         return "StateInputStream{" +
                 "stateType=" + stateType +
                 ", stateElement=" + stateElement +
                 ", streamIdList=" + streamIdList +
+                ", withinTime=" + withinTime +
                 '}';
     }
 
@@ -117,17 +125,16 @@ public class StateInputStream extends InputStream {
 
         StateInputStream that = (StateInputStream) o;
 
-        if (stateElement != null ? !stateElement.equals(that.stateElement) : that.stateElement != null) {
+        if (stateType != that.stateType) {
             return false;
         }
-        if (stateType != that.stateType) {
+        if (stateElement != null ? !stateElement.equals(that.stateElement) : that.stateElement != null) {
             return false;
         }
         if (streamIdList != null ? !streamIdList.equals(that.streamIdList) : that.streamIdList != null) {
             return false;
         }
-
-        return true;
+        return withinTime != null ? withinTime.equals(that.withinTime) : that.withinTime == null;
     }
 
     @Override
@@ -135,6 +142,7 @@ public class StateInputStream extends InputStream {
         int result = stateType != null ? stateType.hashCode() : 0;
         result = 31 * result + (stateElement != null ? stateElement.hashCode() : 0);
         result = 31 * result + (streamIdList != null ? streamIdList.hashCode() : 0);
+        result = 31 * result + (withinTime != null ? withinTime.hashCode() : 0);
         return result;
     }
 

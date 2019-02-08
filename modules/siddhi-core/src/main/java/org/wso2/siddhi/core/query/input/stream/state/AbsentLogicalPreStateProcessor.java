@@ -29,9 +29,6 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
 import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Logical not processor.
@@ -64,8 +61,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     private TimeConstant waitingTimeConstant;
 
     public AbsentLogicalPreStateProcessor(LogicalStateElement.Type type, StateInputStream.Type stateType,
-                                          List<Map.Entry<Long, Set<Integer>>> withinStates, TimeConstant waitingTime) {
-        super(type, stateType, withinStates);
+                                          TimeConstant waitingTime) {
+        super(type, stateType);
         if (waitingTime != null) {
             this.waitingTime = waitingTime.value();
             this.waitingTimeConstant = waitingTime;
@@ -153,11 +150,13 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                     StateEvent stateEvent = iterator.next();
 
                     // Remove expired events based on within
-                    if (withinStates.size() > 0) {
-                        if (isExpired(stateEvent, currentTime)) {
-                            iterator.remove();
-                            continue;
+                    if (isExpired(stateEvent, currentTime)) {
+                        iterator.remove();
+                        if (withinEveryPreStateProcessor != null) {
+                            withinEveryPreStateProcessor.addEveryState(stateEvent);
+                            withinEveryPreStateProcessor.updateState();
                         }
+                        continue;
                     }
 
                     // Collect the events that came before the waiting time
@@ -256,11 +255,13 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         try {
             for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
-                if (withinStates.size() > 0) {
-                    if (isExpired(stateEvent, streamEvent.getTimestamp())) {
-                        iterator.remove();
-                        continue;
+                if (isExpired(stateEvent, streamEvent.getTimestamp())) {
+                    if (withinEveryPreStateProcessor != null) {
+                        withinEveryPreStateProcessor.addEveryState(stateEvent);
+                        withinEveryPreStateProcessor.updateState();
                     }
+                    iterator.remove();
+                    continue;
                 }
                 if (logicalType == LogicalStateElement.Type.OR &&
                         stateEvent.getStreamEvent(partnerStatePreProcessor.getStateId()) != null) {
@@ -315,7 +316,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     @Override
     public PreStateProcessor cloneProcessor(String key) {
         AbsentLogicalPreStateProcessor logicalPreStateProcessor = new AbsentLogicalPreStateProcessor(logicalType,
-                stateType, withinStates, waitingTimeConstant);
+                stateType, waitingTimeConstant);
         cloneProperties(logicalPreStateProcessor, key);
         logicalPreStateProcessor.init(siddhiAppContext, queryName);
 

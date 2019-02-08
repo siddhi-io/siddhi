@@ -22,6 +22,7 @@ import org.wso2.siddhi.query.api.aggregation.Within;
 import org.wso2.siddhi.query.api.execution.query.Query;
 import org.wso2.siddhi.query.api.execution.query.input.state.StateElement;
 import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
 
 import java.util.List;
 
@@ -89,11 +90,19 @@ public abstract class InputStream implements SiddhiElement {
     }
 
     public static StateInputStream patternStream(StateElement patternElement) {
-        return new StateInputStream(StateInputStream.Type.PATTERN, patternElement);
+        return new StateInputStream(StateInputStream.Type.PATTERN, patternElement, null);
+    }
+
+    public static StateInputStream patternStream(StateElement patternElement, TimeConstant timeConstant) {
+        return new StateInputStream(StateInputStream.Type.PATTERN, patternElement, timeConstant);
     }
 
     public static StateInputStream sequenceStream(StateElement sequenceElement) {
-        return new StateInputStream(StateInputStream.Type.SEQUENCE, sequenceElement);
+        return new StateInputStream(StateInputStream.Type.SEQUENCE, sequenceElement, null);
+    }
+
+    public static StateInputStream sequenceStream(StateElement sequenceElement, TimeConstant timeConstant) {
+        return new StateInputStream(StateInputStream.Type.SEQUENCE, sequenceElement, timeConstant);
     }
 
     public static BasicSingleInputStream innerStream(String streamId) {

@@ -73,8 +73,8 @@ public class AbsentPatternTestCase {
                         State.logicalNot(State.stream(InputStream.stream("Stream2")
                                 .filter(Expression.compare(Expression.variable("price"),
                                         Compare.Operator.GREATER_THAN,
-                                        Expression.variable("price").ofStream("e1")))))
-                                .waitingTime(new TimeConstant(2000)))
+                                        Expression.variable("price").ofStream("e1")))),
+                                new TimeConstant(2000)))
                 ))
                 .select(Selector.selector().select("symbol1", Expression.variable("symbol").ofStream("e1")))
                 .insertInto("OutputStream");

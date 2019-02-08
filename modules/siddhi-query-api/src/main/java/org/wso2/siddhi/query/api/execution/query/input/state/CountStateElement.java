@@ -17,8 +17,6 @@
  */
 package org.wso2.siddhi.query.api.execution.query.input.state;
 
-import org.wso2.siddhi.query.api.expression.constant.TimeConstant;
-
 /**
  * Count state element used in patterns
  */
@@ -27,18 +25,10 @@ public class CountStateElement implements StateElement {
     private static final long serialVersionUID = 1L;
     public static final int ANY = -1;
     private StreamStateElement streamStateElement;
-    private TimeConstant within;
     private int minCount = ANY;
     private int maxCount = ANY;
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
-
-    public CountStateElement(StreamStateElement streamStateElement, int minCount, int maxCount, TimeConstant within) {
-        this.streamStateElement = streamStateElement;
-        this.within = within;
-        this.minCount = minCount;
-        this.maxCount = maxCount;
-    }
 
     public CountStateElement(StreamStateElement streamStateElement, int minCount, int maxCount) {
         this.streamStateElement = streamStateElement;
@@ -59,19 +49,9 @@ public class CountStateElement implements StateElement {
     }
 
     @Override
-    public TimeConstant getWithin() {
-        return within;
-    }
-
-    public void setWithin(TimeConstant within) {
-        this.within = within;
-    }
-
-    @Override
     public String toString() {
         return "CountStateElement{" +
                 "streamStateElement=" + streamStateElement +
-                ", within=" + within +
                 ", minCount=" + minCount +
                 ", maxCount=" + maxCount +
                 '}';
@@ -98,17 +78,12 @@ public class CountStateElement implements StateElement {
                 .streamStateElement != null) {
             return false;
         }
-        if (within != null ? !within.equals(that.within) : that.within != null) {
-            return false;
-        }
-
         return true;
     }
 
     @Override
     public int hashCode() {
         int result = streamStateElement != null ? streamStateElement.hashCode() : 0;
-        result = 31 * result + (within != null ? within.hashCode() : 0);
         result = 31 * result + minCount;
         result = 31 * result + maxCount;
         return result;
