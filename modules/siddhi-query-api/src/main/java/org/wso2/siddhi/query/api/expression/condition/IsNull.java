@@ -18,6 +18,7 @@
 package org.wso2.siddhi.query.api.expression.condition;
 
 import org.wso2.siddhi.query.api.expression.Expression;
+import org.wso2.siddhi.query.api.util.SiddhiConstants;
 
 /**
  * Condition {@link Expression} checking whether the event is null
@@ -29,6 +30,7 @@ public class IsNull extends Expression {
     private String streamId;
     private Integer streamIndex;
     private boolean isInnerStream;
+    private boolean isFaultStream;
     private Expression expression;
 
     public IsNull(Expression expression) {
@@ -36,10 +38,27 @@ public class IsNull extends Expression {
     }
 
     public IsNull(String streamId, Integer streamIndex, boolean isInnerStream) {
+        this(streamId, streamIndex, isInnerStream, false);
+    }
 
-        this.streamId = streamId;
+    public IsNull(String streamId, Integer streamIndex, boolean isInnerStream, boolean isFaultStream) {
         this.streamIndex = streamIndex;
         this.isInnerStream = isInnerStream;
+        this.isFaultStream = isFaultStream;
+        if (isInnerStream) {
+            if (isFaultStream) {
+                this.streamId = SiddhiConstants.FAULT_STREAM_FLAG.concat(SiddhiConstants.INNER_STREAM_FLAG)
+                        .concat(streamId);
+            } else {
+                this.streamId = SiddhiConstants.INNER_STREAM_FLAG.concat(streamId);
+            }
+        } else {
+            if (isFaultStream) {
+                this.streamId = SiddhiConstants.FAULT_STREAM_FLAG.concat(streamId);
+            } else {
+                this.streamId = streamId;
+            }
+        }
     }
 
     public Expression getExpression() {
@@ -58,14 +77,8 @@ public class IsNull extends Expression {
         return isInnerStream;
     }
 
-    @Override
-    public String toString() {
-        return "IsNull{" +
-                "id='" + streamId + '\'' +
-                ", streamIndex=" + streamIndex +
-                ", isInnerStream=" + isInnerStream +
-                ", expression=" + expression +
-                "} ";
+    public boolean isFaultStream() {
+        return isFaultStream;
     }
 
     @Override
@@ -77,22 +90,21 @@ public class IsNull extends Expression {
             return false;
         }
 
-        IsNull that = (IsNull) o;
+        IsNull isNull = (IsNull) o;
 
-        if (isInnerStream != that.isInnerStream) {
+        if (isInnerStream != isNull.isInnerStream) {
             return false;
         }
-        if (expression != null ? !expression.equals(that.expression) : that.expression != null) {
+        if (isFaultStream != isNull.isFaultStream) {
             return false;
         }
-        if (streamId != null ? !streamId.equals(that.streamId) : that.streamId != null) {
+        if (streamId != null ? !streamId.equals(isNull.streamId) : isNull.streamId != null) {
             return false;
         }
-        if (streamIndex != null ? !streamIndex.equals(that.streamIndex) : that.streamIndex != null) {
+        if (streamIndex != null ? !streamIndex.equals(isNull.streamIndex) : isNull.streamIndex != null) {
             return false;
         }
-
-        return true;
+        return expression != null ? expression.equals(isNull.expression) : isNull.expression == null;
     }
 
     @Override
@@ -100,8 +112,19 @@ public class IsNull extends Expression {
         int result = streamId != null ? streamId.hashCode() : 0;
         result = 31 * result + (streamIndex != null ? streamIndex.hashCode() : 0);
         result = 31 * result + (isInnerStream ? 1 : 0);
+        result = 31 * result + (isFaultStream ? 1 : 0);
         result = 31 * result + (expression != null ? expression.hashCode() : 0);
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "IsNull{" +
+                "streamId='" + streamId + '\'' +
+                ", streamIndex=" + streamIndex +
+                ", isInnerStream=" + isInnerStream +
+                ", isFaultStream=" + isFaultStream +
+                ", expression=" + expression +
+                '}';
+    }
 }

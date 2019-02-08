@@ -33,6 +33,7 @@ import java.util.List;
 public class SingleInputStream extends InputStream {
 
     private static final long serialVersionUID = 1L;
+    protected boolean isFaultStream = false;
     protected boolean isInnerStream = false;
     protected String streamId;
     protected String streamReferenceId;
@@ -52,17 +53,32 @@ public class SingleInputStream extends InputStream {
     }
 
     public SingleInputStream(String streamReferenceId, String streamId, boolean isInnerStream) {
+      this(streamReferenceId, streamId, isInnerStream, false);
+    }
+
+    public SingleInputStream(String streamReferenceId, String streamId, boolean isInnerStream, boolean isFaultStream) {
         this.streamReferenceId = streamReferenceId;
+        this.isFaultStream = isFaultStream;
         this.isInnerStream = isInnerStream;
         if (isInnerStream) {
-            this.streamId = SiddhiConstants.INNER_STREAM_FLAG.concat(streamId);
+            if (isFaultStream) {
+                this.streamId = SiddhiConstants.FAULT_STREAM_FLAG.concat(SiddhiConstants.INNER_STREAM_FLAG).
+                        concat(streamId);
+            } else {
+                this.streamId = SiddhiConstants.INNER_STREAM_FLAG.concat(streamId);
+            }
         } else {
-            this.streamId = streamId;
+            if (isFaultStream) {
+                this.streamId = SiddhiConstants.FAULT_STREAM_FLAG.concat(streamId);
+            } else {
+                this.streamId = streamId;
+            }
         }
     }
 
     public SingleInputStream(BasicSingleInputStream basicSingleInputStream, Window window) {
         streamId = basicSingleInputStream.getStreamId();
+        isFaultStream = basicSingleInputStream.isFaultStream();
         isInnerStream = basicSingleInputStream.isInnerStream();
         streamReferenceId = basicSingleInputStream.getStreamReferenceId();
         streamHandlers = basicSingleInputStream.getStreamHandlers();
@@ -127,6 +143,10 @@ public class SingleInputStream extends InputStream {
         return this;
     }
 
+    public boolean isFaultStream() {
+        return isFaultStream;
+    }
+
     public boolean isInnerStream() {
         return isInnerStream;
     }
@@ -134,7 +154,8 @@ public class SingleInputStream extends InputStream {
     @Override
     public String toString() {
         return "SingleInputStream{" +
-                "isInnerStream=" + isInnerStream +
+                "isFaultStream=" + isFaultStream +
+                ", isInnerStream=" + isInnerStream +
                 ", id='" + streamId + '\'' +
                 ", streamReferenceId='" + streamReferenceId + '\'' +
                 ", streamHandlers=" + streamHandlers +
@@ -153,6 +174,9 @@ public class SingleInputStream extends InputStream {
 
         SingleInputStream that = (SingleInputStream) o;
 
+        if (isFaultStream != that.isFaultStream) {
+            return false;
+        }
         if (isInnerStream != that.isInnerStream) {
             return false;
         }
@@ -175,7 +199,8 @@ public class SingleInputStream extends InputStream {
 
     @Override
     public int hashCode() {
-        int result = (isInnerStream ? 1 : 0);
+        int result = (isFaultStream ? 1 : 0);
+        result = 31 * result + (isInnerStream ? 1 : 0);
         result = 31 * result + (streamId != null ? streamId.hashCode() : 0);
         result = 31 * result + (streamReferenceId != null ? streamReferenceId.hashCode() : 0);
         result = 31 * result + (streamHandlers != null ? streamHandlers.hashCode() : 0);

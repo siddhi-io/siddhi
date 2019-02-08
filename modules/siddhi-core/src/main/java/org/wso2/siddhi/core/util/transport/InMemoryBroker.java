@@ -37,7 +37,7 @@ public class InMemoryBroker {
         broker.unregister(subscriber);
     }
 
-    public static void publish(String topic, Object message) {
+    public static void publish(String topic, Object message) throws SubscriberUnAvailableException {
         broker.publish(topic, message);
     }
 
@@ -46,7 +46,7 @@ public class InMemoryBroker {
 
         void unregister(Subscriber subscriber);
 
-        void broadcast(String topic, Object msg);
+        void broadcast(String topic, Object msg) throws SubscriberUnAvailableException;
     }
 
     /**
@@ -75,7 +75,9 @@ public class InMemoryBroker {
             synchronized (mutex) {
                 if (topicSubscribers.containsKey(subscriber.getTopic())) {
                     if (!topicSubscribers.get(subscriber.getTopic()).contains(subscriber)) {
-                        topicSubscribers.get(subscriber.getTopic()).add(subscriber);
+                        List<Subscriber> list = new ArrayList<>(topicSubscribers.get(subscriber.getTopic()));
+                        list.add(subscriber);
+                        topicSubscribers.put(subscriber.getTopic(), list);
                     }
                 } else {
                     topicSubscribers.put(subscriber.getTopic(), new ArrayList<Subscriber>() {
@@ -91,31 +93,29 @@ public class InMemoryBroker {
         public void unregister(Subscriber subscriber) {
             synchronized (mutex) {
                 try {
-                    topicSubscribers.get(subscriber.getTopic()).remove(subscriber);
+                    List<Subscriber> list = new ArrayList<>(topicSubscribers.get(subscriber.getTopic()));
+                    list.remove(subscriber);
+                    topicSubscribers.put(subscriber.getTopic(), list);
                 } catch (Exception ignored) {
                 }
             }
         }
 
         @Override
-        public void broadcast(String topic, Object msg) {
+        public void broadcast(String topic, Object msg) throws SubscriberUnAvailableException {
             List<Subscriber> subscribers;
-            // synchronization is used to make sure
-            // any observer registered after message
-            // is received is not notified
-            synchronized (mutex) {
-                if (this.topicSubscribers.containsKey(topic)) {
-                    subscribers = new ArrayList<>(this.topicSubscribers.get(topic));
-                    for (Subscriber subscriber : subscribers) {
-                        subscriber.onMessage(msg);
-                    }
+            if (this.topicSubscribers.containsKey(topic) && !this.topicSubscribers.get(topic).isEmpty()) {
+                subscribers = this.topicSubscribers.get(topic);
+                for (Subscriber subscriber : subscribers) {
+                    subscriber.onMessage(msg);
                 }
+            } else {
+                throw new SubscriberUnAvailableException("Subscriber for topic '" + topic + "' is unavailable.");
             }
         }
 
-        public void publish(String topic, Object msg) {
+        public void publish(String topic, Object msg) throws SubscriberUnAvailableException {
             broadcast(topic, msg);
         }
-
     }
 }

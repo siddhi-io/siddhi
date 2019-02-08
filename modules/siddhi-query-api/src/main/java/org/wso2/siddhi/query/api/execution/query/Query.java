@@ -96,6 +96,16 @@ public class Query implements ExecutionElement, SiddhiElement {
         return this;
     }
 
+    public Query insertIntoFault(String outputStreamId, OutputStream.OutputEventType outputEventType) {
+        this.outputStream = new InsertIntoStream(outputStreamId, false, true, outputEventType);
+        return this;
+    }
+
+    public Query insertIntoFault(String outputStreamId) {
+        this.outputStream = new InsertIntoStream(outputStreamId, false, true);
+        return this;
+    }
+
     public Query returns() {
         this.outputStream = new ReturnStream();
         return this;
