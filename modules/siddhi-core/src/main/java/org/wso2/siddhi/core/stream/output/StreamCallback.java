@@ -23,10 +23,13 @@ import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
+import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * StreamCallback is used to receive events from {@link StreamJunction}. This class should be extended if one intends
@@ -59,6 +62,31 @@ public abstract class StreamCallback implements StreamJunction.Receiver {
 
     public void setContext(SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
+    }
+
+    public Map<String, Object> toMap(Event event) {
+        if (event != null) {
+            Map<String, Object> mapEvent = new HashMap<>();
+            Object[] data = event.getData();
+            List<Attribute> attributeList = streamDefinition.getAttributeList();
+            mapEvent.put("_timestamp", event.getTimestamp());
+            for (int i = 0; i < data.length; i++) {
+                mapEvent.put(attributeList.get(i).getName(), data[i]);
+            }
+            return mapEvent;
+        }
+        return null;
+    }
+
+    public Map<String, Object>[] toMap(Event[] events) {
+        if (events != null) {
+            Map[] mapEvents = new Map[events.length];
+            for (int i = 0; i < events.length; i++) {
+                mapEvents[i] = toMap(events[i]);
+            }
+            return mapEvents;
+        }
+        return null;
     }
 
     @Override

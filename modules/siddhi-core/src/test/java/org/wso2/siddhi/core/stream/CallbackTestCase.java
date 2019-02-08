@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.stream;
 
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,6 +33,8 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 
+import java.util.Map;
+
 /**
  * Created on 1/24/15.
  */
@@ -40,11 +43,13 @@ public class CallbackTestCase {
     private static final Logger log = Logger.getLogger(CallbackTestCase.class);
     private volatile int count;
     private volatile boolean eventArrived;
+    private volatile boolean eventArrived2;
 
     @BeforeMethod
     public void init() {
         count = 0;
         eventArrived = false;
+        eventArrived2 = false;
     }
 
     @Test
@@ -154,4 +159,69 @@ public class CallbackTestCase {
 
         siddhiAppRuntime.shutdown();
     }
+
+    @Test
+    public void callbackTest4() throws InterruptedException {
+        log.info("callback test4");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "@app:name('callbackTest1') " +
+                "" +
+                "define stream StockStream (symbol string, price float, volume long);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from StockStream[70 > price] " +
+                "select symbol, price " +
+                "insert into OutputStream;";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+
+        siddhiAppRuntime.addCallback("StockStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                Map<String, Object>[] eventMap = toMap(events);
+                Assert.assertEquals(eventMap.length, events.length);
+                Assert.assertEquals(eventMap[0].get("_timestamp"), events[0].getTimestamp());
+                Assert.assertEquals(eventMap[1].get("_timestamp"), events[1].getTimestamp());
+                Assert.assertEquals(eventMap[1].get("volume"), events[1].getData(2));
+                count = count + events.length;
+                eventArrived = true;
+            }
+        });
+
+        siddhiAppRuntime.addCallback("OutputStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                Map<String, Object>[] eventMap = toMap(events);
+                Assert.assertEquals(eventMap.length, events.length);
+                Assert.assertEquals(eventMap[0].get("_timestamp"), events[0].getTimestamp());
+                Assert.assertEquals(eventMap[0].get("price"), events[0].getData(1));
+                Assert.assertEquals(eventMap[0].get("symbol"), events[0].getData(0));
+                Assert.assertNull(eventMap[0].get("volume"));
+                count = count + events.length;
+                eventArrived2 = true;
+            }
+        });
+
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
+
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Event[]{
+                new Event(System.currentTimeMillis(), new Object[]{"IBM", 700f, 100L}),
+                new Event(System.currentTimeMillis(), new Object[]{"WSO2", 60.5f, 200L})});
+        Thread.sleep(100);
+        AssertJUnit.assertEquals(3, count);
+        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived2);
+
+        siddhiAppRuntime.shutdown();
+    }
+
 }
