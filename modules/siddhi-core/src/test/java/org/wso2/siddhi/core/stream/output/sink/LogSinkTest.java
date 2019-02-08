@@ -60,6 +60,7 @@ public class LogSinkTest {
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing with all options", e);
         } finally {
+            logger.removeAppender(appender);
             siddhiAppRuntime.shutdown();
         }
     }

@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.StreamJunction;
 
+import java.beans.ExceptionListener;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,14 +38,20 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
     private final String siddhiAppName;
     private List<Event> eventBuffer = new LinkedList<>();
     private static final Logger log = Logger.getLogger(StreamHandler.class);
-
+    private final StreamJunction faultStreamJunction;
+    private final StreamJunction.OnErrorAction onErrorAction;
+    private final ExceptionListener exceptionListener;
 
     public StreamHandler(List<StreamJunction.Receiver> receivers, int batchSize,
-                         String streamName, String siddhiAppName) {
+                         String streamName, String siddhiAppName, StreamJunction faultStreamJunction,
+                         StreamJunction.OnErrorAction onErrorAction, ExceptionListener exceptionListener) {
         this.receivers = receivers;
         this.batchSize = batchSize;
         this.streamName = streamName;
         this.siddhiAppName = siddhiAppName;
+        this.faultStreamJunction = faultStreamJunction;
+        this.onErrorAction = onErrorAction;
+        this.exceptionListener = exceptionListener;
     }
 
     public void onEvent(EventExchangeHolder eventExchangeHolder, long sequence, boolean endOfBatch) {
@@ -55,10 +62,8 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
                 for (StreamJunction.Receiver receiver : receivers) {
                     try {
                         receiver.receive(eventBuffer);
-                    } catch (Throwable t) {
-                        log.error("Error in SiddhiApp '" + siddhiAppName +
-                                "' after consuming events from Stream " +
-                                "'" + streamName + "', " + t.getMessage(), t);
+                    } catch (Exception e) {
+                        onError(eventBuffer, e);
                     }
                 }
                 eventBuffer.clear();
@@ -68,15 +73,44 @@ public class StreamHandler implements EventHandler<EventExchangeHolder> {
                 for (StreamJunction.Receiver receiver : receivers) {
                     try {
                         receiver.receive(eventBuffer);
-                    } catch (Throwable t) {
-                        log.error("Error in SiddhiApp '" + siddhiAppName +
-                                "' after consuming events from Stream " +
-                                "'" + streamName + "', " + t.getMessage(), t);
+                    } catch (Exception e) {
+                        onError(eventBuffer, e);
                     }
                 }
                 eventBuffer.clear();
             }
         }
 
+    }
+
+    private void onError(List<Event> eventBuffer, Exception e) {
+        if (exceptionListener != null) {
+            exceptionListener.exceptionThrown(e);
+        }
+        switch (onErrorAction) {
+            case LOG:
+                for (Event event : eventBuffer) {
+                    log.error("Error in SiddhiApp '" + siddhiAppName +
+                            "' after consuming events from Stream " +
+                            "'" + streamName + "', " + e.getMessage() + ". Hence, dropping event '"
+                            + event.toString() + "'", e);
+                }
+                break;
+            case STREAM:
+                for (Event event : eventBuffer) {
+                    if (faultStreamJunction != null) {
+                        faultStreamJunction.sendEvent(event);
+                    } else {
+                        log.error("Error in SiddhiApp '" + siddhiAppName +
+                                "' after consuming events from Stream " +
+                                "'" + streamName + "', " + e.getMessage()
+                                + ". Siddhi Fault Stream for '" + streamName + "' is not defined. "
+                                + "Hence dropping the event '" + event.toString() + "'", e);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -24,6 +24,8 @@ import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
+import org.wso2.siddhi.core.stream.StreamJunction;
+import org.wso2.siddhi.core.stream.output.sink.Sink;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
@@ -37,6 +39,7 @@ import org.wso2.siddhi.query.api.SiddhiApp;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.annotation.Element;
 import org.wso2.siddhi.query.api.definition.AggregationDefinition;
+import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.FunctionDefinition;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -71,10 +74,10 @@ public class SiddhiAppParser {
      * @param siddhiApp       plan to be parsed
      * @param siddhiAppString content of Siddhi application as string
      * @param siddhiContext   SiddhiContext  @return SiddhiAppRuntime
-     *
      * @return SiddhiAppRuntimeBuilder
      */
-    public static SiddhiAppRuntimeBuilder parse(SiddhiApp siddhiApp, String siddhiAppString, SiddhiContext siddhiContext) {
+    public static SiddhiAppRuntimeBuilder parse(SiddhiApp siddhiApp, String siddhiAppString,
+                                                SiddhiContext siddhiContext) {
 
         SiddhiAppContext siddhiAppContext = new SiddhiAppContext();
         siddhiAppContext.setSiddhiContext(siddhiContext);
@@ -304,12 +307,37 @@ public class SiddhiAppParser {
                                                 SiddhiAppContext siddhiAppContext) {
         for (StreamDefinition definition : streamDefinitionMap.values()) {
             try {
+                Annotation onErrorAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR,
+                        definition.getAnnotations());
+                if (onErrorAnnotation != null) {
+                    StreamJunction.OnErrorAction onErrorAction = StreamJunction.OnErrorAction.valueOf(onErrorAnnotation
+                            .getElement(SiddhiConstants.ANNOTATION_ELEMENT_ACTION).toUpperCase());
+                    if (onErrorAction == StreamJunction.OnErrorAction.STREAM) {
+                        StreamDefinition faultStreamDefinition = createFaultStreamDefinition(definition);
+                        siddhiAppRuntimeBuilder.defineStream(faultStreamDefinition);
+                    }
+                }
                 siddhiAppRuntimeBuilder.defineStream(definition);
             } catch (Throwable t) {
                 ExceptionUtil.populateQueryContext(t, definition, siddhiAppContext);
                 throw t;
             }
         }
+    }
+
+    private static StreamDefinition createFaultStreamDefinition(StreamDefinition streamDefinition) {
+
+        List<Attribute> attributeList = streamDefinition.getAttributeList();
+        StreamDefinition faultStreamDefinition = new StreamDefinition();
+        faultStreamDefinition.setId(SiddhiConstants.FAULT_STREAM_PREFIX.concat(streamDefinition.getId()));
+        for (Attribute attribute : attributeList) {
+            faultStreamDefinition.attribute(attribute.getName(), attribute.getType());
+        }
+        faultStreamDefinition.attribute("_error", Attribute.Type.OBJECT);
+
+        faultStreamDefinition.setQueryContextStartIndex(streamDefinition.getQueryContextStartIndex());
+        faultStreamDefinition.setQueryContextEndIndex(streamDefinition.getQueryContextEndIndex());
+        return faultStreamDefinition;
     }
 
     private static void defineTableDefinitions(SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder,

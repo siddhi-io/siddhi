@@ -26,6 +26,9 @@ import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import org.wso2.siddhi.core.event.stream.converter.FaultStreamEventConverter;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputProcessor;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
@@ -41,7 +44,9 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.exception.DuplicateAnnotationException;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
+import java.beans.ExceptionListener;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,9 +74,13 @@ public class StreamJunction implements EventBufferHolder {
     private RingBuffer<EventExchangeHolder> ringBuffer;
     private ThroughputTracker throughputTracker = null;
     private boolean isTraceEnabled;
+    private StreamJunction faultStreamJunction = null;
+    private FaultStreamEventConverter faultStreamEventChunk = null;
+    private OnErrorAction onErrorAction = OnErrorAction.LOG;
+    private ExceptionListener exceptionListener;
 
     public StreamJunction(StreamDefinition streamDefinition, ExecutorService executorService, int bufferSize,
-                          SiddhiAppContext siddhiAppContext) {
+                          StreamJunction faultStreamJunction, SiddhiAppContext siddhiAppContext) {
         this.streamDefinition = streamDefinition;
         this.bufferSize = bufferSize;
         this.batchSize = bufferSize;
@@ -82,39 +91,54 @@ public class StreamJunction implements EventBufferHolder {
                     streamDefinition.getId(),
                     SiddhiConstants.METRIC_INFIX_STREAMS, null);
         }
+        this.exceptionListener = siddhiAppContext.getRuntimeExceptionListener();
+        this.faultStreamJunction = faultStreamJunction;
+        if (faultStreamJunction != null) {
+            StreamDefinition faultStreamDefinition = faultStreamJunction.getStreamDefinition();
+            StreamEventPool faultStreamEventPool = new StreamEventPool(0, 0,
+                    faultStreamDefinition.getAttributeList().size(), 5);
+            faultStreamEventPool.borrowEvent();
+            faultStreamEventChunk = new FaultStreamEventConverter(faultStreamEventPool);
+
+        }
         try {
-            Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ASYNC,
+            Annotation asyncAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ASYNC,
                     streamDefinition.getAnnotations());
-            if (annotation != null) {
+            if (asyncAnnotation != null) {
                 async = true;
-                String bufferSizeString = annotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_BUFFER_SIZE);
+                String bufferSizeString = asyncAnnotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_BUFFER_SIZE);
                 if (bufferSizeString != null) {
                     this.bufferSize = Integer.parseInt(bufferSizeString);
                 }
-                String workersString = annotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_WORKERS);
+                String workersString = asyncAnnotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_WORKERS);
                 if (workersString != null) {
                     this.workers = Integer.parseInt(workersString);
                     if (workers <= 0) {
                         throw new SiddhiAppCreationException("Annotation element '" +
                                 SiddhiConstants.ANNOTATION_ELEMENT_WORKERS + "' cannot be negative or zero, " +
-                                "but found, '" + workers + "'.", annotation.getQueryContextStartIndex(),
-                                annotation.getQueryContextEndIndex(), siddhiAppContext.getName(),
+                                "but found, '" + workers + "'.", asyncAnnotation.getQueryContextStartIndex(),
+                                asyncAnnotation.getQueryContextEndIndex(), siddhiAppContext.getName(),
                                 siddhiAppContext.getSiddhiAppString());
                     }
                 }
-                String batchSizeString = annotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_MAX_BATCH_SIZE);
+                String batchSizeString = asyncAnnotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_MAX_BATCH_SIZE);
                 if (batchSizeString != null) {
                     this.batchSize = Integer.parseInt(batchSizeString);
                     if (batchSize <= 0) {
                         throw new SiddhiAppCreationException("Annotation element '" +
                                 SiddhiConstants.ANNOTATION_ELEMENT_MAX_BATCH_SIZE + "' cannot be negative or zero, " +
-                                "but found, '" + batchSize + "'.", annotation.getQueryContextStartIndex(),
-                                annotation.getQueryContextEndIndex(), siddhiAppContext.getName(),
+                                "but found, '" + batchSize + "'.", asyncAnnotation.getQueryContextStartIndex(),
+                                asyncAnnotation.getQueryContextEndIndex(), siddhiAppContext.getName(),
                                 siddhiAppContext.getSiddhiAppString());
                     }
                 }
             }
-
+            Annotation onErrorAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ON_ERROR,
+                    streamDefinition.getAnnotations());
+            if (onErrorAnnotation != null) {
+                this.onErrorAction = OnErrorAction.valueOf(onErrorAnnotation
+                        .getElement(SiddhiConstants.ANNOTATION_ELEMENT_ACTION).toUpperCase());
+            }
         } catch (DuplicateAnnotationException e) {
             throw new DuplicateAnnotationException(e.getMessageWithOutContext() + " for the same Stream " +
                     streamDefinition.getId(), e, e.getQueryContextStartIndex(), e.getQueryContextEndIndex(),
@@ -275,11 +299,11 @@ public class StreamJunction implements EventBufferHolder {
             if (workers > 0) {
                 for (int i = 0; i < workers; i++) {
                     disruptor.handleEventsWith(new StreamHandler(receivers, batchSize, streamDefinition.getId(),
-                            siddhiAppContext.getName()));
+                            siddhiAppContext.getName(), faultStreamJunction, onErrorAction, exceptionListener));
                 }
             } else {
                 disruptor.handleEventsWith(new StreamHandler(receivers, batchSize, streamDefinition.getId(),
-                        siddhiAppContext.getName()));
+                        siddhiAppContext.getName(), faultStreamJunction, onErrorAction, exceptionListener));
             }
             ringBuffer = disruptor.start();
         } else {
@@ -339,6 +363,14 @@ public class StreamJunction implements EventBufferHolder {
     }
 
     /**
+     * Different Type of On Error Actions
+     */
+    public enum OnErrorAction {
+        LOG,
+        STREAM
+    }
+
+    /**
      * Interface to be implemented by all receivers who need to subscribe to Stream Junction and receive events.
      */
     public interface Receiver {
@@ -368,31 +400,126 @@ public class StreamJunction implements EventBufferHolder {
         }
 
         public void send(ComplexEvent complexEvent) {
-            streamJunction.sendEvent(complexEvent);
+            try {
+                streamJunction.sendEvent(complexEvent);
+            } catch (Exception e) {
+                handleError(complexEvent, e);
+            }
         }
 
         @Override
         public void send(Event event, int streamIndex) {
-            streamJunction.sendEvent(event);
+            try {
+                streamJunction.sendEvent(event);
+            } catch (Exception e) {
+                handleError(event, e);
+            }
         }
 
         @Override
         public void send(Event[] events, int streamIndex) {
-            streamJunction.sendEvent(events);
+            try {
+                streamJunction.sendEvent(events);
+            } catch (Exception e) {
+                handleError(events, e);
+            }
         }
 
         @Override
         public void send(List<Event> events, int streamIndex) {
-            streamJunction.sendEvent(events);
+            try {
+                streamJunction.sendEvent(events);
+            } catch (Exception e) {
+                handleError(events, e);
+            }
         }
 
         @Override
         public void send(long timeStamp, Object[] data, int streamIndex) {
-            streamJunction.sendData(timeStamp, data);
+            try {
+                streamJunction.sendData(timeStamp, data);
+            } catch (Exception e) {
+                handleError(timeStamp, data, e);
+            }
         }
 
         public String getStreamId() {
             return streamJunction.getStreamId();
+        }
+
+        private void handleError(Object event, Exception e) {
+            if (exceptionListener != null) {
+                exceptionListener.exceptionThrown(e);
+            }
+            switch (onErrorAction) {
+                case LOG:
+                    log.error("Error in '" + siddhiAppContext.getName() + "' after consuming events "
+                            + "from Stream '" + streamDefinition.getId() + "', " + e.getMessage()
+                            + ". Hence, dropping event '" + event.toString() + "'", e);
+                    break;
+                case STREAM:
+                    if (faultStreamJunction != null) {
+                        StreamEvent streamEvent = null;
+                        if (event instanceof ComplexEvent) {
+                            synchronized (this) {
+                                streamEvent = faultStreamEventChunk.convert((ComplexEvent) event, e);
+                            }
+                            faultStreamJunction.sendEvent(streamEvent);
+                        } else if (event instanceof Event) {
+                            synchronized (this) {
+                                streamEvent = faultStreamEventChunk.convert((Event) event, e);
+                            }
+                            faultStreamJunction.sendEvent(streamEvent);
+                        } else if (event instanceof Event[]) {
+                            synchronized (this) {
+                                streamEvent = faultStreamEventChunk.convert((Event[]) event, e);
+                            }
+                            faultStreamJunction.sendEvent(streamEvent);
+                        } else if (event instanceof List) {
+                            synchronized (this) {
+                                streamEvent = faultStreamEventChunk.convert((List<Event>) event, e);
+                            }
+                            faultStreamJunction.sendEvent(streamEvent);
+                        }
+                    } else {
+                        log.error("Error in SiddhiApp '" + siddhiAppContext.getName() +
+                                "' after consuming events from Stream " + "'" + streamDefinition.getId()
+                                + "', " + e.getMessage() + ". Siddhi Fault Stream for '" + streamDefinition.getId()
+                                + "' is not defined. " + "Hence, dropping event '" + event.toString() + "'", e);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void handleError(long timeStamp, Object[] data, Exception e) {
+            if (exceptionListener != null) {
+                exceptionListener.exceptionThrown(e);
+            }
+            switch (onErrorAction) {
+                case LOG:
+                    log.error("Error in '" + siddhiAppContext.getName() + "' after consuming events "
+                            + "from Stream '" + streamDefinition.getId() + "' , " + e.getMessage()
+                            + ". Hence, dropping event '" + Arrays.toString(data) + "'", e);
+                    break;
+                case STREAM:
+                    if (faultStreamJunction != null) {
+                        StreamEvent streamEvent = null;
+                        synchronized (this) {
+                            streamEvent = faultStreamEventChunk.convert(timeStamp, data, e);
+                        }
+                        faultStreamJunction.sendEvent(streamEvent);
+                    } else {
+                        log.error("Error in SiddhiApp '" + siddhiAppContext.getName() +
+                                "' after consuming events from Stream " + "'" + streamDefinition.getId()
+                                + "', " + e.getMessage() + ". Siddhi Fault Stream for '" + streamDefinition.getId()
+                                + "' is not defined. " + "Hence, dropping data '" + Arrays.toString(data) + "'", e);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

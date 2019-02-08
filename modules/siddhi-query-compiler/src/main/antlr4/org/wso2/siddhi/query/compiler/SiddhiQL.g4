@@ -486,11 +486,11 @@ null_check
     ;
 
 stream_reference
-    :hash='#'? name ('['attribute_index']')?
+    :(hash='#'|not='!')? name ('['attribute_index']')?
     ;
 
 attribute_reference
-    : hash1='#'? name1=name ('['attribute_index1=attribute_index']')? (hash2='#' name2=name ('['attribute_index2=attribute_index']')?)? '.'  attribute_name
+    : (hash1='#'|not='!')? name1=name ('['attribute_index1=attribute_index']')? (hash2='#' name2=name ('['attribute_index2=attribute_index']')?)? '.'  attribute_name
     | attribute_name
     ;
 
@@ -539,7 +539,7 @@ property_separator
     ;
 
 source
-    :inner='#'? stream_id
+    :(inner='#' | fault='!')? stream_id
     ;
 
 target

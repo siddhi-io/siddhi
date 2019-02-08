@@ -84,12 +84,25 @@ public class Variable extends Expression {
     }
 
     public void setStreamId(boolean isInnerStream, String streamId) {
+        setStreamId(isInnerStream, false, streamId);
+    }
+
+    public void setStreamId(boolean isInnerStream, boolean isFaultStream, String streamId) {
         this.isInnerStream = isInnerStream;
         if (isInnerStream) {
-            this.streamId = SiddhiConstants.INNER_STREAM_FLAG.concat(streamId);
-        } else {
-            this.streamId = streamId;
+            if (isFaultStream) {
+                this.streamId = SiddhiConstants.FAULT_STREAM_FLAG.
+                        concat(SiddhiConstants.INNER_STREAM_FLAG).concat(streamId);
 
+            } else {
+                this.streamId = SiddhiConstants.INNER_STREAM_FLAG.concat(streamId);
+            }
+        } else {
+            if (isFaultStream) {
+                this.streamId = SiddhiConstants.FAULT_STREAM_FLAG.concat(streamId);
+            } else {
+                this.streamId = streamId;
+            }
         }
     }
 

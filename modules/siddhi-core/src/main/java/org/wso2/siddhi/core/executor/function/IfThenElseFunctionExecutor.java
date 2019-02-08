@@ -25,8 +25,8 @@ import org.wso2.siddhi.annotation.ReturnAttribute;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
@@ -155,9 +155,8 @@ public class IfThenElseFunctionExecutor extends FunctionExecutor {
                     }
             );
         } catch (Exception e) {
-            log.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                    " Exception on class '" + this.getClass().getName() + "', " + e.getMessage(), e);
-            return null;
+            throw new SiddhiAppRuntimeException(e.getMessage() + ". Exception on class '" + this.getClass().getName()
+                    + "'", e);
         }
     }
 }

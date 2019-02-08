@@ -19,16 +19,18 @@
 package org.wso2.siddhi.core.aggregation;
 
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.UnitTestAppender;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.exception.StoreQueryCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
+import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
@@ -1014,8 +1016,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
         siddhiManager.createSiddhiAppRuntime(stockStream + query);
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest15"}, expectedExceptions =
-            SiddhiAppRuntimeException.class)
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest15"})
     public void incrementalStreamProcessorTest16() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest16");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -1037,6 +1038,25 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
 
         InputHandler stockStreamInputHandler = siddhiAppRuntime.getInputHandler("stockStream");
         siddhiAppRuntime.start();
+
+        Logger logger = Logger.getLogger(StreamJunction.class);
+        UnitTestAppender appender = new UnitTestAppender();
+        logger.addAppender(appender);
+        try {
+            // Thursday, June 1, 2017 4:05:50 AM
+            stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, "June 1, 2017 4:05:50 AM"});
+
+            AssertJUnit.assertTrue(appender.getMessages().contains("'June 1, 2017 4:05:50 AM' doesn't match the " +
+                    "supported formats <yyyy>-<MM>-<dd> <HH>:<mm>:<ss> (for GMT time zone) or <yyyy>-<MM>-<dd> " +
+                    "<HH>:<mm>:<ss> <Z> (for non GMT time zone). The ISO 8601 UTC offset must be provided for <Z> " +
+                    "(ex. +05:30, -11:00). Exception on class 'org.wso2.siddhi.core.executor.incremental." +
+                    "IncrementalUnixTimeFunctionExecutor'. Hence, dropping event"));
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception occurred when testing.", e);
+        } finally {
+            logger.removeAppender(appender);
+            siddhiAppRuntime.shutdown();
+        }
 
         // Thursday, June 1, 2017 4:05:50 AM
         stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, "June 1, 2017 4:05:50 AM"});
