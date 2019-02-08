@@ -17,8 +17,8 @@
  */
 package org.wso2.siddhi.core.query.partition;
 
-//import org.testng.AssertJUnit;
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -338,6 +338,50 @@ public class WindowPartitionTestCase {
         AssertJUnit.assertEquals(0, removeEventCount);
         executionRuntime.shutdown();
 
+    }
+
+    @Test
+    public void testWindowPartitionQuery6() throws InterruptedException {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String siddhiApp = "" +
+                "define stream SensorStream (id string, sensorValue float); " +
+                "" +
+                "partition with (id of SensorStream) " +
+                "begin " +
+                "   from SensorStream#window.lengthBatch(2)" +
+                "   select id, sensorValue" +
+                "   insert events into OutputStream ;" +
+                "\n" +
+                "   from OutputStream " +
+                "   select * " +
+                "   insert into TempStream;" +
+                "end;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+        siddhiAppRuntime.addCallback("TempStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                inEventCount = inEventCount + events.length;
+                Assert.assertEquals(events.length, 2);
+                eventArrived = true;
+            }
+        });
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("SensorStream");
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{"id1", 111d});
+        inputHandler.send(new Object[]{"id1", 112d});
+        Thread.sleep(2000);
+        inputHandler.send(new Object[]{"id2", 121d});
+        inputHandler.send(new Object[]{"id2", 122d});
+        Thread.sleep(2000);
+        inputHandler.send(new Object[]{"id3", 131d});
+        inputHandler.send(new Object[]{"id3", 132d});
+
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(eventArrived, true);
+        Assert.assertEquals(inEventCount, 12, "Output Events");
     }
 
 
