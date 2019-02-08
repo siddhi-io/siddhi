@@ -138,9 +138,11 @@ public class DefinitionParserHelper {
                                          ConcurrentMap<String, StreamJunction> streamJunctionMap,
                                          SiddhiAppContext siddhiAppContext) {
         if (!streamJunctionMap.containsKey(streamDefinition.getId())) {
+            StreamJunction faultStreamJunction = streamJunctionMap.get(SiddhiConstants.FAULT_STREAM_PREFIX.
+                    concat(streamDefinition.getId()));
             StreamJunction streamJunction = new StreamJunction(streamDefinition,
                     siddhiAppContext.getExecutorService(),
-                    siddhiAppContext.getBufferSize(), siddhiAppContext);
+                    siddhiAppContext.getBufferSize(), faultStreamJunction, siddhiAppContext);
             streamJunctionMap.putIfAbsent(streamDefinition.getId(), streamJunction);
         }
     }
@@ -452,7 +454,6 @@ public class DefinitionParserHelper {
                                 sinkAnnotation.getAnnotations());
 
                 if (mapAnnotation != null) {
-
                     String[] supportedDynamicOptions = null;
                     List<OptionHolder> destinationOptHolders = new ArrayList<>();
                     Extension sinkExtension = constructExtension(streamDefinition, SiddhiConstants.ANNOTATION_SINK,

@@ -30,6 +30,7 @@ import org.wso2.siddhi.core.util.transport.DynamicOptions;
 import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 import org.wso2.siddhi.core.util.transport.Option;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
+import org.wso2.siddhi.core.util.transport.SubscriberUnAvailableException;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.Map;
@@ -70,8 +71,7 @@ public class InMemorySink extends Sink {
 
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                        ConfigReader sinkConfigReader, SiddhiAppContext
-            siddhiAppContext) {
+                        ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
         topicOption = optionHolder.validateAndGetOption(TOPIC_KEY);
     }
 
@@ -92,7 +92,11 @@ public class InMemorySink extends Sink {
 
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions) throws ConnectionUnavailableException {
-        InMemoryBroker.publish(topicOption.getValue(dynamicOptions), payload);
+        try {
+            InMemoryBroker.publish(topicOption.getValue(dynamicOptions), payload);
+        } catch (SubscriberUnAvailableException e) {
+            onError(payload, e);
+        }
     }
 
     @Override

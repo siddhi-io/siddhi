@@ -25,6 +25,7 @@ import org.wso2.siddhi.query.api.util.SiddhiConstants;
 public class InsertIntoStream extends OutputStream {
 
     private static final long serialVersionUID = 1L;
+    private boolean isFaultStream;
     private boolean isInnerStream;
 
     public InsertIntoStream(String streamId) {
@@ -39,25 +40,33 @@ public class InsertIntoStream extends OutputStream {
         this(streamId, isInnerStream, OutputEventType.CURRENT_EVENTS);
     }
 
+    public InsertIntoStream(String streamId, boolean isInnerStream, boolean isFaultStream) {
+        this(streamId, isInnerStream, isFaultStream, OutputEventType.CURRENT_EVENTS);
+    }
+
     public InsertIntoStream(String streamId, boolean isInnerStream, OutputEventType outputEventType) {
+        this(streamId, isInnerStream, false, outputEventType);
+    }
+
+    public InsertIntoStream(String streamId, boolean isInnerStream, boolean isFaultStream,
+                            OutputEventType outputEventType) {
         this.isInnerStream = isInnerStream;
+        this.isFaultStream = isFaultStream;
         if (isInnerStream) {
             this.id = SiddhiConstants.INNER_STREAM_FLAG.concat(streamId);
         } else {
             this.id = streamId;
         }
         this.outputEventType = outputEventType;
+
     }
 
     public boolean isInnerStream() {
         return isInnerStream;
     }
 
-    @Override
-    public String toString() {
-        return "InsertIntoStream{" +
-                "isInnerStream=" + isInnerStream +
-                "} " + super.toString();
+    public boolean isFaultStream() {
+        return isFaultStream;
     }
 
     @Override
@@ -75,11 +84,26 @@ public class InsertIntoStream extends OutputStream {
             return false;
         }
 
+        if (isFaultStream != that.isFaultStream) {
+            return false;
+        }
+
         return true;
     }
 
     @Override
+    public String toString() {
+        return "InsertIntoStream{" +
+                "isFaultStream=" + isFaultStream +
+                ", isInnerStream=" + isInnerStream +
+                '}';
+    }
+
+    @Override
     public int hashCode() {
-        return (isInnerStream ? 1 : 0);
+        int result = super.hashCode();
+        result = 31 * result + (isFaultStream ? 1 : 0);
+        result = 31 * result + (isInnerStream ? 1 : 0);
+        return result;
     }
 }

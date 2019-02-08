@@ -165,7 +165,6 @@ public abstract class SinkMapper {
             mapAndSend(event, optionHolder, templateBuilderMap, sinkListener);
         } finally {
             trpDynamicOptions.remove();
-
         }
     }
 

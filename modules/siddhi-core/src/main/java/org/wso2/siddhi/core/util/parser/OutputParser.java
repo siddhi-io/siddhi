@@ -251,7 +251,7 @@ public class OutputParser {
             if (outputStreamJunction == null) {
                 outputStreamJunction = new StreamJunction(outputStreamDefinition,
                         siddhiAppContext.getExecutorService(),
-                        siddhiAppContext.getBufferSize(), siddhiAppContext);
+                        siddhiAppContext.getBufferSize(), null, siddhiAppContext);
                 streamJunctionMap.putIfAbsent(id + key, outputStreamJunction);
             }
             InsertIntoStreamCallback insertIntoStreamCallback = new InsertIntoStreamCallback(outputStreamDefinition,

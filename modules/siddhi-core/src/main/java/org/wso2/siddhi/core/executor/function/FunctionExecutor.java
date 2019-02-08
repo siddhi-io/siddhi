@@ -23,7 +23,6 @@ import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 
@@ -109,10 +108,8 @@ public abstract class FunctionExecutor implements ExpressionExecutor, Snapshotab
                     return execute(data);
             }
         } catch (Exception e) {
-            log.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
-                    " Exception on class '" + this
-                    .getClass().getName() + "'.", e);
-            return null;
+            throw new SiddhiAppRuntimeException(e.getMessage() + ". Exception on class '" + this.getClass().getName()
+                    + "'", e);
         }
     }
 

@@ -142,6 +142,14 @@ public abstract class Expression implements SiddhiElement {
         return new IsNull(streamId, streamIndex, false);
     }
 
+    public static Expression isNullFaultStream(String streamId) {
+        return new IsNull(streamId, null, false, true);
+    }
+
+    public static Expression isNullFaultStream(String streamId, int streamIndex) {
+        return new IsNull(streamId, streamIndex, false, true);
+    }
+
     public static Expression isNullInnerStream(String streamId) {
         return new IsNull(streamId, null, true);
     }

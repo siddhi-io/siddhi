@@ -330,7 +330,8 @@ There are two ways you can configure the `@payload` annotation.
 1. Some mappers such as `XML`, `JSON`, and `Test` accept only one output payload using the following format: <br/>
 ```@payload( 'This is a test message from {{user}}.' )``` 
 2. Some mappers such `key-value` accept series of mapping values defined as follows: <br/>
-```@payload( key1='mapping_1', key2='user : {{user}}')``` 
+```@payload( key1='mapping_1', 'key2'='user : {{user}}')``` <br/>
+Here, apart from the dotted key names sush as ```a.b.c```, any constant string value such as ```'$abc'``` can also by used as a key. 
 
 **Supported Mapping Types**
 
@@ -2888,6 +2889,53 @@ The following elements are configured with this annotation.
 |`buffer.size`|The size of the event buffer that will be used to handover the execution to other threads. | - |
 |`workers`|Number of worker threads that will be be used to process the buffered events.|`1`|
 |`batch.size.max`|The maximum number of events that will be processed together by a worker thread at a given time.| `buffer.size`|
+
+### Fault Streams
+
+When the `@OnError` annotation is added to a stream definition, it handles failover scenarios that occur during runtime gracefully.
+
+```sql
+@OnError(action='on_error_action')
+define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
+```
+
+The action parameter of the `@OnError` annotation defines the action to be executed during failure scenarios. 
+
+The following action types can be specified via the `@OnError` annotation when defining a stream. If this annotation is not added, `LOG` is the action type by default.
+
+* `LOG` : Logs the event with an error, and then drops the event.
+* `STREAM`: A fault stream is automatically created for the base stream. The definition of the fault stream includes all the attributes of the base stream as well as an additional attribute named `_error`.
+The events are inserted into the fault stream during a failure. The error identified is captured as the value for the `_error` attribute.
+ 
+e.g., the following is a Siddhi application that includes the `@OnError` annotation to handle failures during runtime.
+
+```sql
+@OnError(name='STREAM')
+define stream StreamA (symbol string, volume long);
+
+from StreamA[custom:fault() > volume] 
+insert into StreamB;
+
+from !StreamA#log("Error Occured")
+insert into tempStream;
+``` 
+
+`!StreamA`, fault stream is automatically created when you add the `@OnError` annotation. The definition of the corresponding fault stream is as follows.
+```sql
+!StreamA(symbol string, volume long, _error object)
+``` 
+
+If you include the `on.error` parameter in the sink configuration, failures are handled by Siddhi at the time the events are published from the `Sink`.
+```sql
+@sink(type='sink_type', on.error='on.error.action')
+define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
+```  
+
+The action types that can be specified via the `on.error` parameter when configuring a sink are as follows. If this parameter is not included in the sink configuration, `LOG` is the action type by default.
+
+* `LOG` : Logs the event with the error, and then drops the event.
+* `WAIT` : The thread waits in the `back-off and re-trying` state, and reconnects once the connection is re-established.
+* `STREAM`: Corresponding fault stream is populated with the failed event and the error while publishing. 
 
 ### Statistics
 
