@@ -120,4 +120,11 @@ public class IncrementalAggregationProcessor implements Processor {
     public Processor cloneProcessor(String key) {
         throw new SiddhiAppCreationException("IncrementalAggregationProcessor cannot be cloned");
     }
+
+    @Override
+    public void clean() {
+        for (ExpressionExecutor expressionExecutor : incomingExpressionExecutors) {
+            expressionExecutor.clean();
+        }
+    }
 }

@@ -56,4 +56,11 @@ public class MultiplyExpressionExecutorInt implements ExpressionExecutor {
                 .cloneExecutor(key));
     }
 
+    @Override
+    public void clean() {
+        leftExpressionExecutor.clean();
+        rightExpressionExecutor.clean();
+    }
+
+
 }

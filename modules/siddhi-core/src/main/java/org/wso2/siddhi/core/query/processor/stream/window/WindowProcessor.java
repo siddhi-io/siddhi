@@ -39,10 +39,10 @@ import java.util.List;
 public abstract class WindowProcessor extends AbstractStreamProcessor {
 
     @Override
-    protected List<Attribute> init(AbstractDefinition inputDefinition, ExpressionExecutor[]
-            attributeExpressionExecutors, ConfigReader configReader, SiddhiAppContext siddhiAppContext,
-                                   boolean
-                                           outputExpectsExpiredEvents) {
+    protected List<Attribute> init(AbstractDefinition inputDefinition,
+                                   ExpressionExecutor[] attributeExpressionExecutors,
+                                   ConfigReader configReader, SiddhiAppContext siddhiAppContext,
+                                   boolean outputExpectsExpiredEvents) {
         init(attributeExpressionExecutors, configReader, outputExpectsExpiredEvents, siddhiAppContext);
         return new ArrayList<Attribute>(0);
     }
@@ -53,11 +53,10 @@ public abstract class WindowProcessor extends AbstractStreamProcessor {
      * @param attributeExpressionExecutors the executors of each function parameters
      * @param configReader                 the config reader of window
      * @param outputExpectsExpiredEvents   is expired event out put or not
-     * @param siddhiAppContext         the context of the siddhi app
+     * @param siddhiAppContext             the context of the siddhi app
      */
     protected abstract void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                 boolean outputExpectsExpiredEvents, SiddhiAppContext
-                                         siddhiAppContext);
+                                 boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext);
 
     @Override
     protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,

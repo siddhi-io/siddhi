@@ -43,4 +43,9 @@ public interface Snapshotable {
     void restoreState(Map<String, Object> state);
 
     String getElementId();
+
+    /**
+     * Used to clean its references
+     */
+    void clean();
 }

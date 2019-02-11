@@ -25,7 +25,6 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.core.stream.output.sink.Sink;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
@@ -263,7 +262,6 @@ public class SiddhiAppParser {
                     PartitionRuntime partitionRuntime = PartitionParser.parse(siddhiAppRuntimeBuilder,
                             (Partition) executionElement, siddhiAppContext, queryIndex);
                     siddhiAppRuntimeBuilder.addPartition(partitionRuntime);
-                    siddhiAppContext.getSnapshotService().addSnapshotable("partition", partitionRuntime);
                     queryIndex += ((Partition) executionElement).getQueryList().size();
                 } catch (Throwable t) {
                     ExceptionUtil.populateQueryContext(t, (Partition) executionElement, siddhiAppContext);

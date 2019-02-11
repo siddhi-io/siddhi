@@ -69,4 +69,10 @@ public class GroupByKeyGenerator {
             return null;
         }
     }
+
+    public void clean() {
+        for (ExpressionExecutor expressionExecutor : groupByExecutors) {
+            expressionExecutor.clean();
+        }
+    }
 }

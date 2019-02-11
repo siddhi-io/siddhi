@@ -61,10 +61,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * It can be seen as a global Window which can be accessed from multiple queries.
  */
 public class Window implements FindableProcessor, Snapshotable, MemoryCalculable {
-    /**
-     * Element id of this snapshot.
-     */
-    private final String elementId;
 
     /**
      * WindowDefinition used to construct this window.
@@ -121,7 +117,6 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
     public Window(WindowDefinition windowDefinition, SiddhiAppContext siddhiAppContext) {
         this.windowDefinition = windowDefinition;
         this.siddhiAppContext = siddhiAppContext;
-        this.elementId = siddhiAppContext.getElementIdGenerator().createNewId();
         this.lockWrapper = new LockWrapper(windowDefinition.getId());
         this.lockWrapper.setLock(new ReentrantLock());
         if (siddhiAppContext.getStatisticsManager() != null) {
@@ -323,7 +318,12 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
      */
     @Override
     public String getElementId() {
-        return this.elementId;
+        return this.internalWindowProcessor.getElementId();
+    }
+
+    @Override
+    public void clean() {
+        internalWindowProcessor.clean();
     }
 
     /**
@@ -393,6 +393,11 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
 
         public Processor cloneProcessor(String key) {
             return new StreamPublishProcessor(this.outputEventType);
+        }
+
+        @Override
+        public void clean() {
+            //ignore
         }
     }
 }

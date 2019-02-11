@@ -164,6 +164,11 @@ public class Scheduler implements Snapshotable {
         return elementId;
     }
 
+    @Override
+    public void clean() {
+        siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
+    }
+
     public void setLatencyTracker(LatencyTracker latencyTracker) {
         this.latencyTracker = latencyTracker;
     }

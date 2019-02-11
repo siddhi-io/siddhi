@@ -27,16 +27,19 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GroupByTestCase {
     private static final Logger log = Logger.getLogger(GroupByTestCase.class);
     private volatile int count;
-    private volatile boolean eventArrived;
+    private AtomicBoolean eventArrived;
 
     @BeforeMethod
     public void init() {
         count = 0;
-        eventArrived = false;
+        eventArrived = new AtomicBoolean(false);
     }
 
     @Test
@@ -67,7 +70,7 @@ public class GroupByTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 count = count + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -84,10 +87,9 @@ public class GroupByTestCase {
         Thread.sleep(4200);
         inputHandler.send(new Object[]{"WSO2", 50f, 200L});
         inputHandler.send(new Object[]{"WSO2", 50f, 200L});
-        Thread.sleep(100);
-
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 100);
         AssertJUnit.assertEquals(6, count);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
 
         siddhiAppRuntime.shutdown();
     }
@@ -120,7 +122,7 @@ public class GroupByTestCase {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 count = count + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -137,10 +139,10 @@ public class GroupByTestCase {
         Thread.sleep(3200);
         inputHandler.send(new Object[]{"WSO2", 50f, 200L});
         inputHandler.send(new Object[]{"WSO2", 50f, 200L});
-        Thread.sleep(2000);
-
+        Thread.sleep(1200);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 800);
         AssertJUnit.assertEquals(3, count);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
 
         siddhiAppRuntime.shutdown();
     }

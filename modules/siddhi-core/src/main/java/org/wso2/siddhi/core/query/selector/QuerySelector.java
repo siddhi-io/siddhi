@@ -366,6 +366,20 @@ public class QuerySelector implements Processor {
         return null;
     }
 
+    @Override
+    public void clean() {
+        for (AttributeProcessor processor : attributeProcessorList) {
+            processor.clean();
+        }
+        if (havingConditionExecutor != null) {
+            havingConditionExecutor.clean();
+        }
+        if (groupByKeyGenerator != null) {
+            groupByKeyGenerator.clean();
+        }
+        outputRateLimiter.clean();
+    }
+
     public List<AttributeProcessor> getAttributeProcessorList() {
         return attributeProcessorList;
     }

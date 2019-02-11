@@ -435,7 +435,8 @@ public class ExpressionParser {
                     ExpressionExecutor[] innerExpressionExecutors = parseInnerExpression(innerExpressions, metaEvent,
                             currentState, tableMap, executorList, siddhiAppContext, groupBy, defaultStreamEventIndex,
                             queryName);
-                    attributeAggregator.initAggregator(innerExpressionExecutors, siddhiAppContext, configReader);
+                    attributeAggregator.initAggregator(innerExpressionExecutors, siddhiAppContext, queryName,
+                            configReader);
                     AbstractAggregationAttributeExecutor aggregationAttributeProcessor;
                     if (groupBy) {
                         aggregationAttributeProcessor = new GroupByAggregationAttributeExecutor(attributeAggregator,

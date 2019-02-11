@@ -109,6 +109,7 @@ public class PartitionRuntime implements Snapshotable {
             this.partitionId = UUID.randomUUID().toString();
         }
         elementId = "PartitionRuntime-" + siddhiAppContext.getElementIdGenerator().createNewId();
+        siddhiAppContext.getSnapshotService().addSnapshotable("partition", this);
         this.partition = partition;
         this.streamDefinitionMap = streamDefinitionMap;
         this.windowDefinitionMap = windowDefinitionMap;
@@ -365,4 +366,8 @@ public class PartitionRuntime implements Snapshotable {
         this.memoryUsageTracker = memoryUsageTracker;
     }
 
+    @Override
+    public void clean() {
+        siddhiAppContext.getSnapshotService().removeSnapshotable("partition", this);
+    }
 }

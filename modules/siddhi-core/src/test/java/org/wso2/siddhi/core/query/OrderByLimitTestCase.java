@@ -29,20 +29,23 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class OrderByLimitTestCase {
     private static final Logger log = Logger.getLogger(OrderByLimitTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private int count;
-    private boolean eventArrived;
+    private AtomicBoolean eventArrived;
 
     @BeforeMethod
     public void init() {
         count = 0;
         inEventCount = 0;
         removeEventCount = 0;
-        eventArrived = false;
+        eventArrived = new AtomicBoolean(false);
     }
 
     @Test
@@ -67,7 +70,7 @@ public class OrderByLimitTestCase {
                 Assert.assertEquals(2, inEvents.length);
                 Assert.assertTrue(inEvents[0].getData(2).equals(0) || inEvents[0].getData(2).equals(4));
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -82,9 +85,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(4, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -111,7 +114,7 @@ public class OrderByLimitTestCase {
                 Assert.assertEquals(3, inEvents.length);
                 Assert.assertTrue(inEvents[0].getData(2).equals(2) || inEvents[0].getData(2).equals(7));
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -126,9 +129,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"IBM", 601.5f, 6});
         inputHandler.send(new Object[]{"BBB", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(6, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -154,7 +157,7 @@ public class OrderByLimitTestCase {
                 Assert.assertEquals(1, inEvents.length);
                 Assert.assertTrue(inEvents[0].getData(2).equals(3) || inEvents[0].getData(2).equals(7));
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -169,9 +172,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(2, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -198,7 +201,7 @@ public class OrderByLimitTestCase {
                 Assert.assertEquals(1, inEvents.length);
                 Assert.assertTrue(inEvents[0].getData(2).equals(3) || inEvents[0].getData(2).equals(7));
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -213,9 +216,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(2, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -243,7 +246,7 @@ public class OrderByLimitTestCase {
                 Assert.assertEquals(2, inEvents.length);
                 Assert.assertTrue(inEvents[0].getData(2).equals(0) || inEvents[0].getData(2).equals(4));
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -258,9 +261,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(4, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -288,7 +291,7 @@ public class OrderByLimitTestCase {
                 Assert.assertEquals(2, inEvents.length);
                 Assert.assertTrue(inEvents[0].getData(2).equals(3) || inEvents[0].getData(2).equals(7));
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -303,9 +306,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(4, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -333,7 +336,7 @@ public class OrderByLimitTestCase {
                 Assert.assertEquals(2, inEvents.length);
                 Assert.assertTrue(inEvents[0].getData(2).equals(1) || inEvents[0].getData(2).equals(7));
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -348,9 +351,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(4, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -378,7 +381,7 @@ public class OrderByLimitTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 Assert.assertEquals(1, inEvents.length);
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -393,9 +396,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(8, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -423,7 +426,7 @@ public class OrderByLimitTestCase {
                 Assert.assertEquals(2, inEvents.length);
                 Assert.assertTrue(inEvents[0].getData(2).equals(2) || inEvents[0].getData(2).equals(4));
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -438,9 +441,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(4, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -466,7 +469,7 @@ public class OrderByLimitTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 Assert.assertEquals(1, inEvents.length);
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -481,9 +484,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(8, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -512,7 +515,7 @@ public class OrderByLimitTestCase {
                 Assert.assertTrue(inEvents[0].getData(2).equals(1) || inEvents[0].getData(2).equals(3)
                         || inEvents[0].getData(2).equals(6) || inEvents[0].getData(2).equals(7));
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -527,9 +530,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"XYZ", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(4, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -555,7 +558,7 @@ public class OrderByLimitTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 Assert.assertEquals(2, inEvents.length);
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -570,9 +573,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(4, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -601,7 +604,7 @@ public class OrderByLimitTestCase {
                 Assert.assertEquals(1, inEvents.length);
                 Assert.assertTrue(inEvents[0].getData(2).equals(1) || inEvents[0].getData(2).equals(6));
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -616,9 +619,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"XYZ", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(2, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -645,7 +648,7 @@ public class OrderByLimitTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 Assert.assertEquals(2, inEvents.length);
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -660,9 +663,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(4, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -687,7 +690,7 @@ public class OrderByLimitTestCase {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -702,9 +705,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(0, inEventCount);
-        AssertJUnit.assertFalse(eventArrived);
+        AssertJUnit.assertFalse(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -731,7 +734,7 @@ public class OrderByLimitTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 Assert.assertEquals(1, inEvents.length);
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -746,9 +749,9 @@ public class OrderByLimitTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 7});
-        Thread.sleep(500);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 500);
         AssertJUnit.assertEquals(8, inEventCount);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -775,7 +778,7 @@ public class OrderByLimitTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 Assert.assertEquals(1, inEvents.length);
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -810,7 +813,7 @@ public class OrderByLimitTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 Assert.assertEquals(1, inEvents.length);
                 inEventCount = inEventCount + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });

@@ -371,6 +371,14 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         return elementId;
     }
 
+    @Override
+    public void clean() {
+        if (nextProcessor != null) {
+            nextProcessor.clean();
+        }
+        siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
+    }
+
     public void setWithinTime(long withinTime) {
         this.withinTime = withinTime;
     }
