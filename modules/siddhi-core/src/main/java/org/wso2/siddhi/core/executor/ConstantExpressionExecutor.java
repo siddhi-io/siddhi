@@ -50,4 +50,10 @@ public class ConstantExpressionExecutor implements ExpressionExecutor {
     public Object getValue() {
         return value;
     }
+
+    @Override
+    public void clean() {
+        //ignore
+    }
+
 }

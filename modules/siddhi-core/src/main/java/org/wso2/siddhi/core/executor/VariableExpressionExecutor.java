@@ -83,5 +83,9 @@ public class VariableExpressionExecutor implements ExpressionExecutor {
         }
     }
 
+    @Override
+    public void clean() {
+        //ignore
+    }
 
 }

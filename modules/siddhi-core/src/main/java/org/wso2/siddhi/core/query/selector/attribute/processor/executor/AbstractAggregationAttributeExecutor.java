@@ -58,5 +58,14 @@ public abstract class AbstractAggregationAttributeExecutor implements Expression
     public String getElementId() {
         return elementId;
     }
+
+    @Override
+    public void clean() {
+        for (ExpressionExecutor expressionExecutor : attributeExpressionExecutors) {
+            expressionExecutor.clean();
+        }
+        attributeAggregator.clean();
+        siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
+    }
 }
 

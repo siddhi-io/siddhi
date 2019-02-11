@@ -54,5 +54,9 @@ public class BoolConditionExpressionExecutor extends ConditionExpressionExecutor
         return new BoolConditionExpressionExecutor(conditionExecutor.cloneExecutor(key));
     }
 
+    @Override
+    public void clean() {
+        conditionExecutor.clean();
+    }
 
 }

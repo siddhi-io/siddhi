@@ -21,12 +21,28 @@ package org.wso2.siddhi.core.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Helper class ot be used by siddhi tests. Any extension can utilize methods in here
  */
 public class SiddhiTestHelper {
+
+    private SiddhiTestHelper() {
+
+    }
+
+    public static void waitForEvents(long sleepTime, AtomicBoolean condition, long timeout)
+            throws InterruptedException {
+        long currentWaitTime = 0;
+        long startTime = System.currentTimeMillis();
+        while (!condition.get() && (currentWaitTime <= timeout)) {
+            Thread.sleep(sleepTime);
+            currentWaitTime = System.currentTimeMillis() - startTime;
+        }
+    }
+
     public static void waitForEvents(long sleepTime, int expectedCount, AtomicInteger actualCount, long timeout)
             throws InterruptedException {
         long currentWaitTime = 0;

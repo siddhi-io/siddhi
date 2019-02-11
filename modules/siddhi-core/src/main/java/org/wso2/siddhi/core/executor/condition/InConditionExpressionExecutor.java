@@ -71,5 +71,10 @@ public class InConditionExpressionExecutor extends ConditionExpressionExecutor {
                 streamEventSize, isMatchingEventAStateEvent, matchingStreamIndex);
     }
 
+    @Override
+    public void clean() {
+        //ignore
+    }
+
 
 }

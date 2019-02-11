@@ -96,4 +96,9 @@ public class EntryValveProcessor implements Processor, Schedulable {
         return new EntryValveProcessor(siddhiAppContext);
     }
 
+    @Override
+    public void clean() {
+        //ignore
+    }
+
 }

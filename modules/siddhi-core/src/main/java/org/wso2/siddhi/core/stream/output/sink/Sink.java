@@ -255,6 +255,11 @@ public abstract class Sink implements SinkListener, Snapshotable {
         return elementId;
     }
 
+    @Override
+    public void clean() {
+        //ignore
+    }
+
     void setTrpDynamicOptions(ThreadLocal<DynamicOptions> trpDynamicOptions) {
         this.trpDynamicOptions = trpDynamicOptions;
     }

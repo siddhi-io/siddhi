@@ -80,4 +80,10 @@ public class AndConditionExpressionExecutor extends ConditionExpressionExecutor 
                 .cloneExecutor(key));
     }
 
+    @Override
+    public void clean() {
+        leftConditionExecutor.clean();
+        rightConditionExecutor.clean();
+    }
+
 }
