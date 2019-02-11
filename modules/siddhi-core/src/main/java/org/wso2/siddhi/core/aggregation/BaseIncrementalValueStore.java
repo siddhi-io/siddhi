@@ -139,7 +139,9 @@ public class BaseIncrementalValueStore implements Snapshotable {
         for (ExpressionExecutor expressionExecutor : expressionExecutors) {
             expressionExecutor.clean();
         }
-        shouldUpdateExpressionExecutor.clean();
+        if (shouldUpdateExpressionExecutor != null) {
+            shouldUpdateExpressionExecutor.clean();
+        }
         if (aggregatorName != null) {
             siddhiAppContext.getSnapshotService().removeSnapshotable(aggregatorName, this);
         }
