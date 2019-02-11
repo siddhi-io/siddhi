@@ -28,11 +28,14 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class IsNullTestCase {
     private static final Logger log = Logger.getLogger(IsNullTestCase.class);
     private int count;
-    private boolean eventArrived;
+    private AtomicBoolean eventArrived;
     private int inEventCount;
     private int removeEventCount;
 
@@ -41,7 +44,7 @@ public class IsNullTestCase {
         count = 0;
         inEventCount = 0;
         removeEventCount = 0;
-        eventArrived = false;
+        eventArrived = new AtomicBoolean(false);
     }
 
 
@@ -71,7 +74,7 @@ public class IsNullTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 AssertJUnit.assertTrue(inEvents[0].getData(0) == null);
                 count = count + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -84,9 +87,9 @@ public class IsNullTestCase {
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
         inputHandler.send(new Object[]{null, 60.5f, 200L});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200L});
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 100);
         AssertJUnit.assertEquals(1, count);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
 
         siddhiAppRuntime.shutdown();
     }
@@ -128,12 +131,12 @@ public class IsNullTestCase {
                                 org.testng.AssertJUnit.assertSame(1, inEventCount);
                         }
                     }
-                    eventArrived = true;
+                    eventArrived.set(true);
                 }
                 if (removeEvents != null) {
                     removeEventCount = removeEventCount + removeEvents.length;
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -144,25 +147,18 @@ public class IsNullTestCase {
         siddhiAppRuntime.start();
 
         stream1.send(new Object[]{"WSO2", 29.6f, 100});
-        Thread.sleep(100);
         stream1.send(new Object[]{"WSO2", 25.0f, 100});
-        Thread.sleep(100);
         stream1.send(new Object[]{"WSO2", 35.6f, 100});
-        Thread.sleep(100);
         stream1.send(new Object[]{"WSO2", 41.5f, 100});
-        Thread.sleep(100);
         stream1.send(new Object[]{"WSO2", 42.6f, 100});
-        Thread.sleep(100);
         stream1.send(new Object[]{"WSO2", 43.6f, 100});
-        Thread.sleep(100);
         stream1.send(new Object[]{"IBM", 58.7f, 100});
-        Thread.sleep(100);
         stream1.send(new Object[]{"IBM", 45.6f, 100});
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 100);
 
         org.testng.AssertJUnit.assertEquals("Number of success events", 1, inEventCount);
         org.testng.AssertJUnit.assertEquals("Number of remove events", 0, removeEventCount);
-        org.testng.AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        org.testng.AssertJUnit.assertTrue("Event arrived", eventArrived.get());
 
         siddhiAppRuntime.shutdown();
     }
