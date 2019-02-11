@@ -18,22 +18,22 @@
 
 ```xml
    <dependency>
-     <groupId>org.wso2.siddhi</groupId>
+     <groupId>io.siddhi</groupId>
      <artifactId>siddhi-core</artifactId>
      <version>4.x.x</version>
    </dependency>
    <dependency>
-     <groupId>org.wso2.siddhi</groupId>
+     <groupId>io.siddhi</groupId>
      <artifactId>siddhi-query-api</artifactId>
      <version>4.x.x</version>
    </dependency>
    <dependency>
-     <groupId>org.wso2.siddhi</groupId>
+     <groupId>io.siddhi</groupId>
      <artifactId>siddhi-query-compiler</artifactId>
      <version>4.x.x</version>
    </dependency>
    <dependency>
-     <groupId>org.wso2.siddhi</groupId>
+     <groupId>io.siddhi</groupId>
      <artifactId>siddhi-annotations</artifactId>
      <version>4.x.x</version>
    </dependency>   
