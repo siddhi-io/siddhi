@@ -26,14 +26,14 @@ Siddhi is free and open source, under **Apache Software License v2.0**.
 
 ## Get Started!
 
-Get started with Siddhi in a few minutes by following the <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-quckstart-4.0/">Siddhi Quick Start Guide</a>
+Get started with Siddhi in a few minutes by following the <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-quckstart-4.0/">Siddhi Quick Start Guide</a>
 
 ## Why use Siddhi ? 
 
 * It is **fast**. <a target="_blank" href="http://wso2.com/library/conference/2017/2/wso2con-usa-2017-scalable-real-time-complex-event-processing-at-uber?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">UBER</a> 
 uses it to process 20 Billion events per day (300,000 events per second). 
 * It is **lightweight** (<2MB),  and embeddable in Android and RaspberryPi.
-* It has **over 40 <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">Siddhi Extensions</a>**
+* It has **over 40 <a target="_blank" href="https://siddhi-io.github.io/siddhi/extensions/">Siddhi Extensions</a>**
 * It is **used by over 60 companies including many Fortune 500 companies** in production. Following are some examples:
     * **WSO2** uses Siddhi for the following purposes:
         * To provide stream processing capabilities in their products such as <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a>.
@@ -49,7 +49,7 @@ If you are a Siddhi user, we would love to hear more.
 
 ## Develop Siddhi using IntelliJ IDEA 
 
-Install <a target="_blank" href="https://wso2.github.io/siddhi-plugin-idea/">IDEA plugin</a> to get the following features:
+Install <a target="_blank" href="https://siddhi-io.github.io/siddhi-plugin-idea/">IDEA plugin</a> to get the following features:
 
 * **Siddhi Query Editor** with syntax highlighting and with basic auto completion
 * **Siddhi Runner and Debugger** support to test Siddhi Application
@@ -83,9 +83,9 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
  
 * **Active development version of Siddhi** : **v4.0.0**  _built on Java 8._ 
      
-    <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v4.x.x
+    <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v4.x.x
     
-    <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v4.x.x
+    <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v4.x.x
 
 
 * **Latest Stable Release of Siddhi** : **v3.0.5** _built on Java 7._
@@ -94,7 +94,7 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.4.8">4.4.8</a>.
+Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/4.4.8">4.4.8</a>.
 
 ## Jenkins Build Status
 
@@ -111,7 +111,7 @@ Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.
  * For more details and support contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>
  
 ## Support 
-* We are committed to ensuring support for Siddhi (with its <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>) and <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a> from development to production. 
+* We are committed to ensuring support for Siddhi (with its <a target="_blank" href="https://siddhi-io.github.io/siddhi/extensions/">extensions</a>) and <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a> from development to production.
 * Our unique approach ensures that all support leverages our open development methodology and is provided by the very same engineers who build the technology. 
 * For more details and to take advantage of this unique opportunity, contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>. 
 
