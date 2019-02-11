@@ -179,6 +179,11 @@ public abstract class Source implements Snapshotable {
         return elementId;
     }
 
+    @Override
+    public void clean() {
+        //ignore
+    }
+
     public String getType() {
         return type;
     }

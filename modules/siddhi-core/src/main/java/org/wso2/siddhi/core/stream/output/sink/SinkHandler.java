@@ -56,4 +56,9 @@ public abstract class SinkHandler implements Snapshotable {
     public String getElementId() {
         return elementId;
     }
+
+    @Override
+    public void clean() {
+        //ignore
+    }
 }

@@ -179,6 +179,11 @@ public class JoinProcessor implements Processor {
         return joinProcessor;
     }
 
+    @Override
+    public void clean() {
+        //ignore
+    }
+
     public void setFindableProcessor(FindableProcessor findableProcessor) {
         this.findableProcessor = findableProcessor;
     }

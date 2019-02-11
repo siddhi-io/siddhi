@@ -47,6 +47,11 @@ public class FilterProcessor implements Processor {
     }
 
     @Override
+    public void clean() {
+        conditionExecutor.clean();
+    }
+
+    @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         while (complexEventChunk.hasNext()) {

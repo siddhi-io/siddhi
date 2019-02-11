@@ -54,5 +54,9 @@ public class NotConditionExpressionExecutor extends ConditionExpressionExecutor 
         return new NotConditionExpressionExecutor(conditionExecutor.cloneExecutor(key));
     }
 
+    @Override
+    public void clean() {
+        conditionExecutor.clean();
+    }
 
 }

@@ -130,5 +130,10 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
     public void setLatencyTracker(LatencyTracker latencyTracker) {
         this.latencyTracker = latencyTracker;
     }
+
+    @Override
+    public void clean() {
+        siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
+    }
 }
 

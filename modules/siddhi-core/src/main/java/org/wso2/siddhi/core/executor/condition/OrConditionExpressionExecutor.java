@@ -81,5 +81,10 @@ public class OrConditionExpressionExecutor extends ConditionExpressionExecutor {
                 .cloneExecutor(key));
     }
 
+    @Override
+    public void clean() {
+        leftConditionExecutor.clean();
+        rightConditionExecutor.clean();
+    }
 
 }

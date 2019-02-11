@@ -59,7 +59,7 @@ public class InMemoryTable extends Table implements Snapshotable {
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private EventHolder eventHolder;
     private String elementId;
-
+    private SiddhiAppContext siddhiAppContext;
 
     @Override
     public void init(TableDefinition tableDefinition, StreamEventPool storeEventPool,
@@ -67,6 +67,7 @@ public class InMemoryTable extends Table implements Snapshotable {
                      RecordTableHandler recordTableHandler) {
         this.tableDefinition = tableDefinition;
         this.tableStreamEventCloner = storeEventCloner;
+        this.siddhiAppContext = siddhiAppContext;
 
         eventHolder = EventHolderPasser.parse(tableDefinition, storeEventPool, siddhiAppContext);
 
@@ -215,5 +216,10 @@ public class InMemoryTable extends Table implements Snapshotable {
     @Override
     public String getElementId() {
         return elementId;
+    }
+
+    @Override
+    public void clean() {
+        siddhiAppContext.getSnapshotService().removeSnapshotable(tableDefinition.getId(), this);
     }
 }

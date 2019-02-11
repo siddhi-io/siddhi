@@ -126,6 +126,11 @@ public class StreamPostStateProcessor implements PostStateProcessor {
         return streamPostStateProcessor;
     }
 
+    @Override
+    public void clean() {
+        //ignore
+    }
+
     protected void cloneProperties(StreamPostStateProcessor streamPostStateProcessor) {
         streamPostStateProcessor.stateId = stateId;
     }

@@ -23,33 +23,30 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.query.api.definition.Attribute;
+
+import java.util.Map;
 
 /**
  * Abstract parent class for attribute aggregators. Attribute aggregators are used to perform aggregate operations
  * such as count, average, etc.
  */
-public abstract class AttributeAggregator implements Snapshotable {
+public abstract class AttributeAggregator {
 
     protected ExpressionExecutor[] attributeExpressionExecutors;
     protected SiddhiAppContext siddhiAppContext;
-    protected String elementId;
     private int attributeSize;
+    private String queryName;
     private ConfigReader configReader;
 
     public void initAggregator(ExpressionExecutor[] attributeExpressionExecutors, SiddhiAppContext
-            siddhiAppContext, ConfigReader configReader) {
+            siddhiAppContext, String queryName, ConfigReader configReader) {
+        this.queryName = queryName;
         this.configReader = configReader;
         try {
             this.siddhiAppContext = siddhiAppContext;
             this.attributeExpressionExecutors = attributeExpressionExecutors;
             this.attributeSize = attributeExpressionExecutors.length;
-            if (elementId == null) {
-                elementId = "AttributeAggregator-" + siddhiAppContext.getElementIdGenerator().createNewId();
-            }
-            //Not added to Snapshotable as the AggregationAttributeExecutors are added
-//            siddhiAppContext.getSnapshotService().addSnapshotable(this);
             init(attributeExpressionExecutors, configReader, siddhiAppContext);
         } catch (Throwable t) {
             throw new SiddhiAppCreationException(t);
@@ -63,8 +60,7 @@ public abstract class AttributeAggregator implements Snapshotable {
             for (int i = 0; i < attributeSize; i++) {
                 innerExpressionExecutors[i] = attributeExpressionExecutors[i].cloneExecutor(key);
             }
-            attributeAggregator.elementId = elementId + "-" + key;
-            attributeAggregator.initAggregator(innerExpressionExecutors, siddhiAppContext, configReader);
+            attributeAggregator.initAggregator(innerExpressionExecutors, siddhiAppContext, queryName, configReader);
             return attributeAggregator;
         } catch (Exception e) {
             throw new SiddhiAppRuntimeException("Exception in cloning " + this.getClass().getCanonicalName(), e);
@@ -132,8 +128,13 @@ public abstract class AttributeAggregator implements Snapshotable {
 
     public abstract Object reset();
 
-    @Override
-    public String getElementId() {
-        return elementId;
+    public abstract Map<String, Object> currentState();
+
+    public abstract void restoreState(Map<String, Object> state);
+
+    public void clean() {
+        for (ExpressionExecutor expressionExecutor : attributeExpressionExecutors) {
+            expressionExecutor.clean();
+        }
     }
 }
