@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.query.api.SiddhiApp;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -38,15 +39,18 @@ import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class FilterTestCase2 {
     private static final Logger log = Logger.getLogger(FilterTestCase2.class);
-    private volatile int count;
-    private volatile boolean eventArrived;
+    private AtomicInteger count;
+    private AtomicBoolean eventArrived;
 
     @BeforeMethod
     public void init() {
-        count = 0;
-        eventArrived = false;
+        count = new AtomicInteger(0);
+        eventArrived = new AtomicBoolean(false);
     }
 
     @Test
@@ -76,7 +80,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -85,8 +89,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 300d, 4});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -117,7 +121,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -126,8 +130,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300d, 4});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -158,7 +162,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -167,8 +171,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300d, 4});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -199,7 +203,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -208,8 +212,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 500f, 50L, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 20L, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300L, 4});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -238,7 +242,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -247,8 +251,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -278,7 +282,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -287,8 +291,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -318,7 +322,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -327,8 +331,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -358,7 +362,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -367,8 +371,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -398,7 +402,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -407,8 +411,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -438,7 +442,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -447,8 +451,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60L, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40L, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200L, 56});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -478,7 +482,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -487,8 +491,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60L, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40L, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200L, 56});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -521,7 +525,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -530,8 +534,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -560,7 +564,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -569,8 +573,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -599,7 +603,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -608,8 +612,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50d, 60d});
         inputHandler.send(new Object[]{"WSO2", 70d, 40d});
         inputHandler.send(new Object[]{"WSO2", 44d, 200d});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -641,7 +645,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -650,8 +654,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 60f, 300d, 4});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -682,7 +686,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -691,8 +695,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300d, 4});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -723,7 +727,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -732,8 +736,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 500f, 50d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 60d, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300d, 4});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -764,7 +768,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -773,8 +777,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 500f, 50L, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 20L, 2});
         inputHandler.send(new Object[]{"WSO2", 50f, 300L, 4});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -804,7 +808,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -813,8 +817,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -843,7 +847,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -852,8 +856,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -883,7 +887,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -892,8 +896,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -924,7 +928,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -933,8 +937,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(2, count);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 100);
+        AssertJUnit.assertEquals(2, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -964,7 +968,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -973,8 +977,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60d, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40d, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200d, 56});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -1005,7 +1009,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -1014,8 +1018,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60L, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40L, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200L, 56});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -1045,7 +1049,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
         });
 
@@ -1054,8 +1058,8 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"WSO2", 50f, 60L, 6});
         inputHandler.send(new Object[]{"WSO2", 70f, 40L, 10});
         inputHandler.send(new Object[]{"WSO2", 44f, 200L, 56});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -1129,7 +1133,7 @@ public class FilterTestCase2 {
                 AssertJUnit.assertTrue("150.0".equals(inEvents[0].getData()[2].toString()));
                 AssertJUnit.assertTrue("9".equals(inEvents[0].getData()[3].toString()));
                 AssertJUnit.assertTrue("20".equals(inEvents[0].getData()[4].toString()));
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
 
         });
@@ -1137,8 +1141,8 @@ public class FilterTestCase2 {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"WSO2", 55.5f, 100d, 5, 10L});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -1187,15 +1191,15 @@ public class FilterTestCase2 {
                 AssertJUnit.assertTrue("50.0".equals(inEvents[0].getData()[2].toString()));
                 AssertJUnit.assertTrue("1".equals(inEvents[0].getData()[3].toString()));
                 AssertJUnit.assertTrue("0".equals(inEvents[0].getData()[4].toString()));
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
 
         });
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"WSO2", 55.5f, 100d, 5, 10L});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -1243,7 +1247,7 @@ public class FilterTestCase2 {
                 AssertJUnit.assertTrue("50.0".equals(inEvents[0].getData()[2].toString()));
                 AssertJUnit.assertTrue("20".equals(inEvents[0].getData()[3].toString()));
                 AssertJUnit.assertTrue("7".equals(inEvents[0].getData()[4].toString()));
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
 
             }
 
@@ -1251,8 +1255,8 @@ public class FilterTestCase2 {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"WSO2", 60f, 100d, 100, 70L});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -1302,15 +1306,15 @@ public class FilterTestCase2 {
                 AssertJUnit.assertTrue("111.0".equals(inEvents[0].getData()[2].toString()));
                 AssertJUnit.assertTrue("300.0".equals(inEvents[0].getData()[3].toString()));
                 AssertJUnit.assertTrue("15".equals(inEvents[0].getData()[4].toString()));
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
 
         });
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"WSO2", 55.5f, 100d, 5, 3L});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -1357,15 +1361,15 @@ public class FilterTestCase2 {
                 AssertJUnit.assertTrue("1.0".equals(inEvents[0].getData()[2].toString()));
                 AssertJUnit.assertTrue("1".equals(inEvents[0].getData()[3].toString()));
                 AssertJUnit.assertTrue("1".equals(inEvents[0].getData()[4].toString()));
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
             }
 
         });
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"WSO2", 55.5f, 101d, 5, 7L});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -1397,8 +1401,8 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                if (count == 1) {
+                count.addAndGet(inEvents.length);
+                if (count.get() == 1) {
                     AssertJUnit.assertEquals(50.0f, inEvents[0].getData()[1]);
                 }
             }
@@ -1407,8 +1411,8 @@ public class FilterTestCase2 {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"WSO2", 50f, 60f, 60L, 6});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -1437,7 +1441,7 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
+                count.addAndGet(inEvents.length);
                 AssertJUnit.fail("No events should occur");
 
             }
@@ -1464,8 +1468,8 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                eventArrived = true;
+                count.addAndGet(inEvents.length);
+                eventArrived.set(true);
             }
 
         });
@@ -1476,9 +1480,9 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200L});
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(3, count);
-        AssertJUnit.assertTrue(eventArrived);
+        SiddhiTestHelper.waitForEvents(10, 3, count, 100);
+        AssertJUnit.assertEquals(3, count.get());
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -1497,9 +1501,9 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                eventArrived = true;
-                if (count == 1) {
+                count.addAndGet(inEvents.length);
+                eventArrived.set(true);
+                if (count.get() == 1) {
                     AssertJUnit.assertEquals(1465.5, inEvents[0].getData()[1]);
                 }
             }
@@ -1512,9 +1516,9 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200L});
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
-        Thread.sleep(1000);
-        AssertJUnit.assertEquals(1, count);
-        AssertJUnit.assertTrue(eventArrived);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 1000);
+        AssertJUnit.assertEquals(1, count.get());
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -1533,8 +1537,8 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                eventArrived = true;
+                count.addAndGet(inEvents.length);
+                eventArrived.set(true);
             }
 
         });
@@ -1545,9 +1549,9 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200L});
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
-        Thread.sleep(1000);
-        AssertJUnit.assertEquals(2, count);
-        AssertJUnit.assertTrue(eventArrived);
+        SiddhiTestHelper.waitForEvents(10, 2, count, 1000);
+        AssertJUnit.assertEquals(2, count.get());
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -1566,8 +1570,8 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                eventArrived = true;
+                count.addAndGet(inEvents.length);
+                eventArrived.set(true);
             }
 
         });
@@ -1578,9 +1582,9 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200L});
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
-        AssertJUnit.assertTrue(eventArrived);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -1599,8 +1603,8 @@ public class FilterTestCase2 {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
-                count = count + inEvents.length;
-                eventArrived = true;
+                count.addAndGet(inEvents.length);
+                eventArrived.set(true);
             }
 
         });
@@ -1611,9 +1615,9 @@ public class FilterTestCase2 {
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200L});
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
-        AssertJUnit.assertTrue(eventArrived);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -1735,8 +1739,8 @@ public class FilterTestCase2 {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 AssertJUnit.assertTrue("IBM".equals(inEvents[0].getData(2)));
-                count = count + inEvents.length;
-                eventArrived = true;
+                count.addAndGet(inEvents.length);
+                eventArrived.set(true);
             }
 
         });
@@ -1747,9 +1751,9 @@ public class FilterTestCase2 {
 
         inputHandler.send(new Object[]{"IBM", 700f, 100L});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200L});
-        Thread.sleep(100);
-        AssertJUnit.assertEquals(1, count);
-        AssertJUnit.assertTrue(eventArrived);
+        SiddhiTestHelper.waitForEvents(10, 1, count, 100);
+        AssertJUnit.assertEquals(1, count.get());
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
 
     }

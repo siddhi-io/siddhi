@@ -32,4 +32,6 @@ public interface ExpressionExecutor {
 
     ExpressionExecutor cloneExecutor(String key);
 
+    void clean();
+
 }

@@ -47,6 +47,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
 
     private final StreamEvent resetEvent;
     private final ExpressionExecutor timestampExpressionExecutor;
+    private final String aggregatorName;
     private TimePeriod.Duration duration;
     private Table table;
     private GroupByKeyGenerator groupByKeyGenerator;
@@ -60,6 +61,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
     private boolean isRoot;
     private String elementId;
     private boolean isProcessingExecutor;
+    private SiddhiAppContext siddhiAppContext;
 
     private BaseIncrementalValueStore baseIncrementalValueStore = null;
     private Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap = null;
@@ -73,6 +75,8 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         this.next = child;
         this.isRoot = isRoot;
         this.table = table;
+        this.siddhiAppContext = siddhiAppContext;
+        this.aggregatorName = aggregatorName;
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
         this.baseIncrementalValueStore = new BaseIncrementalValueStore(-1, processExpressionExecutors,
@@ -253,6 +257,9 @@ public class IncrementalExecutor implements Executor, Snapshotable {
                 next.execute(eventChunk);
             }
         }
+        for (BaseIncrementalValueStore baseIncrementalValueStore : baseIncrementalValueGroupByStore.values()) {
+            baseIncrementalValueStore.clean();
+        }
         baseIncrementalValueGroupByStore.clear();
     }
 
@@ -276,7 +283,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
     }
 
     public long getAggregationStartTimestamp() {
-            return this.startTimeOfAggregates;
+        return this.startTimeOfAggregates;
     }
 
     public long getNextEmitTime() {
@@ -323,5 +330,18 @@ public class IncrementalExecutor implements Executor, Snapshotable {
     @Override
     public String getElementId() {
         return elementId;
+    }
+
+    @Override
+    public void clean() {
+        timestampExpressionExecutor.clean();
+        baseIncrementalValueStore.clean();
+        scheduler.clean();
+        if (baseIncrementalValueStoreGroupByMap != null) {
+            for (BaseIncrementalValueStore aBaseIncrementalValueStore : baseIncrementalValueStoreGroupByMap.values()) {
+                aBaseIncrementalValueStore.clean();
+            }
+        }
+        siddhiAppContext.getSnapshotService().removeSnapshotable(aggregatorName, this);
     }
 }

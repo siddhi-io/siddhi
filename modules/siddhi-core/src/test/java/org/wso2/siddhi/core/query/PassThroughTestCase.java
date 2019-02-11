@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.query.api.SiddhiApp;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -37,15 +38,17 @@ import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class PassThroughTestCase {
     private static final Logger log = Logger.getLogger(PassThroughTestCase.class);
     private int count;
-    private boolean eventArrived;
+    private AtomicBoolean eventArrived;
 
     @BeforeMethod
     public void init() {
         count = 0;
-        eventArrived = false;
+        eventArrived = new AtomicBoolean(false);
     }
 
 
@@ -80,7 +83,7 @@ public class PassThroughTestCase {
                 EventPrinter.print(inEvents);
                 AssertJUnit.assertTrue("IBM".equals(inEvents[0].getData(0)) || "WSO2".equals(inEvents[0].getData(0)));
                 count += inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -88,9 +91,9 @@ public class PassThroughTestCase {
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100});
         inputHandler.send(new Object[]{"WSO2", 100});
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 100);
         AssertJUnit.assertEquals(2, count);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -127,7 +130,7 @@ public class PassThroughTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(inEvents);
                 count += inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -135,9 +138,9 @@ public class PassThroughTestCase {
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 100});
         inputHandler.send(new Object[]{"WSO2", 100});
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 100);
         AssertJUnit.assertEquals(0, count);
-        AssertJUnit.assertFalse(eventArrived);
+        AssertJUnit.assertFalse(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -174,7 +177,7 @@ public class PassThroughTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(inEvents);
                 count += inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -188,9 +191,9 @@ public class PassThroughTestCase {
         inputHandler1.send(new Object[]{"ORACLE", 100});
         inputHandler1.send(new Object[]{"ABC", 100});
 
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 100);
         AssertJUnit.assertEquals(2, count);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         siddhiAppRuntime.shutdown();
     }
 
@@ -224,7 +227,7 @@ public class PassThroughTestCase {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 AssertJUnit.assertTrue("WSO2".equals(inEvents[0].getData(0)));
                 count = count + inEvents.length;
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         };
@@ -237,9 +240,9 @@ public class PassThroughTestCase {
 
         inputHandler.send(new Object[]{"WSO2", 700f, 100L});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200L});
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(10, eventArrived, 100);
         AssertJUnit.assertEquals(2, count);
-        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertTrue(eventArrived.get());
         queryCallback.stopProcessing();
 
         siddhiAppRuntime.shutdown();

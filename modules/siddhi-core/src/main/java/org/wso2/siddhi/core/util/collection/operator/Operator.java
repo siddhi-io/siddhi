@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.util.collection.AddingStreamEventExtractor;
 /**
  * Interface for Operators related to collection of events. These will be used by in-memory table implementation.
  */
+//todo support clean method
 public interface Operator extends CompiledCondition {
 
     StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner);

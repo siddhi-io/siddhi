@@ -202,4 +202,13 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
     public String getElementId() {
         return elementId;
     }
+
+    @Override
+    public void clean() {
+        for (ExpressionExecutor expressionExecutor : attributeExpressionExecutors) {
+            expressionExecutor.clean();
+        }
+        siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
+    }
+
 }

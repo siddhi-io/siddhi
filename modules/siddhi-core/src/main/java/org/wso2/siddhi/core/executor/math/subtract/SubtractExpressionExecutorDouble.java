@@ -56,4 +56,11 @@ public class SubtractExpressionExecutorDouble implements ExpressionExecutor {
                 rightExpressionExecutor.cloneExecutor(key));
     }
 
+    @Override
+    public void clean() {
+        leftExpressionExecutor.clean();
+        rightExpressionExecutor.clean();
+    }
+
+
 }

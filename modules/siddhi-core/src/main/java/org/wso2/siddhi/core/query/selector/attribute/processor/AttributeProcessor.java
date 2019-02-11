@@ -59,4 +59,8 @@ public class AttributeProcessor {
     public ExpressionExecutor getExpressionExecutor() {
         return expressionExecutor;
     }
+
+    public void clean() {
+        expressionExecutor.clean();
+    }
 }

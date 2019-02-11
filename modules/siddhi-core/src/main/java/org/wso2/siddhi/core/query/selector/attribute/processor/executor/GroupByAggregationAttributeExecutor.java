@@ -128,6 +128,7 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
         for (String obsoleteKey : obsoleteAggregatorKeys) {
             AttributeAggregator attributeAggregator = aggregatorMap.get(obsoleteKey);
             if (attributeAggregator != null && attributeAggregator.canDestroy()) {
+                attributeAggregator.clean();
                 aggregatorMap.remove(obsoleteKey);
             }
         }

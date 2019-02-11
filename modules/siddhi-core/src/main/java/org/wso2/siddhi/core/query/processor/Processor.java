@@ -63,4 +63,9 @@ public interface Processor {
      */
     Processor cloneProcessor(String key);
 
+    /**
+     * Used to clean its references
+     */
+    void clean();
+
 }

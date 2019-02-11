@@ -133,4 +133,17 @@ public class BaseIncrementalValueStore implements Snapshotable {
     public String getElementId() {
         return elementId;
     }
+
+    @Override
+    public void clean() {
+        for (ExpressionExecutor expressionExecutor : expressionExecutors) {
+            expressionExecutor.clean();
+        }
+        if (shouldUpdateExpressionExecutor != null) {
+            shouldUpdateExpressionExecutor.clean();
+        }
+        if (aggregatorName != null) {
+            siddhiAppContext.getSnapshotService().removeSnapshotable(aggregatorName, this);
+        }
+    }
 }
