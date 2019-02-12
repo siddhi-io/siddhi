@@ -26,7 +26,7 @@
         <version>5</version>
     </parent>
 
-    <groupId>org.wso2.siddhi</groupId>
+    <groupId>io.siddhi</groupId>
     <artifactId>siddhi</artifactId>
     <packaging>pom</packaging>
     <version>4.4.9-SNAPSHOT</version>
@@ -141,22 +141,22 @@
 
             <!--Time-->
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-query-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-query-compiler</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -352,7 +352,7 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                 </plugin>
                 <plugin>
-                    <groupId>org.wso2.siddhi</groupId>
+                    <groupId>io.siddhi</groupId>
                     <artifactId>siddhi-doc-gen</artifactId>
                     <version>${project.version}</version>
                 </plugin>
@@ -471,9 +471,9 @@
     </properties>
 
     <scm>
-        <url>https://github.com/wso2/siddhi.git</url>
-        <developerConnection>scm:git:https://github.com/wso2/siddhi.git</developerConnection>
-        <connection>scm:git:https://github.com/wso2/siddhi.git</connection>
+        <url>https://github.com/siddhi-io/siddhi.git</url>
+        <developerConnection>scm:git:https://github.com/siddhi-io/siddhi.git</developerConnection>
+        <connection>scm:git:https://github.com/siddhi-io/siddhi.git</connection>
         <tag>HEAD</tag>
     </scm>
 
