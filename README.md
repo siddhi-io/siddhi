@@ -1,6 +1,13 @@
 Siddhi 
 ======
 
+  [![Jenkins Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi)
+  [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/97xlytm8di5l0pmb/branch/master?svg=true)](https://ci.appveyor.com/project/WSO2/ballerina-lang/branch/master)
+  [![GitHub (pre-)release](https://img.shields.io/github/release/siddhi-io/siddhi/all.svg)](https://github.com/siddhi-io/siddhi/releases)
+  [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/releases)
+  [![GitHub last commit](https://img.shields.io/github/last-commit/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
+  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 Siddhi is a java library that listens to events from data streams, detects complex conditions described via a **Streaming
  SQL language**, and triggers actions. It performs both **_Stream Processing_** and **_Complex Event Processing_**.  
  
@@ -23,6 +30,19 @@ Siddhi supports the following:
 * And many more ...  For more information, see <a target="_blank" href="http://www.kdnuggets.com/2015/08/patterns-streaming-realtime-analytics.html">Patterns of Streaming Realtime Analytics</a>
 
 Siddhi is free and open source, under **Apache Software License v2.0**.
+
+## Table of contents
+
+- [Get started](#get-started)
+- [Why use Siddhi](#why-use-siddhi)
+- [Develop Siddhi using Intellij IDEA](#develop-siddhi-using-intellij-idea)
+- [Try Siddhi with WSO2 Stream Processor](#try-siddhi-with-wso2-stream-processor)
+- [Siddhi versions](#siddhi-versions)
+- [Latest API docs](#latest-api-docs)
+- [How to contribute](#how-to-contribute)
+- [Contact us](#contact-us)
+- [Support](#support)
+
 
 ## Get Started!
 
@@ -95,12 +115,6 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 ## Latest API Docs 
 
 Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/4.4.8">4.4.8</a>.
-
-## Jenkins Build Status
-
-|  Siddhi Branch | Jenkins Build Status |
-| :---------------------------------------- |:---------------------------------------
-| master         | [![Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi )|
 
 ## How to Contribute
 * Report issues at <a target="_blank" href="https://github.com/wso2/siddhi/issues">GitHub Issue Tracker</a>.
