@@ -117,7 +117,13 @@ Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/a
 
 ## How to Contribute
 * Report issues at <a target="_blank" href="https://github.com/wso2/siddhi/issues">GitHub Issue Tracker</a>.
-* Feel free to try out the <a target="_blank" href="https://github.com/wso2/siddhi">Siddhi source code</a> and send your contributions as pull requests to the <a target="_blank" href="https://github.com/wso2/siddhi/tree/master">master branch</a>. 
+* Feel free to try out the <a target="_blank" href="https://github.com/wso2/siddhi">Siddhi source code</a> and send your contributions as pull requests to the <a target="_blank" href="https://github.com/wso2/siddhi/tree/master">master branch</a>.
+
+## Build from the source
+
+- Get a clone or download source from [Github](https://github.com/siddhi-io/siddhi.git)
+- Prerequisites: Maven 3.5.x version (Install [Maven](https://maven.apache.org/install.html))
+- Run the Maven command ``mvn clean install`` from the root directory
  
 ## Contact us 
  * Post your questions with the <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">"Siddhi"</a> tag in <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">Stackoverflow</a>. 
