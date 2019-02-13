@@ -61,7 +61,7 @@ public class TriggerTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class, dependsOnMethods = "testQuery1")
     public void testQuery2() throws InterruptedException {
         log.info("testTrigger2 - OUT 0");
 
@@ -77,7 +77,7 @@ public class TriggerTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = DuplicateDefinitionException.class)
+    @Test(expectedExceptions = DuplicateDefinitionException.class, dependsOnMethods = "testQuery2")
     public void testQuery3() throws InterruptedException {
         log.info("testTrigger3 - OUT 0");
 
@@ -93,7 +93,7 @@ public class TriggerTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = "testQuery3")
     public void testQuery4() throws InterruptedException {
         log.info("testTrigger4 - OUT 0");
 
@@ -110,8 +110,8 @@ public class TriggerTestCase {
     }
 
 
-    @Test
-    public void testFilterQuery5() throws InterruptedException {
+    @Test(dependsOnMethods = "testQuery4")
+    public void testQuery5() throws InterruptedException {
         log.info("testTrigger5 - OUT 1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -141,8 +141,8 @@ public class TriggerTestCase {
 
     }
 
-    @Test
-    public void testFilterQuery6() throws InterruptedException {
+    @Test(dependsOnMethods = "testQuery5")
+    public void testQuery6() throws InterruptedException {
         log.info("testTrigger6 - OUT 2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -172,8 +172,8 @@ public class TriggerTestCase {
 
     }
 
-    @Test
-    public void testFilterQuery7() throws InterruptedException {
+    @Test(dependsOnMethods = "testQuery6")
+    public void testQuery7() throws InterruptedException {
         log.info("testTrigger7 - OUT 2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
