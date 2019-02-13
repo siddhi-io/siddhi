@@ -116,7 +116,7 @@ public class StatisticsTestCase {
     /**
      * To test stats disabling
      */
-    @Test
+    @Test(dependsOnMethods = "statisticsTest1")
     public void statisticsTest2() throws InterruptedException {
         log.info("statistics test 2");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -186,7 +186,7 @@ public class StatisticsTestCase {
     /**
      * To test stats dynamic disabling
      */
-    @Test
+    @Test(dependsOnMethods = "statisticsTest2")
     public void statisticsTest3() throws InterruptedException {
         log.info("statistics test 3");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -271,7 +271,7 @@ public class StatisticsTestCase {
     /**
      * To test stats dynamic enabling
      */
-    @Test
+    @Test(dependsOnMethods = "statisticsTest3")
     public void statisticsTest4() throws InterruptedException {
         log.info("statistics test 4");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -356,7 +356,7 @@ public class StatisticsTestCase {
      * To not enable stats if no Stats manager enabled
      *
      */
-    @Test
+    @Test(dependsOnMethods = "statisticsTest4")
     public void statisticsTest5() throws InterruptedException {
         log.info("statistics test 5");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -413,7 +413,7 @@ public class StatisticsTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "statisticsTest5")
     public void statisticsTest6() throws InterruptedException {
         log.info("statistics test 1");
         SiddhiManager siddhiManager = new SiddhiManager();

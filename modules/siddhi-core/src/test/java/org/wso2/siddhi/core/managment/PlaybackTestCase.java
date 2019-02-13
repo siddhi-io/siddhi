@@ -681,7 +681,7 @@ public class PlaybackTestCase {
                     if (inEventCount == 0) {
                         AssertJUnit.assertTrue("Remove Events will only arrive after the second time period. ",
                                 removeEvents
-                                == null);
+                                        == null);
                     }
                     if (inEvents != null) {
                         inEventCount = inEventCount + inEvents.length;
@@ -740,7 +740,7 @@ public class PlaybackTestCase {
                     if (inEventCount == 0) {
                         AssertJUnit.assertTrue("Remove Events will only arrive after the second time period. ",
                                 removeEvents
-                                == null);
+                                        == null);
                     }
                     if (inEvents != null) {
                         inEventCount = inEventCount + inEvents.length;
@@ -799,7 +799,7 @@ public class PlaybackTestCase {
                     if (inEventCount == 0) {
                         AssertJUnit.assertTrue("Remove Events will only arrive after the second time period. ",
                                 removeEvents
-                                == null);
+                                        == null);
                     }
                     if (inEvents != null) {
                         inEventCount = inEventCount + inEvents.length;
@@ -856,7 +856,7 @@ public class PlaybackTestCase {
                     if (inEventCount == 0) {
                         AssertJUnit.assertTrue("Remove Events will only arrive after the second time period. ",
                                 removeEvents
-                                == null);
+                                        == null);
                     }
                     if (inEvents != null) {
                         inEventCount = inEventCount + inEvents.length;
@@ -910,7 +910,7 @@ public class PlaybackTestCase {
                     if (inEventCount == 0) {
                         AssertJUnit.assertTrue("Remove Events will only arrive after the second time period. ",
                                 removeEvents
-                                == null);
+                                        == null);
                     }
                     if (inEvents != null) {
                         inEventCount = inEventCount + inEvents.length;
@@ -962,8 +962,7 @@ public class PlaybackTestCase {
                     EventPrinter.print(timestamp, inEvents, removeEvents);
                     if (inEventCount == 0) {
                         AssertJUnit.assertTrue("Remove Events will only arrive after the second time period. ",
-                                removeEvents
-                                == null);
+                                removeEvents == null);
                     }
                     if (inEvents != null) {
                         inEventCount = inEventCount + inEvents.length;
@@ -981,6 +980,7 @@ public class PlaybackTestCase {
             siddhiAppRuntime.enablePlayBack(true, null, null);
             long timestamp = System.currentTimeMillis();
             inputHandler.send(timestamp - 500, new Object[]{"IBM", 700f, 0});
+            Thread.sleep(10);
             inputHandler.send(timestamp - 100, new Object[]{"WSO2", 60.5f, 1});
             siddhiAppRuntime.enablePlayBack(false, null, null);
             inputHandler.send(System.currentTimeMillis(), new Object[]{"ORACLE", 60.5f, 1});

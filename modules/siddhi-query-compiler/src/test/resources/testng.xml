@@ -20,7 +20,7 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="Siddhi-Compiler-Test-Suite">
-    <test name="siddhi-compiler-tests" enabled="true" preserve-order="true">
+    <test name="siddhi-compiler-tests" enabled="true" parallel="classes">
         <classes>
             <class name="org.wso2.siddhi.query.test.AbsentPatternTestCase"/>
             <class name="org.wso2.siddhi.query.test.DefineAggregationTestCase"/>
