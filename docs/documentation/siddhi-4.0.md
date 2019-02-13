@@ -2917,12 +2917,13 @@ from StreamA[custom:fault() > volume]
 insert into StreamB;
 
 from !StreamA#log("Error Occured")
+select symbol, volume long, _error
 insert into tempStream;
 ``` 
 
-`!StreamA`, fault stream is automatically created when you add the `@OnError` annotation. The definition of the corresponding fault stream is as follows.
+`!StreamA`, fault stream is automatically created when you add the `@OnError` annotation with the following attributes.
 ```sql
-!StreamA(symbol string, volume long, _error object)
+symbol string, volume long, _error object
 ``` 
 
 If you include the `on.error` parameter in the sink configuration, failures are handled by Siddhi at the time the events are published from the `Sink`.
