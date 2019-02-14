@@ -177,8 +177,8 @@ public class StreamFunctionTestCase {
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
                     AssertJUnit.assertEquals(22.6, inEvents[0].getData(0));
-                    AssertJUnit.assertEquals(13.0,inEvents[0].getData(1));
-                    AssertJUnit.assertEquals("test",inEvents[0].getData(2));
+                    AssertJUnit.assertEquals(13.0, inEvents[0].getData(1));
+                    AssertJUnit.assertEquals("test", inEvents[0].getData(2));
 
                 }
                 eventArrived = true;
