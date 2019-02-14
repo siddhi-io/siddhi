@@ -85,6 +85,8 @@ The following parameters are configured in a stream definition.
 | `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camelCase`.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
+To use and refer stream and attribute names that do not follow `[a-zA-Z_][a-zA-Z_0-9]*` format enclose them in ``. E.g. ``` `$test(0)` ```.
+ 
 To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
 [Threading and Asynchronous](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#threading-and-asynchronous) configuration section.
 
