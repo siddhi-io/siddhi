@@ -31,19 +31,22 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class TimeOutputRateLimitTestCase {
     private static final Logger log = Logger.getLogger(TimeOutputRateLimitTestCase.class);
-    private volatile int count;
-    private volatile int inEventCount;
-    private volatile int removeEventCount;
-    private volatile boolean eventArrived;
+    private AtomicInteger count;
+    private AtomicInteger inEventCount;
+    private AtomicInteger removeEventCount;
+    private AtomicBoolean eventArrived;
 
     @BeforeMethod
     public void init() {
-        count = 0;
-        eventArrived = false;
-        inEventCount = 0;
-        removeEventCount = 0;
+        count = new AtomicInteger(0);
+        eventArrived = new AtomicBoolean(false);
+        inEventCount = new AtomicInteger(0);
+        removeEventCount = new AtomicInteger(0);
     }
 
     @Test
@@ -73,11 +76,11 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    count += inEvents.length;
+                    count.addAndGet(inEvents.length);
                 } else {
                     AssertJUnit.fail("Remove events emitted");
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -97,8 +100,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.40"});
         Thread.sleep(1000);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 6, count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output event value", 6, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -130,11 +133,11 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    count += inEvents.length;
+                    count.addAndGet(inEvents.length);
                 } else {
                     AssertJUnit.fail("Remove events emitted");
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -154,8 +157,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.40"});
         Thread.sleep(1000);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 6, count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output event value", 6, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -187,11 +190,11 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    count += inEvents.length;
+                    count.addAndGet(inEvents.length);
                 } else {
                     AssertJUnit.fail("Remove events emitted");
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -211,8 +214,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1000);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 8, count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output event value", 8, count.get());
         siddhiAppRuntime.shutdown();
 
     }
@@ -244,14 +247,14 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    count += inEvents.length;
+                    count.addAndGet(inEvents.length);
                     AssertJUnit.assertTrue("192.10.1.5".equals(inEvents[0].getData(0)) ||
                             "192.10.1.9".equals(inEvents[0].getData(0)) ||
                             "192.10.1.30".equals(inEvents[0].getData(0)));
                 } else {
                     AssertJUnit.fail("Remove events emitted");
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -269,8 +272,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1000);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 3, count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output event value", 3, count.get());
 
         siddhiAppRuntime.shutdown();
 
@@ -303,14 +306,14 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    count += inEvents.length;
+                    count.addAndGet(inEvents.length);
                     AssertJUnit.assertTrue("192.10.1.5".equals(inEvents[0].getData(0)) ||
                             "192.10.1.3".equals(inEvents[0].getData(0)) || "192.10.1.4".equals(inEvents[0].getData(0))
                             || "192.10.1.30".equals(inEvents[0].getData(0)));
                 } else {
                     AssertJUnit.fail("Remove events emitted");
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -328,8 +331,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1000);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertTrue("Number of output event value", 3 <= count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertTrue("Number of output event value", 3 <= count.get());
 
         siddhiAppRuntime.shutdown();
 
@@ -363,11 +366,11 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    count += inEvents.length;
+                    count.addAndGet(inEvents.length);
                 } else {
                     AssertJUnit.fail("Remove events emitted");
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -387,8 +390,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1000);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 6, count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output event value", 6, count.get());
 
         siddhiAppRuntime.shutdown();
 
@@ -422,11 +425,11 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    count += inEvents.length;
+                    count.addAndGet(inEvents.length);
                 } else {
                     AssertJUnit.fail("Remove events emitted");
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -446,8 +449,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1000);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 6, count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output event value", 6, count.get());
 
         siddhiAppRuntime.shutdown();
 
@@ -481,11 +484,11 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    count += inEvents.length;
+                    count.addAndGet(inEvents.length);
                 } else {
                     AssertJUnit.fail("Remove events emitted");
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -505,8 +508,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1200);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 5, count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output event value", 5, count.get());
 
         siddhiAppRuntime.shutdown();
 
@@ -540,11 +543,11 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (removeEvents != null) {
-                    count += removeEvents.length;
+                    count.addAndGet(removeEvents.length);
                 } else {
                     AssertJUnit.fail("inEvents emitted");
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -564,8 +567,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1100);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 4, count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output event value", 4, count.get());
 
         siddhiAppRuntime.shutdown();
 
@@ -599,11 +602,11 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (removeEvents != null) {
-                    count += removeEvents.length;
+                    count.addAndGet(removeEvents.length);
                 } else {
                     AssertJUnit.fail("inEvents emitted");
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -623,8 +626,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1100);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 4, count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output event value", 4, count.get());
 
         siddhiAppRuntime.shutdown();
 
@@ -658,12 +661,12 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    inEventCount += inEvents.length;
+                    inEventCount.addAndGet(inEvents.length);
                 }
                 if (removeEvents != null) {
-                    removeEventCount += removeEvents.length;
+                    removeEventCount.addAndGet(removeEvents.length);
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -683,9 +686,9 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1100);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output in event value", 5, inEventCount);
-        AssertJUnit.assertEquals("Number of output remove event value", 2, removeEventCount);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output in event value", 5, inEventCount.get());
+        AssertJUnit.assertEquals("Number of output remove event value", 2, removeEventCount.get());
 
         siddhiAppRuntime.shutdown();
 
@@ -719,12 +722,12 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    inEventCount += inEvents.length;
+                    inEventCount.addAndGet(inEvents.length);
                 }
                 if (removeEvents != null) {
-                    removeEventCount += removeEvents.length;
+                    removeEventCount.addAndGet(removeEvents.length);
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -744,9 +747,9 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1100);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output in event value", 4, inEventCount);
-        AssertJUnit.assertEquals("Number of output remove event value", 3, removeEventCount);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output in event value", 4, inEventCount.get());
+        AssertJUnit.assertEquals("Number of output remove event value", 3, removeEventCount.get());
 
         siddhiAppRuntime.shutdown();
 
@@ -780,12 +783,12 @@ public class TimeOutputRateLimitTestCase {
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
                 if (inEvents != null) {
-                    inEventCount += inEvents.length;
+                    inEventCount.addAndGet(inEvents.length);
                 }
                 if (removeEvents != null) {
-                    removeEventCount += removeEvents.length;
+                    removeEventCount.addAndGet(removeEvents.length);
                 }
-                eventArrived = true;
+                eventArrived.set(true);
             }
 
         });
@@ -805,9 +808,9 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
         Thread.sleep(1100);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output in event value", 6, inEventCount);
-        AssertJUnit.assertEquals("Number of output remove event value", 3, removeEventCount);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output in event value", 6, inEventCount.get());
+        AssertJUnit.assertEquals("Number of output remove event value", 3, removeEventCount.get());
 
         siddhiAppRuntime.shutdown();
 
@@ -840,11 +843,11 @@ public class TimeOutputRateLimitTestCase {
         siddhiAppRuntime.addCallback("uniqueIps", new StreamCallback() {
             @Override public void receive(Event[] events) {
                 EventPrinter.print(events);
-                count += events.length;
+                count.addAndGet(events.length);
                 AssertJUnit.assertTrue("192.10.1.3".equals(events[0].getData(0))
                                                || "192.10.1.4".equals(events[0].getData(0))
                                                || "192.10.1.30".equals(events[0].getData(0)));
-                eventArrived = true;
+                eventArrived.set(true);
             }
         });
 
@@ -861,8 +864,8 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30", "WSO2"});
         Thread.sleep(1000);
 
-        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertTrue("Number of output event value", 3 == count);
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertTrue("Number of output event value", 3 == count.get());
 
         siddhiAppRuntime.shutdown();
 
