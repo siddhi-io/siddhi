@@ -28,8 +28,8 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
 
-public class Pol2CartFunctionTestCase {
-    private static final Logger log = Logger.getLogger(Pol2CartFunctionTestCase.class);
+public class StreamFunctionTestCase {
+    private static final Logger log = Logger.getLogger(StreamFunctionTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private boolean eventArrived;
@@ -146,6 +146,46 @@ public class Pol2CartFunctionTestCase {
         });
 
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("PolarStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{22.6, 13.0});
+        Thread.sleep(100);
+        AssertJUnit.assertEquals(1, inEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test
+    public void nonStandardAttribute() throws InterruptedException {
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("custom:get", AttributeStreamFunction.class);
+
+        String siddhiApp = "" +
+                "define stream `$InputStream` (`56$2theta` double, rho double); " +
+                "@info(name = 'query1') " +
+                "from `$InputStream`#custom:get('test(0)') " +
+                "select `56$2theta`, rho, `test(0)` as foo " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+//                    AssertJUnit.assertEquals(12, Math.round((Double) inEvents[0].getData(0)));
+//                    AssertJUnit.assertEquals(5, Math.round((Double) inEvents[0].getData(1)));
+
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("$InputStream");
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{22.6, 13.0});
         Thread.sleep(100);
