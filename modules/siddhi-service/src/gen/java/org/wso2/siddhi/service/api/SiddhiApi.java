@@ -31,8 +31,6 @@ import javax.ws.rs.core.Response;
 @Path("/siddhi")
 
 @io.swagger.annotations.Api(description = "The siddhi API")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaMSF4JServerCodegen", date =
-        "2017-03-15T08:56:59.657Z")
 public class SiddhiApi {
     private final SiddhiApiService delegate = SiddhiApiServiceFactory.getSiddhiApi();
 
