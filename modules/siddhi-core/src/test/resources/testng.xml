@@ -67,12 +67,7 @@
             <class name="org.wso2.siddhi.core.query.pattern.WithinPatternTestCase"/>
             <class name="org.wso2.siddhi.core.query.pattern.absent.AbsentPatternTestCase"/>
             <class name="org.wso2.siddhi.core.query.pattern.absent.AbsentWithEveryPatternTestCase"/>
-            <class name="org.wso2.siddhi.core.query.pattern.absent.EveryAbsentPatternTestCase"/>
             <class name="org.wso2.siddhi.core.query.pattern.absent.LogicalAbsentPatternTestCase"/>
-
-            <class name="org.wso2.siddhi.core.query.ratelimit.EventOutputRateLimitTestCase"/>
-            <class name="org.wso2.siddhi.core.query.ratelimit.SnapshotOutputRateLimitTestCase"/>
-            <class name="org.wso2.siddhi.core.query.ratelimit.TimeOutputRateLimitTestCase"/>
 
             <class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.DistinctCountAttributeAggregatorTestCase"/>
             <class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.StdDevAttributeAggregatorTestCase"/>
@@ -146,6 +141,11 @@
     <test name="siddhi-core-on-parallel-test" enabled="true" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.siddhi.core.aggregation.IncrementalPurgingTestCase"/>
+            <class name="org.wso2.siddhi.core.query.pattern.absent.EveryAbsentPatternTestCase"/>
+            <class name="org.wso2.siddhi.core.query.ratelimit.EventOutputRateLimitTestCase"/>
+            <class name="org.wso2.siddhi.core.query.ratelimit.SnapshotOutputRateLimitTestCase"/>
+            <class name="org.wso2.siddhi.core.query.ratelimit.TimeOutputRateLimitTestCase"/>
+
             <class name="org.wso2.siddhi.core.managment.LogTestCase"/>
             <class name="org.wso2.siddhi.core.managment.StatisticsTestCase"/>
             <class name="org.wso2.siddhi.core.transport.InMemoryTransportTestCase"/>
