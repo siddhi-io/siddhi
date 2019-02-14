@@ -52,7 +52,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.log4j.wso2</groupId>
+                                    <groupId>log4j</groupId>
                                     <artifactId>log4j</artifactId>
                                     <version>${log4j.version}</version>
                                     <overWrite>false</overWrite>
@@ -60,7 +60,7 @@
                                     </outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.wso2.orbit.com.lmax</groupId>
+                                    <groupId>com.lmax</groupId>
                                     <artifactId>disruptor</artifactId>
                                     <version>${disruptor.version}</version>
                                     <overWrite>false</overWrite>
