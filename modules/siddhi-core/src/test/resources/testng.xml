@@ -86,7 +86,7 @@
             <class name="org.wso2.siddhi.core.query.sequence.absent.EveryAbsentSequenceTestCase"/>
             <class name="org.wso2.siddhi.core.query.sequence.absent.LogicalAbsentSequenceTestCase"/>
 
-            <class name="org.wso2.siddhi.core.query.streamfunction.Pol2CartFunctionTestCase"/>
+            <class name="org.wso2.siddhi.core.query.streamfunction.StreamFunctionTestCase"/>
 
             <class name="org.wso2.siddhi.core.query.table.DefineTableTestCase"/>
             <class name="org.wso2.siddhi.core.query.table.DeleteFromTableTestCase"/>
