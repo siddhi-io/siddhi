@@ -88,7 +88,7 @@ public class IncrementalPurgingTestCase {
                 "per \"seconds\"");
         EventPrinter.print(events);
         AssertJUnit.assertEquals(6, events.length);
-        Thread.sleep(120000);
+        Thread.sleep(120100);
         events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"" + Calendar.getInstance().get(Calendar.YEAR) + "-**-** **:**:**\" " +
                 "per \"seconds\"");

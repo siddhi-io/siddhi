@@ -24,7 +24,6 @@
         <classes>
             <class name="org.wso2.siddhi.core.aggregation.Aggregation1TestCase"/>
             <class name="org.wso2.siddhi.core.aggregation.Aggregation2TestCase"/>
-            <class name="org.wso2.siddhi.core.aggregation.IncrementalPurgingTestCase"/>
             <class name="org.wso2.siddhi.core.aggregation.DistinctCountAggregationTestCase"/>
             <class name="org.wso2.siddhi.core.aggregation.AggregationFindQueryValidationTestCase"/>
 
@@ -146,13 +145,12 @@
     </test>
     <test name="siddhi-core-on-parallel-test" enabled="true" preserve-order="true" parallel="false">
         <classes>
+            <class name="org.wso2.siddhi.core.aggregation.IncrementalPurgingTestCase"/>
             <class name="org.wso2.siddhi.core.managment.LogTestCase"/>
             <class name="org.wso2.siddhi.core.managment.StatisticsTestCase"/>
-
             <class name="org.wso2.siddhi.core.transport.InMemoryTransportTestCase"/>
             <class name="org.wso2.siddhi.core.transport.MultiClientDistributedSinkTestCase"/>
             <class name="org.wso2.siddhi.core.transport.SingleClientDistributedTransportTestCases"/>
-
             <class name="org.wso2.siddhi.core.stream.output.sink.LogSinkTest"/>
         </classes>
     </test>
