@@ -847,7 +847,7 @@ AGGREGATION: A G G R E G A T I O N;
 AGGREGATE: A G G R E G A T E;
 PER:      P E R;
 
-ID_QUOTES : '`'[a-zA-Z_] [a-zA-Z_0-9]*'`' {setText(getText().substring(1, getText().length()-1));};
+ID_QUOTES : '`'(.*?)'`' {setText(getText().substring(1, getText().length()-1));};
 
 ID : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
