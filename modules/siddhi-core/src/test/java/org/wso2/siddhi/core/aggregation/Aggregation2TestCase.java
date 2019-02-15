@@ -191,8 +191,6 @@ public class Aggregation2TestCase {
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp string);";
         String query = "" +
-                "@BufferSize('3') " +
-                "@IgnoreEventsOlderThanBuffer('true')" +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
@@ -424,12 +422,12 @@ public class Aggregation2TestCase {
 
             SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
 
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isEventsMatch(firstJoinEvent, secondJoinEvent));
             AssertJUnit.assertEquals("Store Query events matched", true,
                     SiddhiTestHelper.isEventsMatch(storeQueryEvents1, storeQueryEvents2));
-            AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         } finally {
             siddhiAppRuntime.shutdown();
         }
