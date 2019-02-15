@@ -196,7 +196,7 @@
     </Match>
     <!--Suppression added to support for Java 11-->
     <Match>
-        <Package name="~org\.wso2\.siddhi\.core\.event\.stream\.holder\.SnapshotableStreamEventQueue"/>
+        <Class name="~org\.wso2\.siddhi\.core\.event\.stream\.holder\.SnapshotableStreamEventQueue"/>
         <Bug pattern="SE_TRANSIENT_FIELD_NOT_RESTORED"/>
     </Match>
 
