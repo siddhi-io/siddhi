@@ -113,7 +113,7 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/4.4.8">4.4.8</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.0.0-m1">5.0.0-m1</a>.
 
 ## How to Contribute
 * Report issues at <a target="_blank" href="https://github.com/wso2/siddhi/issues">GitHub Issue Tracker</a>.

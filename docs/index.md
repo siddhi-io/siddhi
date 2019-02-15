@@ -1,6 +1,12 @@
 Siddhi 
 ======
 
+  [![Jenkins Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi)
+  [![GitHub (pre-)release](https://img.shields.io/github/release/siddhi-io/siddhi/all.svg)](https://github.com/siddhi-io/siddhi/releases)
+  [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/releases)
+  [![GitHub last commit](https://img.shields.io/github/last-commit/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
+  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 Siddhi is a java library that listens to events from data streams, detects complex conditions described via a **Streaming
  SQL language**, and triggers actions. It performs both **_Stream Processing_** and **_Complex Event Processing_**.  
  
@@ -24,16 +30,29 @@ Siddhi supports the following:
 
 Siddhi is free and open source, under **Apache Software License v2.0**.
 
+## Table of contents
+
+- [Get started](#get-started)
+- [Why use Siddhi](#why-use-siddhi)
+- [Develop Siddhi using Intellij IDEA](#develop-siddhi-using-intellij-idea)
+- [Try Siddhi with WSO2 Stream Processor](#try-siddhi-with-wso2-stream-processor)
+- [Siddhi versions](#siddhi-versions)
+- [Latest API docs](#latest-api-docs)
+- [How to contribute](#how-to-contribute)
+- [Contact us](#contact-us)
+- [Support](#support)
+
+
 ## Get Started!
 
-Get started with Siddhi in a few minutes by following the <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-quckstart-4.0/">Siddhi Quick Start Guide</a>
+Get started with Siddhi in a few minutes by following the <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-quckstart-4.0/">Siddhi Quick Start Guide</a>
 
 ## Why use Siddhi ? 
 
 * It is **fast**. <a target="_blank" href="http://wso2.com/library/conference/2017/2/wso2con-usa-2017-scalable-real-time-complex-event-processing-at-uber?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">UBER</a> 
 uses it to process 20 Billion events per day (300,000 events per second). 
 * It is **lightweight** (<2MB),  and embeddable in Android and RaspberryPi.
-* It has **over 40 <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">Siddhi Extensions</a>**
+* It has **over 40 <a target="_blank" href="https://siddhi-io.github.io/siddhi/extensions/">Siddhi Extensions</a>**
 * It is **used by over 60 companies including many Fortune 500 companies** in production. Following are some examples:
     * **WSO2** uses Siddhi for the following purposes:
         * To provide stream processing capabilities in their products such as <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a>.
@@ -49,7 +68,7 @@ If you are a Siddhi user, we would love to hear more.
 
 ## Develop Siddhi using IntelliJ IDEA 
 
-Install <a target="_blank" href="https://wso2.github.io/siddhi-plugin-idea/">IDEA plugin</a> to get the following features:
+Install <a target="_blank" href="https://siddhi-io.github.io/siddhi-plugin-idea/">IDEA plugin</a> to get the following features:
 
 * **Siddhi Query Editor** with syntax highlighting and with basic auto completion
 * **Siddhi Runner and Debugger** support to test Siddhi Application
@@ -83,9 +102,9 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
  
 * **Active development version of Siddhi** : **v4.0.0**  _built on Java 8._ 
      
-    <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v4.x.x
+    <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v4.x.x
     
-    <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v4.x.x
+    <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v4.x.x
 
 
 * **Latest Stable Release of Siddhi** : **v3.0.5** _built on Java 7._
@@ -94,24 +113,32 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.4.8">4.4.8</a>.
-
-## Jenkins Build Status
-
-|  Siddhi Branch | Jenkins Build Status |
-| :---------------------------------------- |:---------------------------------------
-| master         | [![Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi )|
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.0.0-m1">5.0.0-m1</a>.
 
 ## How to Contribute
 * Report issues at <a target="_blank" href="https://github.com/wso2/siddhi/issues">GitHub Issue Tracker</a>.
-* Feel free to try out the <a target="_blank" href="https://github.com/wso2/siddhi">Siddhi source code</a> and send your contributions as pull requests to the <a target="_blank" href="https://github.com/wso2/siddhi/tree/master">master branch</a>. 
+* Feel free to try out the <a target="_blank" href="https://github.com/wso2/siddhi">Siddhi source code</a> and send your contributions as pull requests to the <a target="_blank" href="https://github.com/wso2/siddhi/tree/master">master branch</a>.
+
+## Build from the Source
+
+### Prerequisites
+* [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) or [OpenJDK 8](http://openjdk.java.net/install/) (Java 8 should be used for building in order to support both Java 8 and Java 11 at runtime)
+* [Maven 3.5.x version](https://maven.apache.org/install.html)
+
+### Steps to Build
+1. Get a clone or download source from [Github](https://github.com/siddhi-io/siddhi.git)
+
+    ```bash
+    git clone https://github.com/siddhi-io/siddhi.git
+    ```
+1. Run the Maven command ``mvn clean install`` from the root directory
  
 ## Contact us 
  * Post your questions with the <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">"Siddhi"</a> tag in <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">Stackoverflow</a>. 
  * For more details and support contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>
  
 ## Support 
-* We are committed to ensuring support for Siddhi (with its <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>) and <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a> from development to production. 
+* We are committed to ensuring support for Siddhi (with its <a target="_blank" href="https://siddhi-io.github.io/siddhi/extensions/">extensions</a>) and <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a> from development to production.
 * Our unique approach ensures that all support leverages our open development methodology and is provided by the very same engineers who build the technology. 
 * For more details and to take advantage of this unique opportunity, contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>. 
 
