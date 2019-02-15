@@ -26,8 +26,6 @@ import java.util.Objects;
 /**
  * Success
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaMSF4JServerCodegen", date =
-        "2017-03-15T08:56:59.657Z")
 public class Success {
     @JsonProperty("code")
     private Integer code = null;

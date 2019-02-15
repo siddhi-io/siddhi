@@ -31,7 +31,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.log4j.wso2</groupId>
+            <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
         <dependency>
