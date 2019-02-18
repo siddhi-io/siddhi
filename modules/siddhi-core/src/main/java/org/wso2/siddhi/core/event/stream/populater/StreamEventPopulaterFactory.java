@@ -41,7 +41,7 @@ public class StreamEventPopulaterFactory {
      * @param attributes            mapped attributes
      * @return StateEventPopulater
      */
-    public static ComplexEventPopulater constructEventPopulator(MetaStreamEvent metaStreamEvent, int
+    public static SelectiveComplexEventPopulater constructEventPopulator(MetaStreamEvent metaStreamEvent, int
             streamEventChainIndex, List<Attribute> attributes) {
 
         List<StreamMappingElement> streamMappingElements = new ArrayList<StreamMappingElement>();

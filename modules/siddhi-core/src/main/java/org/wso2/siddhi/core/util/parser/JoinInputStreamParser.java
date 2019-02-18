@@ -289,7 +289,7 @@ public class JoinInputStreamParser {
 
             case TABLE:
                 TableWindowProcessor tableWindowProcessor = new TableWindowProcessor(tableMap.get(inputStreamId));
-                tableWindowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(),
+                tableWindowProcessor.initProcessor(metaStreamEvent,
                         new ExpressionExecutor[0], null, siddhiAppContext, outputExpectsExpiredEvents,
                         queryName, inputStream);
                 streamRuntime.setProcessorChain(tableWindowProcessor);
@@ -297,7 +297,7 @@ public class JoinInputStreamParser {
             case WINDOW:
                 WindowWindowProcessor windowWindowProcessor = new WindowWindowProcessor(
                         windowMap.get(inputStreamId));
-                windowWindowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(),
+                windowWindowProcessor.initProcessor(metaStreamEvent,
                         variableExpressionExecutors.toArray(new ExpressionExecutor[0]), null,
                         siddhiAppContext, outputExpectsExpiredEvents, queryName, inputStream);
                 streamRuntime.setProcessorChain(windowWindowProcessor);
@@ -307,7 +307,7 @@ public class JoinInputStreamParser {
                 AggregationRuntime aggregationRuntime = aggregationMap.get(inputStreamId);
                 AggregateWindowProcessor aggregateWindowProcessor = new AggregateWindowProcessor(
                         aggregationRuntime, within, per);
-                aggregateWindowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(),
+                aggregateWindowProcessor.initProcessor(metaStreamEvent,
                         variableExpressionExecutors.toArray(new ExpressionExecutor[0]), null,
                         siddhiAppContext, outputExpectsExpiredEvents, queryName, inputStream);
                 streamRuntime.setProcessorChain(aggregateWindowProcessor);
@@ -343,7 +343,7 @@ public class JoinInputStreamParser {
                 ConfigReader configReader = siddhiAppContext.getSiddhiContext()
                         .getConfigManager().generateConfigReader("", "length");
                 windowProcessor.initProcessor(
-                        ((MetaStreamEvent) streamRuntime.getMetaComplexEvent()).getLastInputDefinition(),
+                        ((MetaStreamEvent) streamRuntime.getMetaComplexEvent()),
                         expressionExecutors, configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName,
                         inputStream);
                 lastProcessor = windowProcessor;

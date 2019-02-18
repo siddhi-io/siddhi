@@ -84,7 +84,8 @@ import java.util.concurrent.ConcurrentHashMap;
                 )
         }
 )
-public class FrequentWindowProcessor extends WindowProcessor implements FindableProcessor {
+@Deprecated
+public class FrequentWindowProcessor extends SlidingWindowProcessor implements FindableProcessor {
     private ConcurrentHashMap<String, Integer> countMap = new ConcurrentHashMap<String, Integer>();
     private ConcurrentHashMap<String, StreamEvent> map = new ConcurrentHashMap<String, StreamEvent>();
     private VariableExpressionExecutor[] variableExpressionExecutors;
@@ -92,8 +93,8 @@ public class FrequentWindowProcessor extends WindowProcessor implements Findable
     private int mostFrequentCount;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        SiddhiAppContext siddhiAppContext) {
         mostFrequentCount = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
                 attributeExpressionExecutors[0]).getValue()));
         variableExpressionExecutors = new VariableExpressionExecutor[attributeExpressionExecutors.length - 1];
@@ -205,9 +206,9 @@ public class FrequentWindowProcessor extends WindowProcessor implements Findable
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         return OperatorParser.constructOperator(map.values(), condition, matchingMetaInfoHolder, siddhiAppContext,
                 variableExpressionExecutors, tableMap, this.queryName);
     }

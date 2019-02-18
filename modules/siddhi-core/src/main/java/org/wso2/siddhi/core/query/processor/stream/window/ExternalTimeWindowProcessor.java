@@ -81,15 +81,15 @@ import java.util.Map;
                         "from the eventTime and output expired events."
         )
 )
-public class ExternalTimeWindowProcessor extends WindowProcessor implements FindableProcessor {
+public class ExternalTimeWindowProcessor extends SlidingWindowProcessor implements FindableProcessor {
     private static final Logger log = Logger.getLogger(ExternalTimeWindowProcessor.class);
     private long timeToKeep;
     private SnapshotableStreamEventQueue expiredEventQueue;
     private VariableExpressionExecutor timeStampVariableExpressionExecutor;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        SiddhiAppContext siddhiAppContext) {
         this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (attributeExpressionExecutors.length == 2) {
             if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.INT) {
@@ -183,9 +183,9 @@ public class ExternalTimeWindowProcessor extends WindowProcessor implements Find
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
     }

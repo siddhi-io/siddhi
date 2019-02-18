@@ -30,6 +30,7 @@ import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
+import org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;
 import org.wso2.siddhi.core.stream.StreamJunction;
@@ -139,8 +140,7 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
      * @param eventWindowMap map of EventWindows
      * @param queryName      name of the query window belongs to.
      */
-    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap,
-                     String queryName) {
+    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, String queryName) {
         if (this.windowProcessor != null) {
             return;
         }
@@ -399,5 +399,9 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         public void clean() {
             //ignore
         }
+    }
+
+    public AbstractStreamProcessor.ProcessingMode getProcessingMode() {
+        return internalWindowProcessor.getProcessingMode();
     }
 }

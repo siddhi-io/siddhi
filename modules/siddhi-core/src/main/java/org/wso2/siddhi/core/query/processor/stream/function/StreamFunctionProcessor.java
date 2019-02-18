@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.query.processor.stream.function;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
@@ -36,9 +37,6 @@ import java.util.List;
  * Stream Processor to handle Stream Functions.
  */
 public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
-
-    //Introduced to maintain backward compatible
-    protected boolean outputExpectsExpiredEvents;
 
     @Override
     protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
@@ -68,6 +66,11 @@ public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
 
     }
 
+    @Override
+    public ProcessingMode getProcessingMode() {
+        return ProcessingMode.BATCH;
+    }
+
     /**
      * The process method of the StreamFunction, used when more then one function parameters are provided
      *
@@ -88,24 +91,36 @@ public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
     /**
      * The init method of the StreamProcessor, this method will be called before other methods
      *
+     * @param metaStreamEvent              the stream event meta
      * @param inputDefinition              the incoming stream definition
      * @param attributeExpressionExecutors the executors of each function parameters
-     * @param configReader this hold the {@link StreamFunctionProcessor} extensions configuration reader.
-     * @param siddhiAppContext         the context of the siddhi app
+     * @param configReader                 this hold the {@link StreamFunctionProcessor} extensions configuration
+     *                                     reader.
+     * @param siddhiAppContext             the context of the siddhi app
      * @param outputExpectsExpiredEvents   is output expects ExpiredEvents
      * @return the additional output attributes introduced by the function
      */
-    protected List<Attribute> init(AbstractDefinition inputDefinition,
+    protected List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                   SiddhiAppContext
-                                           siddhiAppContext, boolean outputExpectsExpiredEvents) {
-        this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
-        return init(inputDefinition, attributeExpressionExecutors, configReader, siddhiAppContext);
+                                   SiddhiAppContext siddhiAppContext, boolean outputExpectsExpiredEvents) {
+        return init(inputDefinition, attributeExpressionExecutors, configReader, outputExpectsExpiredEvents,
+                siddhiAppContext);
     }
 
+    /**
+     * The init method of the StreamProcessor, this method will be called before other methods
+     *
+     * @param inputDefinition              the incoming stream definition
+     * @param attributeExpressionExecutors the executors of each function parameters
+     * @param configReader                 this hold the {@link StreamFunctionProcessor} extensions configuration
+     *                                     reader.
+     * @param siddhiAppContext             the context of the siddhi app
+     * @param outputExpectsExpiredEvents   is output expects ExpiredEvents
+     * @return the additional output attributes introduced by the function
+     */
     protected abstract List<Attribute> init(AbstractDefinition inputDefinition,
-                                            ExpressionExecutor[] attributeExpressionExecutors, ConfigReader
-                                                    configReader, SiddhiAppContext
-                                                    siddhiAppContext);
+                                            ExpressionExecutor[] attributeExpressionExecutors,
+                                            ConfigReader configReader, boolean outputExpectsExpiredEvents,
+                                            SiddhiAppContext siddhiAppContext);
 
 }

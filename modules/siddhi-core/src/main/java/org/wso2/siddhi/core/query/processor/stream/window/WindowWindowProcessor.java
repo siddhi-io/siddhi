@@ -19,8 +19,10 @@ package org.wso2.siddhi.core.query.processor.stream.window;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
+import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
@@ -30,8 +32,11 @@ import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.window.Window;
+import org.wso2.siddhi.query.api.definition.AbstractDefinition;
+import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -56,22 +61,23 @@ public class WindowWindowProcessor extends WindowProcessor implements FindablePr
         this.window = window;
     }
 
-
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
-        // nothing to be done
+    protected List<Attribute> init(MetaStreamEvent metaStreamEvent,
+                                   AbstractDefinition inputDefinition,
+                                   ExpressionExecutor[] attributeExpressionExecutors,
+                                   ConfigReader configReader, SiddhiAppContext siddhiAppContext,
+                                   boolean outputExpectsExpiredEvents) {
         this.configReader = configReader;
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
+        return new ArrayList<Attribute>(0);
     }
 
     @Override
-    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner) {
-        // Pass the event  to the post JoinProcessor
+    protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
+                                     StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
+        streamEventChunk.reset();
         nextProcessor.process(streamEventChunk);
     }
-
 
     @Override
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
@@ -80,9 +86,9 @@ public class WindowWindowProcessor extends WindowProcessor implements FindablePr
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         return window.compileCondition(condition, matchingMetaInfoHolder, siddhiAppContext,
                 variableExpressionExecutors, tableMap, queryName);
     }
@@ -111,14 +117,19 @@ public class WindowWindowProcessor extends WindowProcessor implements FindablePr
             streamProcessor.attributeExpressionLength = attributeExpressionLength;
             streamProcessor.additionalAttributes = additionalAttributes;
             streamProcessor.complexEventPopulater = complexEventPopulater;
-            streamProcessor.init(inputDefinition, attributeExpressionExecutors, configReader, siddhiAppContext,
-                    outputExpectsExpiredEvents);
+            streamProcessor.init(metaStreamEvent, inputDefinition, attributeExpressionExecutors, configReader,
+                    siddhiAppContext, outputExpectsExpiredEvents);
             streamProcessor.start();
             return streamProcessor;
 
         } catch (Exception e) {
             throw new SiddhiAppRuntimeException("Exception in cloning " + this.getClass().getCanonicalName(), e);
         }
+    }
+
+    @Override
+    public ProcessingMode getProcessingMode() {
+        return window.getProcessingMode();
     }
 
     @Override

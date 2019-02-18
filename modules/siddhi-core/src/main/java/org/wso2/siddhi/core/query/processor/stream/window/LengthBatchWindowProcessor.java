@@ -76,7 +76,7 @@ import java.util.Map;
                 )
         }
 )
-public class LengthBatchWindowProcessor extends WindowProcessor implements FindableProcessor {
+public class LengthBatchWindowProcessor extends BatchingWindowProcessor implements FindableProcessor {
 
     private int length;
     private int count = 0;

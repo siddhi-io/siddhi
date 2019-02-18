@@ -84,7 +84,8 @@ import java.util.Map;
                 )
         }
 )
-public class TimeBatchWindowProcessor extends WindowProcessor implements SchedulingProcessor, FindableProcessor {
+public class TimeBatchWindowProcessor extends BatchingWindowProcessor
+        implements SchedulingProcessor, FindableProcessor {
 
     private long timeInMilliSeconds;
     private long nextEmitTime = -1;

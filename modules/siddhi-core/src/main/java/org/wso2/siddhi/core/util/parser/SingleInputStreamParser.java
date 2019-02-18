@@ -76,7 +76,6 @@ public class SingleInputStreamParser {
      * @param supportsBatchProcessing     supports batch processing
      * @param outputExpectsExpiredEvents  is output expects ExpiredEvents
      * @param queryName                   query name of single input stream belongs to.
-     *
      * @return SingleStreamRuntime
      */
     public static SingleStreamRuntime parseInputStream(SingleInputStream inputStream,
@@ -200,7 +199,7 @@ public class SingleInputStreamParser {
             configReader = siddhiAppContext.getSiddhiContext().getConfigManager().
                     generateConfigReader(((Window) streamHandler).getNamespace(),
                             ((Window) streamHandler).getName());
-            windowProcessor.initProcessor(metaStreamEvent.getLastInputDefinition(), attributeExpressionExecutors,
+            windowProcessor.initProcessor(metaStreamEvent, attributeExpressionExecutors,
                     configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName, streamHandler);
             return windowProcessor;
 
@@ -214,10 +213,9 @@ public class SingleInputStreamParser {
                     abstractStreamProcessor = (StreamProcessor) SiddhiClassLoader.loadExtensionImplementation(
                             (Extension) streamHandler,
                             StreamProcessorExtensionHolder.getInstance(siddhiAppContext));
-                    metaStreamEvent.addInputDefinition(abstractStreamProcessor.initProcessor(metaStreamEvent
-                                    .getLastInputDefinition(),
+                    abstractStreamProcessor.initProcessor(metaStreamEvent,
                             attributeExpressionExecutors, configReader, siddhiAppContext,
-                            outputExpectsExpiredEvents, queryName, streamHandler));
+                            outputExpectsExpiredEvents, queryName, streamHandler);
                     return abstractStreamProcessor;
                 } catch (SiddhiAppCreationException e) {
                     if (!e.isClassLoadingIssue()) {
@@ -229,9 +227,8 @@ public class SingleInputStreamParser {
             abstractStreamProcessor = (StreamFunctionProcessor) SiddhiClassLoader.loadExtensionImplementation(
                     (Extension) streamHandler,
                     StreamFunctionProcessorExtensionHolder.getInstance(siddhiAppContext));
-            metaStreamEvent.addInputDefinition(abstractStreamProcessor.initProcessor(metaStreamEvent
-                            .getLastInputDefinition(), attributeExpressionExecutors, configReader, siddhiAppContext,
-                    outputExpectsExpiredEvents, queryName, streamHandler));
+            abstractStreamProcessor.initProcessor(metaStreamEvent, attributeExpressionExecutors,
+                    configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName, streamHandler);
             return abstractStreamProcessor;
         } else {
             throw new SiddhiAppCreationException(streamHandler.getClass().getName() + " is not supported",
