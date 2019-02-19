@@ -49,18 +49,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of {@link WindowProcessor} which represent a Batch Window that aggregate batch of incoming events
- * together.
+ * Implementation of {@link WindowProcessor} which represent a Batch Window that performs operations to chunks
+ * of predefined length
  */
 @Extension(
         name = "chunkBatch",
         namespace = "",
         description = "A window that holds an incoming events batch. When a new set of events arrives, the previously" +
                 " arrived old events will be expired. Batch window can be used to aggregate events that comes " +
-                "in batches.",
+                "in batches. Then performs the batch operations into chunks. Size of a chunk should be " +
+                "specified in the chunkBatch window. ",
         parameters = {
                 @Parameter(name = "window.length",
-                        description = "The number of events the window should tumble.",
+                        description = "The length of a chunk",
                         type = {DataType.INT}),
         },
         examples = {
