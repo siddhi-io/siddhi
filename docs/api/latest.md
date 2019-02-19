@@ -1,4 +1,4 @@
-# API Docs - v5.0.0-SNAPSHOT
+# API Docs - v5.0.0-m2
 
 ## Core
 
