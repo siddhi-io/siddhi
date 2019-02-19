@@ -17,7 +17,6 @@
  */
 package org.wso2.siddhi.core.query.processor.stream.window;
 
-import org.apache.log4j.Logger;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -86,7 +85,6 @@ public class ChunkBatchWindowProcessor extends WindowProcessor implements Findab
     private boolean outputExpectsExpiredEvents;
     private SiddhiAppContext siddhiAppContext;
     private StreamEvent resetEvent = null;
-    private static final Logger log = Logger.getLogger(ChunkBatchWindowProcessor.class);
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
@@ -109,7 +107,6 @@ public class ChunkBatchWindowProcessor extends WindowProcessor implements Findab
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner) {
         List<ComplexEventChunk<StreamEvent>> streamEventChunks = new ArrayList<ComplexEventChunk<StreamEvent>>();
-        log.info("Window Batch B");
         synchronized (this) {
             ComplexEventChunk<StreamEvent> outputStreamEventChunk = new ComplexEventChunk<StreamEvent>(true);
             ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(true);
@@ -164,7 +161,6 @@ public class ChunkBatchWindowProcessor extends WindowProcessor implements Findab
                 }
             }
         }
-        log.info(streamEventChunks.toString());
         for (ComplexEventChunk<StreamEvent> outputStreamEventChunk : streamEventChunks) {
             nextProcessor.process(outputStreamEventChunk);
         }
