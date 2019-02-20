@@ -260,4 +260,61 @@ public class BatchWindowTestCase {
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
+
+    @Test
+    public void testBatchWindow5() throws InterruptedException {
+        log.info("BatchWindow test5 - process batch as chunks");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, price float, volume long); " +
+                "define window cseEventWindow (symbol string, price float, volume long) batch(5) output all events; ";
+        String query = "" +
+                "@info(name = 'query0') " +
+                "from cseEventStream " +
+                "insert into cseEventWindow; " +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventWindow " +
+                "select * " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+            }
+        });
+
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        int length1 = 20;
+        int length2 = 10;
+        Event[] eventsSet1 = new Event[length1];
+        Event[] eventsSet2 = new Event[length2];
+        for (int i = 0; i < length1; i++) {
+            eventsSet1[i] = new Event(System.currentTimeMillis(), new Object[]{"WSO2", i * 2.5f, 10L});
+            if (i < length2) {
+                eventsSet2[i] = new Event(System.currentTimeMillis(), new Object[]{"IBM", i * 2.5f, 10L});
+            }
+        }
+        inputHandler.send(eventsSet1);
+        inputHandler.send(eventsSet2);
+        Thread.sleep(1000);
+        AssertJUnit.assertEquals(30, inEventCount);
+        AssertJUnit.assertEquals(20, removeEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
 }
