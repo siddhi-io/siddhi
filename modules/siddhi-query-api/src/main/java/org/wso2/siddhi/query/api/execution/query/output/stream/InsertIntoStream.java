@@ -29,7 +29,7 @@ public class InsertIntoStream extends OutputStream {
     private boolean isInnerStream;
 
     public InsertIntoStream(String streamId) {
-        this(streamId, false, OutputEventType.CURRENT_EVENTS);
+        this(streamId, false, null);
     }
 
     public InsertIntoStream(String streamId, OutputEventType outputEventType) {
@@ -37,11 +37,11 @@ public class InsertIntoStream extends OutputStream {
     }
 
     public InsertIntoStream(String streamId, boolean isInnerStream) {
-        this(streamId, isInnerStream, OutputEventType.CURRENT_EVENTS);
+        this(streamId, isInnerStream, null);
     }
 
     public InsertIntoStream(String streamId, boolean isInnerStream, boolean isFaultStream) {
-        this(streamId, isInnerStream, isFaultStream, OutputEventType.CURRENT_EVENTS);
+        this(streamId, isInnerStream, isFaultStream, null);
     }
 
     public InsertIntoStream(String streamId, boolean isInnerStream, OutputEventType outputEventType) {

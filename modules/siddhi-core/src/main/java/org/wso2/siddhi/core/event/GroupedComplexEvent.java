@@ -89,4 +89,13 @@ public class GroupedComplexEvent implements ComplexEvent {
     public void setGroupKey(String groupKey) {
         this.groupKey = groupKey;
     }
+
+    @Override
+    public String toString() {
+        return "GroupedComplexEvent{" +
+                "complexEvent=" + complexEvent +
+                ", groupKey='" + groupKey + '\'' +
+                ", next=" + next +
+                '}';
+    }
 }

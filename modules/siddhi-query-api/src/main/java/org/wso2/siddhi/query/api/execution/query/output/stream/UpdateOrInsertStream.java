@@ -39,7 +39,7 @@ public class UpdateOrInsertStream extends OutputStream {
     public UpdateOrInsertStream(String tableId, UpdateSet updateSet, Expression onUpdateExpression) {
         this.updateSetter = updateSet;
         this.id = tableId;
-        this.outputEventType = OutputEventType.CURRENT_EVENTS;
+        this.outputEventType = null;
         this.onUpdateExpression = onUpdateExpression;
     }
 
@@ -52,7 +52,7 @@ public class UpdateOrInsertStream extends OutputStream {
 
     public UpdateOrInsertStream(String tableId, Expression onUpdateExpression) {
         this.id = tableId;
-        this.outputEventType = OutputEventType.CURRENT_EVENTS;
+        this.outputEventType = null;
         this.onUpdateExpression = onUpdateExpression;
     }
 

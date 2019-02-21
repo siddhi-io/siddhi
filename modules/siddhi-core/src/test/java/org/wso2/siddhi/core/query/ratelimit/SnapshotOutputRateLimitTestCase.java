@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.ratelimit;
 
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -344,6 +345,57 @@ public class SnapshotOutputRateLimitTestCase {
     }
 
     @Test(dependsOnMethods = {"testSnapshotOutputRateLimitQuery5"})
+    public void testSnapshotOutputRateLimitQuery5_1() throws InterruptedException {
+        log.info("SnapshotOutputRateLimit test5");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "@app:name('SnapshotOutputRateLimitTest5') " +
+                "" +
+                "define stream LoginEvents (timestamp long, ip string, calls int);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.time(2 sec) " +
+                "select ip, count(calls) as totalCalls " +
+                "group by ip " +
+                "output snapshot every 1 sec " +
+                "insert all events into uniqueIps ;";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        log.info("Running : " + siddhiAppRuntime.getName());
+
+        siddhiAppRuntime.addCallback("uniqueIps", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventArrived = true;
+                count.incrementAndGet();
+                Assert.assertEquals(2, events.length);
+                if (count.get() == 2) {
+                    AssertJUnit.assertTrue((Long) events[0].getData(1) == 2 && (Long) events[1].getData(1) == 2);
+                }
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("LoginEvents");
+
+        siddhiAppRuntime.start();
+
+        Thread.sleep(1100);
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5", 3});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3", 6});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5", 2});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3", 10});
+        Thread.sleep(3000);
+
+        siddhiAppRuntime.shutdown();
+        Thread.sleep(2000);
+    }
+
+    @Test(dependsOnMethods = {"testSnapshotOutputRateLimitQuery5_1"})
     public void testSnapshotOutputRateLimitQuery6() throws InterruptedException {
         log.info("SnapshotOutputRateLimit test6");
 
@@ -568,7 +620,7 @@ public class SnapshotOutputRateLimitTestCase {
         AssertJUnit.assertTrue("Number of output event with value", count.get() == 3);
 
         siddhiAppRuntime.shutdown();
-
+        Thread.sleep(100);
     }
 
     @Test(dependsOnMethods = {"testSnapshotOutputRateLimitQuery9"})
@@ -1160,8 +1212,6 @@ public class SnapshotOutputRateLimitTestCase {
                     } else if (count.get() == 3 || count.get() == 4 || count.get() == 5) {
                         AssertJUnit.assertTrue((Long) inEvents[0].getData(1) == 5L &&
                                 (Long) inEvents[1].getData(1) == 16L);
-                        AssertJUnit.assertTrue((Long) inEvents[2].getData(1) == 5L &&
-                                (Long) inEvents[3].getData(1) == 16L);
                     } else if (count.get() == 6 || count.get() == 7) {
                         AssertJUnit.assertTrue((Long) inEvents[0].getData(1) == 2L &&
                                 (Long) inEvents[1].getData(1) == 10L);
@@ -1185,7 +1235,7 @@ public class SnapshotOutputRateLimitTestCase {
         Thread.sleep(6200);
         AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         AssertJUnit.assertEquals("Number of output event bundles", 7, count.get());
-        AssertJUnit.assertEquals("Number of output event value", 20, value);
+        AssertJUnit.assertEquals("Number of output event value", 14, value);
 
         siddhiAppRuntime.shutdown();
 
