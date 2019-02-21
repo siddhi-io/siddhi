@@ -150,7 +150,7 @@ public abstract class SourceMapper implements SourceEventListener {
             }
         } catch (InterruptedException | RuntimeException e) {
             log.error("Error while processing '" + eventObject + "', for the input Mapping '" + mapType +
-                    "' for the stream '" + streamDefinition.getId() + "'");
+                    "' for the stream '" + streamDefinition.getId() + "'.", e);
         } finally {
             trpProperties.remove();
             if (transportSyncProperties != null) {
