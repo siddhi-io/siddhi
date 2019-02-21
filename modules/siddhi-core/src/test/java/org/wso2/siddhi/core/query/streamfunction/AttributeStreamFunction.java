@@ -44,8 +44,8 @@ public class AttributeStreamFunction extends StreamFunctionProcessor {
 
     @Override
     protected List<Attribute> init(AbstractDefinition inputDefinition,
-                                   ExpressionExecutor[] attributeExpressionExecutors,
-                                   ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+                                   ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                   boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new SiddhiAppCreationException("Only one attribute is expected but found " +
                     attributeExpressionExecutors.length);
