@@ -1070,7 +1070,7 @@ Following are the supported operations of a join clause.
 
  *  **Left outer join** 
 
-    The left outer join operation allows you to join two streams to be merged based on a condition. `left outer join` is used as the keyword to join both the streams.
+    The `left outer join` operation allows you to join two streams to be merged based on a condition. `left outer join` is used as the keyword to join both the streams.
    
     Here, it returns all the events of left stream even if there are no matching events in the right stream by 
     having null values for the attributes of the right stream.
@@ -1108,7 +1108,6 @@ Following are the supported operations of a join clause.
       on S.symbol== T.symbol
     select S.symbol as symbol, T.tweet, S.price
     insert into outputStream ;    </pre>
-
 
 
 ### Pattern
@@ -1754,6 +1753,25 @@ select deviceID, RoomTypeTable.type as roomType, type, temp
 insert into ServerRoomTempStream;
 ```
 
+**Supported join types** 
+
+Table join supports following join operations.
+
+ *  **Inner join (join)** 
+
+    This is the default behaviour of a join operation. `join` is used as the keyword to join the stream with the table. The output is generated only if there is a matching event in both the stream and the table.
+
+ *  **Left outer join** 
+
+    The `left outer join` operation allows you to join a stream on left side with a table on the right side based on a condition.
+    Here, it returns all the events of left stream even if there are no matching events in the right table by 
+    having null values for the attributes of the right table.
+
+ *  **Right outer join** 
+
+    This is similar to a `left outer join`. `right outer join` is used as the keyword to join a stream on right side with a table on the left side based on a condition.
+    It returns all the events of the right stream even if there are no matching events in the left table. 
+
 ### Delete
 
 To delete selected events that are stored in a table.
@@ -2107,6 +2125,26 @@ select S.symbol, T.total, T.avgPrice
 insert into AggregateStockStream;
 ```
 
+**Supported join types** 
+
+Aggregation join supports following join operations.
+
+ *  **Inner join (join)** 
+
+    This is the default behaviour of a join operation. `join` is used as the keyword to join the stream with the aggregation. The output is generated only if there is a matching event in the stream and the aggregation.
+
+ *  **Left outer join** 
+
+    The `left outer join` operation allows you to join a stream on left side with a aggregation on the right side based on a condition.
+    Here, it returns all the events of left stream even if there are no matching events in the right aggregation by 
+    having null values for the attributes of the right aggregation.
+
+ *  **Right outer join** 
+
+    This is similar to a `left outer join`. `right outer join` is used as the keyword to join a stream on right side with a aggregation on the left side based on a condition.
+    It returns all the events of the right stream even if there are no matching events in the left aggregation. 
+
+
 ## _(Defined)_ Window
 
 A defined window is a window that can be shared across multiple queries. 
@@ -2212,6 +2250,30 @@ from CheckStream as C join TwoMinTempWindow as T
 select requestId, count(T.temp) as count
 insert into HighTempCountStream;
 ```
+
+**Supported join types** 
+
+Window join supports following operations of a join clause.
+
+ *  **Inner join (join)** 
+
+    This is the default behaviour of a join operation. `join` is used as the keyword to join two windows or a stream with a window. The output is generated only if there is a matching event in both stream/window.
+
+ *  **Left outer join** 
+
+    The `left outer join` operation allows you to join two windows or a stream with a window to be merged based on a condition. 
+    Here, it returns all the events of left stream/window even if there are no matching events in the right stream/window by 
+    having null values for the attributes of the right stream/window.
+
+ *  **Right outer join** 
+
+    This is similar to a left outer join. `Right outer join` is used as the keyword to join two windows or a stream with a window.
+    It returns all the events of the right stream/window even if there are no matching events in the left stream/window. 
+
+ *  **Full outer join** 
+
+    The full outer join combines the results of `left outer join` and `right outer join`. `full outer join` is used as the keyword to join two windows or a stream with a window.
+    Here, output event are generated for each incoming event even if there are no matching events in the other stream/window.
 
 ### From
 
