@@ -33,12 +33,14 @@ public class BatchWindowTestCase {
     private static final Logger log = Logger.getLogger(BatchWindowTestCase.class);
     private int inEventCount;
     private int removeEventCount;
+    private int chunkCount;
     private boolean eventArrived;
 
     @BeforeMethod
     public void init() {
         inEventCount = 0;
         removeEventCount = 0;
+        chunkCount = 0;
         eventArrived = false;
     }
 
@@ -264,12 +266,11 @@ public class BatchWindowTestCase {
     @Test
     public void testBatchWindow5() throws InterruptedException {
         log.info("BatchWindow test5 - process batch as chunks");
-
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" +
                 "define stream cseEventStream (symbol string, price float, volume long); " +
-                "define window cseEventWindow (symbol string, price float, volume long) batch(5) output all events; ";
+                "define window cseEventWindow (symbol string, price float, volume long) batch(4) output all events; ";
         String query = "" +
                 "@info(name = 'query0') " +
                 "from cseEventStream " +
@@ -286,6 +287,7 @@ public class BatchWindowTestCase {
             @Override
             public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timestamp, inEvents, removeEvents);
+                chunkCount = chunkCount + 1;
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
                 }
@@ -293,6 +295,7 @@ public class BatchWindowTestCase {
                     removeEventCount = removeEventCount + removeEvents.length;
                 }
                 eventArrived = true;
+
             }
         });
 
@@ -314,6 +317,7 @@ public class BatchWindowTestCase {
         Thread.sleep(1000);
         AssertJUnit.assertEquals(30, inEventCount);
         AssertJUnit.assertEquals(20, removeEventCount);
+        AssertJUnit.assertEquals(8, chunkCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }
