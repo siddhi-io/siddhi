@@ -104,7 +104,7 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
         } else if (attributeExpressionExecutors.length == 0) {
             length = -1;
         } else {
-            throw new SiddhiAppValidationException("Length batch window should have at most one parameter (<int> " +
+            throw new SiddhiAppValidationException("Batch window should have at most one parameter (<int> " +
                     "chunkLength), but found " + attributeExpressionExecutors.length + " input attributes");
         }
     }
@@ -113,7 +113,6 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner) {
         List<ComplexEventChunk<StreamEvent>> streamEventChunks = new ArrayList<ComplexEventChunk<StreamEvent>>();
-        ComplexEventChunk<StreamEvent> streamEventChunkStore = new ComplexEventChunk<StreamEvent>(true);
         ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(true);
         synchronized (this) {
             long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
@@ -133,54 +132,46 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
 
             //check whether the streamEventChunk has next event before add into output stream event chunk
             if (streamEventChunk.hasNext()) {
-                if (outputExpectsExpiredEvents) {
-                    do {
-                        StreamEvent streamEvent = streamEventChunk.next();
-                        StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                        clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
-                        expiredEventQueue.add(clonedStreamEvent);
-                    } while (streamEventChunk.hasNext());
-                }
-                streamEventChunkStore.add(streamEventChunk.getFirst());
-            }
-
-            while (streamEventChunkStore.hasNext()) {
-                StreamEvent streamEvent = streamEventChunkStore.next();
-                StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                currentEventQueue.add(clonedStreamEvent);
-                count++;
-
-                if (count == length) {
-                    if (currentEventQueue.getFirst() != null) {
-                        if (resetEvent != null) {
-                            currentEventChunk.add(resetEvent);
+                do {
+                    StreamEvent streamEvent = streamEventChunk.next();
+                    StreamEvent clonedStreamEventToExpire = streamEventCloner.copyStreamEvent(streamEvent);
+                    StreamEvent clonedStreamEventToProcess = streamEventCloner.copyStreamEvent(streamEvent);
+                    if (outputExpectsExpiredEvents) {
+                        clonedStreamEventToExpire.setType(StreamEvent.Type.EXPIRED);
+                        expiredEventQueue.add(clonedStreamEventToExpire);
+                    }
+                    currentEventQueue.add(clonedStreamEventToProcess);
+                    count++;
+                    if (count == length) {
+                        if (currentEventQueue.getFirst() != null) {
+                            if (resetEvent != null) {
+                                currentEventChunk.add(resetEvent);
+                            }
+                            resetEvent = streamEventCloner.copyStreamEvent(currentEventQueue.getFirst());
+                            resetEvent.setType(ComplexEvent.Type.RESET);
+                            currentEventChunk.add(currentEventQueue.getFirst());
                         }
-                        resetEvent = null;
-                        resetEvent = streamEventCloner.copyStreamEvent(currentEventQueue.getFirst());
-                        resetEvent.setType(ComplexEvent.Type.RESET);
-                        currentEventChunk.add(currentEventQueue.getFirst());
+                        count = 0;
+                        currentEventQueue.clear();
+                        if (currentEventChunk.getFirst() != null) {
+                            streamEventChunks.add(currentEventChunk);
+                            currentEventChunk = new ComplexEventChunk<StreamEvent>(true);
+                        }
                     }
-                    count = 0;
-                    currentEventQueue.clear();
-                    if (currentEventChunk.getFirst() != null) {
-                        streamEventChunks.add(currentEventChunk);
-                        currentEventChunk = new ComplexEventChunk<StreamEvent>(true);
+                } while (streamEventChunk.hasNext());
+                if (currentEventQueue.getFirst() != null) {
+                    if (resetEvent != null) {
+                        currentEventChunk.add(resetEvent);
                     }
+                    resetEvent = streamEventCloner.copyStreamEvent(currentEventQueue.getFirst());
+                    resetEvent.setType(ComplexEvent.Type.RESET);
+                    currentEventChunk.add(currentEventQueue.getFirst());
                 }
-            }
-            if (currentEventQueue.getFirst() != null) {
-                if (resetEvent != null) {
-                    currentEventChunk.add(resetEvent);
+                count = 0;
+                currentEventQueue.clear();
+                if (currentEventChunk.getFirst() != null) {
+                    streamEventChunks.add(currentEventChunk);
                 }
-                resetEvent = null;
-                resetEvent = streamEventCloner.copyStreamEvent(currentEventQueue.getFirst());
-                resetEvent.setType(ComplexEvent.Type.RESET);
-                currentEventChunk.add(currentEventQueue.getFirst());
-            }
-            count = 0;
-            currentEventQueue.clear();
-            if (currentEventChunk.getFirst() != null) {
-                streamEventChunks.add(currentEventChunk);
             }
         }
         for (ComplexEventChunk<StreamEvent> processStreamEventChunk : streamEventChunks) {
