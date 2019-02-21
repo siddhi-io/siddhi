@@ -1685,9 +1685,9 @@ The following is a list of currently supported store types:
 *. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-redis">Redis</a>
 *. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-cassandra">Cassandra</a>
 
-**Operators on Table/Store**
+**Operators on Table (and Store)**
 
-The following operators can be performed on tables.
+The following operators can be performed on tables (and stores).
 
 
 ### Insert
