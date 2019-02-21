@@ -1645,7 +1645,47 @@ This query creates an indexed event table named `RoomTypeTable` with the `roomNo
 define table RoomTypeTable (roomNo int, type string);
 ```
 
-**Operators on Table**
+### Store
+
+Store is a table that refers to data/events stored in data stores outside of Siddhi such as RDBMS, Cassandra, etc. 
+Store is defined via the `@store` annotation, and the store schema is defined via a **table definition** associated with it.
+
+**Purpose**
+
+Store allows Siddhi to search, retrieve and manipulate data stored in external data stores through Siddhi queries. 
+
+**Syntax**
+
+The syntax for a defining store and it's associated table definition is as follows:
+
+```sql
+@store(type='store_type', static.option.key1='static_option_value1', static.option.keyN='static_option_valueN')
+define table TableName (attribute1 Type1, attributeN TypeN);
+```
+
+**Example**
+
+The following defines a RDBMS data store pointing to a MySQL database with name `hotel` hosted in `loacalhost:3306` 
+having a table `RoomTypeTable` with columns `roomNo` of `INTEGER` and `type` of `VARCHAR(255)` mapped to Siddhi data types `int` and `string` respectively.
+
+```sql
+@Store(type="rdbms", jdbc.url="jdbc:mysql://localhost:3306/hotel", username="siddhi", password="123", 
+       jdbc.driver.name="com.mysql.jdbc.Driver")
+define table RoomTypeTable ( roomNo int, type string );
+```
+
+**Supported Store Types**
+
+The following is a list of currently supported store types:
+
+*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-rdbms">RDBMS (MySQL, Oracle, SQL Server, PostgreSQL, DB2, H2)</a>
+*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr">Solr</a>
+*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb">MongoDB</a>
+*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-hbase">HBase</a>
+*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-redis">Redis</a>
+*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-cassandra">Cassandra</a>
+
+**Operators on Table/Store**
 
 The following operators can be performed on tables.
 
