@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
@@ -113,8 +114,8 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
      * @param configReader                 this hold the {@link AbstractStreamProcessor} extensions configuration
      *                                     reader.
      * @param siddhiAppContext             the context of the siddhi app
-     * @param outputExpectsExpiredEvents   is output expects ExpiredEvents   @return the additional output attributes
-     *                                     introduced by the function     @return list of attributes.
+     * @param outputExpectsExpiredEvents   is expired events sent as output
+     * @return the additional output attributes introduced by the function
      */
     protected abstract List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
                                             ExpressionExecutor[] attributeExpressionExecutors,
@@ -221,13 +222,4 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
      */
     public abstract ProcessingMode getProcessingMode();
 
-    /**
-     * The processing modes supported by Stream Processors
-     */
-    public enum ProcessingMode {
-        BATCH,
-        SLIDE,
-        HOP,
-        GROUP
-    }
 }

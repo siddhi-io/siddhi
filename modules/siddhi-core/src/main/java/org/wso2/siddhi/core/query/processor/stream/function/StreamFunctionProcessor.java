@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
@@ -97,7 +98,7 @@ public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
      * @param configReader                 this hold the {@link StreamFunctionProcessor} extensions configuration
      *                                     reader.
      * @param siddhiAppContext             the context of the siddhi app
-     * @param outputExpectsExpiredEvents   is output expects ExpiredEvents
+     * @param outputExpectsExpiredEvents   is expired events sent as output
      * @return the additional output attributes introduced by the function
      */
     protected List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
@@ -115,7 +116,7 @@ public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
      * @param configReader                 this hold the {@link StreamFunctionProcessor} extensions configuration
      *                                     reader.
      * @param siddhiAppContext             the context of the siddhi app
-     * @param outputExpectsExpiredEvents   is output expects ExpiredEvents
+     * @param outputExpectsExpiredEvents   is expired events sent as output
      * @return the additional output attributes introduced by the function
      */
     protected abstract List<Attribute> init(AbstractDefinition inputDefinition,

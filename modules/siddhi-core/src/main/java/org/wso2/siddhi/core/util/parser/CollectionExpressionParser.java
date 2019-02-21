@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.table.holder.IndexedEventHolder;
 import org.wso2.siddhi.core.util.SiddhiConstants;
@@ -409,13 +410,16 @@ public class CollectionExpressionParser {
                                                                      variableExpressionExecutors,
                                                              Map<String, Table> tableMap,
                                                              SiddhiAppContext siddhiAppContext,
-                                                             boolean isFirst, String queryName) {
+                                                             boolean isFirst, String queryName,
+                                                             ProcessingMode processingMode,
+                                                             boolean outputExpectsExpiredEvents) {
         if (collectionExpression instanceof AttributeCollectionExpression) {
             ExpressionExecutor expressionExecutor = null;
             if (isFirst) {
                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                         matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                        tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                        tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
+                        processingMode, outputExpectsExpiredEvents);
             }
             return new CompareCollectionExecutor(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex(), (
                     (AttributeCollectionExpression) collectionExpression).getAttribute(), Compare.Operator.EQUAL, new
@@ -424,14 +428,16 @@ public class CollectionExpressionParser {
             ExpressionExecutor valueExpressionExecutor = ExpressionParser.parseExpression(
                     ((CompareCollectionExpression) collectionExpression).getValueCollectionExpression().getExpression(),
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
+                    processingMode, outputExpectsExpiredEvents);
             AttributeCollectionExpression attributeCollectionExpression = ((AttributeCollectionExpression)
                     ((CompareCollectionExpression) collectionExpression).getAttributeCollectionExpression());
             ExpressionExecutor expressionExecutor = null;
             if (isFirst) {
                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                         matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                        tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                        tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
+                        processingMode, outputExpectsExpiredEvents);
             }
             return new CompareCollectionExecutor(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex(),
                     attributeCollectionExpression.getAttribute(), ((CompareCollectionExpression)
@@ -441,7 +447,8 @@ public class CollectionExpressionParser {
             if (isFirst) {
                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                         matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                        tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                        tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
+                        processingMode, outputExpectsExpiredEvents);
             }
             return new CompareCollectionExecutor(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex(), (
                     (NullCollectionExpression) collectionExpression).getAttribute(),
@@ -450,7 +457,7 @@ public class CollectionExpressionParser {
             Map<String, ExpressionExecutor> multiPrimaryKeyExpressionExecutors =
                     buildMultiPrimaryKeyExpressionExecutors(collectionExpression,
                             matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                            siddhiAppContext, queryName);
+                            siddhiAppContext, queryName, processingMode, outputExpectsExpiredEvents);
             List<Attribute> attributes = matchingMetaInfoHolder.getStoreDefinition().getAttributeList();
             StringBuilder compositePrimaryKey = new StringBuilder();
             List<ExpressionExecutor> sortedExecutors = new ArrayList<ExpressionExecutor>();
@@ -480,7 +487,8 @@ public class CollectionExpressionParser {
                             expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                             .getCurrentState(), tableMap, variableExpressionExecutors,
-                                    siddhiAppContext, false, 0, queryName);
+                                    siddhiAppContext, false, 0, queryName, processingMode,
+                                    outputExpectsExpiredEvents);
                             return new NonCollectionExecutor(expressionExecutor);
                         case INDEXED_ATTRIBUTE:
                         case INDEXED_RESULT_SET:
@@ -493,10 +501,11 @@ public class CollectionExpressionParser {
                                             .getExpression(),
                                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                             .getCurrentState(), tableMap, variableExpressionExecutors,
-                                    siddhiAppContext, false, 0, queryName);
+                                    siddhiAppContext, false, 0, queryName, processingMode,
+                                    outputExpectsExpiredEvents);
                             aCollectionExecutor = buildCollectionExecutor(rightCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, isFirst, queryName);
+                                    siddhiAppContext, isFirst, queryName, processingMode, outputExpectsExpiredEvents);
                             return new NonAndCollectionExecutor(expressionExecutor, aCollectionExecutor,
                                     rightCollectionExpression.getCollectionScope());
                     }
@@ -510,10 +519,11 @@ public class CollectionExpressionParser {
                                             .getExpression(),
                                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                             .getCurrentState(), tableMap, variableExpressionExecutors,
-                                    siddhiAppContext, false, 0, queryName);
+                                    siddhiAppContext, false, 0, queryName, processingMode,
+                                    outputExpectsExpiredEvents);
                             aCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, isFirst, queryName);
+                                    siddhiAppContext, isFirst, queryName, processingMode, outputExpectsExpiredEvents);
                             return new NonAndCollectionExecutor(expressionExecutor, aCollectionExecutor,
                                     rightCollectionExpression.getCollectionScope());
                         case INDEXED_ATTRIBUTE:
@@ -525,29 +535,31 @@ public class CollectionExpressionParser {
                                     .parseExpression(collectionExpression.getExpression(),
                                             matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                                     .getCurrentState(), tableMap, variableExpressionExecutors,
-                                            siddhiAppContext, false, 0, queryName), matchingMetaInfoHolder
+                                            siddhiAppContext, false, 0, queryName,
+                                            processingMode, outputExpectsExpiredEvents), matchingMetaInfoHolder
                                     .getStoreEventIndex());
                             leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, false, queryName);
+                                    siddhiAppContext, false, queryName, processingMode, outputExpectsExpiredEvents);
                             rightCollectionExecutor = buildCollectionExecutor(rightCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, false, queryName);
+                                    siddhiAppContext, false, queryName, processingMode, outputExpectsExpiredEvents);
                             return new AnyAndCollectionExecutor(leftCollectionExecutor, rightCollectionExecutor,
                                     exhaustiveCollectionExecutor);
                         case PARTIAL_PRIMARY_KEY_RESULT_SET:
                         case EXHAUSTIVE:
                             leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, isFirst, queryName);
+                                    siddhiAppContext, isFirst, queryName, processingMode, outputExpectsExpiredEvents);
                             if (isFirst || leftCollectionExecutor.getDefaultCost() == CollectionExecutor.Cost
                                     .SINGLE_RETURN_INDEX_MATCHING) {
                                 exhaustiveCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser
                                         .parseExpression(collectionExpression.getExpression(),
-                                                matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
-                                                        .getCurrentState(), tableMap,
+                                                matchingMetaInfoHolder.getMetaStateEvent(),
+                                                matchingMetaInfoHolder.getCurrentState(), tableMap,
                                                 variableExpressionExecutors, siddhiAppContext, false, 0,
-                                                queryName), matchingMetaInfoHolder.getStoreEventIndex());
+                                                queryName, processingMode, outputExpectsExpiredEvents),
+                                        matchingMetaInfoHolder.getStoreEventIndex());
                             }
                             return new CompareExhaustiveAndCollectionExecutor(leftCollectionExecutor,
                                     exhaustiveCollectionExecutor);
@@ -563,10 +575,11 @@ public class CollectionExpressionParser {
                                             .getExpression(),
                                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                             .getCurrentState(), tableMap, variableExpressionExecutors,
-                                    siddhiAppContext, false, 0, queryName);
+                                    siddhiAppContext, false, 0, queryName, processingMode,
+                                    outputExpectsExpiredEvents);
                             aCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, isFirst, queryName);
+                                    siddhiAppContext, isFirst, queryName, processingMode, outputExpectsExpiredEvents);
                             return new NonAndCollectionExecutor(expressionExecutor, aCollectionExecutor,
                                     rightCollectionExpression.getCollectionScope());
 
@@ -576,14 +589,15 @@ public class CollectionExpressionParser {
                                     .parseExpression(collectionExpression.getExpression(),
                                             matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                                     .getCurrentState(), tableMap, variableExpressionExecutors,
-                                            siddhiAppContext, false, 0, queryName), matchingMetaInfoHolder
+                                            siddhiAppContext, false, 0, queryName,
+                                            processingMode, outputExpectsExpiredEvents), matchingMetaInfoHolder
                                     .getStoreEventIndex());
                             leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, false, queryName);
+                                    siddhiAppContext, false, queryName, processingMode, outputExpectsExpiredEvents);
                             rightCollectionExecutor = buildCollectionExecutor(rightCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, false, queryName);
+                                    siddhiAppContext, false, queryName, processingMode, outputExpectsExpiredEvents);
                             return new AnyAndCollectionExecutor(rightCollectionExecutor, leftCollectionExecutor,
                                     exhaustiveCollectionExecutor);
                         case INDEXED_RESULT_SET:
@@ -593,21 +607,22 @@ public class CollectionExpressionParser {
                                     .parseExpression(collectionExpression.getExpression(),
                                             matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                                     .getCurrentState(), tableMap, variableExpressionExecutors,
-                                            siddhiAppContext, false, 0, queryName), matchingMetaInfoHolder
+                                            siddhiAppContext, false, 0, queryName,
+                                            processingMode, outputExpectsExpiredEvents), matchingMetaInfoHolder
                                     .getStoreEventIndex());
                             leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, false, queryName);
+                                    siddhiAppContext, false, queryName, processingMode, outputExpectsExpiredEvents);
                             rightCollectionExecutor = buildCollectionExecutor(rightCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, false, queryName);
+                                    siddhiAppContext, false, queryName, processingMode, outputExpectsExpiredEvents);
                             return new AnyAndCollectionExecutor(leftCollectionExecutor, rightCollectionExecutor,
                                     exhaustiveCollectionExecutor);
                         case PARTIAL_PRIMARY_KEY_RESULT_SET:
                         case EXHAUSTIVE:
                             leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, isFirst, queryName);
+                                    siddhiAppContext, isFirst, queryName, processingMode, outputExpectsExpiredEvents);
                             if (isFirst || leftCollectionExecutor.getDefaultCost() == CollectionExecutor.Cost
                                     .SINGLE_RETURN_INDEX_MATCHING) {
                                 exhaustiveCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser
@@ -615,7 +630,8 @@ public class CollectionExpressionParser {
                                                 matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                                         .getCurrentState(), tableMap,
                                                 variableExpressionExecutors, siddhiAppContext, false, 0,
-                                                queryName), matchingMetaInfoHolder.getStoreEventIndex());
+                                                queryName, processingMode, outputExpectsExpiredEvents),
+                                        matchingMetaInfoHolder.getStoreEventIndex());
                             }
                             return new CompareExhaustiveAndCollectionExecutor(leftCollectionExecutor,
                                     exhaustiveCollectionExecutor);
@@ -630,10 +646,11 @@ public class CollectionExpressionParser {
                                             .getExpression(),
                                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                             .getCurrentState(), tableMap, variableExpressionExecutors,
-                                    siddhiAppContext, false, 0, queryName);
+                                    siddhiAppContext, false, 0, queryName,
+                                    processingMode, outputExpectsExpiredEvents);
                             aCollectionExecutor = buildCollectionExecutor(leftCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, isFirst, queryName);
+                                    siddhiAppContext, isFirst, queryName, processingMode, outputExpectsExpiredEvents);
                             return new NonAndCollectionExecutor(expressionExecutor, aCollectionExecutor,
                                     rightCollectionExpression.getCollectionScope());
 
@@ -644,7 +661,7 @@ public class CollectionExpressionParser {
                         case OPTIMISED_PRIMARY_KEY_OR_INDEXED_RESULT_SET:
                             rightCollectionExecutor = buildCollectionExecutor(rightCollectionExpression,
                                     matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                                    siddhiAppContext, isFirst, queryName);
+                                    siddhiAppContext, isFirst, queryName, processingMode, outputExpectsExpiredEvents);
                             if (isFirst || rightCollectionExecutor.getDefaultCost() == CollectionExecutor.Cost
                                     .SINGLE_RETURN_INDEX_MATCHING) {
                                 exhaustiveCollectionExecutor = new ExhaustiveCollectionExecutor(ExpressionParser
@@ -652,7 +669,8 @@ public class CollectionExpressionParser {
                                                 matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                                         .getCurrentState(), tableMap,
                                                 variableExpressionExecutors, siddhiAppContext, false, 0,
-                                                queryName), matchingMetaInfoHolder.getStoreEventIndex());
+                                                queryName, processingMode, outputExpectsExpiredEvents),
+                                        matchingMetaInfoHolder.getStoreEventIndex());
                             }
                             return new CompareExhaustiveAndCollectionExecutor(rightCollectionExecutor,
                                     exhaustiveCollectionExecutor);
@@ -664,7 +682,7 @@ public class CollectionExpressionParser {
                                         matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder
                                                 .getCurrentState(),
                                         tableMap, variableExpressionExecutors, siddhiAppContext, false, 0,
-                                        queryName);
+                                        queryName, processingMode, outputExpectsExpiredEvents);
                             }
                             return new ExhaustiveCollectionExecutor(expressionExecutor, matchingMetaInfoHolder
                                     .getStoreEventIndex());
@@ -684,7 +702,8 @@ public class CollectionExpressionParser {
                     rightCollectionExpression.getCollectionScope() == NON) {
                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                         matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                        tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                        tableMap, variableExpressionExecutors, siddhiAppContext, false, 0,
+                        queryName, processingMode, outputExpectsExpiredEvents);
                 return new NonCollectionExecutor(expressionExecutor);
             } else if ((leftCollectionExpression.getCollectionScope() == EXHAUSTIVE &&
                     leftCollectionExpression.getCollectionScope() == PARTIAL_PRIMARY_KEY_RESULT_SET)
@@ -693,7 +712,8 @@ public class CollectionExpressionParser {
                 if (isFirst) {
                     expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                             matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                            tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                            tableMap, variableExpressionExecutors, siddhiAppContext, false, 0,
+                            queryName, processingMode, outputExpectsExpiredEvents);
                 }
                 return new ExhaustiveCollectionExecutor(expressionExecutor,
                         matchingMetaInfoHolder.getStoreEventIndex());
@@ -704,12 +724,15 @@ public class CollectionExpressionParser {
                             matchingMetaInfoHolder.getMetaStateEvent(),
                             matchingMetaInfoHolder.getCurrentState(),
                             tableMap, variableExpressionExecutors, siddhiAppContext, false,
-                            0, queryName), matchingMetaInfoHolder.getStoreEventIndex());
+                            0, queryName, processingMode, outputExpectsExpiredEvents),
+                            matchingMetaInfoHolder.getStoreEventIndex());
                 }
                 leftCollectionExecutor = buildCollectionExecutor(leftCollectionExpression, matchingMetaInfoHolder,
-                        variableExpressionExecutors, tableMap, siddhiAppContext, isFirst, queryName);
+                        variableExpressionExecutors, tableMap, siddhiAppContext, isFirst, queryName, processingMode,
+                        outputExpectsExpiredEvents);
                 rightCollectionExecutor = buildCollectionExecutor(rightCollectionExpression, matchingMetaInfoHolder,
-                        variableExpressionExecutors, tableMap, siddhiAppContext, isFirst, queryName);
+                        variableExpressionExecutors, tableMap, siddhiAppContext, isFirst, queryName, processingMode,
+                        outputExpectsExpiredEvents);
                 return new OrCollectionExecutor(leftCollectionExecutor, rightCollectionExecutor, aCollectionExecutor);
             }
         } else if (collectionExpression instanceof NotCollectionExpression) {
@@ -719,7 +742,8 @@ public class CollectionExpressionParser {
                 case NON:
                     expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                             matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                            tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                            tableMap, variableExpressionExecutors, siddhiAppContext, false, 0,
+                            queryName, processingMode, outputExpectsExpiredEvents);
                     return new NonCollectionExecutor(expressionExecutor);
                 case INDEXED_ATTRIBUTE:
                 case INDEXED_RESULT_SET:
@@ -732,12 +756,14 @@ public class CollectionExpressionParser {
                                 ExpressionParser.parseExpression(collectionExpression.getExpression(),
                                         matchingMetaInfoHolder.getMetaStateEvent(),
                                         matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors,
-                                        siddhiAppContext, false, 0, queryName),
+                                        siddhiAppContext, false, 0, queryName,
+                                        processingMode, outputExpectsExpiredEvents),
                                 matchingMetaInfoHolder.getStoreEventIndex());
                     }
                     CollectionExecutor notCollectionExecutor = buildCollectionExecutor(((NotCollectionExpression)
                                     collectionExpression).getCollectionExpression(), matchingMetaInfoHolder,
-                            variableExpressionExecutors, tableMap, siddhiAppContext, isFirst, queryName);
+                            variableExpressionExecutors, tableMap, siddhiAppContext, isFirst, queryName, processingMode,
+                            outputExpectsExpiredEvents);
                     return new NotCollectionExecutor(notCollectionExecutor, exhaustiveCollectionExecutor);
 
                 case PARTIAL_PRIMARY_KEY_RESULT_SET:
@@ -745,7 +771,8 @@ public class CollectionExpressionParser {
                     if (isFirst) {
                         expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                                 matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                                tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                                tableMap, variableExpressionExecutors, siddhiAppContext, false, 0,
+                                queryName, processingMode, outputExpectsExpiredEvents);
                     }
                     return new ExhaustiveCollectionExecutor(expressionExecutor, matchingMetaInfoHolder
                             .getStoreEventIndex());
@@ -756,13 +783,15 @@ public class CollectionExpressionParser {
             if (collectionExpression.getCollectionScope() == NON) {
                 expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                         matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                        tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                        tableMap, variableExpressionExecutors, siddhiAppContext, false, 0,
+                        queryName, processingMode, outputExpectsExpiredEvents);
                 return new NonCollectionExecutor(expressionExecutor);
             } else { // EXHAUSTIVE
                 if (isFirst) {
                     expressionExecutor = ExpressionParser.parseExpression(collectionExpression.getExpression(),
                             matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                            tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                            tableMap, variableExpressionExecutors, siddhiAppContext, false, 0,
+                            queryName, processingMode, outputExpectsExpiredEvents);
                 }
                 return new ExhaustiveCollectionExecutor(expressionExecutor,
                         matchingMetaInfoHolder.getStoreEventIndex());
@@ -774,7 +803,8 @@ public class CollectionExpressionParser {
     private static Map<String, ExpressionExecutor> buildMultiPrimaryKeyExpressionExecutors(
             CollectionExpression collectionExpression, MatchingMetaInfoHolder matchingMetaInfoHolder,
             List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, Table> tableMap,
-            SiddhiAppContext siddhiAppContext, String queryName) {
+            SiddhiAppContext siddhiAppContext, String queryName, ProcessingMode processingMode,
+            boolean outputExpectsExpiredEvents) {
 
         if (collectionExpression instanceof AndMultiPrimaryKeyCollectionExpression) {
             CollectionExpression leftCollectionExpression = ((AndMultiPrimaryKeyCollectionExpression)
@@ -783,10 +813,10 @@ public class CollectionExpressionParser {
                     collectionExpression).getRightCollectionExpression();
             Map<String, ExpressionExecutor> expressionExecutors = buildMultiPrimaryKeyExpressionExecutors(
                     leftCollectionExpression, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                    siddhiAppContext, queryName);
+                    siddhiAppContext, queryName, processingMode, outputExpectsExpiredEvents);
             expressionExecutors.putAll(buildMultiPrimaryKeyExpressionExecutors(
                     rightCollectionExpression, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                    siddhiAppContext, queryName));
+                    siddhiAppContext, queryName, processingMode, outputExpectsExpiredEvents));
             return expressionExecutors;
         } else if (collectionExpression instanceof AndCollectionExpression) {
             CollectionExpression leftCollectionExpression = ((AndCollectionExpression)
@@ -795,10 +825,10 @@ public class CollectionExpressionParser {
                     collectionExpression).getLeftCollectionExpression();
             Map<String, ExpressionExecutor> expressionExecutors = buildMultiPrimaryKeyExpressionExecutors(
                     leftCollectionExpression, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                    siddhiAppContext, queryName);
+                    siddhiAppContext, queryName, processingMode, outputExpectsExpiredEvents);
             expressionExecutors.putAll(buildMultiPrimaryKeyExpressionExecutors(
                     rightCollectionExpression, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                    siddhiAppContext, queryName));
+                    siddhiAppContext, queryName, processingMode, outputExpectsExpiredEvents));
             return expressionExecutors;
         } else if (collectionExpression instanceof CompareCollectionExpression) {
 
@@ -812,7 +842,8 @@ public class CollectionExpressionParser {
                     ExpressionExecutor valueExpressionExecutor = ExpressionParser.parseExpression(
                             valueCollectionExpression.getExpression(), matchingMetaInfoHolder.getMetaStateEvent(),
                             matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors,
-                            siddhiAppContext, false, 0, queryName);
+                            siddhiAppContext, false, 0, queryName, processingMode,
+                            outputExpectsExpiredEvents);
                     Map<String, ExpressionExecutor> expressionExecutors = new HashMap<String, ExpressionExecutor>();
                     expressionExecutors.put(attribue, valueExpressionExecutor);
                     return expressionExecutors;

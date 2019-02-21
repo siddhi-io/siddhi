@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.event.stream.populater.SelectiveComplexEventPopulater;
 import org.wso2.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
@@ -62,7 +63,7 @@ public abstract class GroupingWindowProcessor extends WindowProcessor {
      *
      * @param attributeExpressionExecutors the executors of each function parameters
      * @param configReader                 the config reader of window
-     * @param outputExpectsExpiredEvents   is expired event out put or not
+     * @param outputExpectsExpiredEvents   is expired events sent as output
      * @param siddhiAppContext             the context of the siddhi app
      */
     protected abstract void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,

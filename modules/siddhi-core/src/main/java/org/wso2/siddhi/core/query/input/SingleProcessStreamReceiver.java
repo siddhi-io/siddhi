@@ -51,7 +51,8 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
     }
 
     public SingleProcessStreamReceiver clone(String key) {
-        return new SingleProcessStreamReceiver(streamId + key, key, latencyTracker, queryName, siddhiAppContext);
+        return new SingleProcessStreamReceiver(streamId + key, key, latencyTracker, queryName,
+                siddhiAppContext);
     }
 
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {

@@ -28,9 +28,9 @@ import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
-import org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;
 import org.wso2.siddhi.core.stream.StreamJunction;
@@ -160,8 +160,9 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         boolean outputExpectsExpiredEvents = outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS;
 
         WindowProcessor internalWindowProcessor = (WindowProcessor) SingleInputStreamParser.generateProcessor
-                (windowDefinition.getWindow(), metaStreamEvent, new ArrayList<VariableExpressionExecutor>(), this
-                        .siddhiAppContext, tableMap, false, outputExpectsExpiredEvents, queryName);
+                (windowDefinition.getWindow(), metaStreamEvent, new ArrayList<VariableExpressionExecutor>(),
+                        this.siddhiAppContext, tableMap, false, outputExpectsExpiredEvents,
+                        queryName);
         internalWindowProcessor.setStreamEventCloner(streamEventCloner);
         internalWindowProcessor.constructStreamEventPopulater(metaStreamEvent, 0);
 
@@ -401,7 +402,7 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         }
     }
 
-    public AbstractStreamProcessor.ProcessingMode getProcessingMode() {
+    public ProcessingMode getProcessingMode() {
         return internalWindowProcessor.getProcessingMode();
     }
 }

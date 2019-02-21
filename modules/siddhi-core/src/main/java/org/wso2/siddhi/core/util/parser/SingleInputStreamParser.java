@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.filter.FilterProcessor;
@@ -74,7 +75,7 @@ public class SingleInputStreamParser {
      * @param metaComplexEvent            MetaComplexEvent
      * @param processStreamReceiver       ProcessStreamReceiver
      * @param supportsBatchProcessing     supports batch processing
-     * @param outputExpectsExpiredEvents  is output expects ExpiredEvents
+     * @param outputExpectsExpiredEvents  is expired events sent as output
      * @param queryName                   query name of single input stream belongs to.
      * @return SingleStreamRuntime
      */
@@ -92,6 +93,7 @@ public class SingleInputStreamParser {
                                                        boolean outputExpectsExpiredEvents, String queryName) {
         Processor processor = null;
         EntryValveProcessor entryValveProcessor = null;
+        ProcessingMode processingMode = ProcessingMode.BATCH;
         boolean first = true;
         MetaStreamEvent metaStreamEvent;
         if (metaComplexEvent instanceof MetaStateEvent) {
@@ -135,6 +137,10 @@ public class SingleInputStreamParser {
                     Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
                     ((SchedulingProcessor) currentProcessor).setScheduler(scheduler);
                 }
+                if (currentProcessor instanceof AbstractStreamProcessor) {
+                    processingMode = ProcessingMode.findUpdatedProcessingMode(processingMode,
+                            ((AbstractStreamProcessor) currentProcessor).getProcessingMode());
+                }
                 if (first) {
                     processor = currentProcessor;
                     first = false;
@@ -145,7 +151,7 @@ public class SingleInputStreamParser {
         }
 
         metaStreamEvent.initializeAfterWindowData();
-        return new SingleStreamRuntime(processStreamReceiver, processor, metaComplexEvent);
+        return new SingleStreamRuntime(processStreamReceiver, processor, processingMode, metaComplexEvent);
 
     }
 
@@ -172,7 +178,8 @@ public class SingleInputStreamParser {
                 for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
                     attributeExpressionExecutors[i] = ExpressionParser.parseExpression(parameters[i], metaEvent,
                             stateIndex, tableMap, variableExpressionExecutors,
-                            siddhiAppContext, false, SiddhiConstants.CURRENT, queryName);
+                            siddhiAppContext, false, SiddhiConstants.CURRENT, queryName, ProcessingMode.BATCH,
+                            false);
                 }
             } else {
                 List<Attribute> attributeList = metaStreamEvent.getLastInputDefinition().getAttributeList();
@@ -181,7 +188,8 @@ public class SingleInputStreamParser {
                 for (int i = 0; i < parameterSize; i++) {
                     attributeExpressionExecutors[i] = ExpressionParser.parseExpression(new Variable(attributeList.get
                                     (i).getName()), metaEvent, stateIndex, tableMap, variableExpressionExecutors,
-                            siddhiAppContext, false, SiddhiConstants.CURRENT, queryName);
+                            siddhiAppContext, false, SiddhiConstants.CURRENT, queryName, ProcessingMode.BATCH,
+                            false);
                 }
             }
         } else {

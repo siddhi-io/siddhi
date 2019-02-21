@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.executor.condition.ConditionExpressionExecutor;
 import org.wso2.siddhi.core.partition.executor.PartitionExecutor;
 import org.wso2.siddhi.core.partition.executor.RangePartitionExecutor;
 import org.wso2.siddhi.core.partition.executor.ValuePartitionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
@@ -59,7 +60,8 @@ public class StreamPartitioner {
                              List<VariableExpressionExecutor> executors, SiddhiAppContext siddhiAppContext,
                              String queryName) {
         if (partition != null) {
-            createExecutors(inputStream, partition, metaEvent, executors, siddhiAppContext, queryName);
+            createExecutors(inputStream, partition, metaEvent, executors, siddhiAppContext, queryName
+            );
         }
     }
 
@@ -68,8 +70,9 @@ public class StreamPartitioner {
                                          siddhiAppContext, String queryName) {
         if (inputStream instanceof SingleInputStream) {
             if (metaEvent instanceof MetaStateEvent) {
-                createSingleInputStreamExecutors((SingleInputStream) inputStream, partition, ((MetaStateEvent)
-                        metaEvent).getMetaStreamEvent(0), executors, null, siddhiAppContext, queryName);
+                createSingleInputStreamExecutors((SingleInputStream) inputStream, partition,
+                        ((MetaStateEvent) metaEvent).getMetaStreamEvent(0), executors, null,
+                        siddhiAppContext, queryName);
             } else {
                 createSingleInputStreamExecutors((SingleInputStream) inputStream, partition, (MetaStreamEvent)
                         metaEvent, executors, null, siddhiAppContext, queryName);
@@ -84,8 +87,8 @@ public class StreamPartitioner {
     }
 
     private int createStateInputStreamExecutors(StateElement stateElement, Partition partition, MetaStateEvent
-            metaEvent, List<VariableExpressionExecutor> executors, SiddhiAppContext siddhiAppContext, int
-            executorIndex, String queryName) {
+            metaEvent, List<VariableExpressionExecutor> executors, SiddhiAppContext siddhiAppContext,
+                                                int executorIndex, String queryName) {
 
         if (stateElement instanceof EveryStateElement) {
             return createStateInputStreamExecutors(((EveryStateElement) stateElement).getStateElement(), partition,
@@ -97,7 +100,7 @@ public class StreamPartitioner {
                     partition, metaEvent, executors, siddhiAppContext, executorIndex, queryName);
         } else if (stateElement instanceof LogicalStateElement) {
             executorIndex = createStateInputStreamExecutors(((LogicalStateElement) stateElement)
-                    .getStreamStateElement1(), partition, metaEvent, executors, siddhiAppContext, executorIndex,
+                            .getStreamStateElement1(), partition, metaEvent, executors, siddhiAppContext, executorIndex,
                     queryName);
             return createStateInputStreamExecutors(((LogicalStateElement) stateElement).getStreamStateElement2(),
                     partition, metaEvent, executors, siddhiAppContext, executorIndex, queryName);
@@ -115,9 +118,9 @@ public class StreamPartitioner {
         }
     }
 
-    private void createJoinInputStreamExecutors(JoinInputStream inputStream, Partition partition, MetaStateEvent
-            metaEvent, List<VariableExpressionExecutor> executors, SiddhiAppContext siddhiAppContext, String
-            queryName) {
+    private void createJoinInputStreamExecutors(JoinInputStream inputStream, Partition partition,
+                                                MetaStateEvent metaEvent, List<VariableExpressionExecutor> executors,
+                                                SiddhiAppContext siddhiAppContext, String queryName) {
         createExecutors(inputStream.getLeftInputStream(), partition, metaEvent.getMetaStreamEvent(0), executors,
                 siddhiAppContext, queryName);
         int size = executors.size();
@@ -142,9 +145,10 @@ public class StreamPartitioner {
                 if (partitionType instanceof ValuePartitionType) {
                     if (partitionType.getStreamId().equals(inputStream.getStreamId())) {
                         executorList.add(new ValuePartitionExecutor(ExpressionParser.parseExpression((
-                                (ValuePartitionType) partitionType).getExpression(),
+                                        (ValuePartitionType) partitionType).getExpression(),
                                 metaEvent, SiddhiConstants.UNKNOWN_STATE, tableMap, executors,
-                                siddhiAppContext, false, 0, queryName)));
+                                siddhiAppContext, false, 0, queryName,
+                                ProcessingMode.BATCH, false)));
                     }
                 } else {
                     for (RangePartitionType.RangePartitionProperty rangePartitionProperty : ((RangePartitionType)
@@ -153,9 +157,9 @@ public class StreamPartitioner {
                             executorList.add(new RangePartitionExecutor((ConditionExpressionExecutor)
                                     ExpressionParser.parseExpression(rangePartitionProperty.getCondition(), metaEvent,
                                             SiddhiConstants.UNKNOWN_STATE, tableMap, executors,
-                                            siddhiAppContext, false, 0, queryName),
+                                            siddhiAppContext, false, 0, queryName,
+                                            ProcessingMode.BATCH, false),
                                     rangePartitionProperty.getPartitionKey()));
-
                         }
                     }
                 }
