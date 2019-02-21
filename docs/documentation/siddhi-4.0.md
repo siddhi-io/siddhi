@@ -85,6 +85,8 @@ The following parameters are configured in a stream definition.
 | `attribute name`   | The schema of an stream is defined by its attributes with uniquely identifiable attribute names. (It is recommended to define attribute names in `camelCase`.)|    |
 | `attribute type`   | The type of each attribute defined in the schema. <br/> This can be `STRING`, `INT`, `LONG`, `DOUBLE`, `FLOAT`, `BOOL` or `OBJECT`.     |
 
+To use and refer stream and attribute names that do not follow `[a-zA-Z_][a-zA-Z_0-9]*` format enclose them in ``. E.g. ``` `$test(0)` ```.
+ 
 To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
 [Threading and Asynchronous](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#threading-and-asynchronous) configuration section.
 
@@ -2065,8 +2067,9 @@ Item|Description
 ---------|---------
 `within  <time range>`| This allows you to specify the time interval for which the aggregate values need to be retrieved. This can be specified by providing the start and end time separated by a comma as `string` or `long` values, or by using the wildcard `string` specifying the data range. For details refer examples.            
 `per <time granularity>`|This specifies the time granularity by which the aggregate values must be grouped and returned. e.g., If you specify `days`, the retrieved aggregate values are grouped for each day within the selected time interval.
+`AGG_TIMESTAMP`|This specifies the start time of the aggregations and can be used in the select clause. 
 
-`within` and `par` clauses also accept attribute values from the stream.
+`within` and `per` clauses also accept attribute values from the stream.
 
 !!! Note
     The timestamp of the aggregations can be accessed through the `AGG_TIMESTAMP` attribute.
@@ -2080,7 +2083,7 @@ define stream TradeStream (symbol string, price double, volume long, timestamp l
 
 define aggregation TradeAggregation
   from TradeStream
-  select symbol, avg(price) as avgPrice, sum(price) as total
+  select AGG_TIMESTAMP, symbol, avg(price) as avgPrice, sum(price) as total
     group by symbol
     aggregate by timestamp every sec ... year;
 ```

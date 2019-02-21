@@ -191,7 +191,6 @@ public class Aggregation1TestCase {
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
         String query = "" +
-                "@BufferSize('3') " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
@@ -281,9 +280,9 @@ public class Aggregation1TestCase {
                     new Object[]{1496290016000L, "IBM", 1000.0, 1000.0, 9000f}
             );
             SiddhiTestHelper.waitForEvents(100, 7, inEventCount, 60000);
-            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 7, inEventCount.get());
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 7, inEventCount.get());
+            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
         }   finally {
             siddhiAppRuntime.shutdown();
         }
@@ -298,8 +297,6 @@ public class Aggregation1TestCase {
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp string);";
         String query = "" +
-                "@BufferSize('3') " +
-                "@IgnoreEventsOlderThanBuffer('true')" +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
@@ -315,7 +312,7 @@ public class Aggregation1TestCase {
                 "on i.symbol == s.symbol " +
                 "within \"2017-06-01 09:35:00 +05:30\", \"2017-06-01 10:37:57 +05:30\" " +
                 "per i.perValue " +
-                "select s.symbol, avgPrice, totalPrice as sumPrice, lastTradeValue  " +
+                "select AGG_TIMESTAMP, s.symbol, avgPrice, totalPrice as sumPrice, lastTradeValue  " +
                 "insert all events into outputStream; ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
@@ -387,16 +384,16 @@ public class Aggregation1TestCase {
             Thread.sleep(100);
 
             List<Object[]> expected = Arrays.asList(
-                    new Object[]{"IBM", 283.3333333333333, 1700.0, 3500f},
-                    new Object[]{"IBM", 400.0, 400.0, 3600f},
-                    new Object[]{"IBM", 700.0, 700.0, 14000f},
-                    new Object[]{"IBM", 600.0, 600.0, 3600f}
-            );
+                    new Object[]{1496289900000L, "IBM", 283.3333333333333, 1700.0, 3500f},
+                    new Object[]{1496289960000L, "IBM", 400.0, 400.0, 3600f},
+                    new Object[]{1496290020000L, "IBM", 600.0, 600.0, 3600f},
+                    new Object[]{1496293620000L, "IBM", 700.0, 700.0, 14000f}
+                    );
             SiddhiTestHelper.waitForEvents(100, 4, inEventCount, 60000);
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -411,7 +408,6 @@ public class Aggregation1TestCase {
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp string);";
         String query = "" +
-                "@BufferSize('3') " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
@@ -506,10 +502,10 @@ public class Aggregation1TestCase {
                     new Object[]{"IBM", 600.0, 600.0, 3600f, 1496290020000L}
             );
             SiddhiTestHelper.waitForEvents(100, 4, inEventCount, 60000);
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
-AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -635,10 +631,10 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                     new Object[]{1596412800000L, 260.0, 260.0, 4160f, 1L}
             );
             SiddhiTestHelper.waitForEvents(100, 8, inEventCount, 60000);
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 8, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 8, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -775,9 +771,9 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                     new Object[]{1496470076000L, "CISCO", 13500f, 900.0}
             );
             SiddhiTestHelper.waitForEvents(100, 10, inEventCount, 60000);
-            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 10, inEventCount.get());
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 10, inEventCount.get());
+            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -856,7 +852,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
         String query = "" +
-                "@BufferSize('3') " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, " +
@@ -876,7 +871,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
 
                 "@info(name = 'query1') " +
                 "from tempStream " +
-                "select totalPrice, avgPrice, lastTradeValue, symbol, maxPrice, minPrice " +
+                "select AGG_TIMESTAMP, totalPrice, avgPrice, lastTradeValue, symbol, maxPrice, minPrice " +
                 "insert into outputStream ";
 
 
@@ -945,19 +940,18 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             Thread.sleep(100);
 
             List<Object[]> expected = Arrays.asList(
-                    new Object[]{240.0, 60.0, 700f, "WSO2", 70f, 50f},
-                    new Object[]{200.0, 100.0, 9600f, "IBM", 100f, 100f},
-                    new Object[]{1400.0, 700.0, 3500f, "IBM", 900f, 500f},
-                    new Object[]{300.0, 100.0, 1540f, "WSO2", 140f, 60f},
-                    new Object[]{400.0, 400.0, 3600f, "IBM", 400f, 400f},
-                    new Object[]{600.0, 600.0, 3600f, "IBM", 600f, 600f},
-                    new Object[]{1000.0, 1000.0, 9000f, "IBM", 1000f, 1000f}
+                    new Object[]{1496289950000L, 240.0, 60.0, 700f, "WSO2", 70f, 50f},
+                    new Object[]{1496289951000L, 200.0, 100.0, 9600f, "IBM", 100f, 100f},
+                    new Object[]{1496289952000L, 1400.0, 700.0, 3500f, "IBM", 900f, 500f},
+                    new Object[]{1496289953000L, 300.0, 100.0, 1540f, "WSO2", 140f, 60f},
+                    new Object[]{1496289953000L, 400.0, 400.0, 3600f, "IBM", 400f, 400f},
+                    new Object[]{1496289954000L, 600.0, 600.0, 3600f, "IBM", 600f, 600f},
+                    new Object[]{1496290016000L, 1000.0, 1000.0, 9000f, "IBM", 1000f, 1000f}
             );
             SiddhiTestHelper.waitForEvents(100, 7, inEventCount, 60000);
-            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 7, inEventCount.get());
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-
+            AssertJUnit.assertEquals("Number of success events", 7, inEventCount.get());
+            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
         }   finally {
             siddhiAppRuntime.shutdown();
         }
@@ -1025,7 +1019,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp string);";
         String query = "" +
-                "@BufferSize('3') " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, " +
@@ -1191,9 +1184,9 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                     new Object[]{1606780800000L, "CISCO", 260.0, 260.0}
             );
             SiddhiTestHelper.waitForEvents(100, 9, inEventCount, 60000);
-            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 9, inEventCount.get());
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 9, inEventCount.get());
+            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -1325,10 +1318,10 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                     new Object[]{1577836800000L, "CISCO", 260.0, 520.0}
             );
             SiddhiTestHelper.waitForEvents(100, 6, inEventCount, 60000);
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 6, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 6, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -1478,13 +1471,13 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "on symbol==\"IBM\" " +
                 "within \"2017-06-** **:**:**\" " +
                 "per \"seconds\" " +
-                "select symbol, avgPrice;");
+                "select AGG_TIMESTAMP, symbol, avgPrice;");
         EventPrinter.print(events);
         AssertJUnit.assertEquals(1, events.length);
         for (int i = 0; i < events.length; i++) {
             switch (i) {
                 case 0:
-                    AssertJUnit.assertArrayEquals(new Object[]{"IBM", 100.0}, events[i].getData());
+                    AssertJUnit.assertArrayEquals(new Object[]{1496289954000L, "IBM", 100.0}, events[i].getData());
                     break;
                 default:
                     AssertJUnit.assertEquals(1, events.length);
@@ -1614,7 +1607,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
         String query = "" +
-                "@BufferSize('3') " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
@@ -1629,7 +1621,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "from inputStream as i join stockAggregation as s " +
                 "within i.startTime, i.endTime " +
                 "per i.perValue " +
-                "select s.symbol, avgPrice, totalPrice as sumPrice, lastTradeValue  " +
+                "select AGG_TIMESTAMP, s.symbol, avgPrice, totalPrice as sumPrice, lastTradeValue  " +
                 "insert all events into outputStream; ";
 
 
@@ -1687,14 +1679,14 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             Thread.sleep(100);
 
             List<Object[]> expected = Arrays.asList(
-                    new Object[]{"IBM", 100.0, 200.0, 9600f},
-                    new Object[]{"IBM", 700.0, 1400.0, 3500f}
+                    new Object[]{1496289951000L, "IBM", 100.0, 200.0, 9600f},
+                    new Object[]{1496289952000L, "IBM", 700.0, 1400.0, 3500f}
             );
             SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         }   finally {
             siddhiAppRuntime.shutdown();
         }
@@ -2172,7 +2164,8 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(dependsOnMethods = {"incrementalStreamProcessorTest37"})
+    @Test
+            //(dependsOnMethods = {"incrementalStreamProcessorTest37"})
     public void incrementalStreamProcessorTest38() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest38");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -2181,8 +2174,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp string);";
         String query = "" +
-                "@BufferSize('3') " +
-                "@IgnoreEventsOlderThanBuffer('true')" +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
@@ -2196,7 +2187,7 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "from inputStream join stockAggregation " +
                 "within \"2017-06-01 09:35:00 +05:30\", \"2017-06-01 10:37:57 +05:30\" " +
                 "per perValue " +
-                "select avgPrice, totalPrice as sumPrice, lastTradeValue  " +
+                "select AGG_TIMESTAMP, avgPrice, totalPrice as sumPrice, lastTradeValue  " +
                 "insert all events into outputStream; ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + query);
@@ -2268,16 +2259,16 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             Thread.sleep(100);
 
             List<Object[]> expected = Arrays.asList(
-                    new Object[]{198.0, 1980.0, 3500f},
-                    new Object[]{400.0, 400.0, 3600f},
-                    new Object[]{700.0, 700.0, 14000f},
-                    new Object[]{600.0, 600.0, 3600f}
+                    new Object[]{1496289900000L, 198.0, 1980.0, 3500f},
+                    new Object[]{1496289960000L, 400.0, 400.0, 3600f},
+                    new Object[]{1496293620000L, 700.0, 700.0, 14000f},
+                    new Object[]{1496290020000L, 600.0, 600.0, 3600f}
             );
             SiddhiTestHelper.waitForEvents(100, 4, inEventCount, 60000);
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -2292,8 +2283,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp string);";
         String query = "" +
-                "@BufferSize('3') " +
-                "@IgnoreEventsOlderThanBuffer('true')" +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) " +
@@ -2405,10 +2394,10 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
 
             );
             SiddhiTestHelper.waitForEvents(100, 10, inEventCount, 60000);
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 10, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 10, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -2423,7 +2412,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
         String query =
-                "@BufferSize('3') " +
                 "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select symbol, avg(price) as avgPrice, sum(price) as totalPrice, " +
@@ -2462,7 +2450,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
         String query =
-                "@BufferSize('3') " +
                 "define aggregation stockAggregation " +
                         "from stockStream " +
                         "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) as " +
@@ -2542,10 +2529,10 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                     new Object[]{1496289950000L, 60.0, 120.0, 700f, 2L}
             );
             SiddhiTestHelper.waitForEvents(100, 5, inEventCount, 60000);
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 5, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 5, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         }  finally {
             siddhiAppRuntime.shutdown();
         }
@@ -2560,7 +2547,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
         String query =
-                "@BufferSize('3') " +
                         "define aggregation stockAggregation " +
                         "from stockStream " +
                         "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) as " +
@@ -2640,10 +2626,10 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                     new Object[]{1496289950000L, 60.0, 120.0, 700f, 2L}
             );
             SiddhiTestHelper.waitForEvents(100, 5, inEventCount, 60000);
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 5, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 5, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         }  finally {
             siddhiAppRuntime.shutdown();
         }
@@ -2658,7 +2644,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
         String query =
-                "@BufferSize('3') " +
                         "define aggregation stockAggregation " +
                         "from stockStream " +
                         "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) as " +
@@ -2739,9 +2724,9 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                     new Object[]{1496289953000L, 100.0, 200.0, 9600f, 2L}
             );
             SiddhiTestHelper.waitForEvents(100, 5, inEventCount, 60000);
-            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 5, inEventCount.get());
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 5, inEventCount.get());
+            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
         }  finally {
             siddhiAppRuntime.shutdown();
         }
@@ -2756,7 +2741,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
         String query =
-                "@BufferSize('3') " +
                         "define aggregation stockAggregation " +
                         "from stockStream " +
                         "select avg(price) as avgPrice, sum(price) as totalPrice, (price * quantity) as " +
@@ -2797,7 +2781,6 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
 
             siddhiAppRuntime.query("from stockAggregation within 1496289949000L, 1496289950000L per " +
                     "'days' select AGG_TIMESTAMP, avgPrice");
-
 
         }  finally {
             siddhiAppRuntime.shutdown();
@@ -2949,10 +2932,10 @@ AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
                     new Object[]{1496275200000L, 323.6363636363636, 3560.0}
             );
                  SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
+            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+            AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
             AssertJUnit.assertEquals("In events matched", true,
                     SiddhiTestHelper.isEventsMatch(inEventsList, expected));
-            AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
-            AssertJUnit.assertEquals("Event arrived", true, eventArrived);
         } finally {
             siddhiAppRuntime.shutdown();
         }

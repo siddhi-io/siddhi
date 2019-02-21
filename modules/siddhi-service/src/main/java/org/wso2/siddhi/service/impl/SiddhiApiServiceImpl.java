@@ -39,9 +39,6 @@ import javax.ws.rs.core.Response;
 /**
  * Siddhi Service Implementataion Class
  */
-
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaMSF4JServerCodegen",
-        date = "2017-03-15T08:56:59.657Z")
 public class SiddhiApiServiceImpl extends SiddhiApiService {
 
     private Log log = LogFactory.getLog(SiddhiApiServiceImpl.class);

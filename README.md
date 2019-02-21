@@ -113,17 +113,25 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi/api/4.4.8">4.4.8</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.0.0-m1">5.0.0-m1</a>.
 
 ## How to Contribute
 * Report issues at <a target="_blank" href="https://github.com/wso2/siddhi/issues">GitHub Issue Tracker</a>.
 * Feel free to try out the <a target="_blank" href="https://github.com/wso2/siddhi">Siddhi source code</a> and send your contributions as pull requests to the <a target="_blank" href="https://github.com/wso2/siddhi/tree/master">master branch</a>.
 
-## Build from the source
+## Build from the Source
 
-- Get a clone or download source from [Github](https://github.com/siddhi-io/siddhi.git)
-- Prerequisites: Maven 3.5.x version (Install [Maven](https://maven.apache.org/install.html))
-- Run the Maven command ``mvn clean install`` from the root directory
+### Prerequisites
+* [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) or [OpenJDK 8](http://openjdk.java.net/install/) (Java 8 should be used for building in order to support both Java 8 and Java 11 at runtime)
+* [Maven 3.5.x version](https://maven.apache.org/install.html)
+
+### Steps to Build
+1. Get a clone or download source from [Github](https://github.com/siddhi-io/siddhi.git)
+
+    ```bash
+    git clone https://github.com/siddhi-io/siddhi.git
+    ```
+1. Run the Maven command ``mvn clean install`` from the root directory
  
 ## Contact us 
  * Post your questions with the <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">"Siddhi"</a> tag in <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">Stackoverflow</a>. 
