@@ -55,15 +55,15 @@
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.compiler.SiddhiQLLexer"/>
+        <Class name="io.siddhi.query.compiler.SiddhiQLLexer"/>
         <Bug pattern="EI_EXPOSE_REP, MS_FINAL_PKGPROTECT, MS_PKGPROTECT, SF_SWITCH_NO_DEFAULT, SF_SWITCH_NO_DEFAULT"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.compiler.SiddhiQLParser"/>
+        <Class name="io.siddhi.query.compiler.SiddhiQLParser"/>
         <Bug pattern="MF_CLASS_MASKS_FIELD, BC_UNCONFIRMED_CAST, EI_EXPOSE_REP, MS_PKGPROTECT, SF_SWITCH_NO_DEFAULT"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.compiler.SiddhiQLParser$CollectContext"/>
+        <Class name="io.siddhi.query.compiler.SiddhiQLParser$CollectContext"/>
         <Bug pattern="MF_CLASS_MASKS_FIELD"/>
     </Match>
     <Match>
@@ -113,7 +113,7 @@
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.util.timestamp.EventTimeBasedMillisTimestampGenerator"/>
+        <class name="io.siddhi.core.util.timestamp.EventTimeBasedMillisTimestampGenerator"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
@@ -165,7 +165,7 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.table.holder.SnapshotableIndexEventHolder"/>
+        <Class name="io.siddhi.core.table.holder.SnapshotableIndexEventHolder"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>

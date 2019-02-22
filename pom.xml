@@ -304,7 +304,7 @@
                     </executions>
                     <configuration>
                         <excludePackageNames>
-                            org.wso2.siddhi.query.compiler.internal:org.wso2.siddhi.query.compiler
+                            io.siddhi.query.compiler.internal:io.siddhi.query.compiler
                         </excludePackageNames>
                     </configuration>
                 </plugin>

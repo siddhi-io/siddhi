@@ -25,7 +25,7 @@ import io.siddhi.core.util.statistics.StatisticsTrackerFactory;
  */
 public class StatisticsConfiguration {
 
-    private String metricPrefix = "org.wso2.siddhi";
+    private String metricPrefix = "io.siddhi";
     private StatisticsTrackerFactory factory;
 
     public StatisticsConfiguration(StatisticsTrackerFactory factory) {

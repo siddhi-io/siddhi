@@ -86,8 +86,8 @@ import io.siddhi.query.api.expression.constant.LongConstant;
 import io.siddhi.query.api.expression.constant.StringConstant;
 import io.siddhi.query.api.expression.constant.TimeConstant;
 import io.siddhi.query.api.util.SiddhiConstants;
-import org.wso2.siddhi.query.compiler.SiddhiQLBaseVisitor;
-import org.wso2.siddhi.query.compiler.SiddhiQLParser;
+import io.siddhi.query.compiler.SiddhiQLBaseVisitor;
+import io.siddhi.query.compiler.SiddhiQLParser;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
 
 import java.util.ArrayList;

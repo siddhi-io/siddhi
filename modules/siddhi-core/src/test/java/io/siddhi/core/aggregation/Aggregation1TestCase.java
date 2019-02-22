@@ -1042,7 +1042,7 @@ public class Aggregation1TestCase {
             AssertJUnit.assertTrue(appender.getMessages().contains("'June 1, 2017 4:05:50 AM' doesn't match the " +
                     "supported formats <yyyy>-<MM>-<dd> <HH>:<mm>:<ss> (for GMT time zone) or <yyyy>-<MM>-<dd> " +
                     "<HH>:<mm>:<ss> <Z> (for non GMT time zone). The ISO 8601 UTC offset must be provided for <Z> " +
-                    "(ex. +05:30, -11:00). Exception on class 'org.wso2.siddhi.core.executor.incremental." +
+                    "(ex. +05:30, -11:00). Exception on class 'io.siddhi.core.executor.incremental." +
                     "IncrementalUnixTimeFunctionExecutor'. Hence, dropping event"));
         } catch (Exception e) {
             Assert.fail("Unexpected exception occurred when testing.", e);

@@ -21,28 +21,28 @@ package io.siddhi.annotation.util;
  * Siddhi annotation constants class.
  */
 public class AnnotationConstants {
-    public static final String SINK_MAPPER_SUPER_CLASS = "org.wso2.siddhi.core.stream.output.sink.SinkMapper";
+    public static final String SINK_MAPPER_SUPER_CLASS = "io.siddhi.core.stream.output.sink.SinkMapper";
     public static final String SINK_SUPER_CLASS =
-            "org.wso2.siddhi.core.stream.output.sink.Sink";
+            "io.siddhi.core.stream.output.sink.Sink";
     public static final String SCRIPT_SUPER_CLASS =
-            "org.wso2.siddhi.core.function.Script";
+            "io.siddhi.core.function.Script";
     public static final String FUNCTION_EXECUTOR_SUPER_CLASS =
-            "org.wso2.siddhi.core.executor.function.FunctionExecutor";
+            "io.siddhi.core.executor.function.FunctionExecutor";
     public static final String AGGREGATION_ATTRIBUTE_SUPER_CLASS =
-            "org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator";
+            "io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator";
     public static final String DISTRIBUTION_STRATEGY_SUPER_CLASS =
-            "org.wso2.siddhi.core.stream.output.sink.distributed.DistributionStrategy";
+            "io.siddhi.core.stream.output.sink.distributed.DistributionStrategy";
     public static final String STREAM_PROCESSOR_SUPER_CLASS =
-            "org.wso2.siddhi.core.query.processor.stream.StreamProcessor";
+            "io.siddhi.core.query.processor.stream.StreamProcessor";
     public static final String STREAM_FUNCTION_PROCESSOR_SUPER_CLASS =
-            "org.wso2.siddhi.core.query.processor.stream.function.StreamFunctionProcessor";
-    public static final String STORE_SUPER_CLASS = "org.wso2.siddhi.core.table.record.AbstractRecordTable";
-    public static final String SOURCE_SUPER_CLASS = "org.wso2.siddhi.core.stream.input.source.Source";
-    public static final String SOURCE_MAPPER_SUPER_CLASS = "org.wso2.siddhi.core.stream.input.source.SourceMapper";
+            "io.siddhi.core.query.processor.stream.function.StreamFunctionProcessor";
+    public static final String STORE_SUPER_CLASS = "io.siddhi.core.table.record.AbstractRecordTable";
+    public static final String SOURCE_SUPER_CLASS = "io.siddhi.core.stream.input.source.Source";
+    public static final String SOURCE_MAPPER_SUPER_CLASS = "io.siddhi.core.stream.input.source.SourceMapper";
     public static final String WINDOW_PROCESSOR_CLASS =
-            "org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor";
+            "io.siddhi.core.query.processor.stream.window.WindowProcessor";
     public static final String INCREMENTAL_ATTRIBUTE_AGGREGATOR_SUPER_CLASS =
-            "org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.IncrementalAttributeAggregator";
+            "io.siddhi.core.query.selector.attribute.aggregator.incremental.IncrementalAttributeAggregator";
 
     public static final String DISTRIBUTION_STRATEGY_NAMESPACE = "distributionStrategy";
     public static final String STORE_NAMESPACE = "store";
