@@ -22,6 +22,7 @@ import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;
@@ -34,9 +35,10 @@ import java.util.List;
  */
 public class JoinStreamRuntime implements StreamRuntime {
 
-    List<SingleStreamRuntime> singleStreamRuntimeList = new ArrayList<SingleStreamRuntime>();
+    private List<SingleStreamRuntime> singleStreamRuntimeList = new ArrayList<SingleStreamRuntime>();
     private SiddhiAppContext siddhiAppContext;
     private MetaStateEvent metaStateEvent;
+    private ProcessingMode overallProcessingMode = ProcessingMode.BATCH;
 
     public JoinStreamRuntime(SiddhiAppContext siddhiAppContext, MetaStateEvent metaStateEvent) {
 
@@ -46,6 +48,8 @@ public class JoinStreamRuntime implements StreamRuntime {
 
 
     public void addRuntime(SingleStreamRuntime singleStreamRuntime) {
+        overallProcessingMode = ProcessingMode.findUpdatedProcessingMode(overallProcessingMode,
+                singleStreamRuntime.getProcessingMode());
         singleStreamRuntimeList.add(singleStreamRuntime);
     }
 
@@ -102,5 +106,9 @@ public class JoinStreamRuntime implements StreamRuntime {
     @Override
     public MetaComplexEvent getMetaComplexEvent() {
         return metaStateEvent;
+    }
+
+    public ProcessingMode getProcessingMode() {
+        return overallProcessingMode;
     }
 }

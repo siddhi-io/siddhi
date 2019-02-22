@@ -99,7 +99,8 @@ import java.util.concurrent.ConcurrentHashMap;
                 )
         }
 )
-public class LossyFrequentWindowProcessor extends WindowProcessor implements FindableProcessor {
+@Deprecated
+public class LossyFrequentWindowProcessor extends SlidingWindowProcessor implements FindableProcessor {
     private static final Logger log = Logger.getLogger(LossyFrequentWindowProcessor.class);
     private ConcurrentHashMap<String, LossyCount> countMap = new ConcurrentHashMap<String, LossyCount>();
     private ConcurrentHashMap<String, StreamEvent> map = new ConcurrentHashMap<String, StreamEvent>();
@@ -112,8 +113,8 @@ public class LossyFrequentWindowProcessor extends WindowProcessor implements Fin
     private double windowWidth;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        SiddhiAppContext siddhiAppContext) {
         support = Double.parseDouble(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[0])
                 .getValue()));
         if (attributeExpressionExecutors.length > 1) {
@@ -247,9 +248,9 @@ public class LossyFrequentWindowProcessor extends WindowProcessor implements Fin
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         return OperatorParser.constructOperator(map.values(), condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
     }

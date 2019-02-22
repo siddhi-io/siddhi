@@ -76,7 +76,7 @@ import java.util.Map;
                 )
         }
 )
-public class TimeWindowProcessor extends WindowProcessor implements SchedulingProcessor, FindableProcessor {
+public class TimeWindowProcessor extends SlidingWindowProcessor implements SchedulingProcessor, FindableProcessor {
 
     private long timeInMilliSeconds;
     private SnapshotableStreamEventQueue expiredEventQueue;
@@ -99,8 +99,8 @@ public class TimeWindowProcessor extends WindowProcessor implements SchedulingPr
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
         this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (attributeExpressionExecutors.length == 1) {

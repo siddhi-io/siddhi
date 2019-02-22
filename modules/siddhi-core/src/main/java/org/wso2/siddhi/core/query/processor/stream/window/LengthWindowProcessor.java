@@ -72,7 +72,7 @@ import java.util.Map;
                 description = "This will processing 10 events and out put all events."
         )
 )
-public class LengthWindowProcessor extends WindowProcessor implements FindableProcessor {
+public class LengthWindowProcessor extends SlidingWindowProcessor implements FindableProcessor {
 
     private int length;
     private int count = 0;
@@ -87,8 +87,8 @@ public class LengthWindowProcessor extends WindowProcessor implements FindablePr
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        SiddhiAppContext siddhiAppContext) {
         if (attributeExpressionExecutors.length == 1) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
         } else {

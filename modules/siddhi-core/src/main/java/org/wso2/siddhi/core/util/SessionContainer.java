@@ -17,8 +17,8 @@
  */
 package org.wso2.siddhi.core.util;
 
-import org.wso2.siddhi.core.event.SessionComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
+import org.wso2.siddhi.core.query.processor.stream.window.SessionWindowProcessor;
 
 import java.io.Serializable;
 
@@ -28,18 +28,18 @@ import java.io.Serializable;
 public class SessionContainer implements Serializable {
 
     private String key;
-    private SessionComplexEventChunk<StreamEvent> currentSession;
-    private SessionComplexEventChunk<StreamEvent> previousSession;
+    private SessionWindowProcessor.SessionComplexEventChunk<StreamEvent> currentSession;
+    private SessionWindowProcessor.SessionComplexEventChunk<StreamEvent> previousSession;
 
     public SessionContainer(String key) {
-        currentSession = new SessionComplexEventChunk<>(key);
-        previousSession = new SessionComplexEventChunk<>(key);
+        currentSession = new SessionWindowProcessor.SessionComplexEventChunk<>(key);
+        previousSession = new SessionWindowProcessor.SessionComplexEventChunk<>(key);
         this.key = key;
     }
 
     public SessionContainer() {
-        currentSession = new SessionComplexEventChunk<>();
-        previousSession = new SessionComplexEventChunk<>();
+        currentSession = new SessionWindowProcessor.SessionComplexEventChunk<>();
+        previousSession = new SessionWindowProcessor.SessionComplexEventChunk<>();
     }
 
     public long getCurrentSessionEndTimestamp() {
@@ -66,11 +66,11 @@ public class SessionContainer implements Serializable {
         this.key = key;
     }
 
-    public SessionComplexEventChunk<StreamEvent> getCurrentSession() {
+    public SessionWindowProcessor.SessionComplexEventChunk<StreamEvent> getCurrentSession() {
         return currentSession;
     }
 
-    public SessionComplexEventChunk<StreamEvent> getPreviousSession() {
+    public SessionWindowProcessor.SessionComplexEventChunk<StreamEvent> getPreviousSession() {
         return previousSession;
     }
 }

@@ -79,12 +79,14 @@ public class Pol2CartStreamFunctionProcessor extends StreamFunctionProcessor {
      *
      * @param inputDefinition              the incoming stream definition
      * @param attributeExpressionExecutors the executors for the function parameters
-     * @param siddhiAppContext         siddhi app context
+     * @param siddhiAppContext             siddhi app context
      * @return the additional output attributes introduced by the function
      */
     @Override
-    protected List<Attribute> init(AbstractDefinition inputDefinition, ExpressionExecutor[]
-            attributeExpressionExecutors, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+    protected List<Attribute> init(AbstractDefinition inputDefinition,
+                                   ExpressionExecutor[] attributeExpressionExecutors,
+                                   ConfigReader configReader, boolean outputExpectsExpiredEvents,
+                                   SiddhiAppContext siddhiAppContext) {
         inputExecutorLength = attributeExpressionExecutors.length;
 
         if (inputExecutorLength < 2 || inputExecutorLength > 3) {

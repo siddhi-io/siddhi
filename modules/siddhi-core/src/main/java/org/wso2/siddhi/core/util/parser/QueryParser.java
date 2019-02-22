@@ -131,7 +131,8 @@ public class QueryParser {
                     outputExpectsExpiredEvents, queryName);
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
                     siddhiAppContext, streamRuntime.getMetaComplexEvent(), tableMap, executors, queryName,
-                    SiddhiConstants.UNKNOWN_STATE);
+                    SiddhiConstants.UNKNOWN_STATE, streamRuntime.getProcessingMode(),
+                    outputExpectsExpiredEvents);
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
             if (!isWindow && query.getInputStream() instanceof SingleInputStream) {
                 for (StreamHandler streamHandler : ((SingleInputStream) query.getInputStream()).getStreamHandlers()) {

@@ -26,7 +26,6 @@ import org.wso2.siddhi.core.util.timestamp.TimestampGenerator;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -69,9 +68,9 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
         if (event.getType() == ComplexEvent.Type.RESET) {
             Object aOutput = null;
             if (canClean) {
-                Iterator<AttributeAggregator> iterator = aggregatorMap.values().iterator();
-                if (iterator.hasNext()) {
-                    aOutput = iterator.next().process(event);
+                for (Map.Entry<String, AttributeAggregator> attributeAggregatorEntry : aggregatorMap.entrySet()) {
+                    aOutput = attributeAggregatorEntry.getValue().process(event);
+                    attributeAggregatorEntry.getValue().clean();
                 }
                 aggregatorMap.clear();
                 obsoleteAggregatorKeys.clear();
@@ -116,7 +115,7 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
 
     @Override
     public void restoreState(Map<String, Object> state) {
-        for (HashMap.Entry<String, Object> item: state.entrySet()) {
+        for (HashMap.Entry<String, Object> item : state.entrySet()) {
             String key = item.getKey();
             AttributeAggregator aAttributeAggregator = attributeAggregator.cloneAggregator(key);
             aAttributeAggregator.restoreState((Map<String, Object>) item.getValue());

@@ -22,6 +22,7 @@ import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -51,7 +52,8 @@ public class OrderByEventComparator implements Comparator<ComplexEvent> {
                 OrderByAttribute orderByAttribute = groupByList.get(i);
                 groupByExecutors[i] = (VariableExpressionExecutor) ExpressionParser.parseExpression(
                         orderByAttribute.getVariable(), metaComplexEvent, currentState, tableMap, executors,
-                        siddhiContext, false, 0, queryName);
+                        siddhiContext, false, 0, queryName,
+                        ProcessingMode.BATCH, false);
                 isAscendingArray[i] = OrderByAttribute.Order.DESC != orderByAttribute.getOrder();
             }
         }

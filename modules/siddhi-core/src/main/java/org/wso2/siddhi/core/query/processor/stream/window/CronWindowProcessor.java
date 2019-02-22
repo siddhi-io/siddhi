@@ -72,7 +72,7 @@ import java.util.Map;
                         "insert into outputStream ;",
                 description = "This will processed events as the output every 5 seconds.")
 )
-public class CronWindowProcessor extends WindowProcessor implements Job {
+public class CronWindowProcessor extends BatchingWindowProcessor implements Job {
     private static final Logger log = Logger.getLogger(CronWindowProcessor.class);
     private final String jobGroup = "CronWindowGroup";
     private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(false);

@@ -43,7 +43,7 @@ import java.util.Map;
  * {@link org.wso2.siddhi.core.query.input.stream.join.JoinProcessor} inorder to handle
  * the events there.
  */
-public class AggregateWindowProcessor extends WindowProcessor implements FindableProcessor {
+public class AggregateWindowProcessor extends BatchingWindowProcessor implements FindableProcessor {
     private final Within within;
     private final Expression per;
     private AggregationRuntime aggregationRuntime;
@@ -80,9 +80,9 @@ public class AggregateWindowProcessor extends WindowProcessor implements Findabl
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         return aggregationRuntime.compileExpression(condition, within, per, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, queryName, siddhiAppContext);
     }
@@ -111,8 +111,8 @@ public class AggregateWindowProcessor extends WindowProcessor implements Findabl
             streamProcessor.attributeExpressionLength = attributeExpressionLength;
             streamProcessor.additionalAttributes = additionalAttributes;
             streamProcessor.complexEventPopulater = complexEventPopulater;
-            streamProcessor.init(inputDefinition, attributeExpressionExecutors, configReader, siddhiAppContext,
-                    outputExpectsExpiredEvents);
+            streamProcessor.init(metaStreamEvent, inputDefinition, attributeExpressionExecutors, configReader,
+                    siddhiAppContext, outputExpectsExpiredEvents);
             streamProcessor.start();
             return streamProcessor;
 

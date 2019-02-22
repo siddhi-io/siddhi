@@ -30,19 +30,6 @@ Siddhi supports the following:
 
 Siddhi is free and open source, under **Apache Software License v2.0**.
 
-## Table of contents
-
-- [Get started](#get-started)
-- [Why use Siddhi](#why-use-siddhi)
-- [Develop Siddhi using Intellij IDEA](#develop-siddhi-using-intellij-idea)
-- [Try Siddhi with WSO2 Stream Processor](#try-siddhi-with-wso2-stream-processor)
-- [Siddhi versions](#siddhi-versions)
-- [Latest API docs](#latest-api-docs)
-- [How to contribute](#how-to-contribute)
-- [Contact us](#contact-us)
-- [Support](#support)
-
-
 ## Get Started!
 
 Get started with Siddhi in a few minutes by following the <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-quckstart-4.0/">Siddhi Quick Start Guide</a>
@@ -96,18 +83,28 @@ For more information please contact us via <a target="_blank" href="http://wso2.
 
 ## Siddhi Versions
 
-Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/">here</a>.
-
  <a target="_blank" href=""></a> 
  
-* **Active development version of Siddhi** : **v4.0.0**  _built on Java 8._ 
+* **Active development version of Siddhi** : **v5.0.0-SNAPSHOT**  _built on Java 8 & 11._ 
      
+    Find the released Siddhi libraries <a target="_blank" href="https://mvnrepository.com/artifact/io.siddhi/siddhi-core">here</a>.
+
+    <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v5.x.x
+    
+    <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v5.x.x
+
+* **Latest Stable Release of Siddhi v4.x.x** : **v4.4.8**  _built on Java 8._ 
+     
+    Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/">here</a>.
+
     <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v4.x.x
     
     <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v4.x.x
 
 
-* **Latest Stable Release of Siddhi** : **v3.0.5** _built on Java 7._
+* **Latest Stable Release of Siddhi v3.x.x** : **v3.2.3** _built on Java 7._
+
+    Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/">here</a>.
 
     <a target="_blank" href="https://docs.wso2.com/display/DAS310/Siddhi+Query+Language">Siddhi Query Guide</a> for Siddhi v3.x.x
 

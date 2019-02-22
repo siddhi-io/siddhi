@@ -109,8 +109,8 @@ import java.util.Map;
                 )
         }
 )
-public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements SchedulingProcessor,
-        FindableProcessor {
+public class ExternalTimeBatchWindowProcessor extends BatchingWindowProcessor
+        implements SchedulingProcessor, FindableProcessor {
     private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(false);
     private ComplexEventChunk<StreamEvent> expiredEventChunk = null;
     private StreamEvent resetEvent = null;
@@ -497,9 +497,9 @@ public class ExternalTimeBatchWindowProcessor extends WindowProcessor implements
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         if (expiredEventChunk == null) {
             expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
             storeExpiredEvents = true;

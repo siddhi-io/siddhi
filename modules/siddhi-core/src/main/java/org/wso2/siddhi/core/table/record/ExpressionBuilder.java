@@ -25,6 +25,7 @@ import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.ExceptionUtil;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
@@ -396,7 +397,8 @@ public class ExpressionBuilder {
         if (!variableExpressionExecutorMap.containsKey(id)) {
             ExpressionExecutor variableExpressionExecutor = ExpressionParser.parseExpression(
                     variable, matchingMetaInfoHolder.getMetaStateEvent(), streamEventChainIndex, tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
+                    ProcessingMode.BATCH, false);
             variableExpressionExecutorMap.put(id, variableExpressionExecutor);
         }
         expressionVisitor.endVisitStreamVariable(id, variable.getStreamId(), variable.getAttributeName(), type);

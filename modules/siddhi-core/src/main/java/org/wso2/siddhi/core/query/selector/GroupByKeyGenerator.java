@@ -22,6 +22,7 @@ import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.parser.ExpressionParser;
@@ -47,7 +48,7 @@ public class GroupByKeyGenerator {
             for (int i = 0, expressionsSize = groupByList.size(); i < expressionsSize; i++) {
                 groupByExecutors[i] = ExpressionParser.parseExpression(
                         groupByList.get(i), metaComplexEvent, currentState, tableMap, executors,
-                        siddhiContext, false, 0, queryName);
+                        siddhiContext, false, 0, queryName, ProcessingMode.BATCH, false);
             }
         }
     }

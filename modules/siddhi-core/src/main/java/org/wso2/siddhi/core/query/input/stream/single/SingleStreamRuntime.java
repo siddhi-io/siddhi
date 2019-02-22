@@ -21,6 +21,7 @@ import org.wso2.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
@@ -34,13 +35,16 @@ import java.util.List;
 public class SingleStreamRuntime implements StreamRuntime {
 
     private Processor processorChain;
+    private ProcessingMode overallProcessingMode;
     private MetaComplexEvent metaComplexEvent;
     private ProcessStreamReceiver processStreamReceiver;
 
     public SingleStreamRuntime(ProcessStreamReceiver processStreamReceiver, Processor processorChain,
+                               ProcessingMode overallProcessingMode,
                                MetaComplexEvent metaComplexEvent) {
         this.processStreamReceiver = processStreamReceiver;
         this.processorChain = processorChain;
+        this.overallProcessingMode = overallProcessingMode;
         this.metaComplexEvent = metaComplexEvent;
     }
 
@@ -97,7 +101,8 @@ public class SingleStreamRuntime implements StreamRuntime {
                 processor = processor.getNextProcessor();
             }
         }
-        return new SingleStreamRuntime(clonedProcessStreamReceiver, clonedProcessorChain, metaComplexEvent);
+        return new SingleStreamRuntime(clonedProcessStreamReceiver, clonedProcessorChain, overallProcessingMode,
+                metaComplexEvent);
     }
 
     @Override
@@ -112,5 +117,9 @@ public class SingleStreamRuntime implements StreamRuntime {
 
     public MetaComplexEvent getMetaComplexEvent() {
         return metaComplexEvent;
+    }
+
+    public ProcessingMode getProcessingMode() {
+        return overallProcessingMode;
     }
 }
