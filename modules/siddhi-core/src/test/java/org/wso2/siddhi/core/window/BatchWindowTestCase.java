@@ -25,9 +25,11 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class BatchWindowTestCase {
     private static final Logger log = Logger.getLogger(BatchWindowTestCase.class);
@@ -319,6 +321,200 @@ public class BatchWindowTestCase {
         AssertJUnit.assertEquals(20, removeEventCount);
         AssertJUnit.assertEquals(8, chunkCount);
         AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testBatchWindow6() throws InterruptedException {
+        log.info("BatchWindow test6 - process batches with size less than the given chunk size");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, price float, volume long); " +
+                "define window cseEventWindow (symbol string, price float, volume long) batch(30) output all events; ";
+        String query = "" +
+                "@info(name = 'query0') " +
+                "from cseEventStream " +
+                "insert into cseEventWindow; " +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventWindow " +
+                "select * " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                chunkCount = chunkCount + 1;
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+
+            }
+        });
+
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        int length1 = 20;
+        int length2 = 10;
+        Event[] eventsSet1 = new Event[length1];
+        Event[] eventsSet2 = new Event[length2];
+        for (int i = 0; i < length1; i++) {
+            eventsSet1[i] = new Event(System.currentTimeMillis(), new Object[]{"WSO2", i * 2.5f, 10L});
+            if (i < length2) {
+                eventsSet2[i] = new Event(System.currentTimeMillis(), new Object[]{"IBM", i * 2.5f, 10L});
+            }
+        }
+        inputHandler.send(eventsSet1);
+        inputHandler.send(eventsSet2);
+        Thread.sleep(1000);
+        AssertJUnit.assertEquals(30, inEventCount);
+        AssertJUnit.assertEquals(20, removeEventCount);
+        AssertJUnit.assertEquals(2, chunkCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testBatchWindow7() throws InterruptedException {
+        log.info("BatchWindow test7 - process batches with size less than the given chunk size");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, price float, volume long); " +
+                "define window cseEventWindow (symbol string, price float, volume long) batch(30) output all events; ";
+        String query = "" +
+                "@info(name = 'query0') " +
+                "from cseEventStream " +
+                "insert into cseEventWindow; " +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventWindow " +
+                "select * " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                chunkCount = chunkCount + 1;
+                if (inEvents != null) {
+                    inEventCount = inEventCount + inEvents.length;
+                }
+                if (removeEvents != null) {
+                    removeEventCount = removeEventCount + removeEvents.length;
+                }
+                eventArrived = true;
+
+            }
+        });
+
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        int length1 = 20;
+        int length2 = 10;
+        Event[] eventsSet1 = new Event[length1];
+        Event[] eventsSet2 = new Event[length2];
+        for (int i = 0; i < length1; i++) {
+            eventsSet1[i] = new Event(System.currentTimeMillis(), new Object[]{"WSO2", i * 2.5f, 10L});
+            if (i < length2) {
+                eventsSet2[i] = new Event(System.currentTimeMillis(), new Object[]{"IBM", i * 2.5f, 10L});
+            }
+        }
+        inputHandler.send(eventsSet1);
+        inputHandler.send(eventsSet2);
+        Thread.sleep(1000);
+        AssertJUnit.assertEquals(30, inEventCount);
+        AssertJUnit.assertEquals(20, removeEventCount);
+        AssertJUnit.assertEquals(2, chunkCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(expectedExceptions = {SiddhiAppValidationException.class, SiddhiAppCreationException.class})
+    public void testBatchWindow8() throws InterruptedException {
+        log.info("BatchWindow test8 - check the SiddhiAppValidationException, SiddhiAppCreationException " +
+                "for multiple parameters");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, price float, volume long); " +
+                "define window cseEventWindow (symbol string, price float, volume long) batch(30, 20) " +
+                "output all events; ";
+        String query = "" +
+                "@info(name = 'query0') " +
+                "from cseEventStream " +
+                "insert into cseEventWindow; " +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventWindow " +
+                "select * " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        int length1 = 20;
+        int length2 = 10;
+        Event[] eventsSet1 = new Event[length1];
+        Event[] eventsSet2 = new Event[length2];
+        for (int i = 0; i < length1; i++) {
+            eventsSet1[i] = new Event(System.currentTimeMillis(), new Object[]{"WSO2", i * 2.5f, 10L});
+            if (i < length2) {
+                eventsSet2[i] = new Event(System.currentTimeMillis(), new Object[]{"IBM", i * 2.5f, 10L});
+            }
+        }
+        inputHandler.send(eventsSet1);
+        inputHandler.send(eventsSet2);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(expectedExceptions = {SiddhiAppValidationException.class, SiddhiAppCreationException.class})
+    public void testBatchWindow9() throws InterruptedException {
+        log.info("BatchWindow test9 - check the SiddhiAppValidationException, SiddhiAppCreationException " +
+                "for wrong parameters");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String cseEventStream = "" +
+                "define stream cseEventStream (symbol string, price float, volume long); " +
+                "define window cseEventWindow (symbol string, price float, volume long) batch(-30) " +
+                "output all events; ";
+        String query = "" +
+                "@info(name = 'query0') " +
+                "from cseEventStream " +
+                "insert into cseEventWindow; " +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventWindow " +
+                "select * " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        int length1 = 20;
+        int length2 = 10;
+        Event[] eventsSet1 = new Event[length1];
+        Event[] eventsSet2 = new Event[length2];
+        for (int i = 0; i < length1; i++) {
+            eventsSet1[i] = new Event(System.currentTimeMillis(), new Object[]{"WSO2", i * 2.5f, 10L});
+            if (i < length2) {
+                eventsSet2[i] = new Event(System.currentTimeMillis(), new Object[]{"IBM", i * 2.5f, 10L});
+            }
+        }
+        inputHandler.send(eventsSet1);
+        inputHandler.send(eventsSet2);
         siddhiAppRuntime.shutdown();
     }
 }
