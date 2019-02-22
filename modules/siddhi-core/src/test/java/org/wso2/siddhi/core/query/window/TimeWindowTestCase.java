@@ -28,7 +28,7 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.EventPrinter;
 
 public class TimeWindowTestCase {
     private static final Logger log = Logger.getLogger(TimeWindowTestCase.class);

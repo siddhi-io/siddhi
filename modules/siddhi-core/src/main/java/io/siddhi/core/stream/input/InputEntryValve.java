@@ -20,7 +20,7 @@ package io.siddhi.core.stream.input;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
-import org.wso2.siddhi.core.util.ThreadBarrier;
+import io.siddhi.core.util.ThreadBarrier;
 
 import java.util.List;
 

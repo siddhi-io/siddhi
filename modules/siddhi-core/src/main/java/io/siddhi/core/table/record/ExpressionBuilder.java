@@ -27,9 +27,9 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.ExceptionUtil;
-import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
-import org.wso2.siddhi.core.util.parser.ExpressionParser;
+import io.siddhi.core.util.ExceptionUtil;
+import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
+import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.AttributeNotExistException;
@@ -60,7 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
+import static io.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 
 /**
  * Parse and build Siddhi Condition objects from @{link {@link Expression}s.

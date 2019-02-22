@@ -23,7 +23,7 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
-import org.wso2.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Map;

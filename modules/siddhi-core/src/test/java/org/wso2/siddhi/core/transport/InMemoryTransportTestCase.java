@@ -29,10 +29,10 @@ import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
-import org.wso2.siddhi.core.util.transport.InMemoryBroker;
-import org.wso2.siddhi.core.util.transport.SubscriberUnAvailableException;
+import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.config.InMemoryConfigManager;
+import io.siddhi.core.util.transport.InMemoryBroker;
+import io.siddhi.core.util.transport.SubscriberUnAvailableException;
 
 import java.util.HashMap;
 import java.util.Map;

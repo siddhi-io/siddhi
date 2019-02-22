@@ -26,8 +26,8 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.query.processor.Processor;
-import org.wso2.siddhi.core.util.SiddhiConstants;
-import org.wso2.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.HashMap;

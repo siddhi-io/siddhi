@@ -18,9 +18,9 @@ package io.siddhi.core.table.record;
 
 import org.apache.log4j.Logger;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
-import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
-import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.CompiledExpression;
+import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Iterator;

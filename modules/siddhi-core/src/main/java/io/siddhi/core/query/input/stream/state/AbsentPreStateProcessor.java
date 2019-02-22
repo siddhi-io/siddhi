@@ -19,7 +19,7 @@
 package io.siddhi.core.query.input.stream.state;
 
 import io.siddhi.core.query.processor.SchedulingProcessor;
-import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
+import io.siddhi.core.util.extension.holder.EternalReferencedHolder;
 
 /**
  * PreStateProcessor of events not received by Siddhi.

@@ -20,8 +20,8 @@ package io.siddhi.core.table.holder;
 
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
-import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
+import io.siddhi.core.util.snapshot.state.SnapshotState;
+import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 
 /**
  * Base EventHolder interface. EventHolder is a container of {@link StreamEvent}s. You can add {@link ComplexEventChunk}

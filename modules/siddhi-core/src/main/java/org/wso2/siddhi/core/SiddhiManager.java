@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.core;
 
+import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.config.StatisticsConfiguration;
@@ -24,11 +25,11 @@ import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import io.siddhi.core.stream.input.source.SourceHandlerManager;
 import io.siddhi.core.stream.output.sink.SinkHandlerManager;
 import io.siddhi.core.table.record.RecordTableHandlerManager;
-import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
-import org.wso2.siddhi.core.util.config.ConfigManager;
-import org.wso2.siddhi.core.util.parser.SiddhiAppParser;
-import org.wso2.siddhi.core.util.persistence.IncrementalPersistenceStore;
-import org.wso2.siddhi.core.util.persistence.PersistenceStore;
+import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
+import io.siddhi.core.util.config.ConfigManager;
+import io.siddhi.core.util.parser.SiddhiAppParser;
+import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
+import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.compiler.SiddhiCompiler;
 
@@ -101,7 +102,7 @@ public class SiddhiManager {
 
     /**
      * Method to set persistence for the Siddhi Manager instance.
-     * {@link org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore} is the default persistence store
+     * {@link InMemoryPersistenceStore} is the default persistence store
      * implementation users can utilize.
      *
      * @param persistenceStore Persistence Store implementation to be used.

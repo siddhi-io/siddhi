@@ -18,7 +18,7 @@
 
 package io.siddhi.core.query.processor;
 
-import org.wso2.siddhi.core.util.Scheduler;
+import io.siddhi.core.util.Scheduler;
 
 /**
  * Parent interface for Processors which need access to Siddhi {@link Scheduler}

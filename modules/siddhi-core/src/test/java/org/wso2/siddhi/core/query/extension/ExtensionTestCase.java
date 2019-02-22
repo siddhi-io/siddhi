@@ -28,8 +28,8 @@ import org.wso2.siddhi.core.query.extension.util.CustomFunctionExtension;
 import org.wso2.siddhi.core.query.extension.util.StringConcatAggregatorString;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
+import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.config.InMemoryConfigManager;
 
 import java.util.HashMap;
 import java.util.Map;

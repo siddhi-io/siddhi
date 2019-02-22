@@ -18,7 +18,7 @@
 
 package io.siddhi.core.config;
 
-import org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory;
+import io.siddhi.core.util.statistics.StatisticsTrackerFactory;
 
 /**
  * Siddhi statistics module related configuration holder

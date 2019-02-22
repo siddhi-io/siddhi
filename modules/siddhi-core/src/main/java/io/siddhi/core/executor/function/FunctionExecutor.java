@@ -24,8 +24,8 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.Snapshotable;
 
 /**
  * Parent abstract class for Function Executors. Function executor will have one or more input parameters and single

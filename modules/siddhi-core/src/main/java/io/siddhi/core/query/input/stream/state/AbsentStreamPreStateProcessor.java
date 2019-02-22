@@ -21,8 +21,8 @@ package io.siddhi.core.query.input.stream.state;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.query.input.stream.single.EntryValveProcessor;
-import org.wso2.siddhi.core.util.Scheduler;
-import org.wso2.siddhi.core.util.parser.SchedulerParser;
+import io.siddhi.core.util.Scheduler;
+import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.Iterator;

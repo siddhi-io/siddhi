@@ -23,7 +23,7 @@ import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.util.parser.SiddhiAppParser;
+import io.siddhi.core.util.parser.SiddhiAppParser;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.compiler.SiddhiCompiler;
 

@@ -20,7 +20,7 @@ import io.siddhi.core.debugger.SiddhiDebugger;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.core.window.Window;
+import io.siddhi.core.window.Window;
 import io.siddhi.query.api.definition.StreamDefinition;
 
 /**

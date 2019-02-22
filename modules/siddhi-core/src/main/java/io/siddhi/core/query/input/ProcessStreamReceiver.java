@@ -30,8 +30,8 @@ import io.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import io.siddhi.core.query.input.stream.state.PreStateProcessor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.core.util.lock.LockWrapper;
-import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.lock.LockWrapper;
+import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.ArrayList;
 import java.util.List;

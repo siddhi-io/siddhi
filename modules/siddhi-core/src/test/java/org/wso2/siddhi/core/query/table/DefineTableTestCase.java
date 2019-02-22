@@ -25,7 +25,7 @@ import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.table.util.TestStore;
-import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
+import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;

@@ -27,10 +27,10 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.exception.OperationNotSupportedException;
-import org.wso2.siddhi.core.util.SiddhiConstants;
-import org.wso2.siddhi.core.util.snapshot.SnapshotRequest;
-import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
-import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
+import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.snapshot.SnapshotRequest;
+import io.siddhi.core.util.snapshot.state.SnapshotState;
+import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.expression.condition.Compare;
 

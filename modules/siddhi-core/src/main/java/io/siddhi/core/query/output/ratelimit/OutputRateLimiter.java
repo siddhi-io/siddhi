@@ -23,10 +23,10 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.query.output.callback.OutputCallback;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.query.input.MultiProcessStreamReceiver;
-import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
-import org.wso2.siddhi.core.util.lock.LockWrapper;
-import org.wso2.siddhi.core.util.snapshot.Snapshotable;
-import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.extension.holder.EternalReferencedHolder;
+import io.siddhi.core.util.lock.LockWrapper;
+import io.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.ArrayList;
 import java.util.List;

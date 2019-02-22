@@ -30,7 +30,7 @@ import io.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.ProcessingMode;
-import org.wso2.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 

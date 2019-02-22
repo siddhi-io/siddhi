@@ -21,8 +21,8 @@ package io.siddhi.core.query.input.stream.single;
 import io.siddhi.core.aggregation.Executor;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.util.Schedulable;
-import org.wso2.siddhi.core.util.ThreadBarrier;
+import io.siddhi.core.util.Schedulable;
+import io.siddhi.core.util.ThreadBarrier;
 
 /**
  * Entry point to incremental executors.

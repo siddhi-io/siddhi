@@ -18,7 +18,7 @@
 package io.siddhi.core.event.stream;
 
 import io.siddhi.core.event.MetaComplexEvent;
-import org.wso2.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;

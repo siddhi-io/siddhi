@@ -41,8 +41,8 @@ import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.Processor;
-import org.wso2.siddhi.core.util.ExceptionUtil;
-import org.wso2.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.ExceptionUtil;
+import io.siddhi.core.util.config.ConfigReader;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -24,9 +24,9 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
-import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
-import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.CompiledSelection;
+import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.execution.query.selection.Selector;
 

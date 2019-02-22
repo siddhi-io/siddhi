@@ -26,8 +26,8 @@ import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.table.CompiledUpdateSet;
 import io.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.collection.AddingStreamEventExtractor;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.AddingStreamEventExtractor;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
 
 /**
  * Implementation of {@link OutputCallback} to receive processed Siddhi events from

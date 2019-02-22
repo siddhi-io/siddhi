@@ -30,7 +30,7 @@ import io.siddhi.core.event.state.populater.StateEventPopulator;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.condition.ConditionExpressionExecutor;
-import org.wso2.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.execution.query.selection.Selector;
 
 import java.util.ArrayList;

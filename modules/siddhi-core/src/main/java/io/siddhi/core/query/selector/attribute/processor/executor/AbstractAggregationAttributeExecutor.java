@@ -20,7 +20,7 @@ package io.siddhi.core.query.selector.attribute.processor.executor;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
-import org.wso2.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.query.api.definition.Attribute;
 
 /**

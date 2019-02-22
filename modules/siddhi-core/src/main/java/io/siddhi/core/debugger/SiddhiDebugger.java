@@ -19,8 +19,9 @@ package io.siddhi.core.debugger;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.util.snapshot.Snapshotable;
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.util.snapshot.SnapshotService;
+import io.siddhi.core.util.snapshot.SnapshotService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -203,7 +204,7 @@ public class SiddhiDebugger {
     }
 
     /**
-     * Get all the events stored in the {@link org.wso2.siddhi.core.util.snapshot.Snapshotable} entities of the given
+     * Get all the events stored in the {@link Snapshotable} entities of the given
      * query.
      *
      * @param queryName name of the Siddhi query

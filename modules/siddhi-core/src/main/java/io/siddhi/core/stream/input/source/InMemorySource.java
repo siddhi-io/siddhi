@@ -25,9 +25,9 @@ import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.transport.InMemoryBroker;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.transport.InMemoryBroker;
+import io.siddhi.core.util.transport.OptionHolder;
 
 import java.util.Map;
 

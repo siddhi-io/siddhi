@@ -20,7 +20,7 @@ package io.siddhi.core.table.record;
 
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.table.CompiledUpdateSet;
-import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
+import io.siddhi.core.util.collection.operator.CompiledExpression;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

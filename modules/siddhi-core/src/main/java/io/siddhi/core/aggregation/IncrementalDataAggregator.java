@@ -25,7 +25,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
-import org.wso2.siddhi.core.util.IncrementalTimeConverterUtil;
+import io.siddhi.core.util.IncrementalTimeConverterUtil;
 import io.siddhi.query.api.aggregation.TimePeriod;
 
 import java.util.HashMap;

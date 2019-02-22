@@ -25,7 +25,7 @@ import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.query.input.stream.state.StreamPreStateProcessor;
 import io.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.LatencyTracker;
 
 /**
  * Implementation of {@link StreamJunction.Receiver} to receive events to be fed into

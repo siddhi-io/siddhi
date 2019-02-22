@@ -21,8 +21,8 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.timestamp.TimestampGenerator;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.timestamp.TimestampGenerator;
 
 import java.util.HashMap;
 import java.util.HashSet;

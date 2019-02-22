@@ -24,7 +24,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.query.input.stream.state.StateStreamRuntime;
 import io.siddhi.core.query.input.StateMultiProcessStreamReceiver;
 import io.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.List;
 

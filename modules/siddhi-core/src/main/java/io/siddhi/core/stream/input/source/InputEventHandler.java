@@ -22,9 +22,9 @@ import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.ExceptionUtil;
-import org.wso2.siddhi.core.util.statistics.LatencyTracker;
-import org.wso2.siddhi.core.util.timestamp.TimestampGenerator;
+import io.siddhi.core.util.ExceptionUtil;
+import io.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.timestamp.TimestampGenerator;
 
 import java.util.List;
 

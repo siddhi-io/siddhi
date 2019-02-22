@@ -25,8 +25,8 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import io.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
-import org.wso2.siddhi.core.util.transport.InMemoryBroker;
+import io.siddhi.core.util.config.InMemoryConfigManager;
+import io.siddhi.core.util.transport.InMemoryBroker;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -20,9 +20,9 @@ package io.siddhi.core.event.stream.holder;
 import io.siddhi.core.event.stream.Operation;
 import io.siddhi.core.event.stream.Operation.Operator;
 import io.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.util.snapshot.SnapshotRequest;
-import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
-import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
+import io.siddhi.core.util.snapshot.SnapshotRequest;
+import io.siddhi.core.util.snapshot.state.SnapshotState;
+import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -28,9 +28,9 @@ import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.input.stream.join.JoinProcessor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
-import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
-import org.wso2.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
+import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.expression.Expression;
 

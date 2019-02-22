@@ -27,8 +27,8 @@ import org.wso2.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.SiddhiConstants;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

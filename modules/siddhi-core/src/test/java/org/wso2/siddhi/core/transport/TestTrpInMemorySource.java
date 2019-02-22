@@ -27,9 +27,9 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.stream.input.source.InMemorySource;
 import io.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.transport.InMemoryBroker;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.transport.InMemoryBroker;
+import io.siddhi.core.util.transport.OptionHolder;
 
 /**
  * Implementation of {@link Source} to receive events through in-memory

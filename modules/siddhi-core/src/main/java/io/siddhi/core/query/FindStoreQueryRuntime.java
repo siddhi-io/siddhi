@@ -26,8 +26,8 @@ import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.StoreQueryRuntimeException;
 import io.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
-import org.wso2.siddhi.core.window.Window;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.window.Window;
 
 import java.util.ArrayList;
 import java.util.List;

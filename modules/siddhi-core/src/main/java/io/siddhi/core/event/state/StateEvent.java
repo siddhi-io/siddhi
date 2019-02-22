@@ -25,16 +25,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.wso2.siddhi.core.util.SiddhiConstants.BEFORE_WINDOW_DATA_INDEX;
-import static org.wso2.siddhi.core.util.SiddhiConstants.CURRENT;
-import static org.wso2.siddhi.core.util.SiddhiConstants.LAST;
-import static org.wso2.siddhi.core.util.SiddhiConstants.ON_AFTER_WINDOW_DATA_INDEX;
-import static org.wso2.siddhi.core.util.SiddhiConstants.OUTPUT_DATA_INDEX;
-import static org.wso2.siddhi.core.util.SiddhiConstants.STATE_OUTPUT_DATA_INDEX;
-import static org.wso2.siddhi.core.util.SiddhiConstants.STREAM_ATTRIBUTE_INDEX_IN_TYPE;
-import static org.wso2.siddhi.core.util.SiddhiConstants.STREAM_ATTRIBUTE_TYPE_INDEX;
-import static org.wso2.siddhi.core.util.SiddhiConstants.STREAM_EVENT_CHAIN_INDEX;
-import static org.wso2.siddhi.core.util.SiddhiConstants.STREAM_EVENT_INDEX_IN_CHAIN;
+import static io.siddhi.core.util.SiddhiConstants.BEFORE_WINDOW_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.CURRENT;
+import static io.siddhi.core.util.SiddhiConstants.LAST;
+import static io.siddhi.core.util.SiddhiConstants.ON_AFTER_WINDOW_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.OUTPUT_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.STATE_OUTPUT_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.STREAM_ATTRIBUTE_INDEX_IN_TYPE;
+import static io.siddhi.core.util.SiddhiConstants.STREAM_ATTRIBUTE_TYPE_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.STREAM_EVENT_CHAIN_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.STREAM_EVENT_INDEX_IN_CHAIN;
 
 /**
  * Implementation of StateEvent to be used when executing join/pattern queries

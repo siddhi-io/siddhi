@@ -30,7 +30,7 @@ import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
 import io.siddhi.core.query.selector.attribute.processor.executor.AbstractAggregationAttributeExecutor;
-import org.wso2.siddhi.core.util.lock.LockWrapper;
+import io.siddhi.core.util.lock.LockWrapper;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -23,9 +23,9 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
-import org.wso2.siddhi.core.util.Schedulable;
-import org.wso2.siddhi.core.util.Scheduler;
-import org.wso2.siddhi.core.util.parser.SchedulerParser;
+import io.siddhi.core.util.Schedulable;
+import io.siddhi.core.util.Scheduler;
+import io.siddhi.core.util.parser.SchedulerParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;

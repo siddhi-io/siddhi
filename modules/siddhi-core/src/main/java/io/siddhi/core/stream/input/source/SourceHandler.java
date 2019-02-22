@@ -20,7 +20,7 @@ package io.siddhi.core.stream.input.source;
 
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.query.api.definition.StreamDefinition;
 
 /**

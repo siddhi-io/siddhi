@@ -25,7 +25,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.query.processor.stream.window.FindableProcessor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.selector.QuerySelector;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
 
 import java.util.LinkedList;
 import java.util.List;

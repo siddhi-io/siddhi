@@ -22,12 +22,12 @@ import io.siddhi.core.event.ComplexEventChunk;
 import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.SiddhiConstants;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
-import org.wso2.siddhi.core.util.statistics.LatencyTracker;
-import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.ThroughputTracker;
+import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.List;

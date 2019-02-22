@@ -21,12 +21,12 @@ package io.siddhi.core.stream.input.source;
 import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.util.ExceptionUtil;
-import org.wso2.siddhi.core.util.StringUtil;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.snapshot.Snapshotable;
-import org.wso2.siddhi.core.util.transport.BackoffRetryCounter;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.core.util.ExceptionUtil;
+import io.siddhi.core.util.StringUtil;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.transport.BackoffRetryCounter;
+import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.List;

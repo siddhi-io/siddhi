@@ -28,7 +28,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.EventPrinter;
 
 import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;

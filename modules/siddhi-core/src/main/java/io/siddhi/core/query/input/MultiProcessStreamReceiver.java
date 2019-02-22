@@ -29,7 +29,7 @@ import io.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.ArrayList;
 import java.util.List;

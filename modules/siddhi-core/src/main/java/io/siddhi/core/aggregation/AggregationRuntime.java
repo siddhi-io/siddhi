@@ -32,15 +32,15 @@ import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
 import io.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
-import org.wso2.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
-import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
-import org.wso2.siddhi.core.util.parser.ExpressionParser;
-import org.wso2.siddhi.core.util.parser.OperatorParser;
-import org.wso2.siddhi.core.util.snapshot.SnapshotService;
-import org.wso2.siddhi.core.util.statistics.LatencyTracker;
-import org.wso2.siddhi.core.util.statistics.MemoryCalculable;
-import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
+import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
+import io.siddhi.core.util.parser.ExpressionParser;
+import io.siddhi.core.util.parser.OperatorParser;
+import io.siddhi.core.util.snapshot.SnapshotService;
+import io.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.MemoryCalculable;
+import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.definition.AbstractDefinition;
@@ -57,7 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
+import static io.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
 /**

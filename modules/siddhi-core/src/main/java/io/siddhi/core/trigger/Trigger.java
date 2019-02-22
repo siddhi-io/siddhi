@@ -20,7 +20,7 @@ package io.siddhi.core.trigger;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
+import io.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import io.siddhi.query.api.definition.TriggerDefinition;
 
 /**

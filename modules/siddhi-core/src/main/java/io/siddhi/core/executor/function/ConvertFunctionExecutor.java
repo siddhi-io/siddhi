@@ -25,7 +25,7 @@ import org.wso2.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 

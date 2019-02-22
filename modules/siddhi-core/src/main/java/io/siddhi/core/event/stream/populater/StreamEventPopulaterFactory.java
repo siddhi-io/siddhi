@@ -24,9 +24,9 @@ import io.siddhi.query.api.definition.Attribute;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.wso2.siddhi.core.util.SiddhiConstants.BEFORE_WINDOW_DATA_INDEX;
-import static org.wso2.siddhi.core.util.SiddhiConstants.ON_AFTER_WINDOW_DATA_INDEX;
-import static org.wso2.siddhi.core.util.SiddhiConstants.OUTPUT_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.BEFORE_WINDOW_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.ON_AFTER_WINDOW_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.OUTPUT_DATA_INDEX;
 
 /**
  * The StateEventPopulaterFactory that populates StreamEventPopulater according to MetaStreamEvent and to be mapped

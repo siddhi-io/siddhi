@@ -18,6 +18,7 @@
 
 package io.siddhi.core.query.output.ratelimit.snapshot;
 
+import io.siddhi.core.util.Scheduler;
 import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
@@ -26,13 +27,13 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventCloner;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import org.wso2.siddhi.core.util.Schedulable;
-import org.wso2.siddhi.core.util.lock.LockWrapper;
+import io.siddhi.core.util.Schedulable;
+import io.siddhi.core.util.lock.LockWrapper;
 
 import java.util.Map;
 
 /**
- * Parent implementation to run the {@link org.wso2.siddhi.core.util.Scheduler} to handle periodic snapshot rate
+ * Parent implementation to run the {@link Scheduler} to handle periodic snapshot rate
  * limiting.
  */
 public abstract class SnapshotOutputRateLimiter implements Schedulable {

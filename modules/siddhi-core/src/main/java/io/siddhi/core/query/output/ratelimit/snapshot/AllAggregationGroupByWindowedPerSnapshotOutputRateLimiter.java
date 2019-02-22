@@ -24,8 +24,8 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.util.Scheduler;
-import org.wso2.siddhi.core.util.parser.SchedulerParser;
+import io.siddhi.core.util.Scheduler;
+import io.siddhi.core.util.parser.SchedulerParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;

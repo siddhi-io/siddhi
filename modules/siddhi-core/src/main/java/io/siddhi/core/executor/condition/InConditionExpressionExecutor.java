@@ -23,8 +23,8 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.collection.FinderStateEvent;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.FinderStateEvent;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
 
 /**
  * Executor class for In condition. Condition evaluation logic is implemented within executor.

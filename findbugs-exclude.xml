@@ -89,11 +89,11 @@
         <Bug pattern="RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper$2"/>
+        <Class name="DefinitionParserHelper$2"/>
         <Bug pattern="SE_BAD_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder"/>
+        <Class name="SiddhiAppRuntimeBuilder"/>
         <Bug pattern="RV_RETURN_VALUE_OF_PUTIFABSENT_IGNORED"/>
     </Match>
     <Match>
@@ -133,11 +133,11 @@
         <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.transport.InMemoryBroker$MessageBroker"/>
+        <Class name="InMemoryBroker$MessageBroker"/>
         <Bug pattern="DE_MIGHT_IGNORE"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.parser.JoinInputStreamParser"/>
+        <Class name="JoinInputStreamParser"/>
         <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
     </Match>
     <Match>

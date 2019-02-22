@@ -27,7 +27,7 @@ import org.wso2.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.StoreQueryCreationException;
 import io.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.EventPrinter;
 
 public class StoreQueryWindowTestCase {
 

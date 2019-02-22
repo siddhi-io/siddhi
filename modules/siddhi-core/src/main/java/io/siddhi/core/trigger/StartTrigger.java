@@ -21,9 +21,9 @@ package io.siddhi.core.trigger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.core.util.SiddhiConstants;
-import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
-import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
+import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.query.api.definition.TriggerDefinition;
 
 /**

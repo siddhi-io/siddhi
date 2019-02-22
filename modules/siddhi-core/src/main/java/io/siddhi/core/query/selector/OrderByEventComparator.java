@@ -24,7 +24,7 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.parser.ExpressionParser;
+import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.execution.query.selection.OrderByAttribute;
 

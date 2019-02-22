@@ -29,9 +29,9 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.exception.StoreQueryCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.core.util.SiddhiTestHelper;
-import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
+import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.SiddhiTestHelper;
+import io.siddhi.core.util.config.InMemoryConfigManager;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

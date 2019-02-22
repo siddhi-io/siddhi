@@ -30,9 +30,9 @@ import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
 import io.siddhi.core.query.selector.attribute.processor.executor.GroupByAggregationAttributeExecutor;
 import io.siddhi.core.table.Table;
-import org.wso2.siddhi.core.util.IncrementalTimeConverterUtil;
-import org.wso2.siddhi.core.util.Scheduler;
-import org.wso2.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.IncrementalTimeConverterUtil;
+import io.siddhi.core.util.Scheduler;
+import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.query.api.aggregation.TimePeriod;
 
 import java.util.HashMap;

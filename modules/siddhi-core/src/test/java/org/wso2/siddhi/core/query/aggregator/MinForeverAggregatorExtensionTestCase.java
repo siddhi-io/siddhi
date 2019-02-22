@@ -28,7 +28,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.EventPrinter;
 
 public class MinForeverAggregatorExtensionTestCase {
     private static final Logger log = Logger.getLogger(MinForeverAggregatorExtensionTestCase.class);

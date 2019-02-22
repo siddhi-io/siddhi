@@ -23,9 +23,9 @@ import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.table.record.AbstractRecordTable;
 import io.siddhi.core.table.record.ExpressionBuilder;
 import io.siddhi.core.table.record.RecordIterator;
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
-import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
-import org.wso2.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.CompiledExpression;
+import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.util.AnnotationHelper;
@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 
 /**
  * Custom store for testing purposes.
