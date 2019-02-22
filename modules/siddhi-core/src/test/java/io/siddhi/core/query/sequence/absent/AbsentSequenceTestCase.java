@@ -23,7 +23,7 @@ import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.TestUtil;
+import io.siddhi.core.TestUtil;
 import io.siddhi.core.stream.input.InputHandler;
 
 /**

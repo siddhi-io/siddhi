@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.siddhi.core;
+package io.siddhi.core;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;

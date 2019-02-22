@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.core;
+package io.siddhi.core;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.executor.ExpressionExecutor;
