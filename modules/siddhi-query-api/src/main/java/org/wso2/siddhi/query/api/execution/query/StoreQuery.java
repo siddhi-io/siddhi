@@ -28,6 +28,8 @@ import org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import org.wso2.siddhi.query.api.execution.query.selection.Selector;
 import org.wso2.siddhi.query.api.expression.Expression;
 
+import static org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream.OutputEventType.CURRENT_EVENTS;
+
 /**
  * This class keep information of a store query.
  */
@@ -36,13 +38,14 @@ public class StoreQuery implements SiddhiElement {
     private static final long serialVersionUID = 1L;
     private InputStore inputStore;
     private Selector selector = new Selector();
-    private OutputStream outputStream = new ReturnStream();
+    private OutputStream outputStream = new ReturnStream(CURRENT_EVENTS);
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
     private StoreQueryType type;
 
     /**
      * Builder method to get a new store query instance
+     *
      * @return a new storeQuery instance
      */
     public static StoreQuery query() {
@@ -51,6 +54,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Builder method to set input store to the store query
+     *
      * @param inputStore inputStore for the store query
      * @return updated store query
      */
@@ -61,6 +65,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Getter for the input store
+     *
      * @return inputStore
      */
     public InputStore getInputStore() {
@@ -69,6 +74,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Builder method to set a selector to the store query
+     *
      * @param selector selector for the store query
      * @return updated store query
      */
@@ -79,54 +85,64 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Builder method to set an outPutStream to the store query
+     *
      * @param outputStream outPutStream for the store query
      * @return updated store query
      */
     public StoreQuery outStream(OutputStream outputStream) {
         this.outputStream = outputStream;
+        if (outputStream != null && outputStream.getOutputEventType() == null) {
+            outputStream.setOutputEventType(OutputStream.OutputEventType.CURRENT_EVENTS);
+        }
         return this;
     }
 
     /**
      * Method to set a deleteStream as the outputStream of the store query
-     * @param outputTableId id of the table which is going to be queried
+     *
+     * @param outputTableId        id of the table which is going to be queried
      * @param onDeletingExpression expression for the delete operation defined in the store query
      */
     public void deleteBy(String outputTableId, Expression onDeletingExpression) {
-        this.outputStream = new DeleteStream(outputTableId, onDeletingExpression);
+        this.outputStream = new DeleteStream(outputTableId, CURRENT_EVENTS, onDeletingExpression);
     }
 
     /**
      * Method to set an updateStream as the outputStream of the store query
-     * @param outputTableId id of the table which is going to be queried
+     *
+     * @param outputTableId      id of the table which is going to be queried
      * @param onUpdateExpression expression for the update operation defined in the store query
      */
     public void updateBy(String outputTableId, Expression onUpdateExpression) {
-        this.outputStream = new UpdateStream(outputTableId, onUpdateExpression);
+        this.outputStream = new UpdateStream(outputTableId, CURRENT_EVENTS, onUpdateExpression);
     }
 
     /**
      * Method to set an updateStream as the outputStream of the store query
-     * @param outputTableId id of the table which is going to be queried
+     *
+     * @param outputTableId       id of the table which is going to be queried
      * @param updateSetAttributes updateSet for the attributes which are going to be updated.
-     * @param onUpdateExpression expression for the update operation defined in the store query
+     * @param onUpdateExpression  expression for the update operation defined in the store query
      */
     public void updateBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
-        this.outputStream = new UpdateStream(outputTableId, updateSetAttributes, onUpdateExpression);
+        this.outputStream = new UpdateStream(outputTableId, CURRENT_EVENTS, updateSetAttributes, onUpdateExpression);
     }
 
     /**
      * Method to set an updateOrInsertStream as the outputStream of the store query
-     * @param outputTableId id of the table which is going to be queried
+     *
+     * @param outputTableId       id of the table which is going to be queried
      * @param updateSetAttributes updateSet for the attributes which are going to be updated.
-     * @param onUpdateExpression expression for the update or insert operation defined in the store query
+     * @param onUpdateExpression  expression for the update or insert operation defined in the store query
      */
     public void updateOrInsertBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
-        this.outputStream = new UpdateOrInsertStream(outputTableId, updateSetAttributes, onUpdateExpression);
+        this.outputStream = new UpdateOrInsertStream(outputTableId, CURRENT_EVENTS,
+                updateSetAttributes, onUpdateExpression);
     }
 
     /**
      * Getter method to get the selector of the store query
+     *
      * @return selector of the store query
      */
     public Selector getSelector() {
@@ -135,6 +151,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Getter method to get the outputStream of the store query
+     *
      * @return outputStream of the store query
      */
     public OutputStream getOutputStream() {
@@ -202,6 +219,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * This method returns the type of given store query.
+     *
      * @return type of given store query
      */
     public StoreQueryType getType() {

@@ -107,18 +107,13 @@ public class QueryParser {
 
             OutputStream.OutputEventType outputEventType = query.getOutputStream().getOutputEventType();
             if (query.getOutputRate() != null && query.getOutputRate() instanceof SnapshotOutputRate) {
-                if (outputEventType == null) {
-                    outputEventType = OutputStream.OutputEventType.ALL_EVENTS;
-                } else if (outputEventType != OutputStream.OutputEventType.ALL_EVENTS) {
+                if (outputEventType != OutputStream.OutputEventType.ALL_EVENTS) {
                     throw new SiddhiAppCreationException("As query '" + queryName + "' is performing snapshot rate " +
                             "limiting, it can only insert '" + OutputStream.OutputEventType.ALL_EVENTS +
                             "' but it is inserting '" + outputEventType + "'!",
                             query.getOutputStream().getQueryContextStartIndex(),
                             query.getOutputStream().getQueryContextEndIndex());
                 }
-            }
-            if (outputEventType == null) {
-                outputEventType = OutputStream.OutputEventType.CURRENT_EVENTS;
             }
 
             boolean outputExpectsExpiredEvents = false;

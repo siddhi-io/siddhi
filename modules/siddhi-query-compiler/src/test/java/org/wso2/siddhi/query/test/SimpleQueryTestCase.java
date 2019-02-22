@@ -517,7 +517,7 @@ public class SimpleQueryTestCase {
                         select("price", Expression.variable("price")).
                         select("volume", Expression.variable("volume"))
         );
-        query.updateBy("StockQuote",
+        query.updateBy("StockQuote", OutputStream.OutputEventType.CURRENT_EVENTS,
                 UpdateStream.updateSet().
                         set(
                                 Expression.variable("price").ofStream("StockQuote"),
