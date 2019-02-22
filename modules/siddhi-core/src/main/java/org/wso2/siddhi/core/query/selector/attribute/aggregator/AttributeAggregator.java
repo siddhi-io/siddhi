@@ -22,6 +22,7 @@ import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -36,18 +37,24 @@ public abstract class AttributeAggregator {
     protected ExpressionExecutor[] attributeExpressionExecutors;
     protected SiddhiAppContext siddhiAppContext;
     private int attributeSize;
+    private ProcessingMode processingMode;
+    private boolean outputExpectsExpiredEvents;
     private String queryName;
     private ConfigReader configReader;
 
-    public void initAggregator(ExpressionExecutor[] attributeExpressionExecutors, SiddhiAppContext
-            siddhiAppContext, String queryName, ConfigReader configReader) {
+    public void initAggregator(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
+                               boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext,
+                               String queryName, ConfigReader configReader) {
+        this.processingMode = processingMode;
+        this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.queryName = queryName;
         this.configReader = configReader;
         try {
             this.siddhiAppContext = siddhiAppContext;
             this.attributeExpressionExecutors = attributeExpressionExecutors;
             this.attributeSize = attributeExpressionExecutors.length;
-            init(attributeExpressionExecutors, configReader, siddhiAppContext);
+            init(attributeExpressionExecutors, processingMode, outputExpectsExpiredEvents,
+                    configReader, siddhiAppContext);
         } catch (Throwable t) {
             throw new SiddhiAppCreationException(t);
         }
@@ -60,7 +67,8 @@ public abstract class AttributeAggregator {
             for (int i = 0; i < attributeSize; i++) {
                 innerExpressionExecutors[i] = attributeExpressionExecutors[i].cloneExecutor(key);
             }
-            attributeAggregator.initAggregator(innerExpressionExecutors, siddhiAppContext, queryName, configReader);
+            attributeAggregator.initAggregator(innerExpressionExecutors, processingMode, outputExpectsExpiredEvents,
+                    siddhiAppContext, queryName, configReader);
             return attributeAggregator;
         } catch (Exception e) {
             throw new SiddhiAppRuntimeException("Exception in cloning " + this.getClass().getCanonicalName(), e);
@@ -107,12 +115,14 @@ public abstract class AttributeAggregator {
      * The initialization method for FunctionExecutor
      *
      * @param attributeExpressionExecutors are the executors of each attributes in the function
+     * @param processingMode               query processing mode
+     * @param outputExpectsExpiredEvents   is expired events sent as output
      * @param configReader                 this hold the {@link AttributeAggregator} extensions configuration reader.
      * @param siddhiAppContext             Siddhi app runtime context
      */
-    protected abstract void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                 SiddhiAppContext
-                                         siddhiAppContext);
+    protected abstract void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
+                                 boolean outputExpectsExpiredEvents, ConfigReader configReader,
+                                 SiddhiAppContext siddhiAppContext);
 
     public abstract Attribute.Type getReturnType();
 

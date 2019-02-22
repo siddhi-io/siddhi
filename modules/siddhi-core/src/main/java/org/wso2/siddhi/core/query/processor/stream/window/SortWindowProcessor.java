@@ -79,7 +79,7 @@ import java.util.Map;
                         defaultValue = "asc")
         },
         examples = @Example(
-                syntax =  "define stream cseEventStream (symbol string, price float, volume long);\n" +
+                syntax = "define stream cseEventStream (symbol string, price float, volume long);\n" +
                         "define window cseEventWindow (symbol string, price float, volume long) sort(2,volume, 'asc')" +
                         ";\n@info(name = 'query0')\n" +
                         "from cseEventStream\n" +
@@ -92,7 +92,7 @@ import java.util.Map;
                         "Therefore, at any given time, the window contains the 5 lowest prices."
         )
 )
-public class SortWindowProcessor extends WindowProcessor implements FindableProcessor {
+public class SortWindowProcessor extends SlidingWindowProcessor implements FindableProcessor {
     private static final String ASC = "asc";
     private static final String DESC = "desc";
     private int lengthToKeep;
@@ -101,8 +101,8 @@ public class SortWindowProcessor extends WindowProcessor implements FindableProc
     private EventComparator eventComparator;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        SiddhiAppContext siddhiAppContext) {
         if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
             lengthToKeep = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
                     attributeExpressionExecutors[0]).getValue()));
@@ -204,9 +204,9 @@ public class SortWindowProcessor extends WindowProcessor implements FindableProc
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         return OperatorParser.constructOperator(sortedWindow, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
     }
@@ -227,4 +227,5 @@ public class SortWindowProcessor extends WindowProcessor implements FindableProc
             return 0;
         }
     }
+
 }

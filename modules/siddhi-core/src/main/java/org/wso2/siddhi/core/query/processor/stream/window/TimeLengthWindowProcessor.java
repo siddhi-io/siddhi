@@ -77,7 +77,8 @@ import java.util.Map;
                         "last 2 seconds and gets updated for every event arrival and expiry."
         )
 )
-public class TimeLengthWindowProcessor extends WindowProcessor implements SchedulingProcessor, FindableProcessor {
+public class TimeLengthWindowProcessor extends SlidingWindowProcessor
+        implements SchedulingProcessor, FindableProcessor {
 
     private long timeInMilliSeconds;
     private int length;
@@ -97,8 +98,8 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                        SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
         expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 2) {
@@ -186,9 +187,9 @@ public class TimeLengthWindowProcessor extends WindowProcessor implements Schedu
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
     }

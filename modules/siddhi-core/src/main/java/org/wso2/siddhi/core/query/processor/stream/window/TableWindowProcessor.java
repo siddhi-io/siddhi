@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * Implementation of {@link WindowProcessor} which represent a Window operating based on {@link Table}.
  */
-public class TableWindowProcessor extends WindowProcessor implements FindableProcessor {
+public class TableWindowProcessor extends BatchingWindowProcessor implements FindableProcessor {
 
     private Table table;
     private boolean outputExpectsExpiredEvents;
@@ -69,9 +69,9 @@ public class TableWindowProcessor extends WindowProcessor implements FindablePro
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                               SiddhiAppContext siddhiAppContext,
-                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName) {
+                                              SiddhiAppContext siddhiAppContext,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, String queryName) {
         return table.compileCondition(condition, matchingMetaInfoHolder, siddhiAppContext,
                 variableExpressionExecutors, tableMap, queryName);
     }
@@ -100,8 +100,8 @@ public class TableWindowProcessor extends WindowProcessor implements FindablePro
             streamProcessor.attributeExpressionLength = attributeExpressionLength;
             streamProcessor.additionalAttributes = additionalAttributes;
             streamProcessor.complexEventPopulater = complexEventPopulater;
-            streamProcessor.init(inputDefinition, attributeExpressionExecutors, configReader, siddhiAppContext,
-                    outputExpectsExpiredEvents);
+            streamProcessor.init(metaStreamEvent, inputDefinition, attributeExpressionExecutors, configReader,
+                    siddhiAppContext, outputExpectsExpiredEvents);
             streamProcessor.start();
             return streamProcessor;
 

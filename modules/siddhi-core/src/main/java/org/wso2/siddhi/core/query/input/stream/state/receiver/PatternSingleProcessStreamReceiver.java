@@ -37,7 +37,8 @@ public class PatternSingleProcessStreamReceiver extends SingleProcessStreamRecei
     }
 
     public PatternSingleProcessStreamReceiver clone(String key) {
-        return new PatternSingleProcessStreamReceiver(streamId + key, key, latencyTracker, queryName, siddhiAppContext);
+        return new PatternSingleProcessStreamReceiver(streamId + key, key, latencyTracker, queryName,
+                siddhiAppContext);
     }
 
     protected void stabilizeStates() {

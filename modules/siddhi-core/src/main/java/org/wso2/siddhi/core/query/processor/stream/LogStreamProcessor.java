@@ -26,11 +26,13 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
@@ -106,6 +108,7 @@ public class LogStreamProcessor extends StreamProcessor {
     /**
      * The init method of the StreamFunction
      *
+     * @param metaStreamEvent              the  stream event meta
      * @param inputDefinition              the incoming stream definition
      * @param attributeExpressionExecutors the executors for the function parameters
      * @param siddhiAppContext             siddhi app context
@@ -113,8 +116,9 @@ public class LogStreamProcessor extends StreamProcessor {
      * @return the additional output attributes introduced by the function
      */
     @Override
-    protected List<Attribute> init(AbstractDefinition inputDefinition, ExpressionExecutor[]
-            attributeExpressionExecutors, ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+    protected List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
+                                   ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                   SiddhiAppContext siddhiAppContext, boolean outputExpectsExpiredEvents) {
         int inputExecutorLength = attributeExpressionExecutors.length;
         if (inputExecutorLength == 1) {
             if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.STRING) {
@@ -239,6 +243,7 @@ public class LogStreamProcessor extends StreamProcessor {
         nextProcessor.process(streamEventChunk);
     }
 
+
     private void logMessage(LogPriority logPriority, String message) {
         switch (logPriority) {
             case INFO:
@@ -283,6 +288,11 @@ public class LogStreamProcessor extends StreamProcessor {
     @Override
     public void restoreState(Map<String, Object> state) {
         //Nothing to be done
+    }
+
+    @Override
+    public ProcessingMode getProcessingMode() {
+        return ProcessingMode.BATCH;
     }
 
     enum LogPriority {

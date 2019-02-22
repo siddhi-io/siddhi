@@ -69,7 +69,7 @@ import java.util.Map;
                 )
         }
 )
-public class BatchWindowProcessor extends WindowProcessor implements FindableProcessor {
+public class BatchWindowProcessor extends BatchingWindowProcessor implements FindableProcessor {
 
     private SnapshotableStreamEventQueue expiredEventQueue = null;
     private boolean outputExpectsExpiredEvents;

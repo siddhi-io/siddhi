@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
@@ -50,6 +51,7 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
     protected Processor nextProcessor;
 
     protected List<Attribute> additionalAttributes;
+    protected MetaStreamEvent metaStreamEvent;
     protected StreamEventClonerHolder streamEventClonerHolder = new StreamEventClonerHolder();
     protected StreamEventCloner streamEventCloner;
     protected AbstractDefinition inputDefinition;
@@ -62,15 +64,16 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
     private ConfigReader configReader;
     private boolean outputExpectsExpiredEvents;
 
-    public AbstractDefinition initProcessor(AbstractDefinition inputDefinition,
-                                            ExpressionExecutor[] attributeExpressionExecutors,
-                                            ConfigReader configReader, SiddhiAppContext
-                                                    siddhiAppContext, boolean outputExpectsExpiredEvents,
-                                            String queryName, SiddhiElement siddhiElement) {
+    public void initProcessor(MetaStreamEvent metaStreamEvent,
+                              ExpressionExecutor[] attributeExpressionExecutors,
+                              ConfigReader configReader, SiddhiAppContext siddhiAppContext,
+                              boolean outputExpectsExpiredEvents,
+                              String queryName, SiddhiElement siddhiElement) {
         this.configReader = configReader;
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
+        this.metaStreamEvent = metaStreamEvent;
         try {
-            this.inputDefinition = inputDefinition;
+            this.inputDefinition = metaStreamEvent.getLastInputDefinition();
             this.attributeExpressionExecutors = attributeExpressionExecutors;
             this.siddhiAppContext = siddhiAppContext;
             this.attributeExpressionLength = attributeExpressionExecutors.length;
@@ -79,23 +82,24 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
                 elementId = "AbstractStreamProcessor-" + siddhiAppContext.getElementIdGenerator().createNewId();
             }
             siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
-            this.additionalAttributes = init(inputDefinition, attributeExpressionExecutors, configReader,
-                    siddhiAppContext,
-                    outputExpectsExpiredEvents);
+            this.additionalAttributes = init(metaStreamEvent, metaStreamEvent.getLastInputDefinition(),
+                    attributeExpressionExecutors, configReader, siddhiAppContext, outputExpectsExpiredEvents);
 
             siddhiAppContext.addEternalReferencedHolder(this);
 
-            StreamDefinition outputDefinition = StreamDefinition.id(inputDefinition.getId());
-            outputDefinition.setQueryContextStartIndex(siddhiElement.getQueryContextStartIndex());
-            outputDefinition.setQueryContextEndIndex(siddhiElement.getQueryContextEndIndex());
-            for (Attribute attribute : inputDefinition.getAttributeList()) {
-                outputDefinition.attribute(attribute.getName(), attribute.getType());
-            }
-            for (Attribute attribute : additionalAttributes) {
-                outputDefinition.attribute(attribute.getName(), attribute.getType());
-            }
+            if (additionalAttributes.size() > 0) {
+                StreamDefinition outputDefinition = StreamDefinition.id(inputDefinition.getId());
+                outputDefinition.setQueryContextStartIndex(siddhiElement.getQueryContextStartIndex());
+                outputDefinition.setQueryContextEndIndex(siddhiElement.getQueryContextEndIndex());
+                for (Attribute attribute : inputDefinition.getAttributeList()) {
+                    outputDefinition.attribute(attribute.getName(), attribute.getType());
+                }
+                for (Attribute attribute : additionalAttributes) {
+                    outputDefinition.attribute(attribute.getName(), attribute.getType());
+                }
 
-            return outputDefinition;
+                metaStreamEvent.addInputDefinition(outputDefinition);
+            }
         } catch (Throwable t) {
             throw new SiddhiAppCreationException(t);
         }
@@ -104,19 +108,19 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
     /**
      * The init method of the StreamProcessor, this method will be called before other methods
      *
+     * @param metaStreamEvent              the stream event meta
      * @param inputDefinition              the incoming stream definition
      * @param attributeExpressionExecutors the executors of each function parameters
      * @param configReader                 this hold the {@link AbstractStreamProcessor} extensions configuration
      *                                     reader.
      * @param siddhiAppContext             the context of the siddhi app
-     * @param outputExpectsExpiredEvents   is output expects ExpiredEvents   @return the additional output attributes
-     *                                     introduced by the function
-     * @return list of attributes.
+     * @param outputExpectsExpiredEvents   is expired events sent as output
+     * @return the additional output attributes introduced by the function
      */
-    protected abstract List<Attribute> init(AbstractDefinition inputDefinition,
-                                            ExpressionExecutor[] attributeExpressionExecutors, ConfigReader
-                                                    configReader, SiddhiAppContext
-                                                    siddhiAppContext, boolean outputExpectsExpiredEvents);
+    protected abstract List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
+                                            ExpressionExecutor[] attributeExpressionExecutors,
+                                            ConfigReader configReader, SiddhiAppContext siddhiAppContext,
+                                            boolean outputExpectsExpiredEvents);
 
     public void process(ComplexEventChunk streamEventChunk) {
         streamEventChunk.reset();
@@ -132,8 +136,8 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
      * @param complexEventPopulater helps to populate the events with the resultant attributes
      */
     protected abstract void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                                              StreamEventCloner streamEventCloner, ComplexEventPopulater
-                                                      complexEventPopulater);
+                                              StreamEventCloner streamEventCloner,
+                                              ComplexEventPopulater complexEventPopulater);
 
     public Processor getNextProcessor() {
         return nextProcessor;
@@ -156,6 +160,7 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
             abstractStreamProcessor.attributeExpressionExecutors = innerExpressionExecutors;
             abstractStreamProcessor.attributeExpressionLength = attributeExpressionLength;
             abstractStreamProcessor.additionalAttributes = additionalAttributes;
+            abstractStreamProcessor.additionalAttributes = additionalAttributes;
             abstractStreamProcessor.complexEventPopulater = complexEventPopulater;
             abstractStreamProcessor.siddhiAppContext = siddhiAppContext;
             abstractStreamProcessor.elementId = elementId + "-" + key;
@@ -166,9 +171,8 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
                     abstractStreamProcessor);
             abstractStreamProcessor.siddhiAppContext.addEternalReferencedHolder(abstractStreamProcessor);
 
-            abstractStreamProcessor.init(inputDefinition, attributeExpressionExecutors, configReader,
-                    siddhiAppContext,
-                    outputExpectsExpiredEvents);
+            abstractStreamProcessor.init(metaStreamEvent, inputDefinition, attributeExpressionExecutors, configReader,
+                    siddhiAppContext, outputExpectsExpiredEvents);
             abstractStreamProcessor.start();
             return abstractStreamProcessor;
 
@@ -210,5 +214,12 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
         }
         siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
     }
+
+    /**
+     * Defines the behaviour of the processing, will be called after the init
+     *
+     * @return ProcessingMode processing mode of the processor
+     */
+    public abstract ProcessingMode getProcessingMode();
 
 }

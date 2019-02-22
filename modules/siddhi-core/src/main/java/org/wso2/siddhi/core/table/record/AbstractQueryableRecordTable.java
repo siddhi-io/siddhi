@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.SiddhiConstants;
@@ -178,7 +179,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (selector.getLimit() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getLimit(),
                     metaInfoHolderAfterSelect.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
+                    ProcessingMode.BATCH, false);
             limit = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
             if (limit < 0) {
                 throw new SiddhiAppCreationException("'limit' cannot have negative value, but found '" + limit + "'",
@@ -188,7 +190,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (selector.getOffset() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getOffset(),
                     metaInfoHolderAfterSelect.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
+                    ProcessingMode.BATCH, false);
             offset = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
             if (offset < 0) {
                 throw new SiddhiAppCreationException("'offset' cannot have negative value, but found '" + offset + "'",

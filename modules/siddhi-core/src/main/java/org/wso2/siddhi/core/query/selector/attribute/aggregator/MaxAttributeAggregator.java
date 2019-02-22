@@ -25,6 +25,7 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -66,29 +67,36 @@ public class MaxAttributeAggregator extends AttributeAggregator {
      * The initialization method for FunctionExecutor
      *
      * @param attributeExpressionExecutors are the executors of each attributes in the function
+     * @param processingMode               query processing mode
+     * @param outputExpectsExpiredEvents   is expired events sent as output
      * @param configReader                 this hold the {@link MaxAttributeAggregator} configuration reader.
      * @param siddhiAppContext             Siddhi app runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
+                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
                         SiddhiAppContext siddhiAppContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("Max aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
         }
+        boolean trackFutureStates = false;
+        if (processingMode == ProcessingMode.SLIDE || outputExpectsExpiredEvents) {
+            trackFutureStates = true;
+        }
         Attribute.Type type = attributeExpressionExecutors[0].getReturnType();
         switch (type) {
             case FLOAT:
-                maxOutputAttributeAggregator = new MaxAttributeAggregatorFloat();
+                maxOutputAttributeAggregator = new MaxAttributeAggregatorFloat(trackFutureStates);
                 break;
             case INT:
-                maxOutputAttributeAggregator = new MaxAttributeAggregatorInt();
+                maxOutputAttributeAggregator = new MaxAttributeAggregatorInt(trackFutureStates);
                 break;
             case LONG:
-                maxOutputAttributeAggregator = new MaxAttributeAggregatorLong();
+                maxOutputAttributeAggregator = new MaxAttributeAggregatorLong(trackFutureStates);
                 break;
             case DOUBLE:
-                maxOutputAttributeAggregator = new MaxAttributeAggregatorDouble();
+                maxOutputAttributeAggregator = new MaxAttributeAggregatorDouble(trackFutureStates);
                 break;
             default:
                 throw new OperationNotSupportedException("Max not supported for " + type);
@@ -154,8 +162,14 @@ public class MaxAttributeAggregator extends AttributeAggregator {
     class MaxAttributeAggregatorDouble extends MaxAttributeAggregator {
 
         private final Attribute.Type type = Attribute.Type.DOUBLE;
-        private Deque<Double> maxDeque = new LinkedList<Double>();
+        private Deque<Double> maxDeque = null;
         private volatile Double maxValue = null;
+
+        public MaxAttributeAggregatorDouble(boolean trackFutureStates) {
+            if (trackFutureStates) {
+                maxDeque = new LinkedList<>();
+            }
+        }
 
         public Attribute.Type getReturnType() {
             return type;
@@ -164,14 +178,16 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         @Override
         public synchronized Object processAdd(Object data) {
             Double value = (Double) data;
-            for (Iterator<Double> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
-                if (iterator.next() < value) {
-                    iterator.remove();
-                } else {
-                    break;
+            if (maxDeque != null) {
+                for (Iterator<Double> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
+                    if (iterator.next() < value) {
+                        iterator.remove();
+                    } else {
+                        break;
+                    }
                 }
+                maxDeque.addLast(value);
             }
-            maxDeque.addLast(value);
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
             }
@@ -180,21 +196,29 @@ public class MaxAttributeAggregator extends AttributeAggregator {
 
         @Override
         public synchronized Object processRemove(Object data) {
-            maxDeque.removeFirstOccurrence(data);
-            maxValue = maxDeque.peekFirst();
+            if (maxDeque != null) {
+                maxDeque.removeFirstOccurrence(data);
+                maxValue = maxDeque.peekFirst();
+            } else {
+                if (maxValue != null && maxValue.equals(data)) {
+                    maxValue = null;
+                }
+            }
             return maxValue;
         }
 
         @Override
         public synchronized Object reset() {
-            maxDeque.clear();
+            if (maxDeque != null) {
+                maxDeque.clear();
+            }
             maxValue = null;
             return null;
         }
 
         @Override
         public boolean canDestroy() {
-            return maxDeque.size() == 0 && maxValue == null;
+            return (maxDeque == null || maxDeque.size() == 0) && maxValue == null;
         }
 
         @Override
@@ -221,8 +245,14 @@ public class MaxAttributeAggregator extends AttributeAggregator {
     class MaxAttributeAggregatorFloat extends MaxAttributeAggregator {
 
         private final Attribute.Type type = Attribute.Type.FLOAT;
-        private Deque<Float> maxDeque = new LinkedList<Float>();
+        private Deque<Float> maxDeque = null;
         private volatile Float maxValue = null;
+
+        public MaxAttributeAggregatorFloat(boolean trackFutureStates) {
+            if (trackFutureStates) {
+                maxDeque = new LinkedList<>();
+            }
+        }
 
         public Attribute.Type getReturnType() {
             return type;
@@ -231,14 +261,16 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         @Override
         public synchronized Object processAdd(Object data) {
             Float value = (Float) data;
-            for (Iterator<Float> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
-                if (iterator.next() < value) {
-                    iterator.remove();
-                } else {
-                    break;
+            if (maxDeque != null) {
+                for (Iterator<Float> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
+                    if (iterator.next() < value) {
+                        iterator.remove();
+                    } else {
+                        break;
+                    }
                 }
+                maxDeque.addLast(value);
             }
-            maxDeque.addLast(value);
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
             }
@@ -247,21 +279,29 @@ public class MaxAttributeAggregator extends AttributeAggregator {
 
         @Override
         public synchronized Object processRemove(Object data) {
-            maxDeque.removeFirstOccurrence(data);
-            maxValue = maxDeque.peekFirst();
+            if (maxDeque != null) {
+                maxDeque.removeFirstOccurrence(data);
+                maxValue = maxDeque.peekFirst();
+            } else {
+                if (maxValue != null && maxValue.equals(data)) {
+                    maxValue = null;
+                }
+            }
             return maxValue;
         }
 
         @Override
         public synchronized Object reset() {
-            maxDeque.clear();
+            if (maxDeque != null) {
+                maxDeque.clear();
+            }
             maxValue = null;
             return null;
         }
 
         @Override
         public boolean canDestroy() {
-            return maxDeque.size() == 0 && maxValue == null;
+            return (maxDeque == null || maxDeque.size() == 0) && maxValue == null;
         }
 
         @Override
@@ -289,8 +329,14 @@ public class MaxAttributeAggregator extends AttributeAggregator {
     class MaxAttributeAggregatorInt extends MaxAttributeAggregator {
 
         private final Attribute.Type type = Attribute.Type.INT;
-        private Deque<Integer> maxDeque = new LinkedList<Integer>();
+        private Deque<Integer> maxDeque = null;
         private volatile Integer maxValue = null;
+
+        public MaxAttributeAggregatorInt(boolean trackFutureStates) {
+            if (trackFutureStates) {
+                maxDeque = new LinkedList<>();
+            }
+        }
 
         public Attribute.Type getReturnType() {
             return type;
@@ -299,14 +345,16 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         @Override
         public synchronized Object processAdd(Object data) {
             Integer value = (Integer) data;
-            for (Iterator<Integer> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
-                if (iterator.next() < value) {
-                    iterator.remove();
-                } else {
-                    break;
+            if (maxDeque != null) {
+                for (Iterator<Integer> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
+                    if (iterator.next() < value) {
+                        iterator.remove();
+                    } else {
+                        break;
+                    }
                 }
+                maxDeque.addLast(value);
             }
-            maxDeque.addLast(value);
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
             }
@@ -315,21 +363,29 @@ public class MaxAttributeAggregator extends AttributeAggregator {
 
         @Override
         public synchronized Object processRemove(Object data) {
-            maxDeque.removeFirstOccurrence(data);
-            maxValue = maxDeque.peekFirst();
+            if (maxDeque != null) {
+                maxDeque.removeFirstOccurrence(data);
+                maxValue = maxDeque.peekFirst();
+            } else {
+                if (maxValue != null && maxValue.equals(data)) {
+                    maxValue = null;
+                }
+            }
             return maxValue;
         }
 
         @Override
         public synchronized Object reset() {
-            maxDeque.clear();
+            if (maxDeque != null) {
+                maxDeque.clear();
+            }
             maxValue = null;
             return null;
         }
 
         @Override
         public boolean canDestroy() {
-            return maxDeque.size() == 0 && maxValue == null;
+            return (maxDeque == null || maxDeque.size() == 0) && maxValue == null;
         }
 
         @Override
@@ -357,8 +413,14 @@ public class MaxAttributeAggregator extends AttributeAggregator {
     class MaxAttributeAggregatorLong extends MaxAttributeAggregator {
 
         private final Attribute.Type type = Attribute.Type.LONG;
-        private Deque<Long> maxDeque = new LinkedList<Long>();
+        private Deque<Long> maxDeque = null;
         private volatile Long maxValue = null;
+
+        public MaxAttributeAggregatorLong(boolean trackFutureStates) {
+            if (trackFutureStates) {
+                maxDeque = new LinkedList<>();
+            }
+        }
 
         public Attribute.Type getReturnType() {
             return type;
@@ -367,14 +429,16 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         @Override
         public synchronized Object processAdd(Object data) {
             Long value = (Long) data;
-            for (Iterator<Long> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
-                if (iterator.next() < value) {
-                    iterator.remove();
-                } else {
-                    break;
+            if (maxDeque != null) {
+                for (Iterator<Long> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
+                    if (iterator.next() < value) {
+                        iterator.remove();
+                    } else {
+                        break;
+                    }
                 }
+                maxDeque.addLast(value);
             }
-            maxDeque.addLast(value);
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
             }
@@ -383,21 +447,29 @@ public class MaxAttributeAggregator extends AttributeAggregator {
 
         @Override
         public synchronized Object processRemove(Object data) {
-            maxDeque.removeFirstOccurrence(data);
-            maxValue = maxDeque.peekFirst();
+            if (maxDeque != null) {
+                maxDeque.removeFirstOccurrence(data);
+                maxValue = maxDeque.peekFirst();
+            } else {
+                if (maxValue != null && maxValue.equals(data)) {
+                    maxValue = null;
+                }
+            }
             return maxValue;
         }
 
         @Override
         public synchronized Object reset() {
-            maxDeque.clear();
+            if (maxDeque != null) {
+                maxDeque.clear();
+            }
             maxValue = null;
             return null;
         }
 
         @Override
         public boolean canDestroy() {
-            return maxDeque.size() == 0 && maxValue == null;
+            return (maxDeque == null || maxDeque.size() == 0) && maxValue == null;
         }
 
         @Override

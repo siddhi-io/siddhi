@@ -54,7 +54,6 @@ import org.wso2.siddhi.query.api.util.AnnotationHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -114,7 +113,8 @@ public class QueryParser {
                     outputExpectsExpiredEvents, queryName);
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
                     siddhiAppContext, streamRuntime.getMetaComplexEvent(), tableMap, executors, queryName,
-                    SiddhiConstants.UNKNOWN_STATE);
+                    SiddhiConstants.UNKNOWN_STATE, streamRuntime.getProcessingMode(),
+                    outputExpectsExpiredEvents);
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
             if (!isWindow && query.getInputStream() instanceof SingleInputStream) {
                 for (StreamHandler streamHandler : ((SingleInputStream) query.getInputStream()).getStreamHandlers()) {

@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.executor.condition.ConditionExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.query.selector.OrderByEventComparator;
 import org.wso2.siddhi.core.query.selector.QuerySelector;
@@ -43,7 +44,6 @@ import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.Variable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -65,12 +65,15 @@ public class SelectorParser {
      * @param variableExpressionExecutors variable expression executors
      * @param queryName                   query name of selector belongs to.
      * @param metaPosition                helps to identify the meta position of aggregates
+     * @param processingMode              processing mode of the query
+     * @param outputExpectsExpiredEvents  is expired events sent as output
      * @return QuerySelector
      */
     public static QuerySelector parse(Selector selector, OutputStream outputStream, SiddhiAppContext siddhiAppContext,
                                       MetaComplexEvent metaComplexEvent, Map<String, Table> tableMap,
                                       List<VariableExpressionExecutor> variableExpressionExecutors, String queryName,
-                                      int metaPosition) {
+                                      int metaPosition, ProcessingMode processingMode,
+                                      boolean outputExpectsExpiredEvents) {
         boolean currentOn = false;
         boolean expiredOn = false;
         String id = null;
@@ -88,9 +91,10 @@ public class SelectorParser {
         containsAggregatorThreadLocal.remove();
         QuerySelector querySelector = new QuerySelector(id, selector, currentOn, expiredOn, siddhiAppContext);
         List<AttributeProcessor> attributeProcessors = getAttributeProcessors(selector, id, siddhiAppContext,
-                metaComplexEvent, tableMap, variableExpressionExecutors, outputStream, queryName, metaPosition);
-        querySelector.setAttributeProcessorList(attributeProcessors, "true".equals(containsAggregatorThreadLocal.
-                get()));
+                metaComplexEvent, tableMap, variableExpressionExecutors, outputStream, queryName, metaPosition,
+                processingMode, outputExpectsExpiredEvents);
+        querySelector.setAttributeProcessorList(attributeProcessors,
+                "true".equals(containsAggregatorThreadLocal.get()));
         containsAggregatorThreadLocal.remove();
         ConditionExpressionExecutor havingCondition = generateHavingExecutor(selector.getHavingExpression(),
                 metaComplexEvent, siddhiAppContext, tableMap, variableExpressionExecutors, queryName);
@@ -105,14 +109,15 @@ public class SelectorParser {
                     queryName));
         }
         if (!selector.getOrderByList().isEmpty()) {
-            querySelector.setOrderByEventComparator(new OrderByEventComparator(selector.getOrderByList(), metaComplexEvent,
-                    SiddhiConstants.HAVING_STATE, null, variableExpressionExecutors, siddhiAppContext,
-                    queryName));
+            querySelector.setOrderByEventComparator(new OrderByEventComparator(selector.getOrderByList(),
+                    metaComplexEvent, SiddhiConstants.HAVING_STATE, null, variableExpressionExecutors,
+                    siddhiAppContext, queryName));
         }
         if (selector.getLimit() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getLimit(),
                     metaComplexEvent, SiddhiConstants.HAVING_STATE, tableMap, variableExpressionExecutors,
-                    siddhiAppContext, false, 0, queryName);
+                    siddhiAppContext, false, 0, queryName,
+                    ProcessingMode.BATCH, false);
             containsAggregatorThreadLocal.remove();
             querySelector.setLimit(((Number)
                     (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue());
@@ -120,7 +125,8 @@ public class SelectorParser {
         if (selector.getOffset() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getOffset(),
                     metaComplexEvent, SiddhiConstants.HAVING_STATE, tableMap, variableExpressionExecutors,
-                    siddhiAppContext, false, 0, queryName);
+                    siddhiAppContext, false, 0, queryName,
+                    ProcessingMode.BATCH, false);
             containsAggregatorThreadLocal.remove();
             querySelector.setOffset(((Number)
                     (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue());
@@ -137,7 +143,9 @@ public class SelectorParser {
      * @param metaComplexEvent            meta ComplexEvent
      * @param tableMap                    Table Map
      * @param variableExpressionExecutors list of VariableExpressionExecutors
-     * @param outputStream
+     * @param outputStream                output stream
+     * @param processingMode              processing mode of the query
+     * @param outputExpectsExpiredEvents  is expired events sent as output
      * @return list of AttributeProcessors
      */
     private static List<AttributeProcessor> getAttributeProcessors(Selector selector, String id,
@@ -147,7 +155,9 @@ public class SelectorParser {
                                                                    List<VariableExpressionExecutor>
                                                                            variableExpressionExecutors,
                                                                    OutputStream outputStream,
-                                                                   String queryName, int metaPosition) {
+                                                                   String queryName, int metaPosition,
+                                                                   ProcessingMode processingMode,
+                                                                   boolean outputExpectsExpiredEvents) {
 
         List<AttributeProcessor> attributeProcessorList = new ArrayList<>();
         StreamDefinition outputDefinition = StreamDefinition.id(id);
@@ -194,7 +204,8 @@ public class SelectorParser {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(outputAttribute.getExpression(),
                     metaComplexEvent, SiddhiConstants.UNKNOWN_STATE, tableMap, variableExpressionExecutors,
                     siddhiAppContext,
-                    !(selector.getGroupByList().isEmpty()), 0, queryName);
+                    !(selector.getGroupByList().isEmpty()), 0, queryName, processingMode,
+                    outputExpectsExpiredEvents);
             if (expressionExecutor instanceof VariableExpressionExecutor) {   //for variables we will directly put
                 // value at conversion stage
                 VariableExpressionExecutor executor = ((VariableExpressionExecutor) expressionExecutor);
@@ -229,14 +240,14 @@ public class SelectorParser {
                                                                       SiddhiAppContext siddhiAppContext,
                                                                       Map<String, Table> tableMap,
                                                                       List<VariableExpressionExecutor>
-                                                                              variableExpressionExecutors, String
-                                                                              queryName) {
+                                                                              variableExpressionExecutors,
+                                                                      String queryName) {
         ConditionExpressionExecutor havingConditionExecutor = null;
         if (expression != null) {
             havingConditionExecutor = (ConditionExpressionExecutor) ExpressionParser.parseExpression(expression,
                     metaComplexEvent, SiddhiConstants.HAVING_STATE, tableMap, variableExpressionExecutors,
-                    siddhiAppContext, false, 0, queryName);
-
+                    siddhiAppContext, false, 0, queryName, ProcessingMode.BATCH,
+                    false);
         }
         return havingConditionExecutor;
     }

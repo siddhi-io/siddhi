@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 
@@ -38,11 +39,14 @@ public abstract class FunctionExecutor implements ExpressionExecutor, Snapshotab
     protected String elementId;
     protected String functionId;
     protected String queryName;
+    protected ProcessingMode processingMode;
     private ConfigReader configReader;
     private int attributeSize;
 
-    public void initExecutor(ExpressionExecutor[] attributeExpressionExecutors, SiddhiAppContext
-            siddhiAppContext, String queryName, ConfigReader configReader) {
+    public void initExecutor(ExpressionExecutor[] attributeExpressionExecutors,
+                             SiddhiAppContext siddhiAppContext, String queryName,
+                             ProcessingMode processingMode, ConfigReader configReader) {
+        this.processingMode = processingMode;
         this.configReader = configReader;
         try {
             this.siddhiAppContext = siddhiAppContext;
@@ -69,7 +73,8 @@ public abstract class FunctionExecutor implements ExpressionExecutor, Snapshotab
             }
             functionExecutor.elementId = elementId + "-" + key;
             functionExecutor.functionId = functionId;
-            functionExecutor.initExecutor(innerExpressionExecutors, siddhiAppContext, queryName, configReader);
+            functionExecutor.initExecutor(innerExpressionExecutors, siddhiAppContext, queryName, processingMode,
+                    configReader);
             return functionExecutor;
         } catch (Exception e) {
             throw new SiddhiAppRuntimeException("Exception in cloning " + this.getClass().getCanonicalName(), e);

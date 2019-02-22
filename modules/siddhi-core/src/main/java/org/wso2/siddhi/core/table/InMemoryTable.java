@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.table.holder.EventHolder;
 import org.wso2.siddhi.core.table.record.RecordTableHandler;
 import org.wso2.siddhi.core.util.collection.AddingStreamEventExtractor;
@@ -192,7 +193,8 @@ public class InMemoryTable extends Table implements Snapshotable {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(
                     setAttribute.getAssignmentExpression(),
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                    tableMap, variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                    tableMap, variableExpressionExecutors, siddhiAppContext, false, 0,
+                    queryName, ProcessingMode.BATCH, false);
             int attributePosition = tableDefinition.
                     getAttributePosition(setAttribute.getTableVariable().getAttributeName());
             expressionExecutorMap.put(attributePosition, expressionExecutor);

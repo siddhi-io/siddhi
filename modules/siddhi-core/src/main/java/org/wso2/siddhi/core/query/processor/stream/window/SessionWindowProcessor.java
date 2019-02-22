@@ -23,8 +23,8 @@ import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
+import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.SessionComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
@@ -65,9 +65,9 @@ import static java.util.stream.Collectors.toMap;
                 "session gap period is specified to determine the time period after which the session is considered " +
                 "to be expired. A new event that arrives with a specific value for the session key is matched with" +
                 " the session window with the same session key.\n " +
-                " When performing aggregations for a specific session, you can include events with the matching " +
-                "session key that arrive after the session is expired if required. This is done by specifying a " +
-                "latency time period that is less than the session gap period.\n" +
+                "There can be out of order and late arrival of events, these events can arrive after the session is " +
+                "expired, to include those events to the matching session key specify a " +
+                "latency time period that is less than the session gap period." +
                 "To have aggregate functions with session windows, the events need to be grouped by the " +
                 "session key via a 'group by' clause.",
         parameters = {
@@ -102,10 +102,10 @@ import static java.util.stream.Collectors.toMap;
                 )
         }
 )
-public class SessionWindowProcessor extends WindowProcessor implements SchedulingProcessor, FindableProcessor {
+public class SessionWindowProcessor extends GroupingWindowProcessor implements SchedulingProcessor, FindableProcessor {
 
     private static final Logger log = Logger.getLogger(SessionWindowProcessor.class);
-
+    private static final String DEFAULT_KEY = "default-key";
     private long sessionGap = 0;
     private long allowedLatency = 0;
     private VariableExpressionExecutor sessionKeyExecutor;
@@ -114,8 +114,6 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
     private Map<String, Long> sessionKeyEndTimeMap;
     private SessionContainer sessionContainer;
     private SessionComplexEventChunk<StreamEvent> expiredEventChunk;
-
-    private static final String DEFAULT_KEY = "default-key";
 
     @Override
     public Scheduler getScheduler() {
@@ -222,8 +220,9 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
     }
 
     @Override
-    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk,
-                           Processor nextProcessor, StreamEventCloner streamEventCloner) {
+    protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
+                                     StreamEventCloner streamEventCloner,
+                                     GroupingKeyPopulator groupingKeyPopulater) {
         String key = DEFAULT_KEY;
         SessionComplexEventChunk<StreamEvent> currentSession;
 
@@ -239,6 +238,10 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
                     if (sessionKeyExecutor != null) {
                         key = (String) sessionKeyExecutor.execute(streamEvent);
                     }
+
+                    //Update event with the grouping key
+                    groupingKeyPopulater.populateComplexEvent(streamEvent, key);
+
 
                     //get the session configuration based on session key
                     //if the map doesn't contain key, then a new sessionContainer
@@ -279,7 +282,7 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
 
                         } else {
                             //when a late event arrives
-                           addLateEvent(streamEventChunk, eventTimestamp, clonedStreamEvent);
+                            addLateEvent(streamEventChunk, eventTimestamp, clonedStreamEvent);
                         }
                     }
                 } else {
@@ -291,12 +294,13 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
             }
         }
 
-        nextProcessor.process(streamEventChunk);
-
         if (expiredEventChunk != null && expiredEventChunk.getFirst() != null) {
-            nextProcessor.process(expiredEventChunk);
+            streamEventChunk.add((StreamEvent) expiredEventChunk.getFirst());
             expiredEventChunk.clear();
         }
+
+        nextProcessor.process(streamEventChunk);
+
     }
 
     /**
@@ -491,12 +495,13 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
 
     /**
      * Gets all end timestamps of current sessions.
+     *
      * @param sessionMap holds all the sessions with the session key
      * @return map with the values of each current session's end timestamp and with the key as the session key
      */
     private Map<String, Long> findAllCurrentEndTimestamps(Map<String, SessionContainer> sessionMap) {
 
-        Collection<SessionContainer> sessionContainerList =  sessionMap.values();
+        Collection<SessionContainer> sessionContainerList = sessionMap.values();
 
         if (!sessionKeyEndTimeMap.isEmpty()) {
             sessionKeyEndTimeMap.clear();
@@ -514,11 +519,12 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
 
     /**
      * Gets all the end timestamps of previous sessions.
+     *
      * @return map with the values of each previous session's end timestamp and with the key as the sesssio key
      */
     private Map<String, Long> findAllPreviousEndTimestamps(Map<String, SessionContainer> sessionMap) {
 
-        Collection<SessionContainer> sessionContainerList =  sessionMap.values();
+        Collection<SessionContainer> sessionContainerList = sessionMap.values();
 
         if (!sessionKeyEndTimeMap.isEmpty()) {
             sessionKeyEndTimeMap.clear();
@@ -573,5 +579,65 @@ public class SessionWindowProcessor extends WindowProcessor implements Schedulin
         return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
                 siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
 
+    }
+
+    /**
+     * Collection used to manage session windows.
+     *
+     * @param <E> sub types of ComplexEvent such as StreamEvent and StateEvent.
+     */
+    public static class SessionComplexEventChunk<E extends ComplexEvent> extends ComplexEventChunk {
+
+        private String key;
+        private long startTimestamp;
+        private long endTimestamp;
+        private long aliveTimestamp;
+
+        public SessionComplexEventChunk(String key) {
+            super(false);
+            this.key = key;
+        }
+
+        public SessionComplexEventChunk() {
+            super(false);
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
+        }
+
+        public long getStartTimestamp() {
+            return startTimestamp;
+        }
+
+        public void setStartTimestamp(long startTimestamp) {
+            this.startTimestamp = startTimestamp;
+        }
+
+        public long getEndTimestamp() {
+            return endTimestamp;
+        }
+
+        public void setEndTimestamp(long endTimestamp) {
+            this.endTimestamp = endTimestamp;
+        }
+
+        public long getAliveTimestamp() {
+            return aliveTimestamp;
+        }
+
+        public void setAliveTimestamp(long aliveTimestamp) {
+            this.aliveTimestamp = aliveTimestamp;
+        }
+
+        public void setTimestamps(long startTimestamp, long endTimestamp, long aliveTimestamp) {
+            this.startTimestamp = startTimestamp;
+            this.endTimestamp = endTimestamp;
+            this.aliveTimestamp = aliveTimestamp;
+        }
     }
 }

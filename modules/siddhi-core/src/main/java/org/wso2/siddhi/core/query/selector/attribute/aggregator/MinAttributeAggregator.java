@@ -25,6 +25,7 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -69,29 +70,36 @@ public class MinAttributeAggregator extends AttributeAggregator {
      * The initialization method for FunctionExecutor
      *
      * @param attributeExpressionExecutors are the executors of each attributes in the function
+     * @param processingMode               query processing mode
+     * @param outputExpectsExpiredEvents   is expired events sent as output
      * @param configReader                 this hold the {@link MinAttributeAggregator} configuration reader.
      * @param siddhiAppContext             Siddhi app runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
+                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
                         SiddhiAppContext siddhiAppContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("Min aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
         }
+        boolean trackFutureStates = false;
+        if (processingMode == ProcessingMode.SLIDE || outputExpectsExpiredEvents) {
+            trackFutureStates = true;
+        }
         Attribute.Type type = attributeExpressionExecutors[0].getReturnType();
         switch (type) {
             case FLOAT:
-                minOutputAttributeAggregator = new MinAttributeAggregatorFloat();
+                minOutputAttributeAggregator = new MinAttributeAggregatorFloat(trackFutureStates);
                 break;
             case INT:
-                minOutputAttributeAggregator = new MinAttributeAggregatorInt();
+                minOutputAttributeAggregator = new MinAttributeAggregatorInt(trackFutureStates);
                 break;
             case LONG:
-                minOutputAttributeAggregator = new MinAttributeAggregatorLong();
+                minOutputAttributeAggregator = new MinAttributeAggregatorLong(trackFutureStates);
                 break;
             case DOUBLE:
-                minOutputAttributeAggregator = new MinAttributeAggregatorDouble();
+                minOutputAttributeAggregator = new MinAttributeAggregatorDouble(trackFutureStates);
                 break;
             default:
                 throw new OperationNotSupportedException("Min not supported for " + type);
@@ -157,8 +165,14 @@ public class MinAttributeAggregator extends AttributeAggregator {
     class MinAttributeAggregatorDouble extends MinAttributeAggregator {
 
         private final Attribute.Type type = Attribute.Type.DOUBLE;
-        private Deque<Double> minDeque = new LinkedList<Double>();
+        private Deque<Double> minDeque = null;
         private volatile Double minValue = null;
+
+        public MinAttributeAggregatorDouble(boolean trackFutureStates) {
+            if (trackFutureStates) {
+                minDeque = new LinkedList<>();
+            }
+        }
 
         public Attribute.Type getReturnType() {
             return type;
@@ -167,14 +181,16 @@ public class MinAttributeAggregator extends AttributeAggregator {
         @Override
         public synchronized Object processAdd(Object data) {
             Double value = (Double) data;
-            for (Iterator<Double> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
-                if (iterator.next() > value) {
-                    iterator.remove();
-                } else {
-                    break;
+            if (minDeque != null) {
+                for (Iterator<Double> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
+                    if (iterator.next() > value) {
+                        iterator.remove();
+                    } else {
+                        break;
+                    }
                 }
+                minDeque.addLast(value);
             }
-            minDeque.addLast(value);
             if (minValue == null || minValue > value) {
                 minValue = value;
             }
@@ -183,21 +199,29 @@ public class MinAttributeAggregator extends AttributeAggregator {
 
         @Override
         public synchronized Object processRemove(Object data) {
-            minDeque.removeFirstOccurrence(data);
-            minValue = minDeque.peekFirst();
+            if (minDeque != null) {
+                minDeque.removeFirstOccurrence(data);
+                minValue = minDeque.peekFirst();
+            } else {
+                if (minValue != null && minValue.equals(data)) {
+                    minValue = null;
+                }
+            }
             return minValue;
         }
 
         @Override
         public synchronized Object reset() {
-            minDeque.clear();
+            if (minDeque != null) {
+                minDeque.clear();
+            }
             minValue = null;
             return null;
         }
 
         @Override
         public boolean canDestroy() {
-            return minDeque.size() == 0 && minValue == null;
+            return (minDeque == null || minDeque.size() == 0) && minValue == null;
         }
 
         @Override
@@ -225,8 +249,14 @@ public class MinAttributeAggregator extends AttributeAggregator {
     class MinAttributeAggregatorFloat extends MinAttributeAggregator {
 
         private final Attribute.Type type = Attribute.Type.FLOAT;
-        private Deque<Float> minDeque = new LinkedList<Float>();
+        private Deque<Float> minDeque = null;
         private volatile Float minValue = null;
+
+        public MinAttributeAggregatorFloat(boolean trackFutureStates) {
+            if (trackFutureStates) {
+                minDeque = new LinkedList<>();
+            }
+        }
 
         public Attribute.Type getReturnType() {
             return type;
@@ -235,14 +265,16 @@ public class MinAttributeAggregator extends AttributeAggregator {
         @Override
         public synchronized Object processAdd(Object data) {
             Float value = (Float) data;
-            for (Iterator<Float> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
-                if (iterator.next() > value) {
-                    iterator.remove();
-                } else {
-                    break;
+            if (minDeque != null) {
+                for (Iterator<Float> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
+                    if (iterator.next() > value) {
+                        iterator.remove();
+                    } else {
+                        break;
+                    }
                 }
+                minDeque.addLast(value);
             }
-            minDeque.addLast(value);
             if (minValue == null || minValue > value) {
                 minValue = value;
             }
@@ -251,21 +283,29 @@ public class MinAttributeAggregator extends AttributeAggregator {
 
         @Override
         public synchronized Object processRemove(Object data) {
-            minDeque.removeFirstOccurrence(data);
-            minValue = minDeque.peekFirst();
+            if (minDeque != null) {
+                minDeque.removeFirstOccurrence(data);
+                minValue = minDeque.peekFirst();
+            } else {
+                if (minValue != null && minValue.equals(data)) {
+                    minValue = null;
+                }
+            }
             return minValue;
         }
 
         @Override
         public synchronized Object reset() {
-            minDeque.clear();
+            if (minDeque != null) {
+                minDeque.clear();
+            }
             minValue = null;
             return null;
         }
 
         @Override
         public boolean canDestroy() {
-            return minDeque.size() == 0 && minValue == null;
+            return (minDeque == null || minDeque.size() == 0) && minValue == null;
         }
 
         @Override
@@ -292,8 +332,14 @@ public class MinAttributeAggregator extends AttributeAggregator {
     class MinAttributeAggregatorInt extends MinAttributeAggregator {
 
         private final Attribute.Type type = Attribute.Type.INT;
-        private Deque<Integer> minDeque = new LinkedList<Integer>();
+        private Deque<Integer> minDeque = null;
         private volatile Integer minValue = null;
+
+        public MinAttributeAggregatorInt(boolean trackFutureStates) {
+            if (trackFutureStates) {
+                minDeque = new LinkedList<>();
+            }
+        }
 
         public Attribute.Type getReturnType() {
             return type;
@@ -302,15 +348,17 @@ public class MinAttributeAggregator extends AttributeAggregator {
         @Override
         public synchronized Object processAdd(Object data) {
             Integer value = (Integer) data;
-            for (Iterator<Integer> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
+            if (minDeque != null) {
+                for (Iterator<Integer> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
 
-                if (iterator.next() > value) {
-                    iterator.remove();
-                } else {
-                    break;
+                    if (iterator.next() > value) {
+                        iterator.remove();
+                    } else {
+                        break;
+                    }
                 }
+                minDeque.addLast(value);
             }
-            minDeque.addLast(value);
             if (minValue == null || minValue > value) {
                 minValue = value;
             }
@@ -319,20 +367,28 @@ public class MinAttributeAggregator extends AttributeAggregator {
 
         @Override
         public synchronized Object reset() {
-            minDeque.clear();
+            if (minDeque != null) {
+                minDeque.clear();
+            }
             minValue = null;
             return null;
         }
 
         @Override
         public boolean canDestroy() {
-            return minDeque.size() == 0 && minValue == null;
+            return (minDeque == null || minDeque.size() == 0) && minValue == null;
         }
 
         @Override
         public synchronized Object processRemove(Object data) {
-            minDeque.removeFirstOccurrence(data);
-            minValue = minDeque.peekFirst();
+            if (minDeque != null) {
+                minDeque.removeFirstOccurrence(data);
+                minValue = minDeque.peekFirst();
+            } else {
+                if (minValue != null && minValue.equals(data)) {
+                    minValue = null;
+                }
+            }
             return minValue;
         }
 
@@ -360,8 +416,14 @@ public class MinAttributeAggregator extends AttributeAggregator {
     class MinAttributeAggregatorLong extends MinAttributeAggregator {
 
         private final Attribute.Type type = Attribute.Type.LONG;
-        private Deque<Long> minDeque = new LinkedList<Long>();
+        private Deque<Long> minDeque = null;
         private volatile Long minValue = null;
+
+        public MinAttributeAggregatorLong(boolean trackFutureStates) {
+            if (trackFutureStates) {
+                minDeque = new LinkedList<>();
+            }
+        }
 
         public Attribute.Type getReturnType() {
             return type;
@@ -370,14 +432,16 @@ public class MinAttributeAggregator extends AttributeAggregator {
         @Override
         public synchronized Object processAdd(Object data) {
             Long value = (Long) data;
-            for (Iterator<Long> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
-                if (iterator.next() > value) {
-                    iterator.remove();
-                } else {
-                    break;
+            if (minDeque != null) {
+                for (Iterator<Long> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
+                    if (iterator.next() > value) {
+                        iterator.remove();
+                    } else {
+                        break;
+                    }
                 }
+                minDeque.addLast(value);
             }
-            minDeque.addLast(value);
             if (minValue == null || minValue > value) {
                 minValue = value;
             }
@@ -386,20 +450,28 @@ public class MinAttributeAggregator extends AttributeAggregator {
 
         @Override
         public synchronized Object reset() {
-            minDeque.clear();
+            if (minDeque != null) {
+                minDeque.clear();
+            }
             minValue = null;
             return null;
         }
 
         @Override
         public boolean canDestroy() {
-            return minDeque.size() == 0 && minValue == null;
+            return (minDeque == null || minDeque.size() == 0) && minValue == null;
         }
 
         @Override
         public synchronized Object processRemove(Object data) {
-            minDeque.removeFirstOccurrence(data);
-            minValue = minDeque.peekFirst();
+            if (minDeque != null) {
+                minDeque.removeFirstOccurrence(data);
+                minValue = minDeque.peekFirst();
+            } else {
+                if (minValue != null && minValue.equals(data)) {
+                    minValue = null;
+                }
+            }
             return minValue;
         }
 

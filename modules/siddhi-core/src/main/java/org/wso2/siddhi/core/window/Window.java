@@ -28,6 +28,7 @@ import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import org.wso2.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.SchedulingProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
@@ -139,8 +140,7 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
      * @param eventWindowMap map of EventWindows
      * @param queryName      name of the query window belongs to.
      */
-    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap,
-                     String queryName) {
+    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, String queryName) {
         if (this.windowProcessor != null) {
             return;
         }
@@ -160,8 +160,9 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         boolean outputExpectsExpiredEvents = outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS;
 
         WindowProcessor internalWindowProcessor = (WindowProcessor) SingleInputStreamParser.generateProcessor
-                (windowDefinition.getWindow(), metaStreamEvent, new ArrayList<VariableExpressionExecutor>(), this
-                        .siddhiAppContext, tableMap, false, outputExpectsExpiredEvents, queryName);
+                (windowDefinition.getWindow(), metaStreamEvent, new ArrayList<VariableExpressionExecutor>(),
+                        this.siddhiAppContext, tableMap, false, outputExpectsExpiredEvents,
+                        queryName);
         internalWindowProcessor.setStreamEventCloner(streamEventCloner);
         internalWindowProcessor.constructStreamEventPopulater(metaStreamEvent, 0);
 
@@ -399,5 +400,9 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         public void clean() {
             //ignore
         }
+    }
+
+    public ProcessingMode getProcessingMode() {
+        return internalWindowProcessor.getProcessingMode();
     }
 }

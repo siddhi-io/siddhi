@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
@@ -266,7 +267,7 @@ public class AggregationRuntime implements MemoryCalculable {
             perExpressionExecutor = ExpressionParser.parseExpression(per,
                     matchingMetaInfoHolder.getMetaStateEvent(),
                     matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, siddhiAppContext,
-                    false, 0, queryName);
+                    false, 0, queryName, ProcessingMode.BATCH, false);
             if (perExpressionExecutor.getReturnType() != Attribute.Type.STRING) {
                 throw new SiddhiAppCreationException(
                         "Query " + queryName + "'s per value expected a string but found "
@@ -319,7 +320,8 @@ public class AggregationRuntime implements MemoryCalculable {
             }
             startTimeEndTimeExpressionExecutor = ExpressionParser.parseExpression(startEndTimeExpression,
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName);
+                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
+                    ProcessingMode.BATCH, false);
         } else {
             throw new SiddhiAppCreationException("Syntax Error : Aggregation read query must contain a `within` " +
                     "definition for filtering of aggregation data.");
@@ -347,7 +349,8 @@ public class AggregationRuntime implements MemoryCalculable {
         // "on stream1.name == aggregator.nickName ..." in the join query) must be executed on that data.
         // This condition is used for that purpose.
         onCompiledCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true), expression,
-                matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
+                matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName
+        );
 
         return new IncrementalAggregateCompileCondition(withinTableCompiledConditions, withinInMemoryCompileCondition,
                 onCompiledCondition, tableMetaStreamEvent, aggregateMetaSteamEvent, additionalAttributes,

@@ -57,7 +57,7 @@ public class InputStreamParser {
      * @param aggregationMap             aggregator map
      * @param executors                  List to hold VariableExpressionExecutors to update after query parsing
      * @param latencyTracker             latency tracker
-     * @param outputExpectsExpiredEvents is output expects ExpiredEvents
+     * @param outputExpectsExpiredEvents is expired events sent as output
      * @param queryName                  query name of input stream belongs to.
      * @return StreamRuntime
      */
