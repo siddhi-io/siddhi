@@ -18,10 +18,10 @@
 
 package org.wso2.siddhi.core.util;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.query.api.SiddhiElement;
-import org.wso2.siddhi.query.api.exception.SiddhiAppContextException;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.query.api.SiddhiElement;
+import io.siddhi.query.api.exception.SiddhiAppContextException;
 
 /**
  * Util class to handling Siddhi exceptions
@@ -72,7 +72,7 @@ public class ExceptionUtil {
 
     public static String getMessageWithContext(Throwable throwable, SiddhiAppContext siddhiAppContext) {
 
-        return org.wso2.siddhi.query.api.util.ExceptionUtil.getMessageWithContext(throwable, siddhiAppContext.getName(),
+        return io.siddhi.query.api.util.ExceptionUtil.getMessageWithContext(throwable, siddhiAppContext.getName(),
                 siddhiAppContext.getSiddhiAppString());
     }
 

@@ -18,9 +18,9 @@
 
 package org.wso2.siddhi.core.executor.condition;
 
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 
 /**

@@ -18,8 +18,9 @@
 
 package org.wso2.siddhi.core.stream.input.source;
 
+import io.siddhi.core.event.ComplexEventChunk;
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.config.ConfigReader;
@@ -27,12 +28,12 @@ import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import io.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.List;
 
 /**
- * Convert custom input from {@link Source} to {@link org.wso2.siddhi.core.event.ComplexEventChunk}.
+ * Convert custom input from {@link Source} to {@link ComplexEventChunk}.
  */
 public abstract class SourceMapper implements SourceEventListener {
 

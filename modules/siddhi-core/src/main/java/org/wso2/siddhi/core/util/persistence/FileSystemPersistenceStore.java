@@ -20,7 +20,7 @@ package org.wso2.siddhi.core.util.persistence;
 
 import com.google.common.io.Files;
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.exception.CannotClearSiddhiAppStateException;
+import io.siddhi.core.exception.CannotClearSiddhiAppStateException;
 import org.wso2.siddhi.core.util.persistence.util.PersistenceConstants;
 
 import java.io.File;

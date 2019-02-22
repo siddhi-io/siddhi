@@ -18,9 +18,10 @@
 
 package org.wso2.siddhi.core.query.input.stream.state;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.MetaComplexEvent;
-import org.wso2.siddhi.core.event.state.MetaStateEvent;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.MetaComplexEvent;
+import io.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
@@ -33,7 +34,7 @@ import org.wso2.siddhi.core.query.processor.Processor;
 import java.util.List;
 
 /**
- * Stream Runtime implementation to represent {@link org.wso2.siddhi.core.event.state.StateEvent}.
+ * Stream Runtime implementation to represent {@link StateEvent}.
  */
 public class StateStreamRuntime implements StreamRuntime {
 

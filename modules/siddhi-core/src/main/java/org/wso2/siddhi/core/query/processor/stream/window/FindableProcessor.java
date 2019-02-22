@@ -18,14 +18,14 @@
 
 package org.wso2.siddhi.core.query.processor.stream.window;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
-import org.wso2.siddhi.query.api.expression.Expression;
+import io.siddhi.query.api.expression.Expression;
 
 import java.util.List;
 import java.util.Map;

@@ -18,13 +18,13 @@
 
 package org.wso2.siddhi.core.util.parser;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.util.collection.operator.SnapshotableEventQueueOperator;
-import org.wso2.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
-import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
+import io.siddhi.core.event.stream.MetaStreamEvent;
+import io.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.Table;
@@ -41,9 +41,9 @@ import org.wso2.siddhi.core.util.collection.operator.MapOperator;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import org.wso2.siddhi.core.util.collection.operator.Operator;
 import org.wso2.siddhi.core.util.collection.operator.OverwriteTableIndexOperator;
-import org.wso2.siddhi.query.api.expression.Expression;
-import org.wso2.siddhi.query.api.expression.Variable;
-import org.wso2.siddhi.query.api.expression.condition.Compare;
+import io.siddhi.query.api.expression.Expression;
+import io.siddhi.query.api.expression.Variable;
+import io.siddhi.query.api.expression.condition.Compare;
 
 import java.util.Arrays;
 import java.util.Collection;

@@ -16,7 +16,7 @@
 
 package org.wso2.siddhi.core.stream.input.source;
 
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 
 /**
  * Interface between InputEventHandler and InputHandler.

@@ -18,13 +18,13 @@
 
 package org.wso2.siddhi.core.trigger;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
-import org.wso2.siddhi.query.api.definition.TriggerDefinition;
+import io.siddhi.query.api.definition.TriggerDefinition;
 
 /**
  * Implementation of {@link Trigger} which will trigger events when siddhi app in started.

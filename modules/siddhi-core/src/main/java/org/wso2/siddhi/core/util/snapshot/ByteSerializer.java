@@ -19,7 +19,7 @@
 package org.wso2.siddhi.core.util.snapshot;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.util.ExceptionUtil;
 
 import java.io.ByteArrayInputStream;

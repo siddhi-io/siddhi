@@ -18,9 +18,9 @@
 
 package org.wso2.siddhi.core.stream.output.sink;
 
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import io.siddhi.query.api.definition.StreamDefinition;
 
 /**
  * SinkHandler is an optional interface before {@link SinkMapper}.

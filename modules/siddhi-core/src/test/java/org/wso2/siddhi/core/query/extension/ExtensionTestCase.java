@@ -23,7 +23,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.extension.util.CustomFunctionExtension;
 import org.wso2.siddhi.core.query.extension.util.StringConcatAggregatorString;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;

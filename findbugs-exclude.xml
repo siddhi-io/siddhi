@@ -117,7 +117,7 @@
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.event.stream.StreamEvent"/>
+        <class name="StreamEvent"/>
         <Bug pattern="UC_USELESS_OBJECT"/>
     </Match>
     <Match>
@@ -153,11 +153,11 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.exception.SiddhiAppCreationException"/>
+        <Class name="SiddhiAppCreationException"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.exception.StoreQueryCreationException"/>
+        <Class name="StoreQueryCreationException"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>

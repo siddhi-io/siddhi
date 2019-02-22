@@ -19,11 +19,11 @@
 package org.wso2.siddhi.core.executor.function;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.function.Script;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Map;
 

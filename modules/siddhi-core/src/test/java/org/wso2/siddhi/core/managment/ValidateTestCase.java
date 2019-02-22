@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 
 public class ValidateTestCase {
     private static final Logger log = Logger.getLogger(ValidateTestCase.class);

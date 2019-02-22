@@ -24,7 +24,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Reporter;
 import com.codahale.metrics.ScheduledReporter;
 import org.wso2.siddhi.core.util.statistics.StatisticsManager;
-import org.wso2.siddhi.query.api.annotation.Element;
+import io.siddhi.query.api.annotation.Element;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

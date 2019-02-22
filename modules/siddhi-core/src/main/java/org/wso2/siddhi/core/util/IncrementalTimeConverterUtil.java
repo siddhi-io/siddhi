@@ -18,8 +18,8 @@
 
 package org.wso2.siddhi.core.util;
 
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
-import org.wso2.siddhi.query.api.aggregation.TimePeriod;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.query.api.aggregation.TimePeriod;
 
 import java.time.Instant;
 import java.time.ZoneId;

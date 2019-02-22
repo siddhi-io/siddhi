@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.stream.output.sink;
 
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 
 /**
  * Output events are grouped before sent out to the transport to achieve efficient network communication.

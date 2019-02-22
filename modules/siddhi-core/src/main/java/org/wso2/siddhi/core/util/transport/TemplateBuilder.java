@@ -18,10 +18,10 @@
 
 package org.wso2.siddhi.core.util.transport;
 
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.exception.NoSuchAttributeException;
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.NoSuchAttributeException;
+import io.siddhi.query.api.definition.StreamDefinition;
 
 import java.text.MessageFormat;
 import java.util.Arrays;

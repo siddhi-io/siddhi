@@ -17,7 +17,7 @@
  */
 package org.wso2.siddhi.core.util.timestamp;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiAppContext;
 
 import java.util.ArrayList;
 import java.util.List;

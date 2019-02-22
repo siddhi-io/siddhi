@@ -25,7 +25,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.query.output.callback.OutputCallback;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.stream.output.StreamCallback;

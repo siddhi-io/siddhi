@@ -17,14 +17,14 @@
  */
 package org.wso2.siddhi.core.query;
 
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.exception.StoreQueryRuntimeException;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.exception.StoreQueryRuntimeException;
 import org.wso2.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.CompiledSelection;
-import org.wso2.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.Attribute;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.util.parser.helper;
 
-import org.wso2.siddhi.query.api.annotation.Element;
+import io.siddhi.query.api.annotation.Element;
 
 import java.util.ArrayList;
 import java.util.List;

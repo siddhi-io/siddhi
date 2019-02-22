@@ -18,10 +18,10 @@
 package org.wso2.siddhi.core.stream.output.sink;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.query.api.definition.AbstractDefinition;
 
 import java.util.List;
 

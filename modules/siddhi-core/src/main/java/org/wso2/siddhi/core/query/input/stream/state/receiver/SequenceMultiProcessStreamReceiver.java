@@ -18,9 +18,9 @@
 
 package org.wso2.siddhi.core.query.input.stream.state.receiver;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.input.StateMultiProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.state.StateStreamRuntime;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;

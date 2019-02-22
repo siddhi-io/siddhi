@@ -19,7 +19,7 @@
 package org.wso2.siddhi.core;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 

@@ -18,8 +18,8 @@
 
 package org.wso2.siddhi.core.table.holder;
 
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.query.api.expression.condition.Compare;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.query.api.expression.condition.Compare;
 
 import java.util.Collection;
 import java.util.Set;

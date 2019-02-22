@@ -18,8 +18,8 @@
 
 package org.wso2.siddhi.core.util.collection.expression;
 
-import org.wso2.siddhi.query.api.expression.Expression;
-import org.wso2.siddhi.query.api.expression.condition.Compare;
+import io.siddhi.query.api.expression.Expression;
+import io.siddhi.query.api.expression.condition.Compare;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -18,9 +18,9 @@
 
 package org.wso2.siddhi.core.query.output.ratelimit.event;
 
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.GroupedComplexEvent;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.GroupedComplexEvent;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 
 import java.util.ArrayList;

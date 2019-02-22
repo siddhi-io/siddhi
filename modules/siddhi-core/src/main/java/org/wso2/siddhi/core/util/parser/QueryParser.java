@@ -18,12 +18,12 @@
 
 package org.wso2.siddhi.core.util.parser;
 
-import org.wso2.siddhi.core.aggregation.AggregationRuntime;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.state.MetaStateEvent;
-import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
-import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.event.stream.MetaStreamEvent.EventType;
+import io.siddhi.core.aggregation.AggregationRuntime;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.state.MetaStateEvent;
+import io.siddhi.core.event.state.populater.StateEventPopulatorFactory;
+import io.siddhi.core.event.stream.MetaStreamEvent;
+import io.siddhi.core.event.stream.MetaStreamEvent.EventType;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
@@ -41,15 +41,15 @@ import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.window.Window;
-import org.wso2.siddhi.query.api.annotation.Element;
-import org.wso2.siddhi.query.api.definition.AbstractDefinition;
-import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
-import org.wso2.siddhi.query.api.execution.query.Query;
-import org.wso2.siddhi.query.api.execution.query.input.handler.StreamHandler;
-import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
-import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
-import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
-import org.wso2.siddhi.query.api.util.AnnotationHelper;
+import io.siddhi.query.api.annotation.Element;
+import io.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.query.api.exception.DuplicateDefinitionException;
+import io.siddhi.query.api.execution.query.Query;
+import io.siddhi.query.api.execution.query.input.handler.StreamHandler;
+import io.siddhi.query.api.execution.query.input.stream.JoinInputStream;
+import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
+import io.siddhi.query.api.execution.query.output.stream.OutputStream;
+import io.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +118,7 @@ public class QueryParser {
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
             if (!isWindow && query.getInputStream() instanceof SingleInputStream) {
                 for (StreamHandler streamHandler : ((SingleInputStream) query.getInputStream()).getStreamHandlers()) {
-                    if (streamHandler instanceof org.wso2.siddhi.query.api.execution.query.input.handler.Window) {
+                    if (streamHandler instanceof io.siddhi.query.api.execution.query.input.handler.Window) {
                         isWindow = true;
                         break;
                     }

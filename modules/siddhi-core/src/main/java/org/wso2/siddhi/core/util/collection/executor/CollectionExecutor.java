@@ -18,9 +18,9 @@
 
 package org.wso2.siddhi.core.util.collection.executor;
 
-import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.table.holder.IndexedEventHolder;
 
 import java.util.Collection;

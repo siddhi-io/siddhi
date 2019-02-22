@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.query.selector.attribute.aggregator;
 
+import io.siddhi.core.event.Event;
 import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -56,8 +57,8 @@ public class DistinctCountAttributeAggregatorTestCase {
                 query);
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
-            public void receive(org.wso2.siddhi.core.event.Event[] events) {
-                for (org.wso2.siddhi.core.event.Event event : events) {
+            public void receive(Event[] events) {
+                for (Event event : events) {
                     AssertJUnit.assertEquals("User ID", "USER_1", event.getData(0));
                     AssertJUnit.assertEquals("Page ID", "WEB_PAGE_4", event.getData(1));
                     AssertJUnit.assertEquals("Distinct Pages", 4L, event.getData(2));

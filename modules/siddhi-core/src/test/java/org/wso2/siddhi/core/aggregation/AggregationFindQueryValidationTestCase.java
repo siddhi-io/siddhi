@@ -22,9 +22,9 @@ import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.exception.StoreQueryCreationException;
+import io.siddhi.core.exception.StoreQueryCreationException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class AggregationFindQueryValidationTestCase {
 

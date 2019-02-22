@@ -18,32 +18,32 @@
 
 package org.wso2.siddhi.core.util.collection.operator;
 
-import org.wso2.siddhi.core.aggregation.IncrementalDataAggregator;
-import org.wso2.siddhi.core.aggregation.IncrementalExecutor;
-import org.wso2.siddhi.core.aggregation.IncrementalExternalTimestampDataAggregator;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventCloner;
-import org.wso2.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.aggregation.IncrementalDataAggregator;
+import io.siddhi.core.aggregation.IncrementalExecutor;
+import io.siddhi.core.aggregation.IncrementalExternalTimestampDataAggregator;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.MetaStreamEvent;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.table.Table;
-import org.wso2.siddhi.query.api.aggregation.TimePeriod;
-import org.wso2.siddhi.query.api.definition.AggregationDefinition;
-import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
+import io.siddhi.query.api.aggregation.TimePeriod;
+import io.siddhi.query.api.definition.AggregationDefinition;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import static org.wso2.siddhi.query.api.expression.Expression.Time.normalizeDuration;
+import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
 
 /**
  * Defines the logic to find a matching event from an incremental aggregator (retrieval from incremental aggregator),

@@ -18,8 +18,8 @@
 
 package org.wso2.siddhi.core.util.persistence.util;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.PersistenceStoreException;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.PersistenceStoreException;
 import org.wso2.siddhi.core.util.snapshot.AsyncIncrementalSnapshotPersistor;
 import org.wso2.siddhi.core.util.snapshot.AsyncSnapshotPersistor;
 import org.wso2.siddhi.core.util.snapshot.IncrementalSnapshot;

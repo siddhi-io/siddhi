@@ -18,8 +18,8 @@
 
 package org.wso2.siddhi.core.query.input.stream.single;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.Schedulable;
 import org.wso2.siddhi.core.util.ThreadBarrier;

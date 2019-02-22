@@ -18,8 +18,8 @@
 
 package org.wso2.siddhi.core.util.collection;
 
-import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.StreamEvent;
 
 /**
  * Extract a {@link StreamEvent} from a {@link StateEvent}

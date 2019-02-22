@@ -18,14 +18,14 @@
 
 package org.wso2.siddhi.core.util.collection.executor;
 
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.state.StateEvent;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.table.holder.IndexedEventHolder;
 import org.wso2.siddhi.core.util.SiddhiConstants;
-import org.wso2.siddhi.query.api.expression.condition.Compare;
+import io.siddhi.query.api.expression.condition.Compare;
 
 import java.util.Collection;
 import java.util.List;

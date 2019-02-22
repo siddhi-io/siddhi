@@ -24,7 +24,7 @@ import org.wso2.siddhi.core.util.statistics.MemoryUsageTracker;
 import org.wso2.siddhi.core.util.statistics.StatisticsManager;
 import org.wso2.siddhi.core.util.statistics.StatisticsTrackerFactory;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
-import org.wso2.siddhi.query.api.annotation.Element;
+import io.siddhi.query.api.annotation.Element;
 
 import java.util.List;
 

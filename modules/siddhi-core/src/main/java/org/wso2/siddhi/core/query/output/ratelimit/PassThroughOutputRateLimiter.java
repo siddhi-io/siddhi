@@ -19,7 +19,7 @@ package org.wso2.siddhi.core.query.output.ratelimit;
 
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunk;
 
 import java.util.Map;
 

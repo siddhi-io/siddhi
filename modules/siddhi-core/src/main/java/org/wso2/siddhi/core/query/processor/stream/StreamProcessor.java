@@ -17,10 +17,10 @@
  */
 package org.wso2.siddhi.core.query.processor.stream;
 
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventCloner;
-import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.query.processor.Processor;
 
 /**

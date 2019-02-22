@@ -21,7 +21,7 @@ import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.state.LogicalPostStateProcessor;
 import org.wso2.siddhi.core.query.input.stream.state.LogicalPreStateProcessor;
 import org.wso2.siddhi.core.query.processor.Processor;
-import org.wso2.siddhi.query.api.execution.query.input.stream.StateInputStream;
+import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.List;
 

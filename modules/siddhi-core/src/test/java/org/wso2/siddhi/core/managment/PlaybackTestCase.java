@@ -24,11 +24,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
+import io.siddhi.query.compiler.exception.SiddhiParserException;
 
 public class PlaybackTestCase {
     private static final Logger log = Logger.getLogger(PlaybackTestCase.class);

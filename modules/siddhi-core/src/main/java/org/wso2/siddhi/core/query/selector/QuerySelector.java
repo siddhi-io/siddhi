@@ -18,20 +18,20 @@
 package org.wso2.siddhi.core.query.selector;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.GroupedComplexEvent;
-import org.wso2.siddhi.core.event.state.populater.StateEventPopulator;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.GroupedComplexEvent;
+import io.siddhi.core.event.state.populater.StateEventPopulator;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.condition.ConditionExpressionExecutor;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
 import org.wso2.siddhi.core.query.selector.attribute.processor.executor.GroupByAggregationAttributeExecutor;
 import org.wso2.siddhi.core.util.SiddhiConstants;
-import org.wso2.siddhi.query.api.execution.query.selection.Selector;
+import io.siddhi.query.api.execution.query.selection.Selector;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

@@ -19,8 +19,8 @@
 package org.wso2.siddhi.core.util.transport;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.stream.output.sink.Sink;
 import org.wso2.siddhi.core.stream.output.sink.distributed.DistributedTransport;
 import org.wso2.siddhi.core.stream.output.sink.distributed.DistributionStrategy;
@@ -29,9 +29,9 @@ import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.extension.holder.SinkExecutorExtensionHolder;
 import org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper;
-import org.wso2.siddhi.query.api.annotation.Annotation;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.wso2.siddhi.query.api.extension.Extension;
+import io.siddhi.query.api.annotation.Annotation;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
+import io.siddhi.query.api.extension.Extension;
 
 import java.util.HashSet;
 import java.util.List;

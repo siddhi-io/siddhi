@@ -19,9 +19,9 @@
 package org.wso2.siddhi.core.util;
 
 import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.aggregation.AggregationRuntime;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.aggregation.AggregationRuntime;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
@@ -40,13 +40,13 @@ import org.wso2.siddhi.core.util.lock.LockSynchronizer;
 import org.wso2.siddhi.core.util.parser.AggregationParser;
 import org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper;
 import org.wso2.siddhi.core.window.Window;
-import org.wso2.siddhi.query.api.definition.AbstractDefinition;
-import org.wso2.siddhi.query.api.definition.AggregationDefinition;
-import org.wso2.siddhi.query.api.definition.FunctionDefinition;
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
-import org.wso2.siddhi.query.api.definition.TableDefinition;
-import org.wso2.siddhi.query.api.definition.TriggerDefinition;
-import org.wso2.siddhi.query.api.definition.WindowDefinition;
+import io.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.query.api.definition.AggregationDefinition;
+import io.siddhi.query.api.definition.FunctionDefinition;
+import io.siddhi.query.api.definition.StreamDefinition;
+import io.siddhi.query.api.definition.TableDefinition;
+import io.siddhi.query.api.definition.TriggerDefinition;
+import io.siddhi.query.api.definition.WindowDefinition;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

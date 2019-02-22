@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 
 public class EventTestCase {
     private static final Logger log = Logger.getLogger(EventTestCase.class);

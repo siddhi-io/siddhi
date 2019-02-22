@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.stream.output.sink;
 
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.transport.Option;
 

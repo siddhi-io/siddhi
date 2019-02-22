@@ -19,7 +19,7 @@
 package org.wso2.siddhi.core.util.snapshot;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.exception.NoPersistenceStoreException;
+import io.siddhi.core.exception.NoPersistenceStoreException;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.core.util.persistence.util.PersistenceConstants;
 

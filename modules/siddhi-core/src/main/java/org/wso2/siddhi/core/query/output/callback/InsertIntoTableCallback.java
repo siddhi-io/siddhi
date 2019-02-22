@@ -17,14 +17,14 @@
  */
 package org.wso2.siddhi.core.query.output.callback;
 
-import org.wso2.siddhi.core.debugger.SiddhiDebugger;
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
+import io.siddhi.core.debugger.SiddhiDebugger;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import org.wso2.siddhi.core.table.Table;
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import io.siddhi.query.api.definition.StreamDefinition;
 
 /**
  * Implementation of {@link OutputCallback} to receive processed Siddhi events from

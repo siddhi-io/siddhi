@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.stream.input.source;
 
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
+import io.siddhi.query.api.definition.StreamDefinition;
 
 /**
  * Listener interface to be used by following component to get the events received by {@link Source}s. Source will

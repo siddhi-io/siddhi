@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.util.collection;
 
-import org.wso2.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.state.StateEvent;
 
 /**
  * State Event holder used by {@link org.wso2.siddhi.core.executor.condition.InConditionExpressionExecutor}

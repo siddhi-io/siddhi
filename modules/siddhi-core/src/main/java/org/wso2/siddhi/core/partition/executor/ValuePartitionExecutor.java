@@ -17,7 +17,7 @@
  */
 package org.wso2.siddhi.core.partition.executor;
 
-import org.wso2.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 
 /**

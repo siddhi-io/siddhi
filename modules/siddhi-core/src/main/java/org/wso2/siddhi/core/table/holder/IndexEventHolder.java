@@ -19,20 +19,20 @@
 package org.wso2.siddhi.core.table.holder;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.stream.Operation;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
-import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.stream.Operation;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.converter.StreamEventConverter;
+import io.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.snapshot.SnapshotRequest;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotState;
 import org.wso2.siddhi.core.util.snapshot.state.SnapshotStateList;
-import org.wso2.siddhi.query.api.definition.AbstractDefinition;
-import org.wso2.siddhi.query.api.expression.condition.Compare;
+import io.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.query.api.expression.condition.Compare;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -45,11 +45,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import static org.wso2.siddhi.core.event.stream.Operation.Operator.ADD;
-import static org.wso2.siddhi.core.event.stream.Operation.Operator.CLEAR;
-import static org.wso2.siddhi.core.event.stream.Operation.Operator.DELETE_BY_OPERATOR;
-import static org.wso2.siddhi.core.event.stream.Operation.Operator.OVERWRITE;
-import static org.wso2.siddhi.core.event.stream.Operation.Operator.REMOVE;
+import static io.siddhi.core.event.stream.Operation.Operator.ADD;
+import static io.siddhi.core.event.stream.Operation.Operator.CLEAR;
+import static io.siddhi.core.event.stream.Operation.Operator.DELETE_BY_OPERATOR;
+import static io.siddhi.core.event.stream.Operation.Operator.OVERWRITE;
+import static io.siddhi.core.event.stream.Operation.Operator.REMOVE;
 
 
 /**

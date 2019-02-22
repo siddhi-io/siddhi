@@ -18,11 +18,11 @@
 package org.wso2.siddhi.core.util.snapshot;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.CannotClearSiddhiAppStateException;
-import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
-import org.wso2.siddhi.core.exception.NoPersistenceStoreException;
-import org.wso2.siddhi.core.exception.PersistenceStoreException;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.CannotClearSiddhiAppStateException;
+import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
+import io.siddhi.core.exception.NoPersistenceStoreException;
+import io.siddhi.core.exception.PersistenceStoreException;
 import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;

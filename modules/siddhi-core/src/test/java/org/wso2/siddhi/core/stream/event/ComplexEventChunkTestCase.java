@@ -21,11 +21,11 @@ package org.wso2.siddhi.core.stream.event;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.event.stream.converter.ConversionStreamEventChunk;
-import org.wso2.siddhi.core.event.stream.converter.StreamEventConverter;
-import org.wso2.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
+import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.converter.ConversionStreamEventChunk;
+import io.siddhi.core.event.stream.converter.StreamEventConverter;
+import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 
 
 public class ComplexEventChunkTestCase {

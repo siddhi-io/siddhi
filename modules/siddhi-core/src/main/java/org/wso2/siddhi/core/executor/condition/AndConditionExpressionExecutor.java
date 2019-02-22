@@ -18,10 +18,10 @@
 
 package org.wso2.siddhi.core.executor.condition;
 
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.exception.OperationNotSupportedException;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.exception.OperationNotSupportedException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.Attribute;
 
 /**
  * Executor class for And condition. Condition evaluation logic is implemented within executor.

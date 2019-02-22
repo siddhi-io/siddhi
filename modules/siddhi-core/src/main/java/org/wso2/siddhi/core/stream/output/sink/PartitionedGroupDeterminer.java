@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.stream.output.sink;
 
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 
 /**
  * This implementation of {@link OutputGroupDeterminer} groups events into 'n' number of partitions. The events will

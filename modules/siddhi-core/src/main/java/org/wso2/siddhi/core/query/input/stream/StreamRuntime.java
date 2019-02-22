@@ -17,7 +17,7 @@
  */
 package org.wso2.siddhi.core.query.input.stream;
 
-import org.wso2.siddhi.core.event.MetaComplexEvent;
+import io.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;

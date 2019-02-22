@@ -21,11 +21,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.config.SiddhiContext;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.config.SiddhiContext;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.parser.SiddhiAppParser;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.wso2.siddhi.query.compiler.SiddhiCompiler;
+import io.siddhi.query.api.exception.SiddhiAppValidationException;
+import io.siddhi.query.compiler.SiddhiCompiler;
 
 public class SimpleQueryValidatorTestCase {
     private SiddhiContext siddhiContext;

@@ -17,10 +17,10 @@
  */
 package org.wso2.siddhi.core.util;
 
-import org.wso2.siddhi.core.exception.CannotLoadClassException;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.CannotLoadClassException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.extension.holder.AbstractExtensionHolder;
-import org.wso2.siddhi.query.api.extension.Extension;
+import io.siddhi.query.api.extension.Extension;
 
 /**
  * used to load classes required for Siddhi extensions.

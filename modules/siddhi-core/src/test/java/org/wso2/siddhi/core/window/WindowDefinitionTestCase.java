@@ -22,9 +22,9 @@ import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
-import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.query.api.exception.DuplicateDefinitionException;
+import io.siddhi.query.compiler.exception.SiddhiParserException;
 
 import static org.testng.AssertJUnit.assertTrue;
 

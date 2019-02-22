@@ -18,12 +18,12 @@
 
 package org.wso2.siddhi.core.util.parser;
 
-import org.wso2.siddhi.core.event.MetaComplexEvent;
-import org.wso2.siddhi.core.event.state.MetaStateEvent;
-import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
+import io.siddhi.core.event.MetaComplexEvent;
+import io.siddhi.core.event.state.MetaStateEvent;
+import io.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
-import org.wso2.siddhi.query.api.definition.AbstractDefinition;
-import org.wso2.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.query.api.definition.Attribute;
 
 import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 

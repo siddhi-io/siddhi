@@ -18,7 +18,7 @@
 package org.wso2.siddhi.core.util;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 
 import java.util.Arrays;
 

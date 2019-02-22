@@ -17,7 +17,7 @@
  */
 package org.wso2.siddhi.core.query.processor;
 
-import org.wso2.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.ComplexEventChunk;
 
 /**
  * Parent interface representing Event Processors in Siddhi. Event Processors are the execution unit which will do

@@ -18,10 +18,10 @@
 
 package org.wso2.siddhi.core.query.input.stream.state;
 
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.state.StateEvent;
 import org.wso2.siddhi.core.query.processor.Processor;
-import org.wso2.siddhi.query.api.execution.query.input.state.LogicalStateElement;
+import io.siddhi.query.api.execution.query.input.state.LogicalStateElement;
 
 /**
  * Created on 12/28/14.

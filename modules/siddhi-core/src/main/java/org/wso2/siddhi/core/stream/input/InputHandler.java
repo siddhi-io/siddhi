@@ -18,8 +18,8 @@
 package org.wso2.siddhi.core.stream.input;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.Event;
 
 /**
  * InputHandler is the {@link Event} entry point to Siddhi. Users can create an Input Handler and then use that to

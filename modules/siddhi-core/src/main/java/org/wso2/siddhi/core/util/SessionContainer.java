@@ -17,7 +17,7 @@
  */
 package org.wso2.siddhi.core.util;
 
-import org.wso2.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.query.processor.stream.window.SessionWindowProcessor;
 
 import java.io.Serializable;

@@ -18,10 +18,10 @@
 
 package org.wso2.siddhi.core.trigger;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
-import org.wso2.siddhi.query.api.definition.TriggerDefinition;
+import io.siddhi.query.api.definition.TriggerDefinition;
 
 /**
  * Interface class to represent event triggers. Event triggers are used to trigger events within Siddhi itself

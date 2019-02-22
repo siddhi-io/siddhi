@@ -19,7 +19,7 @@ package org.wso2.siddhi.core.query;
 
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 
 /**
  * Test expression comparisons with Boolean values.

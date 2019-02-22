@@ -21,8 +21,8 @@ import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.ReturnAttribute;
 import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.expression.Expression;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.expression.Expression;
 
 /**
  * {@link IncrementalAttributeAggregator} to calculate count based on an event attribute.

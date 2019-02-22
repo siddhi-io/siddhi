@@ -18,8 +18,8 @@
 
 package org.wso2.siddhi.core.util.collection.operator;
 
-import org.wso2.siddhi.core.event.state.MetaStateEvent;
-import org.wso2.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.core.event.state.MetaStateEvent;
+import io.siddhi.query.api.definition.AbstractDefinition;
 
 import static org.wso2.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 

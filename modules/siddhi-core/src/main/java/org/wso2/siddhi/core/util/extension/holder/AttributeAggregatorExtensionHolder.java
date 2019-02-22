@@ -17,7 +17,7 @@
  */
 package org.wso2.siddhi.core.util.extension.holder;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
 
 import java.util.concurrent.ConcurrentHashMap;

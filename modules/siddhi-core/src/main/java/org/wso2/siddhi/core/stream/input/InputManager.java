@@ -18,17 +18,18 @@
 
 package org.wso2.siddhi.core.stream.input;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.DefinitionNotExistException;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.exception.DefinitionNotExistException;
 import org.wso2.siddhi.core.stream.StreamJunction;
-import org.wso2.siddhi.query.api.definition.AbstractDefinition;
+import io.siddhi.query.api.definition.AbstractDefinition;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Manager class to handle {@link org.wso2.siddhi.core.event.Event} insertion to Siddhi.
+ * Manager class to handle {@link Event} insertion to Siddhi.
  */
 public class InputManager {
 

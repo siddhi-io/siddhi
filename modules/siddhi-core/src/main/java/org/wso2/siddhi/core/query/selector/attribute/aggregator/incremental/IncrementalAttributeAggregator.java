@@ -18,8 +18,8 @@
 
 package org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental;
 
-import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.expression.Expression;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.expression.Expression;
 
 /**
  * Abstract class for incremental aggregators

@@ -17,7 +17,7 @@
  */
 package org.wso2.siddhi.core.util.transport;
 
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -18,11 +18,11 @@
 
 package org.wso2.siddhi.core.query.output.ratelimit.snapshot;
 
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.GroupedComplexEvent;
-import org.wso2.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.GroupedComplexEvent;
+import io.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.parser.SchedulerParser;
 
@@ -58,7 +58,7 @@ public class GroupByPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimit
     /**
      * Sends the collected unique outputs per group by key upon arrival of timer event from scheduler.
      *
-     * @param complexEventChunk Incoming {@link org.wso2.siddhi.core.event.ComplexEventChunk}
+     * @param complexEventChunk Incoming {@link ComplexEventChunk}
      */
     @Override
     public void process(ComplexEventChunk complexEventChunk) {

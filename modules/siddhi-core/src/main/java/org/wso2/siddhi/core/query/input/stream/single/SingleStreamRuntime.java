@@ -17,7 +17,7 @@
  */
 package org.wso2.siddhi.core.query.input.stream.single;
 
-import org.wso2.siddhi.core.event.MetaComplexEvent;
+import io.siddhi.core.event.MetaComplexEvent;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;

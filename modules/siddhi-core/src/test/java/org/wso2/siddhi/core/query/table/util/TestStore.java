@@ -19,16 +19,16 @@ package org.wso2.siddhi.core.query.table.util;
 
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.table.record.AbstractRecordTable;
 import org.wso2.siddhi.core.table.record.ExpressionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.query.api.annotation.Element;
-import org.wso2.siddhi.query.api.definition.TableDefinition;
-import org.wso2.siddhi.query.api.util.AnnotationHelper;
+import io.siddhi.query.api.annotation.Element;
+import io.siddhi.query.api.definition.TableDefinition;
+import io.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.HashMap;
 import java.util.List;

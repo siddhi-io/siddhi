@@ -19,7 +19,7 @@
 package org.wso2.siddhi.core.function;
 
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.Attribute;
 
 /**
  * Parent interface for Script Function.

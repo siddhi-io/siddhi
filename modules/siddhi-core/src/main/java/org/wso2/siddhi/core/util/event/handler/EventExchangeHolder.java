@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.util.event.handler;
 
-import org.wso2.siddhi.core.event.Event;
+import io.siddhi.core.event.Event;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

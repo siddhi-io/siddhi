@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.core.debugger;
 
+import io.siddhi.core.debugger.SiddhiDebuggerClient;
 import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.AfterMethod;
