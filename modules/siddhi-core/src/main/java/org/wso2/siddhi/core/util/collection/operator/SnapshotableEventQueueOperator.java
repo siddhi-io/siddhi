@@ -23,7 +23,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.table.InMemoryCompiledUpdateSet;
 import org.wso2.siddhi.core.util.collection.AddingStreamEventExtractor;
 

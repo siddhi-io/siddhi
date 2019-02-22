@@ -30,7 +30,7 @@ import io.siddhi.core.exception.DefinitionNotExistException;
 import io.siddhi.core.exception.QueryNotExistException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.exception.StoreQueryCreationException;
-import org.wso2.siddhi.core.partition.PartitionRuntime;
+import io.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.StoreQueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;

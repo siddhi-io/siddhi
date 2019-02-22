@@ -18,8 +18,10 @@
 
 package io.siddhi.core.event.stream;
 
+import io.siddhi.core.partition.PartitionRuntime;
+
 /**
- * Cloner class for {@link StreamEvent} to be used when creating {@link org.wso2.siddhi.core.partition.PartitionRuntime}
+ * Cloner class for {@link StreamEvent} to be used when creating {@link PartitionRuntime}
  */
 public class StreamEventCloner {
 

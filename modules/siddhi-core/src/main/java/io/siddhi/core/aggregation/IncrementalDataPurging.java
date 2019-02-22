@@ -28,7 +28,7 @@ import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.DataPurgingException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;

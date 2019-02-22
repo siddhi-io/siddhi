@@ -20,7 +20,7 @@ package org.wso2.siddhi.core.query.processor.filter;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.exception.OperationNotSupportedException;
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import io.siddhi.query.api.definition.Attribute;
 

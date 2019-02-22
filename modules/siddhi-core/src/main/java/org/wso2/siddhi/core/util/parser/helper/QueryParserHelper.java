@@ -29,7 +29,7 @@ import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.join.JoinProcessor;

@@ -77,15 +77,15 @@
         <Bug pattern="VO_VOLATILE_INCREMENT"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.partition.PartitionRuntime"/>
+        <Class name="PartitionRuntime"/>
         <Bug pattern="RV_RETURN_VALUE_OF_PUTIFABSENT_IGNORED"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.executor.condition.NotConditionExpressionExecutor"/>
+        <Class name="NotConditionExpressionExecutor"/>
         <Bug pattern="RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.executor.condition.OrConditionExpressionExecutor"/>
+        <Class name="OrConditionExpressionExecutor"/>
         <Bug pattern="RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN"/>
     </Match>
     <Match>
@@ -121,7 +121,7 @@
         <Bug pattern="UC_USELESS_OBJECT"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.executor.VariableExpressionExecutor"/>
+        <Class name="VariableExpressionExecutor"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>

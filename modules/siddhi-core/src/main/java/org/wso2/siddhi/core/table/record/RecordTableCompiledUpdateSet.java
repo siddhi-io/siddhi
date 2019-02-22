@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.table.record;
 
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.table.CompiledUpdateSet;
 import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
 

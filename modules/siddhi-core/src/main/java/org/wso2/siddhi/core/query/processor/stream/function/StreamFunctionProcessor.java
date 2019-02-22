@@ -24,7 +24,7 @@ import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor;

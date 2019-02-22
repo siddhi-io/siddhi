@@ -30,7 +30,7 @@ import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import io.siddhi.core.exception.QueryableRecordTableException;
 import io.siddhi.core.exception.StoreQueryCreationException;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.DeleteStoreQueryRuntime;
 import org.wso2.siddhi.core.query.FindStoreQueryRuntime;
 import org.wso2.siddhi.core.query.InsertStoreQueryRuntime;

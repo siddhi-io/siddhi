@@ -26,7 +26,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
 import org.wso2.siddhi.core.table.record.RecordTableHandler;
 import org.wso2.siddhi.core.util.ExceptionUtil;

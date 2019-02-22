@@ -31,7 +31,7 @@ import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 import org.wso2.siddhi.core.table.Table;
 import io.siddhi.query.api.aggregation.TimePeriod;

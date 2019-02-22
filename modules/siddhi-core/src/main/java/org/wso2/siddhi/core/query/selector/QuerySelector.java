@@ -25,7 +25,7 @@ import io.siddhi.core.event.GroupedComplexEvent;
 import io.siddhi.core.event.state.populater.StateEventPopulator;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.executor.condition.ConditionExpressionExecutor;
+import io.siddhi.core.executor.condition.ConditionExpressionExecutor;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.selector.attribute.processor.AttributeProcessor;

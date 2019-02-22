@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.partition.PartitionRuntime;
+import io.siddhi.core.partition.PartitionRuntime;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.util.ElementIdGenerator;

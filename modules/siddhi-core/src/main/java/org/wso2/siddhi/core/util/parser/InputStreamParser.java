@@ -22,7 +22,7 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.exception.OperationNotSupportedException;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.ProcessStreamReceiver;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.table.Table;

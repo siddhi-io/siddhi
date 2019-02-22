@@ -120,7 +120,7 @@ public class SessionWindowTestCase {
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("Session window's 1st parameter, session gap should be a constant parameter"
                     + " attribute but found a dynamic attribute "
-                    + "org.wso2.siddhi.core.executor.VariableExpressionExecutor", e.getCause().getMessage());
+                    + "VariableExpressionExecutor", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -185,7 +185,7 @@ public class SessionWindowTestCase {
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("Session window's 2nd parameter, session key should be a dynamic parameter"
                     + " attribute but found a constant attribute "
-                    + "org.wso2.siddhi.core.executor.ConstantExpressionExecutor", e.getCause().getMessage());
+                    + "ConstantExpressionExecutor", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -250,7 +250,7 @@ public class SessionWindowTestCase {
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("Session window's 3rd parameter, allowedLatency should be a "
                     + "constant parameter attribute but found a dynamic attribute "
-                    + "org.wso2.siddhi.core.executor.VariableExpressionExecutor", e.getCause().getMessage());
+                    + "VariableExpressionExecutor", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {

@@ -19,9 +19,10 @@
 package org.wso2.siddhi.core.util.collection;
 
 import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.executor.condition.InConditionExpressionExecutor;
 
 /**
- * State Event holder used by {@link org.wso2.siddhi.core.executor.condition.InConditionExpressionExecutor}
+ * State Event holder used by {@link InConditionExpressionExecutor}
  */
 public class FinderStateEvent extends StateEvent {
 

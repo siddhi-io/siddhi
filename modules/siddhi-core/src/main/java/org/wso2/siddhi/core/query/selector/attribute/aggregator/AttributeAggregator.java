@@ -21,7 +21,7 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.Attribute;

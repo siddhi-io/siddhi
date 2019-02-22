@@ -20,7 +20,7 @@ package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
 import io.siddhi.query.api.SiddhiApp;
-import org.wso2.siddhi.core.function.Script;
+import io.siddhi.core.function.Script;
 import org.wso2.siddhi.core.util.ElementIdGenerator;
 import org.wso2.siddhi.core.util.Scheduler;
 import org.wso2.siddhi.core.util.ThreadBarrier;

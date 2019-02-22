@@ -17,8 +17,8 @@
  */
 package io.siddhi.doc.gen.metadata;
 
-import org.wso2.siddhi.core.executor.function.FunctionExecutor;
-import org.wso2.siddhi.core.function.Script;
+import io.siddhi.core.executor.function.FunctionExecutor;
+import io.siddhi.core.function.Script;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.query.processor.stream.function.StreamFunctionProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;

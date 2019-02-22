@@ -26,11 +26,11 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.wiring.BundleWiring;
 import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.core.executor.incremental.IncrementalAggregateBaseTimeFunctionExecutor;
-import org.wso2.siddhi.core.executor.incremental.IncrementalShouldUpdateFunctionExecutor;
-import org.wso2.siddhi.core.executor.incremental.IncrementalStartTimeEndTimeFunctionExecutor;
-import org.wso2.siddhi.core.executor.incremental.IncrementalTimeGetTimeZone;
-import org.wso2.siddhi.core.executor.incremental.IncrementalUnixTimeFunctionExecutor;
+import io.siddhi.core.executor.incremental.IncrementalAggregateBaseTimeFunctionExecutor;
+import io.siddhi.core.executor.incremental.IncrementalShouldUpdateFunctionExecutor;
+import io.siddhi.core.executor.incremental.IncrementalStartTimeEndTimeFunctionExecutor;
+import io.siddhi.core.executor.incremental.IncrementalTimeGetTimeZone;
+import io.siddhi.core.executor.incremental.IncrementalUnixTimeFunctionExecutor;
 
 import java.util.HashMap;
 import java.util.Map;

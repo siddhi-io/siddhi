@@ -24,7 +24,7 @@ import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent.EventType;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
 import org.wso2.siddhi.core.query.input.stream.join.JoinStreamRuntime;

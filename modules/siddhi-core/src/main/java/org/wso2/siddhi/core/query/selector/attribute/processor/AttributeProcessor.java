@@ -18,7 +18,7 @@
 package org.wso2.siddhi.core.query.selector.attribute.processor;
 
 import io.siddhi.core.event.ComplexEvent;
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.query.api.definition.Attribute;
 
 /**

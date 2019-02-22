@@ -23,7 +23,7 @@ import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.function.Script;
+import io.siddhi.core.function.Script;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.stream.input.source.AttributeMapping;
 import org.wso2.siddhi.core.stream.input.source.Source;

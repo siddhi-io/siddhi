@@ -21,7 +21,7 @@ package io.siddhi.core.aggregation;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 
 import java.util.ArrayList;

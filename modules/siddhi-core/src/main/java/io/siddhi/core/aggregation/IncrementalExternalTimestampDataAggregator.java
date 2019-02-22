@@ -22,8 +22,8 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.StreamEvent;
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.selector.GroupByKeyGenerator;
 
 import java.util.HashMap;

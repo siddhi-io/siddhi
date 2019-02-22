@@ -26,7 +26,7 @@ import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import io.siddhi.core.exception.OperationNotSupportedException;
-import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.query.processor.Processor;

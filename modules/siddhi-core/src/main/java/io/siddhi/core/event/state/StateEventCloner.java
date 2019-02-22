@@ -18,8 +18,10 @@
 
 package io.siddhi.core.event.state;
 
+import io.siddhi.core.partition.PartitionRuntime;
+
 /**
- * Class to clone {@link StateEvent} used when creating {@link org.wso2.siddhi.core.partition.PartitionRuntime}.
+ * Class to clone {@link StateEvent} used when creating {@link PartitionRuntime}.
  */
 public class StateEventCloner {
 

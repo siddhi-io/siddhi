@@ -18,7 +18,7 @@
 
 package org.wso2.siddhi.core.table;
 
-import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.ExpressionExecutor;
 
 import java.util.Map;
 
