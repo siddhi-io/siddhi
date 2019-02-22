@@ -22,7 +22,7 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.stream.output.StreamCallback;
+import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.query.compiler.SiddhiCompiler;
 
 import java.io.BufferedReader;

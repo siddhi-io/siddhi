@@ -17,6 +17,7 @@
  */
 package org.wso2.siddhi.core.stream;
 
+import io.siddhi.core.stream.StreamJunction;
 import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -26,7 +27,7 @@ import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
-import org.wso2.siddhi.core.stream.output.StreamCallback;
+import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;

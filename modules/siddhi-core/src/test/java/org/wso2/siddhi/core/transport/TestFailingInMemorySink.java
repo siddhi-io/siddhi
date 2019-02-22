@@ -23,7 +23,7 @@ import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.stream.output.sink.InMemorySink;
+import io.siddhi.core.stream.output.sink.InMemorySink;
 import org.wso2.siddhi.core.util.transport.DynamicOptions;
 
 @Extension(

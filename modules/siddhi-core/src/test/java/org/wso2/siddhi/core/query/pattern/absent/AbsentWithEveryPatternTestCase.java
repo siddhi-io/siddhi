@@ -24,7 +24,7 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.TestUtil;
-import org.wso2.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.stream.input.InputHandler;
 
 /**
  * Test the patterns:

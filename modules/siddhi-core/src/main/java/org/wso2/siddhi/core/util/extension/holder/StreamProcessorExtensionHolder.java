@@ -18,7 +18,7 @@
 package org.wso2.siddhi.core.util.extension.holder;
 
 import io.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
+import io.siddhi.core.query.processor.stream.StreamProcessor;
 
 import java.util.concurrent.ConcurrentHashMap;
 

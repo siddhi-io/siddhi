@@ -22,7 +22,7 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.table.Table;
+import io.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.collection.FinderStateEvent;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 

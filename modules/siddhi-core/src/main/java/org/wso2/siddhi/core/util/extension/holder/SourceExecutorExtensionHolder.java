@@ -18,7 +18,7 @@
 package org.wso2.siddhi.core.util.extension.holder;
 
 import io.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.stream.input.source.Source;
+import io.siddhi.core.stream.input.source.Source;
 
 import java.util.concurrent.ConcurrentHashMap;
 

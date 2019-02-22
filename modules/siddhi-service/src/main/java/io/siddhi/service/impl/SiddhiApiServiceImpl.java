@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.util.AnnotationHelper;
 import io.siddhi.query.compiler.SiddhiCompiler;

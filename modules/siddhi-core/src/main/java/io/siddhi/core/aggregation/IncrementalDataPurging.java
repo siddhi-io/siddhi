@@ -29,7 +29,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.DataPurgingException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
-import org.wso2.siddhi.core.table.Table;
+import io.siddhi.core.table.Table;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;

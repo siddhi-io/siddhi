@@ -20,15 +20,15 @@ package org.wso2.siddhi.core.util.parser;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.query.processor.ProcessingMode;
+import io.siddhi.core.query.processor.ProcessingMode;
 import org.wso2.siddhi.core.util.collection.operator.SnapshotableEventQueueOperator;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
-import org.wso2.siddhi.core.table.Table;
-import org.wso2.siddhi.core.table.holder.IndexedEventHolder;
+import io.siddhi.core.table.Table;
+import io.siddhi.core.table.holder.IndexedEventHolder;
 import org.wso2.siddhi.core.util.collection.executor.CollectionExecutor;
 import org.wso2.siddhi.core.util.collection.expression.AndMultiPrimaryKeyCollectionExpression;
 import org.wso2.siddhi.core.util.collection.expression.AttributeCollectionExpression;

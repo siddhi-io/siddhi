@@ -28,7 +28,7 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.incremental.IncrementalUnixTimeFunctionExecutor;
-import org.wso2.siddhi.core.query.processor.Processor;
+import io.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
 

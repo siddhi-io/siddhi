@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.StoreQueryCreationException;
-import org.wso2.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class AggregationFindQueryValidationTestCase {

@@ -20,7 +20,7 @@ package org.wso2.siddhi.core.transport;
 
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.core.stream.input.source.PassThroughSourceMapper;
+import io.siddhi.core.stream.input.source.PassThroughSourceMapper;
 
 /**
  * Test String Mapper implementation to is used for testing purposes.

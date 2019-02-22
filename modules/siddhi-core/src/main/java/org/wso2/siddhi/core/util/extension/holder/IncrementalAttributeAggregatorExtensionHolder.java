@@ -19,7 +19,7 @@
 package org.wso2.siddhi.core.util.extension.holder;
 
 import io.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.IncrementalAttributeAggregator;
+import io.siddhi.core.query.selector.attribute.aggregator.incremental.IncrementalAttributeAggregator;
 
 import java.util.concurrent.ConcurrentHashMap;
 

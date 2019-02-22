@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core.stream.output.sink;
 
+import io.siddhi.core.stream.output.sink.LogSink;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
@@ -25,7 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.UnitTestAppender;
-import org.wso2.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.stream.input.InputHandler;
 
 public class LogSinkTest {
     @Test

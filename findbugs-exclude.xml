@@ -73,7 +73,7 @@
 
     <!--core-->
     <Match>
-        <Class name="org.wso2.siddhi.core.query.output.ratelimit.event.AllPerEventOutputRateLimiter"/>
+        <Class name="AllPerEventOutputRateLimiter"/>
         <Bug pattern="VO_VOLATILE_INCREMENT"/>
     </Match>
     <Match>
@@ -97,19 +97,19 @@
         <Bug pattern="RV_RETURN_VALUE_OF_PUTIFABSENT_IGNORED"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor"/>
+        <class name="AbstractStreamProcessor"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.query.selector.QuerySelector"/>
+        <class name="QuerySelector"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator"/>
+        <class name="AttributeAggregator"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.stream.StreamJunction"/>
+        <class name="StreamJunction"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
@@ -125,11 +125,11 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.stream.output.sink.distributed.DistributedTransport"/>
+        <Class name="DistributedTransport"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.query.selector.attribute.processor.executor.AbstractAggregationAttributeExecutor"/>
+        <Class name="AbstractAggregationAttributeExecutor"/>
         <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
     </Match>
     <Match>
@@ -141,15 +141,15 @@
         <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.AvgIncrementalAttributeAggregator"/>
+        <Class name="AvgIncrementalAttributeAggregator"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.CountIncrementalAttributeAggregator"/>
+        <Class name="CountIncrementalAttributeAggregator"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.SumIncrementalAttributeAggregator"/>
+        <Class name="SumIncrementalAttributeAggregator"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
@@ -161,7 +161,7 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.table.holder.IndexEventHolder"/>
+        <Class name="IndexEventHolder"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
@@ -169,7 +169,7 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.table.holder.ListEventHolder"/>
+        <Class name="ListEventHolder"/>
         <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS"/>
     </Match>
 

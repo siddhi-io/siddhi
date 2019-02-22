@@ -18,15 +18,16 @@
 package io.siddhi.core.aggregation;
 
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.query.input.stream.single.EntryValveExecutor;
 
 /**
  * This is the parent interface representing Event executor for incremental execution in Siddhi.
  * Each event executor ({@link IncrementalExecutor}) corresponds to a duration specified in
  * {@link io.siddhi.query.api.aggregation.TimePeriod.Duration}.
- * Apart from that, {@link org.wso2.siddhi.core.query.input.stream.single.EntryValveExecutor}
+ * Apart from that, {@link EntryValveExecutor}
  * which is a special implementation of this interface, marks the entry point to the rest of the
  * incremental executors. All of these executors are chained in such a way, that
- * {@link org.wso2.siddhi.core.query.input.stream.single.EntryValveExecutor} links to the first
+ * {@link EntryValveExecutor} links to the first
  * {@link IncrementalExecutor} corresponding to the minimum duration, and the rest of the {@link IncrementalExecutor}s
  * link in ascending order of durations. A {@link ComplexEventChunk} received by a certain executor
  * would thus be handed over to next executor in-line.

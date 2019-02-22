@@ -18,15 +18,16 @@
 
 package org.wso2.siddhi.core.transport;
 
+import io.siddhi.core.stream.input.source.Source;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import io.siddhi.core.event.Event;
-import org.wso2.siddhi.core.stream.input.source.InMemorySource;
+import io.siddhi.core.stream.input.source.InMemorySource;
 
 /**
- * Implementation of {@link org.wso2.siddhi.core.stream.input.source.Source} to receive events through in-memory
+ * Implementation of {@link Source} to receive events through in-memory
  * transport.
  */
 @Extension(

@@ -25,7 +25,7 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.converter.ConversionStreamEventChunk;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
-import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
+import io.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;

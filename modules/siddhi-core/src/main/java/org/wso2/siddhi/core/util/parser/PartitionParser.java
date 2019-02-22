@@ -24,7 +24,7 @@ import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.partition.PartitionRuntime;
-import org.wso2.siddhi.core.query.QueryRuntime;
+import io.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.query.api.definition.AbstractDefinition;

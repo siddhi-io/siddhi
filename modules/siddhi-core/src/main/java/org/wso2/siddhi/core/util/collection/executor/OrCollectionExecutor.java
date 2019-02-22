@@ -22,7 +22,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import org.wso2.siddhi.core.table.holder.IndexedEventHolder;
+import io.siddhi.core.table.holder.IndexedEventHolder;
 
 import java.util.Collection;
 import java.util.HashSet;

@@ -21,6 +21,7 @@ package org.wso2.siddhi.core.util.transport;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.NoSuchAttributeException;
+import io.siddhi.core.stream.output.sink.SinkMapper;
 import io.siddhi.query.api.definition.StreamDefinition;
 
 import java.text.MessageFormat;
@@ -32,7 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Template builder used by {@link org.wso2.siddhi.core.stream.output.sink.SinkMapper} to generate custom payload.
+ * Template builder used by {@link SinkMapper} to generate custom payload.
  */
 public class TemplateBuilder {
     private static final Pattern DYNAMIC_PATTERN = Pattern.compile("(\\{\\{[^{}]*\\}\\})|[{}]");

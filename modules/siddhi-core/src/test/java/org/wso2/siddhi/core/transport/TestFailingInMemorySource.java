@@ -24,7 +24,7 @@ import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.stream.input.source.InMemorySource;
+import io.siddhi.core.stream.input.source.InMemorySource;
 
 /**
  * Implementation of Source to receive events through in-memory transport for unavailability checking.

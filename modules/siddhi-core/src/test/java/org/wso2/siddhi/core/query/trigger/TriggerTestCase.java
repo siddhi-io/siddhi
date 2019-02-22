@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
-import org.wso2.siddhi.core.stream.output.StreamCallback;
+import io.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.definition.TriggerDefinition;

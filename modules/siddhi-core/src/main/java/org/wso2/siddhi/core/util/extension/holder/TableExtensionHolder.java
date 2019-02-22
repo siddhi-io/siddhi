@@ -19,7 +19,7 @@
 package org.wso2.siddhi.core.util.extension.holder;
 
 import io.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.table.Table;
+import io.siddhi.core.table.Table;
 
 import java.util.concurrent.ConcurrentHashMap;
 

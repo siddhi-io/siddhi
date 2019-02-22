@@ -27,9 +27,9 @@ import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import io.siddhi.core.partition.executor.PartitionExecutor;
-import org.wso2.siddhi.core.query.QueryRuntime;
-import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
-import org.wso2.siddhi.core.stream.StreamJunction;
+import io.siddhi.core.query.QueryRuntime;
+import io.siddhi.core.query.input.stream.StreamRuntime;
+import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.List;

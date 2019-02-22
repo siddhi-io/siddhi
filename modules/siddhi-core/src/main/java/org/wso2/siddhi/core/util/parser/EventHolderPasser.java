@@ -18,6 +18,10 @@
 
 package org.wso2.siddhi.core.util.parser;
 
+import io.siddhi.core.table.holder.EventHolder;
+import io.siddhi.core.table.holder.IndexEventHolder;
+import io.siddhi.core.table.holder.ListEventHolder;
+import io.siddhi.core.table.holder.PrimaryKeyReferenceHolder;
 import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.stream.MetaStreamEvent;
@@ -27,7 +31,6 @@ import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.table.holder.*;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;

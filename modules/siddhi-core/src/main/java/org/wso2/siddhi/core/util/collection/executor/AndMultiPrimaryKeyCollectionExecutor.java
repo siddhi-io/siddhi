@@ -23,7 +23,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.executor.ExpressionExecutor;
-import org.wso2.siddhi.core.table.holder.IndexedEventHolder;
+import io.siddhi.core.table.holder.IndexedEventHolder;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.expression.condition.Compare;
 

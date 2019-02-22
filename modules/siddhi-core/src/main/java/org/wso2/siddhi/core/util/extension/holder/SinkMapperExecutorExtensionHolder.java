@@ -19,7 +19,7 @@
 package org.wso2.siddhi.core.util.extension.holder;
 
 import io.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.stream.output.sink.SinkMapper;
+import io.siddhi.core.stream.output.sink.SinkMapper;
 
 import java.util.concurrent.ConcurrentHashMap;
 

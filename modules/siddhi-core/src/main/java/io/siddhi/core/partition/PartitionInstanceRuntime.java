@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.partition;
 
-import org.wso2.siddhi.core.query.QueryRuntime;
+import io.siddhi.core.query.QueryRuntime;
 
 import java.util.List;
 

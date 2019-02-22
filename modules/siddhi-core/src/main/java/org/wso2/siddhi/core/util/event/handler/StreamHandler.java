@@ -21,7 +21,7 @@ package org.wso2.siddhi.core.util.event.handler;
 import com.lmax.disruptor.EventHandler;
 import org.apache.log4j.Logger;
 import io.siddhi.core.event.Event;
-import org.wso2.siddhi.core.stream.StreamJunction;
+import io.siddhi.core.stream.StreamJunction;
 
 import java.beans.ExceptionListener;
 import java.util.LinkedList;

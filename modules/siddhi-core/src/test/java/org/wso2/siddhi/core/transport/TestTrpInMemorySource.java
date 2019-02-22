@@ -18,20 +18,21 @@
 
 package org.wso2.siddhi.core.transport;
 
+import io.siddhi.core.stream.input.source.Source;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.stream.input.source.InMemorySource;
-import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.stream.input.source.InMemorySource;
+import io.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.InMemoryBroker;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
 
 /**
- * Implementation of {@link org.wso2.siddhi.core.stream.input.source.Source} to receive events through in-memory
+ * Implementation of {@link Source} to receive events through in-memory
  * transport.
  */
 @Extension(
