@@ -1679,12 +1679,12 @@ define table RoomTypeTable ( roomNo int, type string );
 
 The following is a list of currently supported store types:
 
-*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-rdbms">RDBMS (MySQL, Oracle, SQL Server, PostgreSQL, DB2, H2)</a>
-*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr">Solr</a>
-*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb">MongoDB</a>
-*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-hbase">HBase</a>
-*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-redis">Redis</a>
-*. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-cassandra">Cassandra</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-rdbms">RDBMS (MySQL, Oracle, SQL Server, PostgreSQL, DB2, H2)</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr">Solr</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb">MongoDB</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-hbase">HBase</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-redis">Redis</a>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-cassandra">Cassandra</a>
 
 **Operators on Table (and Store)**
 
