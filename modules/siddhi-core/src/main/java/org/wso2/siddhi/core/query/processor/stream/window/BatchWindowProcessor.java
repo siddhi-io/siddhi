@@ -82,7 +82,7 @@ import java.util.Map;
 )
 public class BatchWindowProcessor extends WindowProcessor implements FindableProcessor {
 
-    private int length = -1;
+    private int length = 0;
     private int count = 0;
     private SnapshotableStreamEventQueue expiredEventQueue = null;
     private SnapshotableStreamEventQueue currentEventQueue;
@@ -102,10 +102,15 @@ public class BatchWindowProcessor extends WindowProcessor implements FindablePro
         if (attributeExpressionExecutors.length == 1) {
             length = (Integer) (((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue());
         } else if (attributeExpressionExecutors.length == 0) {
-            length = -1;
+            length = 0;
         } else {
             throw new SiddhiAppValidationException("Batch window should have at most one parameter (<int> " +
                     "chunkLength), but found " + attributeExpressionExecutors.length + " input attributes");
+        }
+
+        if (length < 0) {
+            throw new SiddhiAppValidationException("Batch window should have at most one parameter (<int> " +
+            "chunkLength) greater than zero. But found value 'chunkLength = " + length + " ' ");
         }
     }
 
