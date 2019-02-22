@@ -111,18 +111,18 @@
             <class name="io.siddhi.core.query.window.TimeBatchWindowTestCase"/>
             <class name="io.siddhi.core.query.window.TimeLengthWindowTestCase"/>
             <class name="io.siddhi.core.query.window.TimeWindowTestCase"/>
-            <class name="org.wso2.siddhi.core.window.CronWindowTestCase"/>
-            <class name="org.wso2.siddhi.core.window.CustomJoinWindowTestCase"/>
-            <class name="org.wso2.siddhi.core.window.ExternalTimeBatchWindowTestCase"/>
-            <class name="org.wso2.siddhi.core.window.FrequentWindowEventTbaleTestCase"/>
-            <class name="org.wso2.siddhi.core.window.LenghtBatchWindowTestCase"/>
-            <class name="org.wso2.siddhi.core.window.LenghtWindowTestCase"/>
-            <class name="org.wso2.siddhi.core.window.LossyFrequentWindowTestCase"/>
-            <class name="org.wso2.siddhi.core.window.SortWindowTestCase"/>
-            <class name="org.wso2.siddhi.core.window.TimeBatchWindowTestCase"/>
-            <class name="org.wso2.siddhi.core.window.TimeLengthWindowTestCase"/>
-            <class name="org.wso2.siddhi.core.window.WindowDefinitionTestCase"/>
-            <class name="org.wso2.siddhi.core.window.BatchWindowTestCase"/>
+            <class name="io.siddhi.core.window.CronWindowTestCase"/>
+            <class name="io.siddhi.core.window.CustomJoinWindowTestCase"/>
+            <class name="io.siddhi.core.window.ExternalTimeBatchWindowTestCase"/>
+            <class name="io.siddhi.core.window.FrequentWindowEventTbaleTestCase"/>
+            <class name="io.siddhi.core.window.LenghtBatchWindowTestCase"/>
+            <class name="io.siddhi.core.window.LenghtWindowTestCase"/>
+            <class name="io.siddhi.core.window.LossyFrequentWindowTestCase"/>
+            <class name="io.siddhi.core.window.SortWindowTestCase"/>
+            <class name="io.siddhi.core.window.TimeBatchWindowTestCase"/>
+            <class name="io.siddhi.core.window.TimeLengthWindowTestCase"/>
+            <class name="io.siddhi.core.window.WindowDefinitionTestCase"/>
+            <class name="io.siddhi.core.window.BatchWindowTestCase"/>
 
             <class name="io.siddhi.core.query.BooleanCompareTestCase"/>
             <class name="io.siddhi.core.query.FilterTestCase1"/>
@@ -132,23 +132,23 @@
             <class name="io.siddhi.core.query.SimpleQueryValidatorTestCase"/>
             <class name="io.siddhi.core.query.StringCompareTestCase"/>
 
-            <class name="org.wso2.siddhi.core.store.StoreQueryTableTestCase"/>
-            <class name="org.wso2.siddhi.core.store.StoreQueryWindowTestCase"/>
+            <class name="io.siddhi.core.store.StoreQueryTableTestCase"/>
+            <class name="io.siddhi.core.store.StoreQueryWindowTestCase"/>
 
-            <class name="org.wso2.siddhi.core.stream.CallbackTestCase"/>
-            <class name="org.wso2.siddhi.core.stream.ExceptionHandlerTestCase"/>
-            <class name="org.wso2.siddhi.core.stream.JunctionTestCase"/>
-            <class name="org.wso2.siddhi.core.stream.event.ComplexEventChunkTestCase"/>
-            <class name="org.wso2.siddhi.core.stream.event.EventTestCase"/>
-            <class name="org.wso2.siddhi.core.stream.output.sink.LogSinkTest"/>
+            <class name="io.siddhi.core.stream.CallbackTestCase"/>
+            <class name="io.siddhi.core.stream.ExceptionHandlerTestCase"/>
+            <class name="io.siddhi.core.stream.JunctionTestCase"/>
+            <class name="io.siddhi.core.stream.event.ComplexEventChunkTestCase"/>
+            <class name="io.siddhi.core.stream.event.EventTestCase"/>
+            <class name="io.siddhi.core.stream.output.sink.LogSinkTest"/>
 
             <class name="io.siddhi.core.query.ratelimit.EventOutputRateLimitTestCase"/>
             <class name="io.siddhi.core.query.ratelimit.SnapshotOutputRateLimitTestCase"/>
             <class name="io.siddhi.core.query.ratelimit.TimeOutputRateLimitTestCase"/>
 
-            <class name="org.wso2.siddhi.core.transport.InMemoryTransportTestCase"/>
-            <class name="org.wso2.siddhi.core.transport.MultiClientDistributedSinkTestCase"/>
-            <class name="org.wso2.siddhi.core.transport.SingleClientDistributedTransportTestCases"/>
+            <class name="io.siddhi.core.transport.InMemoryTransportTestCase"/>
+            <class name="io.siddhi.core.transport.MultiClientDistributedSinkTestCase"/>
+            <class name="io.siddhi.core.transport.SingleClientDistributedTransportTestCases"/>
         </classes>
     </test>
 </suite>
