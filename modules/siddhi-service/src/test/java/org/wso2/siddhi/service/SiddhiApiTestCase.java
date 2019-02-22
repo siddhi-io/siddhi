@@ -17,8 +17,8 @@ package org.wso2.siddhi.service;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.service.api.NotFoundException;
-import org.wso2.siddhi.service.impl.SiddhiApiServiceImpl;
+import io.siddhi.service.api.NotFoundException;
+import io.siddhi.service.impl.SiddhiApiServiceImpl;
 
 import javax.ws.rs.core.Response;
 

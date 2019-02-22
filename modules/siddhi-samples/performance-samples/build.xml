@@ -54,23 +54,23 @@
 
 
     <target name="SimpleFilterSingleQuery" depends="compile">
-        <java classname="org.wso2.siddhi.performance.SimpleFilterSingleQueryPerformance"
+        <java classname="io.siddhi.performance.SimpleFilterSingleQueryPerformance"
               classpathref="classpath" fork="true">
 
         </java>
     </target>
     <target name="SimpleFilterMultipleQuery" depends="compile">
-        <java classname="org.wso2.siddhi.performance.SimpleFilterMultipleQueryPerformance"
+        <java classname="io.siddhi.performance.SimpleFilterMultipleQueryPerformance"
               classpathref="classpath" fork="true">
         </java>
     </target>
     <target name="SimpleFilterMultipleQueryWithDisruptor" depends="compile">
-        <java classname="org.wso2.siddhi.performance.SimpleFilterMultipleQueryWithDisruptorPerformance"
+        <java classname="io.siddhi.performance.SimpleFilterMultipleQueryWithDisruptorPerformance"
               classpathref="classpath" fork="true">
         </java>
     </target>
     <target name="SimpleFilterSingleQueryWithDisruptor" depends="compile">
-        <java classname="org.wso2.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance"
+        <java classname="io.siddhi.performance.SimpleFilterSingleQueryWithDisruptorPerformance"
               classpathref="classpath" fork="true">
         </java>
     </target>

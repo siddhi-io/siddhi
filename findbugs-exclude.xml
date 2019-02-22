@@ -20,27 +20,27 @@
 <FindBugsFilter>
     <!--api-->
     <Match>
-        <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
+        <Class name="io.siddhi.query.api.expression.AttributeFunction"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
+        <Class name="io.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
+        <Class name="io.siddhi.query.api.expression.AttributeFunction"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
+        <Class name="io.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream"/>
+        <Class name="io.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream"/>
         <Bug pattern="SE_BAD_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream"/>
+        <Class name="io.siddhi.query.api.execution.query.output.stream.UpdateStream"/>
         <Bug pattern="SE_BAD_FIELD"/>
     </Match>
 
@@ -51,7 +51,7 @@
 
     <!--compiler-->
     <Match>
-        <Class name="org.wso2.siddhi.query.compiler.internal.SiddhiQLBaseVisitorImpl"/>
+        <Class name="io.siddhi.query.compiler.internal.SiddhiQLBaseVisitorImpl"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
     <Match>
@@ -67,7 +67,7 @@
         <Bug pattern="MF_CLASS_MASKS_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.compiler.exception.SiddhiParserException"/>
+        <Class name="io.siddhi.query.compiler.exception.SiddhiParserException"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
 
