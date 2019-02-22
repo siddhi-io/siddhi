@@ -14,34 +14,37 @@ Siddhi is a **_Streaming_** and **_Complex Event Processing_** engine that liste
 
 ![](https://raw.githubusercontent.com/wso2/siddhi/master/docs/images/siddhi-overview.png?raw=true "Overview")
 
-Siddhi supports:
+Siddhi supports: 
  
-* Streaming data integration 
-    * Retrieving data from various event sources (Kafka, NATS, JMS, HTTP, CDC, etc)
-    * Map events to and from multiple event formats (JSON, XML, Text, Avro, etc)
-    * Data preprocessing & cleaning
-    * Joining multiple data streams 
-    * Integrate streaming data with databases (RDBMS, Cassandra, HBase, Redis, etc)
-    * Integrate with external services
-    * Publish data to multiple event sinks (Email, JMS, HTTP, etc)
-    
-* Streaming data analytics
-    * Generating alerts based on thresholds
-    * Calculate aggregations over a short windows (time, length, session, unique, etc) or a long time period
-    * Calculate aggregations over long time periods with seconds, minutes, hours, days, months & years granularity  
-    * Correlating data while finding missing and erroneous events
-    * Detecting temporal event patterns
-    * Analyzing trends (rise, fall, turn, tipple bottom)
-    * Run pretreated machine learning models (PMML, Tensorflow) 
-    * Learn and predict at runtime using online machine learning models
+**Streaming Data Integration**
 
-* Adaptive Intelligence
-    * Static rule processing 
-    * Stateful rule processing 
-    * Decision making through synchronous stream processing  
-    * Query tables, windows and aggregations  
+- Retrieving data from various event sources (Kafka, NATS, JMS, HTTP, CDC, etc)
+- Map events to and from multiple event formats (JSON, XML, Text, Avro, etc)
+- Data preprocessing & cleaning
+- Joining multiple data streams 
+- Integrate streaming data with databases (RDBMS, Cassandra, HBase, Redis, etc)
+- Integrate with external services
+- Publish data to multiple event sinks (Email, JMS, HTTP, etc)
+    
+**Streaming Data Analytics**
+
+* Generating alerts based on thresholds
+* Calculate aggregations over a short windows (time, length, session, unique, etc) or a long time period
+* Calculate aggregations over long time periods with seconds, minutes, hours, days, months & years granularity  
+* Correlating data while finding missing and erroneous events
+* Detecting temporal event patterns
+* Analyzing trends (rise, fall, turn, tipple bottom)
+* Run pretreated machine learning models (PMML, Tensorflow) 
+* Learn and predict at runtime using online machine learning models
+
+**Adaptive Intelligence**
+
+* Static rule processing 
+* Stateful rule processing 
+* Decision making through synchronous stream processing  
+* Query tables, windows and aggregations  
       
-* And many more ...  For more information, see <a target="_blank" href="http://www.kdnuggets.com/2015/08/patterns-streaming-realtime-analytics.html">Patterns of Streaming Realtime Analytics</a>
+And many more ...  For more information, see <a target="_blank" href="http://www.kdnuggets.com/2015/08/patterns-streaming-realtime-analytics.html">Patterns of Streaming Realtime Analytics</a>
 
 Siddhi is free and open source, under **Apache Software License v2.0**.
 
@@ -108,7 +111,7 @@ For more information please contact us via <a target="_blank" href="http://wso2.
     
     <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v5.x.x
 
-* **Latest Stable Release of Siddhi v4.x.x** : **v4.4.8** _built on Java 8. (Recommended for production use)_
+* **Latest Stable Release of Siddhi v4.x.x** : **v4.4.8** _built on Java 8. (Recommended in production)_
      
     Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/">here</a>.
 
