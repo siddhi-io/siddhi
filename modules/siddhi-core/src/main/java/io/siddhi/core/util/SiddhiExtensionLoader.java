@@ -25,7 +25,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.wiring.BundleWiring;
-import org.wso2.siddhi.annotation.Extension;
+import io.siddhi.annotation.Extension;
 import io.siddhi.core.executor.incremental.IncrementalAggregateBaseTimeFunctionExecutor;
 import io.siddhi.core.executor.incremental.IncrementalShouldUpdateFunctionExecutor;
 import io.siddhi.core.executor.incremental.IncrementalStartTimeEndTimeFunctionExecutor;

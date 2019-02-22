@@ -357,9 +357,9 @@ public class DefinitionParserHelper {
                         sourceAnnotation);
 
                 OptionHolder sourceOptionHolder = constructOptionHolder(streamDefinition, sourceAnnotation,
-                        source.getClass().getAnnotation(org.wso2.siddhi.annotation.Extension.class), null);
+                        source.getClass().getAnnotation(io.siddhi.annotation.Extension.class), null);
                 OptionHolder mapOptionHolder = constructOptionHolder(streamDefinition, mapAnnotation,
-                        sourceMapper.getClass().getAnnotation(org.wso2.siddhi.annotation.Extension.class), null);
+                        sourceMapper.getClass().getAnnotation(io.siddhi.annotation.Extension.class), null);
 
                 AttributesHolder attributesHolder = getAttributeMappings(mapAnnotation, mapType, streamDefinition);
                 String[] transportPropertyNames = getTransportPropertyNames(attributesHolder);
@@ -493,13 +493,13 @@ public class DefinitionParserHelper {
                         SinkMapper sinkMapper = (SinkMapper) SiddhiClassLoader.loadExtensionImplementation(
                                 mapperExtension, SinkMapperExecutorExtensionHolder.getInstance(siddhiAppContext));
 
-                        org.wso2.siddhi.annotation.Extension sinkExt
-                                = sink.getClass().getAnnotation(org.wso2.siddhi.annotation.Extension.class);
+                        io.siddhi.annotation.Extension sinkExt
+                                = sink.getClass().getAnnotation(io.siddhi.annotation.Extension.class);
 
                         OptionHolder transportOptionHolder = constructOptionHolder(streamDefinition, sinkAnnotation,
                                 sinkExt, supportedDynamicOptions);
                         OptionHolder mapOptionHolder = constructOptionHolder(streamDefinition, mapAnnotation,
-                                sinkMapper.getClass().getAnnotation(org.wso2.siddhi.annotation.Extension.class),
+                                sinkMapper.getClass().getAnnotation(io.siddhi.annotation.Extension.class),
                                 sinkMapper.getSupportedDynamicOptions());
                         List<Element> payloadElementList = getPayload(mapAnnotation);
 
@@ -772,7 +772,7 @@ public class DefinitionParserHelper {
 
     private static OptionHolder constructOptionHolder(StreamDefinition streamDefinition,
                                                       Annotation annotation,
-                                                      org.wso2.siddhi.annotation.Extension extension,
+                                                      io.siddhi.annotation.Extension extension,
                                                       String[] supportedDynamicOptions) {
         List<String> supportedDynamicOptionList = new ArrayList<>();
         if (supportedDynamicOptions != null) {
@@ -833,8 +833,8 @@ public class DefinitionParserHelper {
                                                                      StreamDefinition streamDefinition,
                                                                      Sink clientTransport,
                                                                      SiddhiAppContext siddhiAppContext) {
-        org.wso2.siddhi.annotation.Extension sinkExt
-                = clientTransport.getClass().getAnnotation(org.wso2.siddhi.annotation.Extension.class);
+        io.siddhi.annotation.Extension sinkExt
+                = clientTransport.getClass().getAnnotation(io.siddhi.annotation.Extension.class);
 
         List<OptionHolder> destinationOptHolders = new ArrayList<>();
         distributionAnnotation.getAnnotations().stream()

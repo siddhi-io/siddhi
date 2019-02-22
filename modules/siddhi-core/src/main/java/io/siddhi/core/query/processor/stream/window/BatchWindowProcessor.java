@@ -18,8 +18,8 @@
 package io.siddhi.core.query.processor.stream.window;
 
 import io.siddhi.core.query.processor.Processor;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;

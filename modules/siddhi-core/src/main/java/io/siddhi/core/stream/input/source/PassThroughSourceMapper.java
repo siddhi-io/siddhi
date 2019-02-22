@@ -19,8 +19,8 @@
 package io.siddhi.core.stream.input.source;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;

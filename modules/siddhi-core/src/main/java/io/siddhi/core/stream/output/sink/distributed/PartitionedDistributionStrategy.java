@@ -18,8 +18,8 @@
 
 package io.siddhi.core.stream.output.sink.distributed;
 
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.transport.DynamicOptions;

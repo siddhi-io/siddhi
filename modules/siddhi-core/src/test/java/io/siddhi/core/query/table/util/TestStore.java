@@ -17,8 +17,8 @@
  */
 package io.siddhi.core.query.table.util;
 
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.table.record.AbstractRecordTable;
 import io.siddhi.core.table.record.ExpressionBuilder;

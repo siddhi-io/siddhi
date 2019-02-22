@@ -15,50 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.annotation.processor;
+package io.siddhi.annotation.processor;
 
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.ReturnAttribute;
-import org.wso2.siddhi.annotation.util.AnnotationConstants;
-import org.wso2.siddhi.annotation.util.AnnotationValidationException;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ReturnAttribute;
+import io.siddhi.annotation.util.AnnotationValidationException;
 
 import java.text.MessageFormat;
 
 /**
- * This processor will extend the validation rules for validate Store specific annotation contents.
+ * This processor will extend the validation rules for validate Window Processor specific annotation contents.
  */
-public class StoreValidationAnnotationProcessor extends AbstractAnnotationProcessor {
-    public StoreValidationAnnotationProcessor(String extensionClassFullName) {
+public class WindowProcessorValidationAnnotationProcessor extends AbstractAnnotationProcessor {
+    public WindowProcessorValidationAnnotationProcessor(String extensionClassFullName) {
         super(extensionClassFullName);
-    }
-
-    @Override
-    public void basicParameterValidation(String name, String description, String namespace) throws
-            AnnotationValidationException {
-        //Check if the @Extension name is empty.
-        if (name.isEmpty()) {
-            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> name " +
-                    " annotated in class {0} is null or empty.", extensionClassFullName));
-        }
-        //Check if the @Extension description is empty.
-        if (description.isEmpty()) {
-            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> description " +
-                    "annotated in class {0} is null or empty.", extensionClassFullName));
-        }
-        //Check if the @Extension namespace is empty.
-        if (namespace.isEmpty()) {
-            //The namespace cannot be null or empty as @Extension extends from namespace reserved super class.
-            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> namespace cannot " +
-                            "be null or empty, annotated class {1} extends from namespace reserved super class {2}.",
-                    name, extensionClassFullName, AnnotationConstants.STORE_SUPER_CLASS));
-        } else {
-            //Check if namespace provided matches with the reserved namespace.
-            if (!namespace.equals(AnnotationConstants.STORE_NAMESPACE)) {
-                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> namespace " +
-                                "provided {0} should be corrected as {1} annotated in class {2}.", namespace,
-                        AnnotationConstants.STORE_NAMESPACE, extensionClassFullName));
-            }
-        }
     }
 
     @Override
@@ -84,7 +54,7 @@ public class StoreValidationAnnotationProcessor extends AbstractAnnotationProces
             //Check if the @Parameter type is empty.
             if (parameter.type().length == 0) {
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter ->" +
-                                " name:{0} -> type annotated in class {1} is null or empty.", parameterName,
+                        " name:{0} -> type annotated in class {1} is null or empty.", parameterName,
                         extensionClassFullName));
             }
             //Check if the @Parameter dynamic property false or empty in the classes extending
@@ -109,8 +79,8 @@ public class StoreValidationAnnotationProcessor extends AbstractAnnotationProces
         if (returnAttributes != null && returnAttributes.length > 0) {
             //Throw error for other classes as only in the classes extending
             //StreamProcessor or StreamFunctionProcessor allowed to have more than one ReturnAttribute.
-            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @ReturnAttribute" +
-                    " cannot be annotated in class {0}.", extensionClassFullName));
+            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @ReturnAttribute " +
+                    "cannot be annotated in class {0}.", extensionClassFullName));
         }
     }
 }

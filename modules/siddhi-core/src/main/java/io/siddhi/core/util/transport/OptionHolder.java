@@ -18,7 +18,7 @@
 
 package io.siddhi.core.util.transport;
 
-import org.wso2.siddhi.annotation.Extension;
+import io.siddhi.annotation.Extension;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 

@@ -15,20 +15,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.annotation.processor;
+package io.siddhi.annotation.processor;
 
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.ReturnAttribute;
-import org.wso2.siddhi.annotation.util.AnnotationValidationException;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ReturnAttribute;
+import io.siddhi.annotation.util.AnnotationConstants;
+import io.siddhi.annotation.util.AnnotationValidationException;
 
 import java.text.MessageFormat;
 
 /**
- * This processor will extend the validation rules for validate Stream Processor specific annotation contents.
+ * This processor will extend the validation rules for validate Store specific annotation contents.
  */
-public class StreamProcessorValidationAnnotationProcessor extends AbstractAnnotationProcessor {
-    public StreamProcessorValidationAnnotationProcessor(String extensionClassFullName) {
+public class StoreValidationAnnotationProcessor extends AbstractAnnotationProcessor {
+    public StoreValidationAnnotationProcessor(String extensionClassFullName) {
         super(extensionClassFullName);
+    }
+
+    @Override
+    public void basicParameterValidation(String name, String description, String namespace) throws
+            AnnotationValidationException {
+        //Check if the @Extension name is empty.
+        if (name.isEmpty()) {
+            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> name " +
+                    " annotated in class {0} is null or empty.", extensionClassFullName));
+        }
+        //Check if the @Extension description is empty.
+        if (description.isEmpty()) {
+            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> description " +
+                    "annotated in class {0} is null or empty.", extensionClassFullName));
+        }
+        //Check if the @Extension namespace is empty.
+        if (namespace.isEmpty()) {
+            //The namespace cannot be null or empty as @Extension extends from namespace reserved super class.
+            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> namespace cannot " +
+                            "be null or empty, annotated class {1} extends from namespace reserved super class {2}.",
+                    name, extensionClassFullName, AnnotationConstants.STORE_SUPER_CLASS));
+        } else {
+            //Check if namespace provided matches with the reserved namespace.
+            if (!namespace.equals(AnnotationConstants.STORE_NAMESPACE)) {
+                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> namespace " +
+                                "provided {0} should be corrected as {1} annotated in class {2}.", namespace,
+                        AnnotationConstants.STORE_NAMESPACE, extensionClassFullName));
+            }
+        }
     }
 
     @Override
@@ -76,31 +106,11 @@ public class StreamProcessorValidationAnnotationProcessor extends AbstractAnnota
 
     @Override
     public void returnAttributesValidation(ReturnAttribute[] returnAttributes) throws AnnotationValidationException {
-        for (ReturnAttribute returnAttribute : returnAttributes) {
-            String returnAttributeName = returnAttribute.name();
-            //Check if the @ReturnAttributes name is empty.
-            if (returnAttributeName.isEmpty()) {
-                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
-                        "@ReturnAttribute -> name annotated in class {0} is null or empty.", extensionClassFullName));
-            } else if (!CAMEL_CASE_PATTERN.matcher(returnAttributeName).find()) {
-                //Check if the @Extension -> @ReturnAttribute -> name is in a correct camelCase
-                // format using regex pattern.
-                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
-                                "@ReturnAttribute -> name {0} annotated in class {1} is not in camelCase format.",
-                        returnAttributeName, extensionClassFullName));
-            }
-            //Check if the @ReturnAttributes description is empty.
-            if (returnAttribute.description().isEmpty()) {
-                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
-                                "@ReturnAttribute -> name:{0}  -> description annotated in class {1} is null or empty.",
-                        returnAttributeName, extensionClassFullName));
-            }
-            //Check if the @ReturnAttributes type is empty.
-            if (returnAttribute.type().length == 0) {
-                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
-                                "@ReturnAttribute -> name:{0} -> type annotated in class {1} is null or empty.",
-                        returnAttributeName, extensionClassFullName));
-            }
+        if (returnAttributes != null && returnAttributes.length > 0) {
+            //Throw error for other classes as only in the classes extending
+            //StreamProcessor or StreamFunctionProcessor allowed to have more than one ReturnAttribute.
+            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @ReturnAttribute" +
+                    " cannot be annotated in class {0}.", extensionClassFullName));
         }
     }
 }

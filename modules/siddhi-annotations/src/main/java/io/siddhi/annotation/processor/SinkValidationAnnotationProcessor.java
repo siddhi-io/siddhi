@@ -15,21 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package io.siddhi.annotation.processor;
 
-package org.wso2.siddhi.annotation.processor;
-
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.ReturnAttribute;
-import org.wso2.siddhi.annotation.util.AnnotationConstants;
-import org.wso2.siddhi.annotation.util.AnnotationValidationException;
+import io.siddhi.annotation.ReturnAttribute;
+import io.siddhi.annotation.util.AnnotationConstants;
+import io.siddhi.annotation.util.AnnotationValidationException;
 
 import java.text.MessageFormat;
 
 /**
- * This processor will extend the validation rules for validate Distribution Strategy specific annotation contents.
+ * This processor will extend the validation rules for validate Sink specific annotation contents.
  */
-public class DistributionStrategyValidationAnnotationProcessor extends AbstractAnnotationProcessor {
-    public DistributionStrategyValidationAnnotationProcessor(String extensionClassFullName) {
+public class SinkValidationAnnotationProcessor extends AbstractAnnotationProcessor {
+    public SinkValidationAnnotationProcessor(String extensionClassFullName) {
         super(extensionClassFullName);
     }
 
@@ -49,25 +47,16 @@ public class DistributionStrategyValidationAnnotationProcessor extends AbstractA
         //Check if the @Extension namespace is empty.
         if (namespace.isEmpty()) {
             //The namespace cannot be null or empty as @Extension extends from namespace reserved super class.
-            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> namespace cannot " +
-                            "be null or empty, annotated class {1} extends from namespace reserved super class {2}.",
-                    name, extensionClassFullName, AnnotationConstants.DISTRIBUTION_STRATEGY_SUPER_CLASS));
+            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> namespace " +
+                    "cannot be null or empty, annotated class {1} extends from namespace reserved super class {2}.",
+                    name, extensionClassFullName, AnnotationConstants.SINK_SUPER_CLASS));
         } else {
             //Check if namespace provided matches with the reserved namespace.
-            if (!namespace.equals(AnnotationConstants.DISTRIBUTION_STRATEGY_NAMESPACE)) {
+            if (!namespace.equals(AnnotationConstants.SINK_NAMESPACE)) {
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> namespace " +
                                 "provided {0} should be corrected as {1} annotated in class {2}.", namespace,
-                        AnnotationConstants.DISTRIBUTION_STRATEGY_NAMESPACE, extensionClassFullName));
+                        AnnotationConstants.SINK_NAMESPACE, extensionClassFullName));
             }
-        }
-    }
-
-    @Override
-    public void parameterValidation(Parameter[] parameters) throws AnnotationValidationException {
-        if (parameters != null && parameters.length > 0) {
-            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter " +
-                            "cannot be annotated in class {0}. As this class extends from super class {1}.",
-                    extensionClassFullName, AnnotationConstants.DISTRIBUTION_STRATEGY_SUPER_CLASS));
         }
     }
 

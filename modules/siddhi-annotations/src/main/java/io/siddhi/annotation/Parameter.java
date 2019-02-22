@@ -15,21 +15,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.annotation;
+package io.siddhi.annotation;
+
+import io.siddhi.annotation.util.DataType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An Optional annotation for storing an examples for a Siddhi Extension.
+ * Annotation for storing the parameters of a Siddhi Extension.
  * <pre><code>
  * eg:-
  *      {@literal @}Extension(
  *                      ...
- *                      examples = {{@literal @}Example(syntax = "from fooStream#window.time(10 sec)
- *                      select symbol as name, volume insert into barStream;",
- *                      description = "This will processing events that arrived within the last 10 seconds.")
+ *                      parameters = {
+ *                          {@literal @}Parameter(name = "firstParameterName", type = {DataType.INT, DataType.LONG}),
+ *                          {@literal @}Parameter(name = "SecondParameterName", type = {DataType.STRING})
+ *                      },
+ *                      ...
+ *      )
  *      public CustomExtension extends ExtensionSuperClass {
  *          ...
  *      }
@@ -37,8 +42,16 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({})
-public @interface Example {
-    String syntax() default "";
+public @interface Parameter {
+    String name() default "";
+
+    DataType[] type() default {};
 
     String description() default "";
+
+    boolean optional() default false;
+
+    boolean dynamic() default false;
+
+    String defaultValue() default "";
 }

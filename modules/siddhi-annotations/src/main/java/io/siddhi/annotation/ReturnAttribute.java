@@ -15,9 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.annotation;
+package io.siddhi.annotation;
 
-import org.wso2.siddhi.annotation.util.DataType;
+import io.siddhi.annotation.util.DataType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

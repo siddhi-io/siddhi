@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.annotation;
+package io.siddhi.annotation;
 
 import org.atteo.classindex.IndexAnnotated;
 

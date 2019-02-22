@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -15,18 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.annotation.util;
 
+package io.siddhi.annotation.processor;
 /**
- * Enum types used in @Parameter, @ReturnAttribute
- */
-public enum DataType {
-    STRING,
-    INT,
-    LONG,
-    FLOAT,
-    DOUBLE,
-    BOOL,
-    OBJECT,
-    TIME
+ *
+ * This processor will extend the validation rules for validate script specific annotation contents.
+ * **/
+public class ScriptValidationAnnotationProcessor extends AbstractAnnotationProcessor {
+    public ScriptValidationAnnotationProcessor(String extensionClassFullName) {
+        super(extensionClassFullName);
+    }
 }

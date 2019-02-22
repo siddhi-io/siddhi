@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c)  2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,23 +15,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.annotation;
-
-import org.wso2.siddhi.annotation.util.DataType;
+package io.siddhi.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for storing the parameters of a Siddhi Extension.
+ * Annotation for storing the system parameters of a Siddhi Extension.
  * <pre><code>
  * eg:-
  *      {@literal @}Extension(
  *                      ...
- *                      parameters = {
- *                          {@literal @}Parameter(name = "firstParameterName", type = {DataType.INT, DataType.LONG}),
- *                          {@literal @}Parameter(name = "SecondParameterName", type = {DataType.STRING})
+ *                      SystemParameters = {
+ *                          {@literal @}SystemParameters(
+ *                          name = "systemParameterName",
+ *                      description = "Description of the system parameter.",
+ *                      defaultValue = "defaultValue1",
+ *                      possibleParameters = {"defaultValue1", "defaultValue2", "defaultValue3"}
+ *                      ),
  *                      },
  *                      ...
  *      )
@@ -42,16 +44,12 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({})
-public @interface Parameter {
+public @interface SystemParameter {
     String name() default "";
-
-    DataType[] type() default {};
 
     String description() default "";
 
-    boolean optional() default false;
-
-    boolean dynamic() default false;
-
     String defaultValue() default "";
+
+    String[] possibleParameters() default {}; //Optional
 }

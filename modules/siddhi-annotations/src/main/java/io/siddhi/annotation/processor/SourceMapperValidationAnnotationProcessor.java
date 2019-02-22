@@ -15,12 +15,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.annotation.processor;
+package io.siddhi.annotation.processor;
 
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.ReturnAttribute;
-import org.wso2.siddhi.annotation.util.AnnotationConstants;
-import org.wso2.siddhi.annotation.util.AnnotationValidationException;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ReturnAttribute;
+import io.siddhi.annotation.util.AnnotationConstants;
+import io.siddhi.annotation.util.AnnotationValidationException;
 
 import java.text.MessageFormat;
 

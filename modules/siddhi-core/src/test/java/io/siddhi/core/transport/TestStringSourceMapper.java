@@ -18,8 +18,8 @@
 
 package io.siddhi.core.transport;
 
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
 import io.siddhi.core.stream.input.source.PassThroughSourceMapper;
 
 /**

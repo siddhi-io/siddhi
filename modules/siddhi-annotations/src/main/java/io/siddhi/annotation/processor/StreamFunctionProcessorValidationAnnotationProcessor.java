@@ -15,19 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.annotation.processor;
+package io.siddhi.annotation.processor;
 
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.ReturnAttribute;
-import org.wso2.siddhi.annotation.util.AnnotationValidationException;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.ReturnAttribute;
+import io.siddhi.annotation.util.AnnotationValidationException;
 
 import java.text.MessageFormat;
 
 /**
- * This processor will extend the validation rules for validate Window Processor specific annotation contents.
+ * This processor will extend the validation rules for validate Stream Function specific annotation contents.
  */
-public class WindowProcessorValidationAnnotationProcessor extends AbstractAnnotationProcessor {
-    public WindowProcessorValidationAnnotationProcessor(String extensionClassFullName) {
+public class StreamFunctionProcessorValidationAnnotationProcessor extends AbstractAnnotationProcessor {
+    public StreamFunctionProcessorValidationAnnotationProcessor(String extensionClassFullName) {
         super(extensionClassFullName);
     }
 
@@ -54,7 +54,7 @@ public class WindowProcessorValidationAnnotationProcessor extends AbstractAnnota
             //Check if the @Parameter type is empty.
             if (parameter.type().length == 0) {
                 throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @Parameter ->" +
-                        " name:{0} -> type annotated in class {1} is null or empty.", parameterName,
+                                " name:{0} -> type annotated in class {1} is null or empty.", parameterName,
                         extensionClassFullName));
             }
             //Check if the @Parameter dynamic property false or empty in the classes extending
@@ -76,11 +76,31 @@ public class WindowProcessorValidationAnnotationProcessor extends AbstractAnnota
 
     @Override
     public void returnAttributesValidation(ReturnAttribute[] returnAttributes) throws AnnotationValidationException {
-        if (returnAttributes != null && returnAttributes.length > 0) {
-            //Throw error for other classes as only in the classes extending
-            //StreamProcessor or StreamFunctionProcessor allowed to have more than one ReturnAttribute.
-            throw new AnnotationValidationException(MessageFormat.format("The @Extension -> @ReturnAttribute " +
-                    "cannot be annotated in class {0}.", extensionClassFullName));
+        for (ReturnAttribute returnAttribute : returnAttributes) {
+            String returnAttributeName = returnAttribute.name();
+            //Check if the @ReturnAttributes name is empty.
+            if (returnAttributeName.isEmpty()) {
+                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
+                        "@ReturnAttribute -> name annotated in class {0} is null or empty.", extensionClassFullName));
+            } else if (!CAMEL_CASE_PATTERN.matcher(returnAttributeName).find()) {
+                //Check if the @Extension -> @ReturnAttribute -> name is in a correct camelCase
+                // format using regex pattern.
+                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
+                                "@ReturnAttribute -> name {0} annotated in class {1} is not in camelCase format.",
+                        returnAttributeName, extensionClassFullName));
+            }
+            //Check if the @ReturnAttributes description is empty.
+            if (returnAttribute.description().isEmpty()) {
+                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
+                                "@ReturnAttribute -> name:{0}  -> description annotated in class {1} is null or empty.",
+                        returnAttributeName, extensionClassFullName));
+            }
+            //Check if the @ReturnAttributes type is empty.
+            if (returnAttribute.type().length == 0) {
+                throw new AnnotationValidationException(MessageFormat.format("The @Extension -> " +
+                                "@ReturnAttribute -> name:{0} -> type annotated in class {1} is null or empty.",
+                        returnAttributeName, extensionClassFullName));
+            }
         }
     }
 }
