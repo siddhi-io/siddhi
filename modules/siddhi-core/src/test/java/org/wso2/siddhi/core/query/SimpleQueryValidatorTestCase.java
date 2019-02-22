@@ -19,8 +19,8 @@ package org.wso2.siddhi.core.query;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.util.parser.SiddhiAppParser;

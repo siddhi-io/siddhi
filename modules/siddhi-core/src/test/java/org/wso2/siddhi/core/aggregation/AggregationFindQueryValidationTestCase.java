@@ -20,8 +20,8 @@ package org.wso2.siddhi.core.aggregation;
 
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.StoreQueryCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;

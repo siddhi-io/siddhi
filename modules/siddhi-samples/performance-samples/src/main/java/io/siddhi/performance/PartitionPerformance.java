@@ -18,8 +18,8 @@
 
 package io.siddhi.performance;
 
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;

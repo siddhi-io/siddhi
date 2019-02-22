@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.core;
+package io.siddhi.core;
 
 import com.lmax.disruptor.ExceptionHandler;
 import org.apache.log4j.Logger;

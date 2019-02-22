@@ -21,7 +21,7 @@ package io.siddhi.core.util;
 import io.siddhi.core.util.lock.LockSynchronizer;
 import io.siddhi.core.util.parser.AggregationParser;
 import io.siddhi.core.window.Window;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;

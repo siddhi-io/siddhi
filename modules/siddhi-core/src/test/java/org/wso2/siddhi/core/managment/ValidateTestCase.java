@@ -21,7 +21,7 @@ package org.wso2.siddhi.core.managment;
 import org.apache.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.SiddhiManager;
+import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 
 public class ValidateTestCase {

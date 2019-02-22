@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.core;
+package io.siddhi.core;
 
 import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.apache.log4j.Logger;

@@ -18,6 +18,8 @@
 
 package org.wso2.siddhi.core;
 
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
 import org.apache.log4j.Logger;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;

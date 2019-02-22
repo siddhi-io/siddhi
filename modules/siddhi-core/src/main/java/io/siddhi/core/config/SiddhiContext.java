@@ -19,6 +19,7 @@
 package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
+import io.siddhi.core.SiddhiManager;
 import org.apache.log4j.Logger;
 import io.siddhi.core.exception.PersistenceStoreException;
 import io.siddhi.core.stream.input.source.SourceHandlerManager;
@@ -38,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 
 /**
- * Context information holder associated with {@link org.wso2.siddhi.core.SiddhiManager}
+ * Context information holder associated with {@link SiddhiManager}
  */
 public class SiddhiContext {
 

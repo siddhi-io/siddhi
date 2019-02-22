@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.core;
 
+import io.siddhi.core.SiddhiAppRuntime;
 import org.testng.AssertJUnit;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.output.callback.QueryCallback;
