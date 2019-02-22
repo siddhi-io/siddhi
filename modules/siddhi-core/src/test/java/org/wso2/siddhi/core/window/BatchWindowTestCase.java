@@ -36,6 +36,8 @@ public class BatchWindowTestCase {
     private int inEventCount;
     private int removeEventCount;
     private int chunkCount;
+    private int generalChunkSize;
+    private int lastChunkSize;
     private boolean eventArrived;
 
     @BeforeMethod
@@ -292,12 +294,17 @@ public class BatchWindowTestCase {
                 chunkCount = chunkCount + 1;
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
+                    if (chunkCount != 8) {
+                        generalChunkSize = inEvents.length;
+                    } else {
+                        lastChunkSize = inEvents.length;
+                    }
                 }
                 if (removeEvents != null) {
                     removeEventCount = removeEventCount + removeEvents.length;
                 }
                 eventArrived = true;
-
+                AssertJUnit.assertEquals(4, generalChunkSize);
             }
         });
 
@@ -319,6 +326,7 @@ public class BatchWindowTestCase {
         Thread.sleep(1000);
         AssertJUnit.assertEquals(30, inEventCount);
         AssertJUnit.assertEquals(20, removeEventCount);
+        AssertJUnit.assertEquals(2, lastChunkSize);
         AssertJUnit.assertEquals(8, chunkCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
@@ -351,65 +359,13 @@ public class BatchWindowTestCase {
                 chunkCount = chunkCount + 1;
                 if (inEvents != null) {
                     inEventCount = inEventCount + inEvents.length;
-                }
-                if (removeEvents != null) {
-                    removeEventCount = removeEventCount + removeEvents.length;
-                }
-                eventArrived = true;
+                    if (chunkCount == 1) {
+                        AssertJUnit.assertEquals(20, inEvents.length);
+                    }
+                    if (chunkCount == 2) {
+                        AssertJUnit.assertEquals(10, inEvents.length);
+                    }
 
-            }
-        });
-
-
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
-        siddhiAppRuntime.start();
-        int length1 = 20;
-        int length2 = 10;
-        Event[] eventsSet1 = new Event[length1];
-        Event[] eventsSet2 = new Event[length2];
-        for (int i = 0; i < length1; i++) {
-            eventsSet1[i] = new Event(System.currentTimeMillis(), new Object[]{"WSO2", i * 2.5f, 10L});
-            if (i < length2) {
-                eventsSet2[i] = new Event(System.currentTimeMillis(), new Object[]{"IBM", i * 2.5f, 10L});
-            }
-        }
-        inputHandler.send(eventsSet1);
-        inputHandler.send(eventsSet2);
-        Thread.sleep(1000);
-        AssertJUnit.assertEquals(30, inEventCount);
-        AssertJUnit.assertEquals(20, removeEventCount);
-        AssertJUnit.assertEquals(2, chunkCount);
-        AssertJUnit.assertTrue(eventArrived);
-        siddhiAppRuntime.shutdown();
-    }
-
-    @Test
-    public void testBatchWindow7() throws InterruptedException {
-        log.info("BatchWindow test7 - process batches with size less than the given chunk size");
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        String cseEventStream = "" +
-                "define stream cseEventStream (symbol string, price float, volume long); " +
-                "define window cseEventWindow (symbol string, price float, volume long) batch(30) output all events; ";
-        String query = "" +
-                "@info(name = 'query0') " +
-                "from cseEventStream " +
-                "insert into cseEventWindow; " +
-                "" +
-                "@info(name = 'query1') " +
-                "from cseEventWindow " +
-                "select * " +
-                "insert all events into outputStream ;";
-
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
-
-        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                chunkCount = chunkCount + 1;
-                if (inEvents != null) {
-                    inEventCount = inEventCount + inEvents.length;
                 }
                 if (removeEvents != null) {
                     removeEventCount = removeEventCount + removeEvents.length;
@@ -443,7 +399,7 @@ public class BatchWindowTestCase {
     }
 
     @Test(expectedExceptions = {SiddhiAppValidationException.class, SiddhiAppCreationException.class})
-    public void testBatchWindow8() throws InterruptedException {
+    public void testBatchWindow7() throws InterruptedException {
         log.info("BatchWindow test8 - check the SiddhiAppValidationException, SiddhiAppCreationException " +
                 "for multiple parameters");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -481,7 +437,7 @@ public class BatchWindowTestCase {
     }
 
     @Test(expectedExceptions = {SiddhiAppValidationException.class, SiddhiAppCreationException.class})
-    public void testBatchWindow9() throws InterruptedException {
+    public void testBatchWindow8() throws InterruptedException {
         log.info("BatchWindow test9 - check the SiddhiAppValidationException, SiddhiAppCreationException " +
                 "for wrong parameters");
         SiddhiManager siddhiManager = new SiddhiManager();
