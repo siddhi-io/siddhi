@@ -18,15 +18,15 @@
 
 package io.siddhi.core.transport;
 
-import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.core.util.transport.InMemoryBroker;
+import org.apache.log4j.Logger;
+import org.testng.AssertJUnit;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;

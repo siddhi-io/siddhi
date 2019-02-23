@@ -18,7 +18,6 @@
 package io.siddhi.query.api;
 
 
-import org.testng.annotations.Test;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.output.stream.OutputStream;
@@ -26,6 +25,7 @@ import io.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.testng.annotations.Test;
 
 public class TableQueryTestCase {
 

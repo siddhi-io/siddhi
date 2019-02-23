@@ -17,7 +17,6 @@
  */
 package io.siddhi.core.executor.function;
 
-import org.apache.log4j.Logger;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -30,6 +29,7 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 

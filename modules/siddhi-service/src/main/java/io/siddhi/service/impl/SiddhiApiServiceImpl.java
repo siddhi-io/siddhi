@@ -17,9 +17,6 @@
 package io.siddhi.service.impl;
 
 import com.google.gson.Gson;
-import io.siddhi.service.util.SiddhiAppConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.stream.input.InputHandler;
@@ -29,7 +26,10 @@ import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.service.api.ApiResponseMessage;
 import io.siddhi.service.api.NotFoundException;
 import io.siddhi.service.api.SiddhiApiService;
+import io.siddhi.service.util.SiddhiAppConfiguration;
 import io.siddhi.service.util.SiddhiServiceConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Map;
 import java.util.Set;

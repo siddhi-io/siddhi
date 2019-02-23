@@ -19,7 +19,6 @@
 package io.siddhi.core;
 
 import com.lmax.disruptor.ExceptionHandler;
-import org.apache.log4j.Logger;
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.debugger.SiddhiDebugger;
@@ -71,6 +70,7 @@ import io.siddhi.query.api.definition.WindowDefinition;
 import io.siddhi.query.api.exception.SiddhiAppContextException;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.compiler.SiddhiCompiler;
+import org.apache.log4j.Logger;
 
 import java.beans.ExceptionListener;
 import java.util.ArrayList;

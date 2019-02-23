@@ -123,7 +123,7 @@ public class Annotation implements SiddhiElement {
             }
         }
         if (annotations != null && annotations.size() > 0) {
-         
+
             for (Annotation annotation : annotations) {
                 if (!isFirst) {
                     definitionBuilder.append(", ");

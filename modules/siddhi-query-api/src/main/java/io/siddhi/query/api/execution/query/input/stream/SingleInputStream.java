@@ -53,7 +53,7 @@ public class SingleInputStream extends InputStream {
     }
 
     public SingleInputStream(String streamReferenceId, String streamId, boolean isInnerStream) {
-      this(streamReferenceId, streamId, isInnerStream, false);
+        this(streamReferenceId, streamId, isInnerStream, false);
     }
 
     public SingleInputStream(String streamReferenceId, String streamId, boolean isInnerStream, boolean isFaultStream) {

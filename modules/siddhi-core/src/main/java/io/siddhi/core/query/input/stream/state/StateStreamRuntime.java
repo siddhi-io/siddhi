@@ -18,18 +18,18 @@
 
 package io.siddhi.core.query.input.stream.state;
 
-import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
+import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.query.input.ProcessStreamReceiver;
+import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import io.siddhi.core.query.input.stream.state.receiver.SequenceMultiProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.state.receiver.SequenceSingleProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.state.runtime.InnerStateRuntime;
-import io.siddhi.core.query.processor.Processor;
-import io.siddhi.core.query.input.stream.StreamRuntime;
-import io.siddhi.core.query.input.stream.state.receiver.SequenceMultiProcessStreamReceiver;
 import io.siddhi.core.query.processor.ProcessingMode;
+import io.siddhi.core.query.processor.Processor;
 
 import java.util.List;
 

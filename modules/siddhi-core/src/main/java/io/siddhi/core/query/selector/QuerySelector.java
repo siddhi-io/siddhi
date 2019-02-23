@@ -17,11 +17,6 @@
  */
 package io.siddhi.core.query.selector;
 
-import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
-import io.siddhi.core.query.processor.Processor;
-import io.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
-import io.siddhi.core.query.selector.attribute.processor.executor.GroupByAggregationAttributeExecutor;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -30,8 +25,13 @@ import io.siddhi.core.event.state.populater.StateEventPopulator;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.condition.ConditionExpressionExecutor;
+import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
+import io.siddhi.core.query.processor.Processor;
+import io.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
+import io.siddhi.core.query.selector.attribute.processor.executor.GroupByAggregationAttributeExecutor;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.execution.query.selection.Selector;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

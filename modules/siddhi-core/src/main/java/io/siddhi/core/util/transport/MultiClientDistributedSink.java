@@ -18,7 +18,6 @@
 
 package io.siddhi.core.util.transport;
 
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.stream.output.sink.Sink;
@@ -31,6 +30,7 @@ import io.siddhi.core.util.extension.holder.SinkExecutorExtensionHolder;
 import io.siddhi.core.util.parser.helper.DefinitionParserHelper;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.extension.Extension;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;

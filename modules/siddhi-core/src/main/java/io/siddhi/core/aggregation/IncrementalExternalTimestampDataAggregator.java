@@ -20,8 +20,8 @@ package io.siddhi.core.aggregation;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
@@ -42,7 +42,8 @@ public class IncrementalExternalTimestampDataAggregator {
 
     public IncrementalExternalTimestampDataAggregator(List<ExpressionExecutor> baseExecutors,
                                                       GroupByKeyGenerator groupByKeyGenerator,
-                                                      MetaStreamEvent metaStreamEvent, SiddhiAppContext siddhiAppContext,
+                                                      MetaStreamEvent metaStreamEvent,
+                                                      SiddhiAppContext siddhiAppContext,
                                                       ExpressionExecutor shouldUpdateExpressionExecutor) {
         StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 10);
 
@@ -67,6 +68,7 @@ public class IncrementalExternalTimestampDataAggregator {
         }
         return createEventChunkFromAggregatedData();
     }
+
     private void process(StreamEvent streamEvent, BaseIncrementalValueStore baseIncrementalValueStore) {
         List<ExpressionExecutor> expressionExecutors = baseIncrementalValueStore.getExpressionExecutors();
         boolean shouldUpdate = true;

@@ -18,8 +18,6 @@
 
 package io.siddhi.core.util.parser;
 
-import io.siddhi.core.util.SiddhiConstants;
-import org.apache.log4j.Logger;
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.state.MetaStateEvent;
@@ -45,6 +43,7 @@ import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.stream.window.QueryableProcessor;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.table.Table;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.collection.operator.IncrementalAggregateCompileCondition;
@@ -70,6 +69,7 @@ import io.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream;
 import io.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;

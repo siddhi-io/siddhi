@@ -17,8 +17,6 @@
  */
 package io.siddhi.core.util.snapshot;
 
-import io.siddhi.core.util.persistence.util.IncrementalSnapshotInfo;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.CannotClearSiddhiAppStateException;
 import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
@@ -27,9 +25,11 @@ import io.siddhi.core.exception.PersistenceStoreException;
 import io.siddhi.core.util.ThreadBarrier;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
+import io.siddhi.core.util.persistence.util.IncrementalSnapshotInfo;
 import io.siddhi.core.util.persistence.util.PersistenceHelper;
 import io.siddhi.core.util.snapshot.state.SnapshotState;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
+import org.apache.log4j.Logger;
 
 import java.util.Comparator;
 import java.util.HashMap;

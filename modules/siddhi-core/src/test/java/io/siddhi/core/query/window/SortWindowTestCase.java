@@ -19,10 +19,6 @@
 package io.siddhi.core.query.window;
 
 
-import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
@@ -31,6 +27,10 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
+import org.apache.log4j.Logger;
+import org.testng.AssertJUnit;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -144,7 +144,8 @@ public class SortWindowTestCase {
 
     }
 
-    @Test public void sortWindowTest3() throws InterruptedException {
+    @Test
+    public void sortWindowTest3() throws InterruptedException {
         log.info("sortWindowTest3");
 
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -159,7 +160,8 @@ public class SortWindowTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         try {
             siddhiAppRuntime.addCallback("query1", new QueryCallback() {
-                @Override public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                @Override
+                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
                     if (inEvents != null) {
                         atomicCount.addAndGet(inEvents.length);
@@ -173,12 +175,12 @@ public class SortWindowTestCase {
             InputHandler cseEventStreamHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
             InputHandler twitterStreamHandler = siddhiAppRuntime.getInputHandler("twitterStream");
             siddhiAppRuntime.start();
-            cseEventStreamHandler.send(new Object[] { "WSO2", 55.6f, 100 });
-            cseEventStreamHandler.send(new Object[] { "IBM", 59.6f, 101 });
-            twitterStreamHandler.send(new Object[] { 10, "Hello World", "WSO2" });
-            twitterStreamHandler.send(new Object[] { 15, "Hello World2", "WSO2" });
-            cseEventStreamHandler.send(new Object[] { "IBM", 75.6f, 90 });
-            twitterStreamHandler.send(new Object[] { 5, "Hello World2", "IBM" });
+            cseEventStreamHandler.send(new Object[]{"WSO2", 55.6f, 100});
+            cseEventStreamHandler.send(new Object[]{"IBM", 59.6f, 101});
+            twitterStreamHandler.send(new Object[]{10, "Hello World", "WSO2"});
+            twitterStreamHandler.send(new Object[]{15, "Hello World2", "WSO2"});
+            cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, 90});
+            twitterStreamHandler.send(new Object[]{5, "Hello World2", "IBM"});
             SiddhiTestHelper.waitForEvents(100, 3, atomicCount, 10000);
             AssertJUnit.assertEquals(3, atomicCount.get());
             AssertJUnit.assertTrue(eventArrived);
@@ -187,7 +189,8 @@ public class SortWindowTestCase {
         }
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class) public void sortWindowTest4()
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void sortWindowTest4()
             throws InterruptedException {
         log.info("sortWindowTest4");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -200,7 +203,8 @@ public class SortWindowTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class) public void sortWindowTest5()
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void sortWindowTest5()
             throws InterruptedException {
         log.info("sortWindowTest5");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -212,7 +216,8 @@ public class SortWindowTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class) public void sortWindowTest6()
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    public void sortWindowTest6()
             throws InterruptedException {
         log.info("sortWindowTest6");
         SiddhiManager siddhiManager = new SiddhiManager();

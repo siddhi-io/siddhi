@@ -18,7 +18,6 @@
 
 package io.siddhi.core.stream.output.sink;
 
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
@@ -36,6 +35,7 @@ import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.StreamDefinition;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -49,6 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class Sink implements SinkListener, Snapshotable {
 
     private static final Logger LOG = Logger.getLogger(Sink.class);
+    protected AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
     private StreamDefinition streamDefinition;
     private String type;
     private SinkMapper mapper;
@@ -57,8 +58,6 @@ public abstract class Sink implements SinkListener, Snapshotable {
     private String elementId;
     private SiddhiAppContext siddhiAppContext;
     private OnErrorAction onErrorAction;
-
-    protected AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
     private BackoffRetryCounter backoffRetryCounter = new BackoffRetryCounter();
     private BackoffRetryCounter backoffPublishRetryCounter = new BackoffRetryCounter();
     private AtomicBoolean isConnected = new AtomicBoolean(false);
@@ -279,7 +278,7 @@ public abstract class Sink implements SinkListener, Snapshotable {
     void onError(Object payload, Exception e) {
         switch (onErrorAction) {
             case STREAM:
-                throw  new SiddhiAppRuntimeException("Dropping event at Sink '"
+                throw new SiddhiAppRuntimeException("Dropping event at Sink '"
                         + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
                         + "event dropped '" + payload + "'", e);
             case WAIT:
@@ -296,6 +295,13 @@ public abstract class Sink implements SinkListener, Snapshotable {
         }
     }
 
+    private void retryWait(long waitTime) {
+        try {
+            Thread.sleep(waitTime);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
     /**
      * Different Type of On Error Actions
      */
@@ -303,12 +309,5 @@ public abstract class Sink implements SinkListener, Snapshotable {
         LOG,
         WAIT,
         STREAM
-    }
-
-    private void retryWait(long waitTime) {
-        try {
-            Thread.sleep(waitTime);
-        } catch (InterruptedException ignored) {
-        }
     }
 }

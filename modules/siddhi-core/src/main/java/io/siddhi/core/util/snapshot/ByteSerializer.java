@@ -18,9 +18,9 @@
 
 package io.siddhi.core.util.snapshot;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.util.ExceptionUtil;
 import org.apache.log4j.Logger;
-import io.siddhi.core.config.SiddhiAppContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

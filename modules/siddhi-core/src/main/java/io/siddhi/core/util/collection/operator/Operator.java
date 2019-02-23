@@ -42,6 +42,6 @@ public interface Operator extends CompiledCondition {
 
     ComplexEventChunk<StreamEvent> tryUpdate(ComplexEventChunk<StateEvent> updatingOrAddingEventChunk,
                                              Object storeEvents,
-                                            InMemoryCompiledUpdateSet compiledUpdateSet,
+                                             InMemoryCompiledUpdateSet compiledUpdateSet,
                                              AddingStreamEventExtractor addingStreamEventExtractor);
 }

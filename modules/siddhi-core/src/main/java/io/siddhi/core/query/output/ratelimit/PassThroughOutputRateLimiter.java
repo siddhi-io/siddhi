@@ -18,8 +18,8 @@
 package io.siddhi.core.query.output.ratelimit;
 
 
-import org.apache.log4j.Logger;
 import io.siddhi.core.event.ComplexEventChunk;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 

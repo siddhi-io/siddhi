@@ -19,7 +19,6 @@
 package io.siddhi.core.query.output.ratelimit.time;
 
 
-import org.apache.log4j.Logger;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
@@ -28,6 +27,7 @@ import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.Schedulable;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;

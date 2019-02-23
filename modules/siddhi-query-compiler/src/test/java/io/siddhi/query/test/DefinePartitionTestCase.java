@@ -18,12 +18,12 @@
 
 package io.siddhi.query.test;
 
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.query.api.execution.partition.Partition;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.compiler.SiddhiCompiler;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 /**
  * Partition testing testcase

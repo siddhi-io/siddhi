@@ -17,7 +17,6 @@
  */
 package io.siddhi.core.executor.function;
 
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.exception.SiddhiAppCreationException;
@@ -26,6 +25,7 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.Snapshotable;
+import org.apache.log4j.Logger;
 
 /**
  * Parent abstract class for Function Executors. Function executor will have one or more input parameters and single

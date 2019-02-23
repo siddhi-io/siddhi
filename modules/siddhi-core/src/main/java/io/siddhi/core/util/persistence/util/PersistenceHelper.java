@@ -20,10 +20,10 @@ package io.siddhi.core.util.persistence.util;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.PersistenceStoreException;
+import io.siddhi.core.util.snapshot.AsyncIncrementalSnapshotPersistor;
 import io.siddhi.core.util.snapshot.AsyncSnapshotPersistor;
 import io.siddhi.core.util.snapshot.IncrementalSnapshot;
 import io.siddhi.core.util.snapshot.PersistenceReference;
-import io.siddhi.core.util.snapshot.AsyncIncrementalSnapshotPersistor;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -17,8 +17,8 @@
  */
 package io.siddhi.core.executor.condition.compare.greaterthanequal;
 
-import io.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.condition.compare.CompareConditionExpressionExecutor;
 
 /**
  * Parent Executor class for Greater Than or Equal condition. Data type specific sub classes will extend this.

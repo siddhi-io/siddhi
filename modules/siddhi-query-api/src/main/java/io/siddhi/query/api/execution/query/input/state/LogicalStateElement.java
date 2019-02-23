@@ -90,14 +90,6 @@ public class LogicalStateElement implements StateElement {
         return result;
     }
 
-    /**
-     * Different type of logical condition
-     */
-    public enum Type {
-        AND,
-        OR
-    }
-
     @Override
     public int[] getQueryContextStartIndex() {
         return queryContextStartIndex;
@@ -116,5 +108,13 @@ public class LogicalStateElement implements StateElement {
     @Override
     public void setQueryContextEndIndex(int[] lineAndColumn) {
         queryContextEndIndex = lineAndColumn;
+    }
+
+    /**
+     * Different type of logical condition
+     */
+    public enum Type {
+        AND,
+        OR
     }
 }

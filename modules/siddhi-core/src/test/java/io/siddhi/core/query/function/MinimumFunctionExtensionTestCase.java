@@ -18,10 +18,6 @@
 
 package io.siddhi.core.query.function;
 
-import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
@@ -29,6 +25,10 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
+import org.apache.log4j.Logger;
+import org.testng.AssertJUnit;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class MinimumFunctionExtensionTestCase {
     private static final Logger log = Logger.getLogger(MinimumFunctionExtensionTestCase.class);
@@ -287,8 +287,8 @@ public class MinimumFunctionExtensionTestCase {
 
         String inStreamDefinition = "define stream inputStream (price1 object,price2 double, price3 double);";
         String query = ("@info(name = 'query1') from inputStream " +
-                        "select minimum(price1, price2, price3) as min " +
-                        "insert into outputStream;");
+                "select minimum(price1, price2, price3) as min " +
+                "insert into outputStream;");
         siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
     }
 
@@ -299,8 +299,8 @@ public class MinimumFunctionExtensionTestCase {
 
         String inStreamDefinition = "define stream inputStream (price1 double,price2 double, price3 object);";
         String query = ("@info(name = 'query1') from inputStream " +
-                        "select minimum(price1, price2, price3) as min " +
-                        "insert into outputStream;");
+                "select minimum(price1, price2, price3) as min " +
+                "insert into outputStream;");
         siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
     }
 
@@ -311,8 +311,8 @@ public class MinimumFunctionExtensionTestCase {
 
         String inStreamDefinition = "define stream inputStream (price1 float, price2 float, price3 float);";
         String query = ("@info(name = 'query1') from inputStream " +
-                        "select minimum(price1, price2, price3) as min " +
-                        "insert into outputStream;");
+                "select minimum(price1, price2, price3) as min " +
+                "insert into outputStream;");
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
 
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
@@ -372,8 +372,8 @@ public class MinimumFunctionExtensionTestCase {
 
         String inStreamDefinition = "define stream inputStream (price1 long,price2 long, price3 long);";
         String query = ("@info(name = 'query1') from inputStream " +
-                        "select minimum(price1, price2, price3) as min " +
-                        "insert into outputStream;");
+                "select minimum(price1, price2, price3) as min " +
+                "insert into outputStream;");
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
 
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {

@@ -48,6 +48,16 @@ import io.siddhi.query.api.definition.Attribute;
 
 import java.util.List;
 
+import static io.siddhi.core.util.SiddhiConstants.BEFORE_WINDOW_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.HAVING_STATE;
+import static io.siddhi.core.util.SiddhiConstants.ON_AFTER_WINDOW_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.OUTPUT_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.STATE_OUTPUT_DATA_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.STREAM_ATTRIBUTE_INDEX_IN_TYPE;
+import static io.siddhi.core.util.SiddhiConstants.STREAM_ATTRIBUTE_TYPE_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.STREAM_EVENT_CHAIN_INDEX;
+import static io.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
+
 /**
  * Utility class for queryParser to help with QueryRuntime
  * generation.
@@ -59,7 +69,7 @@ public class QueryParserHelper {
             MetaStateEvent metaStateEvent = (MetaStateEvent) metaComplexEvent;
             for (MetaStateEventAttribute attribute : metaStateEvent.getOutputDataAttributes()) {
                 if (attribute != null) {
-                    metaStateEvent.getMetaStreamEvent(attribute.getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX])
+                    metaStateEvent.getMetaStreamEvent(attribute.getPosition()[STREAM_EVENT_CHAIN_INDEX])
                             .addOutputData(attribute.getAttribute());
                 }
             }
@@ -96,15 +106,16 @@ public class QueryParserHelper {
                                               List<VariableExpressionExecutor> variableExpressionExecutorList) {
 
         for (VariableExpressionExecutor variableExpressionExecutor : variableExpressionExecutorList) {
-            int streamEventChainIndex = variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX];
-            if (streamEventChainIndex == SiddhiConstants.HAVING_STATE) {
+            int streamEventChainIndex = variableExpressionExecutor.
+                    getPosition()[STREAM_EVENT_CHAIN_INDEX];
+            if (streamEventChainIndex == HAVING_STATE) {
                 if (metaComplexEvent instanceof MetaStreamEvent) {
-                    variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_ATTRIBUTE_TYPE_INDEX] = SiddhiConstants.OUTPUT_DATA_INDEX;
+                    variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_TYPE_INDEX] = OUTPUT_DATA_INDEX;
                 } else {
-                    variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_ATTRIBUTE_TYPE_INDEX] = SiddhiConstants.STATE_OUTPUT_DATA_INDEX;
+                    variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_TYPE_INDEX] = STATE_OUTPUT_DATA_INDEX;
                 }
-                variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX] = SiddhiConstants.UNKNOWN_STATE;
-                variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_ATTRIBUTE_INDEX_IN_TYPE] = metaComplexEvent
+                variableExpressionExecutor.getPosition()[STREAM_EVENT_CHAIN_INDEX] = UNKNOWN_STATE;
+                variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_INDEX_IN_TYPE] = metaComplexEvent
                         .getOutputStreamDefinition().getAttributeList()
                         .indexOf(variableExpressionExecutor.getAttribute());
                 continue;
@@ -125,16 +136,16 @@ public class QueryParserHelper {
             }
 
             if (metaStreamEvent.getOutputData().contains(variableExpressionExecutor.getAttribute())) {
-                variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_ATTRIBUTE_TYPE_INDEX] = SiddhiConstants.OUTPUT_DATA_INDEX;
-                variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_ATTRIBUTE_INDEX_IN_TYPE] = metaStreamEvent
+                variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_TYPE_INDEX] = OUTPUT_DATA_INDEX;
+                variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_INDEX_IN_TYPE] = metaStreamEvent
                         .getOutputData().indexOf(variableExpressionExecutor.getAttribute());
             } else if (metaStreamEvent.getOnAfterWindowData().contains(variableExpressionExecutor.getAttribute())) {
-                variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_ATTRIBUTE_TYPE_INDEX] = SiddhiConstants.ON_AFTER_WINDOW_DATA_INDEX;
-                variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_ATTRIBUTE_INDEX_IN_TYPE] = metaStreamEvent
+                variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_TYPE_INDEX] = ON_AFTER_WINDOW_DATA_INDEX;
+                variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_INDEX_IN_TYPE] = metaStreamEvent
                         .getOnAfterWindowData().indexOf(variableExpressionExecutor.getAttribute());
             } else if (metaStreamEvent.getBeforeWindowData().contains(variableExpressionExecutor.getAttribute())) {
-                variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_ATTRIBUTE_TYPE_INDEX] = SiddhiConstants.BEFORE_WINDOW_DATA_INDEX;
-                variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_ATTRIBUTE_INDEX_IN_TYPE] = metaStreamEvent
+                variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_TYPE_INDEX] = BEFORE_WINDOW_DATA_INDEX;
+                variableExpressionExecutor.getPosition()[STREAM_ATTRIBUTE_INDEX_IN_TYPE] = metaStreamEvent
                         .getBeforeWindowData().indexOf(variableExpressionExecutor.getAttribute());
             }
         }

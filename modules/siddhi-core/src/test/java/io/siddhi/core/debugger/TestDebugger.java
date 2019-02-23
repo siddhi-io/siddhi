@@ -17,10 +17,6 @@
  */
 package io.siddhi.core.debugger;
 
-import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.ComplexEvent;
@@ -28,6 +24,10 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
+import org.apache.log4j.Logger;
+import org.testng.AssertJUnit;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;

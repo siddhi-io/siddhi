@@ -18,13 +18,13 @@
 
 package io.siddhi.query.test;
 
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 /**
  * Stream definition testing testcase

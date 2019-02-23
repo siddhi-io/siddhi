@@ -18,13 +18,13 @@
 
 package io.siddhi.core.aggregation;
 
-import org.apache.log4j.Logger;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.StoreQueryCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
+import org.apache.log4j.Logger;
+import org.testng.annotations.Test;
 
 public class AggregationFindQueryValidationTestCase {
 
@@ -83,7 +83,7 @@ public class AggregationFindQueryValidationTestCase {
                 "select * " +
                 "insert into ignore;";
 
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream  + triggerStream + query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(stockStream + triggerStream + query);
         try {
             InputHandler triggerStreamInputHandler = siddhiAppRuntime.getInputHandler("triggerStream");
             siddhiAppRuntime.start();

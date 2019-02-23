@@ -18,9 +18,6 @@
 
 package io.siddhi.core.util;
 
-import io.siddhi.core.util.lock.LockSynchronizer;
-import io.siddhi.core.util.parser.AggregationParser;
-import io.siddhi.core.window.Window;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
@@ -39,7 +36,10 @@ import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.trigger.Trigger;
+import io.siddhi.core.util.lock.LockSynchronizer;
+import io.siddhi.core.util.parser.AggregationParser;
 import io.siddhi.core.util.parser.helper.DefinitionParserHelper;
+import io.siddhi.core.window.Window;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.AggregationDefinition;
 import io.siddhi.query.api.definition.FunctionDefinition;

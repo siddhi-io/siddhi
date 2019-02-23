@@ -17,9 +17,9 @@
  */
 package io.siddhi.core.query.input.stream.state.runtime;
 
-import io.siddhi.core.query.input.stream.state.PreStateProcessor;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.input.stream.state.PostStateProcessor;
+import io.siddhi.core.query.input.stream.state.PreStateProcessor;
 import io.siddhi.core.query.input.stream.state.StreamPostStateProcessor;
 import io.siddhi.core.query.input.stream.state.StreamPreStateProcessor;
 import io.siddhi.core.query.processor.Processor;

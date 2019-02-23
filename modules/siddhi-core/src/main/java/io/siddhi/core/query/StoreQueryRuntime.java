@@ -43,6 +43,7 @@ public abstract class StoreQueryRuntime {
 
     /**
      * This method initiates the execution of store query.
+     *
      * @return an array of Events.
      */
     public Event[] execute() {

@@ -33,9 +33,10 @@ public class CustomFunctionExtension extends FunctionExecutor {
 
     /**
      * The initialization method for FunctionExecutor, this method will be called before the other methods
-     *  @param attributeExpressionExecutors are the executors of each function parameters
+     *
+     * @param attributeExpressionExecutors are the executors of each function parameters
      * @param configReader
-     * @param siddhiAppContext         the context of the siddhi app
+     * @param siddhiAppContext             the context of the siddhi app
      */
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,

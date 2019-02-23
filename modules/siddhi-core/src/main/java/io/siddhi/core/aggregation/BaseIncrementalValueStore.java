@@ -18,9 +18,9 @@
 
 package io.siddhi.core.aggregation;
 
-import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.snapshot.Snapshotable;
 
@@ -67,20 +67,16 @@ public class BaseIncrementalValueStore implements Snapshotable {
         this.values = new Object[expressionExecutors.size() + 1];
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
     public void setValue(Object value, int position) {
         values[position] = value;
     }
 
-    public void setProcessed(boolean isProcessed) {
-        this.isProcessed = isProcessed;
-    }
-
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public List<ExpressionExecutor> getExpressionExecutors() {
@@ -89,6 +85,10 @@ public class BaseIncrementalValueStore implements Snapshotable {
 
     public boolean isProcessed() {
         return isProcessed;
+    }
+
+    public void setProcessed(boolean isProcessed) {
+        this.isProcessed = isProcessed;
     }
 
     public StreamEvent createStreamEvent() {

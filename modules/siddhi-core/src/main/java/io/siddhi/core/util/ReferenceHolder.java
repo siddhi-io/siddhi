@@ -23,8 +23,8 @@ import org.osgi.framework.BundleContext;
  * Class to hold references need by siddhi bundle.
  */
 public class ReferenceHolder {
-    private BundleContext bundleContext;    //bundle context for siddhi bundle.
     private static final ReferenceHolder instance = new ReferenceHolder();
+    private BundleContext bundleContext;    //bundle context for siddhi bundle.
 
     private ReferenceHolder() {
         //empty constructor to facilitate singleton.

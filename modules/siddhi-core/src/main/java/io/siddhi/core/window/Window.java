@@ -37,16 +37,16 @@ import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.SiddhiConstants;
-import io.siddhi.core.util.parser.helper.QueryParserHelper;
-import io.siddhi.core.util.statistics.LatencyTracker;
-import io.siddhi.core.util.statistics.MemoryCalculable;
-import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.parser.SingleInputStreamParser;
+import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.MemoryCalculable;
+import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.WindowDefinition;
 import io.siddhi.query.api.execution.query.output.stream.OutputStream;
@@ -327,6 +327,10 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         internalWindowProcessor.clean();
     }
 
+    public ProcessingMode getProcessingMode() {
+        return internalWindowProcessor.getProcessingMode();
+    }
+
     /**
      * PublisherProcessor receives events from the last window processor of Window,
      * filter them depending on user defined output type and publish them to the stream junction.
@@ -400,9 +404,5 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         public void clean() {
             //ignore
         }
-    }
-
-    public ProcessingMode getProcessingMode() {
-        return internalWindowProcessor.getProcessingMode();
     }
 }

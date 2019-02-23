@@ -18,7 +18,6 @@
 package io.siddhi.query.api;
 
 
-import org.testng.annotations.Test;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.state.State;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
@@ -27,6 +26,7 @@ import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.api.expression.constant.TimeConstant;
+import org.testng.annotations.Test;
 
 public class PatternQueryTestCase {
 

@@ -24,7 +24,6 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
-import org.apache.log4j.Logger;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
@@ -34,6 +33,7 @@ import io.siddhi.core.util.IncrementalTimeConverterUtil;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.query.api.aggregation.TimePeriod;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;

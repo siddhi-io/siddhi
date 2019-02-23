@@ -23,13 +23,6 @@ package io.siddhi.core.util.persistence.util;
  */
 public class IncrementalSnapshotInfo {
 
-    /**
-     * Type of incremental snapshot types
-     */
-    public enum SnapshotType {
-        PERIODIC, BASE, INCREMENT
-    }
-
     private String siddhiAppId;
     private String queryName;
     private String elementId;
@@ -92,5 +85,12 @@ public class IncrementalSnapshotInfo {
 
     public void setTime(long time) {
         this.time = time;
+    }
+
+    /**
+     * Type of incremental snapshot types
+     */
+    public enum SnapshotType {
+        PERIODIC, BASE, INCREMENT
     }
 }

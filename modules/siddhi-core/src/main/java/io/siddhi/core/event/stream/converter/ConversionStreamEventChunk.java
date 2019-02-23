@@ -18,12 +18,12 @@
 
 package io.siddhi.core.event.stream.converter;
 
-import io.siddhi.core.event.stream.MetaStreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventPool;
 
 /**
  * A StreamEvent holder that can also convert other events into StreamEvents

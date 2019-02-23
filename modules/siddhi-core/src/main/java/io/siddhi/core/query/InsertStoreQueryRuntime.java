@@ -16,6 +16,7 @@
  * under the License.
  */
 package io.siddhi.core.query;
+
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;

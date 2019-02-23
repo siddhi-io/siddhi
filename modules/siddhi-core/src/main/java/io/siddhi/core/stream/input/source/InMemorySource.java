@@ -18,7 +18,6 @@
 
 package io.siddhi.core.stream.input.source;
 
-import org.apache.log4j.Logger;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -28,6 +27,7 @@ import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.OptionHolder;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 

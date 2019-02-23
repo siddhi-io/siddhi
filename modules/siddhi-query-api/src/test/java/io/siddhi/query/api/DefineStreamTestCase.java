@@ -17,13 +17,12 @@
  */
 package io.siddhi.query.api;
 
-import io.siddhi.query.api.SiddhiApp;
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.exception.DuplicateAttributeException;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 public class DefineStreamTestCase {
 

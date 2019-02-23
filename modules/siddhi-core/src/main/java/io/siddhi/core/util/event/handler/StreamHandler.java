@@ -19,9 +19,9 @@
 package io.siddhi.core.util.event.handler;
 
 import com.lmax.disruptor.EventHandler;
-import org.apache.log4j.Logger;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.StreamJunction;
+import org.apache.log4j.Logger;
 
 import java.beans.ExceptionListener;
 import java.util.LinkedList;
@@ -32,15 +32,15 @@ import java.util.List;
  */
 public class StreamHandler implements EventHandler<EventExchangeHolder> {
 
-    private List<StreamJunction.Receiver> receivers;
-    private int batchSize;
+    private static final Logger log = Logger.getLogger(StreamHandler.class);
     private final String streamName;
     private final String siddhiAppName;
-    private List<Event> eventBuffer = new LinkedList<>();
-    private static final Logger log = Logger.getLogger(StreamHandler.class);
     private final StreamJunction faultStreamJunction;
     private final StreamJunction.OnErrorAction onErrorAction;
     private final ExceptionListener exceptionListener;
+    private List<StreamJunction.Receiver> receivers;
+    private int batchSize;
+    private List<Event> eventBuffer = new LinkedList<>();
 
     public StreamHandler(List<StreamJunction.Receiver> receivers, int batchSize,
                          String streamName, String siddhiAppName, StreamJunction faultStreamJunction,

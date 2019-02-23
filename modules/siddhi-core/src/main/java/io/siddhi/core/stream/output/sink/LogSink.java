@@ -18,7 +18,6 @@
 
 package io.siddhi.core.stream.output.sink;
 
-import org.apache.log4j.Logger;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -29,6 +28,7 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
+import org.apache.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -151,16 +151,6 @@ public class LogSink extends Sink {
         }
     }
 
-    private enum LogPriority {
-        INFO,
-        DEBUG,
-        WARN,
-        FATAL,
-        ERROR,
-        OFF,
-        TRACE
-    }
-
     @Override
     public void connect() throws ConnectionUnavailableException {
         // do nothing
@@ -184,5 +174,15 @@ public class LogSink extends Sink {
     @Override
     public void restoreState(Map<String, Object> state) {
         // no state
+    }
+
+    private enum LogPriority {
+        INFO,
+        DEBUG,
+        WARN,
+        FATAL,
+        ERROR,
+        OFF,
+        TRACE
     }
 }

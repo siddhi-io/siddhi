@@ -234,13 +234,13 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         stateChanged = true;
     }
 
-    public void setStartState(boolean isStartState) {
-        this.isStartState = isStartState;
-    }
-
     @Override
     public boolean isStartState() {
         return isStartState;
+    }
+
+    public void setStartState(boolean isStartState) {
+        this.isStartState = isStartState;
     }
 
     public void setStateEventPool(StateEventPool stateEventPool) {

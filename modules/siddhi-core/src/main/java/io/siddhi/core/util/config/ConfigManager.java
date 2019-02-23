@@ -29,5 +29,5 @@ public interface ConfigManager {
 
     Map<String, String> extractSystemConfigs(String name);
 
-    String extractProperty (String name);
+    String extractProperty(String name);
 }

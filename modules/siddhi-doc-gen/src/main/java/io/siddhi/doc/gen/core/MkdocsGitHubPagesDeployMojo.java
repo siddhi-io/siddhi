@@ -18,6 +18,7 @@
 package io.siddhi.doc.gen.core;
 
 import io.siddhi.doc.gen.core.utils.Constants;
+import io.siddhi.doc.gen.core.utils.DocumentationUtils;
 import io.siddhi.doc.gen.metadata.NamespaceMetaData;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.model.Scm;
@@ -28,7 +29,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import io.siddhi.doc.gen.core.utils.DocumentationUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;

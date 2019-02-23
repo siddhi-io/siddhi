@@ -23,13 +23,12 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.input.SingleProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.state.StateStreamRuntime;
-import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.List;
 
 /**
- * {@link StreamJunction.Receiver} implementation to receive events into sequence queries
+ * {StreamJunction.Receiver} implementation to receive events into sequence queries
  * with single stream.
  */
 public class SequenceSingleProcessStreamReceiver extends SingleProcessStreamReceiver {

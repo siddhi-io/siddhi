@@ -20,7 +20,6 @@ package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
 import io.siddhi.core.SiddhiManager;
-import org.apache.log4j.Logger;
 import io.siddhi.core.exception.PersistenceStoreException;
 import io.siddhi.core.stream.input.source.SourceHandlerManager;
 import io.siddhi.core.stream.output.sink.SinkHandlerManager;
@@ -32,6 +31,7 @@ import io.siddhi.core.util.extension.holder.AbstractExtensionHolder;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.core.util.statistics.metrics.SiddhiMetricsFactory;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -111,12 +111,12 @@ public class SiddhiContext {
         this.incrementalPersistenceStore = incrementalPersistenceStore;
     }
 
-    public void setConfigManager(ConfigManager configManager) {
-        this.configManager = configManager;
-    }
-
     public ConfigManager getConfigManager() {
         return configManager;
+    }
+
+    public void setConfigManager(ConfigManager configManager) {
+        this.configManager = configManager;
     }
 
     public DataSource getSiddhiDataSource(String dataSourceName) {

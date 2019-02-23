@@ -39,9 +39,9 @@ public interface PreStateProcessor extends Processor {
 
     void init();
 
-    void setStartState(boolean isStartState);
-
     boolean isStartState();
+
+    void setStartState(boolean isStartState);
 
     void setWithinEveryPreStateProcessor(PreStateProcessor withinEveryPreStateProcessor);
 

@@ -18,7 +18,6 @@
 
 package io.siddhi.core.transport;
 
-import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -26,6 +25,7 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.stream.input.source.InMemorySource;
+import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.transport.InMemoryBroker;

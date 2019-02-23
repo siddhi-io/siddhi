@@ -18,10 +18,10 @@
 
 package io.siddhi.core.util.snapshot;
 
+import io.siddhi.core.exception.NoPersistenceStoreException;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import io.siddhi.core.util.persistence.util.IncrementalSnapshotInfo;
 import org.apache.log4j.Logger;
-import io.siddhi.core.exception.NoPersistenceStoreException;
 
 /**
  * {@link Runnable} which is responsible for persisting the snapshots that are taken

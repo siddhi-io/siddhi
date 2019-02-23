@@ -17,9 +17,9 @@
  */
 package io.siddhi.core.query;
 
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
+import org.testng.annotations.Test;
 
 /**
  * Test expression comparisons with Boolean values.

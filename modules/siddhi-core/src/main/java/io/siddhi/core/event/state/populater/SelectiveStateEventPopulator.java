@@ -17,8 +17,8 @@
  */
 package io.siddhi.core.event.state.populater;
 
-import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.state.StateEvent;
 
 import java.util.List;
 

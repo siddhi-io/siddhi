@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Constants used by the doc generator and the free marker templates
- *
+ * <p>
  * These constants will be passed onto the freemarker templates as a map
  * These can be accesses using the CONSTANTS variable
  * eg:- CONSTANTS.DOCS_DIRECTORY

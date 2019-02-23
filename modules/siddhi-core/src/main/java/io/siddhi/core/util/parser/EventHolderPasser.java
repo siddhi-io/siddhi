@@ -18,12 +18,6 @@
 
 package io.siddhi.core.util.parser;
 
-import io.siddhi.core.table.holder.EventHolder;
-import io.siddhi.core.table.holder.IndexEventHolder;
-import io.siddhi.core.table.holder.ListEventHolder;
-import io.siddhi.core.table.holder.PrimaryKeyReferenceHolder;
-import io.siddhi.core.util.SiddhiConstants;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
@@ -32,12 +26,18 @@ import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.table.holder.EventHolder;
+import io.siddhi.core.table.holder.IndexEventHolder;
+import io.siddhi.core.table.holder.ListEventHolder;
+import io.siddhi.core.table.holder.PrimaryKeyReferenceHolder;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.util.AnnotationHelper;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;

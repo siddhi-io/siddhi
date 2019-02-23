@@ -98,28 +98,6 @@ public class TimestampGeneratorImpl implements TimestampGenerator {
     }
 
     /**
-     * This {@link Runnable} class is executed by the {@link ScheduledExecutorService}
-     */
-    private class TimeInjector implements Runnable {
-        @Override
-        public void run() {
-            long currentTimestamp = System.currentTimeMillis();
-            synchronized (TimestampGeneratorImpl.this) {
-                heartbeatRunning = false;
-                long diff = currentTimestamp - lastSystemTimestamp;
-                if (diff >= idleTime) {
-                    // Siddhi has not received events for more than idleTime
-                    long newTimestamp = lastEventTimestamp + incrementInMilliseconds;
-                    setCurrentTimestamp(newTimestamp);
-                } else {
-                    // Wait for idleTime from the timestamp if last event arrival
-                    notifyAfter(idleTime - diff);
-                }
-            }
-        }
-    }
-
-    /**
      * Set the timestamp and notify the interested listeners.
      *
      * @param timestamp the timestamp to the {@link TimestampGenerator}
@@ -142,13 +120,6 @@ public class TimestampGeneratorImpl implements TimestampGenerator {
                 notifyAfter(idleTime);
             }
         }
-    }
-
-    /**
-     * Listener used to get notification when a new event comes in.
-     */
-    public interface TimeChangeListener {
-        void onTimeChange(long currentTimestamp);
     }
 
     /**
@@ -182,6 +153,35 @@ public class TimestampGeneratorImpl implements TimestampGenerator {
     public void addTimeChangeListener(TimestampGeneratorImpl.TimeChangeListener listener) {
         synchronized (this) {
             this.timeChangeListeners.add(listener);
+        }
+    }
+
+    /**
+     * Listener used to get notification when a new event comes in.
+     */
+    public interface TimeChangeListener {
+        void onTimeChange(long currentTimestamp);
+    }
+
+    /**
+     * This {@link Runnable} class is executed by the {@link ScheduledExecutorService}
+     */
+    private class TimeInjector implements Runnable {
+        @Override
+        public void run() {
+            long currentTimestamp = System.currentTimeMillis();
+            synchronized (TimestampGeneratorImpl.this) {
+                heartbeatRunning = false;
+                long diff = currentTimestamp - lastSystemTimestamp;
+                if (diff >= idleTime) {
+                    // Siddhi has not received events for more than idleTime
+                    long newTimestamp = lastEventTimestamp + incrementInMilliseconds;
+                    setCurrentTimestamp(newTimestamp);
+                } else {
+                    // Wait for idleTime from the timestamp if last event arrival
+                    notifyAfter(idleTime - diff);
+                }
+            }
         }
     }
 }

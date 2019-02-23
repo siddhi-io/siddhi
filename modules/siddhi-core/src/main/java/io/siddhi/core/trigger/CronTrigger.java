@@ -18,6 +18,14 @@
 
 package io.siddhi.core.trigger;
 
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.stream.StreamJunction;
+import io.siddhi.core.util.ExceptionUtil;
+import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.core.util.statistics.ThroughputTracker;
+import io.siddhi.query.api.definition.TriggerDefinition;
 import org.apache.log4j.Logger;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
@@ -30,14 +38,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
-import io.siddhi.core.config.SiddhiAppContext;
-import io.siddhi.core.event.Event;
-import io.siddhi.core.stream.StreamJunction;
-import io.siddhi.core.util.ExceptionUtil;
-import io.siddhi.core.util.SiddhiConstants;
-import io.siddhi.core.util.parser.helper.QueryParserHelper;
-import io.siddhi.core.util.statistics.ThroughputTracker;
-import io.siddhi.query.api.definition.TriggerDefinition;
 
 /**
  * Implementation of {@link Trigger} which will trigger events based on a cron expression.

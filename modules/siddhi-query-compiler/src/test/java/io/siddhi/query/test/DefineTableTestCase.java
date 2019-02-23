@@ -18,13 +18,13 @@
 
 package io.siddhi.query.test;
 
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 public class DefineTableTestCase {
 

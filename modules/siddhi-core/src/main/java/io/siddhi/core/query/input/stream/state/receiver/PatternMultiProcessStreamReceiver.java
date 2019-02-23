@@ -23,13 +23,12 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.input.StateMultiProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.state.PreStateProcessor;
-import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.List;
 
 /**
- * {@link StreamJunction.Receiver} implementation to receive events into pattern queries
+ * {StreamJunction.Receiver} implementation to receive events into pattern queries
  * with multiple streams.
  */
 public class PatternMultiProcessStreamReceiver extends StateMultiProcessStreamReceiver {

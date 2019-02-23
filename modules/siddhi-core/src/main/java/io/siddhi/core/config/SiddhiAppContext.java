@@ -19,7 +19,6 @@
 package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
-import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.core.function.Script;
 import io.siddhi.core.util.ElementIdGenerator;
 import io.siddhi.core.util.Scheduler;
@@ -28,6 +27,7 @@ import io.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import io.siddhi.core.util.snapshot.SnapshotService;
 import io.siddhi.core.util.statistics.StatisticsManager;
 import io.siddhi.core.util.timestamp.TimestampGenerator;
+import io.siddhi.query.api.SiddhiApp;
 
 import java.beans.ExceptionListener;
 import java.util.ArrayList;
@@ -226,12 +226,12 @@ public class SiddhiAppContext {
         this.siddhiAppString = siddhiAppString;
     }
 
-    public void setIncludedMetrics(List<String> includedMetrics) {
-        this.includedMetrics = includedMetrics;
-    }
-
     public List<String> getIncludedMetrics() {
         return includedMetrics;
+    }
+
+    public void setIncludedMetrics(List<String> includedMetrics) {
+        this.includedMetrics = includedMetrics;
     }
 
     public boolean isTransportChannelCreationEnabled() {

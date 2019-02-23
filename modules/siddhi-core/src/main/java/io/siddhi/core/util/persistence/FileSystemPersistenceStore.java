@@ -19,9 +19,9 @@
 package io.siddhi.core.util.persistence;
 
 import com.google.common.io.Files;
-import org.apache.log4j.Logger;
 import io.siddhi.core.exception.CannotClearSiddhiAppStateException;
 import io.siddhi.core.util.persistence.util.PersistenceConstants;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;

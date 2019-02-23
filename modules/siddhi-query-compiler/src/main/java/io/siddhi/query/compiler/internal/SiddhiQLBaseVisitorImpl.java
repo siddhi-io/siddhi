@@ -17,8 +17,6 @@
  */
 package io.siddhi.query.compiler.internal;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.NotNull;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.SiddhiElement;
 import io.siddhi.query.api.aggregation.TimePeriod;
@@ -89,6 +87,8 @@ import io.siddhi.query.api.util.SiddhiConstants;
 import io.siddhi.query.compiler.SiddhiQLBaseVisitor;
 import io.siddhi.query.compiler.SiddhiQLParser;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;

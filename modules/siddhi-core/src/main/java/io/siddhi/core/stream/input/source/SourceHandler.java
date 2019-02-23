@@ -61,12 +61,12 @@ public abstract class SourceHandler implements InputEventHandlerCallback, Snapsh
         return elementId;
     }
 
-    public void setInputHandler(InputHandler inputHandler) {
-        this.inputHandler = inputHandler;
-    }
-
     public InputHandler getInputHandler() {
         return inputHandler;
+    }
+
+    public void setInputHandler(InputHandler inputHandler) {
+        this.inputHandler = inputHandler;
     }
 
     @Override

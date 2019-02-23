@@ -108,10 +108,10 @@ public abstract class AbstractDefinition implements SiddhiElement {
 
     @Override
     public String toString() {
-       return toString("stream");
+        return toString("stream");
     }
 
-     protected String toString(String type) {
+    protected String toString(String type) {
         StringBuilder definitionBuilder = new StringBuilder();
         if (annotations != null && annotations.size() > 0) {
             for (Annotation annotation : annotations) {
@@ -132,6 +132,7 @@ public abstract class AbstractDefinition implements SiddhiElement {
         definitionBuilder.append(")");
         return definitionBuilder.toString();
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

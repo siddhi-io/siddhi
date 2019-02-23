@@ -17,13 +17,13 @@
  */
 package io.siddhi.query.api;
 
-import org.testng.annotations.Test;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.output.ratelimit.OutputRate;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.testng.annotations.Test;
 
 /**
  * Test case to validate output rate limiting

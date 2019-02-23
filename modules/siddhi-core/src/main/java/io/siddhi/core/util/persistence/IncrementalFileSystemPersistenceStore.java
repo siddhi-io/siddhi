@@ -19,11 +19,11 @@
 package io.siddhi.core.util.persistence;
 
 import com.google.common.io.Files;
-import io.siddhi.core.util.persistence.util.IncrementalSnapshotInfo;
-import org.apache.log4j.Logger;
 import io.siddhi.core.exception.CannotClearSiddhiAppStateException;
+import io.siddhi.core.util.persistence.util.IncrementalSnapshotInfo;
 import io.siddhi.core.util.persistence.util.PersistenceConstants;
 import io.siddhi.core.util.persistence.util.PersistenceHelper;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
             cleanOldRevisions(snapshotInfo);
             if (log.isDebugEnabled()) {
                 log.debug("Incremental persistence of '" + snapshotInfo.getSiddhiAppId() +
-                       "' with revision '" + snapshotInfo.getRevision() + "' persisted successfully.");
+                        "' with revision '" + snapshotInfo.getRevision() + "' persisted successfully.");
             }
         } catch (IOException e) {
             log.error("Cannot save the revision '" + snapshotInfo.getRevision() + "' of SiddhiApp: '" +

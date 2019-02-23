@@ -128,6 +128,7 @@ public class Selector implements SiddhiElement {
                     constant + "'");
         }
     }
+
     public List<OutputAttribute> getSelectionList() {
         return selectionList;
     }

@@ -18,8 +18,8 @@
 package io.siddhi.core.executor.condition.compare;
 
 import io.siddhi.core.event.ComplexEvent;
-import io.siddhi.core.executor.condition.ConditionExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
+import io.siddhi.core.executor.condition.ConditionExpressionExecutor;
 
 /**
  * Parent Executor class for Compare conditions. common evaluation logic is implemented within executor.

@@ -18,7 +18,6 @@
 
 package io.siddhi.core.table.holder;
 
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -33,6 +32,7 @@ import io.siddhi.core.util.snapshot.state.SnapshotState;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -60,6 +60,7 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
 
     private static final Logger log = Logger.getLogger(IndexEventHolder.class);
     private static final long serialVersionUID = 1272291743721603253L;
+    private static final float FULL_SNAPSHOT_THRESHOLD = 2.1f;
     private final Map<Object, StreamEvent> primaryKeyData;
     private final Map<String, TreeMap<Object, Set<StreamEvent>>> indexData;
     private final PrimaryKeyReferenceHolder[] primaryKeyReferenceHolders;
@@ -73,7 +74,6 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     private Map<String, Integer> allIndexMetaData = new HashMap<>();
     private ArrayList<Operation> operationChangeLog = new ArrayList<>();
     private long eventsCount;
-    private static final float FULL_SNAPSHOT_THRESHOLD = 2.1f;
     private boolean forceFullSnapshot = true;
     private boolean isOperationLogEnabled = true;
 

@@ -18,8 +18,6 @@
 
 package io.siddhi.query.test;
 
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
@@ -28,6 +26,8 @@ import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 public class QueryStoreTestCase {
 

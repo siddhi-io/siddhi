@@ -18,7 +18,6 @@
 
 package io.siddhi.core.query.output.ratelimit.time;
 
-import org.apache.log4j.Logger;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEventPool;
@@ -26,6 +25,7 @@ import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.Schedulable;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,7 +60,7 @@ public class AllPerTimeOutputRateLimiter extends OutputRateLimiter implements Sc
     @Override
     public OutputRateLimiter clone(String key) {
         AllPerTimeOutputRateLimiter instance = new AllPerTimeOutputRateLimiter(id + key, value,
-                                                                               scheduledExecutorService, queryName);
+                scheduledExecutorService, queryName);
         instance.setLatencyTracker(latencyTracker);
         return instance;
     }

@@ -27,7 +27,7 @@ import java.util.Objects;
 /**
  * Apache Freemarker method for formatting text
  * This is invoked by the freemarker templates
- *
+ * <p>
  * This method escapes relevant html characters, wraps text
  */
 public class FormatDescriptionMethod implements TemplateMethodModelEx {

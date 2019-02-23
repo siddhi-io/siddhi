@@ -18,8 +18,6 @@
 
 package io.siddhi.query.test;
 
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.query.api.exception.DuplicateAttributeException;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
@@ -31,6 +29,8 @@ import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 public class SimpleQueryTestCase {
 

@@ -17,8 +17,8 @@
  */
 package io.siddhi.core.event.stream.converter;
 
-import io.siddhi.core.event.Event;
 import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.StreamEvent;
 
 import java.io.Serializable;

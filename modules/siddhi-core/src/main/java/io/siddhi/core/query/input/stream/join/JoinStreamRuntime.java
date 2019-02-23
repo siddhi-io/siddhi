@@ -22,10 +22,10 @@ import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.stream.window.FindableProcessor;
 import io.siddhi.core.query.processor.stream.window.WindowProcessor;
-import io.siddhi.core.query.processor.ProcessingMode;
 
 import java.util.ArrayList;
 import java.util.List;

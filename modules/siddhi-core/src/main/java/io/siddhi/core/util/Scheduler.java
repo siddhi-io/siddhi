@@ -18,7 +18,6 @@
 
 package io.siddhi.core.util;
 
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -30,6 +29,7 @@ import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.timestamp.TimestampGeneratorImpl;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,13 +49,13 @@ public class Scheduler implements Snapshotable {
     private final BlockingQueue<Long> toNotifyQueue = new LinkedBlockingQueue<Long>();
     private final ThreadBarrier threadBarrier;
     private final Schedulable singleThreadEntryValve;
+    private final Semaphore mutex;
+    protected String queryName;
     private SiddhiAppContext siddhiAppContext;
     private String elementId;
-    protected String queryName;
     private LockWrapper lockWrapper;
     private ScheduledExecutorService scheduledExecutorService;
     private EventCaller eventCaller;
-    private final Semaphore mutex;
     private StreamEventPool streamEventPool;
     private ComplexEventChunk<StreamEvent> streamEventChunk;
     private LatencyTracker latencyTracker;

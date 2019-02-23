@@ -18,14 +18,14 @@
 
 package io.siddhi.core.stream.event;
 
-import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.converter.ConversionStreamEventChunk;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
+import org.testng.AssertJUnit;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 
 public class ComplexEventChunkTestCase {

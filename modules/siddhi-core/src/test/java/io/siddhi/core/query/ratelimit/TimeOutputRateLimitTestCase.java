@@ -19,10 +19,6 @@
 package io.siddhi.core.query.ratelimit;
 
 
-import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
@@ -30,6 +26,10 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
+import org.apache.log4j.Logger;
+import org.testng.AssertJUnit;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -841,12 +841,13 @@ public class TimeOutputRateLimitTestCase {
         log.info("Running : " + siddhiAppRuntime.getName());
 
         siddhiAppRuntime.addCallback("uniqueIps", new StreamCallback() {
-            @Override public void receive(Event[] events) {
+            @Override
+            public void receive(Event[] events) {
                 EventPrinter.print(events);
                 count.addAndGet(events.length);
                 AssertJUnit.assertTrue("192.10.1.3".equals(events[0].getData(0))
-                                               || "192.10.1.4".equals(events[0].getData(0))
-                                               || "192.10.1.30".equals(events[0].getData(0)));
+                        || "192.10.1.4".equals(events[0].getData(0))
+                        || "192.10.1.30".equals(events[0].getData(0)));
                 eventArrived.set(true);
             }
         });

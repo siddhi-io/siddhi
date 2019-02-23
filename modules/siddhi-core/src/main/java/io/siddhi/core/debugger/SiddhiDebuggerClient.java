@@ -18,10 +18,10 @@
 package io.siddhi.core.debugger;
 
 import com.google.gson.Gson;
-import io.siddhi.core.event.ComplexEvent;
-import io.siddhi.core.event.Event;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.query.compiler.SiddhiCompiler;
 
@@ -224,7 +224,7 @@ public class SiddhiDebuggerClient {
      * Start the {@link SiddhiDebuggerClient} and configure the breakpoints.
      *
      * @param siddhiApp the Siddhi query
-     * @param input         the user input as a whole text
+     * @param input     the user input as a whole text
      */
     public void start(final String siddhiApp, String input) {
         SiddhiManager siddhiManager = new SiddhiManager();

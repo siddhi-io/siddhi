@@ -18,10 +18,6 @@
 
 package io.siddhi.core.aggregation;
 
-import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
@@ -32,6 +28,10 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.core.util.config.InMemoryConfigManager;
+import org.apache.log4j.Logger;
+import org.testng.AssertJUnit;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -49,6 +49,7 @@ public class Aggregation2TestCase {
     private boolean eventArrived;
     private List<Object[]> inEventsList;
     private List<Object[]> removeEventsList;
+
     @BeforeMethod
     public void init() {
         inEventCount = new AtomicInteger(0);
@@ -67,7 +68,7 @@ public class Aggregation2TestCase {
         String stockStream =
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
-        String query =  "define aggregation stockAggregation " +
+        String query = "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select symbol, sum(price) as totalPrice, avg(price) as avgPrice " +
                 "group by symbol " +
@@ -112,7 +113,7 @@ public class Aggregation2TestCase {
             );
             AssertJUnit.assertEquals("Data Matched", true,
                     SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
-        }  finally {
+        } finally {
             siddhiAppRuntime.shutdown();
         }
     }
@@ -126,7 +127,7 @@ public class Aggregation2TestCase {
         String stockStream =
                 "define stream stockStream (symbol string, price float, lastClosingPrice float, volume long , " +
                         "quantity int, timestamp long);";
-        String query =  "define aggregation stockAggregation " +
+        String query = "define aggregation stockAggregation " +
                 "from stockStream " +
                 "select symbol, sum(price) as totalPrice " +
                 "group by symbol " +
@@ -177,7 +178,7 @@ public class Aggregation2TestCase {
 
             AssertJUnit.assertEquals("Data Matched", true,
                     SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
-        }  finally {
+        } finally {
             siddhiAppRuntime.shutdown();
         }
     }

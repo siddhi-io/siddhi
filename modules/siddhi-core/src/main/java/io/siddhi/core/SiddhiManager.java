@@ -17,8 +17,6 @@
  */
 package io.siddhi.core;
 
-import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.config.StatisticsConfiguration;
 import io.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
@@ -28,10 +26,12 @@ import io.siddhi.core.table.record.RecordTableHandlerManager;
 import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import io.siddhi.core.util.config.ConfigManager;
 import io.siddhi.core.util.parser.SiddhiAppParser;
+import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.IncrementalPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.compiler.SiddhiCompiler;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;

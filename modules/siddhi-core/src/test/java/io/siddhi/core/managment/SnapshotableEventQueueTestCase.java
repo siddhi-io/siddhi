@@ -18,10 +18,6 @@
 
 package io.siddhi.core.managment;
 
-import org.apache.log4j.Logger;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.Operation;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -32,6 +28,10 @@ import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.util.snapshot.state.SnapshotState;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 import io.siddhi.query.api.definition.Attribute;
+import org.apache.log4j.Logger;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -46,6 +46,30 @@ import java.util.Map;
 
 public class SnapshotableEventQueueTestCase {
     private static final Logger log = Logger.getLogger(SnapshotableEventQueueTestCase.class);
+
+    /**
+     * Read the object from Base64 string.
+     */
+    private static Object fromString(String s) throws IOException,
+            ClassNotFoundException {
+        byte[] data = Base64.getDecoder().decode(s);
+        ObjectInputStream ois = new ObjectInputStream(
+                new ByteArrayInputStream(data));
+        Object o = ois.readObject();
+        ois.close();
+        return o;
+    }
+
+    /**
+     * Write the object to a Base64 string.
+     */
+    private static String toString(Serializable o) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(o);
+        oos.close();
+        return Base64.getEncoder().encodeToString(baos.toByteArray());
+    }
 
     @BeforeMethod
     public void init() {
@@ -374,30 +398,6 @@ public class SnapshotableEventQueueTestCase {
         }
         snapshotableStreamEventQueue2.restore(snapshotStateList);
         Assert.assertEquals(snapshotableStreamEventQueue, snapshotableStreamEventQueue2);
-    }
-
-    /**
-     * Read the object from Base64 string.
-     */
-    private static Object fromString(String s) throws IOException,
-            ClassNotFoundException {
-        byte[] data = Base64.getDecoder().decode(s);
-        ObjectInputStream ois = new ObjectInputStream(
-                new ByteArrayInputStream(data));
-        Object o = ois.readObject();
-        ois.close();
-        return o;
-    }
-
-    /**
-     * Write the object to a Base64 string.
-     */
-    private static String toString(Serializable o) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(o);
-        oos.close();
-        return Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
 }

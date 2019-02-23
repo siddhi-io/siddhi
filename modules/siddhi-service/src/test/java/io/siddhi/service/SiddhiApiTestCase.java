@@ -15,10 +15,10 @@
  */
 package io.siddhi.service;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
 import io.siddhi.service.api.NotFoundException;
 import io.siddhi.service.impl.SiddhiApiServiceImpl;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import javax.ws.rs.core.Response;
 
@@ -46,11 +46,11 @@ public class SiddhiApiTestCase {
         Response response = apiService.siddhiArtifactDeployPost(siddhiApp);
         Assert.assertEquals(response.getStatus(), 200, "HTTP 200 should be returned");
         Assert.assertTrue(response.getEntity().toString().contains("Siddhi app is deployed and runtime is created"),
-                          "Siddhi App creation message should be returned");
+                "Siddhi App creation message should be returned");
 
         Response undeployResponse = apiService.siddhiArtifactUndeploySiddhiAppGet("filterTest1");
         Assert.assertEquals(undeployResponse.getStatus(), 200, "HTTP 200 should be returned");
         Assert.assertTrue(undeployResponse.getEntity().toString().contains("Siddhi app removed successfully"),
-                          "Siddhi App removed message should be returned");
+                "Siddhi App removed message should be returned");
     }
 }

@@ -18,12 +18,12 @@
 
 package io.siddhi.core.executor.function;
 
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.function.Script;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.Attribute;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 
@@ -36,7 +36,8 @@ public class ScriptFunctionExecutor extends FunctionExecutor {
     Attribute.Type returnType;
     Script script;
 
-    public ScriptFunctionExecutor() { }
+    public ScriptFunctionExecutor() {
+    }
 
     public ScriptFunctionExecutor(String name) {
         this.functionId = name;

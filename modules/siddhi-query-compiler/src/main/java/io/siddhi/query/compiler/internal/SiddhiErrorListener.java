@@ -17,10 +17,10 @@
  */
 package io.siddhi.query.compiler.internal;
 
+import io.siddhi.query.compiler.exception.SiddhiParserException;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import io.siddhi.query.compiler.exception.SiddhiParserException;
 
 /**
  * Error listener in Siddhi Parser

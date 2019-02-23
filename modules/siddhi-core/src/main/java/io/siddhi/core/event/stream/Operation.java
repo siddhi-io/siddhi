@@ -25,18 +25,6 @@ import java.io.Serializable;
  */
 public class Operation implements Serializable {
 
-    /**
-     * Possible Operator actions
-     */
-    public enum Operator {
-        ADD ,
-        REMOVE,
-        CLEAR,
-        OVERWRITE,
-        DELETE_BY_OPERATOR,
-        DELETE_BY_INDEX
-    }
-
     public Operator operation;
     public Object parameters;
 
@@ -47,5 +35,17 @@ public class Operation implements Serializable {
 
     public Operation(Operator operation) {
         this.operation = operation;
+    }
+
+    /**
+     * Possible Operator actions
+     */
+    public enum Operator {
+        ADD,
+        REMOVE,
+        CLEAR,
+        OVERWRITE,
+        DELETE_BY_OPERATOR,
+        DELETE_BY_INDEX
     }
 }

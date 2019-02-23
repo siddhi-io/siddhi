@@ -18,11 +18,11 @@
 
 package io.siddhi.core.aggregation;
 
-import io.siddhi.core.event.stream.MetaStreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
@@ -136,8 +136,8 @@ public class IncrementalDataAggregator {
             for (Map.Entry<String, BaseIncrementalValueStore> entryAgainstGroupBy :
                     baseIncrementalValueStoreGroupByMap.entrySet()) {
                 processedInMemoryEventChunk.add(entryAgainstGroupBy.getValue().createStreamEvent());
-                }
             }
+        }
         return processedInMemoryEventChunk;
     }
 }

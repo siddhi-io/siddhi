@@ -17,12 +17,12 @@
  */
 package io.siddhi.core.stream.output.sink;
 
-import io.siddhi.core.stream.StreamJunction;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.query.api.definition.AbstractDefinition;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 

@@ -17,8 +17,6 @@
  */
 package io.siddhi.core.query.processor.stream.window;
 
-import io.siddhi.core.query.processor.Processor;
-import io.siddhi.core.table.Table;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -33,7 +31,9 @@ import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.SchedulingProcessor;
+import io.siddhi.core.table.Table;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;

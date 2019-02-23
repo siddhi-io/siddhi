@@ -19,9 +19,9 @@ package io.siddhi.core.debugger;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.util.snapshot.SnapshotService;
 import io.siddhi.core.util.snapshot.Snapshotable;
 import org.apache.log4j.Logger;
-import io.siddhi.core.util.snapshot.SnapshotService;
 
 import java.util.HashMap;
 import java.util.Map;

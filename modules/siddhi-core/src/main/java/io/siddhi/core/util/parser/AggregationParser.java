@@ -39,17 +39,17 @@ import io.siddhi.core.query.selector.attribute.aggregator.incremental.Incrementa
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.Scheduler;
+import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
+import io.siddhi.core.util.SiddhiClassLoader;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigManager;
+import io.siddhi.core.util.extension.holder.FunctionExecutorExtensionHolder;
 import io.siddhi.core.util.extension.holder.IncrementalAttributeAggregatorExtensionHolder;
+import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.window.Window;
-import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
-import io.siddhi.core.util.SiddhiClassLoader;
-import io.siddhi.core.util.extension.holder.FunctionExecutorExtensionHolder;
-import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
@@ -429,7 +429,7 @@ public class AggregationParser {
             } else if (attributeList.get(i).getName().equals(AGG_LAST_TIMESTAMP_COL)) {
                 Expression lastTimestampExpression =
                         AttributeFunction.function(
-                                 "max",
+                                "max",
                                 new Variable(AGG_LAST_TIMESTAMP_COL)
                         );
                 ExpressionExecutor latestTimestampExecutor = ExpressionParser.parseExpression(
@@ -610,7 +610,7 @@ public class AggregationParser {
                 } else {
                     if (isProcessingOnExternalTime) {
                         if (!addAggLastEvent) {
-                            Attribute lastEventTimeStamp =  new Attribute(AGG_LAST_TIMESTAMP_COL,
+                            Attribute lastEventTimeStamp = new Attribute(AGG_LAST_TIMESTAMP_COL,
                                     Attribute.Type.LONG);
                             incomingMetaStreamEvent.addOutputData(lastEventTimeStamp);
                             incomingExpressionExecutors.add(externalTimestampExecutor);

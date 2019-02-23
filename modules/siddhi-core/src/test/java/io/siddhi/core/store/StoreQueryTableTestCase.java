@@ -18,10 +18,6 @@
 
 package io.siddhi.core.store;
 
-import org.apache.log4j.Logger;
-import org.testng.Assert;
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
@@ -31,6 +27,10 @@ import io.siddhi.core.util.EventPrinter;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.apache.log4j.Logger;
+import org.testng.Assert;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 public class StoreQueryTableTestCase {
 
@@ -637,7 +637,7 @@ public class StoreQueryTableTestCase {
         Assert.assertEquals(initialEvents.length, 3);
 
         String storeQuery = "select 100L as vol " +
-                            "delete StockTable on StockTable.volume == vol;";
+                "delete StockTable on StockTable.volume == vol;";
 
         siddhiAppRuntime.query(storeQuery);
         Thread.sleep(500);
@@ -719,7 +719,7 @@ public class StoreQueryTableTestCase {
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{1, "WSO2", 100});
-        stockStream.send(new Object[]{2, "IBM",  200});
+        stockStream.send(new Object[]{2, "IBM", 200});
         stockStream.send(new Object[]{3, "GOOGLE", 300});
         Thread.sleep(500);
 
@@ -773,7 +773,7 @@ public class StoreQueryTableTestCase {
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{1, "WSO2", 100});
-        stockStream.send(new Object[]{2, "IBM",  200});
+        stockStream.send(new Object[]{2, "IBM", 200});
         stockStream.send(new Object[]{3, "GOOGLE", 300});
         Thread.sleep(500);
 
@@ -830,7 +830,7 @@ public class StoreQueryTableTestCase {
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{1, "WSO2", 100});
-        stockStream.send(new Object[]{2, "IBM",  200});
+        stockStream.send(new Object[]{2, "IBM", 200});
         stockStream.send(new Object[]{3, "GOOGLE", 300});
         Thread.sleep(500);
 

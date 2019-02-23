@@ -18,11 +18,10 @@
 
 package io.siddhi.core.stream.output.sink.distributed;
 
-import io.siddhi.core.stream.output.sink.Sink;
-import io.siddhi.core.stream.output.sink.SinkHandler;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.stream.output.sink.Sink;
+import io.siddhi.core.stream.output.sink.SinkHandler;
 import io.siddhi.core.stream.output.sink.SinkMapper;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.config.ConfigReader;
@@ -31,6 +30,7 @@ import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.StreamDefinition;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 
@@ -39,10 +39,10 @@ import java.util.List;
  */
 public abstract class DistributedTransport extends Sink {
     private static final Logger log = Logger.getLogger(DistributedTransport.class);
-    private String type;
     protected DistributionStrategy strategy;
     protected StreamDefinition streamDefinition;
     protected SiddhiAppContext siddhiAppContext;
+    private String type;
     private OptionHolder sinkOptionHolder;
     private String[] supportedDynamicOptions;
 

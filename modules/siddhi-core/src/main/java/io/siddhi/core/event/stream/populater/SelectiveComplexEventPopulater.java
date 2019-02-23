@@ -18,8 +18,8 @@
 
 package io.siddhi.core.event.stream.populater;
 
-import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 
 import java.util.Arrays;

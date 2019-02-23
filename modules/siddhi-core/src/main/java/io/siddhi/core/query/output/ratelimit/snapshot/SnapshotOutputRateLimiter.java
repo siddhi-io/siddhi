@@ -18,8 +18,6 @@
 
 package io.siddhi.core.query.output.ratelimit.snapshot;
 
-import io.siddhi.core.util.Scheduler;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -28,7 +26,9 @@ import io.siddhi.core.event.state.StateEventCloner;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.util.Schedulable;
+import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.lock.LockWrapper;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 

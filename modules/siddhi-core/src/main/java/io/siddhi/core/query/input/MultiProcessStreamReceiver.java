@@ -28,18 +28,18 @@ import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.query.processor.Processor;
-import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link StreamJunction.Receiver} implementation to receive events to be fed into multi
+ * {StreamJunction.Receiver} implementation to receive events to be fed into multi
  * stream processors which consume multiple streams.
  */
 public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
 
+    private static ThreadLocal<ReturnEventHolder> multiProcessReturn = new ThreadLocal<>();
     protected Processor[] nextProcessors;
     protected int processCount;
     protected int[] eventSequence;
@@ -48,7 +48,6 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
     private MetaStreamEvent[] metaStreamEvents;
     private StreamEventPool[] streamEventPools;
     private StreamEventConverter[] streamEventConverters;
-    private static ThreadLocal<ReturnEventHolder> multiProcessReturn = new ThreadLocal<>();
 
 
     public MultiProcessStreamReceiver(String streamId, int processCount, LatencyTracker latencyTracker,
@@ -64,6 +63,10 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
         for (int i = 0; i < eventSequence.length; i++) {
             eventSequence[i] = i;
         }
+    }
+
+    public static ThreadLocal<ReturnEventHolder> getMultiProcessReturn() {
+        return multiProcessReturn;
     }
 
     public MultiProcessStreamReceiver clone(String key) {
@@ -316,7 +319,6 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
 
     }
 
-
     public void setNext(Processor nextProcessor) {
         for (int i = 0, nextLength = nextProcessors.length; i < nextLength; i++) {
             Processor processor = nextProcessors[i];
@@ -362,10 +364,6 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                 break;
             }
         }
-    }
-
-    public static ThreadLocal<ReturnEventHolder> getMultiProcessReturn() {
-        return multiProcessReturn;
     }
 
     public void setOutputRateLimiter(OutputRateLimiter outputRateLimiter) {

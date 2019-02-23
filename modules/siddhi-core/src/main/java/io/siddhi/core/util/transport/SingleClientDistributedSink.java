@@ -18,20 +18,20 @@
 
 package io.siddhi.core.util.transport;
 
-import io.siddhi.core.util.SiddhiConstants;
-import io.siddhi.core.util.config.ConfigReader;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.stream.output.sink.distributed.DistributedTransport;
 import io.siddhi.core.stream.output.sink.distributed.DistributionStrategy;
 import io.siddhi.core.util.SiddhiClassLoader;
+import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.extension.holder.SinkExecutorExtensionHolder;
 import io.siddhi.core.util.parser.helper.DefinitionParserHelper;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.extension.Extension;
+import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 import java.util.List;

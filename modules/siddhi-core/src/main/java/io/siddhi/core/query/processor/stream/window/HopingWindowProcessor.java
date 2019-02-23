@@ -28,8 +28,8 @@ import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.event.stream.populater.SelectiveComplexEventPopulater;
 import io.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import io.siddhi.core.executor.ExpressionExecutor;
-import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.ProcessingMode;
+import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
@@ -95,6 +95,11 @@ public abstract class HopingWindowProcessor extends WindowProcessor {
         }
     }
 
+    @Override
+    public ProcessingMode getProcessingMode() {
+        return ProcessingMode.HOP;
+    }
+
     /**
      * Populates hopping timestamp to the complex event
      */
@@ -110,10 +115,5 @@ public abstract class HopingWindowProcessor extends WindowProcessor {
             selectiveComplexEventPopulater.populateComplexEvent(complexEvent, new Object[]{key});
         }
 
-    }
-
-    @Override
-    public ProcessingMode getProcessingMode() {
-        return ProcessingMode.HOP;
     }
 }

@@ -17,9 +17,9 @@
  */
 package io.siddhi.core.util.extension.holder;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.util.SiddhiConstants;
 import org.apache.log4j.Logger;
-import io.siddhi.core.config.SiddhiAppContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +40,7 @@ public abstract class AbstractExtensionHolder {
                 if (clazz.isAssignableFrom(extension)) {
                     if (extensionMap.containsKey(extensionKey)) {
                         log.error("Extension class " + extension.getName() + " not loaded, as there is already an" +
-                                          " matching extension '" + extensionKey + "' implemented as " + extensionMap
+                                " matching extension '" + extensionKey + "' implemented as " + extensionMap
                                 .get
                                         (extensionKey).getName());
                     } else {

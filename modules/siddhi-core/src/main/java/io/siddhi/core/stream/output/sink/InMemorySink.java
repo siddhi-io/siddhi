@@ -18,7 +18,6 @@
 
 package io.siddhi.core.stream.output.sink;
 
-import org.apache.log4j.Logger;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -32,6 +31,7 @@ import io.siddhi.core.util.transport.Option;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.core.util.transport.SubscriberUnAvailableException;
 import io.siddhi.query.api.definition.StreamDefinition;
+import org.apache.log4j.Logger;
 
 import java.util.Map;
 

@@ -17,8 +17,6 @@
  */
 package io.siddhi.core.stream.event;
 
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiContext;
@@ -63,6 +61,8 @@ import io.siddhi.query.api.execution.query.input.stream.InputStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;

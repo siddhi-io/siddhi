@@ -18,13 +18,13 @@
 package io.siddhi.query.api;
 
 
-import org.testng.annotations.Test;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.execution.query.StoreQuery;
 import io.siddhi.query.api.execution.query.input.store.InputStore;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.testng.annotations.Test;
 
 public class StoreQueryTestCase {
 

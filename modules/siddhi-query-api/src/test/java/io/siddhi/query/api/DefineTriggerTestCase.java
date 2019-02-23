@@ -18,14 +18,13 @@
 
 package io.siddhi.query.api;
 
-import io.siddhi.query.api.SiddhiApp;
-import org.testng.annotations.Test;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.definition.TriggerDefinition;
 import io.siddhi.query.api.exception.DuplicateAttributeException;
 import io.siddhi.query.api.expression.Expression;
+import org.testng.annotations.Test;
 
 public class DefineTriggerTestCase {
 

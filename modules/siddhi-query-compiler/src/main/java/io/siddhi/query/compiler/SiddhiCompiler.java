@@ -33,9 +33,6 @@
 
 package io.siddhi.query.compiler;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.definition.AggregationDefinition;
 import io.siddhi.query.api.definition.FunctionDefinition;
@@ -48,6 +45,9 @@ import io.siddhi.query.api.expression.constant.TimeConstant;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
 import io.siddhi.query.compiler.internal.SiddhiErrorListener;
 import io.siddhi.query.compiler.internal.SiddhiQLBaseVisitorImpl;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 /**
  * Siddhi query compiler

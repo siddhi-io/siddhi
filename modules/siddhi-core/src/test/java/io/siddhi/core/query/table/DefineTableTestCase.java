@@ -18,19 +18,19 @@
 
 package io.siddhi.core.query.table;
 
-import io.siddhi.core.query.table.util.TestStore;
-import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.query.table.util.TestStore;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.exception.DuplicateDefinitionException;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.apache.log4j.Logger;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -18,10 +18,6 @@
 
 package io.siddhi.core.aggregation;
 
-import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
@@ -29,6 +25,10 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
+import org.apache.log4j.Logger;
+import org.testng.AssertJUnit;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -176,7 +176,7 @@ public class DistinctCountAggregationTestCase {
             AssertJUnit.assertEquals("Number of success events", 8, inEventCount.get());
             AssertJUnit.assertEquals("Number of remove events", 8, removeEventCount.get());
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        }  finally {
+        } finally {
             siddhiAppRuntime.shutdown();
         }
     }

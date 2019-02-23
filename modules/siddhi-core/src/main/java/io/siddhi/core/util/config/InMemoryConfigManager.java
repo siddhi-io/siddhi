@@ -80,6 +80,7 @@ public class InMemoryConfigManager implements ConfigManager {
 
     /**
      * Returns the value of a given property
+     *
      * @param name Name of the property which needs to be extracted
      * @return value of the property as a string
      */

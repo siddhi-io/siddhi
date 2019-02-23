@@ -18,14 +18,13 @@
 
 package io.siddhi.core.aggregation;
 
-import io.siddhi.core.event.state.StateEvent;
-import io.siddhi.core.event.stream.MetaStreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.MetaStateEvent;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.exception.DataPurgingException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -42,6 +41,7 @@ import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -59,6 +59,10 @@ import static io.siddhi.query.api.expression.Expression.Time.timeToLong;
  **/
 public class IncrementalDataPurging implements Runnable {
     private static final Logger LOG = Logger.getLogger(IncrementalDataPurging.class);
+    private static final String INTERNAL_AGG_TIMESTAMP_FIELD = "AGG_TIMESTAMP";
+    private static final String EXTERNAL_AGG_TIMESTAMP_FIELD = "AGG_EVENT_TIMESTAMP";
+    private static final Long RETAIN_ALL = -1L;
+    private static final String RETAIN_ALL_VALUES = "all";
     private long purgeExecutionInterval = Expression.Time.minute(15).value();
     private boolean purgingEnabled = true;
     private Map<TimePeriod.Duration, Long> retentionPeriods = new EnumMap<>(TimePeriod.Duration.class);
@@ -66,12 +70,8 @@ public class IncrementalDataPurging implements Runnable {
     private Map<TimePeriod.Duration, Table> aggregationTables;
     private SiddhiAppContext siddhiAppContext;
     private ScheduledFuture scheduledPurgingTaskStatus;
-    private static final String INTERNAL_AGG_TIMESTAMP_FIELD = "AGG_TIMESTAMP";
-    private static final String EXTERNAL_AGG_TIMESTAMP_FIELD = "AGG_EVENT_TIMESTAMP";
     private String purgingTimestampField;
     private Map<TimePeriod.Duration, Long> minimumDurationMap = new EnumMap<>(TimePeriod.Duration.class);
-    private static final Long RETAIN_ALL = -1L;
-    private static final String RETAIN_ALL_VALUES = "all";
     private ComplexEventChunk<StateEvent> eventChunk = new ComplexEventChunk<>(true);
     private List<VariableExpressionExecutor> variableExpressionExecutorList = new ArrayList<>();
     private Attribute aggregatedTimestampAttribute;

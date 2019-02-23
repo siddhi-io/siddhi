@@ -18,9 +18,9 @@
 package io.siddhi.core.event.state.populater;
 
 import io.siddhi.core.event.MetaComplexEvent;
-import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.MetaStateEventAttribute;
+import io.siddhi.core.event.stream.MetaStreamEvent;
 
 import java.util.ArrayList;
 import java.util.List;

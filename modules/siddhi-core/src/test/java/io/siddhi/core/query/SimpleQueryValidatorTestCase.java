@@ -17,8 +17,6 @@
  */
 package io.siddhi.core.query;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.config.SiddhiContext;
@@ -26,6 +24,8 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.util.parser.SiddhiAppParser;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.compiler.SiddhiCompiler;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class SimpleQueryValidatorTestCase {
     private SiddhiContext siddhiContext;

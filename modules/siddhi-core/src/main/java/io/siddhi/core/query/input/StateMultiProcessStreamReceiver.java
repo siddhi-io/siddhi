@@ -21,14 +21,13 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.query.input.stream.state.StreamPreStateProcessor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.selector.QuerySelector;
-import io.siddhi.core.query.input.stream.state.StreamPreStateProcessor;
-import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.util.statistics.LatencyTracker;
 
 /**
- * Implementation of {@link StreamJunction.Receiver} to receive events to be fed into
+ * Implementation of {StreamJunction.Receiver} to receive events to be fed into
  * multi stream stateful queries.
  */
 public class StateMultiProcessStreamReceiver extends MultiProcessStreamReceiver {

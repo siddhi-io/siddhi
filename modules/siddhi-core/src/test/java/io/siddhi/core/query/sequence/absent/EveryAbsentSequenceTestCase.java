@@ -18,13 +18,13 @@
 
 package io.siddhi.core.query.sequence.absent;
 
-import org.apache.log4j.Logger;
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.TestUtil;
 import io.siddhi.core.stream.input.InputHandler;
+import org.apache.log4j.Logger;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 /**
  * Test the patterns:

@@ -17,10 +17,10 @@
  */
 
 package io.siddhi.annotation.processor;
+
 /**
- *
  * This processor will extend the validation rules for validate script specific annotation contents.
- * **/
+ **/
 public class ScriptValidationAnnotationProcessor extends AbstractAnnotationProcessor {
     public ScriptValidationAnnotationProcessor(String extensionClassFullName) {
         super(extensionClassFullName);

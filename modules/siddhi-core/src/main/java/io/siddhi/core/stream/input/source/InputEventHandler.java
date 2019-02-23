@@ -18,13 +18,13 @@
 
 package io.siddhi.core.stream.input.source;
 
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.timestamp.TimestampGenerator;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 

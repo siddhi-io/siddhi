@@ -43,6 +43,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Builder method to get a new store query instance
+     *
      * @return a new storeQuery instance
      */
     public static StoreQuery query() {
@@ -51,6 +52,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Builder method to set input store to the store query
+     *
      * @param inputStore inputStore for the store query
      * @return updated store query
      */
@@ -61,6 +63,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Getter for the input store
+     *
      * @return inputStore
      */
     public InputStore getInputStore() {
@@ -69,6 +72,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Builder method to set a selector to the store query
+     *
      * @param selector selector for the store query
      * @return updated store query
      */
@@ -79,6 +83,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Builder method to set an outPutStream to the store query
+     *
      * @param outputStream outPutStream for the store query
      * @return updated store query
      */
@@ -89,7 +94,8 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Method to set a deleteStream as the outputStream of the store query
-     * @param outputTableId id of the table which is going to be queried
+     *
+     * @param outputTableId        id of the table which is going to be queried
      * @param onDeletingExpression expression for the delete operation defined in the store query
      */
     public void deleteBy(String outputTableId, Expression onDeletingExpression) {
@@ -98,7 +104,8 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Method to set an updateStream as the outputStream of the store query
-     * @param outputTableId id of the table which is going to be queried
+     *
+     * @param outputTableId      id of the table which is going to be queried
      * @param onUpdateExpression expression for the update operation defined in the store query
      */
     public void updateBy(String outputTableId, Expression onUpdateExpression) {
@@ -107,9 +114,10 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Method to set an updateStream as the outputStream of the store query
-     * @param outputTableId id of the table which is going to be queried
+     *
+     * @param outputTableId       id of the table which is going to be queried
      * @param updateSetAttributes updateSet for the attributes which are going to be updated.
-     * @param onUpdateExpression expression for the update operation defined in the store query
+     * @param onUpdateExpression  expression for the update operation defined in the store query
      */
     public void updateBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
         this.outputStream = new UpdateStream(outputTableId, updateSetAttributes, onUpdateExpression);
@@ -117,9 +125,10 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Method to set an updateOrInsertStream as the outputStream of the store query
-     * @param outputTableId id of the table which is going to be queried
+     *
+     * @param outputTableId       id of the table which is going to be queried
      * @param updateSetAttributes updateSet for the attributes which are going to be updated.
-     * @param onUpdateExpression expression for the update or insert operation defined in the store query
+     * @param onUpdateExpression  expression for the update or insert operation defined in the store query
      */
     public void updateOrInsertBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
         this.outputStream = new UpdateOrInsertStream(outputTableId, updateSetAttributes, onUpdateExpression);
@@ -127,6 +136,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Getter method to get the selector of the store query
+     *
      * @return selector of the store query
      */
     public Selector getSelector() {
@@ -135,6 +145,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * Getter method to get the outputStream of the store query
+     *
      * @return outputStream of the store query
      */
     public OutputStream getOutputStream() {
@@ -202,6 +213,7 @@ public class StoreQuery implements SiddhiElement {
 
     /**
      * This method returns the type of given store query.
+     *
      * @return type of given store query
      */
     public StoreQueryType getType() {

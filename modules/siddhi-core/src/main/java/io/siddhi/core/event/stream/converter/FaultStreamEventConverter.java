@@ -18,10 +18,10 @@
 
 package io.siddhi.core.event.stream.converter;
 
+import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
-import io.siddhi.core.event.ComplexEvent;
 
 import java.util.List;
 

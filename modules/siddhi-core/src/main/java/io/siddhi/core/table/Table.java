@@ -18,8 +18,6 @@
 
 package io.siddhi.core.table;
 
-import io.siddhi.core.query.processor.stream.window.FindableProcessor;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
@@ -28,6 +26,7 @@ import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.query.processor.stream.window.FindableProcessor;
 import io.siddhi.core.table.record.RecordTableHandler;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiConstants;
@@ -43,6 +42,7 @@ import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -397,7 +397,7 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
                         siddhiAppContext)) + " Error while connecting to Table '" +
                         StringUtil.removeCRLFCharacters(tableDefinition.getId())
                         + "', will retry in '" + StringUtil.removeCRLFCharacters(
-                                backoffRetryCounter.getTimeInterval()) + "'.", e);
+                        backoffRetryCounter.getTimeInterval()) + "'.", e);
                 scheduledExecutorService.schedule(new Runnable() {
                     @Override
                     public void run() {

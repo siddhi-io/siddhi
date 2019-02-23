@@ -135,12 +135,12 @@ public class StreamPostStateProcessor implements PostStateProcessor {
         streamPostStateProcessor.stateId = stateId;
     }
 
-    public void setNextStatePreProcessor(PreStateProcessor preStateProcessor) {
-        this.nextStatePreProcessor = preStateProcessor;
-    }
-
     public PreStateProcessor getNextStatePreProcessor() {
         return nextStatePreProcessor;
+    }
+
+    public void setNextStatePreProcessor(PreStateProcessor preStateProcessor) {
+        this.nextStatePreProcessor = preStateProcessor;
     }
 
     public PreStateProcessor getNextEveryStatePreProcessor() {

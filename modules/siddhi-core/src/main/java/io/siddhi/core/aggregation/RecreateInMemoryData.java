@@ -22,8 +22,8 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.MetaStreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.StreamEvent;
+import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.query.StoreQueryRuntime;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
@@ -58,8 +58,9 @@ public class RecreateInMemoryData {
 
     public RecreateInMemoryData(List<TimePeriod.Duration> incrementalDurations,
                                 Map<TimePeriod.Duration, Table> aggregationTables,
-                                Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap, SiddhiAppContext siddhiAppContext,
-                                MetaStreamEvent metaStreamEvent, Map<String, Table> tableMap, Map<String, Window> windowMap,
+                                Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
+                                SiddhiAppContext siddhiAppContext, MetaStreamEvent metaStreamEvent, Map<String,
+                                Table> tableMap, Map<String, Window> windowMap,
                                 Map<String, AggregationRuntime> aggregationMap, String shardId,
                                 Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
         this.incrementalDurations = incrementalDurations;
@@ -130,8 +131,8 @@ public class RecreateInMemoryData {
             } else {
                 storeQuery = StoreQuery.query().from(
                         InputStore.store(recreateFromTable.getTableDefinition().getId()).on(
-                        Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
-                                Expression.value(shardId))))
+                                Expression.compare(Expression.variable("SHARD_ID"), Compare.Operator.EQUAL,
+                                        Expression.value(shardId))))
                         .select(Selector.selector().orderBy(Expression.variable("AGG_TIMESTAMP")));
             }
 

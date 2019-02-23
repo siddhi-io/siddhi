@@ -17,19 +17,6 @@
  */
 package io.siddhi.core.query.processor.stream.window;
 
-import org.apache.log4j.Logger;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
-import org.quartz.Trigger;
-import org.quartz.impl.StdSchedulerFactory;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -43,6 +30,19 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.config.ConfigReader;
+import org.apache.log4j.Logger;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
+import org.quartz.Trigger;
+import org.quartz.impl.StdSchedulerFactory;
 
 import java.util.HashMap;
 import java.util.Map;

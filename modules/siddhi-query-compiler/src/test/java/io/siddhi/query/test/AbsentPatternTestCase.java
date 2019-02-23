@@ -18,8 +18,6 @@
 
 package io.siddhi.query.test;
 
-import org.testng.AssertJUnit;
-import org.testng.annotations.Test;
 import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.execution.query.input.state.State;
 import io.siddhi.query.api.execution.query.input.stream.InputStream;
@@ -29,6 +27,8 @@ import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.api.expression.constant.TimeConstant;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 public class AbsentPatternTestCase {
 
@@ -71,9 +71,9 @@ public class AbsentPatternTestCase {
                                         Compare.Operator.GREATER_THAN,
                                         Expression.value(20)))),
                         State.logicalNot(State.stream(InputStream.stream("Stream2")
-                                .filter(Expression.compare(Expression.variable("price"),
-                                        Compare.Operator.GREATER_THAN,
-                                        Expression.variable("price").ofStream("e1")))),
+                                        .filter(Expression.compare(Expression.variable("price"),
+                                                Compare.Operator.GREATER_THAN,
+                                                Expression.variable("price").ofStream("e1")))),
                                 new TimeConstant(2000)))
                 ))
                 .select(Selector.selector().select("symbol1", Expression.variable("symbol").ofStream("e1")))

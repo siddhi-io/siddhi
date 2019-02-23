@@ -18,10 +18,10 @@
 
 package io.siddhi.core.query.window;
 
-import org.apache.log4j.Logger;
-import org.testng.annotations.Test;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
+import org.apache.log4j.Logger;
+import org.testng.annotations.Test;
 
 public class IncrementalStreamProcessorTestCase {
     private static final Logger log = Logger.getLogger(IncrementalStreamProcessorTestCase.class);

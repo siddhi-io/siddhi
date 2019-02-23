@@ -18,11 +18,6 @@
 package io.siddhi.core.util.parser;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.siddhi.core.util.ExceptionUtil;
-import io.siddhi.core.util.SiddhiConstants;
-import io.siddhi.core.util.snapshot.SnapshotService;
-import io.siddhi.core.util.timestamp.TimestampGenerator;
-import org.apache.log4j.Logger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
@@ -30,8 +25,12 @@ import io.siddhi.core.partition.PartitionRuntime;
 import io.siddhi.core.query.QueryRuntime;
 import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.util.ElementIdGenerator;
+import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.ThreadBarrier;
+import io.siddhi.core.util.snapshot.SnapshotService;
+import io.siddhi.core.util.timestamp.TimestampGenerator;
 import io.siddhi.core.util.timestamp.TimestampGeneratorImpl;
 import io.siddhi.core.window.Window;
 import io.siddhi.query.api.SiddhiApp;
@@ -52,6 +51,7 @@ import io.siddhi.query.api.execution.query.Query;
 import io.siddhi.query.api.util.AnnotationHelper;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -22,8 +22,8 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventPool;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.query.processor.stream.window.FindableProcessor;
 import io.siddhi.core.query.processor.Processor;
+import io.siddhi.core.query.processor.stream.window.FindableProcessor;
 import io.siddhi.core.query.selector.QuerySelector;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 
@@ -188,12 +188,12 @@ public class JoinProcessor implements Processor {
         this.findableProcessor = findableProcessor;
     }
 
-    public void setCompiledCondition(CompiledCondition compiledCondition) {
-        this.compiledCondition = compiledCondition;
-    }
-
     public CompiledCondition getCompiledCondition() {
         return this.compiledCondition;
+    }
+
+    public void setCompiledCondition(CompiledCondition compiledCondition) {
+        this.compiledCondition = compiledCondition;
     }
 
     public void setTrigger(boolean trigger) {
