@@ -21,4 +21,4 @@ done
 
 echo classpath: $SIDDHI_CLASSPATH
 
-java -cp siddhi-service-${pom.version}.jar":$SIDDHI_CLASSPATH:." org.wso2.siddhi.service.api.Application
+java -cp siddhi-service-${pom.version}.jar":$SIDDHI_CLASSPATH:." Application

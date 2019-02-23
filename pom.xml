@@ -304,7 +304,7 @@
                     </executions>
                     <configuration>
                         <excludePackageNames>
-                            org.wso2.siddhi.query.compiler.internal:org.wso2.siddhi.query.compiler
+                            io.siddhi.query.compiler.internal:io.siddhi.query.compiler
                         </excludePackageNames>
                     </configuration>
                 </plugin>
@@ -777,7 +777,7 @@
         <apache.rat.plugin.version>0.11</apache.rat.plugin.version>
 
         <maven.plugin.plugin.version>3.4</maven.plugin.plugin.version>
-        <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
+        <maven.checkstyleplugin.version>3.0.0</maven.checkstyleplugin.version>
         <maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
         <maven.findbugsplugin.version>3.0.3</maven.findbugsplugin.version>
         <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>

@@ -22,18 +22,18 @@
 <suite name="Siddhi-Api-Test-Suite">
     <test name="siddhi-api-tests" enabled="true" parallel="classes">
         <classes>
-            <class name="org.wso2.siddhi.query.api.DefineAggregationTestCase"/>
-            <class name="org.wso2.siddhi.query.api.DefineStreamTestCase"/>
-            <class name="org.wso2.siddhi.query.api.DefineTableTestCase"/>
-            <class name="org.wso2.siddhi.query.api.DefineTriggerTestCase"/>
-            <class name="org.wso2.siddhi.query.api.JoinQueryTestCase"/>
-            <class name="org.wso2.siddhi.query.api.OutputRateTestCase"/>
-            <class name="org.wso2.siddhi.query.api.PartitionQueryTestCase"/>
-            <class name="org.wso2.siddhi.query.api.PatternQueryTestCase"/>
-            <class name="org.wso2.siddhi.query.api.SequenceQueryTestCase"/>
-            <class name="org.wso2.siddhi.query.api.SimpleQueryTestCase"/>
-            <class name="org.wso2.siddhi.query.api.StoreQueryTestCase"/>
-            <class name="org.wso2.siddhi.query.api.TableQueryTestCase"/>
+            <class name="io.siddhi.query.api.DefineAggregationTestCase"/>
+            <class name="io.siddhi.query.api.DefineStreamTestCase"/>
+            <class name="io.siddhi.query.api.DefineTableTestCase"/>
+            <class name="io.siddhi.query.api.DefineTriggerTestCase"/>
+            <class name="io.siddhi.query.api.JoinQueryTestCase"/>
+            <class name="io.siddhi.query.api.OutputRateTestCase"/>
+            <class name="io.siddhi.query.api.PartitionQueryTestCase"/>
+            <class name="io.siddhi.query.api.PatternQueryTestCase"/>
+            <class name="io.siddhi.query.api.SequenceQueryTestCase"/>
+            <class name="io.siddhi.query.api.SimpleQueryTestCase"/>
+            <class name="io.siddhi.query.api.StoreQueryTestCase"/>
+            <class name="io.siddhi.query.api.TableQueryTestCase"/>
         </classes>
     </test>
 </suite>
