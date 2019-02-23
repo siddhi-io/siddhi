@@ -2694,7 +2694,7 @@ Siddhi supports following extension types:
 
     For each event, it consumes zero or more parameters as input parameters and returns a single attribute. This can be used to manipulate existing event attributes to generate new attributes like any Function operation.
     
-    This is implemented by extending `org.wso2.siddhi.core.executor.function.FunctionExecutor`.
+    This is implemented by extending `io.siddhi.core.executor.function.FunctionExecutor`.
     
     Example : 
     
@@ -2706,7 +2706,7 @@ Siddhi supports following extension types:
 
     For each event, it consumes zero or more parameters as input parameters and returns a single attribute with aggregated results. This can be used in conjunction with a window in order to find the aggregated results based on the given window like any Aggregate Function operation. 
     
-     This is implemented by extending `org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator`.
+     This is implemented by extending `io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator`.
 
     Example : 
     
@@ -2718,7 +2718,7 @@ Siddhi supports following extension types:
 
     This allows events to be **collected, generated, dropped and expired anytime** **without altering** the event format based on the given input parameters, similar to any other Window operator. 
     
-    This is implemented by extending `org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor`.
+    This is implemented by extending `io.siddhi.core.query.processor.stream.window.WindowProcessor`.
 
     Example : 
     
@@ -2730,7 +2730,7 @@ Siddhi supports following extension types:
 
     This allows events to be  **generated or dropped only during event arrival** and **altered** by adding one or more attributes to it. 
     
-    This is implemented by extending  `org.wso2.siddhi.core.query.processor.stream.function.StreamFunctionProcessor`.
+    This is implemented by extending  `io.siddhi.core.query.processor.stream.function.StreamFunctionProcessor`.
     
     Example :  
     
@@ -2742,7 +2742,7 @@ Siddhi supports following extension types:
     
     This allows events to be **collected, generated, dropped and expired anytime** by **altering** the event format by adding one or more attributes to it based on the given input parameters. 
     
-    Implemented by extending `org.wso2.siddhi.core.query.processor.stream.StreamProcessor`.
+    Implemented by extending `io.siddhi.core.query.processor.stream.StreamProcessor`.
     
     Example :  
     
@@ -2754,7 +2754,7 @@ Siddhi supports following extension types:
 
     Sinks provide a way to **publish Siddhi events to external systems** in the preferred data format. Sinks publish events from the streams via multiple transports to external endpoints in various data formats.
     
-    Implemented by extending `org.wso2.siddhi.core.stream.output.sink.Sink`.
+    Implemented by extending `io.siddhi.core.stream.output.sink.Sink`.
 
     Example : 
 
@@ -2766,7 +2766,7 @@ Siddhi supports following extension types:
 
     Source allows Siddhi to **consume events from external systems**, and map the events to adhere to the associated stream. Sources receive events via multiple transports and in various data formats, and direct them into streams for processing.
     
-    Implemented by extending `org.wso2.siddhi.core.stream.input.source.Source`.
+    Implemented by extending `io.siddhi.core.stream.input.source.Source`.
     
     Example : 
     
@@ -2778,19 +2778,19 @@ Siddhi supports following extension types:
 
     You can use Store extension type to work with data/events **stored in various data stores through the table abstraction**. You can find more information about these extension types under the heading 'Extension types' in this document. 
     
-    Implemented by extending `org.wso2.siddhi.core.table.record.AbstractRecordTable`.
+    Implemented by extending `io.siddhi.core.table.record.AbstractRecordTable`.
 
 * **Script**
 
     Scripts allow you to **define a function** operation that is not provided in Siddhi core or its extension. It is not required to write an extension to define the function logic. Scripts allow you to write functions in other programming languages and execute them within Siddhi queries. Functions defined via scripts can be accessed in queries similar to any other inbuilt function.
     
-    Implemented by extending `org.wso2.siddhi.core.function.Script`.
+    Implemented by extending `io.siddhi.core.function.Script`.
 
 * **Source Mapper**
 
     Each `@source` configuration has a mapping denoted by the `@map` annotation that **converts the incoming messages format to Siddhi events**.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
     
-    Implemented by extending `org.wso2.siddhi.core.stream.output.sink.SourceMapper`.
+    Implemented by extending `io.siddhi.core.stream.output.sink.SourceMapper`.
 
     Example :
    
@@ -2800,7 +2800,7 @@ Siddhi supports following extension types:
 
     Each `@sink` configuration has a mapping denoted by the `@map` annotation that **converts the outgoing Siddhi events to configured messages format**.The type parameter of the @map defines the map type to be used to map the data. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional. 
 
-    Implemented by extending `org.wso2.siddhi.core.stream.output.sink.SinkMapper`.
+    Implemented by extending `io.siddhi.core.stream.output.sink.SinkMapper`.
 
     Example :
    
@@ -2857,9 +2857,9 @@ To install and implement the siddhi-io extension archetype, follow the procedure
 1. Issue the following command from your CLI.
             
                 mvn archetype:generate
-                    -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                    -DarchetypeGroupId=io.siddhi.extension.archetype
                     -DarchetypeArtifactId=siddhi-archetype-execution
-                    -DgroupId=org.wso2.extension.siddhi.execution
+                    -DgroupId=io.extension.siddhi.execution
                     -Dversion=1.0.0-SNAPSHOT
             
 2. Enter the required execution name in the message that pops up as shown in the example below.
@@ -2887,9 +2887,9 @@ To implement the siddhi-io extension archetype, follow the procedure below:
                 
           
                mvn archetype:generate
-                   -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                   -DarchetypeGroupId=io.siddhi.extension.archetype
                    -DarchetypeArtifactId=siddhi-archetype-io
-                   -DgroupId=org.wso2.extension.siddhi.io
+                   -DgroupId=io.extension.siddhi.io
                    -Dversion=1.0.0-SNAPSHOT
             
 2. Enter the required execution name (the transport type in this scenario) in the message that pops up as shown in the example below.
@@ -2917,9 +2917,9 @@ To implement the siddhi-map extension archetype, follow the procedure below:
 1. Issue the following command from your CLI.                
             
                 mvn archetype:generate
-                    -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                    -DarchetypeGroupId=io.siddhi.extension.archetype
                     -DarchetypeArtifactId=siddhi-archetype-map
-                    -DgroupId=org.wso2.extension.siddhi.map
+                    -DgroupId=io.extension.siddhi.map
                     -Dversion=1.0.0-SNAPSHOT
             
 2. Enter the required execution name (the map type in this scenario) in the message that pops up as shown in the example below.
@@ -2941,9 +2941,9 @@ To implement the siddhi-script extension archetype, follow the procedure below:
 1. Issue the following command from your CLI.                   
            
                mvn archetype:generate
-                   -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                   -DarchetypeGroupId=io.siddhi.extension.archetype
                    -DarchetypeArtifactId=siddhi-archetype-script
-                   -DgroupId=org.wso2.extension.siddhi.script
+                   -DgroupId=io.extension.siddhi.script
                    -Dversion=1.0.0-SNAPSHOT
            
 2. Enter the required execution name in the message that pops up as shown in the example below.
@@ -2965,9 +2965,9 @@ To implement the siddhi-store extension archetype, follow the procedure below:
 1. Issue the following command from your CLI.                      
    
                mvn archetype:generate
-                  -DarchetypeGroupId=org.wso2.siddhi.extension.archetype
+                  -DarchetypeGroupId=io.siddhi.extension.archetype
                   -DarchetypeArtifactId=siddhi-archetype-store
-                  -DgroupId=org.wso2.extension.siddhi.store
+                  -DgroupId=io.extension.siddhi.store
                   -Dversion=1.0.0-SNAPSHOT
            
 2. Enter the required execution name in the message that pops up as shown in the example below.
@@ -3059,7 +3059,7 @@ The following elements are configured with this annotation.
 |`include`|If this parameter is added, only the types of metrics you specify are included in the reporting. The required metric types can be specified as a comma-separated list. It is also possible to use wild cards| All (*.*)|
 
 The metrics are reported in the following format.
-`org.wso2.siddhi.SiddhiApps.<SiddhiAppName>.Siddhi.<Component Type>.<Component Name>. <Metrics name>`
+`io.siddhi.SiddhiApps.<SiddhiAppName>.Siddhi.<Component Type>.<Component Name>. <Metrics name>`
 
 The following table lists the types of metrics supported for different Siddhi application component types.
 
@@ -3097,25 +3097,25 @@ Statistics are reported for this Siddhi application as shown in the extract belo
 11/26/17 8:01:20 PM ============================================================
 
  -- Gauges ----------------------------------------------------------------------
- org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.memory
+ io.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.memory
               value = 5760
- org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestStream.size
+ io.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestStream.size
               value = 0
  
  -- Meters ----------------------------------------------------------------------
- org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Sources.TestStream.http.throughput
+ io.siddhi.SiddhiApps.TestMetrics.Siddhi.Sources.TestStream.http.throughput
               count = 0
           mean rate = 0.00 events/second
       1-minute rate = 0.00 events/second
       5-minute rate = 0.00 events/second
      15-minute rate = 0.00 events/second
- org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TempSream.throughput
+ io.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TempSream.throughput
               count = 2
           mean rate = 0.04 events/second
       1-minute rate = 0.03 events/second
       5-minute rate = 0.01 events/second
      15-minute rate = 0.00 events/second
- org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestStream.throughput
+ io.siddhi.SiddhiApps.TestMetrics.Siddhi.Streams.TestStream.throughput
               count = 2
           mean rate = 0.04 events/second
       1-minute rate = 0.03 events/second
@@ -3123,7 +3123,7 @@ Statistics are reported for this Siddhi application as shown in the extract belo
      15-minute rate = 0.00 events/second
  
  -- Timers ----------------------------------------------------------------------
- org.wso2.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.latency
+ io.siddhi.SiddhiApps.TestMetrics.Siddhi.Queries.logQuery.latency
               count = 2
           mean rate = 0.11 calls/second
       1-minute rate = 0.34 calls/second
