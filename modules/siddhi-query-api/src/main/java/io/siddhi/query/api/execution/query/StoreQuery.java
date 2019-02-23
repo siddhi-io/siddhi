@@ -28,7 +28,7 @@ import io.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 
-import static org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream.OutputEventType.CURRENT_EVENTS;
+import static io.siddhi.query.api.execution.query.output.stream.OutputStream.OutputEventType.CURRENT_EVENTS;
 
 /**
  * This class keep information of a store query.
