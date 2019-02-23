@@ -53,26 +53,52 @@ import java.util.Map;
 @Extension(
         name = "lengthBatch",
         namespace = "",
-        description = "A batch (tumbling) length window that holds a number of events specified as the windowLength. " +
-                "The window is updated each time a batch of events that equals the number " +
-                "specified as the windowLength arrives.",
+        description = "A batch (tumbling) length window that holds and process a number of events as specified in " +
+                "the window.length.",
         parameters = {
                 @Parameter(name = "window.length",
                         description = "The number of events the window should tumble.",
                         type = {DataType.INT}),
+                @Parameter(name = "stream.current.event",
+                        description = "Let the window stream the current events out as and when they arrive" +
+                                " to the window while expiring them in batches.",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "false")
         },
         examples = {
                 @Example(
-                        syntax = "define window cseEventWindow (symbol string, price float, volume int) " +
+                        syntax = "define stream InputEventStream (symbol string, price float, volume int);\n\n" +
+                                "@info(name = 'query1')\n" +
+                                "from InputEventStream#lengthBatch(10)\n" +
+                                "select symbol, sum(price) as price \n" +
+                                "insert into OutputStream;",
+                        description = "This collect and process 10 events as a batch" +
+                                " and output them."
+                ),
+                @Example(
+                        syntax = "define stream InputEventStream (symbol string, price float, volume int);\n\n" +
+                                "@info(name = 'query1')\n" +
+                                "from InputEventStream#lengthBatch(10, true)\n" +
+                                "select symbol, sum(price) as sumPrice \n" +
+                                "insert into OutputStream;",
+                        description = "This window sends the arriving events directly to the output letting the " +
+                                "`sumPrice` to increase gradually, after every 10 events it clears the " +
+                                "window as a batch and resets the `sumPrice` to zero."
+                ),
+                @Example(
+                        syntax = "define stream InputEventStream (symbol string, price float, volume int);\n" +
+                                "define window StockEventWindow (symbol string, price float, volume int) " +
                                 "lengthBatch(10) output all events;\n\n" +
                                 "@info(name = 'query0')\n" +
-                                "from cseEventStream\n" +
-                                "insert into cseEventWindow;\n\n" +
+                                "from InputEventStream\n" +
+                                "insert into StockEventWindow;\n\n" +
                                 "@info(name = 'query1')\n" +
-                                "from cseEventWindow\n" +
+                                "from StockEventWindow\n" +
                                 "select symbol, sum(price) as price\n" +
-                                "insert all events into outputStream ;",
-                        description = "This will processing 10 events as a batch and out put all events."
+                                "insert all events into OutputStream ;",
+                        description = "This uses an defined window to process 10 events " +
+                                " as a batch and output all events."
                 )
         }
 )
@@ -80,27 +106,45 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
 
     private int length;
     private int count = 0;
-    private SnapshotableStreamEventQueue currentEventQueue;
+    private SnapshotableStreamEventQueue currentEventQueue = null;
     private SnapshotableStreamEventQueue expiredEventQueue = null;
     private boolean outputExpectsExpiredEvents;
     private SiddhiAppContext siddhiAppContext;
+    private boolean isStreamCurrentEvents = false;
     private StreamEvent resetEvent = null;
-
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                         boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiAppContext = siddhiAppContext;
-        currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+        if (!isStreamCurrentEvents) {
+            currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+        }
         if (outputExpectsExpiredEvents) {
             expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
-        if (attributeExpressionExecutors.length == 1) {
+        if (attributeExpressionExecutors.length >= 1) {
+            if (!(attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor)) {
+                throw new SiddhiAppValidationException("TimeBatch window's window.time (1st) parameter " +
+                        "'window.length' should be a constant but found a dynamic parameter " +
+                        attributeExpressionExecutors[0].getClass().getCanonicalName());
+            }
             length = (Integer) (((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue());
-        } else {
-            throw new SiddhiAppValidationException("Length batch window should only have one parameter (<int> " +
-                    "windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
+        }
+        if (attributeExpressionExecutors.length == 2) {
+            if (!(attributeExpressionExecutors[1] instanceof ConstantExpressionExecutor)) {
+                throw new SiddhiAppValidationException("TimeBatch window's window.time (2nd) parameter " +
+                        "'stream.current.event' should be a constant but found a dynamic parameter " +
+                        attributeExpressionExecutors[1].getClass().getCanonicalName());
+            }
+            isStreamCurrentEvents = (Boolean) (((ConstantExpressionExecutor)
+                    attributeExpressionExecutors[1]).getValue());
+        }
+        if (attributeExpressionExecutors.length > 2) {
+            throw new SiddhiAppValidationException("LengthBatch window should have one parameter (<int> " +
+                    "window.length) or two parameters (<int> window.length, <bool> stream.current.event), " +
+                    "but found " + attributeExpressionExecutors.length + " input parameters.");
         }
     }
 
@@ -113,28 +157,39 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
             long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
+                streamEventChunk.remove();
                 StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                currentEventQueue.add(clonedStreamEvent);
+                if (resetEvent == null) {
+                    resetEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                    resetEvent.setType(ComplexEvent.Type.RESET);
+                }
+                if (!isStreamCurrentEvents) {
+                    currentEventQueue.add(clonedStreamEvent);
+                } else {
+                    outputStreamEventChunk.add(streamEvent);
+                    if (expiredEventQueue != null) {
+                        clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
+                        expiredEventQueue.add(clonedStreamEvent);
+                    }
+                }
                 count++;
                 if (count == length) {
-                    if (outputExpectsExpiredEvents) {
-                        if (expiredEventQueue.getFirst() != null) {
-                            while (expiredEventQueue.hasNext()) {
-                                StreamEvent expiredEvent = expiredEventQueue.next();
-                                expiredEvent.setTimestamp(currentTime);
-                            }
-                            outputStreamEventChunk.add(expiredEventQueue.getFirst());
+                    if (outputExpectsExpiredEvents && expiredEventQueue.getFirst() != null) {
+                        while (expiredEventQueue.hasNext()) {
+                            StreamEvent expiredEvent = expiredEventQueue.next();
+                            expiredEvent.setTimestamp(currentTime);
                         }
-                    }
-                    if (expiredEventQueue != null) {
+                        outputStreamEventChunk.add(expiredEventQueue.getFirst());
                         expiredEventQueue.clear();
                     }
 
-                    if (currentEventQueue.getFirst() != null) {
-
-                        // add reset event in front of current events
+                    if (resetEvent != null) {
+                        resetEvent.setTimestamp(currentTime);
                         outputStreamEventChunk.add(resetEvent);
                         resetEvent = null;
+                    }
+
+                    if (currentEventQueue != null && currentEventQueue.getFirst() != null) {
 
                         if (expiredEventQueue != null) {
                             currentEventQueue.reset();
@@ -145,17 +200,14 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
                                 expiredEventQueue.add(toExpireEvent);
                             }
                         }
-
-                        resetEvent = streamEventCloner.copyStreamEvent(currentEventQueue.getFirst());
-                        resetEvent.setType(ComplexEvent.Type.RESET);
                         outputStreamEventChunk.add(currentEventQueue.getFirst());
+                        currentEventQueue.clear();
                     }
-                    currentEventQueue.clear();
                     count = 0;
-                    if (outputStreamEventChunk.getFirst() != null) {
-                        streamEventChunks.add(outputStreamEventChunk);
-                        outputStreamEventChunk = new ComplexEventChunk<StreamEvent>(true);
-                    }
+                }
+                if (outputStreamEventChunk.getFirst() != null) {
+                    streamEventChunks.add(outputStreamEventChunk);
+                    outputStreamEventChunk = new ComplexEventChunk<StreamEvent>(true);
                 }
             }
         }
@@ -179,8 +231,8 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
             state.put("Count", count);
-            state.put("CurrentEventQueue", currentEventQueue.getSnapshot());
-            state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
+            state.put("CurrentEventQueue", currentEventQueue != null ? currentEventQueue.getSnapshot() : null);
+            state.put("ExpiredEventQueue", expiredEventQueue != null ? expiredEventQueue.getSnapshot() : null);
             state.put("ResetEvent", resetEvent);
         }
         return state;
@@ -190,8 +242,10 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
     @Override
     public synchronized void restoreState(Map<String, Object> state) {
         count = (int) state.get("Count");
-        currentEventQueue.clear();
-        currentEventQueue.restore((SnapshotStateList) state.get("CurrentEventQueue"));
+        if (currentEventQueue != null) {
+            currentEventQueue.clear();
+            currentEventQueue.restore((SnapshotStateList) state.get("CurrentEventQueue"));
+        }
 
         if (expiredEventQueue != null) {
             expiredEventQueue.clear();

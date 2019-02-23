@@ -35,7 +35,7 @@ import org.wso2.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.window.AggregateWindowProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.FindableProcessor;
-import org.wso2.siddhi.core.query.processor.stream.window.LengthWindowProcessor;
+import org.wso2.siddhi.core.query.processor.stream.window.LengthBatchWindowProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.TableWindowProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowProcessor;
 import org.wso2.siddhi.core.query.processor.stream.window.WindowWindowProcessor;
@@ -344,11 +344,12 @@ public class JoinInputStreamParser {
 
         if (lastProcessor == null) {
             try {
-                WindowProcessor windowProcessor = new LengthWindowProcessor();
-                ExpressionExecutor[] expressionExecutors = new ExpressionExecutor[1];
+                WindowProcessor windowProcessor = new LengthBatchWindowProcessor();
+                ExpressionExecutor[] expressionExecutors = new ExpressionExecutor[2];
                 expressionExecutors[0] = new ConstantExpressionExecutor(0, Attribute.Type.INT);
+                expressionExecutors[1] = new ConstantExpressionExecutor(true, Attribute.Type.BOOL);
                 ConfigReader configReader = siddhiAppContext.getSiddhiContext()
-                        .getConfigManager().generateConfigReader("", "length");
+                        .getConfigManager().generateConfigReader("", "lengthBatch");
                 windowProcessor.initProcessor(
                         ((MetaStreamEvent) streamRuntime.getMetaComplexEvent()),
                         expressionExecutors, configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName,

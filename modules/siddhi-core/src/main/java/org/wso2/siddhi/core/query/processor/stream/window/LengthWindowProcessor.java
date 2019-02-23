@@ -52,7 +52,7 @@ import java.util.Map;
 @Extension(
         name = "length",
         namespace = "",
-        description = "A sliding length window that holds the last windowLength events at a given time, " +
+        description = "A sliding length window that holds the last 'window.length' events at a given time, " +
                 "and gets updated for each arrival and expiry.",
         parameters = {
                 @Parameter(name = "window.length",
@@ -60,16 +60,16 @@ import java.util.Map;
                         type = {DataType.INT})
         },
         examples = @Example(
-                syntax = "define window cseEventWindow (symbol string, price float, volume int) " +
-                        "length(10) output all events;\n" +
+                syntax = "define window StockEventWindow (symbol string, price float, volume int) " +
+                        "length(10) output all events;\n\n" +
                         "@info(name = 'query0')\n" +
-                        "from cseEventStream\n" +
-                        "insert into cseEventWindow;\n" +
-                        "@info(name = 'query1')\n" +
-                        "from cseEventWindow\n" +
+                        "from StockEventStream\n" +
+                        "insert into StockEventWindow;\n" +
+                        "@info(name = 'query1')\n\n" +
+                        "from StockEventWindow\n" +
                         "select symbol, sum(price) as price\n" +
                         "insert all events into outputStream ;",
-                description = "This will processing 10 events and out put all events."
+                description = "This will process last 10 events in a sliding manner."
         )
 )
 public class LengthWindowProcessor extends SlidingWindowProcessor implements FindableProcessor {
@@ -93,7 +93,7 @@ public class LengthWindowProcessor extends SlidingWindowProcessor implements Fin
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
         } else {
             throw new SiddhiAppValidationException("Length window should only have one parameter (<int> " +
-                    "windowLength), but found " + attributeExpressionExecutors.length + " input attributes");
+                    "window.length), but found " + attributeExpressionExecutors.length + " input parameters.");
         }
         expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder, length);
     }
