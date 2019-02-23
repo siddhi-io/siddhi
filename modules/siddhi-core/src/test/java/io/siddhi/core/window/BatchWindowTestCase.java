@@ -303,7 +303,6 @@ public class BatchWindowTestCase {
                     removeEventCount = removeEventCount + removeEvents.length;
                 }
                 eventArrived = true;
-                AssertJUnit.assertEquals(4, generalChunkSize);
             }
         });
 
@@ -327,6 +326,7 @@ public class BatchWindowTestCase {
         AssertJUnit.assertEquals(20, removeEventCount);
         AssertJUnit.assertEquals(2, lastChunkSize);
         AssertJUnit.assertEquals(8, chunkCount);
+        AssertJUnit.assertEquals(4, generalChunkSize);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }

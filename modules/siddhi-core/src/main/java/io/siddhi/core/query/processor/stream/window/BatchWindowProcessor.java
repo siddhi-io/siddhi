@@ -138,9 +138,9 @@ public class BatchWindowProcessor extends BatchingWindowProcessor implements Fin
             if (streamEventChunk.hasNext()) {
                 do {
                     StreamEvent streamEvent = streamEventChunk.next();
-                    StreamEvent clonedStreamEventToExpire = streamEventCloner.copyStreamEvent(streamEvent);
                     StreamEvent clonedStreamEventToProcess = streamEventCloner.copyStreamEvent(streamEvent);
                     if (outputExpectsExpiredEvents) {
+                        StreamEvent clonedStreamEventToExpire = streamEventCloner.copyStreamEvent(streamEvent);
                         clonedStreamEventToExpire.setType(StreamEvent.Type.EXPIRED);
                         expiredEventQueue.add(clonedStreamEventToExpire);
                     }
