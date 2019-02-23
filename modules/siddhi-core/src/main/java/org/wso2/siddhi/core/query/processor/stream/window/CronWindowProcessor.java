@@ -53,24 +53,39 @@ import java.util.Map;
 @Extension(
         name = "cron",
         namespace = "",
-        description = "This window returns events processed periodically as the output in time-repeating patterns, " +
-                "triggered based on time passing.",
+        description = "This window outputs the arriving events as and when they arrive, and resets (expires) " +
+                "the window periodically based on the given cron expression.",
         parameters = {
                 @Parameter(name = "cron.expression",
-                        description = "The cron expression that represents a time schedule.",
+                        description = "The cron expression that resets the window.",
                         type = {DataType.STRING})
         },
-        examples = @Example(
-                syntax = "define window cseEventWindow (symbol string, price float, volume int)" +
-                        "cron('*/5 * * * * ?');\n" +
-                        "@info(name = 'query0')\n" +
-                        "from cseEventStream\n" +
-                        "insert into cseEventWindow;\n" +
-                        "@info(name = 'query1')\n" +
-                        "from cseEventWindow \n" +
-                        "select symbol,price,volume\n" +
-                        "insert into outputStream ;",
-                description = "This will processed events as the output every 5 seconds.")
+
+        examples = {
+                @Example(
+                        syntax = "define stream InputEventStream (symbol string, price float, volume int);\n\n" +
+                                "@info(name = 'query1')\n" +
+                                "from InputEventStream#cron('*/5 * * * * ?')\n" +
+                                "select symbol, sum(price) as totalPrice \n" +
+                                "insert into OutputStream;",
+                        description = "This let the totalPrice to gradually increase and resets to zero " +
+                                "as a batch every 5 seconds."
+                ),
+                @Example(
+                        syntax = "define stream StockEventStream (symbol string, price float, volume int)\n" +
+                                "define window StockEventWindow (symbol string, price float, volume int) " +
+                                "cron('*/5 * * * * ?');\n\n" +
+                                "@info(name = 'query0')\n" +
+                                "from StockEventStream\n" +
+                                "insert into StockEventWindow;\n\n" +
+                                "@info(name = 'query1')\n" +
+                                "from StockEventWindow \n" +
+                                "select symbol, sum(price) as totalPrice\n" +
+                                "insert into OutputStream ;",
+                        description = "The defined window will let the totalPrice to gradually increase and " +
+                                "resets to zero as a batch every 5 seconds."
+                )
+        }
 )
 public class CronWindowProcessor extends BatchingWindowProcessor implements Job {
     private static final Logger log = Logger.getLogger(CronWindowProcessor.class);
