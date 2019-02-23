@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.event.state.MetaStateEvent;
 import org.wso2.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent;
 import org.wso2.siddhi.core.event.stream.MetaStreamEvent.EventType;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.QueryRuntime;
 import org.wso2.siddhi.core.query.input.stream.StreamRuntime;
@@ -48,6 +49,7 @@ import org.wso2.siddhi.query.api.execution.query.Query;
 import org.wso2.siddhi.query.api.execution.query.input.handler.StreamHandler;
 import org.wso2.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import org.wso2.siddhi.query.api.execution.query.input.stream.SingleInputStream;
+import org.wso2.siddhi.query.api.execution.query.output.ratelimit.SnapshotOutputRate;
 import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
@@ -102,7 +104,18 @@ public class QueryParser {
             }
             latencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, queryName,
                     SiddhiConstants.METRIC_INFIX_QUERIES, null);
+
             OutputStream.OutputEventType outputEventType = query.getOutputStream().getOutputEventType();
+            if (query.getOutputRate() != null && query.getOutputRate() instanceof SnapshotOutputRate) {
+                if (outputEventType != OutputStream.OutputEventType.ALL_EVENTS) {
+                    throw new SiddhiAppCreationException("As query '" + queryName + "' is performing snapshot rate " +
+                            "limiting, it can only insert '" + OutputStream.OutputEventType.ALL_EVENTS +
+                            "' but it is inserting '" + outputEventType + "'!",
+                            query.getOutputStream().getQueryContextStartIndex(),
+                            query.getOutputStream().getQueryContextEndIndex());
+                }
+            }
+
             boolean outputExpectsExpiredEvents = false;
             if (outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS) {
                 outputExpectsExpiredEvents = true;

@@ -25,17 +25,19 @@ import org.wso2.siddhi.core.event.GroupedComplexEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Implementation of {@link PerSnapshotOutputRateLimiter} for queries with GroupBy, Aggregators and Windows.
  */
 public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
-                                                                    AggregationWindowedPerSnapshotOutputRateLimiter {
+        AggregationWindowedPerSnapshotOutputRateLimiter {
     private List<GroupedComplexEvent> eventList;
     private Map<String, Map<Integer, Object>> groupByAggregateAttributeValueMap;
 
@@ -45,7 +47,7 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
                                                                      SiddhiAppContext siddhiAppContext,
                                                                      String queryName) {
         super(id, value, scheduledExecutorService, aggregateAttributePositionList, wrappedSnapshotOutputRateLimiter,
-              siddhiAppContext, queryName);
+                siddhiAppContext, queryName);
         this.queryName = queryName;
         groupByAggregateAttributeValueMap = new HashMap<String, Map<Integer, Object>>();
         eventList = new LinkedList<GroupedComplexEvent>();
@@ -88,8 +90,8 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
                                     .getComplexEvent()) == 0) {
                                 iterator.remove();
                                 for (Integer position : aggregateAttributePositionList) {
-                                    currentAggregateAttributeValueMap.put(position, groupedComplexEvent.getOutputData
-                                            ()[position]);
+                                    currentAggregateAttributeValueMap.put(position,
+                                            groupedComplexEvent.getOutputData()[position]);
                                 }
                                 break;
                             }
@@ -116,15 +118,19 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
 
     private void constructOutputChunk(List<ComplexEventChunk<ComplexEvent>> outputEventChunks) {
         ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+        Set<String> outputGroupingKeys = new HashSet<>();
         for (GroupedComplexEvent originalComplexEvent : eventList) {
             String currentGroupByKey = originalComplexEvent.getGroupKey();
-            Map<Integer, Object> currentAggregateAttributeValueMap = groupByAggregateAttributeValueMap.get
-                    (currentGroupByKey);
-            ComplexEvent eventCopy = cloneComplexEvent(originalComplexEvent.getComplexEvent());
-            for (Integer position : aggregateAttributePositionList) {
-                eventCopy.getOutputData()[position] = currentAggregateAttributeValueMap.get(position);
+            if (!outputGroupingKeys.contains(currentGroupByKey)) {
+                outputGroupingKeys.add(currentGroupByKey);
+                Map<Integer, Object> currentAggregateAttributeValueMap = groupByAggregateAttributeValueMap.get
+                        (currentGroupByKey);
+                ComplexEvent eventCopy = cloneComplexEvent(originalComplexEvent.getComplexEvent());
+                for (Integer position : aggregateAttributePositionList) {
+                    eventCopy.getOutputData()[position] = currentAggregateAttributeValueMap.get(position);
+                }
+                outputEventChunk.add(eventCopy);
             }
-            outputEventChunk.add(eventCopy);
         }
         outputEventChunks.add(outputEventChunk);
     }
@@ -150,8 +156,8 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
     public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter
             wrappedSnapshotOutputRateLimiter) {
         return new AggregationGroupByWindowedPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService,
-                                                                          aggregateAttributePositionList,
-                                                                          wrappedSnapshotOutputRateLimiter,
-                                                                          siddhiAppContext, queryName);
+                aggregateAttributePositionList,
+                wrappedSnapshotOutputRateLimiter,
+                siddhiAppContext, queryName);
     }
 }

@@ -22,6 +22,7 @@ import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.execution.ExecutionElement;
 import org.wso2.siddhi.query.api.execution.query.input.stream.InputStream;
 import org.wso2.siddhi.query.api.execution.query.output.ratelimit.OutputRate;
+import org.wso2.siddhi.query.api.execution.query.output.ratelimit.SnapshotOutputRate;
 import org.wso2.siddhi.query.api.execution.query.output.stream.DeleteStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.InsertIntoStream;
 import org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream;
@@ -43,7 +44,7 @@ public class Query implements ExecutionElement, SiddhiElement {
     private static final long serialVersionUID = 1L;
     private InputStream inputStream;
     private Selector selector = new Selector();
-    private OutputStream outputStream = new ReturnStream();
+    private OutputStream outputStream = new ReturnStream(OutputStream.OutputEventType.CURRENT_EVENTS);
     private OutputRate outputRate;
     private List<Annotation> annotations = new ArrayList<Annotation>();
     private int[] queryContextStartIndex;
@@ -73,84 +74,102 @@ public class Query implements ExecutionElement, SiddhiElement {
 
     public Query outStream(OutputStream outputStream) {
         this.outputStream = outputStream;
+        updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertInto(String outputStreamId, OutputStream.OutputEventType outputEventType) {
         this.outputStream = new InsertIntoStream(outputStreamId, outputEventType);
+        updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertInto(String outputStreamId) {
         this.outputStream = new InsertIntoStream(outputStreamId);
+        updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertIntoInner(String outputStreamId, OutputStream.OutputEventType outputEventType) {
         this.outputStream = new InsertIntoStream(outputStreamId, true, outputEventType);
+        updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertIntoInner(String outputStreamId) {
         this.outputStream = new InsertIntoStream(outputStreamId, true);
+        updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertIntoFault(String outputStreamId, OutputStream.OutputEventType outputEventType) {
         this.outputStream = new InsertIntoStream(outputStreamId, false, true, outputEventType);
+        updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query insertIntoFault(String outputStreamId) {
         this.outputStream = new InsertIntoStream(outputStreamId, false, true);
+        updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query returns() {
         this.outputStream = new ReturnStream();
+        updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public Query returns(OutputStream.OutputEventType outputEventType) {
         this.outputStream = new ReturnStream(outputEventType);
+        updateOutputEventType(outputRate, outputStream);
         return this;
     }
 
     public void deleteBy(String outputTableId, Expression onDeletingExpression) {
         this.outputStream = new DeleteStream(outputTableId, onDeletingExpression);
+        updateOutputEventType(outputRate, outputStream);
     }
 
     public void deleteBy(String outputTableId, OutputStream.OutputEventType outputEventType, Expression
             onDeletingExpression) {
         this.outputStream = new DeleteStream(outputTableId, outputEventType, onDeletingExpression);
+        updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateBy(String outputTableId, Expression onUpdateExpression) {
         this.outputStream = new UpdateStream(outputTableId, onUpdateExpression);
+        updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
         this.outputStream = new UpdateStream(outputTableId, updateSetAttributes, onUpdateExpression);
+        updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateBy(String outputTableId, OutputStream.OutputEventType outputEventType,
                          Expression onUpdateExpression) {
         this.outputStream = new UpdateStream(outputTableId, outputEventType, null, onUpdateExpression);
+        updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateBy(String outputTableId, OutputStream.OutputEventType outputEventType,
                          UpdateSet updateSetAttributes, Expression onUpdateExpression) {
         this.outputStream = new UpdateStream(outputTableId, outputEventType, updateSetAttributes, onUpdateExpression);
+        updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateOrInsertBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
         this.outputStream = new UpdateOrInsertStream(outputTableId, updateSetAttributes, onUpdateExpression);
+        updateOutputEventType(outputRate, outputStream);
     }
 
     public void updateOrInsertBy(String outputTableId, OutputStream.OutputEventType outputEventType,
                                  UpdateSet updateSetAttributes, Expression onUpdateExpression) {
         this.outputStream = new UpdateOrInsertStream(outputTableId, outputEventType, updateSetAttributes,
                 onUpdateExpression);
+        updateOutputEventType(outputRate, outputStream);
+
     }
 
     public OutputStream getOutputStream() {
@@ -159,6 +178,17 @@ public class Query implements ExecutionElement, SiddhiElement {
 
     public void output(OutputRate outputRate) {
         this.outputRate = outputRate;
+        updateOutputEventType(outputRate, outputStream);
+    }
+
+    private void updateOutputEventType(OutputRate outputRate, OutputStream outputStream) {
+        if (outputStream != null && outputStream.getOutputEventType() == null) {
+            if (outputRate instanceof SnapshotOutputRate) {
+                outputStream.setOutputEventType(OutputStream.OutputEventType.ALL_EVENTS);
+            } else {
+                outputStream.setOutputEventType(OutputStream.OutputEventType.CURRENT_EVENTS);
+            }
+        }
     }
 
     public OutputRate getOutputRate() {
