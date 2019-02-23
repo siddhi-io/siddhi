@@ -25,10 +25,12 @@ import io.siddhi.core.event.GroupedComplexEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -88,8 +90,8 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
                                     .getComplexEvent()) == 0) {
                                 iterator.remove();
                                 for (Integer position : aggregateAttributePositionList) {
-                                    currentAggregateAttributeValueMap.put(position, groupedComplexEvent.getOutputData
-                                            ()[position]);
+                                    currentAggregateAttributeValueMap.put(position,
+                                            groupedComplexEvent.getOutputData()[position]);
                                 }
                                 break;
                             }
@@ -116,15 +118,19 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
 
     private void constructOutputChunk(List<ComplexEventChunk<ComplexEvent>> outputEventChunks) {
         ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
+        Set<String> outputGroupingKeys = new HashSet<>();
         for (GroupedComplexEvent originalComplexEvent : eventList) {
             String currentGroupByKey = originalComplexEvent.getGroupKey();
-            Map<Integer, Object> currentAggregateAttributeValueMap = groupByAggregateAttributeValueMap.get
-                    (currentGroupByKey);
-            ComplexEvent eventCopy = cloneComplexEvent(originalComplexEvent.getComplexEvent());
-            for (Integer position : aggregateAttributePositionList) {
-                eventCopy.getOutputData()[position] = currentAggregateAttributeValueMap.get(position);
+            if (!outputGroupingKeys.contains(currentGroupByKey)) {
+                outputGroupingKeys.add(currentGroupByKey);
+                Map<Integer, Object> currentAggregateAttributeValueMap = groupByAggregateAttributeValueMap.get
+                        (currentGroupByKey);
+                ComplexEvent eventCopy = cloneComplexEvent(originalComplexEvent.getComplexEvent());
+                for (Integer position : aggregateAttributePositionList) {
+                    eventCopy.getOutputData()[position] = currentAggregateAttributeValueMap.get(position);
+                }
+                outputEventChunk.add(eventCopy);
             }
-            outputEventChunk.add(eventCopy);
         }
         outputEventChunks.add(outputEventChunk);
     }

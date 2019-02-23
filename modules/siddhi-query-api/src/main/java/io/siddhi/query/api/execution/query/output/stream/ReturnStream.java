@@ -29,6 +29,6 @@ public class ReturnStream extends OutputStream {
     }
 
     public ReturnStream() {
-        this(OutputStream.OutputEventType.CURRENT_EVENTS);
+        this(null);
     }
 }

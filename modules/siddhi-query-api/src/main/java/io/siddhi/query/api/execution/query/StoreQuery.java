@@ -28,6 +28,8 @@ import io.siddhi.query.api.execution.query.output.stream.UpdateStream;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import io.siddhi.query.api.expression.Expression;
 
+import static org.wso2.siddhi.query.api.execution.query.output.stream.OutputStream.OutputEventType.CURRENT_EVENTS;
+
 /**
  * This class keep information of a store query.
  */
@@ -36,7 +38,7 @@ public class StoreQuery implements SiddhiElement {
     private static final long serialVersionUID = 1L;
     private InputStore inputStore;
     private Selector selector = new Selector();
-    private OutputStream outputStream = new ReturnStream();
+    private OutputStream outputStream = new ReturnStream(CURRENT_EVENTS);
     private int[] queryContextStartIndex;
     private int[] queryContextEndIndex;
     private StoreQueryType type;
@@ -89,6 +91,9 @@ public class StoreQuery implements SiddhiElement {
      */
     public StoreQuery outStream(OutputStream outputStream) {
         this.outputStream = outputStream;
+        if (outputStream != null && outputStream.getOutputEventType() == null) {
+            outputStream.setOutputEventType(OutputStream.OutputEventType.CURRENT_EVENTS);
+        }
         return this;
     }
 
@@ -99,7 +104,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onDeletingExpression expression for the delete operation defined in the store query
      */
     public void deleteBy(String outputTableId, Expression onDeletingExpression) {
-        this.outputStream = new DeleteStream(outputTableId, onDeletingExpression);
+        this.outputStream = new DeleteStream(outputTableId, CURRENT_EVENTS, onDeletingExpression);
     }
 
     /**
@@ -109,7 +114,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onUpdateExpression expression for the update operation defined in the store query
      */
     public void updateBy(String outputTableId, Expression onUpdateExpression) {
-        this.outputStream = new UpdateStream(outputTableId, onUpdateExpression);
+        this.outputStream = new UpdateStream(outputTableId, CURRENT_EVENTS, onUpdateExpression);
     }
 
     /**
@@ -120,7 +125,7 @@ public class StoreQuery implements SiddhiElement {
      * @param onUpdateExpression  expression for the update operation defined in the store query
      */
     public void updateBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
-        this.outputStream = new UpdateStream(outputTableId, updateSetAttributes, onUpdateExpression);
+        this.outputStream = new UpdateStream(outputTableId, CURRENT_EVENTS, updateSetAttributes, onUpdateExpression);
     }
 
     /**
@@ -131,7 +136,8 @@ public class StoreQuery implements SiddhiElement {
      * @param onUpdateExpression  expression for the update or insert operation defined in the store query
      */
     public void updateOrInsertBy(String outputTableId, UpdateSet updateSetAttributes, Expression onUpdateExpression) {
-        this.outputStream = new UpdateOrInsertStream(outputTableId, updateSetAttributes, onUpdateExpression);
+        this.outputStream = new UpdateOrInsertStream(outputTableId, CURRENT_EVENTS,
+                updateSetAttributes, onUpdateExpression);
     }
 
     /**

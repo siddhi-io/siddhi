@@ -35,7 +35,7 @@ public class DeleteStream extends OutputStream {
 
     public DeleteStream(String tableId, Expression onDeleteExpression) {
         this.id = tableId;
-        this.outputEventType = OutputEventType.CURRENT_EVENTS;
+        this.outputEventType = null;
         this.onDeleteExpression = onDeleteExpression;
     }
 
