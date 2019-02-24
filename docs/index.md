@@ -7,25 +7,40 @@ Siddhi
   [![GitHub last commit](https://img.shields.io/github/last-commit/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Siddhi is a java library that listens to events from data streams, detects complex conditions described via a **Streaming
- SQL language**, and triggers actions. It performs both **_Stream Processing_** and **_Complex Event Processing_**.  
+Siddhi is a **_Streaming_** and **_Complex Event Processing_** engine that listens to events from data streams, detects complex conditions described via a **Streaming
+ SQL language**, and triggers actions.   
  
 ## Overview 
 
 ![](https://raw.githubusercontent.com/wso2/siddhi/master/docs/images/siddhi-overview.png?raw=true "Overview")
 
-Siddhi supports the following:
+Siddhi supports:
  
-* Data preprocessing
-* Generating alerts based on thresholds
-* Calculating aggregations over a short window or a long time period
-* Joining multiple data streams
-* Correlating data while finding missing and erroneous events
-* Interacting streaming data with databases
-* Detecting temporal event patterns
-* Tracking (something over space or time)
-* Analyzing trends (rise, fall, turn, tipple bottom)
-* Making real-time predictions with existing and online machine learning models
+* Streaming data integration 
+    * Retrieving data from various event sources (Kafka, NATS, JMS, HTTP, CDC, etc)
+    * Map events to and from multiple event formats (JSON, XML, Text, Avro, etc)
+    * Data preprocessing & cleaning
+    * Joining multiple data streams 
+    * Integrate streaming data with databases (RDBMS, Cassandra, HBase, Redis, etc)
+    * Integrate with external services
+    * Publish data to multiple event sinks (Email, JMS, HTTP, etc)
+    
+* Streaming data analytics
+    * Generating alerts based on thresholds
+    * Calculate aggregations over a short windows (time, length, session, unique, etc) or a long time period
+    * Calculate aggregations over long time periods with seconds, minutes, hours, days, months & years granularity  
+    * Correlating data while finding missing and erroneous events
+    * Detecting temporal event patterns
+    * Analyzing trends (rise, fall, turn, tipple bottom)
+    * Run pretreated machine learning models (PMML, Tensorflow) 
+    * Learn and predict at runtime using online machine learning models
+
+* Adaptive Intelligence
+    * Static rule processing 
+    * Stateful rule processing 
+    * Decision making through synchronous stream processing  
+    * Query tables, windows and aggregations  
+      
 * And many more ...  For more information, see <a target="_blank" href="http://www.kdnuggets.com/2015/08/patterns-streaming-realtime-analytics.html">Patterns of Streaming Realtime Analytics</a>
 
 Siddhi is free and open source, under **Apache Software License v2.0**.
@@ -38,8 +53,8 @@ Get started with Siddhi in a few minutes by following the <a target="_blank" hre
 
 * It is **fast**. <a target="_blank" href="http://wso2.com/library/conference/2017/2/wso2con-usa-2017-scalable-real-time-complex-event-processing-at-uber?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">UBER</a> 
 uses it to process 20 Billion events per day (300,000 events per second). 
-* It is **lightweight** (<2MB),  and embeddable in Android and RaspberryPi.
-* It has **over 40 <a target="_blank" href="https://siddhi-io.github.io/siddhi/extensions/">Siddhi Extensions</a>**
+* It is **lightweight** (<2MB),  and embeddable in Android, Python and RaspberryPi.
+* It has **over 50 <a target="_blank" href="https://siddhi-io.github.io/siddhi/extensions/">Siddhi Extensions</a>**
 * It is **used by over 60 companies including many Fortune 500 companies** in production. Following are some examples:
     * **WSO2** uses Siddhi for the following purposes:
         * To provide stream processing capabilities in their products such as <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a>.
@@ -93,7 +108,7 @@ For more information please contact us via <a target="_blank" href="http://wso2.
     
     <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v5.x.x
 
-* **Latest Stable Release of Siddhi v4.x.x** : **v4.4.8**  _built on Java 8._ 
+* **Latest Stable Release of Siddhi v4.x.x** : **v4.4.8** _built on Java 8. (Recommended for production use)_
      
     Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/">here</a>.
 
@@ -128,6 +143,7 @@ Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.
     ```bash
     git clone https://github.com/siddhi-io/siddhi.git
     ```
+    
 1. Run the Maven command ``mvn clean install`` from the root directory
  
 ## Contact us 
@@ -140,4 +156,4 @@ Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.
 * For more details and to take advantage of this unique opportunity, contact us via <a target="_blank" href="http://wso2.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>. 
 
 
-Siddhi was joint research project initiated by <a target="_blank" href="http://wso2.com/"> WSO2</a> and <a target="_blank" href="http://www.mrt.ac.lk/web/">University of Moratuwa</a>, Sri Lanka.
+Siddhi was joint research project initiated by <a target="_blank" href="http://wso2.com/">WSO2</a> and <a target="_blank" href="http://www.mrt.ac.lk/web/">University of Moratuwa</a>, Sri Lanka.

@@ -22,7 +22,7 @@
 <suite name="Siddhi-Api-Test-Suite">
     <test name="siddhi-api-tests" enabled="true" preserve-order="true">
         <classes>
-            <class name="org.wso2.siddhi.service.SiddhiApiTestCase"/>
+            <class name="io.siddhi.service.SiddhiApiTestCase"/>
         </classes>
     </test>
 </suite>

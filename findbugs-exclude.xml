@@ -20,192 +20,192 @@
 <FindBugsFilter>
     <!--api-->
     <Match>
-        <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
+        <Class name="io.siddhi.query.api.expression.AttributeFunction"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
+        <Class name="io.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.expression.AttributeFunction"/>
+        <Class name="io.siddhi.query.api.expression.AttributeFunction"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
+        <Class name="io.siddhi.query.api.execution.query.input.handler.StreamFunction"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream"/>
+        <Class name="io.siddhi.query.api.execution.query.output.stream.UpdateOrInsertStream"/>
         <Bug pattern="SE_BAD_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.api.execution.query.output.stream.UpdateStream"/>
+        <Class name="io.siddhi.query.api.execution.query.output.stream.UpdateStream"/>
         <Bug pattern="SE_BAD_FIELD"/>
     </Match>
 
     <Match>
-        <Package name="~org\.wso2\.siddhi\.query\.api.*"/>
+        <Package name="~io\.siddhi\.query\.api.*"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
 
     <!--compiler-->
     <Match>
-        <Class name="org.wso2.siddhi.query.compiler.internal.SiddhiQLBaseVisitorImpl"/>
+        <Class name="io.siddhi.query.compiler.internal.SiddhiQLBaseVisitorImpl"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.compiler.SiddhiQLLexer"/>
+        <Class name="io.siddhi.query.compiler.SiddhiQLLexer"/>
         <Bug pattern="EI_EXPOSE_REP, MS_FINAL_PKGPROTECT, MS_PKGPROTECT, SF_SWITCH_NO_DEFAULT, SF_SWITCH_NO_DEFAULT"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.compiler.SiddhiQLParser"/>
+        <Class name="io.siddhi.query.compiler.SiddhiQLParser"/>
         <Bug pattern="MF_CLASS_MASKS_FIELD, BC_UNCONFIRMED_CAST, EI_EXPOSE_REP, MS_PKGPROTECT, SF_SWITCH_NO_DEFAULT"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.compiler.SiddhiQLParser$CollectContext"/>
+        <Class name="io.siddhi.query.compiler.SiddhiQLParser$CollectContext"/>
         <Bug pattern="MF_CLASS_MASKS_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.query.compiler.exception.SiddhiParserException"/>
+        <Class name="io.siddhi.query.compiler.exception.SiddhiParserException"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
 
     <!--core-->
     <Match>
-        <Class name="org.wso2.siddhi.core.query.output.ratelimit.event.AllPerEventOutputRateLimiter"/>
+        <Class name="io.siddhi.core.query.output.ratelimit.event.AllPerEventOutputRateLimiter"/>
         <Bug pattern="VO_VOLATILE_INCREMENT"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.partition.PartitionRuntime"/>
+        <Class name="PartitionRuntime"/>
         <Bug pattern="RV_RETURN_VALUE_OF_PUTIFABSENT_IGNORED"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.executor.condition.NotConditionExpressionExecutor"/>
+        <Class name="io.siddhi.core.executor.condition.NotConditionExpressionExecutor"/>
         <Bug pattern="RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.executor.condition.OrConditionExpressionExecutor"/>
+        <Class name="OrConditionExpressionExecutor"/>
         <Bug pattern="RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.parser.helper.DefinitionParserHelper$2"/>
+        <Class name="DefinitionParserHelper$2"/>
         <Bug pattern="SE_BAD_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder"/>
+        <Class name="io.siddhi.core.util.SiddhiAppRuntimeBuilder"/>
         <Bug pattern="RV_RETURN_VALUE_OF_PUTIFABSENT_IGNORED"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.query.processor.stream.AbstractStreamProcessor"/>
+        <class name="AbstractStreamProcessor"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.query.selector.QuerySelector"/>
+        <class name="QuerySelector"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator"/>
+        <class name="AttributeAggregator"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.stream.StreamJunction"/>
+        <class name="StreamJunction"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.util.timestamp.EventTimeBasedMillisTimestampGenerator"/>
+        <class name="io.siddhi.core.util.timestamp.EventTimeBasedMillisTimestampGenerator"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <class name="org.wso2.siddhi.core.event.stream.StreamEvent"/>
+        <class name="StreamEvent"/>
         <Bug pattern="UC_USELESS_OBJECT"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.executor.VariableExpressionExecutor"/>
+        <Class name="io.siddhi.core.executor.VariableExpressionExecutor"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.stream.output.sink.distributed.DistributedTransport"/>
+        <Class name="io.siddhi.core.stream.output.sink.distributed.DistributedTransport"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.query.selector.attribute.processor.executor.AbstractAggregationAttributeExecutor"/>
+        <Class name="io.siddhi.core.query.selector.attribute.processor.executor.AbstractAggregationAttributeExecutor"/>
         <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.transport.InMemoryBroker$MessageBroker"/>
+        <Class name="io.siddhi.core.util.transport.InMemoryBroker$MessageBroker"/>
         <Bug pattern="DE_MIGHT_IGNORE"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.util.parser.JoinInputStreamParser"/>
+        <Class name="io.siddhi.core.util.parser.JoinInputStreamParser"/>
         <Bug pattern="SF_SWITCH_NO_DEFAULT"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.AvgIncrementalAttributeAggregator"/>
+        <Class name="AvgIncrementalAttributeAggregator"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.CountIncrementalAttributeAggregator"/>
+        <Class name="CountIncrementalAttributeAggregator"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.query.selector.attribute.aggregator.incremental.SumIncrementalAttributeAggregator"/>
+        <Class name="SumIncrementalAttributeAggregator"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.exception.SiddhiAppCreationException"/>
+        <Class name="io.siddhi.core.exception.SiddhiAppCreationException"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.exception.StoreQueryCreationException"/>
+        <Class name="io.siddhi.core.exception.StoreQueryCreationException"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.table.holder.IndexEventHolder"/>
+        <Class name="io.siddhi.core.table.holder.IndexEventHolder"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.table.holder.SnapshotableIndexEventHolder"/>
+        <Class name="io.siddhi.core.table.holder.SnapshotableIndexEventHolder"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Class name="org.wso2.siddhi.core.table.holder.ListEventHolder"/>
+        <Class name="io.siddhi.core.table.holder.ListEventHolder"/>
         <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS"/>
     </Match>
 
 
     <Match>
-        <Package name="~org\.wso2\.siddhi\.core\.query\.output\.ratelimit\.time.*"/>
+        <Package name="~io\.siddhi\.core\.query\.output\.ratelimit\.time.*"/>
         <Bug pattern="IS2_INCONSISTENT_SYNC"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.core.*"/>
+        <Package name="~io\.siddhi\.core.*"/>
         <Bug pattern="EI_EXPOSE_REP2, SIC_INNER_SHOULD_BE_STATIC"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.core\.event.*"/>
+        <Package name="~io\.siddhi\.core\.event.*"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.core\.query\.selector\.attribute\.aggregator\.incremental.*"/>
+        <Package name="~io\.siddhi\.core\.query\.selector\.attribute\.aggregator\.incremental.*"/>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.core\.util\.snapshot\.*"/>
+        <Package name="~io\.siddhi\.core\.util\.snapshot\.*"/>
         <Bug pattern="AT_OPERATION_SEQUENCE_ON_CONCURRENT_ABSTRACTION"/>
     </Match>
     <!--Suppression added to support for Java 11-->
     <Match>
-        <Class name="~org\.wso2\.siddhi\.core\.event\.stream\.holder\.SnapshotableStreamEventQueue"/>
+        <Class name="~io\.siddhi\.core\.event\.stream\.holder\.SnapshotableStreamEventQueue"/>
         <Bug pattern="SE_TRANSIENT_FIELD_NOT_RESTORED"/>
     </Match>
 
     <!--other-->
     <Match>
-        <Package name="~org\.wso2\.siddhi\.performance.*"/>
+        <Package name="~io\.siddhi\.performance.*"/>
     </Match>
     <Match>
-        <Package name="~org\.wso2\.siddhi\.sample.*"/>
+        <Package name="~io\.siddhi\.sample.*"/>
     </Match>
 
 

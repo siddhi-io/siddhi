@@ -53,23 +53,23 @@
 
 
     <target name="simpleFilter" depends="compile">
-        <java classname="org.wso2.siddhi.sample.SimpleFilterSample"
+        <java classname="io.siddhi.sample.SimpleFilterSample"
               classpathref="classpath" fork="true">
 
         </java>
     </target>
     <target name="function" depends="compile">
-        <java classname="org.wso2.siddhi.sample.FunctionSample"
+        <java classname="io.siddhi.sample.FunctionSample"
               classpathref="classpath" fork="true">
         </java>
     </target>
     <target name="extension" depends="compile">
-        <java classname="org.wso2.siddhi.sample.ExtensionSample"
+        <java classname="io.siddhi.sample.ExtensionSample"
               classpathref="classpath" fork="true">
         </java>
     </target>
     <target name="partition" depends="compile">
-        <java classname="org.wso2.siddhi.sample.PartitionSample"
+        <java classname="io.siddhi.sample.PartitionSample"
               classpathref="classpath" fork="true">
         </java>
     </target>

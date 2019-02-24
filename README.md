@@ -143,6 +143,7 @@ Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.
     ```bash
     git clone https://github.com/siddhi-io/siddhi.git
     ```
+    
 1. Run the Maven command ``mvn clean install`` from the root directory
  
 ## Contact us 

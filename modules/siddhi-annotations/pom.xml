@@ -57,7 +57,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.siddhi.annotation.*,
+                            io.siddhi.annotation.*,
                             org.atteo.classindex.*;version="3.4"
                         </Export-Package>
                         <Import-Package>
