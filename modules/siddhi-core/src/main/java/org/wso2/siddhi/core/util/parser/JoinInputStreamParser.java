@@ -345,9 +345,8 @@ public class JoinInputStreamParser {
         if (lastProcessor == null) {
             try {
                 WindowProcessor windowProcessor = new LengthBatchWindowProcessor();
-                ExpressionExecutor[] expressionExecutors = new ExpressionExecutor[2];
+                ExpressionExecutor[] expressionExecutors = new ExpressionExecutor[1];
                 expressionExecutors[0] = new ConstantExpressionExecutor(0, Attribute.Type.INT);
-                expressionExecutors[1] = new ConstantExpressionExecutor(true, Attribute.Type.BOOL);
                 ConfigReader configReader = siddhiAppContext.getSiddhiContext()
                         .getConfigManager().generateConfigReader("", "lengthBatch");
                 windowProcessor.initProcessor(

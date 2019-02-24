@@ -118,12 +118,6 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
                         boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiAppContext = siddhiAppContext;
-        if (!isStreamCurrentEvents) {
-            currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
-        }
-        if (outputExpectsExpiredEvents) {
-            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
-        }
         if (attributeExpressionExecutors.length >= 1) {
             if (!(attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor)) {
                 throw new SiddhiAppValidationException("TimeBatch window's window.time (1st) parameter " +
@@ -146,6 +140,12 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
                     "window.length) or two parameters (<int> window.length, <bool> stream.current.event), " +
                     "but found " + attributeExpressionExecutors.length + " input parameters.");
         }
+        if (!isStreamCurrentEvents) {
+            currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+        }
+        if (outputExpectsExpiredEvents) {
+            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+        }
     }
 
     @Override
@@ -158,52 +158,18 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 streamEventChunk.remove();
-                StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                if (resetEvent == null) {
-                    resetEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                    resetEvent.setType(ComplexEvent.Type.RESET);
-                }
-                if (!isStreamCurrentEvents) {
-                    currentEventQueue.add(clonedStreamEvent);
+                if (length == 0) {
+                    processLengthZeroBatch(streamEvent, outputStreamEventChunk, currentTime);
                 } else {
-                    outputStreamEventChunk.add(streamEvent);
-                    if (expiredEventQueue != null) {
-                        clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
-                        expiredEventQueue.add(clonedStreamEvent);
+                    if (resetEvent == null) {
+                        resetEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                        resetEvent.setType(ComplexEvent.Type.RESET);
                     }
-                }
-                count++;
-                if (count == length) {
-                    if (outputExpectsExpiredEvents && expiredEventQueue.getFirst() != null) {
-                        while (expiredEventQueue.hasNext()) {
-                            StreamEvent expiredEvent = expiredEventQueue.next();
-                            expiredEvent.setTimestamp(currentTime);
-                        }
-                        outputStreamEventChunk.add(expiredEventQueue.getFirst());
-                        expiredEventQueue.clear();
+                    if (isStreamCurrentEvents) {
+                        processStreamCurrentEvents(streamEvent, outputStreamEventChunk, currentTime);
+                    } else {
+                        processFullBatchEvents(streamEvent, outputStreamEventChunk, currentTime);
                     }
-
-                    if (resetEvent != null) {
-                        resetEvent.setTimestamp(currentTime);
-                        outputStreamEventChunk.add(resetEvent);
-                        resetEvent = null;
-                    }
-
-                    if (currentEventQueue != null && currentEventQueue.getFirst() != null) {
-
-                        if (expiredEventQueue != null) {
-                            currentEventQueue.reset();
-                            while (currentEventQueue.hasNext()) {
-                                StreamEvent currentEvent = currentEventQueue.next();
-                                StreamEvent toExpireEvent = streamEventCloner.copyStreamEvent(currentEvent);
-                                toExpireEvent.setType(StreamEvent.Type.EXPIRED);
-                                expiredEventQueue.add(toExpireEvent);
-                            }
-                        }
-                        outputStreamEventChunk.add(currentEventQueue.getFirst());
-                        currentEventQueue.clear();
-                    }
-                    count = 0;
                 }
                 if (outputStreamEventChunk.getFirst() != null) {
                     streamEventChunks.add(outputStreamEventChunk);
@@ -214,6 +180,92 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
         for (ComplexEventChunk<StreamEvent> outputStreamEventChunk : streamEventChunks) {
             nextProcessor.process(outputStreamEventChunk);
         }
+    }
+
+    private void processLengthZeroBatch(StreamEvent streamEvent,
+                                        ComplexEventChunk<StreamEvent> outputStreamEventChunk,
+                                        long currentTime) {
+
+        outputStreamEventChunk.add(streamEvent);
+        if (outputExpectsExpiredEvents) {
+            StreamEvent expiredEvent = streamEventCloner.copyStreamEvent(streamEvent);
+            expiredEvent.setType(ComplexEvent.Type.EXPIRED);
+            expiredEvent.setTimestamp(currentTime);
+            outputStreamEventChunk.add(expiredEvent);
+        }
+        StreamEvent resetEvent = streamEventCloner.copyStreamEvent(streamEvent);
+        resetEvent.setType(ComplexEvent.Type.RESET);
+        resetEvent.setTimestamp(currentTime);
+        outputStreamEventChunk.add(resetEvent);
+    }
+
+    private void processFullBatchEvents(StreamEvent streamEvent,
+                                        ComplexEventChunk<StreamEvent> outputStreamEventChunk,
+                                        long currentTime) {
+        StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
+        currentEventQueue.add(clonedStreamEvent);
+        count++;
+        if (count == length) {
+            if (outputExpectsExpiredEvents && expiredEventQueue.getFirst() != null) {
+                while (expiredEventQueue.hasNext()) {
+                    StreamEvent expiredEvent = expiredEventQueue.next();
+                    expiredEvent.setTimestamp(currentTime);
+                }
+                outputStreamEventChunk.add(expiredEventQueue.getFirst());
+                expiredEventQueue.clear();
+            }
+
+            if (resetEvent != null) {
+                resetEvent.setTimestamp(currentTime);
+                outputStreamEventChunk.add(resetEvent);
+                resetEvent = null;
+            }
+
+            if (currentEventQueue.getFirst() != null) {
+                if (expiredEventQueue != null) {
+                    currentEventQueue.reset();
+                    while (currentEventQueue.hasNext()) {
+                        StreamEvent currentEvent = currentEventQueue.next();
+                        StreamEvent toExpireEvent = streamEventCloner.copyStreamEvent(currentEvent);
+                        toExpireEvent.setType(StreamEvent.Type.EXPIRED);
+                        expiredEventQueue.add(toExpireEvent);
+                    }
+                }
+                outputStreamEventChunk.add(currentEventQueue.getFirst());
+                currentEventQueue.clear();
+            }
+            count = 0;
+        }
+    }
+
+    private void processStreamCurrentEvents(StreamEvent streamEvent,
+                                            ComplexEventChunk<StreamEvent> outputStreamEventChunk,
+                                            long currentTime) {
+        count++;
+        if (count == length + 1) {
+            if (outputExpectsExpiredEvents && expiredEventQueue.getFirst() != null) {
+                while (expiredEventQueue.hasNext()) {
+                    StreamEvent expiredEvent = expiredEventQueue.next();
+                    expiredEvent.setTimestamp(currentTime);
+                }
+                outputStreamEventChunk.add(expiredEventQueue.getFirst());
+                expiredEventQueue.clear();
+            }
+
+            if (resetEvent != null) {
+                resetEvent.setTimestamp(currentTime);
+                outputStreamEventChunk.add(resetEvent);
+                resetEvent = null;
+            }
+            count = 1;
+        }
+        outputStreamEventChunk.add(streamEvent);
+        if (expiredEventQueue != null) {
+            StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
+            clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
+            expiredEventQueue.add(clonedStreamEvent);
+        }
+
     }
 
     @Override

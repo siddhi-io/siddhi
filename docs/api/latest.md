@@ -1376,7 +1376,7 @@ insert into outputStream;
 
 ### cron *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
-<p style="word-wrap: break-word">This window returns events processed periodically as the output in time-repeating patterns, triggered based on time passing.</p>
+<p style="word-wrap: break-word">This window outputs the arriving events as and when they arrive, and resets (expires) the window periodically based on the given cron expression.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
@@ -1395,7 +1395,7 @@ cron(<STRING> cron.expression)
     </tr>
     <tr>
         <td style="vertical-align: top">cron.expression</td>
-        <td style="vertical-align: top; word-wrap: break-word">The cron expression that represents a time schedule.</td>
+        <td style="vertical-align: top; word-wrap: break-word">The cron expression that resets the window.</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
@@ -1406,16 +1406,30 @@ cron(<STRING> cron.expression)
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-define window cseEventWindow (symbol string, price float, volume int)cron('*/5 * * * * ?');
-@info(name = 'query0')
-from cseEventStream
-insert into cseEventWindow;
+define stream InputEventStream (symbol string, price float, volume int);
+
 @info(name = 'query1')
-from cseEventWindow 
-select symbol,price,volume
-insert into outputStream ;
+from InputEventStream#cron('*/5 * * * * ?')
+select symbol, sum(price) as totalPrice 
+insert into OutputStream;
 ```
-<p style="word-wrap: break-word">This will processed events as the output every 5 seconds.</p>
+<p style="word-wrap: break-word">This let the totalPrice to gradually increase and resets to zero as a batch every 5 seconds.</p>
+
+<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
+```
+define stream StockEventStream (symbol string, price float, volume int)
+define window StockEventWindow (symbol string, price float, volume int) cron('*/5 * * * * ?');
+
+@info(name = 'query0')
+from StockEventStream
+insert into StockEventWindow;
+
+@info(name = 'query1')
+from StockEventWindow 
+select symbol, sum(price) as totalPrice
+insert into OutputStream ;
+```
+<p style="word-wrap: break-word">The defined window will let the totalPrice to gradually increase and resets to zero as a batch every 5 seconds.</p>
 
 ### delay *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
@@ -1702,7 +1716,7 @@ insert all events into outputStream ;
 
 ### lengthBatch *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
-<p style="word-wrap: break-word">A batch (tumbling) length window that holds and process a number of events specified as the window.length.</p>
+<p style="word-wrap: break-word">A batch (tumbling) length window that holds and process a number of events as specified in the window.length.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
@@ -1729,7 +1743,7 @@ lengthBatch(<INT> window.length, <BOOL> stream.current.event)
     </tr>
     <tr>
         <td style="vertical-align: top">stream.current.event</td>
-        <td style="vertical-align: top; word-wrap: break-word">This streams the current events out as and then arrives to the window while expiring them in batches.</td>
+        <td style="vertical-align: top; word-wrap: break-word">Let the window stream the current events out as and when they arrive to the window while expiring them in batches.</td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">Yes</td>
@@ -1758,7 +1772,7 @@ from InputEventStream#lengthBatch(10, true)
 select symbol, sum(price) as sumPrice 
 insert into OutputStream;
 ```
-<p style="word-wrap: break-word">This window sends the arriving events directly to the output letting the <code>sumPrice</code> to increase gradually and on after every 10 events it clears the window as a batch resetting the <code>sumPrice</code> to zero.</p>
+<p style="word-wrap: break-word">This window sends the arriving events directly to the output letting the <code>sumPrice</code> to increase gradually, after every 10 events it clears the window as a batch and resets the <code>sumPrice</code> to zero.</p>
 
 <span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span>
 ```
@@ -2012,7 +2026,7 @@ insert all events into outputStream ;
 
 ### timeBatch *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
-<p style="word-wrap: break-word">A batch (tumbling) time window that holds and process events that arrive during window.time period as a batch.</p>
+<p style="word-wrap: break-word">A batch (tumbling) time window that holds and process events that arrive during 'window.time' period as a batch.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
@@ -2047,7 +2061,7 @@ timeBatch(<INT|LONG|TIME> window.time, <INT> start.time, <BOOL> stream.current.e
     </tr>
     <tr>
         <td style="vertical-align: top">stream.current.event</td>
-        <td style="vertical-align: top; word-wrap: break-word">This streams the current events out as and then arrives to the window while expiring them in batches.</td>
+        <td style="vertical-align: top; word-wrap: break-word">Let the window stream the current events out as and when they arrive to the window while expiring them in batches.</td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">Yes</td>
