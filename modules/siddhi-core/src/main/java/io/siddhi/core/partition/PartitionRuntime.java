@@ -85,6 +85,7 @@ public class PartitionRuntime implements Snapshotable {
             PartitionStreamReceiver>();
     private SiddhiAppContext siddhiAppContext;
     private MemoryUsageTracker memoryUsageTracker;
+    public static ThreadLocal<String> partitionKey= new ThreadLocal<>();
 
     public PartitionRuntime(ConcurrentMap<String, AbstractDefinition> streamDefinitionMap,
                             ConcurrentMap<String, AbstractDefinition> windowDefinitionMap,
