@@ -101,7 +101,9 @@ public abstract class AbstractStreamProcessor implements Processor, EternalRefer
                 metaStreamEvent.addInputDefinition(outputDefinition);
             }
         } catch (Throwable t) {
-            throw new SiddhiAppCreationException(t);
+            throw new SiddhiAppCreationException(t.getMessage(), t,
+                    siddhiElement.getQueryContextStartIndex(),
+                    siddhiElement.getQueryContextEndIndex(), siddhiAppContext);
         }
     }
 

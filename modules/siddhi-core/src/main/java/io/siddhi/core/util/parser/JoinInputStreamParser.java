@@ -35,7 +35,7 @@ import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.stream.window.AggregateWindowProcessor;
 import io.siddhi.core.query.processor.stream.window.FindableProcessor;
-import io.siddhi.core.query.processor.stream.window.LengthWindowProcessor;
+import io.siddhi.core.query.processor.stream.window.LengthBatchWindowProcessor;
 import io.siddhi.core.query.processor.stream.window.TableWindowProcessor;
 import io.siddhi.core.query.processor.stream.window.WindowProcessor;
 import io.siddhi.core.query.processor.stream.window.WindowWindowProcessor;
@@ -343,11 +343,11 @@ public class JoinInputStreamParser {
 
         if (lastProcessor == null) {
             try {
-                WindowProcessor windowProcessor = new LengthWindowProcessor();
+                WindowProcessor windowProcessor = new LengthBatchWindowProcessor();
                 ExpressionExecutor[] expressionExecutors = new ExpressionExecutor[1];
                 expressionExecutors[0] = new ConstantExpressionExecutor(0, Attribute.Type.INT);
                 ConfigReader configReader = siddhiAppContext.getSiddhiContext()
-                        .getConfigManager().generateConfigReader("", "length");
+                        .getConfigManager().generateConfigReader("", "lengthBatch");
                 windowProcessor.initProcessor(
                         ((MetaStreamEvent) streamRuntime.getMetaComplexEvent()),
                         expressionExecutors, configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName,

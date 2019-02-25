@@ -74,7 +74,6 @@ public class LengthBatchWindowTestCase {
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
-        Thread.sleep(500);
         AssertJUnit.assertEquals(0, inEventCount);
         AssertJUnit.assertFalse(eventArrived);
         siddhiAppRuntime.shutdown();
@@ -118,7 +117,6 @@ public class LengthBatchWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
         inputHandler.send(new Object[]{"IBM", 700f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
-        Thread.sleep(500);
         AssertJUnit.assertEquals("Total event count", 4, count);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
@@ -175,7 +173,6 @@ public class LengthBatchWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
         inputHandler.send(new Object[]{"IBM", 700f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
-        Thread.sleep(500);
         AssertJUnit.assertEquals("In event count", 6, inEventCount);
         AssertJUnit.assertEquals("Remove event count", 4, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
@@ -220,7 +217,6 @@ public class LengthBatchWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 40f, 1});
         inputHandler.send(new Object[]{"IBM", 50f, 0});
         inputHandler.send(new Object[]{"WSO2", 60f, 1});
-        Thread.sleep(500);
         siddhiAppRuntime.shutdown();
         AssertJUnit.assertEquals(1, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
@@ -263,7 +259,6 @@ public class LengthBatchWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
         inputHandler.send(new Object[]{"IBM", 700f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
-        Thread.sleep(500);
         AssertJUnit.assertEquals("Remove event count", 4, count);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
@@ -312,7 +307,6 @@ public class LengthBatchWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 60f, 1});
         inputHandler.send(new Object[]{"IBM", 70f, 0});
         inputHandler.send(new Object[]{"WSO2", 80f, 1});
-        Thread.sleep(500);
         siddhiAppRuntime.shutdown();
         AssertJUnit.assertEquals(2, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
@@ -362,7 +356,6 @@ public class LengthBatchWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 60f, 1});
         inputHandler.send(new Object[]{"IBM", 70f, 0});
         inputHandler.send(new Object[]{"WSO2", 80f, 1});
-        Thread.sleep(500);
         siddhiAppRuntime.shutdown();
         AssertJUnit.assertEquals(2, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
@@ -407,9 +400,7 @@ public class LengthBatchWindowTestCase {
             twitterStreamHandler.send(new Object[]{"User1", "Hello World", "WSO2"});
             twitterStreamHandler.send(new Object[]{"User2", "Hello World2", "WSO2"});
             cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, 100});
-            Thread.sleep(500);
             cseEventStreamHandler.send(new Object[]{"WSO2", 57.6f, 100});
-            Thread.sleep(1000);
             AssertJUnit.assertEquals(4, inEventCount);
             AssertJUnit.assertEquals(2, removeEventCount);
             AssertJUnit.assertTrue(eventArrived);
@@ -456,14 +447,433 @@ public class LengthBatchWindowTestCase {
             twitterStreamHandler.send(new Object[]{"User1", "Hello World", "WSO2"});
             twitterStreamHandler.send(new Object[]{"User2", "Hello World2", "WSO2"});
             cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, 100});
-            Thread.sleep(500);
             cseEventStreamHandler.send(new Object[]{"WSO2", 57.6f, 100});
-            Thread.sleep(1000);
             AssertJUnit.assertEquals(4, inEventCount);
             AssertJUnit.assertEquals(0, removeEventCount);
             AssertJUnit.assertTrue(eventArrived);
         } finally {
             siddhiAppRuntime.shutdown();
         }
+    }
+
+
+    @Test
+    public void lengthBatchWindowTest10() throws InterruptedException {
+        log.info("LengthBatchWindow Test10");
+
+        final int length = 4;
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(" + length + ", true) " +
+                "select symbol,price,volume " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventArrived = true;
+                if (events.length == 1) {
+                    inEventCount++;
+                } else if (events.length == 5) {
+                    removeEventCount++;
+                } else {
+                    AssertJUnit.assertFalse("Event batch with unexpected number of events " + events.length,
+                            false);
+                }
+                for (Event event : events) {
+                    count++;
+                }
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 1});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
+        inputHandler.send(new Object[]{"IBM", 700f, 3});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        AssertJUnit.assertEquals("Total events", 17, count);
+        AssertJUnit.assertEquals("single batch", 7, inEventCount);
+        AssertJUnit.assertEquals("5 event batch", 2, removeEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+    }
+
+
+    @Test
+    public void lengthBatchWindowTest11() throws InterruptedException {
+        log.info("LengthBatchWindow Test11");
+
+        final int length = 4;
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(" + length + ", true) " +
+                "select symbol, price, count(volume) as volumes " +
+                "insert into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventArrived = true;
+                if (events.length == 1) {
+                    inEventCount++;
+                } else {
+                    AssertJUnit.assertFalse("Event batch with unexpected number of events " + events.length,
+                            false);
+                }
+                for (Event event : events) {
+                    AssertJUnit.assertTrue("Count values", ((Long) event.getData(2)) <= 4
+                            && ((Long) event.getData(2)) > 0);
+
+                    count++;
+                }
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 1});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
+        inputHandler.send(new Object[]{"IBM", 700f, 3});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        AssertJUnit.assertEquals("Total events", 9, count);
+        AssertJUnit.assertEquals("single batch", 9, inEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test
+    public void lengthBatchWindowTest12() throws InterruptedException {
+        log.info("LengthBatchWindow Test12");
+
+        final int length = 4;
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(" + length + ", true) " +
+                "select symbol, price, count(volume) as volumes " +
+                "insert expired events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventArrived = true;
+                if (events.length == 1) {
+                    inEventCount++;
+                } else {
+                    AssertJUnit.assertFalse("Event batch with unexpected number of events " + events.length,
+                            false);
+                }
+                for (Event event : events) {
+                    AssertJUnit.assertTrue("Count values", ((Long) event.getData(2)) == 0);
+                    count++;
+                }
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 1});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
+        inputHandler.send(new Object[]{"IBM", 700f, 3});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        AssertJUnit.assertEquals("Total events", 2, count);
+        AssertJUnit.assertEquals("1 event batch", 2, inEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test
+    public void lengthBatchWindowTest13() throws InterruptedException {
+        log.info("LengthBatchWindow Test13");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(2,true) join twitterStream#window.lengthBatch(2,true) " +
+                "on cseEventStream.symbol== twitterStream.company " +
+                "select cseEventStream.symbol as symbol, twitterStream.tweet, cseEventStream.price " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timestamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        inEventCount += (inEvents.length);
+                    }
+                    if (removeEvents != null) {
+                        removeEventCount += (removeEvents.length);
+                    }
+                    eventArrived = true;
+                }
+            });
+            InputHandler cseEventStreamHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+            InputHandler twitterStreamHandler = siddhiAppRuntime.getInputHandler("twitterStream");
+            siddhiAppRuntime.start();
+            cseEventStreamHandler.send(new Object[]{"WSO2", 55.6f, 100});
+            twitterStreamHandler.send(new Object[]{"User1", "Hello World", "WSO2"});
+            cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, 100});
+            cseEventStreamHandler.send(new Object[]{"WSO2", 57.6f, 100});
+            AssertJUnit.assertEquals(2, inEventCount);
+            AssertJUnit.assertEquals(1, removeEventCount);
+            AssertJUnit.assertTrue(eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void lengthBatchWindowTest14() throws InterruptedException {
+        log.info("LengthBatchWindow Test14");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream cseEventStream (symbol string, price float, volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); ";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(2,true) join twitterStream#window.lengthBatch(2,true) " +
+                "on cseEventStream.symbol== twitterStream.company " +
+                "select cseEventStream.symbol as symbol, twitterStream.tweet, cseEventStream.price " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        try {
+            siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+                @Override
+                public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timestamp, inEvents, removeEvents);
+                    if (inEvents != null) {
+                        inEventCount += (inEvents.length);
+                    }
+                    if (removeEvents != null) {
+                        removeEventCount += (removeEvents.length);
+                    }
+                    eventArrived = true;
+                }
+            });
+            InputHandler cseEventStreamHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+            InputHandler twitterStreamHandler = siddhiAppRuntime.getInputHandler("twitterStream");
+            siddhiAppRuntime.start();
+            cseEventStreamHandler.send(new Object[]{"WSO2", 55.6f, 100});
+            cseEventStreamHandler.send(new Object[]{"IBM", 59.6f, 100});
+            twitterStreamHandler.send(new Object[]{"User1", "Hello World", "WSO2"});
+            twitterStreamHandler.send(new Object[]{"User2", "Hello World2", "WSO2"});
+            cseEventStreamHandler.send(new Object[]{"IBM", 75.6f, 100});
+            cseEventStreamHandler.send(new Object[]{"WSO2", 57.6f, 100});
+            AssertJUnit.assertEquals(4, inEventCount);
+            AssertJUnit.assertEquals(2, removeEventCount);
+            AssertJUnit.assertTrue(eventArrived);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
+    }
+
+    @Test
+    public void lengthBatchWindowTest15() throws InterruptedException {
+        log.info("LengthBatchWindow Test15");
+
+        final int length = 1;
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(" + length + ", true) " +
+                "select symbol, price, count(volume) as volumes " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventArrived = true;
+                if (events.length == 1) {
+                    inEventCount++;
+                } else {
+                    AssertJUnit.assertFalse("Event batch with unexpected number of events " + events.length,
+                            false);
+                }
+                for (Event event : events) {
+                    AssertJUnit.assertTrue("Count values", ((Long) event.getData(2)) == 1);
+                    count++;
+                }
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 1});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
+        inputHandler.send(new Object[]{"IBM", 700f, 3});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        AssertJUnit.assertEquals("Total events", 9, count);
+        AssertJUnit.assertEquals("1 event batch", 9, inEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test
+    public void lengthBatchWindowTest16() throws InterruptedException {
+        log.info("LengthBatchWindow Test16");
+
+        final int length = 1;
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(" + length + ") " +
+                "select symbol, price, count(volume) as volumes " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventArrived = true;
+                if (events.length == 1) {
+                    inEventCount++;
+                } else {
+                    AssertJUnit.assertFalse("Event batch with unexpected number of events " + events.length,
+                            false);
+                }
+                for (Event event : events) {
+                    AssertJUnit.assertTrue("Count values", ((Long) event.getData(2)) == 1);
+                    count++;
+                }
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 1});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
+        inputHandler.send(new Object[]{"IBM", 700f, 3});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        AssertJUnit.assertEquals("Total events", 9, count);
+        AssertJUnit.assertEquals("1 event batch", 9, inEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test
+    public void lengthBatchWindowTest17() throws InterruptedException {
+        log.info("LengthBatchWindow Test17");
+
+        final int length = 0;
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "define stream cseEventStream (symbol string, price float, volume int);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream#window.lengthBatch(" + length + ") " +
+                "select symbol, price, count(volume) as volumes " +
+                "insert all events into outputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
+
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventArrived = true;
+                if (events.length == 1) {
+                    inEventCount++;
+                } else {
+                    AssertJUnit.assertFalse("Event batch with unexpected number of events " + events.length,
+                            false);
+                }
+                for (Event event : events) {
+                    AssertJUnit.assertTrue("Count values", ((Long) event.getData(2)) == 0);
+                    count++;
+                }
+            }
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{"IBM", 700f, 1});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 2});
+        inputHandler.send(new Object[]{"IBM", 700f, 3});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
+        inputHandler.send(new Object[]{"IBM", 700f, 5});
+        inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
+        AssertJUnit.assertEquals("Total events", 9, count);
+        AssertJUnit.assertEquals("1 event batch", 9, inEventCount);
+        AssertJUnit.assertTrue(eventArrived);
+        siddhiAppRuntime.shutdown();
+
     }
 }

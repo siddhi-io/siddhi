@@ -1376,7 +1376,7 @@ insert into outputStream;
 
 ### cron *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
-<p style="word-wrap: break-word">This window returns events processed periodically as the output in time-repeating patterns, triggered based on time passing.</p>
+<p style="word-wrap: break-word">This window outputs the arriving events as and when they arrive, and resets (expires) the window periodically based on the given cron expression.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
@@ -1395,7 +1395,7 @@ cron(<STRING> cron.expression)
     </tr>
     <tr>
         <td style="vertical-align: top">cron.expression</td>
-        <td style="vertical-align: top; word-wrap: break-word">The cron expression that represents a time schedule.</td>
+        <td style="vertical-align: top; word-wrap: break-word">The cron expression that resets the window.</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
@@ -1406,16 +1406,30 @@ cron(<STRING> cron.expression)
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-define window cseEventWindow (symbol string, price float, volume int)cron('*/5 * * * * ?');
-@info(name = 'query0')
-from cseEventStream
-insert into cseEventWindow;
+define stream InputEventStream (symbol string, price float, volume int);
+
 @info(name = 'query1')
-from cseEventWindow 
-select symbol,price,volume
-insert into outputStream ;
+from InputEventStream#cron('*/5 * * * * ?')
+select symbol, sum(price) as totalPrice 
+insert into OutputStream;
 ```
-<p style="word-wrap: break-word">This will processed events as the output every 5 seconds.</p>
+<p style="word-wrap: break-word">This let the totalPrice to gradually increase and resets to zero as a batch every 5 seconds.</p>
+
+<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
+```
+define stream StockEventStream (symbol string, price float, volume int)
+define window StockEventWindow (symbol string, price float, volume int) cron('*/5 * * * * ?');
+
+@info(name = 'query0')
+from StockEventStream
+insert into StockEventWindow;
+
+@info(name = 'query1')
+from StockEventWindow 
+select symbol, sum(price) as totalPrice
+insert into OutputStream ;
+```
+<p style="word-wrap: break-word">The defined window will let the totalPrice to gradually increase and resets to zero as a batch every 5 seconds.</p>
 
 ### delay *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
@@ -1657,7 +1671,7 @@ insert all events into PotentialFraud;
 
 ### length *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
-<p style="word-wrap: break-word">A sliding length window that holds the last windowLength events at a given time, and gets updated for each arrival and expiry.</p>
+<p style="word-wrap: break-word">A sliding length window that holds the last 'window.length' events at a given time, and gets updated for each arrival and expiry.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
@@ -1687,24 +1701,26 @@ length(<INT> window.length)
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-define window cseEventWindow (symbol string, price float, volume int) length(10) output all events;
+define window StockEventWindow (symbol string, price float, volume int) length(10) output all events;
+
 @info(name = 'query0')
-from cseEventStream
-insert into cseEventWindow;
+from StockEventStream
+insert into StockEventWindow;
 @info(name = 'query1')
-from cseEventWindow
+
+from StockEventWindow
 select symbol, sum(price) as price
 insert all events into outputStream ;
 ```
-<p style="word-wrap: break-word">This will processing 10 events and out put all events.</p>
+<p style="word-wrap: break-word">This will process last 10 events in a sliding manner.</p>
 
 ### lengthBatch *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
-<p style="word-wrap: break-word">A batch (tumbling) length window that holds a number of events specified as the windowLength. The window is updated each time a batch of events that equals the number specified as the windowLength arrives.</p>
+<p style="word-wrap: break-word">A batch (tumbling) length window that holds and process a number of events as specified in the window.length.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-lengthBatch(<INT> window.length)
+lengthBatch(<INT> window.length, <BOOL> stream.current.event)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1725,23 +1741,54 @@ lengthBatch(<INT> window.length)
         <td style="vertical-align: top">No</td>
         <td style="vertical-align: top">No</td>
     </tr>
+    <tr>
+        <td style="vertical-align: top">stream.current.event</td>
+        <td style="vertical-align: top; word-wrap: break-word">Let the window stream the current events out as and when they arrive to the window while expiring them in batches.</td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
 </table>
 
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-define window cseEventWindow (symbol string, price float, volume int) lengthBatch(10) output all events;
-
-@info(name = 'query0')
-from cseEventStream
-insert into cseEventWindow;
+define stream InputEventStream (symbol string, price float, volume int);
 
 @info(name = 'query1')
-from cseEventWindow
-select symbol, sum(price) as price
-insert all events into outputStream ;
+from InputEventStream#lengthBatch(10)
+select symbol, sum(price) as price 
+insert into OutputStream;
 ```
-<p style="word-wrap: break-word">This will processing 10 events as a batch and out put all events.</p>
+<p style="word-wrap: break-word">This collect and process 10 events as a batch and output them.</p>
+
+<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
+```
+define stream InputEventStream (symbol string, price float, volume int);
+
+@info(name = 'query1')
+from InputEventStream#lengthBatch(10, true)
+select symbol, sum(price) as sumPrice 
+insert into OutputStream;
+```
+<p style="word-wrap: break-word">This window sends the arriving events directly to the output letting the <code>sumPrice</code> to increase gradually, after every 10 events it clears the window as a batch and resets the <code>sumPrice</code> to zero.</p>
+
+<span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span>
+```
+define stream InputEventStream (symbol string, price float, volume int);
+define window StockEventWindow (symbol string, price float, volume int) lengthBatch(10) output all events;
+
+@info(name = 'query0')
+from InputEventStream
+insert into StockEventWindow;
+
+@info(name = 'query1')
+from StockEventWindow
+select symbol, sum(price) as price
+insert all events into OutputStream ;
+```
+<p style="word-wrap: break-word">This uses an defined window to process 10 events  as a batch and output all events.</p>
 
 ### lossyFrequent *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
@@ -1979,11 +2026,11 @@ insert all events into outputStream ;
 
 ### timeBatch *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 
-<p style="word-wrap: break-word">A batch (tumbling) time window that holds events that arrive during window.time periods, and gets updated for each window.time.</p>
+<p style="word-wrap: break-word">A batch (tumbling) time window that holds and process events that arrive during 'window.time' period as a batch.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-timeBatch(<INT|LONG|TIME> window.time, <INT> start.time)
+timeBatch(<INT|LONG|TIME> window.time, <INT> start.time, <BOOL> stream.current.event)
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1998,7 +2045,7 @@ timeBatch(<INT|LONG|TIME> window.time, <INT> start.time)
     </tr>
     <tr>
         <td style="vertical-align: top">window.time</td>
-        <td style="vertical-align: top; word-wrap: break-word">The batch time period for which the window should hold events.</td>
+        <td style="vertical-align: top; word-wrap: break-word">The batch time period in which the window process the events.</td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">INT<br>LONG<br>TIME</td>
         <td style="vertical-align: top">No</td>
@@ -2012,23 +2059,54 @@ timeBatch(<INT|LONG|TIME> window.time, <INT> start.time)
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
+    <tr>
+        <td style="vertical-align: top">stream.current.event</td>
+        <td style="vertical-align: top; word-wrap: break-word">Let the window stream the current events out as and when they arrive to the window while expiring them in batches.</td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
 </table>
 
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-define window cseEventWindow (symbol string, price float, volume int) timeBatch(20 sec) output all events;
-
-@info(name = 'query0')
-from cseEventStream
-insert into cseEventWindow;
+define stream InputEventStream (symbol string, price float, volume int);
 
 @info(name = 'query1')
-from cseEventWindow
-select symbol, sum(price) as price
-insert all events into outputStream ;
+from InputEventStream#timeBatch(20 sec)
+select symbol, sum(price) as price 
+insert into OutputStream;
 ```
-<p style="word-wrap: break-word">This will processing events arrived every 20 seconds as a batch and out put all events.</p>
+<p style="word-wrap: break-word">This collect and process incoming events as a batch every 20 seconds and output them.</p>
+
+<span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
+```
+define stream InputEventStream (symbol string, price float, volume int);
+
+@info(name = 'query1')
+from InputEventStream#timeBatch(20 sec, true)
+select symbol, sum(price) as sumPrice 
+insert into OutputStream;
+```
+<p style="word-wrap: break-word">This window sends the arriving events directly to the output letting the <code>sumPrice</code> to increase gradually and on every 20 second interval it clears the window as a batch resetting the <code>sumPrice</code> to zero.</p>
+
+<span id="example-3" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 3</span>
+```
+define stream InputEventStream (symbol string, price float, volume int);
+define window StockEventWindow (symbol string, price float, volume int) timeBatch(20 sec) output all events;
+
+@info(name = 'query0')
+from InputEventStream
+insert into StockEventWindow;
+
+@info(name = 'query1')
+from StockEventWindow
+select symbol, sum(price) as price
+insert all events into OutputStream ;
+```
+<p style="word-wrap: break-word">This uses an defined window to process events arrived every 20 seconds as a batch and output all events.</p>
 
 ### timeLength *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#window">(Window)</a>*
 

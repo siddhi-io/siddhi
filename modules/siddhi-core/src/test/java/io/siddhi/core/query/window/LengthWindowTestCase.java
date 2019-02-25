@@ -76,7 +76,6 @@ public class LengthWindowTestCase {
         siddhiAppRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
-        Thread.sleep(500);
         AssertJUnit.assertEquals(2, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
@@ -125,7 +124,6 @@ public class LengthWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
         inputHandler.send(new Object[]{"IBM", 700f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
-        Thread.sleep(500);
         AssertJUnit.assertEquals("In event count", 6, inEventCount);
         AssertJUnit.assertEquals("Remove event count", 2, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
@@ -180,7 +178,6 @@ public class LengthWindowTestCase {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 4});
         inputHandler.send(new Object[]{"IBM", 700f, 5});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 6});
-        Thread.sleep(500);
         AssertJUnit.assertEquals("In event count", 6, inEventCount);
         AssertJUnit.assertEquals("Remove event count", 2, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
@@ -248,7 +245,6 @@ public class LengthWindowTestCase {
         inputHandler.send(new Object[]{"IBM", 700F, 0, 0.0D, 5L, true});
         inputHandler.send(new Object[]{"IBM", 700F, 0, 0.0D, 5L, true});
         inputHandler.send(new Object[]{"IBM", 700F, 0, 0.0D, 5L, true});
-        Thread.sleep(500);
         AssertJUnit.assertEquals(8, inEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
