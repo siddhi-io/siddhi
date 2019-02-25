@@ -31,8 +31,8 @@ import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class LenghtBatchWindowTestCase {
-    private static final Logger log = Logger.getLogger(LenghtBatchWindowTestCase.class);
+public class LengthBatchWindowTestCase {
+    private static final Logger log = Logger.getLogger(LengthBatchWindowTestCase.class);
     private int inEventCount;
     private int removeEventCount;
     private int count;

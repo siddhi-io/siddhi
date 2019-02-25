@@ -6,7 +6,7 @@ from  ( from StockStream[StockStream.price >= 20][ StockStream.price is null]
                         insert into OutStockStream
 
 /**
-from  StockStream[price>3]#window.lenght(50)
+from  StockStream[price>3]#window.length(50)
                         select symbol, avg(price) as avgPrice
                         group by symbol
                         having (price >= 20)
