@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.selector.attribute.processor.executor;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
@@ -43,11 +43,10 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
 
     public GroupByAggregationAttributeExecutor(AttributeAggregator attributeAggregator,
                                                ExpressionExecutor[] attributeExpressionExecutors,
-                                               ConfigReader configReader, SiddhiAppContext siddhiAppContext,
-                                               String queryName) {
-        super(attributeAggregator, attributeExpressionExecutors, siddhiAppContext, queryName);
+                                               ConfigReader configReader, SiddhiQueryContext siddhiQueryContext) {
+        super(attributeAggregator, attributeExpressionExecutors, siddhiQueryContext);
         this.configReader = configReader;
-        timestampGenerator = siddhiAppContext.getTimestampGenerator();
+        timestampGenerator = this.siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator();
         lastCleanupTimestamp = timestampGenerator.currentTime();
     }
 
@@ -100,8 +99,8 @@ public class GroupByAggregationAttributeExecutor extends AbstractAggregationAttr
 
     public ExpressionExecutor cloneExecutor(String key) {
         return new GroupByAggregationAttributeExecutor(attributeAggregator.cloneAggregator(key),
-                attributeExpressionExecutors, configReader, siddhiAppContext,
-                queryName);
+                attributeExpressionExecutors, configReader,
+                siddhiQueryContext);
     }
 
     @Override

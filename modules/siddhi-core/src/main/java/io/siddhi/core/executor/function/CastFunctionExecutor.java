@@ -23,7 +23,7 @@ import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
@@ -70,7 +70,7 @@ public class CastFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 2) {
             throw new SiddhiAppValidationException("Invalid no of arguments passed to common:cast() function, " +
                     "required 2 parameters, but found " +

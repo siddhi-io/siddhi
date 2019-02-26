@@ -18,7 +18,7 @@
 
 package io.siddhi.core.query.processor.stream.window;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.ConnectionUnavailableException;
@@ -80,16 +80,14 @@ public interface QueryableProcessor extends FindableProcessor {
      * @param selector                    the query selector
      * @param expectedOutputAttributes
      * @param matchingMetaInfoHolder      the meta structure of the incoming matchingEvent
-     * @param siddhiAppContext            current siddhi app context
      * @param variableExpressionExecutors the list of variable ExpressionExecutors already created
      * @param tableMap                    map of event tables
-     * @param queryName                   query name of findable processor belongs to.
+     * @param siddhiQueryContext          current siddhi query context
      * @return compiled Selection having the capability of transforming events based on the selection
      */
     CompiledSelection compileSelection(Selector selector,
                                        List<Attribute> expectedOutputAttributes,
                                        MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                       SiddhiAppContext siddhiAppContext,
                                        List<VariableExpressionExecutor> variableExpressionExecutors,
-                                       Map<String, Table> tableMap, String queryName);
+                                       Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext);
 }

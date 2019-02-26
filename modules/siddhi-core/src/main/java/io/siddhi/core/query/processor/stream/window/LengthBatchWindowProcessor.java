@@ -21,7 +21,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
@@ -109,15 +109,15 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
     private SnapshotableStreamEventQueue currentEventQueue = null;
     private SnapshotableStreamEventQueue expiredEventQueue = null;
     private boolean outputExpectsExpiredEvents;
-    private SiddhiAppContext siddhiAppContext;
+    private SiddhiQueryContext siddhiQueryContext;
     private boolean isStreamCurrentEvents = false;
     private StreamEvent resetEvent = null;
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+                        boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
-        this.siddhiAppContext = siddhiAppContext;
+        this.siddhiQueryContext = siddhiQueryContext;
         if (attributeExpressionExecutors.length >= 1) {
             if (!(attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor)) {
                 throw new SiddhiAppValidationException("TimeBatch window's window.time (1st) parameter " +
@@ -154,7 +154,7 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
         List<ComplexEventChunk<StreamEvent>> streamEventChunks = new ArrayList<ComplexEventChunk<StreamEvent>>();
         synchronized (this) {
             ComplexEventChunk<StreamEvent> outputStreamEventChunk = new ComplexEventChunk<StreamEvent>(true);
-            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 streamEventChunk.remove();
@@ -313,13 +313,12 @@ public class LengthBatchWindowProcessor extends BatchingWindowProcessor implemen
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         if (expiredEventQueue == null) {
             expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
         return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
-                siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 }

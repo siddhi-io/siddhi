@@ -18,7 +18,7 @@
 
 package io.siddhi.core.table.record;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
@@ -123,9 +123,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
     public CompiledSelection compileSelection(Selector selector,
                                               List<Attribute> expectedOutputAttributes,
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         List<OutputAttribute> outputAttributes = selector.getSelectionList();
         if (outputAttributes.size() == 0) {
             MetaStreamEvent metaStreamEvent = matchingMetaInfoHolder.getMetaStateEvent().getMetaStreamEvent(
@@ -138,7 +137,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         List<SelectAttributeBuilder> selectAttributeBuilders = new ArrayList<>(outputAttributes.size());
         for (OutputAttribute outputAttribute : outputAttributes) {
             ExpressionBuilder expressionBuilder = new ExpressionBuilder(outputAttribute.getExpression(),
-                    matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
+                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
             selectAttributeBuilders.add(new SelectAttributeBuilder(expressionBuilder, outputAttribute.getRename()));
         }
 
@@ -152,14 +151,14 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             groupByExpressionBuilders = new ArrayList<>(outputAttributes.size());
             for (Variable variable : selector.getGroupByList()) {
                 groupByExpressionBuilders.add(new ExpressionBuilder(variable, metaInfoHolderAfterSelect,
-                        siddhiAppContext, variableExpressionExecutors, tableMap, queryName));
+                        variableExpressionExecutors, tableMap, siddhiQueryContext));
             }
         }
 
         ExpressionBuilder havingExpressionBuilder = null;
         if (selector.getHavingExpression() != null) {
             havingExpressionBuilder = new ExpressionBuilder(selector.getHavingExpression(), metaInfoHolderAfterSelect,
-                    siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
+                    variableExpressionExecutors, tableMap, siddhiQueryContext);
         }
 
         List<OrderByAttributeBuilder> orderByAttributeBuilders = null;
@@ -167,8 +166,8 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             orderByAttributeBuilders = new ArrayList<>(selector.getOrderByList().size());
             for (OrderByAttribute orderByAttribute : selector.getOrderByList()) {
                 ExpressionBuilder expressionBuilder = new ExpressionBuilder(orderByAttribute.getVariable(),
-                        metaInfoHolderAfterSelect, siddhiAppContext, variableExpressionExecutors,
-                        tableMap, queryName);
+                        metaInfoHolderAfterSelect, variableExpressionExecutors,
+                        tableMap, siddhiQueryContext);
                 orderByAttributeBuilders.add(new OrderByAttributeBuilder(expressionBuilder,
                         orderByAttribute.getOrder()));
             }
@@ -179,23 +178,23 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (selector.getLimit() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getLimit(),
                     metaInfoHolderAfterSelect.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
-                    ProcessingMode.BATCH, false);
+                    variableExpressionExecutors, false, 0,
+                    ProcessingMode.BATCH, false, siddhiQueryContext);
             limit = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
             if (limit < 0) {
                 throw new SiddhiAppCreationException("'limit' cannot have negative value, but found '" + limit + "'",
-                        selector, siddhiAppContext);
+                        selector, siddhiQueryContext.getSiddhiAppContext());
             }
         }
         if (selector.getOffset() != null) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression((Expression) selector.getOffset(),
                     metaInfoHolderAfterSelect.getMetaStateEvent(), SiddhiConstants.HAVING_STATE, tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
-                    ProcessingMode.BATCH, false);
+                    variableExpressionExecutors, false, 0,
+                    ProcessingMode.BATCH, false, siddhiQueryContext);
             offset = ((Number) (((ConstantExpressionExecutor) expressionExecutor).getValue())).longValue();
             if (offset < 0) {
                 throw new SiddhiAppCreationException("'offset' cannot have negative value, but found '" + offset + "'",
-                        selector, siddhiAppContext);
+                        selector, siddhiQueryContext.getSiddhiAppContext());
             }
         }
         CompiledSelection compiledSelection = compileSelection(selectAttributeBuilders, groupByExpressionBuilders,

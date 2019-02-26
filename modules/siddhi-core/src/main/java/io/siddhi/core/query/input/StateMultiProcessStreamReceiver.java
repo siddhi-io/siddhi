@@ -17,14 +17,13 @@
  */
 package io.siddhi.core.query.input;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.query.input.stream.state.StreamPreStateProcessor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.selector.QuerySelector;
-import io.siddhi.core.util.statistics.LatencyTracker;
 
 /**
  * Implementation of {StreamJunction.Receiver} to receive events to be fed into
@@ -34,9 +33,8 @@ public class StateMultiProcessStreamReceiver extends MultiProcessStreamReceiver 
 
     private QuerySelector querySelector;
 
-    public StateMultiProcessStreamReceiver(String streamId, int processCount, LatencyTracker latencyTracker,
-                                           String queryName, SiddhiAppContext siddhiAppContext) {
-        super(streamId, processCount, latencyTracker, queryName, siddhiAppContext);
+    public StateMultiProcessStreamReceiver(String streamId, int processCount, SiddhiQueryContext siddhiQueryContext) {
+        super(streamId, processCount, siddhiQueryContext);
     }
 
     public void setNext(Processor next) {
@@ -46,8 +44,7 @@ public class StateMultiProcessStreamReceiver extends MultiProcessStreamReceiver 
     }
 
     public StateMultiProcessStreamReceiver clone(String key) {
-        return new StateMultiProcessStreamReceiver(streamId + key, processCount, latencyTracker, queryName,
-                siddhiAppContext);
+        return new StateMultiProcessStreamReceiver(streamId + key, processCount, siddhiQueryContext);
     }
 
     protected void processAndClear(int processIndex, StreamEvent streamEvent) {

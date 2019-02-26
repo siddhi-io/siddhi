@@ -18,12 +18,11 @@
 
 package io.siddhi.core.query.input.stream.state.receiver;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.input.StateMultiProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.state.PreStateProcessor;
-import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.List;
 
@@ -33,9 +32,9 @@ import java.util.List;
  */
 public class PatternMultiProcessStreamReceiver extends StateMultiProcessStreamReceiver {
 
-    public PatternMultiProcessStreamReceiver(String streamId, int processCount, LatencyTracker latencyTracker,
-                                             String queryName, SiddhiAppContext siddhiAppContext) {
-        super(streamId, processCount, latencyTracker, queryName, siddhiAppContext);
+    public PatternMultiProcessStreamReceiver(String streamId, int processCount,
+                                             SiddhiQueryContext siddhiQueryContext) {
+        super(streamId, processCount, siddhiQueryContext);
         eventSequence = new int[processCount];
         int count = 0;
         for (int i = eventSequence.length - 1; i >= 0; i--) {
@@ -45,8 +44,8 @@ public class PatternMultiProcessStreamReceiver extends StateMultiProcessStreamRe
     }
 
     public PatternMultiProcessStreamReceiver clone(String key) {
-        return new PatternMultiProcessStreamReceiver(streamId + key, processCount, latencyTracker, queryName,
-                siddhiAppContext);
+        return new PatternMultiProcessStreamReceiver(streamId + key, processCount,
+                siddhiQueryContext);
     }
 
     protected void stabilizeStates() {

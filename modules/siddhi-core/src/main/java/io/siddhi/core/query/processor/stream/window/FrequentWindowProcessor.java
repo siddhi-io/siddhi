@@ -22,7 +22,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -94,7 +94,7 @@ public class FrequentWindowProcessor extends SlidingWindowProcessor implements F
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         mostFrequentCount = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
                 attributeExpressionExecutors[0]).getValue()));
         variableExpressionExecutors = new VariableExpressionExecutor[attributeExpressionExecutors.length - 1];
@@ -109,7 +109,7 @@ public class FrequentWindowProcessor extends SlidingWindowProcessor implements F
         synchronized (this) {
             StreamEvent streamEvent = streamEventChunk.getFirst();
             streamEventChunk.clear();
-            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
             while (streamEvent != null) {
                 StreamEvent next = streamEvent.getNext();
                 streamEvent.setNext(null);
@@ -206,10 +206,9 @@ public class FrequentWindowProcessor extends SlidingWindowProcessor implements F
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
-        return OperatorParser.constructOperator(map.values(), condition, matchingMetaInfoHolder, siddhiAppContext,
-                variableExpressionExecutors, tableMap, this.queryName);
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
+        return OperatorParser.constructOperator(map.values(), condition, matchingMetaInfoHolder,
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 }

@@ -18,7 +18,7 @@
 
 package io.siddhi.core.query.output.ratelimit.snapshot;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
@@ -41,14 +41,14 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
     private List<GroupedComplexEvent> eventList;
     private Map<String, Map<Integer, Object>> groupByAggregateAttributeValueMap;
 
-    protected AggregationGroupByWindowedPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService
-            scheduledExecutorService, List<Integer> aggregateAttributePositionList, WrappedSnapshotOutputRateLimiter
+    protected AggregationGroupByWindowedPerSnapshotOutputRateLimiter(String id, Long value,
+                                                                     ScheduledExecutorService scheduledExecutorService,
+                                                                     List<Integer> aggregateAttributePositionList,
+                                                                     WrappedSnapshotOutputRateLimiter
                                                                              wrappedSnapshotOutputRateLimiter,
-                                                                     SiddhiAppContext siddhiAppContext,
-                                                                     String queryName) {
+                                                                     SiddhiQueryContext siddhiQueryContext) {
         super(id, value, scheduledExecutorService, aggregateAttributePositionList, wrappedSnapshotOutputRateLimiter,
-                siddhiAppContext, queryName);
-        this.queryName = queryName;
+                siddhiQueryContext);
         groupByAggregateAttributeValueMap = new HashMap<String, Map<Integer, Object>>();
         eventList = new LinkedList<GroupedComplexEvent>();
     }
@@ -158,6 +158,6 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         return new AggregationGroupByWindowedPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService,
                 aggregateAttributePositionList,
                 wrappedSnapshotOutputRateLimiter,
-                siddhiAppContext, queryName);
+                siddhiQueryContext);
     }
 }

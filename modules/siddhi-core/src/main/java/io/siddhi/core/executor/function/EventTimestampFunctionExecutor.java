@@ -22,7 +22,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
@@ -55,7 +55,7 @@ public class EventTimestampFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 0) {
             throw new SiddhiAppValidationException("Invalid no of arguments passed to eventTimestamp() function, " +
                     "required 0 parameters, but found " +

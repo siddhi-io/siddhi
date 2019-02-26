@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.executor.incremental;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
@@ -36,7 +36,7 @@ public class IncrementalShouldUpdateFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new SiddhiAppValidationException("shouldUpdate() function has to have exactly 1 parameter, " +
                     "currently " + attributeExpressionExecutors.length + " parameters provided");

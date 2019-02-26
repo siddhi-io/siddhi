@@ -18,7 +18,7 @@
 
 package io.siddhi.core.query.output.ratelimit.snapshot;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEventPool;
@@ -46,23 +46,21 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter extends SnapshotOut
     protected List<Integer> aggregateAttributePositionList;
     protected Scheduler scheduler;
     protected long scheduledTime;
-    protected String queryName;
     private List<ComplexEvent> eventList;
     private Map<Integer, Object> aggregateAttributeValueMap;
 
-    protected AggregationWindowedPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService
-            scheduledExecutorService, final List<Integer> aggregateAttributePositionList,
+    protected AggregationWindowedPerSnapshotOutputRateLimiter(String id, Long value,
+                                                              ScheduledExecutorService scheduledExecutorService,
+                                                              final List<Integer> aggregateAttributePositionList,
                                                               WrappedSnapshotOutputRateLimiter
                                                                       wrappedSnapshotOutputRateLimiter,
-                                                              SiddhiAppContext siddhiAppContext, String
-                                                                      queryName) {
-        super(wrappedSnapshotOutputRateLimiter, siddhiAppContext);
+                                                              SiddhiQueryContext siddhiQueryContext) {
+        super(wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
         this.id = id;
         this.value = value;
         this.scheduledExecutorService = scheduledExecutorService;
         this.eventList = new LinkedList<ComplexEvent>();
         this.aggregateAttributePositionList = aggregateAttributePositionList;
-        this.queryName = queryName;
         Collections.sort(aggregateAttributePositionList);
         aggregateAttributeValueMap = new HashMap<Integer, Object>(aggregateAttributePositionList.size());
         this.comparator = new Comparator<ComplexEvent>() {
@@ -153,9 +151,9 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter extends SnapshotOut
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiAppContext);
+        scheduler = SchedulerParser.parse(this, siddhiQueryContext.getSiddhiAppContext());
         scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
-        scheduler.init(lockWrapper, queryName);
+        scheduler.init(lockWrapper, siddhiQueryContext.getName());
         long currentTime = System.currentTimeMillis();
         scheduledTime = currentTime + value;
         scheduler.notifyAt(scheduledTime);
@@ -186,7 +184,7 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter extends SnapshotOut
     public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter
             wrappedSnapshotOutputRateLimiter) {
         return new AggregationWindowedPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService,
-                aggregateAttributePositionList, wrappedSnapshotOutputRateLimiter, siddhiAppContext, queryName);
+                aggregateAttributePositionList, wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
     }
 
 

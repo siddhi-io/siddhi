@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.input.stream.state;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventCloner;
@@ -48,7 +48,6 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     protected long withinTime = SiddhiConstants.UNKNOWN_STATE;
     protected int[] startStateIds;
     protected PreStateProcessor withinEveryPreStateProcessor;
-    protected SiddhiAppContext siddhiAppContext;
     protected String elementId;
     protected StreamPostStateProcessor thisStatePostProcessor;
     protected StreamPostStateProcessor thisLastProcessor;
@@ -64,20 +63,21 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     protected StreamEventCloner streamEventCloner;
     protected StateEventCloner stateEventCloner;
     protected StreamEventPool streamEventPool;
-    protected String queryName;
+    protected SiddhiQueryContext siddhiQueryContext;
     private boolean initialized;
 
     public StreamPreStateProcessor(StateInputStream.Type stateType) {
         this.stateType = stateType;
     }
 
-    public void init(SiddhiAppContext siddhiAppContext, String queryName) {
-        this.siddhiAppContext = siddhiAppContext;
-        this.queryName = queryName;
+    public void init(SiddhiQueryContext siddhiQueryContext) {
+        this.siddhiQueryContext = siddhiQueryContext;
         if (elementId == null) {
-            this.elementId = "StreamPreStateProcessor-" + siddhiAppContext.getElementIdGenerator().createNewId();
+            this.elementId = "StreamPreStateProcessor-" +
+                    siddhiQueryContext.getSiddhiAppContext().getElementIdGenerator().createNewId();
         }
-        siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
+        siddhiQueryContext.getSiddhiAppContext().getSnapshotService().addSnapshotable(
+                siddhiQueryContext.getName(), this);
     }
 
     public StreamPostStateProcessor getThisStatePostProcessor() {
@@ -183,7 +183,7 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
     public PreStateProcessor cloneProcessor(String key) {
         StreamPreStateProcessor streamPreStateProcessor = new StreamPreStateProcessor(stateType);
         cloneProperties(streamPreStateProcessor, key);
-        streamPreStateProcessor.init(siddhiAppContext, queryName);
+        streamPreStateProcessor.init(siddhiQueryContext);
         return streamPreStateProcessor;
     }
 
@@ -376,7 +376,8 @@ public class StreamPreStateProcessor implements PreStateProcessor, Snapshotable 
         if (nextProcessor != null) {
             nextProcessor.clean();
         }
-        siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
+        siddhiQueryContext.getSiddhiAppContext().getSnapshotService().removeSnapshotable(
+                siddhiQueryContext.getName(), this);
     }
 
     public void setWithinTime(long withinTime) {

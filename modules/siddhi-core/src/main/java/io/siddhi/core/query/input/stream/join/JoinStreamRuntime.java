@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.input.stream.join;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.query.input.stream.StreamRuntime;
@@ -36,13 +36,13 @@ import java.util.List;
 public class JoinStreamRuntime implements StreamRuntime {
 
     private List<SingleStreamRuntime> singleStreamRuntimeList = new ArrayList<SingleStreamRuntime>();
-    private SiddhiAppContext siddhiAppContext;
+    private SiddhiQueryContext siddhiQueryContext;
     private MetaStateEvent metaStateEvent;
     private ProcessingMode overallProcessingMode = ProcessingMode.BATCH;
 
-    public JoinStreamRuntime(SiddhiAppContext siddhiAppContext, MetaStateEvent metaStateEvent) {
+    public JoinStreamRuntime(SiddhiQueryContext siddhiQueryContext, MetaStateEvent metaStateEvent) {
 
-        this.siddhiAppContext = siddhiAppContext;
+        this.siddhiQueryContext = siddhiQueryContext;
         this.metaStateEvent = metaStateEvent;
     }
 
@@ -60,7 +60,7 @@ public class JoinStreamRuntime implements StreamRuntime {
     @Override
     public StreamRuntime clone(String key) {
 
-        JoinStreamRuntime joinStreamRuntime = new JoinStreamRuntime(siddhiAppContext, metaStateEvent);
+        JoinStreamRuntime joinStreamRuntime = new JoinStreamRuntime(siddhiQueryContext, metaStateEvent);
         for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
             joinStreamRuntime.addRuntime((SingleStreamRuntime) singleStreamRuntime.clone(key));
         }

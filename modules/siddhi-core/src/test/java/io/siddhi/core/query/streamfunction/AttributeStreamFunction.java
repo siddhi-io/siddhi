@@ -18,7 +18,7 @@
 
 package io.siddhi.core.query.streamfunction;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -45,7 +45,7 @@ public class AttributeStreamFunction extends StreamFunctionProcessor {
     @Override
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                   boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+                                   boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new SiddhiAppCreationException("Only one attribute is expected but found " +
                     attributeExpressionExecutors.length);

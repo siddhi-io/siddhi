@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.util.parser;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
@@ -65,7 +65,6 @@ public class SingleInputStreamParser {
      * Parse single InputStream and return SingleStreamRuntime
      *
      * @param inputStream                 single input stream to be parsed
-     * @param siddhiAppContext            query to be parsed
      * @param variableExpressionExecutors List to hold VariableExpressionExecutors to update after query parsing
      * @param streamDefinitionMap         Stream Definition Map
      * @param tableDefinitionMap          Table Definition Map
@@ -76,11 +75,9 @@ public class SingleInputStreamParser {
      * @param processStreamReceiver       ProcessStreamReceiver
      * @param supportsBatchProcessing     supports batch processing
      * @param outputExpectsExpiredEvents  is expired events sent as output
-     * @param queryName                   query name of single input stream belongs to.
-     * @return SingleStreamRuntime
+     * @param siddhiQueryContext          @return SingleStreamRuntime
      */
     public static SingleStreamRuntime parseInputStream(SingleInputStream inputStream,
-                                                       SiddhiAppContext siddhiAppContext,
                                                        List<VariableExpressionExecutor> variableExpressionExecutors,
                                                        Map<String, AbstractDefinition> streamDefinitionMap,
                                                        Map<String, AbstractDefinition> tableDefinitionMap,
@@ -90,7 +87,8 @@ public class SingleInputStreamParser {
                                                        MetaComplexEvent metaComplexEvent,
                                                        ProcessStreamReceiver processStreamReceiver,
                                                        boolean supportsBatchProcessing,
-                                                       boolean outputExpectsExpiredEvents, String queryName) {
+                                                       boolean outputExpectsExpiredEvents,
+                                                       SiddhiQueryContext siddhiQueryContext) {
         Processor processor = null;
         EntryValveProcessor entryValveProcessor = null;
         ProcessingMode processingMode = ProcessingMode.BATCH;
@@ -121,12 +119,12 @@ public class SingleInputStreamParser {
         if (!inputStream.getStreamHandlers().isEmpty()) {
             for (StreamHandler handler : inputStream.getStreamHandlers()) {
                 Processor currentProcessor = generateProcessor(handler, metaComplexEvent,
-                        variableExpressionExecutors, siddhiAppContext, tableMap, supportsBatchProcessing,
-                        outputExpectsExpiredEvents, queryName);
+                        variableExpressionExecutors, tableMap, supportsBatchProcessing,
+                        outputExpectsExpiredEvents, siddhiQueryContext);
                 if (currentProcessor instanceof SchedulingProcessor) {
                     if (entryValveProcessor == null) {
 
-                        entryValveProcessor = new EntryValveProcessor(siddhiAppContext);
+                        entryValveProcessor = new EntryValveProcessor(siddhiQueryContext.getSiddhiAppContext());
                         if (first) {
                             processor = entryValveProcessor;
                             first = false;
@@ -134,7 +132,8 @@ public class SingleInputStreamParser {
                             processor.setToLast(entryValveProcessor);
                         }
                     }
-                    Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
+                    Scheduler scheduler = SchedulerParser.parse(entryValveProcessor,
+                            siddhiQueryContext.getSiddhiAppContext());
                     ((SchedulingProcessor) currentProcessor).setScheduler(scheduler);
                 }
                 if (currentProcessor instanceof AbstractStreamProcessor) {
@@ -158,9 +157,8 @@ public class SingleInputStreamParser {
 
     public static Processor generateProcessor(StreamHandler streamHandler, MetaComplexEvent metaEvent,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              SiddhiAppContext siddhiAppContext, Map<String, Table> tableMap,
-                                              boolean supportsBatchProcessing, boolean outputExpectsExpiredEvents,
-                                              String queryName) {
+                                              Map<String, Table> tableMap,
+                                              boolean supportsBatchProcessing, boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
         Expression[] parameters = streamHandler.getParameters();
         MetaStreamEvent metaStreamEvent;
         int stateIndex = SiddhiConstants.UNKNOWN_STATE;
@@ -177,9 +175,9 @@ public class SingleInputStreamParser {
                 attributeExpressionExecutors = new ExpressionExecutor[parameters.length];
                 for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
                     attributeExpressionExecutors[i] = ExpressionParser.parseExpression(parameters[i], metaEvent,
-                            stateIndex, tableMap, variableExpressionExecutors,
-                            siddhiAppContext, false, SiddhiConstants.CURRENT, queryName, ProcessingMode.BATCH,
-                            false);
+                            stateIndex, tableMap, variableExpressionExecutors, false,
+                            SiddhiConstants.CURRENT, ProcessingMode.BATCH, false,
+                            siddhiQueryContext);
                 }
             } else {
                 List<Attribute> attributeList = metaStreamEvent.getLastInputDefinition().getAttributeList();
@@ -188,8 +186,8 @@ public class SingleInputStreamParser {
                 for (int i = 0; i < parameterSize; i++) {
                     attributeExpressionExecutors[i] = ExpressionParser.parseExpression(new Variable(attributeList.get
                                     (i).getName()), metaEvent, stateIndex, tableMap, variableExpressionExecutors,
-                            siddhiAppContext, false, SiddhiConstants.CURRENT, queryName, ProcessingMode.BATCH,
-                            false);
+                            false, SiddhiConstants.CURRENT, ProcessingMode.BATCH,
+                            false, siddhiQueryContext);
                 }
             }
         } else {
@@ -203,40 +201,40 @@ public class SingleInputStreamParser {
         } else if (streamHandler instanceof Window) {
             WindowProcessor windowProcessor = (WindowProcessor) SiddhiClassLoader.loadExtensionImplementation(
                     (Extension) streamHandler,
-                    WindowProcessorExtensionHolder.getInstance(siddhiAppContext));
-            configReader = siddhiAppContext.getSiddhiContext().getConfigManager().
+                    WindowProcessorExtensionHolder.getInstance(siddhiQueryContext.getSiddhiAppContext()));
+            configReader = siddhiQueryContext.getSiddhiContext().getConfigManager().
                     generateConfigReader(((Window) streamHandler).getNamespace(),
                             ((Window) streamHandler).getName());
             windowProcessor.initProcessor(metaStreamEvent, attributeExpressionExecutors,
-                    configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName, streamHandler);
+                    configReader, outputExpectsExpiredEvents, streamHandler, siddhiQueryContext);
             return windowProcessor;
 
         } else if (streamHandler instanceof StreamFunction) {
             AbstractStreamProcessor abstractStreamProcessor;
-            configReader = siddhiAppContext.getSiddhiContext().getConfigManager().
+            configReader = siddhiQueryContext.getSiddhiContext().getConfigManager().
                     generateConfigReader(((StreamFunction) streamHandler).getNamespace(),
                             ((StreamFunction) streamHandler).getName());
             if (supportsBatchProcessing) {
                 try {
                     abstractStreamProcessor = (StreamProcessor) SiddhiClassLoader.loadExtensionImplementation(
                             (Extension) streamHandler,
-                            StreamProcessorExtensionHolder.getInstance(siddhiAppContext));
+                            StreamProcessorExtensionHolder.getInstance(siddhiQueryContext.getSiddhiAppContext()));
                     abstractStreamProcessor.initProcessor(metaStreamEvent,
-                            attributeExpressionExecutors, configReader, siddhiAppContext,
-                            outputExpectsExpiredEvents, queryName, streamHandler);
+                            attributeExpressionExecutors, configReader,
+                            outputExpectsExpiredEvents, streamHandler, siddhiQueryContext);
                     return abstractStreamProcessor;
                 } catch (SiddhiAppCreationException e) {
                     if (!e.isClassLoadingIssue()) {
-                        ExceptionUtil.populateQueryContext(e, streamHandler, siddhiAppContext);
+                        ExceptionUtil.populateQueryContext(e, streamHandler, siddhiQueryContext.getSiddhiAppContext());
                         throw e;
                     }
                 }
             }
             abstractStreamProcessor = (StreamFunctionProcessor) SiddhiClassLoader.loadExtensionImplementation(
                     (Extension) streamHandler,
-                    StreamFunctionProcessorExtensionHolder.getInstance(siddhiAppContext));
+                    StreamFunctionProcessorExtensionHolder.getInstance(siddhiQueryContext.getSiddhiAppContext()));
             abstractStreamProcessor.initProcessor(metaStreamEvent, attributeExpressionExecutors,
-                    configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName, streamHandler);
+                    configReader, outputExpectsExpiredEvents, streamHandler, siddhiQueryContext);
             return abstractStreamProcessor;
         } else {
             throw new SiddhiAppCreationException(streamHandler.getClass().getName() + " is not supported",

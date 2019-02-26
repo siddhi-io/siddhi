@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.selector;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
@@ -46,7 +46,7 @@ public class QuerySelector implements Processor {
 
     private static final Logger log = Logger.getLogger(QuerySelector.class);
     private Selector selector;
-    private SiddhiAppContext siddhiAppContext;
+    private SiddhiQueryContext siddhiQueryContext;
     private boolean currentOn = false;
     private boolean expiredOn = false;
     private boolean containsAggregator = false;
@@ -63,13 +63,13 @@ public class QuerySelector implements Processor {
     private long limit = SiddhiConstants.UNKNOWN_STATE;
     private long offset = SiddhiConstants.UNKNOWN_STATE;
 
-    public QuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, SiddhiAppContext
-            siddhiAppContext) {
+    public QuerySelector(String id, Selector selector, boolean currentOn, boolean expiredOn, SiddhiQueryContext
+            siddhiQueryContext) {
         this.id = id;
         this.currentOn = currentOn;
         this.expiredOn = expiredOn;
         this.selector = selector;
-        this.siddhiAppContext = siddhiAppContext;
+        this.siddhiQueryContext = siddhiQueryContext;
     }
 
     @Override
@@ -407,7 +407,7 @@ public class QuerySelector implements Processor {
 
     public QuerySelector clone(String key) {
         QuerySelector clonedQuerySelector = new QuerySelector(id + key, selector, currentOn, expiredOn,
-                siddhiAppContext);
+                siddhiQueryContext);
         List<AttributeProcessor> clonedAttributeProcessorList = new ArrayList<AttributeProcessor>();
         for (AttributeProcessor attributeProcessor : attributeProcessorList) {
             clonedAttributeProcessorList.add(attributeProcessor.cloneProcessor(key));
@@ -437,7 +437,7 @@ public class QuerySelector implements Processor {
     public void setLimit(long limit) {
         if (limit < 0) {
             throw new SiddhiAppCreationException("'limit' cannot have negative value, but found '" + limit + "'",
-                    selector, siddhiAppContext);
+                    selector, siddhiQueryContext.getSiddhiAppContext());
         }
         this.limit = limit;
     }
@@ -445,7 +445,7 @@ public class QuerySelector implements Processor {
     public void setOffset(long offset) {
         if (offset < 0) {
             throw new SiddhiAppCreationException("'offset' cannot have negative value, but found '" + offset + "'",
-                    selector, siddhiAppContext);
+                    selector, siddhiQueryContext.getSiddhiAppContext());
         }
         this.offset = offset;
     }

@@ -21,7 +21,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -81,7 +81,7 @@ public class TimeWindowProcessor extends SlidingWindowProcessor implements Sched
     private long timeInMilliSeconds;
     private SnapshotableStreamEventQueue expiredEventQueue;
     private Scheduler scheduler;
-    private SiddhiAppContext siddhiAppContext;
+    private SiddhiQueryContext siddhiQueryContext;
     private volatile long lastTimestamp = Long.MIN_VALUE;
 
     public void setTimeInMilliSeconds(long timeInMilliSeconds) {
@@ -100,8 +100,8 @@ public class TimeWindowProcessor extends SlidingWindowProcessor implements Sched
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
-        this.siddhiAppContext = siddhiAppContext;
+                        SiddhiQueryContext siddhiQueryContext) {
+        this.siddhiQueryContext = siddhiQueryContext;
         this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
@@ -133,7 +133,7 @@ public class TimeWindowProcessor extends SlidingWindowProcessor implements Sched
 
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
-                long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
 
                 expiredEventQueue.reset();
                 while (expiredEventQueue.hasNext()) {
@@ -174,11 +174,10 @@ public class TimeWindowProcessor extends SlidingWindowProcessor implements Sched
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
-                siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     @Override

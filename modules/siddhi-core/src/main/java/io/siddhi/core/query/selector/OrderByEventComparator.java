@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.selector;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -44,7 +44,7 @@ public class OrderByEventComparator implements Comparator<ComplexEvent> {
                                   MetaComplexEvent metaComplexEvent,
                                   int currentState, Map<String, Table> tableMap,
                                   List<VariableExpressionExecutor> executors,
-                                  SiddhiAppContext siddhiContext, String queryName) {
+                                  SiddhiQueryContext siddhiQueryContext) {
         if (!groupByList.isEmpty()) {
             groupByExecutors = new VariableExpressionExecutor[groupByList.size()];
             isAscendingArray = new boolean[groupByList.size()];
@@ -52,8 +52,8 @@ public class OrderByEventComparator implements Comparator<ComplexEvent> {
                 OrderByAttribute orderByAttribute = groupByList.get(i);
                 groupByExecutors[i] = (VariableExpressionExecutor) ExpressionParser.parseExpression(
                         orderByAttribute.getVariable(), metaComplexEvent, currentState, tableMap, executors,
-                        siddhiContext, false, 0, queryName,
-                        ProcessingMode.BATCH, false);
+                        false, 0, ProcessingMode.BATCH, false,
+                        siddhiQueryContext);
                 isAscendingArray[i] = OrderByAttribute.Order.DESC != orderByAttribute.getOrder();
             }
         }

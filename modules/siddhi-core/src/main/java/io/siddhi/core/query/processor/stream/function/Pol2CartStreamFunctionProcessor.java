@@ -22,7 +22,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.AbstractDefinition;
@@ -79,14 +79,14 @@ public class Pol2CartStreamFunctionProcessor extends StreamFunctionProcessor {
      *
      * @param inputDefinition              the incoming stream definition
      * @param attributeExpressionExecutors the executors for the function parameters
-     * @param siddhiAppContext             siddhi app context
+     * @param siddhiQueryContext           siddhi query context
      * @return the additional output attributes introduced by the function
      */
     @Override
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors,
                                    ConfigReader configReader, boolean outputExpectsExpiredEvents,
-                                   SiddhiAppContext siddhiAppContext) {
+                                   SiddhiQueryContext siddhiQueryContext) {
         inputExecutorLength = attributeExpressionExecutors.length;
 
         if (inputExecutorLength < 2 || inputExecutorLength > 3) {

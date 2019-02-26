@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.selector;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -42,13 +42,14 @@ public class GroupByKeyGenerator {
                                MetaComplexEvent metaComplexEvent,
                                int currentState, Map<String, Table> tableMap,
                                List<VariableExpressionExecutor> executors,
-                               SiddhiAppContext siddhiContext, String queryName) {
+                               SiddhiQueryContext siddhiQueryContext) {
         if (!groupByList.isEmpty()) {
             groupByExecutors = new ExpressionExecutor[groupByList.size()];
             for (int i = 0, expressionsSize = groupByList.size(); i < expressionsSize; i++) {
                 groupByExecutors[i] = ExpressionParser.parseExpression(
                         groupByList.get(i), metaComplexEvent, currentState, tableMap, executors,
-                        siddhiContext, false, 0, queryName, ProcessingMode.BATCH, false);
+                        false, 0, ProcessingMode.BATCH, false,
+                        siddhiQueryContext);
             }
         }
     }

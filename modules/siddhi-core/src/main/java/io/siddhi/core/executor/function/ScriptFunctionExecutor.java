@@ -18,7 +18,7 @@
 
 package io.siddhi.core.executor.function;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.function.Script;
 import io.siddhi.core.util.config.ConfigReader;
@@ -50,9 +50,9 @@ public class ScriptFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
-        returnType = siddhiAppContext.getScript(functionId).getReturnType();
-        script = siddhiAppContext.getScript(functionId);
+                        SiddhiQueryContext siddhiQueryContext) {
+        returnType = siddhiQueryContext.getSiddhiAppContext().getScript(functionId).getReturnType();
+        script = siddhiQueryContext.getSiddhiAppContext().getScript(functionId);
     }
 
     @Override

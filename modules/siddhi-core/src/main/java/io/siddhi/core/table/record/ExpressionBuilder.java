@@ -18,7 +18,7 @@
 
 package io.siddhi.core.table.record;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.exception.OperationNotSupportedException;
@@ -68,22 +68,19 @@ import static io.siddhi.core.util.SiddhiConstants.UNKNOWN_STATE;
 public class ExpressionBuilder {
     private final Map<String, ExpressionExecutor> variableExpressionExecutorMap;
     private final MatchingMetaInfoHolder matchingMetaInfoHolder;
-    private final SiddhiAppContext siddhiAppContext;
+    private final SiddhiQueryContext siddhiQueryContext;
     private final List<VariableExpressionExecutor> variableExpressionExecutors;
     private final Map<String, Table> tableMap;
-    private final String queryName;
     private Expression expression;
 
     ExpressionBuilder(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                      SiddhiAppContext siddhiAppContext,
                       List<VariableExpressionExecutor> variableExpressionExecutors, Map<String, Table> tableMap,
-                      String queryName) {
+                      SiddhiQueryContext siddhiQueryContext) {
         this.expression = expression;
         this.matchingMetaInfoHolder = matchingMetaInfoHolder;
-        this.siddhiAppContext = siddhiAppContext;
+        this.siddhiQueryContext = siddhiQueryContext;
         this.variableExpressionExecutors = variableExpressionExecutors;
         this.tableMap = tableMap;
-        this.queryName = queryName;
         this.variableExpressionExecutorMap = new HashMap<String, ExpressionExecutor>();
     }
 
@@ -332,8 +329,8 @@ public class ExpressionBuilder {
                             throw new SiddhiAppValidationException(e.getMessageWithOutContext() + " Input Stream: " +
                                     definition.getId() + " with " + "reference: " +
                                     metaStreamEvent.getInputReferenceId(), e.getQueryContextStartIndex(),
-                                    e.getQueryContextEndIndex(), siddhiAppContext.getName(),
-                                    siddhiAppContext.getSiddhiAppString());
+                                    e.getQueryContextEndIndex(), siddhiQueryContext.getSiddhiAppContext().getName(),
+                                    siddhiQueryContext.getSiddhiAppContext().getSiddhiAppString());
                         }
 
                         if (matchingMetaInfoHolder.getCurrentState() == matchingMetaInfoHolder
@@ -375,7 +372,7 @@ public class ExpressionBuilder {
                 }
             }
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, expression, siddhiAppContext);
+            ExceptionUtil.populateQueryContext(t, expression, siddhiQueryContext.getSiddhiAppContext());
             throw t;
         }
     }
@@ -397,8 +394,8 @@ public class ExpressionBuilder {
         if (!variableExpressionExecutorMap.containsKey(id)) {
             ExpressionExecutor variableExpressionExecutor = ExpressionParser.parseExpression(
                     variable, matchingMetaInfoHolder.getMetaStateEvent(), streamEventChainIndex, tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
-                    ProcessingMode.BATCH, false);
+                    variableExpressionExecutors, false, 0,
+                    ProcessingMode.BATCH, false, siddhiQueryContext);
             variableExpressionExecutorMap.put(id, variableExpressionExecutor);
         }
         expressionVisitor.endVisitStreamVariable(id, variable.getStreamId(), variable.getAttributeName(), type);

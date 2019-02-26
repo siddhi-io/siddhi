@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.selector.attribute.processor.executor;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
@@ -30,9 +30,9 @@ import java.util.Map;
 public class AggregationAttributeExecutor extends AbstractAggregationAttributeExecutor {
 
     public AggregationAttributeExecutor(AttributeAggregator attributeAggregator,
-                                        ExpressionExecutor[] attributeExpressionExecutors, SiddhiAppContext
-                                                siddhiAppContext, String queryName) {
-        super(attributeAggregator, attributeExpressionExecutors, siddhiAppContext, queryName);
+                                        ExpressionExecutor[] attributeExpressionExecutors,
+                                        SiddhiQueryContext siddhiQueryContext) {
+        super(attributeAggregator, attributeExpressionExecutors, siddhiQueryContext);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class AggregationAttributeExecutor extends AbstractAggregationAttributeEx
 
     public ExpressionExecutor cloneExecutor(String key) {
         return new AggregationAttributeExecutor(attributeAggregator.cloneAggregator(key),
-                attributeExpressionExecutors, siddhiAppContext, queryName);
+                attributeExpressionExecutors, siddhiQueryContext);
     }
 
     @Override

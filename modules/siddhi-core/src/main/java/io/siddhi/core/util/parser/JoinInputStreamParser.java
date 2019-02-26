@@ -18,7 +18,7 @@
 package io.siddhi.core.util.parser;
 
 import io.siddhi.core.aggregation.AggregationRuntime;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.exception.OperationNotSupportedException;
@@ -45,7 +45,6 @@ import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.window.Window;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.definition.AbstractDefinition;
@@ -67,7 +66,6 @@ public class JoinInputStreamParser {
 
 
     public static StreamRuntime parseInputStream(JoinInputStream joinInputStream,
-                                                 SiddhiAppContext siddhiAppContext,
                                                  Map<String, AbstractDefinition> streamDefinitionMap,
                                                  Map<String, AbstractDefinition> tableDefinitionMap,
                                                  Map<String, AbstractDefinition> windowDefinitionMap,
@@ -76,9 +74,8 @@ public class JoinInputStreamParser {
                                                  Map<String, Window> windowMap,
                                                  Map<String, AggregationRuntime> aggregationMap,
                                                  List<VariableExpressionExecutor> executors,
-                                                 LatencyTracker latencyTracker,
                                                  boolean outputExpectsExpiredEvents,
-                                                 String queryName) {
+                                                 SiddhiQueryContext siddhiQueryContext) {
         try {
             ProcessStreamReceiver leftProcessStreamReceiver;
             ProcessStreamReceiver rightProcessStreamReceiver;
@@ -98,13 +95,13 @@ public class JoinInputStreamParser {
                         leftMetaStreamEvent, leftInputStreamId);
                 setEventType(streamDefinitionMap, tableDefinitionMap, windowDefinitionMap, aggregationDefinitionMap,
                         rightMetaStreamEvent, rightInputStreamId);
-                leftProcessStreamReceiver = new ProcessStreamReceiver(leftInputStreamId, latencyTracker, queryName,
-                        siddhiAppContext);
+                leftProcessStreamReceiver = new ProcessStreamReceiver(leftInputStreamId,
+                        siddhiQueryContext);
                 leftProcessStreamReceiver.setBatchProcessingAllowed(
                         leftMetaStreamEvent.getEventType() == WINDOW);
 
-                rightProcessStreamReceiver = new ProcessStreamReceiver(rightInputStreamId, latencyTracker, queryName,
-                        siddhiAppContext);
+                rightProcessStreamReceiver = new ProcessStreamReceiver(rightInputStreamId,
+                        siddhiQueryContext);
                 rightProcessStreamReceiver.setBatchProcessingAllowed(
                         rightMetaStreamEvent.getEventType() == WINDOW);
 
@@ -129,14 +126,12 @@ public class JoinInputStreamParser {
                     leftMetaStreamEvent.setEventType(WINDOW);
                     rightMetaStreamEvent.setEventType(WINDOW);
                     rightProcessStreamReceiver = new MultiProcessStreamReceiver(
-                            joinInputStream.getAllStreamIds().get(0),
-                            1, latencyTracker, queryName, siddhiAppContext);
+                            joinInputStream.getAllStreamIds().get(0), 1, siddhiQueryContext);
                     rightProcessStreamReceiver.setBatchProcessingAllowed(true);
                     leftProcessStreamReceiver = rightProcessStreamReceiver;
                 } else if (streamDefinitionMap.containsKey(joinInputStream.getAllStreamIds().get(0))) {
                     rightProcessStreamReceiver = new MultiProcessStreamReceiver(
-                            joinInputStream.getAllStreamIds().get(0),
-                            2, latencyTracker, queryName, siddhiAppContext);
+                            joinInputStream.getAllStreamIds().get(0), 2, siddhiQueryContext);
                     leftProcessStreamReceiver = rightProcessStreamReceiver;
                 } else {
                     throw new SiddhiAppCreationException("Input of join is from static source " + leftInputStreamId +
@@ -145,13 +140,13 @@ public class JoinInputStreamParser {
             }
 
             SingleStreamRuntime leftStreamRuntime = SingleInputStreamParser.parseInputStream(
-                    (SingleInputStream) joinInputStream.getLeftInputStream(), siddhiAppContext, executors,
+                    (SingleInputStream) joinInputStream.getLeftInputStream(), executors,
                     streamDefinitionMap,
                     leftMetaStreamEvent.getEventType() != TABLE ? null : tableDefinitionMap,
                     leftMetaStreamEvent.getEventType() != WINDOW ? null : windowDefinitionMap,
                     leftMetaStreamEvent.getEventType() != AGGREGATE ? null : aggregationDefinitionMap,
                     tableMap, leftMetaStreamEvent, leftProcessStreamReceiver, true,
-                    outputExpectsExpiredEvents, queryName);
+                    outputExpectsExpiredEvents, siddhiQueryContext);
 
             for (VariableExpressionExecutor variableExpressionExecutor : executors) {
                 variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX] = 0;
@@ -159,13 +154,13 @@ public class JoinInputStreamParser {
             int size = executors.size();
 
             SingleStreamRuntime rightStreamRuntime = SingleInputStreamParser.parseInputStream(
-                    (SingleInputStream) joinInputStream.getRightInputStream(), siddhiAppContext, executors,
+                    (SingleInputStream) joinInputStream.getRightInputStream(), executors,
                     streamDefinitionMap,
                     rightMetaStreamEvent.getEventType() != TABLE ? null : tableDefinitionMap,
                     rightMetaStreamEvent.getEventType() != WINDOW ? null : windowDefinitionMap,
                     rightMetaStreamEvent.getEventType() != AGGREGATE ? null : aggregationDefinitionMap,
                     tableMap, rightMetaStreamEvent, rightProcessStreamReceiver, true,
-                    outputExpectsExpiredEvents, queryName);
+                    outputExpectsExpiredEvents, siddhiQueryContext);
 
             for (int i = size; i < executors.size(); i++) {
                 VariableExpressionExecutor variableExpressionExecutor = executors.get(i);
@@ -173,12 +168,12 @@ public class JoinInputStreamParser {
             }
 
             setStreamRuntimeProcessorChain(leftMetaStreamEvent, leftStreamRuntime, leftInputStreamId, tableMap,
-                    windowMap, aggregationMap, executors, outputExpectsExpiredEvents, queryName,
-                    joinInputStream.getWithin(), joinInputStream.getPer(), siddhiAppContext,
+                    windowMap, aggregationMap, executors, outputExpectsExpiredEvents,
+                    joinInputStream.getWithin(), joinInputStream.getPer(), siddhiQueryContext,
                     joinInputStream.getLeftInputStream());
             setStreamRuntimeProcessorChain(rightMetaStreamEvent, rightStreamRuntime, rightInputStreamId, tableMap,
-                    windowMap, aggregationMap, executors, outputExpectsExpiredEvents, queryName,
-                    joinInputStream.getWithin(), joinInputStream.getPer(), siddhiAppContext,
+                    windowMap, aggregationMap, executors, outputExpectsExpiredEvents,
+                    joinInputStream.getWithin(), joinInputStream.getPer(), siddhiQueryContext,
                     joinInputStream.getRightInputStream());
 
             MetaStateEvent metaStateEvent = new MetaStateEvent(2);
@@ -198,19 +193,25 @@ public class JoinInputStreamParser {
                     break;
             }
 
-            JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true, leftOuterJoinProcessor, 0);
-            JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false, leftOuterJoinProcessor, 0);
+            JoinProcessor leftPreJoinProcessor = new JoinProcessor(true, true,
+                    leftOuterJoinProcessor, 0);
+            JoinProcessor leftPostJoinProcessor = new JoinProcessor(true, false,
+                    leftOuterJoinProcessor, 0);
 
             FindableProcessor leftFindableProcessor = insertJoinProcessorsAndGetFindable(leftPreJoinProcessor,
-                    leftPostJoinProcessor, leftStreamRuntime, siddhiAppContext, outputExpectsExpiredEvents, queryName,
-                    joinInputStream.getLeftInputStream());
+                    leftPostJoinProcessor, leftStreamRuntime, outputExpectsExpiredEvents,
+                    joinInputStream.getLeftInputStream(), siddhiQueryContext
+            );
 
-            JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true, rightOuterJoinProcessor, 1);
-            JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false, rightOuterJoinProcessor, 1);
+            JoinProcessor rightPreJoinProcessor = new JoinProcessor(false, true,
+                    rightOuterJoinProcessor, 1);
+            JoinProcessor rightPostJoinProcessor = new JoinProcessor(false, false,
+                    rightOuterJoinProcessor, 1);
 
             FindableProcessor rightFindableProcessor = insertJoinProcessorsAndGetFindable(rightPreJoinProcessor,
-                    rightPostJoinProcessor, rightStreamRuntime, siddhiAppContext, outputExpectsExpiredEvents,
-                    queryName, joinInputStream.getRightInputStream());
+                    rightPostJoinProcessor, rightStreamRuntime, outputExpectsExpiredEvents,
+                    joinInputStream.getRightInputStream(), siddhiQueryContext
+            );
 
             leftPreJoinProcessor.setFindableProcessor(rightFindableProcessor);
             leftPostJoinProcessor.setFindableProcessor(rightFindableProcessor);
@@ -229,7 +230,7 @@ public class JoinInputStreamParser {
                         (metaStateEvent, 1, leftMetaStreamEvent.getLastInputDefinition(),
                                 SiddhiConstants.UNKNOWN_STATE);
                 CompiledCondition rightCompiledCondition = leftFindableProcessor.compileCondition(compareCondition,
-                        leftMatchingMetaInfoHolder, siddhiAppContext, executors, tableMap, queryName);
+                        leftMatchingMetaInfoHolder, executors, tableMap, siddhiQueryContext);
                 populateJoinProcessors(rightMetaStreamEvent, rightInputStreamId, rightPreJoinProcessor,
                         rightPostJoinProcessor, rightCompiledCondition);
             }
@@ -240,16 +241,16 @@ public class JoinInputStreamParser {
                         (metaStateEvent, 0, rightMetaStreamEvent.getLastInputDefinition(),
                                 SiddhiConstants.UNKNOWN_STATE);
                 CompiledCondition leftCompiledCondition = rightFindableProcessor.compileCondition(compareCondition,
-                        rightMatchingMetaInfoHolder, siddhiAppContext, executors, tableMap, queryName);
+                        rightMatchingMetaInfoHolder, executors, tableMap, siddhiQueryContext);
                 populateJoinProcessors(leftMetaStreamEvent, leftInputStreamId, leftPreJoinProcessor,
                         leftPostJoinProcessor, leftCompiledCondition);
             }
-            JoinStreamRuntime joinStreamRuntime = new JoinStreamRuntime(siddhiAppContext, metaStateEvent);
+            JoinStreamRuntime joinStreamRuntime = new JoinStreamRuntime(siddhiQueryContext, metaStateEvent);
             joinStreamRuntime.addRuntime(leftStreamRuntime);
             joinStreamRuntime.addRuntime(rightStreamRuntime);
             return joinStreamRuntime;
         } catch (Throwable t) {
-            ExceptionUtil.populateQueryContext(t, joinInputStream, siddhiAppContext);
+            ExceptionUtil.populateQueryContext(t, joinInputStream, siddhiQueryContext.getSiddhiAppContext());
             throw t;
         }
     }
@@ -289,15 +290,15 @@ public class JoinInputStreamParser {
             String inputStreamId, Map<String, Table> tableMap, Map<String, Window> windowMap,
             Map<String, AggregationRuntime> aggregationMap,
             List<VariableExpressionExecutor> variableExpressionExecutors, boolean outputExpectsExpiredEvents,
-            String queryName, Within within, Expression per, SiddhiAppContext siddhiAppContext,
+            Within within, Expression per, SiddhiQueryContext siddhiQueryContext,
             InputStream inputStream) {
         switch (metaStreamEvent.getEventType()) {
 
             case TABLE:
                 TableWindowProcessor tableWindowProcessor = new TableWindowProcessor(tableMap.get(inputStreamId));
                 tableWindowProcessor.initProcessor(metaStreamEvent,
-                        new ExpressionExecutor[0], null, siddhiAppContext, outputExpectsExpiredEvents,
-                        queryName, inputStream);
+                        new ExpressionExecutor[0], null, outputExpectsExpiredEvents,
+                        inputStream, siddhiQueryContext);
                 streamRuntime.setProcessorChain(tableWindowProcessor);
                 break;
             case WINDOW:
@@ -305,7 +306,7 @@ public class JoinInputStreamParser {
                         windowMap.get(inputStreamId));
                 windowWindowProcessor.initProcessor(metaStreamEvent,
                         variableExpressionExecutors.toArray(new ExpressionExecutor[0]), null,
-                        siddhiAppContext, outputExpectsExpiredEvents, queryName, inputStream);
+                        outputExpectsExpiredEvents, inputStream, siddhiQueryContext);
                 streamRuntime.setProcessorChain(windowWindowProcessor);
                 break;
             case AGGREGATE:
@@ -315,7 +316,7 @@ public class JoinInputStreamParser {
                         aggregationRuntime, within, per);
                 aggregateWindowProcessor.initProcessor(metaStreamEvent,
                         variableExpressionExecutors.toArray(new ExpressionExecutor[0]), null,
-                        siddhiAppContext, outputExpectsExpiredEvents, queryName, inputStream);
+                        outputExpectsExpiredEvents, inputStream, siddhiQueryContext);
                 streamRuntime.setProcessorChain(aggregateWindowProcessor);
                 break;
             case DEFAULT:
@@ -327,10 +328,9 @@ public class JoinInputStreamParser {
     private static FindableProcessor insertJoinProcessorsAndGetFindable(JoinProcessor preJoinProcessor,
                                                                         JoinProcessor postJoinProcessor,
                                                                         SingleStreamRuntime streamRuntime,
-                                                                        SiddhiAppContext siddhiAppContext,
                                                                         boolean outputExpectsExpiredEvents,
-                                                                        String queryName,
-                                                                        InputStream inputStream) {
+                                                                        InputStream inputStream,
+                                                                        SiddhiQueryContext siddhiQueryContext) {
 
         Processor lastProcessor = streamRuntime.getProcessorChain();
         Processor prevLastProcessor = null;
@@ -346,12 +346,12 @@ public class JoinInputStreamParser {
                 WindowProcessor windowProcessor = new LengthBatchWindowProcessor();
                 ExpressionExecutor[] expressionExecutors = new ExpressionExecutor[1];
                 expressionExecutors[0] = new ConstantExpressionExecutor(0, Attribute.Type.INT);
-                ConfigReader configReader = siddhiAppContext.getSiddhiContext()
+                ConfigReader configReader = siddhiQueryContext.getSiddhiContext()
                         .getConfigManager().generateConfigReader("", "lengthBatch");
                 windowProcessor.initProcessor(
                         ((MetaStreamEvent) streamRuntime.getMetaComplexEvent()),
-                        expressionExecutors, configReader, siddhiAppContext, outputExpectsExpiredEvents, queryName,
-                        inputStream);
+                        expressionExecutors, configReader, outputExpectsExpiredEvents,
+                        inputStream, siddhiQueryContext);
                 lastProcessor = windowProcessor;
             } catch (Throwable t) {
                 throw new SiddhiAppCreationException(t);

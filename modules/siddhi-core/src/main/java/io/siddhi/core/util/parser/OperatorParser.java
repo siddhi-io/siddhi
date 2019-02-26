@@ -18,7 +18,7 @@
 
 package io.siddhi.core.util.parser;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
@@ -60,15 +60,14 @@ public class OperatorParser {
 
     public static Operator constructOperator(Object storeEvents, Expression expression,
                                              MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                             SiddhiAppContext siddhiAppContext,
                                              List<VariableExpressionExecutor> variableExpressionExecutors,
-                                             Map<String, Table> tableMap, String queryName) {
+                                             Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         if (storeEvents instanceof IndexedEventHolder) {
             CollectionExpression collectionExpression = CollectionExpressionParser.parseCollectionExpression(
                     expression, matchingMetaInfoHolder, (IndexedEventHolder) storeEvents);
             CollectionExecutor collectionExecutor = CollectionExpressionParser.buildCollectionExecutor(
                     collectionExpression, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                    siddhiAppContext, true, queryName, ProcessingMode.BATCH, false);
+                    true, ProcessingMode.BATCH, false, siddhiQueryContext);
             if (collectionExpression instanceof CompareCollectionExpression &&
                     ((CompareCollectionExpression) collectionExpression).getOperator() == Compare.Operator.EQUAL &&
                     (collectionExpression.getCollectionScope() == INDEXED_RESULT_SET ||
@@ -79,36 +78,36 @@ public class OperatorParser {
                             equals(((AttributeCollectionExpression)
                                     ((CompareCollectionExpression) collectionExpression)
                                             .getAttributeCollectionExpression()).getAttribute())) {
-                return new OverwriteTableIndexOperator(collectionExecutor, queryName);
+                return new OverwriteTableIndexOperator(collectionExecutor, siddhiQueryContext.getName());
             } else if (collectionExpression instanceof AndMultiPrimaryKeyCollectionExpression &&
                     collectionExpression.getCollectionScope() == PRIMARY_KEY_RESULT_SET) {
-                return new OverwriteTableIndexOperator(collectionExecutor, queryName);
+                return new OverwriteTableIndexOperator(collectionExecutor, siddhiQueryContext.getName());
             } else {
-                return new IndexOperator(collectionExecutor, queryName);
+                return new IndexOperator(collectionExecutor, siddhiQueryContext.getName());
             }
         } else if (storeEvents instanceof ComplexEventChunk) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
-                    ProcessingMode.BATCH, false);
+                    variableExpressionExecutors, false, 0,
+                    ProcessingMode.BATCH, false, siddhiQueryContext);
             return new EventChunkOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
         } else if (storeEvents instanceof SnapshotableStreamEventQueue) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
-                    ProcessingMode.BATCH, false);
+                    variableExpressionExecutors, false, 0,
+                    ProcessingMode.BATCH, false, siddhiQueryContext);
             return new SnapshotableEventQueueOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
         } else if (storeEvents instanceof Map) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
-                    ProcessingMode.BATCH, false);
+                    variableExpressionExecutors, false, 0,
+                    ProcessingMode.BATCH, false, siddhiQueryContext);
             return new MapOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
         } else if (storeEvents instanceof Collection) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(expression,
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
-                    ProcessingMode.BATCH, false);
+                    variableExpressionExecutors, false, 0,
+                    ProcessingMode.BATCH, false, siddhiQueryContext);
             return new CollectionOperator(expressionExecutor, matchingMetaInfoHolder.getStoreEventIndex());
         } else {
             throw new OperationNotSupportedException(storeEvents.getClass() + " is not supported by OperatorParser!");

@@ -21,7 +21,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
@@ -88,7 +88,7 @@ public class LengthWindowProcessor extends SlidingWindowProcessor implements Fin
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length == 1) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
         } else {
@@ -102,7 +102,7 @@ public class LengthWindowProcessor extends SlidingWindowProcessor implements Fin
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner) {
         synchronized (this) {
-            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
@@ -144,11 +144,10 @@ public class LengthWindowProcessor extends SlidingWindowProcessor implements Fin
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
-                siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     @Override

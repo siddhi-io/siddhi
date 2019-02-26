@@ -18,7 +18,7 @@
 
 package io.siddhi.core.executor.incremental;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
@@ -67,7 +67,7 @@ public class IncrementalUnixTimeFunctionExecutor extends FunctionExecutor {
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new SiddhiAppValidationException("incrementalAggregator:timestampInMilliseconds() function " +
                     "accepts only one argument, but found " + attributeExpressionExecutors.length);
