@@ -117,14 +117,14 @@ public class SimpleQueryTestCase {
 
     @Test
     public void test4() throws SiddhiParserException {
-        Query query = SiddhiCompiler.parseQuery("from  AllStockQuotes#window.lenghtBatch(50)  " +
+        Query query = SiddhiCompiler.parseQuery("from  AllStockQuotes#window.lengthBatch(50)  " +
                 "select symbol, avg(price) as avgPrice " +
                 "return ;"
         );
         AssertJUnit.assertNotNull(query);
 
         Query api = Query.query().from(InputStream.stream("AllStockQuotes").
-                window("lenghtBatch", Expression.value(50))).
+                window("lengthBatch", Expression.value(50))).
                 select(Selector.selector().
                         select("symbol", Expression.variable("symbol")).
                         select("avgPrice", Expression.function("avg", Expression.variable("price")))).

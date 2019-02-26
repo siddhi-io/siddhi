@@ -115,8 +115,8 @@
             <class name="io.siddhi.core.window.CustomJoinWindowTestCase"/>
             <class name="io.siddhi.core.window.ExternalTimeBatchWindowTestCase"/>
             <class name="io.siddhi.core.window.FrequentWindowEventTbaleTestCase"/>
-            <class name="io.siddhi.core.window.LenghtBatchWindowTestCase"/>
-            <class name="io.siddhi.core.window.LenghtWindowTestCase"/>
+            <class name="io.siddhi.core.window.LengthBatchWindowTestCase"/>
+            <class name="io.siddhi.core.window.LengthWindowTestCase"/>
             <class name="io.siddhi.core.window.LossyFrequentWindowTestCase"/>
             <class name="io.siddhi.core.window.SortWindowTestCase"/>
             <class name="io.siddhi.core.window.TimeBatchWindowTestCase"/>
