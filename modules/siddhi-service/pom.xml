@@ -221,7 +221,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
-        <maven.findbugsplugin.version>3.0.3</maven.findbugsplugin.version>
+        <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
         <mavan.findbugsplugin.exclude.file>../../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
     </properties>
 
