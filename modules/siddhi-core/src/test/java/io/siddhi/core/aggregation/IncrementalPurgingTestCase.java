@@ -87,13 +87,13 @@ public class IncrementalPurgingTestCase {
                 "within \"" + Calendar.getInstance().get(Calendar.YEAR) + "-**-** **:**:**\" " +
                 "per \"seconds\"");
         EventPrinter.print(events);
-        AssertJUnit.assertEquals(6, events.length);
+        AssertJUnit.assertEquals("Number of events before purging", 6, events.length);
         Thread.sleep(120100);
         events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"" + Calendar.getInstance().get(Calendar.YEAR) + "-**-** **:**:**\" " +
                 "per \"seconds\"");
         EventPrinter.print(events);
-        AssertJUnit.assertNull(events);
+        AssertJUnit.assertNull("No events expected after purging", events);
         siddhiAppRuntime.shutdown();
     }
 
