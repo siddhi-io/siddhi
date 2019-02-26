@@ -20,6 +20,7 @@ package io.siddhi.core.util.parser;
 
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
@@ -96,38 +97,42 @@ public class QueryParser {
         try {
             nameElement = AnnotationHelper.getAnnotationElement("info", "name",
                     query.getAnnotations());
-            String queryName = null;
+            String queryName;
             if (nameElement != null) {
                 queryName = nameElement.getValue();
             } else {
                 queryName = "query_" + queryIndex;
             }
-            latencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, queryName,
+            SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+            latencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, siddhiQueryContext.getName(),
                     SiddhiConstants.METRIC_INFIX_QUERIES, null);
+            siddhiQueryContext.setLatencyTracker(latencyTracker);
 
             OutputStream.OutputEventType outputEventType = query.getOutputStream().getOutputEventType();
             if (query.getOutputRate() != null && query.getOutputRate() instanceof SnapshotOutputRate) {
                 if (outputEventType != OutputStream.OutputEventType.ALL_EVENTS) {
-                    throw new SiddhiAppCreationException("As query '" + queryName + "' is performing snapshot rate " +
-                            "limiting, it can only insert '" + OutputStream.OutputEventType.ALL_EVENTS +
+                    throw new SiddhiAppCreationException("As query '" + siddhiQueryContext.getName() +
+                            "' is performing snapshot rate limiting, it can only insert '" +
+                            OutputStream.OutputEventType.ALL_EVENTS +
                             "' but it is inserting '" + outputEventType + "'!",
                             query.getOutputStream().getQueryContextStartIndex(),
                             query.getOutputStream().getQueryContextEndIndex());
                 }
             }
+            siddhiQueryContext.setOutputEventType(outputEventType);
 
             boolean outputExpectsExpiredEvents = false;
             if (outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS) {
                 outputExpectsExpiredEvents = true;
             }
             StreamRuntime streamRuntime = InputStreamParser.parse(query.getInputStream(),
-                    siddhiAppContext, streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
-                    aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors, latencyTracker,
-                    outputExpectsExpiredEvents, queryName);
+                    streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,
+                    aggregationDefinitionMap, tableMap, windowMap, aggregationMap, executors,
+                    outputExpectsExpiredEvents, siddhiQueryContext);
             QuerySelector selector = SelectorParser.parse(query.getSelector(), query.getOutputStream(),
-                    siddhiAppContext, streamRuntime.getMetaComplexEvent(), tableMap, executors, queryName,
-                    SiddhiConstants.UNKNOWN_STATE, streamRuntime.getProcessingMode(),
-                    outputExpectsExpiredEvents);
+                    streamRuntime.getMetaComplexEvent(), tableMap, executors,
+                    SiddhiConstants.UNKNOWN_STATE, streamRuntime.getProcessingMode(), outputExpectsExpiredEvents,
+                    siddhiQueryContext);
             boolean isWindow = query.getInputStream() instanceof JoinInputStream;
             if (!isWindow && query.getInputStream() instanceof SingleInputStream) {
                 for (StreamHandler streamHandler : ((SingleInputStream) query.getInputStream()).getStreamHandlers()) {
@@ -199,7 +204,7 @@ public class QueryParser {
             OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(
                     query.getOutputStream().getId(), query.getOutputRate(),
                     query.getSelector().getGroupByList().size() != 0, isWindow,
-                    siddhiAppContext.getScheduledExecutorService(), siddhiAppContext, queryName);
+                    siddhiAppContext.getScheduledExecutorService(), siddhiQueryContext);
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
                 selector.setBatchingEnabled(false);
             }
@@ -207,17 +212,17 @@ public class QueryParser {
 
             OutputCallback outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(),
                     streamRuntime.getMetaComplexEvent().getOutputStreamDefinition(), tableMap, windowMap,
-                    siddhiAppContext, !(streamRuntime instanceof SingleStreamRuntime) ||
-                            !query.getSelector().getGroupByList().isEmpty(), queryName);
+                    !(streamRuntime instanceof SingleStreamRuntime) ||
+                            !query.getSelector().getGroupByList().isEmpty(), siddhiQueryContext);
 
             QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
             QueryParserHelper.initStreamRuntime(streamRuntime, streamRuntime.getMetaComplexEvent(), lockWrapper,
-                    queryName);
+                    siddhiQueryContext.getName());
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
                     .getMetaComplexEvent()));
-            queryRuntime = new QueryRuntime(query, siddhiAppContext, streamRuntime, selector, outputRateLimiter,
-                    outputCallback, streamRuntime.getMetaComplexEvent(), lockWrapper != null, queryName);
+            queryRuntime = new QueryRuntime(query, streamRuntime, selector, outputRateLimiter, outputCallback,
+                    streamRuntime.getMetaComplexEvent(), lockWrapper != null, siddhiQueryContext);
 
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
                 selector.setBatchingEnabled(false);
@@ -225,7 +230,7 @@ public class QueryParser {
                         .init(streamRuntime.getMetaComplexEvent().getOutputStreamDefinition().getAttributeList().size(),
                                 selector.getAttributeProcessorList(), streamRuntime.getMetaComplexEvent());
             }
-            outputRateLimiter.init(siddhiAppContext, lockWrapper, queryName);
+            outputRateLimiter.init(lockWrapper, siddhiQueryContext);
 
         } catch (DuplicateDefinitionException e) {
             if (nameElement != null) {

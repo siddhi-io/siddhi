@@ -18,7 +18,7 @@
 
 package io.siddhi.core.query.output.ratelimit.snapshot;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
@@ -47,13 +47,11 @@ public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimi
     private Comparator comparator;
     private Scheduler scheduler;
     private long scheduledTime;
-    private String queryName;
 
     public WindowedPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService
             scheduledExecutorService, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
-                                                SiddhiAppContext siddhiAppContext, String queryName) {
-        super(wrappedSnapshotOutputRateLimiter, siddhiAppContext);
-        this.queryName = queryName;
+                                                SiddhiQueryContext siddhiQueryContext) {
+        super(wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
         this.id = id;
         this.value = value;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -125,15 +123,15 @@ public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimi
     public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter
             wrappedSnapshotOutputRateLimiter) {
         return new WindowedPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService,
-                wrappedSnapshotOutputRateLimiter, siddhiAppContext, queryName);
+                wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
     }
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiAppContext);
+        scheduler = SchedulerParser.parse(this, siddhiQueryContext.getSiddhiAppContext());
         scheduler.setStreamEventPool(new StreamEventPool(0, 0,
                 0, 5));
-        scheduler.init(lockWrapper, queryName);
+        scheduler.init(lockWrapper, siddhiQueryContext.getName());
         long currentTime = System.currentTimeMillis();
         scheduledTime = currentTime + value;
         scheduler.notifyAt(scheduledTime);

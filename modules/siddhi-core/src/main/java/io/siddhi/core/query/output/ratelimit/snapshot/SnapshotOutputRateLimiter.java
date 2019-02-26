@@ -18,7 +18,7 @@
 
 package io.siddhi.core.query.output.ratelimit.snapshot;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
@@ -38,17 +38,17 @@ import java.util.Map;
  */
 public abstract class SnapshotOutputRateLimiter implements Schedulable {
     private static final Logger log = Logger.getLogger(SnapshotOutputRateLimiter.class);
-    protected SiddhiAppContext siddhiAppContext;
     protected StreamEventCloner streamEventCloner;
     protected StateEventCloner stateEventCloner;
+    protected SiddhiQueryContext siddhiQueryContext;
     protected LockWrapper lockWrapper;
     private WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter;
     private boolean receiveStreamEvent;
 
     protected SnapshotOutputRateLimiter(WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
-                                        SiddhiAppContext siddhiAppContext) {
+                                        SiddhiQueryContext siddhiQueryContext) {
         this.wrappedSnapshotOutputRateLimiter = wrappedSnapshotOutputRateLimiter;
-        this.siddhiAppContext = siddhiAppContext;
+        this.siddhiQueryContext = siddhiQueryContext;
     }
 
     public abstract void process(ComplexEventChunk complexEventChunk);

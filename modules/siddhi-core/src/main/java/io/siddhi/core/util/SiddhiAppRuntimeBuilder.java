@@ -136,7 +136,7 @@ public class SiddhiAppRuntimeBuilder {
         }
         DefinitionParserHelper.addWindow(windowDefinition, windowMap, siddhiAppContext);
         // defineStream(windowDefinition);
-        // DefinitionParserHelper.addStreamJunction(windowDefinition, streamJunctionMap, siddhiAppContext);
+        // DefinitionParserHelper.addStreamJunction(windowDefinition, streamJunctionMap, siddhiQueryContext);
     }
 
     public void defineTrigger(TriggerDefinition triggerDefinition) {

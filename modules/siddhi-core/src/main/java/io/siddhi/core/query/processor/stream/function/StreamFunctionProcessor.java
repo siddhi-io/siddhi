@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.processor.stream.function;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
@@ -97,15 +97,15 @@ public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
      * @param attributeExpressionExecutors the executors of each function parameters
      * @param configReader                 this hold the {@link StreamFunctionProcessor} extensions configuration
      *                                     reader.
-     * @param siddhiAppContext             the context of the siddhi app
      * @param outputExpectsExpiredEvents   is expired events sent as output
+     * @param siddhiQueryContext           siddhi query context
      * @return the additional output attributes introduced by the function
      */
     protected List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                   SiddhiAppContext siddhiAppContext, boolean outputExpectsExpiredEvents) {
+                                   boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
         return init(inputDefinition, attributeExpressionExecutors, configReader, outputExpectsExpiredEvents,
-                siddhiAppContext);
+                siddhiQueryContext);
     }
 
     /**
@@ -115,13 +115,13 @@ public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
      * @param attributeExpressionExecutors the executors of each function parameters
      * @param configReader                 this hold the {@link StreamFunctionProcessor} extensions configuration
      *                                     reader.
-     * @param siddhiAppContext             the context of the siddhi app
      * @param outputExpectsExpiredEvents   is expired events sent as output
+     * @param siddhiQueryContext           the context of the siddhi query
      * @return the additional output attributes introduced by the function
      */
     protected abstract List<Attribute> init(AbstractDefinition inputDefinition,
                                             ExpressionExecutor[] attributeExpressionExecutors,
                                             ConfigReader configReader, boolean outputExpectsExpiredEvents,
-                                            SiddhiAppContext siddhiAppContext);
+                                            SiddhiQueryContext siddhiQueryContext);
 
 }

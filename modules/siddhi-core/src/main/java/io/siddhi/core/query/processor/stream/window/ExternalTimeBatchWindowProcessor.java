@@ -22,7 +22,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
@@ -131,7 +131,7 @@ public class ExternalTimeBatchWindowProcessor extends BatchingWindowProcessor
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+            outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         if (outputExpectsExpiredEvents) {
             this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
@@ -257,8 +257,8 @@ public class ExternalTimeBatchWindowProcessor extends BatchingWindowProcessor
                         }
 
                         // rescheduling to emit the current batch after expiring it if no further events arrive.
-                        lastScheduledTime = siddhiAppContext.getTimestampGenerator().currentTime() +
-                                schedulerTimeout;
+                        lastScheduledTime = siddhiQueryContext.getSiddhiAppContext().
+                                getTimestampGenerator().currentTime() + schedulerTimeout;
                         scheduler.notifyAt(lastScheduledTime);
                     }
                     continue;
@@ -285,8 +285,8 @@ public class ExternalTimeBatchWindowProcessor extends BatchingWindowProcessor
                     cloneAppend(streamEventCloner, currStreamEvent);
                     // triggering the last batch expiration.
                     if (schedulerTimeout > 0) {
-                        lastScheduledTime = siddhiAppContext.getTimestampGenerator().currentTime() +
-                                schedulerTimeout;
+                        lastScheduledTime = siddhiQueryContext.getSiddhiAppContext().
+                                getTimestampGenerator().currentTime() + schedulerTimeout;
                         scheduler.notifyAt(lastScheduledTime);
                     }
                 }
@@ -313,7 +313,8 @@ public class ExternalTimeBatchWindowProcessor extends BatchingWindowProcessor
                 endTime = startTime + timeToKeep;
             }
             if (schedulerTimeout > 0) {
-                lastScheduledTime = siddhiAppContext.getTimestampGenerator().currentTime() + schedulerTimeout;
+                lastScheduledTime = siddhiQueryContext.getSiddhiAppContext().
+                        getTimestampGenerator().currentTime() + schedulerTimeout;
                 scheduler.notifyAt(lastScheduledTime);
             }
         }
@@ -497,15 +498,14 @@ public class ExternalTimeBatchWindowProcessor extends BatchingWindowProcessor
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         if (expiredEventChunk == null) {
             expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
             storeExpiredEvents = true;
         }
         return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
-                siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     @Override

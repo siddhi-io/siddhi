@@ -23,7 +23,7 @@ import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
@@ -69,12 +69,12 @@ public class MaxForeverAttributeAggregator extends AttributeAggregator {
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
      * @param configReader                 this hold the {@link MaxForeverAttributeAggregator} configuration reader.
-     * @param siddhiAppContext             Siddhi app runtime context
+     * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
                         boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("MaxForever aggregator has to have exactly 1 parameter, " +
                     "currently " +

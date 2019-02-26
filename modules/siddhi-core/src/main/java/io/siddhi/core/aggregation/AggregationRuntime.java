@@ -19,6 +19,7 @@
 package io.siddhi.core.aggregation;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
@@ -228,8 +229,7 @@ public class AggregationRuntime implements MemoryCalculable {
     public CompiledCondition compileExpression(Expression expression, Within within, Expression per,
                                                MatchingMetaInfoHolder matchingMetaInfoHolder,
                                                List<VariableExpressionExecutor> variableExpressionExecutors,
-                                               Map<String, Table> tableMap, String queryName,
-                                               SiddhiAppContext siddhiAppContext) {
+                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
 
         Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions = new HashMap<>();
         CompiledCondition withinInMemoryCompileCondition;
@@ -266,11 +266,11 @@ public class AggregationRuntime implements MemoryCalculable {
         if (per != null) {
             perExpressionExecutor = ExpressionParser.parseExpression(per,
                     matchingMetaInfoHolder.getMetaStateEvent(),
-                    matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors, siddhiAppContext,
-                    false, 0, queryName, ProcessingMode.BATCH, false);
+                    matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors,
+                    false, 0, ProcessingMode.BATCH, false, siddhiQueryContext);
             if (perExpressionExecutor.getReturnType() != Attribute.Type.STRING) {
                 throw new SiddhiAppCreationException(
-                        "Query " + queryName + "'s per value expected a string but found "
+                        "Query " + siddhiQueryContext.getName() + "'s per value expected a string but found "
                                 + perExpressionExecutor.getReturnType(),
                         per.getQueryContextStartIndex(), per.getQueryContextEndIndex());
             }
@@ -320,8 +320,8 @@ public class AggregationRuntime implements MemoryCalculable {
             }
             startTimeEndTimeExpressionExecutor = ExpressionParser.parseExpression(startEndTimeExpression,
                     matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(), tableMap,
-                    variableExpressionExecutors, siddhiAppContext, false, 0, queryName,
-                    ProcessingMode.BATCH, false);
+                    variableExpressionExecutors, false, 0,
+                    ProcessingMode.BATCH, false, siddhiQueryContext);
         } else {
             throw new SiddhiAppCreationException("Syntax Error : Aggregation read query must contain a `within` " +
                     "definition for filtering of aggregation data.");
@@ -332,8 +332,7 @@ public class AggregationRuntime implements MemoryCalculable {
         // These compile conditions are used to check whether the aggregates in tables are within the given duration.
         for (Map.Entry<TimePeriod.Duration, Table> entry : aggregationTables.entrySet()) {
             CompiledCondition withinTableCompileCondition = entry.getValue().compileCondition(withinExpression,
-                    streamTableMetaInfoHolderWithStartEnd, siddhiAppContext, variableExpressionExecutors, tableMap,
-                    queryName);
+                    streamTableMetaInfoHolderWithStartEnd, variableExpressionExecutors, tableMap, siddhiQueryContext);
             withinTableCompiledConditions.put(entry.getKey(), withinTableCompileCondition);
         }
 
@@ -341,16 +340,16 @@ public class AggregationRuntime implements MemoryCalculable {
         // This compile condition is used to check whether the running aggregates (in-memory data)
         // are within given duration
         withinInMemoryCompileCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true),
-                withinExpression, streamTableMetaInfoHolderWithStartEnd, siddhiAppContext, variableExpressionExecutors,
-                tableMap, queryName);
+                withinExpression, streamTableMetaInfoHolderWithStartEnd, variableExpressionExecutors,
+                tableMap, siddhiQueryContext);
 
         // On compile condition.
         // After finding all the aggregates belonging to within duration, the final on condition (given as
         // "on stream1.name == aggregator.nickName ..." in the join query) must be executed on that data.
         // This condition is used for that purpose.
         onCompiledCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true), expression,
-                matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName
-        );
+                matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                siddhiQueryContext);
 
         return new IncrementalAggregateCompileCondition(withinTableCompiledConditions, withinInMemoryCompileCondition,
                 onCompiledCondition, tableMetaStreamEvent, aggregateMetaSteamEvent, additionalAttributes,

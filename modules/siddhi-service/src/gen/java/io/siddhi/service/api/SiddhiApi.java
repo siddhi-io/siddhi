@@ -16,9 +16,9 @@
 
 package io.siddhi.service.api;
 
+import io.siddhi.service.factories.SiddhiApiServiceFactory;
 import io.siddhi.service.model.Success;
 import io.swagger.annotations.ApiParam;
-import io.siddhi.service.factories.SiddhiApiServiceFactory;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

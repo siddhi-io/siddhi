@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.executor.function;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
@@ -35,29 +35,29 @@ public abstract class FunctionExecutor implements ExpressionExecutor, Snapshotab
 
     private static final Logger log = Logger.getLogger(FunctionExecutor.class);
     protected ExpressionExecutor[] attributeExpressionExecutors;
-    protected SiddhiAppContext siddhiAppContext;
+    protected SiddhiQueryContext siddhiQueryContext;
     protected String elementId;
     protected String functionId;
-    protected String queryName;
     protected ProcessingMode processingMode;
     private ConfigReader configReader;
     private int attributeSize;
 
     public void initExecutor(ExpressionExecutor[] attributeExpressionExecutors,
-                             SiddhiAppContext siddhiAppContext, String queryName,
-                             ProcessingMode processingMode, ConfigReader configReader) {
+                             ProcessingMode processingMode, ConfigReader configReader,
+                             SiddhiQueryContext siddhiQueryContext) {
         this.processingMode = processingMode;
         this.configReader = configReader;
+        this.siddhiQueryContext = siddhiQueryContext;
         try {
-            this.siddhiAppContext = siddhiAppContext;
             this.attributeExpressionExecutors = attributeExpressionExecutors;
             attributeSize = attributeExpressionExecutors.length;
-            this.queryName = queryName;
             if (elementId == null) {
-                elementId = "FunctionExecutor-" + siddhiAppContext.getElementIdGenerator().createNewId();
+                elementId = "FunctionExecutor-" + this.siddhiQueryContext.getSiddhiAppContext().
+                        getElementIdGenerator().createNewId();
             }
-            siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
-            init(attributeExpressionExecutors, configReader, siddhiAppContext);
+            this.siddhiQueryContext.getSiddhiAppContext().getSnapshotService().addSnapshotable(
+                    siddhiQueryContext.getName(), this);
+            init(attributeExpressionExecutors, configReader, this.siddhiQueryContext);
         } catch (Throwable t) {
             throw new SiddhiAppCreationException(t);
         }
@@ -73,8 +73,8 @@ public abstract class FunctionExecutor implements ExpressionExecutor, Snapshotab
             }
             functionExecutor.elementId = elementId + "-" + key;
             functionExecutor.functionId = functionId;
-            functionExecutor.initExecutor(innerExpressionExecutors, siddhiAppContext, queryName, processingMode,
-                    configReader);
+            functionExecutor.initExecutor(innerExpressionExecutors, processingMode,
+                    configReader, siddhiQueryContext);
             return functionExecutor;
         } catch (Exception e) {
             throw new SiddhiAppRuntimeException("Exception in cloning " + this.getClass().getCanonicalName(), e);
@@ -86,10 +86,10 @@ public abstract class FunctionExecutor implements ExpressionExecutor, Snapshotab
      *
      * @param attributeExpressionExecutors are the executors of each function parameters
      * @param configReader                 This hold the {@link FunctionExecutor} extensions configuration reader.
-     * @param siddhiAppContext             the context of the siddhi app
+     * @param siddhiQueryContext           the context of the siddhi query
      */
     protected abstract void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                 SiddhiAppContext siddhiAppContext);
+                                 SiddhiQueryContext siddhiQueryContext);
 
     /**
      * The main execution method which will be called upon event arrival
@@ -147,6 +147,7 @@ public abstract class FunctionExecutor implements ExpressionExecutor, Snapshotab
         for (ExpressionExecutor expressionExecutor : attributeExpressionExecutors) {
             expressionExecutor.clean();
         }
-        siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
+        siddhiQueryContext.getSiddhiAppContext().getSnapshotService().removeSnapshotable(
+                siddhiQueryContext.getName(), this);
     }
 }

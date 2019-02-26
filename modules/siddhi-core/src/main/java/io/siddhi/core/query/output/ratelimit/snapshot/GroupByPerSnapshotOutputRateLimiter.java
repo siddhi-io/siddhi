@@ -18,7 +18,7 @@
 
 package io.siddhi.core.query.output.ratelimit.snapshot;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
@@ -43,13 +43,12 @@ public class GroupByPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimit
     private Map<String, ComplexEvent> groupByKeyEvents = new LinkedHashMap<String, ComplexEvent>();
     private Scheduler scheduler;
     private long scheduledTime;
-    private String queryName;
 
-    public GroupByPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService
-            scheduledExecutorService, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
-                                               SiddhiAppContext siddhiAppContext, String queryName) {
-        super(wrappedSnapshotOutputRateLimiter, siddhiAppContext);
-        this.queryName = queryName;
+    public GroupByPerSnapshotOutputRateLimiter(String id, Long value,
+                                               ScheduledExecutorService scheduledExecutorService,
+                                               WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
+                                               SiddhiQueryContext siddhiQueryContext) {
+        super(wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
         this.id = id;
         this.value = value;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -97,9 +96,9 @@ public class GroupByPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimit
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiAppContext);
+        scheduler = SchedulerParser.parse(this, siddhiQueryContext.getSiddhiAppContext());
         scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
-        scheduler.init(lockWrapper, queryName);
+        scheduler.init(lockWrapper, siddhiQueryContext.getName());
         long currentTime = System.currentTimeMillis();
         scheduledTime = currentTime + value;
         scheduler.notifyAt(scheduledTime);
@@ -128,7 +127,7 @@ public class GroupByPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimit
     public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter
             wrappedSnapshotOutputRateLimiter) {
         return new GroupByPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService,
-                wrappedSnapshotOutputRateLimiter, siddhiAppContext, queryName);
+                wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
     }
 
 }

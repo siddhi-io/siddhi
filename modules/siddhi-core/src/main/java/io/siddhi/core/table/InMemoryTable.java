@@ -19,6 +19,7 @@
 package io.siddhi.core.table;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -176,25 +177,23 @@ public class InMemoryTable extends Table implements Snapshotable {
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         return OperatorParser.constructOperator(eventHolder, condition, matchingMetaInfoHolder,
-                siddhiAppContext, variableExpressionExecutors, tableMap, tableDefinition.getId());
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     @Override
     public CompiledUpdateSet compileUpdateSet(UpdateSet updateSet, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         Map<Integer, ExpressionExecutor> expressionExecutorMap = new HashMap<>();
         for (UpdateSet.SetAttribute setAttribute : updateSet.getSetAttributeList()) {
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(
-                    setAttribute.getAssignmentExpression(),
-                    matchingMetaInfoHolder.getMetaStateEvent(), matchingMetaInfoHolder.getCurrentState(),
-                    tableMap, variableExpressionExecutors, siddhiAppContext, false, 0,
-                    queryName, ProcessingMode.BATCH, false);
+                    setAttribute.getAssignmentExpression(), matchingMetaInfoHolder.getMetaStateEvent(),
+                    matchingMetaInfoHolder.getCurrentState(), tableMap, variableExpressionExecutors,
+                    false, 0, ProcessingMode.BATCH, false,
+                    siddhiQueryContext);
             int attributePosition = tableDefinition.
                     getAttributePosition(setAttribute.getTableVariable().getAttributeName());
             expressionExecutorMap.put(attributePosition, expressionExecutor);

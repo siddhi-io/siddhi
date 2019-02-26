@@ -18,12 +18,11 @@
 
 package io.siddhi.core.query.input.stream.state.receiver;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.input.StateMultiProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.state.StateStreamRuntime;
-import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.List;
 
@@ -36,8 +35,8 @@ public class SequenceMultiProcessStreamReceiver extends StateMultiProcessStreamR
     private StateStreamRuntime stateStreamRuntime;
 
     public SequenceMultiProcessStreamReceiver(String streamId, int processCount, StateStreamRuntime
-            stateStreamRuntime, LatencyTracker latencyTracker, String queryName, SiddhiAppContext siddhiAppContext) {
-        super(streamId, processCount, latencyTracker, queryName, siddhiAppContext);
+            stateStreamRuntime, SiddhiQueryContext siddhiQueryContext) {
+        super(streamId, processCount, siddhiQueryContext);
         this.stateStreamRuntime = stateStreamRuntime;
         eventSequence = new int[processCount];
         int count = 0;
@@ -49,7 +48,7 @@ public class SequenceMultiProcessStreamReceiver extends StateMultiProcessStreamR
 
     public SequenceMultiProcessStreamReceiver clone(String key) {
         return new SequenceMultiProcessStreamReceiver(streamId + key, processCount, null,
-                latencyTracker, queryName, siddhiAppContext);
+                siddhiQueryContext);
     }
 
     public void setStateStreamRuntime(StateStreamRuntime stateStreamRuntime) {

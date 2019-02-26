@@ -18,7 +18,7 @@
 
 package io.siddhi.core.aggregation;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
@@ -68,7 +68,7 @@ public class IncrementalDataPurging implements Runnable {
     private Map<TimePeriod.Duration, Long> retentionPeriods = new EnumMap<>(TimePeriod.Duration.class);
     private StreamEventPool streamEventPool;
     private Map<TimePeriod.Duration, Table> aggregationTables;
-    private SiddhiAppContext siddhiAppContext;
+    private SiddhiQueryContext siddhiQueryContext;
     private ScheduledFuture scheduledPurgingTaskStatus;
     private String purgingTimestampField;
     private Map<TimePeriod.Duration, Long> minimumDurationMap = new EnumMap<>(TimePeriod.Duration.class);
@@ -80,11 +80,10 @@ public class IncrementalDataPurging implements Runnable {
     private Map<String, Table> tableMap = new HashMap<>();
     private AggregationDefinition aggregationDefinition;
 
-
     public void init(AggregationDefinition aggregationDefinition, StreamEventPool streamEventPool,
                      Map<TimePeriod.Duration, Table> aggregationTables, Boolean isProcessingOnExternalTime,
-                     SiddhiAppContext siddhiAppContext) {
-        this.siddhiAppContext = siddhiAppContext;
+                     SiddhiQueryContext siddhiQueryContext) {
+        this.siddhiQueryContext = siddhiQueryContext;
         this.aggregationDefinition = aggregationDefinition;
         List<Annotation> annotations = aggregationDefinition.getAnnotations();
         this.streamEventPool = streamEventPool;
@@ -254,8 +253,8 @@ public class IncrementalDataPurging implements Runnable {
                 Compare expression = new Compare(leftVariable,
                         Compare.Operator.LESS_THAN, new Variable(purgingTimestampField));
                 compiledCondition = table.compileCondition(expression,
-                        matchingMetaInfoHolder(table, aggregatedTimestampAttribute), siddhiAppContext,
-                        variableExpressionExecutorList, tableMap, table.getTableDefinition().getId() + "DeleteQuery");
+                        matchingMetaInfoHolder(table, aggregatedTimestampAttribute), variableExpressionExecutorList,
+                        tableMap, siddhiQueryContext);
                 compiledConditionMap.put(entry.getKey(), compiledCondition);
             }
         }
@@ -270,11 +269,11 @@ public class IncrementalDataPurging implements Runnable {
         if (isPurgingEnabled()) {
             if (scheduledPurgingTaskStatus != null) {
                 scheduledPurgingTaskStatus.cancel(true);
-                scheduledPurgingTaskStatus = siddhiAppContext.getScheduledExecutorService().
+                scheduledPurgingTaskStatus = siddhiQueryContext.getSiddhiAppContext().getScheduledExecutorService().
                         scheduleWithFixedDelay(this, purgeExecutionInterval, purgeExecutionInterval,
                                 TimeUnit.MILLISECONDS);
             } else {
-                scheduledPurgingTaskStatus = siddhiAppContext.getScheduledExecutorService().
+                scheduledPurgingTaskStatus = siddhiQueryContext.getSiddhiAppContext().getScheduledExecutorService().
                         scheduleWithFixedDelay(this, purgeExecutionInterval, purgeExecutionInterval,
                                 TimeUnit.MILLISECONDS);
             }
@@ -288,7 +287,7 @@ public class IncrementalDataPurging implements Runnable {
                     " aggregation");
         } else {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Purging is disabled in siddhi app: " + siddhiAppContext.getName());
+                LOG.debug("Purging is disabled in siddhi app: " + siddhiQueryContext.getSiddhiAppContext().getName());
             }
         }
     }

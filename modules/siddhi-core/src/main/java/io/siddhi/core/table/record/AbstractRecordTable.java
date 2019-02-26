@@ -19,6 +19,7 @@
 package io.siddhi.core.table.record;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -341,14 +342,11 @@ public abstract class AbstractRecordTable extends Table {
             throws ConnectionUnavailableException;
 
     @Override
-    public CompiledCondition compileCondition(Expression condition,
-                                              MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
+    public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         ExpressionBuilder expressionBuilder = new ExpressionBuilder(condition, matchingMetaInfoHolder,
-                siddhiAppContext, variableExpressionExecutors,
-                tableMap, queryName);
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
         CompiledCondition compileCondition = compileCondition(expressionBuilder);
         Map<String, ExpressionExecutor> expressionExecutorMap = expressionBuilder.getVariableExpressionExecutorMap();
         return new RecordStoreCompiledCondition(expressionExecutorMap, compileCondition);
@@ -356,14 +354,13 @@ public abstract class AbstractRecordTable extends Table {
 
     public CompiledUpdateSet compileUpdateSet(UpdateSet updateSet,
                                               MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         RecordTableCompiledUpdateSet recordTableCompiledUpdateSet = new RecordTableCompiledUpdateSet();
         Map<String, ExpressionExecutor> parentExecutorMap = new HashMap<>();
         for (UpdateSet.SetAttribute setAttribute : updateSet.getSetAttributeList()) {
             ExpressionBuilder expressionBuilder = new ExpressionBuilder(setAttribute.getAssignmentExpression(),
-                    matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap, queryName);
+                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
             CompiledExpression compiledExpression = compileSetAttribute(expressionBuilder);
             recordTableCompiledUpdateSet.put(setAttribute.getTableVariable().getAttributeName(), compiledExpression);
             Map<String, ExpressionExecutor> expressionExecutorMap =

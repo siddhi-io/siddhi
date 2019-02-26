@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.selector.attribute.processor.executor;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
 import io.siddhi.core.util.snapshot.Snapshotable;
@@ -29,24 +29,23 @@ import io.siddhi.query.api.definition.Attribute;
 public abstract class AbstractAggregationAttributeExecutor implements ExpressionExecutor, Snapshotable {
     protected AttributeAggregator attributeAggregator;
     protected ExpressionExecutor[] attributeExpressionExecutors;
-    protected SiddhiAppContext siddhiAppContext;
+    protected SiddhiQueryContext siddhiQueryContext;
     protected int size;
-    protected String queryName;
     private String elementId = null;
 
     public AbstractAggregationAttributeExecutor(AttributeAggregator attributeAggregator,
                                                 ExpressionExecutor[] attributeExpressionExecutors,
-                                                SiddhiAppContext siddhiAppContext, String queryName) {
-        this.siddhiAppContext = siddhiAppContext;
+                                                SiddhiQueryContext siddhiQueryContext) {
+        this.siddhiQueryContext = siddhiQueryContext;
         this.attributeExpressionExecutors = attributeExpressionExecutors;
         this.attributeAggregator = attributeAggregator;
         this.size = attributeExpressionExecutors.length;
-        this.queryName = queryName;
         if (elementId == null) {
-            elementId = "AbstractAggregationAttributeExecutor-" + siddhiAppContext.getElementIdGenerator()
-                    .createNewId();
+            elementId = "AbstractAggregationAttributeExecutor-" +
+                    this.siddhiQueryContext.getSiddhiAppContext().getElementIdGenerator().createNewId();
         }
-        siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
+        this.siddhiQueryContext.getSiddhiAppContext().getSnapshotService().addSnapshotable(
+                siddhiQueryContext.getName(), this);
     }
 
     @Override
@@ -65,7 +64,8 @@ public abstract class AbstractAggregationAttributeExecutor implements Expression
             expressionExecutor.clean();
         }
         attributeAggregator.clean();
-        siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
+        siddhiQueryContext.getSiddhiAppContext().getSnapshotService().removeSnapshotable(
+                siddhiQueryContext.getName(), this);
     }
 }
 

@@ -17,14 +17,13 @@
  */
 package io.siddhi.core.query.input;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.query.input.stream.state.StreamPreStateProcessor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.selector.QuerySelector;
-import io.siddhi.core.util.statistics.LatencyTracker;
 
 /**
  * Implementation of {StreamJunction.Receiver} to receive events to be fed into
@@ -35,14 +34,11 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
     protected final String lockKey;
     protected ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<StreamEvent>
             (batchProcessingAllowed);
-    protected String queryName;
     private QuerySelector querySelector;
 
-    public SingleProcessStreamReceiver(String streamId, String lockKey, LatencyTracker latencyTracker,
-                                       String queryName, SiddhiAppContext siddhiAppContext) {
-        super(streamId, latencyTracker, queryName, siddhiAppContext);
+    public SingleProcessStreamReceiver(String streamId, String lockKey, SiddhiQueryContext siddhiQueryContext) {
+        super(streamId, siddhiQueryContext);
         this.lockKey = lockKey;
-        this.queryName = queryName;
     }
 
     public void setNext(Processor next) {
@@ -51,8 +47,8 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
     }
 
     public SingleProcessStreamReceiver clone(String key) {
-        return new SingleProcessStreamReceiver(streamId + key, key, latencyTracker, queryName,
-                siddhiAppContext);
+        return new SingleProcessStreamReceiver(streamId + key, key,
+                siddhiQueryContext);
     }
 
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {

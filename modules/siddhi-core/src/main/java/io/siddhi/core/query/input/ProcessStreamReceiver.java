@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.input;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.debugger.SiddhiDebugger;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -42,26 +42,22 @@ import java.util.List;
  */
 public class ProcessStreamReceiver implements StreamJunction.Receiver {
 
+    protected final SiddhiQueryContext siddhiQueryContext;
     protected String streamId;
     protected Processor next;
     protected List<PreStateProcessor> stateProcessors = new ArrayList<PreStateProcessor>();
     protected int stateProcessorsSize;
-    protected LatencyTracker latencyTracker;
     protected LockWrapper lockWrapper;
     protected boolean batchProcessingAllowed;
-    protected SiddhiAppContext siddhiAppContext;
     private StreamEventConverter streamEventConverter;
     private MetaStreamEvent metaStreamEvent;
     private StreamEventPool streamEventPool;
     private SiddhiDebugger siddhiDebugger;
-    private String queryName;
 
-    public ProcessStreamReceiver(String streamId, LatencyTracker latencyTracker, String queryName,
-                                 SiddhiAppContext siddhiAppContext) {
+    public ProcessStreamReceiver(String streamId,
+                                 SiddhiQueryContext siddhiQueryContext) {
         this.streamId = streamId;
-        this.latencyTracker = latencyTracker;
-        this.queryName = queryName;
-        this.siddhiAppContext = siddhiAppContext;
+        this.siddhiQueryContext = siddhiQueryContext;
     }
 
     @Override
@@ -71,7 +67,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
 
     public ProcessStreamReceiver clone(String key) {
         ProcessStreamReceiver processStreamReceiver = new ProcessStreamReceiver(
-                streamId + key, latencyTracker, queryName, siddhiAppContext);
+                streamId + key, siddhiQueryContext);
         processStreamReceiver.batchProcessingAllowed = this.batchProcessingAllowed;
         return processStreamReceiver;
     }
@@ -85,7 +81,8 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
             lockWrapper.lock();
         }
         try {
-            if (siddhiAppContext.isStatsEnabled() && latencyTracker != null) {
+            LatencyTracker latencyTracker = siddhiQueryContext.getLatencyTracker();
+            if (siddhiQueryContext.getSiddhiAppContext().isStatsEnabled() && latencyTracker != null) {
                 try {
                     latencyTracker.markIn();
                     processAndClear(streamEventChunk);
@@ -105,7 +102,8 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     @Override
     public void receive(ComplexEvent complexEvents) {
         if (siddhiDebugger != null) {
-            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.IN, complexEvents);
+            siddhiDebugger.checkBreakPoint(siddhiQueryContext.getName(),
+                    SiddhiDebugger.QueryTerminal.IN, complexEvents);
         }
         StreamEvent firstEvent = streamEventPool.borrowEvent();
         streamEventConverter.convertComplexEvent(complexEvents, firstEvent);
@@ -127,7 +125,8 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
             StreamEvent borrowedEvent = streamEventPool.borrowEvent();
             streamEventConverter.convertEvent(event, borrowedEvent);
             if (siddhiDebugger != null) {
-                siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.IN, borrowedEvent);
+                siddhiDebugger.checkBreakPoint(siddhiQueryContext.getName(),
+                        SiddhiDebugger.QueryTerminal.IN, borrowedEvent);
             }
             process(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, this.batchProcessingAllowed));
         }
@@ -145,7 +144,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
             currentEvent = nextEvent;
         }
         if (siddhiDebugger != null) {
-            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.IN, firstEvent);
+            siddhiDebugger.checkBreakPoint(siddhiQueryContext.getName(), SiddhiDebugger.QueryTerminal.IN, firstEvent);
         }
         process(new ComplexEventChunk<StreamEvent>(firstEvent, currentEvent, this.batchProcessingAllowed));
     }
@@ -166,7 +165,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
 
         }
         if (siddhiDebugger != null) {
-            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.IN, firstEvent);
+            siddhiDebugger.checkBreakPoint(siddhiQueryContext.getName(), SiddhiDebugger.QueryTerminal.IN, firstEvent);
         }
         process(new ComplexEventChunk<StreamEvent>(firstEvent, currentEvent, this.batchProcessingAllowed));
     }
@@ -177,7 +176,8 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         streamEventConverter.convertData(timestamp, data, borrowedEvent);
         // Send to debugger
         if (siddhiDebugger != null) {
-            siddhiDebugger.checkBreakPoint(queryName, SiddhiDebugger.QueryTerminal.IN, borrowedEvent);
+            siddhiDebugger.checkBreakPoint(siddhiQueryContext.getName(),
+                    SiddhiDebugger.QueryTerminal.IN, borrowedEvent);
         }
         process(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, this.batchProcessingAllowed));
     }

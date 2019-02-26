@@ -49,7 +49,7 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
     public PreStateProcessor cloneProcessor(String key) {
         LogicalPreStateProcessor logicalPreStateProcessor = new LogicalPreStateProcessor(logicalType, stateType);
         cloneProperties(logicalPreStateProcessor, key);
-        logicalPreStateProcessor.init(siddhiAppContext, queryName);
+        logicalPreStateProcessor.init(siddhiQueryContext);
         return logicalPreStateProcessor;
     }
 

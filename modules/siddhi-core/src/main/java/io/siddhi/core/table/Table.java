@@ -19,6 +19,7 @@
 package io.siddhi.core.table;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -439,17 +440,16 @@ public abstract class Table implements FindableProcessor, MemoryCalculable {
      * @param updateSet                   the set of assignment expressions, each containing the table column to be
      *                                    updated and the expression to be assigned.
      * @param matchingMetaInfoHolder      the meta structure of the incoming matchingEvent
-     * @param siddhiAppContext            current siddhi app context
      * @param variableExpressionExecutors the list of variable ExpressionExecutors already created
      * @param tableMap                    map of event tables
-     * @param queryName                   query name to which the update statement belongs.
+     * @param siddhiQueryContext          current siddhi query context
      * @return CompiledUpdateSet
      */
     public abstract CompiledUpdateSet compileUpdateSet(UpdateSet updateSet,
                                                        MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                                       SiddhiAppContext siddhiAppContext,
                                                        List<VariableExpressionExecutor> variableExpressionExecutors,
-                                                       Map<String, Table> tableMap, String queryName);
+                                                       Map<String, Table> tableMap,
+                                                       SiddhiQueryContext siddhiQueryContext);
 
     protected abstract void connect() throws ConnectionUnavailableException;
 

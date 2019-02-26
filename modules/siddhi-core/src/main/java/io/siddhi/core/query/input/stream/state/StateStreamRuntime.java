@@ -18,7 +18,7 @@
 
 package io.siddhi.core.query.input.stream.state;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
@@ -38,12 +38,12 @@ import java.util.List;
  */
 public class StateStreamRuntime implements StreamRuntime {
 
-    private SiddhiAppContext siddhiAppContext;
     private MetaStateEvent metaStateEvent;
     private InnerStateRuntime innerStateRuntime;
+    private SiddhiQueryContext siddhiQueryContext;
 
-    public StateStreamRuntime(SiddhiAppContext siddhiAppContext, MetaStateEvent metaStateEvent) {
-        this.siddhiAppContext = siddhiAppContext;
+    public StateStreamRuntime(SiddhiQueryContext siddhiQueryContext, MetaStateEvent metaStateEvent) {
+        this.siddhiQueryContext = siddhiQueryContext;
         this.metaStateEvent = metaStateEvent;
     }
 
@@ -53,7 +53,7 @@ public class StateStreamRuntime implements StreamRuntime {
 
     @Override
     public StreamRuntime clone(String key) {
-        StateStreamRuntime stateStreamRuntime = new StateStreamRuntime(siddhiAppContext, metaStateEvent);
+        StateStreamRuntime stateStreamRuntime = new StateStreamRuntime(siddhiQueryContext, metaStateEvent);
         stateStreamRuntime.innerStateRuntime = this.innerStateRuntime.clone(key);
         for (SingleStreamRuntime singleStreamRuntime : stateStreamRuntime.getSingleStreamRuntimes()) {
             ProcessStreamReceiver processStreamReceiver = singleStreamRuntime.getProcessStreamReceiver();

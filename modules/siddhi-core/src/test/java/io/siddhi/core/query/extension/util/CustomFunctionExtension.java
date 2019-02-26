@@ -22,7 +22,7 @@ import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
@@ -57,7 +57,7 @@ public class CustomFunctionExtension extends FunctionExecutor {
     @Override
     public void init(ExpressionExecutor[] attributeExpressionExecutors,
                      ConfigReader configReader,
-                     SiddhiAppContext siddhiAppContext) {
+                     SiddhiQueryContext siddhiQueryContext) {
         for (ExpressionExecutor expressionExecutor : attributeExpressionExecutors) {
             Attribute.Type attributeType = expressionExecutor.getReturnType();
             if (attributeType == Attribute.Type.DOUBLE) {

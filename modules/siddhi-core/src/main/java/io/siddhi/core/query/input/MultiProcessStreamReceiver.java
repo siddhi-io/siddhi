@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.input;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
@@ -43,18 +43,16 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
     protected Processor[] nextProcessors;
     protected int processCount;
     protected int[] eventSequence;
-    protected String queryName;
     protected OutputRateLimiter outputRateLimiter;
     private MetaStreamEvent[] metaStreamEvents;
     private StreamEventPool[] streamEventPools;
     private StreamEventConverter[] streamEventConverters;
 
 
-    public MultiProcessStreamReceiver(String streamId, int processCount, LatencyTracker latencyTracker,
-                                      String queryName, SiddhiAppContext siddhiAppContext) {
-        super(streamId, latencyTracker, queryName, siddhiAppContext);
+    public MultiProcessStreamReceiver(String streamId, int processCount,
+                                      SiddhiQueryContext siddhiQueryContext) {
+        super(streamId, siddhiQueryContext);
         this.processCount = processCount;
-        this.queryName = queryName;
         nextProcessors = new Processor[processCount];
         metaStreamEvents = new MetaStreamEvent[processCount];
         streamEventPools = new StreamEventPool[processCount];
@@ -70,8 +68,8 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
     }
 
     public MultiProcessStreamReceiver clone(String key) {
-        return new MultiProcessStreamReceiver(streamId + key, processCount, latencyTracker, queryName,
-                siddhiAppContext);
+        return new MultiProcessStreamReceiver(streamId + key, processCount,
+                siddhiQueryContext);
     }
 
     private void process(int eventSequence, StreamEvent borrowedEvent) {
@@ -79,6 +77,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
             lockWrapper.lock();
         }
         try {
+            LatencyTracker latencyTracker = siddhiQueryContext.getLatencyTracker();
             if (latencyTracker != null) {
                 try {
                     latencyTracker.markIn();

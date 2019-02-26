@@ -22,7 +22,7 @@ import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.query.api.definition.Attribute;
@@ -74,7 +74,7 @@ public class CoalesceFunctionExecutor extends FunctionExecutor {
 
     @Override
     public void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                     SiddhiAppContext siddhiAppContext) {
+                     SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length == 0) {
             throw new SiddhiAppValidationException("Coalesce must have at least one parameter");
         }
