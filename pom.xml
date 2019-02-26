@@ -776,7 +776,7 @@
         <maven.source.plugin.version>3.0.0</maven.source.plugin.version>
         <apache.rat.plugin.version>0.11</apache.rat.plugin.version>
 
-        <maven.plugin.plugin.version>3.4</maven.plugin.plugin.version>
+        <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
         <maven.checkstyleplugin.version>3.0.0</maven.checkstyleplugin.version>
         <maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
         <maven.findbugsplugin.version>3.0.3</maven.findbugsplugin.version>
