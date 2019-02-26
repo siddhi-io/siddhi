@@ -22,7 +22,7 @@ import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
@@ -74,7 +74,7 @@ public class ConvertFunctionExecutor extends FunctionExecutor {
 
     @Override
     public void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                     SiddhiAppContext siddhiAppContext) {
+                     SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 2) {
             throw new SiddhiAppValidationException("convert() must have at 2 parameters, attribute and to be " +
                     "converted type");

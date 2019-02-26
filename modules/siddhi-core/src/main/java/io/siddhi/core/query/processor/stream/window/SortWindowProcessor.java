@@ -22,7 +22,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -102,7 +102,7 @@ public class SortWindowProcessor extends SlidingWindowProcessor implements Finda
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
             lengthToKeep = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
                     attributeExpressionExecutors[0]).getValue()));
@@ -146,7 +146,7 @@ public class SortWindowProcessor extends SlidingWindowProcessor implements Finda
                            StreamEventCloner streamEventCloner) {
 
         synchronized (this) {
-            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
 
             StreamEvent streamEvent = streamEventChunk.getFirst();
             streamEventChunk.clear();
@@ -204,11 +204,10 @@ public class SortWindowProcessor extends SlidingWindowProcessor implements Finda
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         return OperatorParser.constructOperator(sortedWindow, condition, matchingMetaInfoHolder,
-                siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     private class EventComparator implements Comparator<StreamEvent> {

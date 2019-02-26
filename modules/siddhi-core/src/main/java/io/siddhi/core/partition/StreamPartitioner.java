@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.partition;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
@@ -57,60 +57,58 @@ public class StreamPartitioner {
     private List<List<PartitionExecutor>> partitionExecutorLists = new ArrayList<List<PartitionExecutor>>();
 
     public StreamPartitioner(InputStream inputStream, Partition partition, MetaStateEvent metaEvent,
-                             List<VariableExpressionExecutor> executors, SiddhiAppContext siddhiAppContext,
-                             String queryName) {
+                             List<VariableExpressionExecutor> executors, SiddhiQueryContext siddhiQueryContext) {
         if (partition != null) {
-            createExecutors(inputStream, partition, metaEvent, executors, siddhiAppContext, queryName
-            );
+            createExecutors(inputStream, partition, metaEvent, executors,
+                    siddhiQueryContext);
         }
     }
 
     private void createExecutors(InputStream inputStream, Partition partition, MetaComplexEvent metaEvent,
-                                 List<VariableExpressionExecutor> executors, SiddhiAppContext
-                                         siddhiAppContext, String queryName) {
+                                 List<VariableExpressionExecutor> executors, SiddhiQueryContext siddhiQueryContext) {
         if (inputStream instanceof SingleInputStream) {
             if (metaEvent instanceof MetaStateEvent) {
                 createSingleInputStreamExecutors((SingleInputStream) inputStream, partition,
                         ((MetaStateEvent) metaEvent).getMetaStreamEvent(0), executors, null,
-                        siddhiAppContext, queryName);
+                        siddhiQueryContext);
             } else {
                 createSingleInputStreamExecutors((SingleInputStream) inputStream, partition, (MetaStreamEvent)
-                        metaEvent, executors, null, siddhiAppContext, queryName);
+                        metaEvent, executors, null, siddhiQueryContext);
             }
         } else if (inputStream instanceof JoinInputStream) {
             createJoinInputStreamExecutors((JoinInputStream) inputStream, partition, (MetaStateEvent) metaEvent,
-                    executors, siddhiAppContext, queryName);
+                    executors, siddhiQueryContext);
         } else if (inputStream instanceof StateInputStream) {
             createStateInputStreamExecutors(((StateInputStream) inputStream).getStateElement(), partition,
-                    (MetaStateEvent) metaEvent, executors, siddhiAppContext, 0, queryName);
+                    (MetaStateEvent) metaEvent, executors, 0, siddhiQueryContext);
         }
     }
 
     private int createStateInputStreamExecutors(StateElement stateElement, Partition partition, MetaStateEvent
-            metaEvent, List<VariableExpressionExecutor> executors, SiddhiAppContext siddhiAppContext,
-                                                int executorIndex, String queryName) {
+            metaEvent, List<VariableExpressionExecutor> executors,
+                                                int executorIndex, SiddhiQueryContext siddhiQueryContext) {
 
         if (stateElement instanceof EveryStateElement) {
             return createStateInputStreamExecutors(((EveryStateElement) stateElement).getStateElement(), partition,
-                    metaEvent, executors, siddhiAppContext, executorIndex, queryName);
+                    metaEvent, executors, executorIndex, siddhiQueryContext);
         } else if (stateElement instanceof NextStateElement) {
             executorIndex = createStateInputStreamExecutors(((NextStateElement) stateElement).getStateElement(),
-                    partition, metaEvent, executors, siddhiAppContext, executorIndex, queryName);
+                    partition, metaEvent, executors, executorIndex, siddhiQueryContext);
             return createStateInputStreamExecutors(((NextStateElement) stateElement).getNextStateElement(),
-                    partition, metaEvent, executors, siddhiAppContext, executorIndex, queryName);
+                    partition, metaEvent, executors, executorIndex, siddhiQueryContext);
         } else if (stateElement instanceof LogicalStateElement) {
             executorIndex = createStateInputStreamExecutors(((LogicalStateElement) stateElement)
-                            .getStreamStateElement1(), partition, metaEvent, executors, siddhiAppContext, executorIndex,
-                    queryName);
+                            .getStreamStateElement1(), partition, metaEvent, executors, executorIndex,
+                    siddhiQueryContext);
             return createStateInputStreamExecutors(((LogicalStateElement) stateElement).getStreamStateElement2(),
-                    partition, metaEvent, executors, siddhiAppContext, executorIndex, queryName);
+                    partition, metaEvent, executors, executorIndex, siddhiQueryContext);
         } else if (stateElement instanceof CountStateElement) {
             return createStateInputStreamExecutors(((CountStateElement) stateElement).getStreamStateElement(),
-                    partition, metaEvent, executors, siddhiAppContext, executorIndex, queryName);
+                    partition, metaEvent, executors, executorIndex, siddhiQueryContext);
         } else {  //when stateElement is an instanceof StreamStateElement
             int size = executors.size();
             createExecutors(((StreamStateElement) stateElement).getBasicSingleInputStream(), partition, metaEvent
-                    .getMetaStreamEvent(executorIndex), executors, siddhiAppContext, queryName);
+                    .getMetaStreamEvent(executorIndex), executors, siddhiQueryContext);
             for (int j = size; j < executors.size(); j++) {
                 executors.get(j).getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX] = executorIndex;
             }
@@ -120,24 +118,26 @@ public class StreamPartitioner {
 
     private void createJoinInputStreamExecutors(JoinInputStream inputStream, Partition partition,
                                                 MetaStateEvent metaEvent, List<VariableExpressionExecutor> executors,
-                                                SiddhiAppContext siddhiAppContext, String queryName) {
+                                                SiddhiQueryContext siddhiQueryContext) {
         createExecutors(inputStream.getLeftInputStream(), partition, metaEvent.getMetaStreamEvent(0), executors,
-                siddhiAppContext, queryName);
+                siddhiQueryContext);
         int size = executors.size();
         for (VariableExpressionExecutor variableExpressionExecutor : executors) {
             variableExpressionExecutor.getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX] = 0;
         }
         createExecutors(inputStream.getRightInputStream(), partition, metaEvent.getMetaStreamEvent(1), executors,
-                siddhiAppContext, queryName);
+                siddhiQueryContext);
         for (int i = size; i < executors.size(); i++) {
             executors.get(i).getPosition()[SiddhiConstants.STREAM_EVENT_CHAIN_INDEX] = 1;
         }
 
     }
 
-    private void createSingleInputStreamExecutors(SingleInputStream inputStream, Partition partition, MetaStreamEvent
-            metaEvent, List<VariableExpressionExecutor> executors, Map<String, Table> tableMap,
-                                                  SiddhiAppContext siddhiAppContext, String queryName) {
+    private void createSingleInputStreamExecutors(SingleInputStream inputStream, Partition partition,
+                                                  MetaStreamEvent metaEvent,
+                                                  List<VariableExpressionExecutor> executors,
+                                                  Map<String, Table> tableMap,
+                                                  SiddhiQueryContext siddhiQueryContext) {
         List<PartitionExecutor> executorList = new ArrayList<PartitionExecutor>();
         partitionExecutorLists.add(executorList);
         if (!inputStream.isInnerStream()) {
@@ -147,8 +147,8 @@ public class StreamPartitioner {
                         executorList.add(new ValuePartitionExecutor(ExpressionParser.parseExpression((
                                         (ValuePartitionType) partitionType).getExpression(),
                                 metaEvent, SiddhiConstants.UNKNOWN_STATE, tableMap, executors,
-                                siddhiAppContext, false, 0, queryName,
-                                ProcessingMode.BATCH, false)));
+                                false, 0,
+                                ProcessingMode.BATCH, false, siddhiQueryContext)));
                     }
                 } else {
                     for (RangePartitionType.RangePartitionProperty rangePartitionProperty : ((RangePartitionType)
@@ -157,8 +157,8 @@ public class StreamPartitioner {
                             executorList.add(new RangePartitionExecutor((ConditionExpressionExecutor)
                                     ExpressionParser.parseExpression(rangePartitionProperty.getCondition(), metaEvent,
                                             SiddhiConstants.UNKNOWN_STATE, tableMap, executors,
-                                            siddhiAppContext, false, 0, queryName,
-                                            ProcessingMode.BATCH, false),
+                                            false, 0, ProcessingMode.BATCH,
+                                            false, siddhiQueryContext),
                                     rangePartitionProperty.getPartitionKey()));
                         }
                     }

@@ -21,7 +21,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
@@ -92,7 +92,7 @@ public class CronWindowProcessor extends BatchingWindowProcessor implements Job 
     private final String jobGroup = "CronWindowGroup";
     private ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(false);
     private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
-    private SiddhiAppContext siddhiAppContext;
+    private SiddhiQueryContext siddhiQueryContext;
     private Scheduler scheduler;
     private String jobName;
     private String cronString;
@@ -100,8 +100,8 @@ public class CronWindowProcessor extends BatchingWindowProcessor implements Job 
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
-        this.siddhiAppContext = siddhiAppContext;
+            outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
+        this.siddhiQueryContext = siddhiQueryContext;
         if (attributeExpressionExecutors != null) {
             cronString = (String) (((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue());
         }
@@ -132,7 +132,7 @@ public class CronWindowProcessor extends BatchingWindowProcessor implements Job 
                 scheduler.deleteJob(new JobKey(jobName, jobGroup));
             }
         } catch (SchedulerException e) {
-            log.error(ExceptionUtil.getMessageWithContext(e, siddhiAppContext) +
+            log.error(ExceptionUtil.getMessageWithContext(e, siddhiQueryContext.getSiddhiAppContext()) +
                     " Error while removing the cron job '" + jobGroup + ":'" + jobName + "'.", e);
         }
     }
@@ -190,7 +190,7 @@ public class CronWindowProcessor extends BatchingWindowProcessor implements Job 
         ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<StreamEvent>(false);
         synchronized (this) {
             if (currentEventChunk.getFirst() != null) {
-                long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
                 while (expiredEventChunk.hasNext()) {
                     StreamEvent expiredEvent = expiredEventChunk.next();
                     expiredEvent.setTimestamp(currentTime);

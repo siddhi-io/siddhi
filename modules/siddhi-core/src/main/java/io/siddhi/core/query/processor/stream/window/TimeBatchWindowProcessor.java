@@ -21,7 +21,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
@@ -120,7 +120,7 @@ public class TimeBatchWindowProcessor extends BatchingWindowProcessor
     private StreamEvent resetEvent = null;
     private Scheduler scheduler;
     private boolean outputExpectsExpiredEvents;
-    private SiddhiAppContext siddhiAppContext;
+    private SiddhiQueryContext siddhiQueryContext;
     private boolean isStartTimeEnabled = false;
     private boolean isStreamCurrentEvents = false;
     private long startTime = 0;
@@ -141,9 +141,9 @@ public class TimeBatchWindowProcessor extends BatchingWindowProcessor
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+            outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
-        this.siddhiAppContext = siddhiAppContext;
+        this.siddhiQueryContext = siddhiQueryContext;
         if (!isStreamCurrentEvents) {
             this.currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
@@ -249,15 +249,16 @@ public class TimeBatchWindowProcessor extends BatchingWindowProcessor
                            StreamEventCloner streamEventCloner) {
         synchronized (this) {
             if (nextEmitTime == -1) {
-                long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
                 if (isStartTimeEnabled) {
                     nextEmitTime = getNextEmitTime(currentTime);
                 } else {
-                    nextEmitTime = siddhiAppContext.getTimestampGenerator().currentTime() + timeInMilliSeconds;
+                    nextEmitTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime()
+                            + timeInMilliSeconds;
                 }
                 scheduler.notifyAt(nextEmitTime);
             }
-            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
             boolean sendEvents;
 
             if (currentTime >= nextEmitTime) {
@@ -372,14 +373,13 @@ public class TimeBatchWindowProcessor extends BatchingWindowProcessor
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         if (expiredEventQueue == null) {
             expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         }
         return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
-                siddhiAppContext, variableExpressionExecutors, tableMap,
-                this.queryName);
+                variableExpressionExecutors, tableMap,
+                siddhiQueryContext);
     }
 }

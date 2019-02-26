@@ -17,11 +17,10 @@
  */
 package io.siddhi.core.query.input.stream.state.receiver;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.input.SingleProcessStreamReceiver;
-import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.List;
 
@@ -31,14 +30,13 @@ import java.util.List;
  */
 public class PatternSingleProcessStreamReceiver extends SingleProcessStreamReceiver {
 
-    public PatternSingleProcessStreamReceiver(String streamId, String lockKey, LatencyTracker latencyTracker, String
-            queryName, SiddhiAppContext siddhiAppContext) {
-        super(streamId, lockKey, latencyTracker, queryName, siddhiAppContext);
+    public PatternSingleProcessStreamReceiver(String streamId, String lockKey, SiddhiQueryContext siddhiQueryContext) {
+        super(streamId, lockKey, siddhiQueryContext);
     }
 
     public PatternSingleProcessStreamReceiver clone(String key) {
-        return new PatternSingleProcessStreamReceiver(streamId + key, key, latencyTracker, queryName,
-                siddhiAppContext);
+        return new PatternSingleProcessStreamReceiver(streamId + key, key,
+                siddhiQueryContext);
     }
 
     protected void stabilizeStates() {

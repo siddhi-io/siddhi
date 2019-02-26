@@ -18,12 +18,11 @@
 
 package io.siddhi.core.query.input.stream.state.receiver;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.input.SingleProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.state.StateStreamRuntime;
-import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.List;
 
@@ -36,9 +35,8 @@ public class SequenceSingleProcessStreamReceiver extends SingleProcessStreamRece
     private StateStreamRuntime stateStreamRuntime;
 
     public SequenceSingleProcessStreamReceiver(String streamId, StateStreamRuntime stateStreamRuntime,
-                                               String lockKey, LatencyTracker latencyTracker, String queryName,
-                                               SiddhiAppContext siddhiAppContext) {
-        super(streamId, lockKey, latencyTracker, queryName, siddhiAppContext);
+                                               String lockKey, SiddhiQueryContext siddhiQueryContext) {
+        super(streamId, lockKey, siddhiQueryContext);
         this.stateStreamRuntime = stateStreamRuntime;
     }
 
@@ -48,7 +46,7 @@ public class SequenceSingleProcessStreamReceiver extends SingleProcessStreamRece
 
     public SequenceSingleProcessStreamReceiver clone(String key) {
         return new SequenceSingleProcessStreamReceiver(streamId + key, null, key,
-                latencyTracker, queryName, siddhiAppContext);
+                siddhiQueryContext);
     }
 
     protected void stabilizeStates() {

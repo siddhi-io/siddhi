@@ -21,7 +21,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
@@ -128,7 +128,7 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors,
                         ConfigReader configReader, boolean outputExpectsExpiredEvents,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         this.sessionMap = new ConcurrentHashMap<>();
         this.sessionKeyEndTimeMap = new HashMap<>();
         this.sessionContainer = new SessionContainer();
@@ -573,11 +573,10 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
-                siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
 
     }
 

@@ -21,7 +21,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
@@ -52,7 +52,7 @@ public class FaultFunctionExtension extends FunctionExecutor {
     @Override
     public void init(ExpressionExecutor[] attributeExpressionExecutors,
                      ConfigReader configReader,
-                     SiddhiAppContext siddhiAppContext) {
+                     SiddhiQueryContext siddhiQueryContext) {
         returnType = Attribute.Type.DOUBLE;
     }
 

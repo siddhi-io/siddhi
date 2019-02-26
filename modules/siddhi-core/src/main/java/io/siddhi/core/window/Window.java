@@ -17,6 +17,7 @@
 package io.siddhi.core.window;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
@@ -138,9 +139,9 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
      *
      * @param tableMap       map of {@link Table}s
      * @param eventWindowMap map of EventWindows
-     * @param queryName      name of the query window belongs to.
+     * @param windowName     name of the query window belongs to.
      */
-    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, String queryName) {
+    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, String windowName) {
         if (this.windowProcessor != null) {
             return;
         }
@@ -159,10 +160,11 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         OutputStream.OutputEventType outputEventType = windowDefinition.getOutputEventType();
         boolean outputExpectsExpiredEvents = outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS;
 
+        SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, windowName);
         WindowProcessor internalWindowProcessor = (WindowProcessor) SingleInputStreamParser.generateProcessor
                 (windowDefinition.getWindow(), metaStreamEvent, new ArrayList<VariableExpressionExecutor>(),
-                        this.siddhiAppContext, tableMap, false, outputExpectsExpiredEvents,
-                        queryName);
+                        tableMap, false,
+                        outputExpectsExpiredEvents, siddhiQueryContext);
         internalWindowProcessor.setStreamEventCloner(streamEventCloner);
         internalWindowProcessor.constructStreamEventPopulater(metaStreamEvent, 0);
 
@@ -170,7 +172,7 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         if (internalWindowProcessor instanceof SchedulingProcessor) {
             entryValveProcessor = new EntryValveProcessor(this.siddhiAppContext);
             Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, this.siddhiAppContext);
-            scheduler.init(this.lockWrapper, queryName);
+            scheduler.init(this.lockWrapper, windowName);
             scheduler.setStreamEventPool(streamEventPool);
             ((SchedulingProcessor) internalWindowProcessor).setScheduler(scheduler);
         }
@@ -272,13 +274,11 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
      */
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         if (this.internalWindowProcessor instanceof FindableProcessor) {
             return ((FindableProcessor) this.internalWindowProcessor).compileCondition(condition,
-                    matchingMetaInfoHolder, siddhiAppContext, variableExpressionExecutors, tableMap,
-                    queryName);
+                    matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
         } else {
             throw new OperationNotSupportedException("Cannot construct finder for the window " + this
                     .windowDefinition.getWindow());

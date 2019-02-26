@@ -18,7 +18,7 @@
 
 package io.siddhi.sample.util;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
@@ -36,11 +36,11 @@ public class CustomFunctionExtension extends FunctionExecutor {
      *
      * @param attributeExpressionExecutors are the executors of each function parameters
      * @param configReader
-     * @param siddhiAppContext             the context of the siddhi app
+     * @param siddhiQueryContext           the context of the siddhi query
      */
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         for (ExpressionExecutor expressionExecutor : attributeExpressionExecutors) {
             Attribute.Type attributeType = expressionExecutor.getReturnType();
             if (attributeType == Attribute.Type.DOUBLE) {

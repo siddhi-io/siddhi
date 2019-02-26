@@ -17,7 +17,7 @@
 package io.siddhi.core.query.processor.stream.window;
 
 import io.siddhi.core.aggregation.AggregationRuntime;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -50,7 +50,7 @@ public class AggregateWindowProcessor extends BatchingWindowProcessor implements
     private AggregationRuntime aggregationRuntime;
     private ConfigReader configReader;
     private boolean outputExpectsExpiredEvents;
-    private SiddhiAppContext siddhiAppContext;
+    private SiddhiQueryContext siddhiQueryContext;
 
     public AggregateWindowProcessor(AggregationRuntime aggregationRuntime, Within within, Expression per) {
         this.aggregationRuntime = aggregationRuntime;
@@ -60,11 +60,11 @@ public class AggregateWindowProcessor extends BatchingWindowProcessor implements
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+                        boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
         // nothing to be done
         this.configReader = configReader;
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
-        this.siddhiAppContext = siddhiAppContext;
+        this.siddhiQueryContext = siddhiQueryContext;
     }
 
     @Override
@@ -81,11 +81,10 @@ public class AggregateWindowProcessor extends BatchingWindowProcessor implements
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         return aggregationRuntime.compileExpression(condition, within, per, matchingMetaInfoHolder,
-                variableExpressionExecutors, tableMap, queryName, siddhiAppContext);
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     @Override
@@ -113,7 +112,7 @@ public class AggregateWindowProcessor extends BatchingWindowProcessor implements
             streamProcessor.additionalAttributes = additionalAttributes;
             streamProcessor.complexEventPopulater = complexEventPopulater;
             streamProcessor.init(metaStreamEvent, inputDefinition, attributeExpressionExecutors, configReader,
-                    siddhiAppContext, outputExpectsExpiredEvents);
+                    outputExpectsExpiredEvents, siddhiQueryContext);
             streamProcessor.start();
             return streamProcessor;
 

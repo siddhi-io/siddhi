@@ -44,12 +44,8 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter implements S
     private ScheduledExecutorService scheduledExecutorService;
     private Scheduler scheduler;
     private long scheduledTime;
-    private String queryName;
 
-
-    public LastPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService,
-                                        String queryName) {
-        this.queryName = queryName;
+    public LastPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService) {
         this.id = id;
         this.value = value;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -58,7 +54,7 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter implements S
     @Override
     public OutputRateLimiter clone(String key) {
         LastPerTimeOutputRateLimiter instance = new LastPerTimeOutputRateLimiter(id + key, value,
-                scheduledExecutorService, queryName);
+                scheduledExecutorService);
         instance.setLatencyTracker(latencyTracker);
         return instance;
     }
@@ -97,9 +93,9 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter implements S
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiAppContext);
+        scheduler = SchedulerParser.parse(this, siddhiQueryContext.getSiddhiAppContext());
         scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
-        scheduler.init(lockWrapper, queryName);
+        scheduler.init(lockWrapper, siddhiQueryContext.getName());
         long currentTime = System.currentTimeMillis();
         scheduledTime = currentTime + value;
         scheduler.notifyAt(scheduledTime);

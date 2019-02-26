@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.output.ratelimit;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.query.input.MultiProcessStreamReceiver;
@@ -39,23 +39,23 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
 
     protected List<QueryCallback> queryCallbacks = new ArrayList<QueryCallback>();
     protected OutputCallback outputCallback = null;
-    protected SiddhiAppContext siddhiAppContext;
     protected LatencyTracker latencyTracker;
+    protected SiddhiQueryContext siddhiQueryContext;
     protected LockWrapper lockWrapper;
-    protected String queryName;
     private boolean hasCallBack = false;
     private String elementId;
 
-    public void init(SiddhiAppContext siddhiAppContext, LockWrapper lockWrapper, String queryName) {
-        this.siddhiAppContext = siddhiAppContext;
-        this.queryName = queryName;
+    public void init(LockWrapper lockWrapper, SiddhiQueryContext siddhiQueryContext) {
+        this.siddhiQueryContext = siddhiQueryContext;
         if (outputCallback != null) {
             this.lockWrapper = lockWrapper;
         }
         if (elementId == null) {
-            elementId = "OutputRateLimiter-" + siddhiAppContext.getElementIdGenerator().createNewId();
+            elementId = "OutputRateLimiter-" +
+                    siddhiQueryContext.getSiddhiAppContext().getElementIdGenerator().createNewId();
         }
-        siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
+        siddhiQueryContext.getSiddhiAppContext().getSnapshotService().addSnapshotable(
+                siddhiQueryContext.getName(), this);
     }
 
     public void sendToCallBacks(ComplexEventChunk complexEventChunk) {
@@ -67,7 +67,7 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
         } else if (lockWrapper != null) {
             lockWrapper.unlock();
         }
-        if (siddhiAppContext.isStatsEnabled() && latencyTracker != null) {
+        if (siddhiQueryContext.getSiddhiAppContext().isStatsEnabled() && latencyTracker != null) {
             latencyTracker.markOut();
         }
         if (lockWrapper != null) {
@@ -133,7 +133,8 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
 
     @Override
     public void clean() {
-        siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
+        siddhiQueryContext.getSiddhiAppContext().getSnapshotService().removeSnapshotable(
+                siddhiQueryContext.getName(), this);
     }
 }
 

@@ -199,7 +199,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
             sendEvent(stateEvent);
         }
 
-        long actualCurrentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+        long actualCurrentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
         if (actualCurrentTime > waitingTime + currentTime) {
             lastScheduledTime = actualCurrentTime + waitingTime;
         }
@@ -262,13 +262,13 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         AbsentStreamPreStateProcessor streamPreStateProcessor = new AbsentStreamPreStateProcessor(stateType,
                 waitingTime);
         cloneProperties(streamPreStateProcessor, key);
-        streamPreStateProcessor.init(siddhiAppContext, queryName);
+        streamPreStateProcessor.init(siddhiQueryContext);
 
         // Set the scheduler
-        siddhiAppContext.addEternalReferencedHolder(streamPreStateProcessor);
-        EntryValveProcessor entryValveProcessor = new EntryValveProcessor(siddhiAppContext);
+        siddhiQueryContext.getSiddhiAppContext().addEternalReferencedHolder(streamPreStateProcessor);
+        EntryValveProcessor entryValveProcessor = new EntryValveProcessor(siddhiQueryContext.getSiddhiAppContext());
         entryValveProcessor.setToLast(streamPreStateProcessor);
-        Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
+        Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiQueryContext.getSiddhiAppContext());
         streamPreStateProcessor.setScheduler(scheduler);
         return streamPreStateProcessor;
     }
@@ -279,7 +279,8 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         // Otherwise, scheduler will be started in the addState method
         if (isStartState && waitingTime != -1 && active) {
             synchronized (this) {
-                lastScheduledTime = this.siddhiAppContext.getTimestampGenerator().currentTime() + waitingTime;
+                lastScheduledTime = this.siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime()
+                        + waitingTime;
                 this.scheduler.notifyAt(lastScheduledTime);
             }
         }

@@ -200,7 +200,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
             // If every or (notProcessed and startState), schedule again
             long nextBreak;
             if (lastArrivalTime == 0) {
-                nextBreak = siddhiAppContext.getTimestampGenerator().currentTime() + waitingTime;
+                nextBreak = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime() +
+                        waitingTime;
             } else {
                 nextBreak = lastArrivalTime + waitingTime;
             }
@@ -318,13 +319,13 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         AbsentLogicalPreStateProcessor logicalPreStateProcessor = new AbsentLogicalPreStateProcessor(logicalType,
                 stateType, waitingTimeConstant);
         cloneProperties(logicalPreStateProcessor, key);
-        logicalPreStateProcessor.init(siddhiAppContext, queryName);
+        logicalPreStateProcessor.init(siddhiQueryContext);
 
         // Set the scheduler
-        siddhiAppContext.addEternalReferencedHolder(logicalPreStateProcessor);
-        EntryValveProcessor entryValveProcessor = new EntryValveProcessor(siddhiAppContext);
+        siddhiQueryContext.getSiddhiAppContext().addEternalReferencedHolder(logicalPreStateProcessor);
+        EntryValveProcessor entryValveProcessor = new EntryValveProcessor(siddhiQueryContext.getSiddhiAppContext());
         entryValveProcessor.setToLast(logicalPreStateProcessor);
-        Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiAppContext);
+        Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiQueryContext.getSiddhiAppContext());
         logicalPreStateProcessor.setScheduler(scheduler);
 
         return logicalPreStateProcessor;
@@ -335,8 +336,8 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         if (isStartState && waitingTime != -1 && active) {
             this.lock.lock();
             try {
-                this.scheduler.notifyAt(this.siddhiAppContext.getTimestampGenerator().currentTime() +
-                        waitingTime);
+                this.scheduler.notifyAt(this.siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator()
+                        .currentTime() + waitingTime);
             } finally {
                 this.lock.unlock();
             }

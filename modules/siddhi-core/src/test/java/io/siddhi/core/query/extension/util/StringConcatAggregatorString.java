@@ -23,7 +23,7 @@ import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
@@ -64,12 +64,12 @@ public class StringConcatAggregatorString extends AttributeAggregator {
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
      * @param configReader                 this hold the {@link StringConcatAggregatorString} configuration reader.
-     * @param siddhiAppContext             SiddhiContext
+     * @param siddhiQueryContext           current siddhi query context
      */
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
                         boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
+                        SiddhiQueryContext siddhiQueryContext) {
         appendAbc = Boolean.parseBoolean(configReader.readConfig("append.abc", "false"));
 
     }

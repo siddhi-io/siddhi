@@ -22,7 +22,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
@@ -111,14 +111,14 @@ public class LogStreamProcessor extends StreamProcessor {
      * @param metaStreamEvent              the  stream event meta
      * @param inputDefinition              the incoming stream definition
      * @param attributeExpressionExecutors the executors for the function parameters
-     * @param siddhiAppContext             siddhi app context
      * @param configReader                 this hold the {@link LogStreamProcessor} configuration reader.
+     * @param siddhiQueryContext           current siddhi query context
      * @return the additional output attributes introduced by the function
      */
     @Override
     protected List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                   SiddhiAppContext siddhiAppContext, boolean outputExpectsExpiredEvents) {
+                                   boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
         int inputExecutorLength = attributeExpressionExecutors.length;
         if (inputExecutorLength == 1) {
             if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.STRING) {
@@ -182,7 +182,7 @@ public class LogStreamProcessor extends StreamProcessor {
             throw new SiddhiAppValidationException("Input parameters for Log can be logMessage (String), " +
                     "isEventLogged (Bool), but there are " + attributeExpressionExecutors.length + " in the input!");
         }
-        logPrefix = siddhiAppContext.getName() + ": ";
+        logPrefix = siddhiQueryContext.getSiddhiAppContext().getName() + ": ";
         return new ArrayList<Attribute>();
     }
 

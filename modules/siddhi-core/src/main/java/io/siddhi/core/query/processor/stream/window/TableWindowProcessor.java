@@ -17,7 +17,7 @@
  */
 package io.siddhi.core.query.processor.stream.window;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -51,7 +51,7 @@ public class TableWindowProcessor extends BatchingWindowProcessor implements Fin
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        boolean outputExpectsExpiredEvents, SiddhiAppContext siddhiAppContext) {
+                        boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
         this.configReader = configReader;
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
     }
@@ -69,11 +69,10 @@ public class TableWindowProcessor extends BatchingWindowProcessor implements Fin
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
-        return table.compileCondition(condition, matchingMetaInfoHolder, siddhiAppContext,
-                variableExpressionExecutors, tableMap, queryName);
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
+        return table.compileCondition(condition, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
+                siddhiQueryContext);
     }
 
     @Override
@@ -101,7 +100,7 @@ public class TableWindowProcessor extends BatchingWindowProcessor implements Fin
             streamProcessor.additionalAttributes = additionalAttributes;
             streamProcessor.complexEventPopulater = complexEventPopulater;
             streamProcessor.init(metaStreamEvent, inputDefinition, attributeExpressionExecutors, configReader,
-                    siddhiAppContext, outputExpectsExpiredEvents);
+                    outputExpectsExpiredEvents, siddhiQueryContext);
             streamProcessor.start();
             return streamProcessor;
 

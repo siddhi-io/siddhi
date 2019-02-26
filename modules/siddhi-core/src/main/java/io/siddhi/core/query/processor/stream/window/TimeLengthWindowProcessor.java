@@ -22,7 +22,7 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
@@ -85,7 +85,7 @@ public class TimeLengthWindowProcessor extends SlidingWindowProcessor
     private int count = 0;
     private ComplexEventChunk<StreamEvent> expiredEventChunk;
     private Scheduler scheduler;
-    private SiddhiAppContext siddhiAppContext;
+    private SiddhiQueryContext siddhiQueryContext;
 
     @Override
     public Scheduler getScheduler() {
@@ -99,8 +99,8 @@ public class TimeLengthWindowProcessor extends SlidingWindowProcessor
 
     @Override
     protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiAppContext siddhiAppContext) {
-        this.siddhiAppContext = siddhiAppContext;
+                        SiddhiQueryContext siddhiQueryContext) {
+        this.siddhiQueryContext = siddhiQueryContext;
         expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 2) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
@@ -132,7 +132,7 @@ public class TimeLengthWindowProcessor extends SlidingWindowProcessor
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner) {
         synchronized (this) {
-            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
 
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
@@ -187,11 +187,10 @@ public class TimeLengthWindowProcessor extends SlidingWindowProcessor
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              SiddhiAppContext siddhiAppContext,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, String queryName) {
+                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
         return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
-                siddhiAppContext, variableExpressionExecutors, tableMap, this.queryName);
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     @Override
