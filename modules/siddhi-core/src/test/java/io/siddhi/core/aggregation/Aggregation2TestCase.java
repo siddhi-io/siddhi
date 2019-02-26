@@ -97,22 +97,33 @@ public class Aggregation2TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 96, 1496289953000L});
 
-            Thread.sleep(100);
+            Event[] events = null;
+            int i = 0;
 
-            Event[] events = siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
-                    "'minutes' select AGG_TIMESTAMP, symbol, totalPrice, avgPrice ");
-            AssertJUnit.assertEquals("Check time windows", 2, events.length);
-            List<Object[]> eventsList = new ArrayList<>();
-            for (Event event : events) {
-                eventsList.add(event.getData());
+            while (events == null && i < 10) {
+                events = siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
+                        "'minutes' select AGG_TIMESTAMP, symbol, totalPrice, avgPrice ");
+                Thread.sleep(100);
+                i++;
             }
 
-            List<Object[]> expected = Arrays.asList(
-                    new Object[]{1496289900000L, "WSO2", 650.0, 216.66666666666666},
-                    new Object[]{1496289900000L, "IBM", 1500.0, 375.0}
-            );
-            AssertJUnit.assertEquals("Data Matched", true,
-                    SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
+            AssertJUnit.assertNotNull("Aggregation event list is null", events);
+            if (events != null) {
+                AssertJUnit.assertEquals("Check time windows", 2, events.length);
+
+                List<Object[]> eventsList = new ArrayList<>();
+                for (Event event : events) {
+                    eventsList.add(event.getData());
+                }
+
+
+                List<Object[]> expected = Arrays.asList(
+                        new Object[]{1496289900000L, "WSO2", 650.0, 216.66666666666666},
+                        new Object[]{1496289900000L, "IBM", 1500.0, 375.0}
+                );
+                AssertJUnit.assertEquals("Data Matched", true,
+                        SiddhiTestHelper.isUnsortedEventsMatch(eventsList, expected));
+            }
         } finally {
             siddhiAppRuntime.shutdown();
         }
