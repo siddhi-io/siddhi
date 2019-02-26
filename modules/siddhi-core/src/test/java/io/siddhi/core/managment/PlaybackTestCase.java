@@ -24,6 +24,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
 import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
@@ -92,8 +93,10 @@ public class PlaybackTestCase {
 
         timestamp += 1000;   // Another 1 sec passed
         inputHandler.send(timestamp, new Object[]{"ORACLE", 90.5f, 1});
-
         Thread.sleep(100);
+
+        SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+        SiddhiTestHelper.waitForEvents(100, 2, removeEventCount, 60000);
 
         AssertJUnit.assertEquals(3, inEventCount);
         AssertJUnit.assertEquals(2, removeEventCount);
@@ -152,8 +155,10 @@ public class PlaybackTestCase {
         inputHandler.send(timestamp, new Object[]{"YY", 60.5f, 1});
         timestamp += 5000;
         inputHandler.send(timestamp, new Object[]{"ZZ", 0.0f, 0});
-
         Thread.sleep(100);
+
+        SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+        SiddhiTestHelper.waitForEvents(100, 0, removeEventCount, 60000);
 
         AssertJUnit.assertEquals(3, inEventCount);
         AssertJUnit.assertEquals(0, removeEventCount);
@@ -209,8 +214,10 @@ public class PlaybackTestCase {
         timestamp += 13000;
         inputHandler.send(timestamp, new Object[]{"TT", 60.5f, 1});
         inputHandler.send(timestamp, new Object[]{"YY", 60.5f, 1});
-
         Thread.sleep(200);  // Anything more than 100 is enough. Used 200 to be on safe side
+
+        SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+        SiddhiTestHelper.waitForEvents(100, 0, removeEventCount, 60000);
 
         AssertJUnit.assertEquals(3, inEventCount);
         AssertJUnit.assertEquals(0, removeEventCount);
@@ -310,8 +317,10 @@ public class PlaybackTestCase {
         timestamp += 500;
         inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 4});
         timestamp += 5000;
-
         inputHandler.send(timestamp, new Object[]{"GOOGLE", 90.5f, 5});
+
+        SiddhiTestHelper.waitForEvents(100, 5, inEventCount, 60000);
+        SiddhiTestHelper.waitForEvents(100, 4, removeEventCount, 60000);
 
         AssertJUnit.assertEquals(5, inEventCount);
         AssertJUnit.assertEquals(4, removeEventCount);
@@ -359,8 +368,10 @@ public class PlaybackTestCase {
         inputHandler.send(timestamp, new Object[]{"IBM", 700f, 3});
         timestamp += 500;
         inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 4});
-
         Thread.sleep(200);  // Anything more than 100 is enough. Used 200 to be on safe side
+
+        SiddhiTestHelper.waitForEvents(100, 4, inEventCount, 60000);
+        SiddhiTestHelper.waitForEvents(100, 4, removeEventCount, 60000);
 
         AssertJUnit.assertEquals(4, inEventCount);
         AssertJUnit.assertEquals(4, removeEventCount);
@@ -409,6 +420,10 @@ public class PlaybackTestCase {
         timestamp += 2000;
         inputHandler.send(timestamp, new Object[]{"GOOGLE", 0.0f, 1});
         Thread.sleep(100);
+
+        SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+        SiddhiTestHelper.waitForEvents(100, 2, removeEventCount, 60000);
+
         AssertJUnit.assertEquals(3, inEventCount);
         AssertJUnit.assertEquals(2, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
@@ -453,8 +468,10 @@ public class PlaybackTestCase {
         long timestamp = System.currentTimeMillis();
         inputHandler.send(timestamp, new Object[]{"IBM", 700f, 0});
         inputHandler.send(timestamp, new Object[]{"WSO2", 60.5f, 1});
-
         Thread.sleep(200);  // Anything more than 100 is enough. Used 200 to be on safe side
+
+        SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
+        SiddhiTestHelper.waitForEvents(100, 2, removeEventCount, 60000);
 
         AssertJUnit.assertEquals(2, inEventCount);
         AssertJUnit.assertEquals(2, removeEventCount);
@@ -541,8 +558,10 @@ public class PlaybackTestCase {
         inputHandler.send(200, new Object[]{"WSO2", 600.5f, 1});
         Thread.sleep(150);
         inputHandler.send(1150, new Object[]{"ORACLE", 500.0f, 2});  // Does no increase the system clock
-
         Thread.sleep(350);  // Anything more than 100 is enough. Used 200 to be on safe side
+
+        SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+        SiddhiTestHelper.waitForEvents(100, 3, removeEventCount, 60000);
 
         AssertJUnit.assertEquals(3, inEventCount);
         AssertJUnit.assertEquals(3, removeEventCount);
@@ -593,8 +612,10 @@ public class PlaybackTestCase {
         inputHandler.send(200, new Object[]{"WSO2", 600.5f, 1});
         Thread.sleep(150);
         inputHandler.send(1900, new Object[]{"ORACLE", 500.0f, 2});
-
         Thread.sleep(350);  // Anything more than 100 is enough. Used 200 to be on safe side
+
+        SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+        SiddhiTestHelper.waitForEvents(100, 3, removeEventCount, 60000);
 
         AssertJUnit.assertEquals(3, inEventCount);
         AssertJUnit.assertEquals(3, removeEventCount);
@@ -648,6 +669,9 @@ public class PlaybackTestCase {
             Thread.sleep(220);
             inputHandler.send(250, new Object[]{"ORACLE", 500.0f, 2});
             Thread.sleep(450);
+
+            SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+            SiddhiTestHelper.waitForEvents(100, 3, removeEventCount, 60000);
 
             AssertJUnit.assertEquals(3, inEventCount);
             AssertJUnit.assertEquals(3, removeEventCount);
@@ -706,6 +730,9 @@ public class PlaybackTestCase {
             timestamp += 1000;   // Another 1 sec passed
             inputHandler.send(timestamp, new Object[]{"ORACLE", 90.5f, 1});
             Thread.sleep(100);
+
+            SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+            SiddhiTestHelper.waitForEvents(100, 2, removeEventCount, 60000);
 
             AssertJUnit.assertEquals(3, inEventCount);
             AssertJUnit.assertEquals(2, removeEventCount);
@@ -766,6 +793,9 @@ public class PlaybackTestCase {
             inputHandler.send(timestamp, new Object[]{"ORACLE", 90.5f, 1});
             Thread.sleep(100);
 
+            SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+            SiddhiTestHelper.waitForEvents(100, 2, removeEventCount, 60000);
+
             AssertJUnit.assertEquals(3, inEventCount);
             AssertJUnit.assertEquals(2, removeEventCount);
             AssertJUnit.assertTrue(eventArrived);
@@ -825,6 +855,9 @@ public class PlaybackTestCase {
             inputHandler.send(new Object[]{"ORACLE", 10000.5f, 1});
             Thread.sleep(100);
 
+            SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+            SiddhiTestHelper.waitForEvents(100, 2, removeEventCount, 60000);
+
             AssertJUnit.assertEquals(3, inEventCount);
             AssertJUnit.assertEquals(2, removeEventCount);
             AssertJUnit.assertTrue(eventArrived);
@@ -878,6 +911,9 @@ public class PlaybackTestCase {
             inputHandler.send(events);
             siddhiAppRuntime.enablePlayBack(false, null, null);
             Thread.sleep(805);   // 1 sec passed
+
+            SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
+            SiddhiTestHelper.waitForEvents(100, 0, removeEventCount, 60000);
 
             AssertJUnit.assertEquals(2, inEventCount);
             AssertJUnit.assertEquals(0, removeEventCount);
@@ -933,6 +969,9 @@ public class PlaybackTestCase {
             siddhiAppRuntime.enablePlayBack(false, null, null);
             Thread.sleep(605);   // 1 sec passed
 
+            SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
+            SiddhiTestHelper.waitForEvents(100, 0, removeEventCount, 60000);
+
             AssertJUnit.assertEquals(2, inEventCount);
             AssertJUnit.assertEquals(0, removeEventCount);
             AssertJUnit.assertTrue(eventArrived);
@@ -987,6 +1026,8 @@ public class PlaybackTestCase {
             inputHandler.send(System.currentTimeMillis(), new Object[]{"ORACLE", 60.5f, 1});
             Thread.sleep(505);   // 1 sec passed
 
+            SiddhiTestHelper.waitForEvents(100, 3, inEventCount, 60000);
+            SiddhiTestHelper.waitForEvents(100, 0, removeEventCount, 60000);
             AssertJUnit.assertEquals(3, inEventCount);
             AssertJUnit.assertEquals(0, removeEventCount);
             AssertJUnit.assertTrue(eventArrived);
