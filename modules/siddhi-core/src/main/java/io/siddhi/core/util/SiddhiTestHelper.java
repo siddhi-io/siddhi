@@ -56,6 +56,16 @@ public class SiddhiTestHelper {
         }
     }
 
+    public static void waitForEvents(long sleepTime, int expectedCount, int actualCount, long timeout)
+            throws InterruptedException {
+        long currentWaitTime = 0;
+        long startTime = System.currentTimeMillis();
+        while ((actualCount < expectedCount) && (currentWaitTime <= timeout)) {
+            Thread.sleep(sleepTime);
+            currentWaitTime = System.currentTimeMillis() - startTime;
+        }
+    }
+
     public static void waitForEvents(long sleepTime, int expectedSize, Collection<?> collection, long timeout)
             throws InterruptedException {
         long currentWaitTime = 0;
