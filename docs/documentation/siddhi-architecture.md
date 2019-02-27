@@ -12,7 +12,7 @@ patterns on event data from multiple disparate live data sources. This allows de
 analyze it, and communicate the results in real time.
 
 This section illustrates the architecture of Siddhi and guides you through its key functionality. We hope this article 
-helps developers to understand Siddhi and its the codebase better, and also contribute to improve Siddhi by reporting and fixing bugs.
+helps developers to understand Siddhi and its codebase better, and also contribute to improve Siddhi by reporting and fixing bugs.
 
 ## Main Design Decisions
 
@@ -21,7 +21,7 @@ helps developers to understand Siddhi and its the codebase better, and also cont
 event processing constructs such as Patterns.  
 - Achieve high performance by processing all events in-memory and by storing their states in-memory. 
 - Optimizing performance by enforcing a strict schema for event streams and by pre-compiling the queries.
-- Optimizing memory consumption by having only the absolutly necessary information in-memory and 
+- Optimizing memory consumption by having only the absolutely necessary information in-memory and 
 dropping the rest as soon as possible. 
 - Supporting multiple extension points to accommodate a diverse set of functionality such as supporting multiple sources, sinks, functions, 
 aggregation operations, windows, etc.
@@ -71,7 +71,7 @@ for consuming and publishing events. To achieve these tasks, it uses the followi
  These Siddhi Application Runtimes are based on the logic of their Siddhi Application, and they consume and publish events from various external systems and Java or Python programmes. 
   
 - [SiddhiContext](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/config/SiddhiContext.java) : 
-This is a shared object for all the Siddhi Application Runtimes within the a Siddhi manager, and it contains references 
+This is a shared object for all the Siddhi Application Runtimes within the Siddhi manager, and it contains references 
 to the persistence store for periodic persistence, statistics manager to report performance statistics of Siddhi Application Runtimes, 
 and extension holders for loading Siddhi extensions. 
 
@@ -153,7 +153,7 @@ The components that are involved in handling the events are as follows:
     implementation to store events in-memory. When `@Store` annotation
     is used, it loads the associated Table implementation based on the defined `store` type. Most table implementations are 
     extended from the [AbstractRecordTable](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/table/record/AbstractRecordTable.java) 
-    abstract class for the ease of development.
+    abstract class for ease of development.
     
 - [Window](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/org/wso2/siddhi/core/window/Window.java)
     
