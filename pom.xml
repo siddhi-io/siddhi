@@ -739,7 +739,7 @@
         </equinox.osgi.services.imp.pkg.version.range>
         <hazelcast.imp.pkg.version.range>[3.5, 3.6.0)</hazelcast.imp.pkg.version.range>
         <metrics.version>3.1.0</metrics.version>
-        <jsonpath.version>2.2.0</jsonpath.version>
+        <jsonpath.version>2.4.0</jsonpath.version>
         <msf4j.version>2.1.1</msf4j.version>
         <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
         <servlet-api-version>2.5</servlet-api-version>
