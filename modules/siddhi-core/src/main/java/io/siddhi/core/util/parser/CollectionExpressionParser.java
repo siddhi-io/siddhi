@@ -257,6 +257,27 @@ public class CollectionExpressionParser {
                         return new CompareCollectionExpression((Compare) expression, CollectionExpression.CollectionScope.PARTIAL_PRIMARY_KEY_RESULT_SET,
                                 rightCollectionExpression, operator, leftCollectionExpression);
                 }
+            } else if((leftCollectionExpression.getCollectionScope() == CollectionExpression.CollectionScope.INDEXED_ATTRIBUTE ||
+                       leftCollectionExpression.getCollectionScope() == CollectionExpression.CollectionScope.PRIMARY_KEY_ATTRIBUTE ||
+                       leftCollectionExpression.getCollectionScope() == CollectionExpression.CollectionScope.PARTIAL_PRIMARY_KEY_ATTRIBUTE)
+                      && (rightCollectionExpression.getCollectionScope() == CollectionExpression.CollectionScope.INDEXED_ATTRIBUTE ||
+                          rightCollectionExpression.getCollectionScope() == CollectionExpression.CollectionScope.PRIMARY_KEY_ATTRIBUTE ||
+                          rightCollectionExpression.getCollectionScope() == CollectionExpression.CollectionScope.PARTIAL_PRIMARY_KEY_ATTRIBUTE)) {
+                // comparing indexed table field with stream attributes
+                switch (leftCollectionExpression.getCollectionScope()) {
+                    case INDEXED_ATTRIBUTE:
+                        return new CompareCollectionExpression((Compare) expression, CollectionExpression.CollectionScope.INDEXED_RESULT_SET,
+                            leftCollectionExpression, ((Compare) expression).getOperator(),
+                            rightCollectionExpression);
+                    case PRIMARY_KEY_ATTRIBUTE:
+                        return new CompareCollectionExpression((Compare) expression, CollectionExpression.CollectionScope.PRIMARY_KEY_RESULT_SET,
+                            leftCollectionExpression, ((Compare) expression).getOperator(),
+                            rightCollectionExpression);
+                    case PARTIAL_PRIMARY_KEY_ATTRIBUTE:
+                        return new CompareCollectionExpression((Compare) expression, CollectionExpression.CollectionScope.PARTIAL_PRIMARY_KEY_RESULT_SET,
+                            leftCollectionExpression, ((Compare) expression).getOperator(),
+                            rightCollectionExpression);
+                }
             } else {
                 //comparing non indexed table with stream attributes or another table attribute
                 return new BasicCollectionExpression(expression, CollectionExpression.CollectionScope.EXHAUSTIVE);
