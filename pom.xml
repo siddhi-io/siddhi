@@ -741,7 +741,7 @@
         <metrics.version>3.1.0</metrics.version>
         <jsonpath.version>2.4.0</jsonpath.version>
         <msf4j.version>2.1.1</msf4j.version>
-        <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
+        <maven.shadeplugin.version>3.2.1</maven.shadeplugin.version>
         <servlet-api-version>2.5</servlet-api-version>
         <jackson-datatype-joda-version>2.9.8</jackson-datatype-joda-version>
         <maven.core.version>3.3.9</maven.core.version>
