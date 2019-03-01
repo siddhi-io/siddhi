@@ -756,7 +756,7 @@
         <apache.source.release.assembly.descriptor.version>1.0.6</apache.source.release.assembly.descriptor.version>
         <maven.remote.resources.plugin.version>1.6.0</maven.remote.resources.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
-        <clirr.maven.plugin.version>2.7</clirr.maven.plugin.version>
+        <clirr.maven.plugin.version>2.8</clirr.maven.plugin.version>
 
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
         <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
