@@ -88,7 +88,7 @@ The following parameters are configured in a stream definition.
 To use and refer stream and attribute names that do not follow `[a-zA-Z_][a-zA-Z_0-9]*` format enclose them in ``. E.g. ``` `$test(0)` ```.
  
 To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
-[Threading and Asynchronous](https://wso2.github.io/siddhi/documentation/siddhi-4.0/#threading-and-asynchronous) configuration section.
+[Threading and Asynchronous](http://siddhi.io/documentation/siddhi-4.0/#threading-and-asynchronous) configuration section.
 
 **Example**
 ```sql
@@ -134,7 +134,7 @@ The following is the list of source types that are currently supported:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
-* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#inmemory-source">In-memory</a>
+* <a target="_blank" href="http://siddhi.io/api/latest/#inmemory-source">In-memory</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a>
@@ -248,8 +248,8 @@ The following is a list of currently supported sink types.
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
-* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#inmemory-sink">In-memory</a>  
-* <a target="_blank" href="https://wso2.github.io/siddhi/api/latest/#log-sink">Log</a>
+* <a target="_blank" href="http://siddhi.io/api/latest/#inmemory-sink">In-memory</a>
+* <a target="_blank" href="http://siddhi.io/api/latest/#log-sink">Log</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> 
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> 
@@ -675,24 +675,24 @@ E.g. Passing 1 hour and 25 minutes to `test()` function.
 !!! note
     Functions, mathematical expressions, and logical expressions can be used in a nested manner.
 
-Following are some inbuilt functions shipped with Siddhi, for more functions refer execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>.
+Following are some inbuilt functions shipped with Siddhi, for more functions refer execution <a target="_blank" href="http://siddhi.io/extensions/">extensions</a>.
 
-+ [eventTimestamp](https://wso2.github.io/siddhi/api/latest/#eventtimestamp-function)
-+ [log](https://wso2.github.io/siddhi/api/latest/#log-stream-processor)
-+ [UUID](https://wso2.github.io/siddhi/api/latest/#uuid-function)
-+ [default](https://wso2.github.io/siddhi/api/latest/#default-function)
-+ [cast](https://wso2.github.io/siddhi/api/latest/#cast-function)
-+ [convert](https://wso2.github.io/siddhi/api/latest/#convert-function)
-+ [ifThenElse](https://wso2.github.io/siddhi/api/latest/#ifthenelse-function)
-+ [minimum](https://wso2.github.io/siddhi/api/latest/#minimum-function)
-+ [maximum](https://wso2.github.io/siddhi/api/latest/#maximum-function)
-+ [coalesce](https://wso2.github.io/siddhi/api/latest/#coalesce-function)
-+ [instanceOfBoolean](https://wso2.github.io/siddhi/api/latest/#instanceofboolean-function)
-+ [instanceOfDouble](https://wso2.github.io/siddhi/api/latest/#instanceofdouble-function)
-+ [instanceOfFloat](https://wso2.github.io/siddhi/api/latest/#instanceoffloat-function)
-+ [instanceOfInteger](https://wso2.github.io/siddhi/api/latest/#instanceofinteger-function)
-+ [instanceOfLong](https://wso2.github.io/siddhi/api/latest/#instanceoflong-function)
-+ [instanceOfString](https://wso2.github.io/siddhi/api/latest/#instanceofstring-function)
++ [eventTimestamp](http://siddhi.io/api/latest/#eventtimestamp-function)
++ [log](http://siddhi.io/api/latest/#log-stream-processor)
++ [UUID](http://siddhi.io/api/latest/#uuid-function)
++ [default](http://siddhi.io/api/latest/#default-function)
++ [cast](http://siddhi.io/api/latest/#cast-function)
++ [convert](http://siddhi.io/api/latest/#convert-function)
++ [ifThenElse](http://siddhi.io/api/latest/#ifthenelse-function)
++ [minimum](http://siddhi.io/api/latest/#minimum-function)
++ [maximum](http://siddhi.io/api/latest/#maximum-function)
++ [coalesce](http://siddhi.io/api/latest/#coalesce-function)
++ [instanceOfBoolean](http://siddhi.io/api/latest/#instanceofboolean-function)
++ [instanceOfDouble](http://siddhi.io/api/latest/#instanceofdouble-function)
++ [instanceOfFloat](http://siddhi.io/api/latest/#instanceoffloat-function)
++ [instanceOfInteger](http://siddhi.io/api/latest/#instanceofinteger-function)
++ [instanceOfLong](http://siddhi.io/api/latest/#instanceoflong-function)
++ [instanceOfString](http://siddhi.io/api/latest/#instanceofstring-function)
 
 **Example**
 
@@ -796,22 +796,22 @@ insert into MaxTempStream;
     Similar operations can be done based on time via `time` windows and `timeBatch` windows and for others. 
     Code segments such as `#window.time(10 min)` considers events that arrive during the last 10 minutes in a sliding manner, and the `#window.timeBatch(2 min)` considers events that arrive every 2 minutes in a tumbling manner. 
 
-Following are some inbuilt windows shipped with Siddhi. For more window types, see execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
+Following are some inbuilt windows shipped with Siddhi. For more window types, see execution <a target="_blank" href="http://siddhi.io/extensions/">extensions</a>.
 
-* [time](https://wso2.github.io/siddhi/api/latest/#time-window)
-* [timeBatch](https://wso2.github.io/siddhi/api/latest/#timebatch-window)
-* [batch](https://wso2.github.io/siddhi/api/latest/#batch-window)
-* [timeLength](https://wso2.github.io/siddhi/api/latest/#timelength-window)
-* [length](https://wso2.github.io/siddhi/api/latest/#length-window)
-* [lengthBatch](https://wso2.github.io/siddhi/api/latest/#lengthbatch-window)
-* [sort](https://wso2.github.io/siddhi/api/latest/#sort-window)
-* [frequent](https://wso2.github.io/siddhi/api/latest/#frequent-window)
-* [lossyFrequent](https://wso2.github.io/siddhi/api/latest/#lossyfrequent-window)
-* [session](https://wso2.github.io/siddhi/api/latest/#session-window)
-* [cron](https://wso2.github.io/siddhi/api/latest/#cron-window)
-* [externalTime](https://wso2.github.io/siddhi/api/latest/#externaltime-window)
-* [externalTimeBatch](https://wso2.github.io/siddhi/api/latest/#externaltimebatch-window)
-* [delay](https://wso2.github.io/siddhi/api/latest/#delay-window)
+* [time](http://siddhi.io/api/latest/#time-window)
+* [timeBatch](http://siddhi.io/api/latest/#timebatch-window)
+* [batch](http://siddhi.io/api/latest/#batch-window)
+* [timeLength](http://siddhi.io/api/latest/#timelength-window)
+* [length](http://siddhi.io/api/latest/#length-window)
+* [lengthBatch](http://siddhi.io/api/latest/#lengthbatch-window)
+* [sort](http://siddhi.io/api/latest/#sort-window)
+* [frequent](http://siddhi.io/api/latest/#frequent-window)
+* [lossyFrequent](http://siddhi.io/api/latest/#lossyfrequent-window)
+* [session](http://siddhi.io/api/latest/#session-window)
+* [cron](http://siddhi.io/api/latest/#cron-window)
+* [externalTime](http://siddhi.io/api/latest/#externaltime-window)
+* [externalTimeBatch](http://siddhi.io/api/latest/#externaltimebatch-window)
+* [delay](http://siddhi.io/api/latest/#delay-window)
 
 **Output event types**<a id="output-event-types" class='anchor' aria-hidden='true'></a> 
 
@@ -868,17 +868,17 @@ from TempStream#window.time(10 min)
 select avg(temp) as avgTemp, roomNo, deviceID
 insert into AvgTempStream;
 ```
-Following are some inbuilt aggregation functions shipped with Siddhi, for more aggregation functions, see execution <a target="_blank" href="https://wso2.github.io/siddhi/extensions/">extensions</a>. 
+Following are some inbuilt aggregation functions shipped with Siddhi, for more aggregation functions, see execution <a target="_blank" href="http://siddhi.io/extensions/">extensions</a>.
 
-+ [avg](http://wso2.github.io/siddhi/api/latest/#avg-aggregate-function)
-+ [sum](http://wso2.github.io/siddhi/api/latest/#sum-aggregate-function)
-+ [max](http://wso2.github.io/siddhi/api/latest/#max-aggregate-function)
-+ [min](http://wso2.github.io/siddhi/api/latest/#min-aggregate-function)
-+ [count](http://wso2.github.io/siddhi/api/latest/#count-aggregate-function)
-+ [distinctCount](http://wso2.github.io/siddhi/api/latest/#distinctcount-aggregate-function)
-+ [maxForever](http://wso2.github.io/siddhi/api/latest/#maxforever-aggregate-function)
-+ [minForever](http://wso2.github.io/siddhi/api/latest/#minforever-aggregate-function)
-+ [stdDev](http://wso2.github.io/siddhi/api/latest/#stddev-aggregate-function)
++ [avg](http://siddhi.io/api/latest/#avg-aggregate-function)
++ [sum](http://siddhi.io/api/latest/#sum-aggregate-function)
++ [max](http://siddhi.io/api/latest/#max-aggregate-function)
++ [min](http://siddhi.io/api/latest/#min-aggregate-function)
++ [count](http://siddhi.io/api/latest/#count-aggregate-function)
++ [distinctCount](http://siddhi.io/api/latest/#distinctcount-aggregate-function)
++ [maxForever](http://siddhi.io/api/latest/#maxforever-aggregate-function)
++ [minForever](http://siddhi.io/api/latest/#minforever-aggregate-function)
++ [stdDev](http://siddhi.io/api/latest/#stddev-aggregate-function)
 
 ### Group By
 
@@ -2818,7 +2818,7 @@ insert into StockQuote
 
 **Available Extensions**
 
-Siddhi currently has several pre written extensions that are available **<a target="_blank" href="https://wso2.github.io/siddhi/extensions/">here</a>**
+Siddhi currently has several pre written extensions that are available **<a target="_blank" href="http://siddhi.io/extensions/">here</a>**
  
 _We value your contribution on improving Siddhi and its extensions further._
 
