@@ -311,7 +311,7 @@
                 <plugin>
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
-                    <version>3.1.6</version>
+                    <version>3.4.6</version>
                 </plugin>
                 <plugin>
                     <groupId>org.antlr</groupId>
@@ -726,7 +726,7 @@
         <log4j.version>1.2.17</log4j.version>
         <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
         <slf4j.version>1.7.12</slf4j.version>
-        <mvel2.version>2.2.1.Final</mvel2.version>
+        <mvel2.version>2.4.4.Final</mvel2.version>
         <antlr.runtime.version>4.5.1</antlr.runtime.version>
         <disruptor.version>3.4.2</disruptor.version>
         <guava.version>23.0</guava.version>
@@ -770,7 +770,7 @@
         <maven.invoker.plugin.version>2.0.0</maven.invoker.plugin.version>
         <maven.jar.plugin.version>2.6</maven.jar.plugin.version>
         <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
-        <maven.scm.plugin.version>1.9.4</maven.scm.plugin.version>
+        <maven.scm.plugin.version>1.11.1</maven.scm.plugin.version>
         <maven.scm.publish.plugin.version>3.0.0</maven.scm.publish.plugin.version>
         <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
         <maven.source.plugin.version>3.0.0</maven.source.plugin.version>
@@ -780,7 +780,7 @@
         <maven.checkstyleplugin.version>3.0.0</maven.checkstyleplugin.version>
         <maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
-        <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.8.0-jboss-2</maven.compiler.plugin.version>
         <wso2.maven.compiler.source>1.8</wso2.maven.compiler.source>
         <wso2.maven.compiler.target>1.8</wso2.maven.compiler.target>
         <sourceReleaseAssemblyDescriptor>source-release</sourceReleaseAssemblyDescriptor>
