@@ -112,7 +112,7 @@ public class InMemoryTransportTestCase {
         InMemoryBroker.unsubscribe(subscriptionIBM);
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemorySinkAndEventMappingWithSiddhiQLDynamicParams"})
     public void inMemorySinkAndEventMappingWithSiddhiQL() throws InterruptedException {
         log.info("Test inMemorySink And EventMapping With SiddhiQL");
 
@@ -175,7 +175,7 @@ public class InMemoryTransportTestCase {
         InMemoryBroker.unsubscribe(subscriptionIBM);
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemorySinkAndEventMappingWithSiddhiQL"})
     public void inMemorySourceAndEventMappingWithSiddhiQL() throws InterruptedException,
             SubscriberUnAvailableException {
         log.info("Test inMemorySource And EventMapping With SiddhiQL");
@@ -225,7 +225,7 @@ public class InMemoryTransportTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemorySourceAndEventMappingWithSiddhiQL"})
     public void inMemorySourceSinkAndEventMappingWithSiddhiQL() throws InterruptedException,
             SubscriberUnAvailableException {
         log.info("Test inMemory Source Sink And EventMapping With SiddhiQL");
@@ -289,7 +289,7 @@ public class InMemoryTransportTestCase {
         InMemoryBroker.unsubscribe(subscriptionIBM);
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemorySourceSinkAndEventMappingWithSiddhiQL"})
     public void inMemorySourceSinkAndEventMappingWithSiddhiQL2() throws InterruptedException,
             SubscriberUnAvailableException {
         log.info("Test inMemory Source Sink And EventMapping With SiddhiQL2");
@@ -358,7 +358,8 @@ public class InMemoryTransportTestCase {
         InMemoryBroker.unsubscribe(subscriptionIBM);
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class,
+            dependsOnMethods = {"inMemorySourceSinkAndEventMappingWithSiddhiQL2"})
     public void inMemoryTestCase3() throws InterruptedException {
         log.info("Test inMemory 3");
 
@@ -379,7 +380,7 @@ public class InMemoryTransportTestCase {
 
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class, dependsOnMethods = {"inMemoryTestCase3"})
     public void inMemoryTestCase4() throws InterruptedException {
         log.info("Test inMemory 4");
 
@@ -400,7 +401,7 @@ public class InMemoryTransportTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemoryTestCase4"})
     public void inMemoryTestCase5() throws InterruptedException {
         log.info("Test inMemory 5");
 
@@ -422,7 +423,7 @@ public class InMemoryTransportTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemoryTestCase5"})
     public void inMemoryTestCase6() throws InterruptedException, SubscriberUnAvailableException {
         log.info("Test inMemory 6");
 
@@ -463,7 +464,7 @@ public class InMemoryTransportTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemoryTestCase6"})
     public void inMemoryTestCase7() throws InterruptedException, SubscriberUnAvailableException {
         log.info("Test inMemory 7");
 
@@ -502,7 +503,7 @@ public class InMemoryTransportTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemoryTestCase7"})
     public void inMemoryWithFailingSink() throws InterruptedException {
         log.info("Test failing inMemorySink");
 
@@ -570,7 +571,7 @@ public class InMemoryTransportTestCase {
         InMemoryBroker.unsubscribe(subscriptionIBM);
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemoryWithFailingSink"})
     public void inMemoryWithFailingSource() throws InterruptedException {
         log.info("Test failing inMemorySource");
 
@@ -628,7 +629,7 @@ public class InMemoryTransportTestCase {
 
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class, dependsOnMethods = {"inMemoryWithFailingSource"})
     public void inMemoryTestCase8() throws InterruptedException {
         log.info("Test inMemory 8");
 
@@ -650,7 +651,7 @@ public class InMemoryTransportTestCase {
 
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class, dependsOnMethods = {"inMemoryTestCase8"})
     public void inMemoryTestCase9() throws InterruptedException {
         log.info("Test inMemory 9");
 
@@ -670,7 +671,7 @@ public class InMemoryTransportTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemoryTestCase9"})
     public void inMemorySourceSinkAndEventMappingWithSiddhiQLAndRef() throws InterruptedException,
             SubscriberUnAvailableException {
         log.info("Test inMemory Source Sink And EventMapping With SiddhiQL and Ref");
@@ -743,7 +744,7 @@ public class InMemoryTransportTestCase {
         InMemoryBroker.unsubscribe(subscriptionIBM);
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemorySourceSinkAndEventMappingWithSiddhiQLAndRef"})
     public void inMemoryTestCase10() throws InterruptedException, SubscriberUnAvailableException {
         log.info("Test inMemory 10");
 
@@ -784,7 +785,7 @@ public class InMemoryTransportTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = {"inMemoryTestCase10"})
     public void inMemoryTestCase11() throws InterruptedException, SubscriberUnAvailableException {
         log.info("Test inMemory 11");
 
