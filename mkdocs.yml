@@ -38,6 +38,7 @@ pages:
 - Contribute: documentation/contribution.md
 - Extensions: extensions.md
 - API Docs:
+  - 5.0.0-m4: api/5.0.0-m4.md
   - 5.0.0-m3: api/5.0.0-m3.md
   - 5.0.0-m2: api/5.0.0-m2.md
   - 5.0.0-m1: api/5.0.0-m1.md
