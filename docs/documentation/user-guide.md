@@ -122,7 +122,7 @@ siddhiManager.shutdown();
 ```
 When the events are sent, you can see the output logged by the event printer.
 
-Find the executable Java code of this example [here](https://github.com/wso2/siddhi/tree/master/modules/siddhi-samples/quick-start-samples/src/main/java/org/wso2/siddhi/sample/TimeWindowSample.java) 
+Find the executable Java code of this example [here](https://github.com/wso2/siddhi/tree/master/modules/siddhi-samples/quick-start-samples/src/main/java/io/siddhi/sample/TimeWindowSample.java)
 
 For more code examples, see [quick start samples for Siddhi](https://github.com/wso2/siddhi/tree/master/modules/siddhi-samples/quick-start-samples).
 
