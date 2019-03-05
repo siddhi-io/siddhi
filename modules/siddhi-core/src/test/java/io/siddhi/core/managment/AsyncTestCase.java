@@ -73,7 +73,7 @@ public class AsyncTestCase {
     }
 
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class, dependsOnMethods = {"asyncTest1"})
     public void asyncTest2() throws InterruptedException {
         log.info("async test 2");
 
@@ -99,7 +99,7 @@ public class AsyncTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"asyncTest2"})
     public void asyncTest3() throws InterruptedException {
         log.info("async test 3");
 
@@ -159,7 +159,7 @@ public class AsyncTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"asyncTest3"})
     public void asyncTest4() throws InterruptedException {
         log.info("async test 4");
         HashMap<String, Integer> threads = new HashMap<>();
@@ -223,7 +223,7 @@ public class AsyncTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"asyncTest4"})
     public void asyncTest5() throws InterruptedException {
         log.info("async test 5");
         HashMap<String, Integer> threads = new HashMap<>();
@@ -285,7 +285,7 @@ public class AsyncTestCase {
         Assert.assertEquals(threads.size(), 10);
     }
 
-    @Test
+    @Test(dependsOnMethods = {"asyncTest5"})
     public void asyncTest6() throws InterruptedException {
         log.info("async test 6");
         HashMap<String, Integer> threads = new HashMap<>();
@@ -349,7 +349,7 @@ public class AsyncTestCase {
 
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class, dependsOnMethods = {"asyncTest6"})
     public void asyncTest7() throws InterruptedException {
         log.info("async test 7");
 
@@ -375,7 +375,7 @@ public class AsyncTestCase {
 
     }
 
-    @Test(expectedExceptions = SiddhiAppCreationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class, dependsOnMethods = {"asyncTest7"})
     public void asyncTest8() throws InterruptedException {
         log.info("async test 8");
 
