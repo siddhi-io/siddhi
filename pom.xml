@@ -799,7 +799,7 @@
         <import.package>*</import.package>
 
         <maven.dependency.plugin.version>3.1.1</maven.dependency.plugin.version>
-        <maven.javadoc.plugin.version>3.0.1</maven.javadoc.plugin.version>
+        <maven.javadoc.plugin.version>3.1.0</maven.javadoc.plugin.version>
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
         <maven.wagon.ssh.version>2.10</maven.wagon.ssh.version>
     </properties>
