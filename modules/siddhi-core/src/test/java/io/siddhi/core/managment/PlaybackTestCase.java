@@ -849,7 +849,7 @@ public class PlaybackTestCase {
             inputHandler.send(timestamp - 500, new Object[]{"IBM", 700f, 0});
             inputHandler.send(timestamp - 100, new Object[]{"WSO2", 60.5f, 1});
             siddhiAppRuntime.enablePlayBack(false, null, null);
-            Thread.sleep(505);   // 1 sec passed
+            Thread.sleep(1000);   // 1 sec passed
             inputHandler.send(new Object[]{"GOOGLE", 85.0f, 1});
             Thread.sleep(1000);   // Another 1 sec passed
             inputHandler.send(new Object[]{"ORACLE", 10000.5f, 1});
