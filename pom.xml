@@ -734,7 +734,7 @@
         <classindex.version>3.4</classindex.version>
         <quartz.version>2.3.0</quartz.version>
         <org.osgi.core.version>6.0.0</org.osgi.core.version>
-        <version.equinox.osgi.services>3.3.100.v20120522-1822</version.equinox.osgi.services>
+        <version.equinox.osgi.services>3.3.100.v20130513-1956</version.equinox.osgi.services>
         <equinox.osgi.services.imp.pkg.version.range>[1.2.0, 1.3.0)
         </equinox.osgi.services.imp.pkg.version.range>
         <hazelcast.imp.pkg.version.range>[3.5, 3.6.0)</hazelcast.imp.pkg.version.range>
