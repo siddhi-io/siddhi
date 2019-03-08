@@ -787,7 +787,7 @@
         <project.scm.id>my-scm-server</project.scm.id>
 
         <!--Maven bundle plugin configuration -->
-        <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
+        <maven.bundle.plugin.version>4.1.0</maven.bundle.plugin.version>
         <maven.bundle.plugin.vendor>WSO2 Inc</maven.bundle.plugin.vendor>
         <maven.bundle.plugin.extensions>true</maven.bundle.plugin.extensions>
         <bundle.classpath>.</bundle.classpath>
