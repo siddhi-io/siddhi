@@ -177,6 +177,7 @@ public class AggregationParser {
                     throw new SiddhiAppCreationException("Configuration 'shardId' not provided for @partitionbyid " +
                             "annotation");
                 }
+                enablePartioning = true;
             }
 
             boolean isLatestEventAdded = populateIncomingAggregatorsAndExecutors(
