@@ -187,13 +187,16 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         if (isProcessingOnExternalTime) {
             int durationIndex = incrementalDurations.indexOf(perValue);
             List<ExpressionExecutor> expressionExecutors = aggregateProcessingExecutorsList.get(durationIndex);
+            List<ExpressionExecutor> clonedExecutors = expressionExecutors.stream().map(expressionExecutor ->
+                    expressionExecutor.cloneExecutor("")).collect(Collectors.toList());
+
             GroupByKeyGenerator groupByKeyGenerator = groupbyKeyGeneratorList.get(durationIndex);
 
             ExpressionExecutor shouldUpdateExpressionExecutorCloneExt =
                     (shouldUpdateExpressionExecutor == null) ? null :
                             shouldUpdateExpressionExecutor.cloneExecutor(null);
             IncrementalExternalTimestampDataAggregator incrementalExternalTimestampDataAggregator =
-                    new IncrementalExternalTimestampDataAggregator(expressionExecutors, groupByKeyGenerator,
+                    new IncrementalExternalTimestampDataAggregator(clonedExecutors, groupByKeyGenerator,
                     tableMetaStreamEvent, siddhiAppContext, shouldUpdateExpressionExecutorCloneExt);
             processedEvents = incrementalExternalTimestampDataAggregator
                     .aggregateData(complexEventChunkToHoldWithinMatches);
