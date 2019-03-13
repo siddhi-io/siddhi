@@ -274,7 +274,6 @@ public class CollectionExpressionParser {
         } else if (expression instanceof Constant) {
             return new BasicCollectionExpression(expression, NON);
         } else if (expression instanceof Variable) {
-
             if (((Variable) expression).getStreamId() == null) {
                 List<String> attributeNameList = Arrays.asList(matchingMetaInfoHolder.getMatchingStreamDefinition().
                         getAttributeNameArray());
