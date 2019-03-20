@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 import org.wso2.siddhi.core.util.timestamp.TimestampGeneratorImpl;
 
 import java.util.HashMap;
@@ -191,7 +192,7 @@ public class Scheduler implements Snapshotable {
             }
             threadBarrier.pass();
             try {
-                if (siddhiAppContext.isStatsEnabled() && latencyTracker != null) {
+                if (Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 && latencyTracker != null) {
                     try {
                         latencyTracker.markIn();
                         singleThreadEntryValve.process(streamEventChunk);

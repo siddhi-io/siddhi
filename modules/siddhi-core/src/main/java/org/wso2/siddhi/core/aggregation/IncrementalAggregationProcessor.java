@@ -31,6 +31,7 @@ import org.wso2.siddhi.core.executor.incremental.IncrementalUnixTimeFunctionExec
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 
 import java.util.List;
 
@@ -67,7 +68,7 @@ public class IncrementalAggregationProcessor implements Processor {
                 new ComplexEventChunk<>(complexEventChunk.isBatch());
         try {
             int noOfEvents = 0;
-            if (latencyTrackerInsert != null && siddhiAppContext.isStatsEnabled()) {
+            if (latencyTrackerInsert != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerInsert.markIn();
             }
             while (complexEventChunk.hasNext()) {
@@ -89,11 +90,12 @@ public class IncrementalAggregationProcessor implements Processor {
                 noOfEvents++;
             }
             aggregationRuntime.processEvents(streamEventChunk);
-            if (throughputTrackerInsert != null && siddhiAppContext.isStatsEnabled()) {
+            if (throughputTrackerInsert != null &&
+                    Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 throughputTrackerInsert.eventsIn(noOfEvents);
             }
         } finally {
-            if (latencyTrackerInsert != null && siddhiAppContext.isStatsEnabled()) {
+            if (latencyTrackerInsert != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerInsert.markOut();
             }
         }

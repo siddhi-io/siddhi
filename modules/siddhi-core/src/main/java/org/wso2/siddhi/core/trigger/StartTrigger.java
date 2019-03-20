@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 import org.wso2.siddhi.query.api.definition.TriggerDefinition;
 
 /**
@@ -67,7 +68,7 @@ public class StartTrigger implements Trigger {
     @Override
     public void start() {
         long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
-        if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+        if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTracker.eventIn();
         }
         streamJunction.sendEvent(new Event(currentTime, new Object[]{currentTime}));
