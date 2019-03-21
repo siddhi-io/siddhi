@@ -25,6 +25,7 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.statistics.metrics.Level;
 import org.apache.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
@@ -137,7 +138,7 @@ public class StatisticsTestCase {
                 "insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-        siddhiAppRuntime.enableStats(false);
+        siddhiAppRuntime.enableStats(Level.OFF);
 
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -247,7 +248,7 @@ public class StatisticsTestCase {
 
         Thread.sleep(100);
 
-        siddhiAppRuntime.enableStats(false);
+        siddhiAppRuntime.enableStats(Level.OFF);
 
         Thread.sleep(100);
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
@@ -292,7 +293,7 @@ public class StatisticsTestCase {
                 "insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-        siddhiAppRuntime.enableStats(false);
+        siddhiAppRuntime.enableStats(Level.OFF);
 
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -313,7 +314,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
-        siddhiAppRuntime.enableStats(false);
+        siddhiAppRuntime.enableStats(Level.OFF);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -332,7 +333,7 @@ public class StatisticsTestCase {
         eventArrived = false;
         count = 0;
 
-        siddhiAppRuntime.enableStats(true);
+        siddhiAppRuntime.enableStats(Level.OFF);
         Thread.sleep(100);
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -374,7 +375,7 @@ public class StatisticsTestCase {
                 "insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-        siddhiAppRuntime.enableStats(true);
+        siddhiAppRuntime.enableStats(Level.OFF);
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {

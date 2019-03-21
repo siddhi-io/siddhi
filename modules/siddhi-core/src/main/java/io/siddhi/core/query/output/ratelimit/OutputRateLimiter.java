@@ -27,6 +27,7 @@ import io.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +68,8 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
         } else if (lockWrapper != null) {
             lockWrapper.unlock();
         }
-        if (siddhiQueryContext.getSiddhiAppContext().isStatsEnabled() && latencyTracker != null) {
+        if (Level.DETAIL.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0 &&
+                latencyTracker != null) {
             latencyTracker.markOut();
         }
         if (lockWrapper != null) {

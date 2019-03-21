@@ -23,6 +23,7 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.timestamp.TimestampGenerator;
 import org.apache.log4j.Logger;
 
@@ -62,7 +63,7 @@ public class InputEventHandler {
 
     public void sendEvent(Event event) throws InterruptedException {
         try {
-            if (latencyTracker != null && siddhiAppContext.isStatsEnabled()) {
+            if (latencyTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTracker.markOut();
             }
             String[] transportProperties = trpProperties.get();
@@ -90,7 +91,7 @@ public class InputEventHandler {
 
     public void sendEvents(Event[] events) throws InterruptedException {
         try {
-            if (latencyTracker != null && siddhiAppContext.isStatsEnabled()) {
+            if (latencyTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTracker.markOut();
             }
             String[] transportProperties = trpProperties.get();

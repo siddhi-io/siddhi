@@ -26,6 +26,7 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.ThroughputTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
@@ -105,7 +106,6 @@ public abstract class SourceMapper implements SourceEventListener {
         } else {
             inputEventHandlerCallback = new PassThroughSourceHandler(inputHandler);
         }
-        LatencyTracker mapperLatencyTracker = null;
         this.inputEventHandler = new InputEventHandler(inputHandler, transportMappings,
                 trpProperties, trpSyncProperties, sourceType, mapperLatencyTracker, siddhiAppContext,
                 inputEventHandlerCallback);
@@ -138,13 +138,18 @@ public abstract class SourceMapper implements SourceEventListener {
                     trpSyncProperties.set(transportSyncProperties);
                 }
                 try {
-                    if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+                    if (throughputTracker != null &&
+                            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                         throughputTracker.eventIn();
+                    }
+                    if (throughputTracker != null &&
+                            Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                         mapperLatencyTracker.markIn();
                     }
                     mapAndProcess(eventObject, inputEventHandler);
                 } finally {
-                    if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+                    if (throughputTracker != null &&
+                            Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                         mapperLatencyTracker.markOut();
                     }
                 }

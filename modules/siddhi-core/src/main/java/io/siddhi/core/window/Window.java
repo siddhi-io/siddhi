@@ -48,6 +48,7 @@ import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.MemoryCalculable;
 import io.siddhi.core.util.statistics.ThroughputTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.WindowDefinition;
 import io.siddhi.query.api.execution.query.output.stream.OutputStream;
@@ -234,7 +235,8 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
             }
 
             try {
-                if (throughputTrackerInsert != null && siddhiAppContext.isStatsEnabled()) {
+                if (throughputTrackerInsert != null &&
+                        Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTrackerInsert.eventsIn(numberOfEvents);
                     latencyTrackerInsert.markIn();
                 }
@@ -242,7 +244,8 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
                 windowProcessor.process(new ComplexEventChunk<StreamEvent>(firstEvent, currentEvent,
                         complexEventChunk.isBatch()));
             } finally {
-                if (throughputTrackerInsert != null && siddhiAppContext.isStatsEnabled()) {
+                if (throughputTrackerInsert != null &&
+                        Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     latencyTrackerInsert.markOut();
                 }
             }
@@ -257,13 +260,13 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
     @Override
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
         try {
-            if (throughputTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
+            if (throughputTrackerFind != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 throughputTrackerFind.eventIn();
                 latencyTrackerFind.markIn();
             }
             return ((FindableProcessor) this.internalWindowProcessor).find(matchingEvent, compiledCondition);
         } finally {
-            if (throughputTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
+            if (throughputTrackerFind != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerFind.markOut();
             }
         }
@@ -361,7 +364,8 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         }
 
         public void process(ComplexEventChunk complexEventChunk) {
-            if (throughputTrackerInsert != null && siddhiAppContext.isStatsEnabled()) {
+            if (throughputTrackerInsert != null &&
+                    Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerInsert.markOut();
             }
             // Filter the events depending on user defined output type.

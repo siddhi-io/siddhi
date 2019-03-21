@@ -47,8 +47,27 @@ public class SiddhiBufferedEventsMetric implements BufferedEventsTracker {
     @Override
     public void registerEventBufferHolder(EventBufferHolder eventBufferHolder, String name) {
         if (registeredObjects.get(eventBufferHolder) == null) {
-            registeredObjects.put(eventBufferHolder,
-                    new SiddhiBufferedEventsMetric.ObjectMetric(eventBufferHolder, name));
+            ObjectMetric objectMetric = new ObjectMetric(eventBufferHolder, name);
+            metricRegistry.register(name, objectMetric.getGauge());
+            registeredObjects.put(eventBufferHolder, new ObjectMetric(eventBufferHolder, name));
+        }
+    }
+
+    @Override
+    public void enableEventBufferHolderMetrics() {
+        for (ConcurrentMap.Entry<Object, ObjectMetric> entry :
+                registeredObjects.entrySet()) {
+            if (!metricRegistry.getNames().contains(entry.getValue().getName())) {
+                metricRegistry.register(entry.getValue().getName(), entry.getValue().getGauge());
+            }
+        }
+    }
+
+    @Override
+    public void disableEventBufferHolderMetrics() {
+        for (ConcurrentMap.Entry<Object, ObjectMetric> entry :
+                registeredObjects.entrySet()) {
+            metricRegistry.remove(entry.getValue().getName());
         }
     }
 
@@ -69,34 +88,35 @@ public class SiddhiBufferedEventsMetric implements BufferedEventsTracker {
 
         private final EventBufferHolder eventBufferHolder;
         private String name;
+        private Gauge gauge;
 
         public ObjectMetric(final EventBufferHolder eventBufferHolder, String name) {
             this.eventBufferHolder = eventBufferHolder;
             this.name = name;
-            initMetric();
+            this.gauge = new Gauge<Long>() {
+                @Override
+                public Long getValue() {
+                    try {
+                        if (eventBufferHolder != null) {
+                            return eventBufferHolder.getBufferedEvents();
+                        } else {
+                            return 0L;
+                        }
+                    } catch (Throwable e) {
+                        return 0L;
+                    }
+                }
+            };
         }
 
         public String getName() {
             return name;
         }
 
-        private void initMetric() {
-            metricRegistry.register(name,
-                    new Gauge<Long>() {
-                        @Override
-                        public Long getValue() {
-                            try {
-                                if (eventBufferHolder != null) {
-                                    return eventBufferHolder.getBufferedEvents();
-                                } else {
-                                    return 0L;
-                                }
-                            } catch (Throwable e) {
-                                return 0L;
-                            }
-                        }
-                    });
+        public Gauge getGauge() {
+            return gauge;
         }
     }
+
 
 }

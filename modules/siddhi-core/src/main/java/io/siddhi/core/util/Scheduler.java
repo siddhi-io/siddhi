@@ -28,6 +28,7 @@ import io.siddhi.core.query.input.stream.single.EntryValveProcessor;
 import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.timestamp.TimestampGeneratorImpl;
 import org.apache.log4j.Logger;
 
@@ -191,7 +192,7 @@ public class Scheduler implements Snapshotable {
             }
             threadBarrier.pass();
             try {
-                if (siddhiAppContext.isStatsEnabled() && latencyTracker != null) {
+                if (Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 && latencyTracker != null) {
                     try {
                         latencyTracker.markIn();
                         singleThreadEntryValve.process(streamEventChunk);
