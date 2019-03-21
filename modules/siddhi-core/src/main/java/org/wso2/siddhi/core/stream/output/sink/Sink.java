@@ -149,7 +149,6 @@ public abstract class Sink implements SinkListener, Snapshotable {
                 publish(payload, dynamicOptions);
                 if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTracker.eventIn();
-                    LOG.error("Sink throughput count()");
                 }
             } catch (ConnectionUnavailableException e) {
                 setConnected(false);
