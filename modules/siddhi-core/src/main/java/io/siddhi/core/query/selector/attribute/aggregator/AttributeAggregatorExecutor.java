@@ -106,48 +106,36 @@ public abstract class AttributeAggregatorExecutor<S extends State> implements Ex
     }
 
     private Object processAdd(Object data) {
-        S state;
-        state = stateHolder.getState();
+        S state = stateHolder.getState();
         try {
-            synchronized (state) {
-                return processAdd(data, state);
-            }
+            return processAdd(data, state);
         } finally {
             stateHolder.returnState(state);
         }
     }
 
     private Object processRemove(Object data) {
-        S state;
-        state = stateHolder.getState();
+        S state = stateHolder.getState();
         try {
-            synchronized (state) {
-                return processRemove(data, state);
-            }
+            return processRemove(data, state);
         } finally {
             stateHolder.returnState(state);
         }
     }
 
     private Object processAdd(Object[] data) {
-        S state;
-        state = stateHolder.getState();
+        S state = stateHolder.getState();
         try {
-            synchronized (state) {
-                return processAdd(data, state);
-            }
+            return processAdd(data, state);
         } finally {
             stateHolder.returnState(state);
         }
     }
 
     private Object processRemove(Object[] data) {
-        S state;
-        state = stateHolder.getState();
+        S state = stateHolder.getState();
         try {
-            synchronized (state) {
-                return processRemove(data, state);
-            }
+            return processRemove(data, state);
         } finally {
             stateHolder.returnState(state);
         }
@@ -155,15 +143,14 @@ public abstract class AttributeAggregatorExecutor<S extends State> implements Ex
 
     private Object processReset() {
         Object returnValue = null;
-        synchronized (stateHolder) {
-            Map<String, S> states = stateHolder.getAllStates();
-            try {
-                for (S aState : states.values()) {
-                    returnValue = reset(aState);
-                }
-            } finally {
-                stateHolder.returnStates(states);
+        //todo get all stream per partition
+        Map<String, S> states = stateHolder.getAllStates();
+        try {
+            for (S aState : states.values()) {
+                returnValue = reset(aState);
             }
+        } finally {
+            stateHolder.returnStates(states);
         }
         return returnValue;
     }

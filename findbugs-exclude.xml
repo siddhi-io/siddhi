@@ -188,6 +188,10 @@
         <Class name="io.siddhi.core.util.Scheduler$SchedulerState"/>
         <Bug pattern="EQ_COMPARETO_USE_OBJECT_EQUALS"/>
     </Match>
+    <Match>
+        <Class name="io.siddhi.core.util.snapshot.state.SingleStateHolder"/>
+        <Bug pattern="DC_DOUBLECHECK"/>
+    </Match>
 
 
     <Match>
