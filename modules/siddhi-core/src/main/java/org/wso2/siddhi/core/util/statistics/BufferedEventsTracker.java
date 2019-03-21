@@ -30,10 +30,6 @@ public interface BufferedEventsTracker {
      */
     void registerEventBufferHolder(EventBufferHolder eventBufferHolder, String name);
 
-    /**
-     * Remove the EventBufferHolder
-     *
-     */
     void enableEventBufferHolderMetrics();
 
     void disableEventBufferHolderMetrics();
