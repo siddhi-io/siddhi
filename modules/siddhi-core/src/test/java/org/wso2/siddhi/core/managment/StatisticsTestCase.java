@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.SiddhiConstants;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -88,6 +89,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
+        siddhiAppRuntime.enableStats(Level.DETAIL);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -137,7 +139,6 @@ public class StatisticsTestCase {
                 "insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-        siddhiAppRuntime.enableStats(false);
 
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -158,6 +159,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
+        siddhiAppRuntime.enableStats(Level.OFF);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -227,6 +229,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
+        siddhiAppRuntime.enableStats(Level.DETAIL);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -247,7 +250,7 @@ public class StatisticsTestCase {
 
         Thread.sleep(100);
 
-        siddhiAppRuntime.enableStats(false);
+        siddhiAppRuntime.enableStats(Level.OFF);
 
         Thread.sleep(100);
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
@@ -292,7 +295,7 @@ public class StatisticsTestCase {
                 "insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-        siddhiAppRuntime.enableStats(false);
+        siddhiAppRuntime.enableStats(Level.OFF);
 
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -313,7 +316,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
-        siddhiAppRuntime.enableStats(false);
+        siddhiAppRuntime.enableStats(Level.OFF);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -332,7 +335,7 @@ public class StatisticsTestCase {
         eventArrived = false;
         count = 0;
 
-        siddhiAppRuntime.enableStats(true);
+        siddhiAppRuntime.enableStats(Level.DETAIL);
         Thread.sleep(100);
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -375,7 +378,6 @@ public class StatisticsTestCase {
                 "insert into outputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-        siddhiAppRuntime.enableStats(true);
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
@@ -395,6 +397,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
+        siddhiAppRuntime.enableStats(Level.DETAIL);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -453,6 +456,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
+        siddhiAppRuntime.enableStats(Level.DETAIL);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 

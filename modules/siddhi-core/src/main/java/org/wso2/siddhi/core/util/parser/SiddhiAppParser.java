@@ -31,6 +31,7 @@ import org.wso2.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import org.wso2.siddhi.core.util.SiddhiConstants;
 import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 import org.wso2.siddhi.core.util.timestamp.TimestampGenerator;
 import org.wso2.siddhi.core.util.timestamp.TimestampGeneratorImpl;
 import org.wso2.siddhi.core.window.Window;
@@ -127,7 +128,7 @@ public class SiddhiAppParser {
                     SiddhiConstants.ANNOTATION_ELEMENT_ENABLE, siddhiApp.getAnnotations());
 
             if (statStateEnableElement != null && Boolean.valueOf(statStateEnableElement.getValue())) {
-                siddhiAppContext.setStatsEnabled(true);
+                siddhiAppContext.setRootMetricsLevel(Level.BASIC);
             } else {
                 Element statStateElement = AnnotationHelper.getAnnotationElement(
                         SiddhiConstants.ANNOTATION_STATISTICS, null, siddhiApp.getAnnotations());
@@ -135,7 +136,7 @@ public class SiddhiAppParser {
                 // @app:statistics(reporter = 'console', interval = '5' )
                 // where sp uses @app:statistics('true').
                 if (annotation != null && (statStateElement == null || Boolean.valueOf(statStateElement.getValue()))) {
-                    siddhiAppContext.setStatsEnabled(true);
+                    siddhiAppContext.setRootMetricsLevel(Level.BASIC);
                 }
             }
             Element statStateIncludElement = AnnotationHelper.getAnnotationElement(

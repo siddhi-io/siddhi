@@ -40,6 +40,7 @@ import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.MemoryCalculable;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 import org.wso2.siddhi.query.api.aggregation.TimePeriod;
 import org.wso2.siddhi.query.api.aggregation.Within;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
@@ -198,7 +199,7 @@ public class AggregationRuntime implements MemoryCalculable {
 
         try {
             SnapshotService.getSkipSnapshotableThreadLocal().set(true);
-            if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
+            if (latencyTrackerFind != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerFind.markIn();
                 throughputTrackerFind.eventIn();
             }
@@ -218,7 +219,7 @@ public class AggregationRuntime implements MemoryCalculable {
                     incrementalExecutorMapForPartitions);
         } finally {
             SnapshotService.getSkipSnapshotableThreadLocal().set(null);
-            if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
+            if (latencyTrackerFind != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerFind.markOut();
             }
         }
