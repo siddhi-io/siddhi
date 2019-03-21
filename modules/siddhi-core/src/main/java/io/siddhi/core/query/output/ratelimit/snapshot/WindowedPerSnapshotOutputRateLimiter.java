@@ -25,6 +25,8 @@ import io.siddhi.core.event.GroupedComplexEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,37 +36,29 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Implementation of {@link PerSnapshotOutputRateLimiter} for queries with Windows.
  */
-public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimiter {
+public class WindowedPerSnapshotOutputRateLimiter
+        extends SnapshotOutputRateLimiter<WindowedPerSnapshotOutputRateLimiter.RateLimiterState> {
     private final Long value;
-    private final ScheduledExecutorService scheduledExecutorService;
-    private String id;
-    private List<ComplexEvent> eventList;
     private Comparator comparator;
     private Scheduler scheduler;
     private long scheduledTime;
 
-    public WindowedPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService
-            scheduledExecutorService, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
-                                                SiddhiQueryContext siddhiQueryContext) {
-        super(wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
-        this.id = id;
+    public WindowedPerSnapshotOutputRateLimiter(Long value,
+                                                WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
+                                                boolean groupBy, SiddhiQueryContext siddhiQueryContext) {
+        super(wrappedSnapshotOutputRateLimiter, siddhiQueryContext, groupBy);
         this.value = value;
-        this.scheduledExecutorService = scheduledExecutorService;
-        this.eventList = new LinkedList<ComplexEvent>();
         this.comparator = new Comparator<ComplexEvent>() {
-
             @Override
             public int compare(ComplexEvent event1, ComplexEvent event2) {
                 if (Arrays.equals(event1.getOutputData(), event2.getOutputData())) {
                     return 0;
                 } else {
                     return 1;
-
                 }
             }
         };
@@ -72,45 +66,56 @@ public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimi
 
 
     @Override
+    protected StateFactory<RateLimiterState> init() {
+        return () -> new RateLimiterState();
+    }
+
+    @Override
     public void process(ComplexEventChunk complexEventChunk) {
         List<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
         complexEventChunk.reset();
-        synchronized (this) {
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event instanceof GroupedComplexEvent) {
-                    event = ((GroupedComplexEvent) event).getComplexEvent();
-                }
-                if (event.getType() == ComplexEvent.Type.TIMER) {
-                    tryFlushEvents(outputEventChunks, event);
-                } else if (event.getType() == ComplexEvent.Type.CURRENT) {
-                    complexEventChunk.remove();
-                    tryFlushEvents(outputEventChunks, event);
-                    eventList.add(event);
-                } else if (event.getType() == ComplexEvent.Type.EXPIRED) {
-                    tryFlushEvents(outputEventChunks, event);
-                    for (Iterator<ComplexEvent> iterator = eventList.iterator(); iterator.hasNext(); ) {
-                        ComplexEvent currentEvent = iterator.next();
-                        if (comparator.compare(currentEvent, event) == 0) {
-                            iterator.remove();
-                            break;
-                        }
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event instanceof GroupedComplexEvent) {
+                        event = ((GroupedComplexEvent) event).getComplexEvent();
                     }
-                } else if (event.getType() == ComplexEvent.Type.RESET) {
-                    tryFlushEvents(outputEventChunks, event);
-                    eventList.clear();
+                    if (event.getType() == ComplexEvent.Type.TIMER) {
+                        tryFlushEvents(outputEventChunks, event, state);
+                    } else if (event.getType() == ComplexEvent.Type.CURRENT) {
+                        complexEventChunk.remove();
+                        tryFlushEvents(outputEventChunks, event, state);
+                        state.eventList.add(event);
+                    } else if (event.getType() == ComplexEvent.Type.EXPIRED) {
+                        tryFlushEvents(outputEventChunks, event, state);
+                        for (Iterator<ComplexEvent> iterator = state.eventList.iterator(); iterator.hasNext(); ) {
+                            ComplexEvent currentEvent = iterator.next();
+                            if (comparator.compare(currentEvent, event) == 0) {
+                                iterator.remove();
+                                break;
+                            }
+                        }
+                    } else if (event.getType() == ComplexEvent.Type.RESET) {
+                        tryFlushEvents(outputEventChunks, event, state);
+                        state.eventList.clear();
+                    }
                 }
             }
+        } finally {
+            stateHolder.returnState(state);
         }
         for (ComplexEventChunk eventChunk : outputEventChunks) {
             sendToCallBacks(eventChunk);
         }
     }
 
-    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event) {
+    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
+                                RateLimiterState state) {
         if (event.getTimestamp() >= scheduledTime) {
             ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
-            for (ComplexEvent complexEvent : eventList) {
+            for (ComplexEvent complexEvent : state.eventList) {
                 outputEventChunk.add(cloneComplexEvent(complexEvent));
             }
             outputEventChunks.add(outputEventChunk);
@@ -120,15 +125,8 @@ public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimi
     }
 
     @Override
-    public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter
-            wrappedSnapshotOutputRateLimiter) {
-        return new WindowedPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService,
-                wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
-    }
-
-    @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiQueryContext.getSiddhiAppContext());
+        scheduler = SchedulerParser.parse(this, siddhiQueryContext);
         scheduler.setStreamEventPool(new StreamEventPool(0, 0,
                 0, 5));
         scheduler.init(lockWrapper, siddhiQueryContext.getName());
@@ -142,18 +140,28 @@ public class WindowedPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimi
         //Nothing to stop
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
-            state.put("EventList", eventList);
-        }
-        return state;
-    }
+    class RateLimiterState extends State {
 
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        eventList = (List<ComplexEvent>) state.get("EventList");
+        List<ComplexEvent> eventList = new LinkedList<ComplexEvent>();
+
+        @Override
+        public boolean canDestroy() {
+            return eventList.isEmpty();
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            synchronized (this) {
+                state.put("EventList", eventList);
+            }
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            eventList = (List<ComplexEvent>) state.get("EventList");
+        }
     }
 
 }

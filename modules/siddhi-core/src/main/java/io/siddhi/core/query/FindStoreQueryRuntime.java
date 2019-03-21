@@ -18,6 +18,7 @@
 package io.siddhi.core.query;
 
 import io.siddhi.core.aggregation.AggregationRuntime;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
@@ -38,6 +39,7 @@ import java.util.List;
 public class FindStoreQueryRuntime extends StoreQueryRuntime {
 
     private CompiledCondition compiledCondition;
+    private SiddhiQueryContext siddhiQueryContext;
     private Table table;
     private Window window;
     private MetaStreamEvent.EventType eventType;
@@ -64,9 +66,10 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
     }
 
     public FindStoreQueryRuntime(AggregationRuntime aggregation, CompiledCondition compiledCondition, String queryName,
-                                 MetaStreamEvent metaStreamEvent) {
+                                 MetaStreamEvent metaStreamEvent, SiddhiQueryContext siddhiQueryContext) {
         this.aggregation = aggregation;
         this.compiledCondition = compiledCondition;
+        this.siddhiQueryContext = siddhiQueryContext;
         this.queryName = queryName;
         this.eventType = metaStreamEvent.getEventType();
         this.metaStreamEvent = metaStreamEvent;
@@ -89,7 +92,7 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
                     stateEvent = new StateEvent(2, 0);
                     StreamEvent streamEvent = new StreamEvent(0, 2, 0);
                     stateEvent.addEvent(0, streamEvent);
-                    streamEvents = aggregation.find(stateEvent, compiledCondition);
+                    streamEvents = aggregation.find(stateEvent, compiledCondition, siddhiQueryContext);
                     break;
                 case DEFAULT:
                     break;
@@ -171,6 +174,5 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
         } else {
             return null;
         }
-
     }
 }

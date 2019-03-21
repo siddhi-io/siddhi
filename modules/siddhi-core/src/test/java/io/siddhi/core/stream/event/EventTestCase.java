@@ -44,7 +44,7 @@ import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.table.Table;
-import io.siddhi.core.util.ElementIdGenerator;
+import io.siddhi.core.util.IdGenerator;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.event.handler.EventExchangeHolderFactory;
 import io.siddhi.core.util.lock.LockSynchronizer;
@@ -296,11 +296,11 @@ public class EventTestCase {
         SiddhiContext siddhicontext = new SiddhiContext();
         SiddhiAppContext context = new SiddhiAppContext();
         context.setSiddhiContext(siddhicontext);
-        context.setElementIdGenerator(new ElementIdGenerator(context.getName()));
+        context.setIdGenerator(new IdGenerator());
         context.setSnapshotService(new SnapshotService(context));
         QueryRuntime runtime = QueryParser.parse(query, context, streamDefinitionMap, tableDefinitionMap,
                 windowDefinitionMap, aggregationDefinitionMap, tableMap, aggregationMap, eventWindowMap,
-                lockSynchronizer, "1");
+                lockSynchronizer, "1", false);
         AssertJUnit.assertNotNull(runtime);
         AssertJUnit.assertTrue(runtime.getStreamRuntime() instanceof SingleStreamRuntime);
         AssertJUnit.assertNotNull(runtime.getSelector());

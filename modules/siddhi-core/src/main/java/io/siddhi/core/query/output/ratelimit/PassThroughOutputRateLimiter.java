@@ -19,9 +19,8 @@ package io.siddhi.core.query.output.ratelimit;
 
 
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import org.apache.log4j.Logger;
-
-import java.util.Map;
 
 /**
  * Implementation of {@link OutputRateLimiter} which will pass through events without doing any rate limiting. This
@@ -42,6 +41,11 @@ public class PassThroughOutputRateLimiter extends OutputRateLimiter {
     }
 
     @Override
+    protected StateFactory init() {
+        return null;
+    }
+
+    @Override
     public void process(ComplexEventChunk complexEventChunk) {
         sendToCallBacks(complexEventChunk);
     }
@@ -55,15 +59,4 @@ public class PassThroughOutputRateLimiter extends OutputRateLimiter {
     public void stop() {
         //Nothing to stop
     }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-
-    }
-
 }

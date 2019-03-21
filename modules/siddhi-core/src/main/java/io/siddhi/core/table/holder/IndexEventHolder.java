@@ -28,7 +28,7 @@ import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.snapshot.SnapshotRequest;
-import io.siddhi.core.util.snapshot.state.SnapshotState;
+import io.siddhi.core.util.snapshot.state.Snapshot;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.expression.condition.Compare;
@@ -617,23 +617,23 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
                 || SnapshotRequest.isRequestForFullSnapshot();
     }
 
-    public SnapshotState getSnapshot() {
+    public Snapshot getSnapshot() {
         if (isFullSnapshot()) {
             forceFullSnapshot = false;
-            return new SnapshotState(this, false);
+            return new Snapshot(this, false);
         } else {
-            SnapshotState snapshot = new SnapshotState(operationChangeLog, true);
+            Snapshot snapshot = new Snapshot(operationChangeLog, true);
             operationChangeLog = new ArrayList<>();
             return snapshot;
         }
     }
 
     public void restore(SnapshotStateList snapshotStatelist) {
-        TreeMap<Long, SnapshotState> revisions = snapshotStatelist.getSnapshotStates();
-        Iterator<Map.Entry<Long, SnapshotState>> itr = revisions.entrySet().iterator();
+        TreeMap<Long, Snapshot> revisions = snapshotStatelist.getSnapshotStates();
+        Iterator<Map.Entry<Long, Snapshot>> itr = revisions.entrySet().iterator();
         this.isOperationLogEnabled = false;
         while (itr.hasNext()) {
-            Map.Entry<Long, SnapshotState> snapshotEntry = itr.next();
+            Map.Entry<Long, Snapshot> snapshotEntry = itr.next();
             if (!snapshotEntry.getValue().isIncrementalSnapshot()) {
                 this.deleteAll();
                 IndexEventHolder snapshotEventHolder = (IndexEventHolder) snapshotEntry.getValue().getState();

@@ -22,19 +22,23 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.query.processor.Processor;
+import io.siddhi.core.util.snapshot.state.State;
 
 /**
  * For Siddhi extensions, extend this class to use the functionality of
  * AbstractStreamProcessor. This class processes only StreamEvents. Use
  * StreamFunctionProcessor to process StateEvents.
+ *
+ * @param <S> current state of the processor
  */
-public abstract class StreamProcessor extends AbstractStreamProcessor {
+public abstract class StreamProcessor<S extends State> extends AbstractStreamProcessor<S> {
 
     @Override
     protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                                     StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
+                                     StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater,
+                                     S state) {
         streamEventChunk.reset();
-        process(streamEventChunk, nextProcessor, streamEventCloner, complexEventPopulater);
+        process(streamEventChunk, nextProcessor, streamEventCloner, complexEventPopulater, state);
     }
 
 
@@ -45,8 +49,10 @@ public abstract class StreamProcessor extends AbstractStreamProcessor {
      * @param nextProcessor         the next processor to which the success events need to be passed
      * @param streamEventCloner     helps to clone the incoming event for local storage or modification
      * @param complexEventPopulater helps to populate the events with the resultant attributes
+     * @param state                 current processor state
      */
     protected abstract void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                                    StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater);
+                                    StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater,
+                                    S state);
 
 }

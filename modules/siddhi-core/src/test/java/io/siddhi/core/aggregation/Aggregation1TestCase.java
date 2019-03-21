@@ -162,7 +162,6 @@ public class Aggregation1TestCase {
 
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L});
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L});
-        Thread.sleep(100);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-06-** **:**:**\" " +
@@ -275,8 +274,8 @@ public class Aggregation1TestCase {
                     new Object[]{1496289950000L, "WSO2", 60.0, 240.0, 700f},
                     new Object[]{1496289951000L, "IBM", 100.0, 200.0, 9600f},
                     new Object[]{1496289952000L, "IBM", 700.0, 1400.0, 3500f},
-                    new Object[]{1496289953000L, "WSO2", 100.0, 300.0, 1540f},
                     new Object[]{1496289953000L, "IBM", 400.0, 400.0, 3600f},
+                    new Object[]{1496289953000L, "WSO2", 100.0, 300.0, 1540f},
                     new Object[]{1496289954000L, "IBM", 600.0, 600.0, 3600f},
                     new Object[]{1496290016000L, "IBM", 1000.0, 1000.0, 9000f}
             );
@@ -944,8 +943,8 @@ public class Aggregation1TestCase {
                     new Object[]{1496289950000L, 240.0, 60.0, 700f, "WSO2", 70f, 50f},
                     new Object[]{1496289951000L, 200.0, 100.0, 9600f, "IBM", 100f, 100f},
                     new Object[]{1496289952000L, 1400.0, 700.0, 3500f, "IBM", 900f, 500f},
-                    new Object[]{1496289953000L, 300.0, 100.0, 1540f, "WSO2", 140f, 60f},
                     new Object[]{1496289953000L, 400.0, 400.0, 3600f, "IBM", 400f, 400f},
+                    new Object[]{1496289953000L, 300.0, 100.0, 1540f, "WSO2", 140f, 60f},
                     new Object[]{1496289954000L, 600.0, 600.0, 3600f, "IBM", 600f, 600f},
                     new Object[]{1496290016000L, 1000.0, 1000.0, 9000f, "IBM", 1000f, 1000f}
             );
@@ -1039,7 +1038,6 @@ public class Aggregation1TestCase {
         try {
             // Thursday, June 1, 2017 4:05:50 AM
             stockStreamInputHandler.send(new Object[]{"WSO2", 50f, 60f, 90L, 6, "June 1, 2017 4:05:50 AM"});
-
             AssertJUnit.assertTrue(appender.getMessages().contains("'June 1, 2017 4:05:50 AM' doesn't match the " +
                     "supported formats <yyyy>-<MM>-<dd> <HH>:<mm>:<ss> (for GMT time zone) or <yyyy>-<MM>-<dd> " +
                     "<HH>:<mm>:<ss> <Z> (for non GMT time zone). The ISO 8601 UTC offset must be provided for <Z> " +
@@ -2165,8 +2163,7 @@ public class Aggregation1TestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
-    //(dependsOnMethods = {"incrementalStreamProcessorTest37"})
+    @Test(dependsOnMethods = {"incrementalStreamProcessorTest37"})
     public void incrementalStreamProcessorTest38() throws InterruptedException {
         LOG.info("incrementalStreamProcessorTest38");
         SiddhiManager siddhiManager = new SiddhiManager();

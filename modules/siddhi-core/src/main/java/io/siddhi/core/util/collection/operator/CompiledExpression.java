@@ -23,6 +23,4 @@ package io.siddhi.core.util.collection.operator;
  */
 public interface CompiledExpression {
 
-    CompiledExpression cloneCompilation(String key);
-
 }

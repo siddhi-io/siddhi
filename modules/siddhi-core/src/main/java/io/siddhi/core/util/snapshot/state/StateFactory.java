@@ -18,7 +18,12 @@
 
 package io.siddhi.core.util.snapshot.state;
 
-public interface StateFactory {
+/**
+ * State factory that create states that are used to store query and other states
+ *
+ * @param <S> state that hold data
+ */
+public interface StateFactory<S extends State> {
 
-    State createNewState();
+    S createNewState();
 }

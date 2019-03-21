@@ -273,9 +273,11 @@ public class TimeLengthWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String sensorStream = "define stream sensorStream (id string, sensorValue int);";
-        String query = "@info(name = 'query1') from sensorStream#window.timeLength(3 sec,6)" +
-                " select id,sum(sensorValue) as sum" +
-                " insert all events into outputStream ;";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from sensorStream#window.timeLength(3 sec, 6) " +
+                "select id, sum(sensorValue) as sum " +
+                "insert all events into outputStream ;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(sensorStream + query);
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
@@ -303,7 +305,7 @@ public class TimeLengthWindowTestCase {
                         AssertJUnit.assertEquals("5", removeEvents[0].getData(1).toString());
                     }
                     if (removeEvents[0].getData(0).toString().equals("id3")) {
-                        AssertJUnit.assertEquals("3", removeEvents[0].getData(1).toString());
+                        AssertJUnit.assertEquals("5", removeEvents[0].getData(1).toString());
                     }
                     removeEventCount++;
                 }
@@ -329,10 +331,10 @@ public class TimeLengthWindowTestCase {
         Thread.sleep(520);
         inputHandler.send(new Object[]{"id8", 1});
 
-        Thread.sleep(1000);
+        Thread.sleep(500);
 
         AssertJUnit.assertEquals(8, inEventCount);
-        AssertJUnit.assertEquals(2, removeEventCount);
+        AssertJUnit.assertEquals(3, removeEventCount);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
     }

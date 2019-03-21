@@ -22,10 +22,10 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.function.Script;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import org.apache.log4j.Logger;
-
-import java.util.Map;
 
 /**
  * Executor class for Script function. Function execution logic is implemented in execute here.
@@ -49,29 +49,21 @@ public class ScriptFunctionExecutor extends FunctionExecutor {
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         returnType = siddhiQueryContext.getSiddhiAppContext().getScript(functionId).getReturnType();
         script = siddhiQueryContext.getSiddhiAppContext().getScript(functionId);
-    }
-
-    @Override
-    protected Object execute(Object[] data) {
-        return script.eval(functionId, data);
-    }
-
-    @Override
-    protected Object execute(Object data) {
-        return script.eval(functionId, new Object[]{data});
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
         return null;
     }
 
     @Override
-    public void restoreState(Map<String, Object> state) {
-
+    protected Object execute(Object[] data, State state) {
+        return script.eval(functionId, data);
     }
+
+    @Override
+    protected Object execute(Object data, State state) {
+        return script.eval(functionId, new Object[]{data});
+    }
+
 }

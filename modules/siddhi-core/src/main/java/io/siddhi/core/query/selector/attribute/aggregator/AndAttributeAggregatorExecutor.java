@@ -27,13 +27,15 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link AttributeAggregator} to calculate sum based on an event attribute.
+ * {@link AttributeAggregatorExecutor} to calculate sum based on an event attribute.
  */
 @Extension(
         name = "and",
@@ -57,11 +59,11 @@ import java.util.Map;
                 )
         }
 )
-public class AndAttributeAggregator extends AttributeAggregator {
+public class AndAttributeAggregatorExecutor
+        extends AttributeAggregatorExecutor<AndAttributeAggregatorExecutor.AggregatorState> {
 
     private static Attribute.Type type = Attribute.Type.BOOL;
-    private int trueEventsCount = 0;
-    private int falseEventsCount = 0;
+
 
     /**
      * The initialization method for FunctionExecutor
@@ -69,18 +71,19 @@ public class AndAttributeAggregator extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link AndAttributeAggregator} configuration reader.
+     * @param configReader                 this hold the {@link AndAttributeAggregatorExecutor} configuration reader.
      * @param siddhiQueryContext           current siddhi query context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
+                                boolean outputExpectsExpiredEvents, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("And aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length
                     + " parameters provided");
         }
+        return () -> new AggregatorState();
     }
 
     public Attribute.Type getReturnType() {
@@ -88,76 +91,82 @@ public class AndAttributeAggregator extends AttributeAggregator {
     }
 
     @Override
-    public Object processAdd(Object data) {
+    public Object processAdd(Object data, AggregatorState state) {
         if ((boolean) data) {
-            trueEventsCount++;
+            state.trueEventsCount++;
         } else {
-            falseEventsCount++;
+            state.falseEventsCount++;
         }
-        return computeLogicalOperation();
+        return computeLogicalOperation(state);
     }
 
     @Override
-    public Object processAdd(Object[] data) {
+    public Object processAdd(Object[] data, AggregatorState state) {
         for (Object object : data) {
             if ((boolean) object) {
-                trueEventsCount++;
+                state.trueEventsCount++;
             } else {
-                falseEventsCount++;
+                state.falseEventsCount++;
             }
         }
-        return computeLogicalOperation();
+        return computeLogicalOperation(state);
     }
 
     @Override
-    public Object processRemove(Object data) {
+    public Object processRemove(Object data, AggregatorState state) {
         if ((boolean) data) {
-            trueEventsCount--;
+            state.trueEventsCount--;
         } else {
-            falseEventsCount--;
+            state.falseEventsCount--;
         }
-        return computeLogicalOperation();
+        return computeLogicalOperation(state);
     }
 
     @Override
-    public Object processRemove(Object[] data) {
+    public Object processRemove(Object[] data, AggregatorState state) {
         for (Object object : data) {
             if ((boolean) object) {
-                trueEventsCount--;
+                state.trueEventsCount--;
             } else {
-                falseEventsCount--;
+                state.falseEventsCount--;
             }
         }
-        return computeLogicalOperation();
+        return computeLogicalOperation(state);
     }
 
-    private boolean computeLogicalOperation() {
-        return trueEventsCount > 0 && falseEventsCount == 0;
+    private boolean computeLogicalOperation(AggregatorState state) {
+        return state.trueEventsCount > 0 && state.falseEventsCount == 0;
     }
 
     @Override
-    public Object reset() {
-        trueEventsCount = 0;
-        falseEventsCount = 0;
+    public Object reset(AggregatorState state) {
+        state.trueEventsCount = 0;
+        state.falseEventsCount = 0;
         return false;
     }
 
-    @Override
-    public boolean canDestroy() {
-        return trueEventsCount == 0 && falseEventsCount == 0;
-    }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("trueEventsCount", trueEventsCount);
-        state.put("falseEventsCount", falseEventsCount);
-        return state;
-    }
+    class AggregatorState extends State {
+        private int trueEventsCount = 0;
+        private int falseEventsCount = 0;
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        trueEventsCount = (int) state.get("trueEventsCount");
-        falseEventsCount = (int) state.get("falseEventsCount");
+        @Override
+        public boolean canDestroy() {
+            return trueEventsCount == 0 && falseEventsCount == 0;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("trueEventsCount", trueEventsCount);
+            state.put("falseEventsCount", falseEventsCount);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            trueEventsCount = (int) state.get("trueEventsCount");
+            falseEventsCount = (int) state.get("falseEventsCount");
+        }
     }
 }

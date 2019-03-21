@@ -15,33 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.siddhi.core.partition;
 
-import io.siddhi.core.query.QueryRuntime;
+package io.siddhi.core.util;
 
-import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Class to represent each partition key instance. These will be created dynamically and will contain
- * {@link QueryRuntime}s belonging to that partition key.
+ * unique id generator for elements inside a given siddhi app
  */
-public class PartitionInstanceRuntime {
-    private String key;
-    private List<QueryRuntime> queryRuntimeList;
+public class IdGenerator {
 
-    public PartitionInstanceRuntime(String key, List<QueryRuntime> queryRuntimeList) {
-        this.key = key;
-        this.queryRuntimeList = queryRuntimeList;
+    private AtomicLong id = new AtomicLong(0);
+
+    public String createNewId() {
+        return String.valueOf(id.incrementAndGet());
     }
-
-    public List<QueryRuntime> getQueryRuntimeList() {
-        return queryRuntimeList;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
 }
-
-

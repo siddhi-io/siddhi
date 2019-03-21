@@ -27,6 +27,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -40,6 +41,8 @@ import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.OperatorParser;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
@@ -76,17 +79,12 @@ import java.util.Map;
                 )
         }
 )
-public class TimeWindowProcessor extends SlidingWindowProcessor implements SchedulingProcessor, FindableProcessor {
+public class TimeWindowProcessor extends SlidingFindableWindowProcessor<TimeWindowProcessor.WindowState>
+        implements SchedulingProcessor {
 
     private long timeInMilliSeconds;
-    private SnapshotableStreamEventQueue expiredEventQueue;
     private Scheduler scheduler;
     private SiddhiQueryContext siddhiQueryContext;
-    private volatile long lastTimestamp = Long.MIN_VALUE;
-
-    public void setTimeInMilliSeconds(long timeInMilliSeconds) {
-        this.timeInMilliSeconds = timeInMilliSeconds;
-    }
 
     @Override
     public Scheduler getScheduler() {
@@ -99,10 +97,10 @@ public class TimeWindowProcessor extends SlidingWindowProcessor implements Sched
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<WindowState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                             ConfigReader configReader, SiddhiQueryContext siddhiQueryContext) {
         this.siddhiQueryContext = siddhiQueryContext;
-        this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
@@ -124,13 +122,14 @@ public class TimeWindowProcessor extends SlidingWindowProcessor implements Sched
             throw new SiddhiAppValidationException("Time window should only have one parameter (<int|long|time> " +
                     "windowTime), but found " + attributeExpressionExecutors.length + " input attributes");
         }
+        return () -> new WindowState(streamEventClonerHolder);
     }
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner) {
-        synchronized (this) {
-
+                           StreamEventCloner streamEventCloner, WindowState state) {
+        synchronized (state) {
+            SnapshotableStreamEventQueue expiredEventQueue = state.expiredEventQueue;
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
@@ -149,14 +148,12 @@ public class TimeWindowProcessor extends SlidingWindowProcessor implements Sched
                 }
 
                 if (streamEvent.getType() == StreamEvent.Type.CURRENT) {
-
                     StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
                     clonedEvent.setType(StreamEvent.Type.EXPIRED);
-                    this.expiredEventQueue.add(clonedEvent);
-
-                    if (lastTimestamp < clonedEvent.getTimestamp()) {
+                    expiredEventQueue.add(clonedEvent);
+                    if (state.lastTimestamp < clonedEvent.getTimestamp()) {
                         scheduler.notifyAt(clonedEvent.getTimestamp() + timeInMilliSeconds);
-                        lastTimestamp = clonedEvent.getTimestamp();
+                        state.lastTimestamp = clonedEvent.getTimestamp();
                     }
                 } else {
                     streamEventChunk.remove();
@@ -168,16 +165,18 @@ public class TimeWindowProcessor extends SlidingWindowProcessor implements Sched
     }
 
     @Override
-    public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, expiredEventQueue, streamEventCloner);
+    public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, WindowState state,
+                                              SiddhiQueryContext siddhiQueryContext) {
+        return OperatorParser.constructOperator(state.expiredEventQueue, condition,
+                matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     @Override
-    public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
-                variableExpressionExecutors, tableMap, siddhiQueryContext);
+    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                            StreamEventCloner streamEventCloner, WindowState state) {
+        return ((Operator) compiledCondition).find(matchingEvent, state.expiredEventQueue, streamEventCloner);
     }
 
     @Override
@@ -190,15 +189,31 @@ public class TimeWindowProcessor extends SlidingWindowProcessor implements Sched
         //Do nothing
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
-        return state;
-    }
+    class WindowState extends State {
+        private SnapshotableStreamEventQueue expiredEventQueue;
+        private volatile long lastTimestamp = Long.MIN_VALUE;
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
+
+        WindowState(StreamEventClonerHolder streamEventClonerHolder) {
+            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
+            state.put("LastTimestamp", lastTimestamp);
+            return state;
+        }
+
+        public void restore(Map<String, Object> state) {
+            expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
+            lastTimestamp = (long) state.get("LastTimestamp");
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return expiredEventQueue.getFirst() == null;
+        }
     }
 }

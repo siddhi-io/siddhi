@@ -23,9 +23,9 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
-
-import java.util.Map;
 
 public class CustomFunctionExtension extends FunctionExecutor {
 
@@ -39,8 +39,8 @@ public class CustomFunctionExtension extends FunctionExecutor {
      * @param siddhiQueryContext           the context of the siddhi query
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         for (ExpressionExecutor expressionExecutor : attributeExpressionExecutors) {
             Attribute.Type attributeType = expressionExecutor.getReturnType();
             if (attributeType == Attribute.Type.DOUBLE) {
@@ -52,17 +52,19 @@ public class CustomFunctionExtension extends FunctionExecutor {
                 returnType = Attribute.Type.LONG;
             }
         }
+        return null;
     }
 
     /**
      * The main execution method which will be called upon event arrival
      * when there are more then one function parameter
      *
-     * @param data the runtime values of function parameters
+     * @param data  the runtime values of function parameters
+     * @param state
      * @return the function result
      */
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         if (returnType == Attribute.Type.DOUBLE) {
             double total = 0;
             for (Object aObj : data) {
@@ -83,12 +85,13 @@ public class CustomFunctionExtension extends FunctionExecutor {
      * The main execution method which will be called upon event arrival
      * when there are zero or one function parameter
      *
-     * @param data null if the function parameter count is zero or
-     *             runtime data value of the function parameter
+     * @param data  null if the function parameter count is zero or
+     *              runtime data value of the function parameter
+     * @param state Function state
      * @return the function result
      */
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         if (returnType == Attribute.Type.DOUBLE) {
             return Double.parseDouble(String.valueOf(data));
         } else {
@@ -99,29 +102,6 @@ public class CustomFunctionExtension extends FunctionExecutor {
     @Override
     public Attribute.Type getReturnType() {
         return returnType;
-    }
-
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for the reconstructing the element to the same state on a different point of time
-     *
-     * @return stateful objects of the processing element as an array
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        return null;
-    }
-
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     * the element to the same state as if was on a previous point of time.
-     *
-     * @param state the stateful objects of the element as an array on
-     *              the same order provided by currentState().
-     */
-    @Override
-    public void restoreState(Map<String, Object> state) {
-
     }
 
 }

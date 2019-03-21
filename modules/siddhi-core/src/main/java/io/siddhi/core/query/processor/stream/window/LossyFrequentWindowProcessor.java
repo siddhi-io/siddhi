@@ -37,6 +37,8 @@ import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.OperatorParser;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.expression.Expression;
 import org.apache.log4j.Logger;
 
@@ -100,21 +102,18 @@ import java.util.concurrent.ConcurrentHashMap;
         }
 )
 @Deprecated
-public class LossyFrequentWindowProcessor extends SlidingWindowProcessor implements FindableProcessor {
+public class LossyFrequentWindowProcessor extends
+        SlidingFindableWindowProcessor<LossyFrequentWindowProcessor.WindowState> {
     private static final Logger log = Logger.getLogger(LossyFrequentWindowProcessor.class);
-    private ConcurrentHashMap<String, LossyCount> countMap = new ConcurrentHashMap<String, LossyCount>();
-    private ConcurrentHashMap<String, StreamEvent> map = new ConcurrentHashMap<String, StreamEvent>();
     private VariableExpressionExecutor[] variableExpressionExecutors;
 
-    private int totalCount = 0;
-    private double currentBucketId = 1;
     private double support;           // these will be initialize during init
     private double error;             // these will be initialize during init
     private double windowWidth;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         support = Double.parseDouble(String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[0])
                 .getValue()));
         if (attributeExpressionExecutors.length > 1) {
@@ -133,14 +132,14 @@ public class LossyFrequentWindowProcessor extends SlidingWindowProcessor impleme
             }
         }
         windowWidth = Math.ceil(1 / error);
-        currentBucketId = 1;
+        return () -> new WindowState();
     }
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner) {
+                           StreamEventCloner streamEventCloner, WindowState state) {
 
-        synchronized (this) {
+        synchronized (state) {
             long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
 
             StreamEvent streamEvent = streamEventChunk.getFirst();
@@ -152,43 +151,43 @@ public class LossyFrequentWindowProcessor extends SlidingWindowProcessor impleme
                 StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
                 clonedEvent.setType(StreamEvent.Type.EXPIRED);
 
-                totalCount++;
-                if (totalCount != 1) {
-                    currentBucketId = Math.ceil(totalCount / windowWidth);
+                state.totalCount++;
+                if (state.totalCount != 1) {
+                    state.currentBucketId = Math.ceil(state.totalCount / windowWidth);
                 }
                 String currentKey = generateKey(streamEvent);
-                StreamEvent oldEvent = map.put(currentKey, clonedEvent);
+                StreamEvent oldEvent = state.map.put(currentKey, clonedEvent);
                 if (oldEvent != null) {    // this event is already in the store
-                    countMap.put(currentKey, countMap.get(currentKey).incrementCount());
+                    state.countMap.put(currentKey, state.countMap.get(currentKey).incrementCount());
                 } else {
                     //  This is a new event
                     LossyCount lCount;
-                    lCount = new LossyCount(1, (int) currentBucketId - 1);
-                    countMap.put(currentKey, lCount);
+                    lCount = new LossyCount(1, (int) state.currentBucketId - 1);
+                    state.countMap.put(currentKey, lCount);
                 }
                 // calculating all the events in the system which match the
                 // requirement provided by the user
                 List<String> keys = new ArrayList<String>();
-                keys.addAll(countMap.keySet());
+                keys.addAll(state.countMap.keySet());
                 for (String key : keys) {
-                    LossyCount lossyCount = countMap.get(key);
-                    if (lossyCount.getCount() >= ((support - error) * totalCount)) {
+                    LossyCount lossyCount = state.countMap.get(key);
+                    if (lossyCount.getCount() >= ((support - error) * state.totalCount)) {
                         // among the selected events, if the newly arrive event is there we mark it as an inEvent
                         if (key.equals(currentKey)) {
                             streamEventChunk.add(streamEvent);
                         }
                     }
                 }
-                if (totalCount % windowWidth == 0) {
+                if (state.totalCount % windowWidth == 0) {
                     // its time to run the data-structure prune code
                     keys = new ArrayList<String>();
-                    keys.addAll(countMap.keySet());
+                    keys.addAll(state.countMap.keySet());
                     for (String key : keys) {
-                        LossyCount lossyCount = countMap.get(key);
-                        if (lossyCount.getCount() + lossyCount.getBucketId() <= currentBucketId) {
+                        LossyCount lossyCount = state.countMap.get(key);
+                        if (lossyCount.getCount() + lossyCount.getBucketId() <= state.currentBucketId) {
                             log.info("Removing the Event: " + key + " from the window");
-                            countMap.remove(key);
-                            StreamEvent expirtedEvent = map.remove(key);
+                            state.countMap.remove(key);
+                            StreamEvent expirtedEvent = state.map.remove(key);
                             expirtedEvent.setTimestamp(currentTime);
                             streamEventChunk.add(expirtedEvent);
                         }
@@ -210,22 +209,6 @@ public class LossyFrequentWindowProcessor extends SlidingWindowProcessor impleme
         //Do nothing
     }
 
-
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
-            state.put("CountMap", countMap);
-        }
-        return state;
-    }
-
-
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        countMap = (ConcurrentHashMap<String, LossyCount>) state.get("CountMap");
-    }
-
     private String generateKey(StreamEvent event) {      // for performance reason if its all attribute we don't do
         // the attribute list check
         StringBuilder stringBuilder = new StringBuilder();
@@ -242,16 +225,18 @@ public class LossyFrequentWindowProcessor extends SlidingWindowProcessor impleme
     }
 
     @Override
-    public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, map.values(), streamEventCloner);
+    public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, WindowState state,
+                                              SiddhiQueryContext siddhiQueryContext) {
+        return OperatorParser.constructOperator(state.map.values(), condition, matchingMetaInfoHolder,
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     @Override
-    public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        return OperatorParser.constructOperator(map.values(), condition, matchingMetaInfoHolder,
-                variableExpressionExecutors, tableMap, siddhiQueryContext);
+    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                            StreamEventCloner streamEventCloner, WindowState state) {
+        return ((Operator) compiledCondition).find(matchingEvent, state.map.values(), streamEventCloner);
     }
 
     /**
@@ -285,6 +270,39 @@ public class LossyFrequentWindowProcessor extends SlidingWindowProcessor impleme
         public LossyCount incrementCount() {
             this.count++;
             return this;
+        }
+    }
+
+    class WindowState extends State {
+
+        private int totalCount = 0;
+        private double currentBucketId = 1;
+        private ConcurrentHashMap<String, LossyCount> countMap = new ConcurrentHashMap<String, LossyCount>();
+        private ConcurrentHashMap<String, StreamEvent> map = new ConcurrentHashMap<String, StreamEvent>();
+
+        @Override
+        public boolean canDestroy() {
+            return countMap.isEmpty() && map.isEmpty();
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            synchronized (this) {
+                state.put("CountMap", countMap);
+                state.put("Map", map);
+                state.put("TotalCount", totalCount);
+                state.put("CurrentBucketId", currentBucketId);
+            }
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            countMap = (ConcurrentHashMap<String, LossyCount>) state.get("CountMap");
+            countMap = (ConcurrentHashMap<String, LossyCount>) state.get("Map");
+            totalCount = (Integer) state.get("TotalCount");
+            currentBucketId = (Double) state.get("CurrentBucketId");
         }
     }
 }

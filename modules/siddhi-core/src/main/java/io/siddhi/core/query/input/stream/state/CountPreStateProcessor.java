@@ -18,12 +18,14 @@
 
 package io.siddhi.core.query.input.stream.state;
 
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created on 1/6/15.
@@ -31,9 +33,7 @@ import java.util.Iterator;
 public class CountPreStateProcessor extends StreamPreStateProcessor {
     private final int minCount;
     private final int maxCount;
-    protected volatile boolean successCondition = false;
     private CountPostStateProcessor countPostStateProcessor;
-    private volatile boolean startStateReset = false;
 
     public CountPreStateProcessor(int minCount, int maxCount, StateInputStream.Type stateType) {
         super(stateType);
@@ -41,12 +41,11 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
         this.maxCount = maxCount;
     }
 
-
-    public PreStateProcessor cloneProcessor(String key) {
-        CountPreStateProcessor countPreStateProcessor = new CountPreStateProcessor(minCount, maxCount, stateType);
-        cloneProperties(countPreStateProcessor, key);
-        countPreStateProcessor.init(siddhiQueryContext);
-        return countPreStateProcessor;
+    public void init(SiddhiQueryContext siddhiQueryContext) {
+        this.siddhiQueryContext = siddhiQueryContext;
+        this.stateHolder = siddhiQueryContext.generateStateHolder(
+                this.getClass().getName(),
+                false, () -> new CountStreamPreState());
     }
 
     @Override
@@ -54,9 +53,10 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
+        CountStreamPreState state = (CountStreamPreState) stateHolder.getState();
         lock.lock();
         try {
-            for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
+            for (Iterator<StateEvent> iterator = state.getPendingStateEventList().iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
                 if (removeIfNextStateProcessed(stateEvent, iterator, stateId + 1)) {
                     continue;
@@ -65,16 +65,16 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
                     continue;
                 }
                 stateEvent.addEvent(stateId, streamEventCloner.copyStreamEvent(streamEvent));
-                successCondition = false;
+                state.successCondition = false;
                 process(stateEvent);
                 if (this.thisLastProcessor.isEventReturned()) {
                     this.thisLastProcessor.clearProcessedEvent();
                     returnEventChunk.add(stateEvent);
                 }
-                if (stateChanged) {
+                if (state.isStateChanged()) {
                     iterator.remove();
                 }
-                if (!successCondition) {
+                if (!state.successCondition) {
                     switch (stateType) {
                         case PATTERN:
                             stateEvent.removeLastEvent(stateId);
@@ -88,6 +88,7 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
             }
         } finally {
             lock.unlock();
+            stateHolder.returnState(state);
         }
         return returnEventChunk;
     }
@@ -101,12 +102,15 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
     }
 
     public void successCondition() {
-        this.successCondition = true;
+        CountStreamPreState state = (CountStreamPreState) stateHolder.getState();
+        try {
+            state.successCondition = true;
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
-
-    @Override
-    public void addState(StateEvent stateEvent) {
+    protected void addState(StateEvent stateEvent, StreamPreState state) {
         //        if (stateType == StateInputStream.Type.SEQUENCE) {
         //            newAndEveryStateEventList.clear();
         //            pendingStateEventList.clear();
@@ -114,20 +118,21 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
         lock.lock();
         try {
             if (stateType == StateInputStream.Type.SEQUENCE) {
-                if (newAndEveryStateEventList.isEmpty()) {
-                    newAndEveryStateEventList.add(stateEvent);
+                if (state.getNewAndEveryStateEventList().isEmpty()) {
+                    state.getNewAndEveryStateEventList().add(stateEvent);
                 }
             } else {
-                newAndEveryStateEventList.add(stateEvent);
+                state.getNewAndEveryStateEventList().add(stateEvent);
             }
         } finally {
             lock.unlock();
         }
         if (minCount == 0 && stateEvent.getStreamEvent(stateId) == null) {
-            currentStateEventChunk.clear();
-            currentStateEventChunk.add(stateEvent);
-            countPostStateProcessor.processMinCountReached(stateEvent, currentStateEventChunk);
-            currentStateEventChunk.clear();
+            ComplexEventChunk<StateEvent> eventChunk = state.getCurrentStateEventChunk();
+            eventChunk.clear();
+            eventChunk.add(stateEvent);
+            countPostStateProcessor.processMinCountReached(stateEvent, eventChunk);
+            eventChunk.clear();
         }
     }
 
@@ -140,18 +145,56 @@ public class CountPreStateProcessor extends StreamPreStateProcessor {
     }
 
     public void startStateReset() {
-        startStateReset = true;
-        if (thisStatePostProcessor.callbackPreStateProcessor != null) {
-            ((CountPreStateProcessor) countPostStateProcessor.thisStatePreProcessor).startStateReset();
+        CountStreamPreState state = (CountStreamPreState) stateHolder.getState();
+        try {
+            state.startStateReset = true;
+            if (thisStatePostProcessor.callbackPreStateProcessor != null) {
+                ((CountPreStateProcessor) countPostStateProcessor.thisStatePreProcessor).startStateReset();
+            }
+        } finally {
+            stateHolder.returnState(state);
         }
+
     }
 
     @Override
     public void updateState() {
-        if (startStateReset) {
-            startStateReset = false;
-            init();
+        CountStreamPreState state = (CountStreamPreState) stateHolder.getState();
+        try {
+            if (state.startStateReset) {
+                state.startStateReset = false;
+                init();
+            }
+            super.updateState();
+        } finally {
+            stateHolder.returnState(state);
         }
-        super.updateState();
+    }
+
+    class CountStreamPreState extends StreamPreState {
+
+        protected volatile boolean successCondition = false;
+
+        private volatile boolean startStateReset = false;
+
+        @Override
+        public boolean canDestroy() {
+            return super.canDestroy();
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> snapshot = super.snapshot();
+            snapshot.put("SuccessCondition", successCondition);
+            snapshot.put("StartStateReset", startStateReset);
+            return snapshot;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            super.restore(state);
+            successCondition = (Boolean) state.get("SuccessCondition");
+            startStateReset = (Boolean) state.get("StartStateReset");
+        }
     }
 }

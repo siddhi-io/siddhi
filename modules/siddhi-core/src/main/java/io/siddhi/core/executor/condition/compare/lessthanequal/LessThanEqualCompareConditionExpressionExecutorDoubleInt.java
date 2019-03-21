@@ -38,10 +38,4 @@ public class LessThanEqualCompareConditionExpressionExecutorDoubleInt extends
         return (Double) left <= (Integer) right;
 
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new LessThanEqualCompareConditionExpressionExecutorDoubleInt(leftExpressionExecutor.cloneExecutor(key)
-                , rightExpressionExecutor.cloneExecutor(key));
-    }
 }

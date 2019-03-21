@@ -162,28 +162,6 @@ public class JoinProcessor implements Processor {
         }
     }
 
-    /**
-     * Clone a copy of processor.
-     *
-     * @param key partition key
-     * @return Cloned Processor
-     */
-    @Override
-    public Processor cloneProcessor(String key) {
-        JoinProcessor joinProcessor = new JoinProcessor(leftJoinProcessor, preJoinProcessor, outerJoinProcessor,
-                matchingStreamIndex);
-        joinProcessor.setTrigger(trigger);
-        if (trigger) {
-            joinProcessor.setCompiledCondition(compiledCondition.cloneCompilation(key));
-        }
-        return joinProcessor;
-    }
-
-    @Override
-    public void clean() {
-        //ignore
-    }
-
     public void setFindableProcessor(FindableProcessor findableProcessor) {
         this.findableProcessor = findableProcessor;
     }

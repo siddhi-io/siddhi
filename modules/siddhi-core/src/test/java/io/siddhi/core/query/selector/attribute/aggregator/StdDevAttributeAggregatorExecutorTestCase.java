@@ -29,8 +29,8 @@ import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class StdDevAttributeAggregatorTestCase {
-    private static final Logger log = Logger.getLogger(StdDevAttributeAggregatorTestCase.class);
+public class StdDevAttributeAggregatorExecutorTestCase {
+    private static final Logger log = Logger.getLogger(StdDevAttributeAggregatorExecutorTestCase.class);
     private final double epsilon = 0.00001; // difference threshold for two doubles to be treated distinct
     private int inEventCount; // Only used in the Test #1 and #6
 

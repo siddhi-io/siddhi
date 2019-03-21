@@ -43,10 +43,6 @@ public class StateMultiProcessStreamReceiver extends MultiProcessStreamReceiver 
                 .getNextProcessor();
     }
 
-    public StateMultiProcessStreamReceiver clone(String key) {
-        return new StateMultiProcessStreamReceiver(streamId + key, processCount, siddhiQueryContext);
-    }
-
     protected void processAndClear(int processIndex, StreamEvent streamEvent) {
         ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<StateEvent>(batchProcessingAllowed);
         ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<StreamEvent>(streamEvent,

@@ -22,6 +22,8 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
@@ -31,12 +33,12 @@ import java.util.Map;
 /**
  * Execute class for shouldUpdate() function.
  */
-public class IncrementalShouldUpdateFunctionExecutor extends FunctionExecutor {
-    private long lastTimestamp = 0;
+public class IncrementalShouldUpdateFunctionExecutor
+        extends FunctionExecutor<IncrementalShouldUpdateFunctionExecutor.FunctionState> {
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<FunctionState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                               ConfigReader configReader, SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new SiddhiAppValidationException("shouldUpdate() function has to have exactly 1 parameter, " +
                     "currently " + attributeExpressionExecutors.length + " parameters provided");
@@ -45,10 +47,11 @@ public class IncrementalShouldUpdateFunctionExecutor extends FunctionExecutor {
             throw new OperationNotSupportedException("Parameter given for shouldUpdate() function has to be of type " +
                     "long, but found: " + attributeExpressionExecutors[0].getReturnType());
         }
+        return () -> new FunctionState();
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, FunctionState state) {
         //will not occur
         return null;
     }
@@ -56,14 +59,15 @@ public class IncrementalShouldUpdateFunctionExecutor extends FunctionExecutor {
     /**
      * return true/false based on timestamp values
      *
-     * @param data of Long type
+     * @param data  of Long type
+     * @param state function state
      * @return true/false
      */
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, FunctionState state) {
         long timestamp = (long) data;
-        if (timestamp >= this.lastTimestamp) {
-            this.lastTimestamp = timestamp;
+        if (timestamp >= state.lastTimestamp) {
+            state.lastTimestamp = timestamp;
             return true;
         }
         return false;
@@ -74,15 +78,24 @@ public class IncrementalShouldUpdateFunctionExecutor extends FunctionExecutor {
         return Attribute.Type.BOOL;
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        HashMap<String, Object> state = new HashMap<>();
-        state.put("lastTimestamp", this.lastTimestamp);
-        return state;
-    }
+    class FunctionState extends State {
+        private long lastTimestamp = 0;
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        this.lastTimestamp = ((long) state.get("lastTimestamp"));
+        @Override
+        public boolean canDestroy() {
+            return lastTimestamp == 0;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            HashMap<String, Object> state = new HashMap<>();
+            state.put("lastTimestamp", this.lastTimestamp);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            this.lastTimestamp = ((long) state.get("lastTimestamp"));
+        }
     }
 }

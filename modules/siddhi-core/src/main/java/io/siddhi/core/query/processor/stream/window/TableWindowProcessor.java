@@ -22,7 +22,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.processor.Processor;
@@ -30,6 +30,8 @@ import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.expression.Expression;
 
 import java.util.List;
@@ -41,8 +43,6 @@ import java.util.Map;
 public class TableWindowProcessor extends BatchingWindowProcessor implements FindableProcessor {
 
     private Table table;
-    private boolean outputExpectsExpiredEvents;
-    private ConfigReader configReader;
 
     public TableWindowProcessor(Table table) {
         this.table = table;
@@ -50,17 +50,18 @@ public class TableWindowProcessor extends BatchingWindowProcessor implements Fin
 
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
-        this.configReader = configReader;
-        this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                StreamEventClonerHolder streamEventClonerHolder, boolean outputExpectsExpiredEvents,
+                                boolean findToBeExecuted, SiddhiQueryContext siddhiQueryContext) {
+        return null;
     }
 
     @Override
-    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner) {
+    protected void process(ComplexEventChunk streamEventChunk, Processor nextProcessor,
+                           StreamEventCloner streamEventCloner, State state) {
         // nothing to be done
     }
+
 
     @Override
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
@@ -83,40 +84,5 @@ public class TableWindowProcessor extends BatchingWindowProcessor implements Fin
     @Override
     public void stop() {
         //Do nothing
-    }
-
-    @Override
-    public Processor cloneProcessor(String key) {
-        try {
-            TableWindowProcessor streamProcessor = new TableWindowProcessor(table);
-            streamProcessor.inputDefinition = inputDefinition;
-            ExpressionExecutor[] innerExpressionExecutors = new ExpressionExecutor[attributeExpressionLength];
-            ExpressionExecutor[] attributeExpressionExecutors1 = this.attributeExpressionExecutors;
-            for (int i = 0; i < attributeExpressionLength; i++) {
-                innerExpressionExecutors[i] = attributeExpressionExecutors1[i].cloneExecutor(key);
-            }
-            streamProcessor.attributeExpressionExecutors = innerExpressionExecutors;
-            streamProcessor.attributeExpressionLength = attributeExpressionLength;
-            streamProcessor.additionalAttributes = additionalAttributes;
-            streamProcessor.complexEventPopulater = complexEventPopulater;
-            streamProcessor.init(metaStreamEvent, inputDefinition, attributeExpressionExecutors, configReader,
-                    outputExpectsExpiredEvents, siddhiQueryContext);
-            streamProcessor.start();
-            return streamProcessor;
-
-        } catch (Exception e) {
-            throw new SiddhiAppRuntimeException("Exception in cloning " + this.getClass().getCanonicalName(), e);
-        }
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        //No state
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Nothing to be done
     }
 }

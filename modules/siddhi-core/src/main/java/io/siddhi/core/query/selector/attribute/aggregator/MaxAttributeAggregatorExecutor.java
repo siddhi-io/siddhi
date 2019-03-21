@@ -27,6 +27,8 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
@@ -37,7 +39,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 /**
- * {@link AttributeAggregator} to calculate max value based on an event attribute.
+ * {@link AttributeAggregatorExecutor} to calculate max value based on an event attribute.
  */
 @Extension(
         name = "max",
@@ -59,9 +61,10 @@ import java.util.Map;
                         "arrival and expiry."
         )
 )
-public class MaxAttributeAggregator extends AttributeAggregator {
+public class MaxAttributeAggregatorExecutor
+        extends AttributeAggregatorExecutor<MaxAttributeAggregatorExecutor.MaxAggregatorState> {
 
-    private MaxAttributeAggregator maxOutputAttributeAggregator;
+    private Attribute.Type returnType;
 
     /**
      * The initialization method for FunctionExecutor
@@ -69,13 +72,15 @@ public class MaxAttributeAggregator extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link MaxAttributeAggregator} configuration reader.
+     * @param configReader                 this hold the {@link MaxAttributeAggregatorExecutor} configuration reader.
      * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<MaxAggregatorState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                                    ProcessingMode processingMode,
+                                                    boolean outputExpectsExpiredEvents,
+                                                    ConfigReader configReader,
+                                                    SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("Max aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
@@ -84,95 +89,73 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         if (processingMode == ProcessingMode.SLIDE || outputExpectsExpiredEvents) {
             trackFutureStates = true;
         }
-        Attribute.Type type = attributeExpressionExecutors[0].getReturnType();
-        switch (type) {
-            case FLOAT:
-                maxOutputAttributeAggregator = new MaxAttributeAggregatorFloat(trackFutureStates);
-                break;
-            case INT:
-                maxOutputAttributeAggregator = new MaxAttributeAggregatorInt(trackFutureStates);
-                break;
-            case LONG:
-                maxOutputAttributeAggregator = new MaxAttributeAggregatorLong(trackFutureStates);
-                break;
-            case DOUBLE:
-                maxOutputAttributeAggregator = new MaxAttributeAggregatorDouble(trackFutureStates);
-                break;
-            default:
-                throw new OperationNotSupportedException("Max not supported for " + type);
-        }
+        returnType = attributeExpressionExecutors[0].getReturnType();
+        boolean finalTrackFutureStates = trackFutureStates;
+        return new StateFactory<MaxAggregatorState>() {
+            @Override
+            public MaxAggregatorState createNewState() {
+                switch (returnType) {
+                    case FLOAT:
+                        return new MaxAttributeAggregatorStateFloat(finalTrackFutureStates);
+                    case INT:
+                        return new MaxAttributeAggregatorStateInt(finalTrackFutureStates);
+                    case LONG:
+                        return new MaxAttributeAggregatorStateLong(finalTrackFutureStates);
+                    case DOUBLE:
+                        return new MaxAttributeAggregatorStateDouble(finalTrackFutureStates);
+                    default:
+                        throw new OperationNotSupportedException("Max not supported for " + returnType);
+                }
+            }
+        };
     }
 
     public Attribute.Type getReturnType() {
-        return maxOutputAttributeAggregator.getReturnType();
+        return returnType;
     }
 
     @Override
-    public Object processAdd(Object data) {
+    public Object processAdd(Object data, MaxAggregatorState state) {
         if (data == null) {
-            return maxOutputAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return maxOutputAttributeAggregator.processAdd(data);
-    }
-
-    protected Object currentValue() {
-        return null;
+        return state.processAdd(data);
     }
 
     @Override
-    public Object processAdd(Object[] data) {
+    public Object processAdd(Object[] data, MaxAggregatorState state) {
         // will not occur
         return new IllegalStateException("Max cannot process data array, but found " + Arrays.deepToString(data));
     }
 
     @Override
-    public Object processRemove(Object data) {
+    public Object processRemove(Object data, MaxAggregatorState state) {
         if (data == null) {
-            return maxOutputAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return maxOutputAttributeAggregator.processRemove(data);
+        return state.processRemove(data);
     }
 
     @Override
-    public Object processRemove(Object[] data) {
+    public Object processRemove(Object[] data, MaxAggregatorState state) {
         // will not occur
         return new IllegalStateException("Max cannot process data array, but found " + Arrays.deepToString(data));
     }
 
     @Override
-    public boolean canDestroy() {
-        return maxOutputAttributeAggregator.canDestroy();
+    public Object reset(MaxAggregatorState state) {
+        return state.reset();
     }
 
-    @Override
-    public Object reset() {
-        return maxOutputAttributeAggregator.reset();
-    }
+    class MaxAttributeAggregatorStateDouble extends MaxAggregatorState {
 
-    @Override
-    public Map<String, Object> currentState() {
-        return maxOutputAttributeAggregator.currentState();
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        maxOutputAttributeAggregator.restoreState(state);
-    }
-
-    class MaxAttributeAggregatorDouble extends MaxAttributeAggregator {
-
-        private final Attribute.Type type = Attribute.Type.DOUBLE;
         private Deque<Double> maxDeque = null;
         private volatile Double maxValue = null;
 
-        public MaxAttributeAggregatorDouble(boolean trackFutureStates) {
+        public MaxAttributeAggregatorStateDouble(boolean trackFutureStates) {
             if (trackFutureStates) {
                 maxDeque = new LinkedList<>();
             }
-        }
-
-        public Attribute.Type getReturnType() {
-            return type;
         }
 
         @Override
@@ -222,7 +205,7 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             synchronized (this) {
                 state.put("MaxValue", maxValue);
@@ -232,7 +215,7 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public synchronized void restoreState(Map<String, Object> state) {
+        public synchronized void restore(Map<String, Object> state) {
             maxValue = (Double) state.get("MaxValue");
             maxDeque = (Deque<Double>) state.get("MaxDeque");
         }
@@ -242,20 +225,15 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         }
     }
 
-    class MaxAttributeAggregatorFloat extends MaxAttributeAggregator {
+    class MaxAttributeAggregatorStateFloat extends MaxAggregatorState {
 
-        private final Attribute.Type type = Attribute.Type.FLOAT;
         private Deque<Float> maxDeque = null;
         private volatile Float maxValue = null;
 
-        public MaxAttributeAggregatorFloat(boolean trackFutureStates) {
+        public MaxAttributeAggregatorStateFloat(boolean trackFutureStates) {
             if (trackFutureStates) {
                 maxDeque = new LinkedList<>();
             }
-        }
-
-        public Attribute.Type getReturnType() {
-            return type;
         }
 
         @Override
@@ -305,7 +283,7 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             synchronized (this) {
                 state.put("MaxValue", maxValue);
@@ -315,7 +293,7 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public synchronized void restoreState(Map<String, Object> state) {
+        public synchronized void restore(Map<String, Object> state) {
             maxValue = (Float) state.get("MaxValue");
             maxDeque = (Deque<Float>) state.get("MaxDeque");
         }
@@ -326,20 +304,15 @@ public class MaxAttributeAggregator extends AttributeAggregator {
 
     }
 
-    class MaxAttributeAggregatorInt extends MaxAttributeAggregator {
+    class MaxAttributeAggregatorStateInt extends MaxAggregatorState {
 
-        private final Attribute.Type type = Attribute.Type.INT;
         private Deque<Integer> maxDeque = null;
         private volatile Integer maxValue = null;
 
-        public MaxAttributeAggregatorInt(boolean trackFutureStates) {
+        public MaxAttributeAggregatorStateInt(boolean trackFutureStates) {
             if (trackFutureStates) {
                 maxDeque = new LinkedList<>();
             }
-        }
-
-        public Attribute.Type getReturnType() {
-            return type;
         }
 
         @Override
@@ -389,7 +362,7 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             synchronized (this) {
                 state.put("MaxValue", maxValue);
@@ -399,7 +372,7 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public synchronized void restoreState(Map<String, Object> state) {
+        public synchronized void restore(Map<String, Object> state) {
             maxValue = (Integer) state.get("MaxValue");
             maxDeque = (Deque<Integer>) state.get("MaxDeque");
         }
@@ -410,20 +383,15 @@ public class MaxAttributeAggregator extends AttributeAggregator {
 
     }
 
-    class MaxAttributeAggregatorLong extends MaxAttributeAggregator {
+    class MaxAttributeAggregatorStateLong extends MaxAggregatorState {
 
-        private final Attribute.Type type = Attribute.Type.LONG;
         private Deque<Long> maxDeque = null;
         private volatile Long maxValue = null;
 
-        public MaxAttributeAggregatorLong(boolean trackFutureStates) {
+        public MaxAttributeAggregatorStateLong(boolean trackFutureStates) {
             if (trackFutureStates) {
                 maxDeque = new LinkedList<>();
             }
-        }
-
-        public Attribute.Type getReturnType() {
-            return type;
         }
 
         @Override
@@ -473,7 +441,7 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             synchronized (this) {
                 state.put("MaxValue", maxValue);
@@ -483,7 +451,7 @@ public class MaxAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public synchronized void restoreState(Map<String, Object> state) {
+        public synchronized void restore(Map<String, Object> state) {
             maxValue = (Long) state.get("MaxValue");
             maxDeque = (Deque<Long>) state.get("MaxDeque");
         }
@@ -492,6 +460,16 @@ public class MaxAttributeAggregator extends AttributeAggregator {
             return maxValue;
         }
 
+    }
+
+    abstract class MaxAggregatorState extends State {
+        public abstract Object processAdd(Object data);
+
+        public abstract Object processRemove(Object data);
+
+        public abstract Object reset();
+
+        protected abstract Object currentValue();
     }
 
 }

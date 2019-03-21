@@ -21,7 +21,6 @@ package io.siddhi.core.executor.condition;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.FinderStateEvent;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
@@ -64,17 +63,5 @@ public class InConditionExpressionExecutor extends ConditionExpressionExecutor {
             }
         }
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new InConditionExpressionExecutor(table, compiledCondition.cloneCompilation(key),
-                streamEventSize, isMatchingEventAStateEvent, matchingStreamIndex);
-    }
-
-    @Override
-    public void clean() {
-        //ignore
-    }
-
 
 }

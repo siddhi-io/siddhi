@@ -73,8 +73,8 @@
             <class name="io.siddhi.core.query.pattern.absent.LogicalAbsentPatternTestCase"/>
             <class name="io.siddhi.core.query.pattern.absent.EveryAbsentPatternTestCase"/>
 
-            <class name="io.siddhi.core.query.selector.attribute.aggregator.DistinctCountAttributeAggregatorTestCase"/>
-            <class name="io.siddhi.core.query.selector.attribute.aggregator.StdDevAttributeAggregatorTestCase"/>
+            <class name="io.siddhi.core.query.selector.attribute.aggregator.DistinctCountAttributeAggregatorExecutorTestCase"/>
+            <class name="io.siddhi.core.query.selector.attribute.aggregator.StdDevAttributeAggregatorExecutorTestCase"/>
 
             <class name="io.siddhi.core.query.sequence.SequenceTestCase"/>
             <class name="io.siddhi.core.query.sequence.absent.AbsentSequenceTestCase"/>

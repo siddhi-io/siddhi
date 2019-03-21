@@ -28,6 +28,8 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
@@ -35,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link AttributeAggregator} to calculate standard deviation based on an event attribute.
+ * {@link AttributeAggregatorExecutor} to calculate standard deviation based on an event attribute.
  */
 @Extension(
         name = "stdDev",
@@ -57,8 +59,9 @@ import java.util.Map;
                         "based on their arrival and expiry."
         )
 )
-public class StdDevAttributeAggregator extends AttributeAggregator {
-    private StdDevAttributeAggregator stdDevOutputAttributeAggregator;
+public class StdDevAttributeAggregatorExecutor
+        extends AttributeAggregatorExecutor<StdDevAttributeAggregatorExecutor.AggregatorState> {
+    private Attribute.Type returnType;
 
     /**
      * The initialization method for FunctionExecutor
@@ -66,106 +69,85 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link StdDevAttributeAggregator} configuration reader.
+     * @param configReader                 this hold the {@link StdDevAttributeAggregatorExecutor} configuration reader.
      * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<AggregatorState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                                 ProcessingMode processingMode,
+                                                 boolean outputExpectsExpiredEvents, ConfigReader configReader,
+                                                 SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("stdDev aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length
                     + " parameters provided");
         }
-
+        returnType = Attribute.Type.DOUBLE;
         Attribute.Type type = attributeExpressionExecutors[0].getReturnType();
+        return () -> {
+            switch (type) {
+                case INT:
+                    return new StdDevAttributeAggregatorStateInt();
+                case LONG:
+                    return new StdDevAttributeAggregatorStateLong();
+                case FLOAT:
+                    return new StdDevAttributeAggregatorStateFloat();
+                case DOUBLE:
+                    return new StdDevAttributeAggregatorStateDouble();
+                default:
+                    throw new OperationNotSupportedException("stdDev not supported for " + returnType);
+            }
+        };
 
-        switch (type) {
-            case INT:
-                stdDevOutputAttributeAggregator = new StdDevAttributeAggregatorInt();
-                break;
-            case LONG:
-                stdDevOutputAttributeAggregator = new StdDevAttributeAggregatorLong();
-                break;
-            case FLOAT:
-                stdDevOutputAttributeAggregator = new StdDevAttributeAggregatorFloat();
-                break;
-            case DOUBLE:
-                stdDevOutputAttributeAggregator = new StdDevAttributeAggregatorDouble();
-                break;
-            default:
-                throw new OperationNotSupportedException("stdDev not supported for " + type);
-        }
     }
 
     @Override
     public Attribute.Type getReturnType() {
-        return stdDevOutputAttributeAggregator.getReturnType();
+        return returnType;
     }
 
     @Override
-    public Object processAdd(Object data) {
+    public Object processAdd(Object data, AggregatorState state) {
         if (data == null) {
-            return stdDevOutputAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return stdDevOutputAttributeAggregator.processAdd(data);
+        return state.processAdd(data);
     }
 
     @Override
-    public Object processAdd(Object[] data) {
+    public Object processAdd(Object[] data, AggregatorState state) {
         return new IllegalStateException("stdDev cannot process data array, but found " + Arrays.deepToString(data));
     }
 
     @Override
-    public Object processRemove(Object data) {
+    public Object processRemove(Object data, AggregatorState state) {
         if (data == null) {
-            return stdDevOutputAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return stdDevOutputAttributeAggregator.processRemove(data);
+        return state.processRemove(data);
     }
 
     @Override
-    public Object processRemove(Object[] data) {
+    public Object processRemove(Object[] data, AggregatorState state) {
         return new IllegalStateException("stdDev cannot process data array, but found " + Arrays.deepToString(data));
     }
 
-    protected Object currentValue() {
-        return null;
-    }
-
     @Override
-    public boolean canDestroy() {
-        return stdDevOutputAttributeAggregator.canDestroy();
-    }
-
-    @Override
-    public Object reset() {
-        return stdDevOutputAttributeAggregator.reset();
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return stdDevOutputAttributeAggregator.currentState();
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        stdDevOutputAttributeAggregator.restoreState(state);
+    public Object reset(AggregatorState state) {
+        return state.reset();
     }
 
     /**
      * Standard deviation abstrct aggregator for Double values
      */
-    private abstract class StdDevAbstractAttributeAggregatorDouble extends StdDevAttributeAggregator {
-        private final Attribute.Type type = Attribute.Type.DOUBLE;
+    abstract class AggregatorState extends State {
+
         private double mean, stdDeviation, sum;
         private int count = 0;
 
-        @Override
-        public Attribute.Type getReturnType() {
-            return type;
-        }
+        public abstract Object processRemove(Object data);
+
+        public abstract Object processAdd(Object data);
 
         public Object processAdd(double value) {
             // See here for the algorithm: http://www.johndcook.com/blog/standard_deviation/
@@ -204,7 +186,6 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
             return Math.sqrt(stdDeviation / count);
         }
 
-        @Override
         public Object reset() {
             sum = mean = 0.0;
             stdDeviation = 0.0;
@@ -218,7 +199,7 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("Sum", sum);
             state.put("Mean", mean);
@@ -228,7 +209,7 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             sum = (Long) state.get("Sum");
             mean = (Long) state.get("Mean");
             stdDeviation = (Long) state.get("stdDeviation");
@@ -248,7 +229,7 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
     /**
      * Standard deviation aggregator for Double values
      */
-    private class StdDevAttributeAggregatorDouble extends StdDevAbstractAttributeAggregatorDouble {
+    private class StdDevAttributeAggregatorStateDouble extends AggregatorState {
         @Override
         public Object processAdd(Object data) {
             return processAdd(((Double) data).doubleValue());
@@ -263,7 +244,7 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
     /**
      * Standard deviation aggregator for Float values
      */
-    private class StdDevAttributeAggregatorFloat extends StdDevAbstractAttributeAggregatorDouble {
+    private class StdDevAttributeAggregatorStateFloat extends AggregatorState {
         @Override
         public Object processAdd(Object data) {
             return processAdd(((Float) data).doubleValue());
@@ -278,7 +259,7 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
     /**
      * Standard deviation aggregator for Integer values
      */
-    private class StdDevAttributeAggregatorInt extends StdDevAbstractAttributeAggregatorDouble {
+    private class StdDevAttributeAggregatorStateInt extends AggregatorState {
         @Override
         public Object processAdd(Object data) {
             return processAdd(((Integer) data).doubleValue());
@@ -293,7 +274,7 @@ public class StdDevAttributeAggregator extends AttributeAggregator {
     /**
      * Standard deviation aggregator for Long values
      */
-    private class StdDevAttributeAggregatorLong extends StdDevAbstractAttributeAggregatorDouble {
+    private class StdDevAttributeAggregatorStateLong extends AggregatorState {
         @Override
         public Object processAdd(Object data) {
             return processAdd(((Long) data).doubleValue());

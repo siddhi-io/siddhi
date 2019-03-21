@@ -24,6 +24,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.event.stream.populater.SelectiveComplexEventPopulater;
 import io.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
@@ -31,6 +32,8 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 
@@ -39,24 +42,27 @@ import java.util.List;
 
 /**
  * Performs event processing with key based event groups
+ *
+ * @param <S> current state of the processor
  */
-public abstract class GroupingWindowProcessor extends WindowProcessor {
+public abstract class GroupingWindowProcessor<S extends State> extends WindowProcessor<S> {
 
     protected List<Attribute> internalAttributes;
     protected GroupingKeyPopulator groupingKeyPopulator;
 
     @Override
-    protected List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
+    protected StateFactory<S> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors,
-                                   ConfigReader configReader,
-                                   boolean outputExpectsExpiredEvents,
+                                   ConfigReader configReader, StreamEventClonerHolder streamEventClonerHolder,
+                                   boolean outputExpectsExpiredEvents, boolean findToBeExecuted,
                                    SiddhiQueryContext siddhiQueryContext) {
-        init(attributeExpressionExecutors, configReader, outputExpectsExpiredEvents, siddhiQueryContext);
+        StateFactory<S> stateFactory = init(attributeExpressionExecutors, configReader, outputExpectsExpiredEvents,
+                siddhiQueryContext);
         Attribute groupingKey = new Attribute("_groupingKey", Attribute.Type.STRING);
         internalAttributes = new ArrayList<Attribute>(1);
         internalAttributes.add(groupingKey);
         metaStreamEvent.addData(groupingKey);
-        return new ArrayList<>(0);
+        return stateFactory;
     }
 
     /**
@@ -67,13 +73,14 @@ public abstract class GroupingWindowProcessor extends WindowProcessor {
      * @param outputExpectsExpiredEvents   is expired events sent as output
      * @param siddhiQueryContext           the context of the siddhi query
      */
-    protected abstract void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                 boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext);
+    protected abstract StateFactory<S> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                            ConfigReader configReader, boolean outputExpectsExpiredEvents,
+                                            SiddhiQueryContext siddhiQueryContext);
 
     protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                                      StreamEventCloner streamEventCloner,
-                                     ComplexEventPopulater complexEventPopulater) {
-        processEventChunk(streamEventChunk, nextProcessor, streamEventCloner, groupingKeyPopulator);
+                                     ComplexEventPopulater complexEventPopulater, S state) {
+        processEventChunk(streamEventChunk, nextProcessor, streamEventCloner, groupingKeyPopulator, state);
     }
 
     /**
@@ -83,10 +90,11 @@ public abstract class GroupingWindowProcessor extends WindowProcessor {
      * @param nextProcessor        the next processor to which the success events need to be passed
      * @param streamEventCloner    helps to clone the incoming event for local storage or modification
      * @param groupingKeyPopulater helps to populate the events with the grouping key
+     * @param state                current state of the processor
      */
     protected abstract void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk,
                                               Processor nextProcessor, StreamEventCloner streamEventCloner,
-                                              GroupingKeyPopulator groupingKeyPopulater);
+                                              GroupingKeyPopulator groupingKeyPopulater, S state);
 
     public void constructStreamEventPopulater(MetaStreamEvent metaStreamEvent, int streamEventChainIndex) {
         super.constructStreamEventPopulater(metaStreamEvent, streamEventChainIndex);

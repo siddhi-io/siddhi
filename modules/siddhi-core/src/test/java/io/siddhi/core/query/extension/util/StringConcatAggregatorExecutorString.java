@@ -26,8 +26,10 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
-import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
+import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregatorExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute.Type;
 
 import java.util.HashMap;
@@ -52,9 +54,9 @@ import java.util.Map;
                 description = "This will concatenate given input values and return 'hello world'."
         )
 )
-public class StringConcatAggregatorString extends AttributeAggregator {
+public class StringConcatAggregatorExecutorString extends
+        AttributeAggregatorExecutor<StringConcatAggregatorExecutorString.ExecutorState> {
     private static final long serialVersionUID = 1358667438272544590L;
-    private String aggregatedStringValue = "";
     private boolean appendAbc = false;
 
     /**
@@ -63,15 +65,17 @@ public class StringConcatAggregatorString extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link StringConcatAggregatorString} configuration reader.
+     * @param configReader                 this hold the {@link StringConcatAggregatorExecutorString}
+     *                                     configuration reader.
      * @param siddhiQueryContext           current siddhi query context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<ExecutorState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                               ProcessingMode processingMode,
+                                               boolean outputExpectsExpiredEvents, ConfigReader configReader,
+                                               SiddhiQueryContext siddhiQueryContext) {
         appendAbc = Boolean.parseBoolean(configReader.readConfig("append.abc", "false"));
-
+        return () -> new ExecutorState();
     }
 
     @Override
@@ -81,70 +85,75 @@ public class StringConcatAggregatorString extends AttributeAggregator {
 
 
     @Override
-    public Object processAdd(Object data) {
-        aggregatedStringValue = aggregatedStringValue + data;
+    public Object processAdd(Object data, ExecutorState state) {
+        state.aggregatedStringValue = state.aggregatedStringValue + data;
         if (appendAbc) {
-            return aggregatedStringValue + "-abc";
+            return state.aggregatedStringValue + "-abc";
         } else {
-            return aggregatedStringValue;
+            return state.aggregatedStringValue;
         }
     }
 
     @Override
-    public Object processAdd(Object[] data) {
+    public Object processAdd(Object[] data, ExecutorState state) {
         for (Object aData : data) {
-            aggregatedStringValue = aggregatedStringValue + aData;
+            state.aggregatedStringValue = state.aggregatedStringValue + aData;
         }
         if (appendAbc) {
-            return aggregatedStringValue + "-abc";
+            return state.aggregatedStringValue + "-abc";
         } else {
-            return aggregatedStringValue;
+            return state.aggregatedStringValue;
         }
     }
 
 
     @Override
-    public Object processRemove(Object data) {
-        aggregatedStringValue = aggregatedStringValue.replaceFirst(data.toString(), "");
+    public Object processRemove(Object data, ExecutorState state) {
+        state.aggregatedStringValue = state.aggregatedStringValue.replaceFirst(data.toString(), "");
         if (appendAbc) {
-            return aggregatedStringValue + "-abc";
+            return state.aggregatedStringValue + "-abc";
         } else {
-            return aggregatedStringValue;
+            return state.aggregatedStringValue;
         }
     }
 
     @Override
-    public Object processRemove(Object[] data) {
+    public Object processRemove(Object[] data, ExecutorState state) {
         for (Object aData : data) {
-            aggregatedStringValue = aggregatedStringValue.replaceFirst(aData.toString(), "");
+            state.aggregatedStringValue = state.aggregatedStringValue.replaceFirst(aData.toString(), "");
         }
         if (appendAbc) {
-            return aggregatedStringValue + "-abc";
+            return state.aggregatedStringValue + "-abc";
         } else {
-            return aggregatedStringValue;
+            return state.aggregatedStringValue;
         }
     }
 
     @Override
-    public boolean canDestroy() {
-        return aggregatedStringValue != null && aggregatedStringValue.equals("");
+    public Object reset(ExecutorState state) {
+        state.aggregatedStringValue = "";
+        return state.aggregatedStringValue;
     }
 
-    @Override
-    public Object reset() {
-        aggregatedStringValue = "";
-        return aggregatedStringValue;
-    }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("AggregatedStringValue", aggregatedStringValue);
-        return state;
-    }
+    class ExecutorState extends State {
+        private String aggregatedStringValue = "";
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        aggregatedStringValue = (String) state.get("AggregatedStringValue");
+        @Override
+        public boolean canDestroy() {
+            return aggregatedStringValue != null && aggregatedStringValue.equals("");
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("AggregatedStringValue", aggregatedStringValue);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            aggregatedStringValue = (String) state.get("AggregatedStringValue");
+        }
     }
 }

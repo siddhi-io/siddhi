@@ -32,8 +32,6 @@ import io.siddhi.core.query.selector.QuerySelector;
 public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
 
     protected final String lockKey;
-    protected ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<StreamEvent>
-            (batchProcessingAllowed);
     private QuerySelector querySelector;
 
     public SingleProcessStreamReceiver(String streamId, String lockKey, SiddhiQueryContext siddhiQueryContext) {
@@ -46,21 +44,18 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
         this.querySelector = (QuerySelector) ((StreamPreStateProcessor) next).getThisLastProcessor().getNextProcessor();
     }
 
-    public SingleProcessStreamReceiver clone(String key) {
-        return new SingleProcessStreamReceiver(streamId + key, key,
-                siddhiQueryContext);
-    }
-
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {
         ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<StateEvent>(false);
+        ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<StreamEvent>(
+                batchProcessingAllowed);
         synchronized (lockKey) {
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 streamEventChunk.remove();
                 stabilizeStates();
                 currentStreamEventChunk.add(streamEvent);
-                ComplexEventChunk<StateEvent> eventChunk = ((StreamPreStateProcessor) next).processAndReturn
-                        (currentStreamEventChunk);
+                ComplexEventChunk<StateEvent> eventChunk = ((StreamPreStateProcessor) next).
+                        processAndReturn(currentStreamEventChunk);
                 if (eventChunk.getFirst() != null) {
                     retEventChunk.add(eventChunk.getFirst());
                 }

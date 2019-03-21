@@ -25,13 +25,15 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link AttributeAggregator} to calculate count.
+ * {@link AttributeAggregatorExecutor} to calculate count.
  */
 @Extension(
         name = "count",
@@ -48,10 +50,10 @@ import java.util.Map;
                 description = "This will return the count of all the events for time batch in 10 seconds."
         )
 )
-public class CountAttributeAggregator extends AttributeAggregator {
+public class CountAttributeAggregatorExecutor
+        extends AttributeAggregatorExecutor<CountAttributeAggregatorExecutor.AggregatorState> {
 
     private static Attribute.Type type = Attribute.Type.LONG;
-    private long count = 0L;
 
     /**
      * The initialization method for FunctionExecutor
@@ -59,13 +61,16 @@ public class CountAttributeAggregator extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link CountAttributeAggregator} configuration reader.
+     * @param configReader                 this hold the {@link CountAttributeAggregatorExecutor} configuration reader.
      * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<AggregatorState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                                 ProcessingMode processingMode,
+                                                 boolean outputExpectsExpiredEvents,
+                                                 ConfigReader configReader,
+                                                 SiddhiQueryContext siddhiQueryContext) {
+        return () -> new AggregatorState();
 
     }
 
@@ -74,49 +79,54 @@ public class CountAttributeAggregator extends AttributeAggregator {
     }
 
     @Override
-    public Object processAdd(Object data) {
-        count++;
-        return count;
+    public Object processAdd(Object data, AggregatorState state) {
+        state.count++;
+        return state.count;
     }
 
     @Override
-    public Object processAdd(Object[] data) {
-        count++;
-        return count;
+    public Object processAdd(Object[] data, AggregatorState state) {
+        state.count++;
+        return state.count;
     }
 
     @Override
-    public Object processRemove(Object data) {
-        count--;
-        return count;
+    public Object processRemove(Object data, AggregatorState state) {
+        state.count--;
+        return state.count;
     }
 
     @Override
-    public Object processRemove(Object[] data) {
-        count--;
-        return count;
+    public Object processRemove(Object[] data, AggregatorState state) {
+        state.count--;
+        return state.count;
     }
 
     @Override
-    public Object reset() {
-        count = 0L;
-        return count;
+    public Object reset(AggregatorState state) {
+        state.count = 0L;
+        return state.count;
     }
 
-    @Override
-    public boolean canDestroy() {
-        return count == 0;
-    }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("Count", count);
-        return state;
-    }
+    class AggregatorState extends State {
+        private long count = 0L;
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        count = (long) state.get("Count");
+        @Override
+        public boolean canDestroy() {
+            return count == 0;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("Count", count);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            count = (long) state.get("Count");
+        }
     }
 }

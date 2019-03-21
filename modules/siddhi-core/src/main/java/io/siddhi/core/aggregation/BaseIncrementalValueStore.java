@@ -19,12 +19,17 @@
 package io.siddhi.core.aggregation;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.executor.ExpressionExecutor;
-import io.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.executor.VariableExpressionExecutor;
+import io.siddhi.core.util.snapshot.state.PartitionStateHolder;
+import io.siddhi.core.util.snapshot.state.SingleStateHolder;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,50 +38,56 @@ import java.util.Map;
  * Store for maintaining the base values related to incremental aggregation. (e.g. for average,
  * the base incremental values would be sum and count. The timestamp too is stored here.
  */
-public class BaseIncrementalValueStore implements Snapshotable {
-    private long timestamp; // This is the starting timeStamp of aggregates
-    private Object[] values;
+public class BaseIncrementalValueStore {
+    private StateHolder<ValueState> valueStateHolder;
+    private StateHolder<StoreState> storeStateHolder;
     private List<ExpressionExecutor> expressionExecutors;
-    private boolean isProcessed = false;
     private StreamEventPool streamEventPool;
-    private String elementId;
-    private SiddhiAppContext siddhiAppContext;
-    private String aggregatorName;
-    private ExpressionExecutor shouldUpdateExpressionExecutor;
+    private ExpressionExecutor shouldUpdateTimestamp;
+    private long initialTimestamp;
 
-    public BaseIncrementalValueStore(long timeStamp, List<ExpressionExecutor> expressionExecutors,
+    public BaseIncrementalValueStore(List<ExpressionExecutor> expressionExecutors,
                                      StreamEventPool streamEventPool,
-                                     SiddhiAppContext siddhiAppContext, String aggregatorName,
-                                     ExpressionExecutor shouldUpdateExpressionExecutor) {
-        this.timestamp = timeStamp;
-        this.values = new Object[expressionExecutors.size() + 1];
+                                     SiddhiQueryContext siddhiQueryContext, String aggregatorName,
+                                     ExpressionExecutor shouldUpdateTimestamp, long initialTimestamp,
+                                     boolean groupBy, boolean local) {
         this.expressionExecutors = expressionExecutors;
         this.streamEventPool = streamEventPool;
-        this.siddhiAppContext = siddhiAppContext;
-        this.aggregatorName = aggregatorName;
-        this.shouldUpdateExpressionExecutor = shouldUpdateExpressionExecutor;
-        if (elementId == null) {
-            elementId = "IncrementalBaseStore-" + siddhiAppContext.getElementIdGenerator().createNewId();
-        }
-        if (aggregatorName != null) {
-            siddhiAppContext.getSnapshotService().addSnapshotable(aggregatorName, this);
+        this.shouldUpdateTimestamp = shouldUpdateTimestamp;
+        this.initialTimestamp = initialTimestamp;
+        if (!local) {
+            this.valueStateHolder = siddhiQueryContext.generateStateHolder(aggregatorName + "-" +
+                    this.getClass().getName() + "-value", groupBy, () -> new ValueState());
+            this.storeStateHolder = siddhiQueryContext.generateStateHolder(aggregatorName + "-" +
+                    this.getClass().getName(), false, () -> new StoreState());
+        } else {
+            this.valueStateHolder = new PartitionStateHolder(() -> new ValueState());
+            this.storeStateHolder = new SingleStateHolder(() -> new StoreState());
         }
     }
 
-    public void clearValues() {
-        this.values = new Object[expressionExecutors.size() + 1];
+    public void clearValues(long startTimeOfNewAggregates, StreamEvent resetEvent) {
+        this.initialTimestamp = startTimeOfNewAggregates;
+        setTimestamp(startTimeOfNewAggregates);
+        setProcessed(false);
+        Map<String, ValueState> states = this.valueStateHolder.getAllStates();
+        try {
+            for (ValueState storeState : states.values()) {
+                storeState.values = null;
+                storeState.lastTimestamp = 0;
+            }
+        } finally {
+            this.valueStateHolder.returnStates(states);
+        }
     }
 
     public void setValue(Object value, int position) {
-        values[position] = value;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+        ValueState state = this.valueStateHolder.getState();
+        try {
+            state.values[position] = value;
+        } finally {
+            this.valueStateHolder.returnState(state);
+        }
     }
 
     public List<ExpressionExecutor> getExpressionExecutors() {
@@ -84,66 +95,285 @@ public class BaseIncrementalValueStore implements Snapshotable {
     }
 
     public boolean isProcessed() {
-        return isProcessed;
+        StoreState state = this.storeStateHolder.getState();
+        try {
+            return state.isProcessed;
+        } finally {
+            this.storeStateHolder.returnState(state);
+        }
     }
 
     public void setProcessed(boolean isProcessed) {
-        this.isProcessed = isProcessed;
-    }
-
-    public StreamEvent createStreamEvent() {
-        StreamEvent streamEvent = streamEventPool.borrowEvent();
-        streamEvent.setTimestamp(timestamp);
-        setValue(timestamp, 0);
-        streamEvent.setOutputData(values);
-        return streamEvent;
-    }
-
-    public BaseIncrementalValueStore cloneStore(String key, long timestamp) {
-        List<ExpressionExecutor> newExpressionExecutors = new ArrayList<>(expressionExecutors.size());
-        expressionExecutors
-                .forEach(expressionExecutor -> newExpressionExecutors.add(expressionExecutor.cloneExecutor(key)));
-        ExpressionExecutor newShouldUpdateExpressionExecutor =
-                (shouldUpdateExpressionExecutor == null) ? null : shouldUpdateExpressionExecutor.cloneExecutor(key);
-        return new BaseIncrementalValueStore(timestamp, newExpressionExecutors, streamEventPool, siddhiAppContext,
-                aggregatorName, newShouldUpdateExpressionExecutor);
-    }
-
-    public ExpressionExecutor getShouldUpdateExpressionExecutor() {
-        return shouldUpdateExpressionExecutor;
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("Timestamp", timestamp);
-        state.put("Values", values);
-        state.put("IsProcessed", isProcessed);
-        return state;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        timestamp = (long) state.get("Timestamp");
-        values = (Object[]) state.get("Values");
-        isProcessed = (boolean) state.get("IsProcessed");
-    }
-
-    @Override
-    public String getElementId() {
-        return elementId;
-    }
-
-    @Override
-    public void clean() {
-        for (ExpressionExecutor expressionExecutor : expressionExecutors) {
-            expressionExecutor.clean();
-        }
-        if (shouldUpdateExpressionExecutor != null) {
-            shouldUpdateExpressionExecutor.clean();
-        }
-        if (aggregatorName != null) {
-            siddhiAppContext.getSnapshotService().removeSnapshotable(aggregatorName, this);
+        StoreState state = this.storeStateHolder.getState();
+        try {
+            state.isProcessed = isProcessed;
+        } finally {
+            this.storeStateHolder.returnState(state);
         }
     }
+
+    private long getTimestamp() {
+        StoreState state = this.storeStateHolder.getState();
+        try {
+            return state.timestamp;
+        } finally {
+            this.storeStateHolder.returnState(state);
+        }
+    }
+
+    private void setTimestamp(long timestamp) {
+        StoreState state = this.storeStateHolder.getState();
+        try {
+            state.timestamp = timestamp;
+        } finally {
+            this.storeStateHolder.returnState(state);
+        }
+    }
+
+    public Map<String, StreamEvent> getGroupedByEvents() {
+        Map<String, StreamEvent> groupedByEvents = new HashMap<>();
+
+        if (isProcessed()) {
+            Map<String, ValueState> baseIncrementalValueStoreMap = this.valueStateHolder.getAllStates();
+            try {
+                for (Map.Entry<String, ValueState> state : baseIncrementalValueStoreMap.entrySet()) {
+                    StreamEvent streamEvent = streamEventPool.borrowEvent();
+                    long timestamp = getTimestamp();
+                    streamEvent.setTimestamp(timestamp);
+                    state.getValue().setValue(timestamp, 0);
+                    streamEvent.setOutputData(state.getValue().values);
+                    groupedByEvents.put(state.getKey(), streamEvent);
+                }
+            } finally {
+                this.valueStateHolder.returnStates(baseIncrementalValueStoreMap);
+            }
+        }
+        return groupedByEvents;
+    }
+
+    public ComplexEventChunk<StreamEvent> getProcessedEventChunk() {
+        ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(true);
+        Map<String, ValueState> baseIncrementalValueStoreMap = this.valueStateHolder.getAllStates();
+        try {
+            for (ValueState state : baseIncrementalValueStoreMap.values()) {
+                if (isProcessed()) {
+                    StreamEvent streamEvent = streamEventPool.borrowEvent();
+                    long timestamp = getTimestamp();
+                    streamEvent.setTimestamp(timestamp);
+                    state.setValue(timestamp, 0);
+                    streamEvent.setOutputData(state.values);
+                    streamEventChunk.add(streamEvent);
+                }
+            }
+        } finally {
+            this.valueStateHolder.returnStates(baseIncrementalValueStoreMap);
+        }
+        return streamEventChunk;
+    }
+
+//    public BaseIncrementalValueStore cloneStore(String key, long timestamp) {
+//        List<ExpressionExecutor> newExpressionExecutors = new ArrayList<>(expressionExecutors.size());
+//        expressionExecutors
+//                .forEach(expressionExecutor -> newExpressionExecutors.add(expressionExecutor.cloneExecutor(key)));
+//        ExpressionExecutor newShouldUpdateExpressionExecutor =
+//                (shouldUpdateExpressionExecutor == null) ? null : shouldUpdateExpressionExecutor.cloneExecutor(key);
+//        return new BaseIncrementalValueStore(newExpressionExecutors, streamEventPool, siddhiAppContext,
+//                aggregatorName, newShouldUpdateExpressionExecutor);
+//    }
+
+    public void process(StreamEvent streamEvent) {
+        ValueState state = valueStateHolder.getState();
+        try {
+            boolean shouldUpdate = true;
+            if (shouldUpdateTimestamp != null) {
+                shouldUpdate = (boolean) shouldUpdate(
+                        shouldUpdateTimestamp.execute(streamEvent), state);
+            }
+            for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
+                if (shouldUpdate) {
+                    ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+                    state.setValue(expressionExecutor.execute(streamEvent), i + 1);
+                } else {
+                    ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+                    if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                        state.setValue(expressionExecutor.execute(streamEvent), i + 1);
+                    }
+                }
+            }
+            setProcessed(true);
+        } finally {
+            valueStateHolder.returnState(state);
+        }
+//        List<ExpressionExecutor> expressionExecutors = baseIncrementalValueStore.getExpressionExecutors();
+//        boolean shouldUpdate = baseIncrementalValueStore.;
+//        if (shouldUpdateExpressionExecutor != null) {
+//            shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
+//        }
+//        baseIncrementalValueStore.setProcessed(true);
+//        for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
+//            if (shouldUpdate) {
+//                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+//                baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
+//            } else {
+//                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+//                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+//                    baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
+//                }
+//            }
+//        }
+    }
+
+    public void process(Map<String, StreamEvent> groupedByEvents) {
+        for (Map.Entry<String, StreamEvent> eventEntry : groupedByEvents.entrySet()) {
+            synchronized (this) {
+                SiddhiAppContext.startGroupByFlow(eventEntry.getKey() + "-" +
+                        eventEntry.getValue().getTimestamp());
+                ValueState state = valueStateHolder.getState();
+                try {
+                    boolean shouldUpdate = true;
+                    if (shouldUpdateTimestamp != null) {
+                        shouldUpdate = (boolean) shouldUpdate(
+                                shouldUpdateTimestamp.execute(eventEntry.getValue()), state);
+                    }
+                    for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
+                        if (shouldUpdate) {
+                            ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+                            state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
+                        } else {
+                            ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+                            if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                                state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
+                            }
+                        }
+                    }
+                    setProcessed(true);
+                } finally {
+                    valueStateHolder.returnState(state);
+                    SiddhiAppContext.stopGroupByFlow();
+                }
+            }
+        }
+    }
+
+    private Object shouldUpdate(Object data, ValueState state) {
+        long timestamp = (long) data;
+        if (timestamp >= state.lastTimestamp) {
+            state.lastTimestamp = timestamp;
+            return true;
+        }
+        return false;
+    }
+
+    public Object shouldUpdate(Object data) {
+        ValueState state = this.valueStateHolder.getState();
+        try {
+            long timestamp = (long) data;
+            if (timestamp >= state.lastTimestamp) {
+                state.lastTimestamp = timestamp;
+                return true;
+            }
+            return false;
+        } finally {
+            this.valueStateHolder.returnState(state);
+        }
+
+    }
+
+//    public void process() {
+//        ValueStoreState state = this.stateHolder.getState();
+//        try {
+//            StreamEvent streamEvent = streamEventPool.borrowEvent();
+//            streamEvent.setTimestamp(state.timestamp);
+//            state.setValue(state.timestamp, 0);
+//            streamEvent.setOutputData(state.values);
+//
+//            boolean shouldUpdate = true;
+//            if (shouldUpdateExpressionExecutor != null) {
+//                shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
+//            }
+//
+//            for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
+//                if (shouldUpdate) {
+//                    ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+//                    state.setValue(expressionExecutor.execute(streamEvent), i + 1);
+//                } else {
+//                    ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
+//                    if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+//                        state.setValue(expressionExecutor.execute(streamEvent), i + 1);
+//                    }
+//                }
+//            }
+//            state.isProcessed = true;
+//        } finally {
+//            this.stateHolder.returnState(state);
+//        }
+//    }
+
+    class StoreState extends State {
+        private long timestamp;
+        private boolean isProcessed = false;
+
+        public StoreState() {
+            this.timestamp = initialTimestamp;
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return !isProcessed;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("Timestamp", timestamp);
+            state.put("IsProcessed", isProcessed);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            timestamp = (long) state.get("Timestamp");
+            isProcessed = (boolean) state.get("IsProcessed");
+        }
+
+        public void setIfAbsentTimestamp(long timestamp) {
+            if (this.timestamp == -1) {
+                this.timestamp = timestamp;
+            }
+        }
+    }
+
+    class ValueState extends State {
+        private Object[] values;
+        public long lastTimestamp = 0;
+
+        public ValueState() {
+            this.values = new Object[expressionExecutors.size() + 1];
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return values == null && lastTimestamp == 0;
+        }
+
+        public void setValue(Object value, int position) {
+            values[position] = value;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("Values", values);
+            state.put("LastTimestamp", lastTimestamp);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            values = (Object[]) state.get("Values");
+            lastTimestamp = (Long) state.get("LastTimestamp");
+        }
+
+    }
+
 }

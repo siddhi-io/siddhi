@@ -27,6 +27,8 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.HashMap;
@@ -35,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * {@link AttributeAggregator} to return a union of an aggregation of sets.
+ * {@link AttributeAggregatorExecutor} to return a union of an aggregation of sets.
  */
 @Extension(
         name = "unionSet",
@@ -62,13 +64,8 @@ import java.util.Set;
                         "stock symbols received during a sliding window of 10 seconds."
         )
 )
-public class UnionSetAttributeAggregator extends AttributeAggregator {
-
-    /**
-     * This map aggregates the count per each distinct element
-     */
-    private Map<Object, Integer> counter = null;
-    private Set set = new HashSet();
+public class UnionSetAttributeAggregatorExecutor
+        extends AttributeAggregatorExecutor<UnionSetAttributeAggregatorExecutor.AggregatorState> {
 
     /**
      * The initialization method for FunctionExecutor
@@ -76,13 +73,14 @@ public class UnionSetAttributeAggregator extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link CountAttributeAggregator} configuration reader.
+     * @param configReader                 this hold the {@link CountAttributeAggregatorExecutor} configuration reader.
      * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<AggregatorState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                                 ProcessingMode processingMode,
+                                                 boolean outputExpectsExpiredEvents, ConfigReader configReader,
+                                                 SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("unionSet aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
@@ -91,9 +89,8 @@ public class UnionSetAttributeAggregator extends AttributeAggregator {
             throw new OperationNotSupportedException("Parameter passed to unionSet aggregator should be of type" +
                     " object but found: " + attributeExpressionExecutors[0].getReturnType());
         }
-        if (processingMode == ProcessingMode.SLIDE || outputExpectsExpiredEvents) {
-            counter = new HashMap<>();
-        }
+        return () -> new AggregatorState(processingMode, outputExpectsExpiredEvents);
+
     }
 
     public Attribute.Type getReturnType() {
@@ -101,87 +98,104 @@ public class UnionSetAttributeAggregator extends AttributeAggregator {
     }
 
     @Override
-    public Object processAdd(Object data) {
+    public Object processAdd(Object data, AggregatorState state) {
         Set inputSet = (Set) data;
         for (Object o : inputSet) {
-            set.add(o);
-            if (counter != null) {
-                Integer currentCount = counter.get(o);
+            state.set.add(o);
+            if (state.counter != null) {
+                Integer currentCount = state.counter.get(o);
                 if (currentCount == null) {
-                    counter.put(o, 1);
+                    state.counter.put(o, 1);
                 } else {
-                    counter.put(o, currentCount + 1);
+                    state.counter.put(o, currentCount + 1);
                 }
             }
         }
         // Creating a new set object as the returned set reference is kept until the aggregated values are
         // inserted into the store
         Set returnSet = new HashSet();
-        returnSet.addAll(set);
+        returnSet.addAll(state.set);
         return returnSet;
     }
 
     @Override
-    public Object processAdd(Object[] data) {
+    public Object processAdd(Object[] data, AggregatorState state) {
         //UnionSet can have only one input parameter, hence this will not be invoked.
         return null;
     }
 
     @Override
-    public Object processRemove(Object data) {
+    public Object processRemove(Object data, AggregatorState state) {
         Set newSet = (Set) data;
         for (Object o : newSet) {
-            if (counter != null) {
-                Integer currentCount = counter.get(o);
+            if (state.counter != null) {
+                Integer currentCount = state.counter.get(o);
                 if (currentCount == null) {
                     //means o does not exist in the counter map or in the set hence doing nothing
                 } else if (currentCount == 0) {
                     throw new IllegalStateException("Error occurred when removing element from " +
                             "union-set for element: " + o.toString());
                 } else if (currentCount == 1) {
-                    set.remove(o);
+                    state.set.remove(o);
                 } else {
-                    counter.put(o, currentCount - 1);
+                    state.counter.put(o, currentCount - 1);
                 }
             } else {
-                set.remove(o);
+                state.set.remove(o);
             }
         }
         Set returnSet = new HashSet();
-        returnSet.addAll(set);
+        returnSet.addAll(state.set);
         return returnSet;
     }
 
     @Override
-    public Object processRemove(Object[] data) {
+    public Object processRemove(Object[] data, AggregatorState state) {
         //UnionSet can have only one input parameter, hence this will not be invoked.
         return null;
     }
 
     @Override
-    public Object reset() {
-        set.clear();
-        counter.clear();
+    public Object reset(AggregatorState state) {
+        state.set.clear();
+        if (state.counter != null) {
+            state.counter.clear();
+        }
         Set returnSet = new HashSet();
         return returnSet;   // returning an empty set.
     }
 
-    @Override
-    public boolean canDestroy() {
-        return set.size() == 0;
-    }
+    class AggregatorState extends State {
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("Set", set);
-        state.put("Counter", counter);
-        return state;
-    }
+        /**
+         * This map aggregates the count per each distinct element
+         */
+        private Map<Object, Integer> counter = null;
+        private Set set = new HashSet();
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        set = (Set) state.get("Set");
-        counter = (Map) state.get("Counter");
+        public AggregatorState(ProcessingMode processingMode, boolean outputExpectsExpiredEvents) {
+            if (processingMode == ProcessingMode.SLIDE || outputExpectsExpiredEvents) {
+                counter = new HashMap<>();
+            }
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return set.size() == 0;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("Set", set);
+            state.put("Counter", counter);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            set = (Set) state.get("Set");
+            counter = (Map) state.get("Counter");
+        }
     }
 }

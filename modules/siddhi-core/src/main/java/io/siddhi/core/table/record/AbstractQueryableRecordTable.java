@@ -255,14 +255,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             this.compiledSelection = compiledSelection;
         }
 
-        @Override
-        public CompiledSelection cloneCompilation(String key) {
-            Map<String, ExpressionExecutor> newVariableExpressionExecutorMap = new HashMap<>();
-            for (Map.Entry<String, ExpressionExecutor> entry : variableExpressionExecutorMap.entrySet()) {
-                newVariableExpressionExecutorMap.put(entry.getKey(), entry.getValue().cloneExecutor(key));
-            }
-            return new RecordStoreCompiledSelection(newVariableExpressionExecutorMap, compiledSelection);
-        }
     }
 
     /**

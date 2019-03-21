@@ -212,7 +212,7 @@ public class DefinitionParserHelper {
             table.initTable(tableDefinition, tableStreamEventPool, tableStreamEventCloner, configReader,
                     siddhiAppContext, recordTableHandler);
             if (recordTableHandler != null) {
-                recordTableHandlerManager.registerRecordTableHandler(recordTableHandler.getElementId(),
+                recordTableHandlerManager.registerRecordTableHandler(recordTableHandler.getId(),
                         recordTableHandler);
             }
             tableMap.putIfAbsent(tableDefinition.getId(), table);
@@ -372,10 +372,8 @@ public class DefinitionParserHelper {
                     ExceptionUtil.populateQueryContext(t, sourceAnnotation, siddhiAppContext);
                     throw t;
                 }
-                siddhiAppContext.getSnapshotService().addSnapshotable(source.getStreamDefinition().getId(), source);
                 if (sourceHandlerManager != null) {
-                    sourceHandlerManager.registerSourceHandler(sourceHandler.getElementId(), sourceHandler);
-                    siddhiAppContext.getSnapshotService().addSnapshotable(streamDefinition.getId(), sourceHandler);
+                    sourceHandlerManager.registerSourceHandler(sourceHandler.getId(), sourceHandler);
                 }
                 List<Source> eventSources = eventSourceMap.get(streamDefinition.getId());
                 if (eventSources == null) {
@@ -553,9 +551,7 @@ public class DefinitionParserHelper {
                         }
 
                         if (sinkHandlerManager != null) {
-                            sinkHandlerManager.registerSinkHandler(sinkHandler.getElementId(), sinkHandler);
-                            siddhiAppContext.getSnapshotService().addSnapshotable(streamDefinition.getId(),
-                                    sinkHandler);
+                            sinkHandlerManager.registerSinkHandler(sinkHandler.getId(), sinkHandler);
                         }
 
                         validateSinkMapperCompatibility(streamDefinition, sinkType, mapType, sink, sinkMapper,
@@ -567,8 +563,6 @@ public class DefinitionParserHelper {
                         if (groupDeterminer != null) {
                             sink.getMapper().setGroupDeterminer(groupDeterminer);
                         }
-
-                        siddhiAppContext.getSnapshotService().addSnapshotable(sink.getStreamDefinition().getId(), sink);
 
                         List<Sink> eventSinks = eventSinkMap.get(streamDefinition.getId());
                         if (eventSinks == null) {

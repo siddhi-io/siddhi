@@ -34,11 +34,6 @@ public class PatternSingleProcessStreamReceiver extends SingleProcessStreamRecei
         super(streamId, lockKey, siddhiQueryContext);
     }
 
-    public PatternSingleProcessStreamReceiver clone(String key) {
-        return new PatternSingleProcessStreamReceiver(streamId + key, key,
-                siddhiQueryContext);
-    }
-
     protected void stabilizeStates() {
         if (stateProcessorsSize != 0) {
             stateProcessors.get(0).updateState();

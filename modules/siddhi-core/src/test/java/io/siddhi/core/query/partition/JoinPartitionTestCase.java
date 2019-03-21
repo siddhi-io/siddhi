@@ -83,21 +83,25 @@ public class JoinPartitionTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testJoinPartition1")
     public void testJoinPartition2() throws InterruptedException {
         log.info("Join partition test2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String siddhiApp = "define stream cseEventStream (symbol string, user string,volume int);  define stream " +
-                "twitterStream (user string, tweet string, company string);"
-                + "partition with (user of cseEventStream, user of twitterStream) begin @info(name = 'query1') " +
-                "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
-                "on cseEventStream.symbol== twitterStream.company " +
-                "select cseEventStream.symbol as symbol, cseEventStream.user as user,twitterStream.tweet, " +
-                "cseEventStream.volume " +
-                "insert all events into outputStream ;" + "" +
-                "end ";
+        String siddhiApp = "" +
+                "define stream cseEventStream (symbol string, user string,volume int); " +
+                "define stream twitterStream (user string, tweet string, company string); " +
+                "partition with (user of cseEventStream, user of twitterStream) " +
+                "begin " +
+                "   @info(name = 'query1') " +
+                "   from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
+                "       on cseEventStream.symbol== twitterStream.company " +
+                "   select cseEventStream.symbol as symbol, cseEventStream.user as user,twitterStream.tweet, " +
+                "       cseEventStream.volume " +
+                "   insert all events into outputStream ;" +
+                "end " +
+                "";
 
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
@@ -129,21 +133,28 @@ public class JoinPartitionTestCase {
     }
 
 
-    @Test
+    @Test(dependsOnMethods = "testJoinPartition2")
     public void testJoinPartition3() throws InterruptedException {
         log.info("Join partition test3");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String siddhiApp = "define stream cseEventStream (symbol string, user string,volume int);  define stream " +
-                "twitterStream (user string, tweet string, company string);"
-                + "partition with (user of cseEventStream, user of twitterStream) begin @info(name = 'query1') " +
-                "from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
-                "on cseEventStream.symbol== twitterStream.company " +
-                "select cseEventStream.symbol as symbol, cseEventStream.user as user,twitterStream.tweet, " +
-                "cseEventStream.volume " +
-                "insert all events into #outputStream ;" +
-                "@info(name = 'query2') from #outputStream select symbol,user insert all events into outStream;" +
+        String siddhiApp = "" +
+                "define stream cseEventStream (symbol string, user string,volume int);  " +
+                "define stream twitterStream (user string, tweet string, company string);"                +
+                "partition with (user of cseEventStream, user of twitterStream) " +
+                "begin " +
+                "   @info(name = 'query1') " +
+                "   from cseEventStream#window.time(1 sec) join twitterStream#window.time(1 sec) " +
+                "       on cseEventStream.symbol== twitterStream.company " +
+                "   select cseEventStream.symbol as symbol, cseEventStream.user as user,twitterStream.tweet, " +
+                "       cseEventStream.volume " +
+                "   insert all events into #outputStream ;" +
+                "" +
+                "   @info(name = 'query2') " +
+                "   from #outputStream " +
+                "   select symbol,user " +
+                "   insert all events into outStream;" +
                 "end ";
 
 
@@ -167,17 +178,16 @@ public class JoinPartitionTestCase {
 
         cseEventStreamHandler.send(new Object[]{"IBM", "User2", 100});
         twitterStreamHandler.send(new Object[]{"User2", "Hello World", "IBM"});
-
         twitterStreamHandler.send(new Object[]{"User2", "World", "IBM"});
 
-        SiddhiTestHelper.waitForEvents(100, 8, count, 6000);
+        SiddhiTestHelper.waitForEvents(200, 8, count, 6000);
         AssertJUnit.assertEquals(8, count.get());
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testJoinPartition3")
     public void testJoinPartition4() throws InterruptedException {
         log.info("Join partition test4");
 
@@ -229,7 +239,7 @@ public class JoinPartitionTestCase {
 
     }
 
-    @Test
+    @Test//(dependsOnMethods = "testJoinPartition4")
     public void testJoinPartition5() throws InterruptedException {
         log.info("Join partition test5");
 
@@ -281,7 +291,7 @@ public class JoinPartitionTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testJoinPartition5")
     public void testJoinPartition6() throws InterruptedException {
         log.info("Join partition test6");
 
@@ -328,7 +338,7 @@ public class JoinPartitionTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testJoinPartition6")
     public void testJoinPartition7() throws InterruptedException {
         log.info("Join partition test7");
 
@@ -377,7 +387,7 @@ public class JoinPartitionTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testJoinPartition7")
     public void testJoinPartition8() throws InterruptedException {
         log.info("Join partition test8");
 
@@ -419,7 +429,7 @@ public class JoinPartitionTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testJoinPartition8")
     public void testJoinPartition9() throws InterruptedException {
         log.info("Join partition test9");
 
@@ -467,7 +477,7 @@ public class JoinPartitionTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testJoinPartition9")
     public void testJoinPartition10() throws InterruptedException {
         log.info("Join partition test10");
 

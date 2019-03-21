@@ -48,10 +48,4 @@ public class AbsentLogicalPostStateProcessor extends LogicalPostStateProcessor {
         ((AbsentPreStateProcessor) thisStatePreProcessor).updateLastArrivalTime(streamEvent.getTimestamp());
     }
 
-    @Override
-    public PostStateProcessor cloneProcessor(String key) {
-        AbsentLogicalPostStateProcessor logicalPostStateProcessor = new AbsentLogicalPostStateProcessor(type);
-        cloneProperties(logicalPostStateProcessor);
-        return logicalPostStateProcessor;
-    }
 }

@@ -27,11 +27,11 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
-
-import java.util.Map;
 
 /**
  * Executor class for ifThenElse function. Function execution logic is implemented in execute here.
@@ -90,8 +90,8 @@ public class IfThenElseFunctionExecutor extends FunctionExecutor {
     Attribute.Type returnType;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors,
-                        ConfigReader configReader, SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors,
+                                ConfigReader configReader, SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 3) {
             // check whether all the arguments passed
             throw new SiddhiAppValidationException("Invalid no of arguments passed to ifThenElse() function, " +
@@ -110,10 +110,11 @@ public class IfThenElseFunctionExecutor extends FunctionExecutor {
         } else {
             returnType = attributeExpressionExecutors[1].getReturnType();
         }
+        return null;
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         // check whether first argument true or null
         if (Boolean.TRUE.equals(data[0])) {
             return data[1];
@@ -123,7 +124,7 @@ public class IfThenElseFunctionExecutor extends FunctionExecutor {
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         // Since the e function takes in multiple parameters, this method does not get called. Hence, not implemented.
         return null;
     }
@@ -131,16 +132,6 @@ public class IfThenElseFunctionExecutor extends FunctionExecutor {
     @Override
     public Attribute.Type getReturnType() {
         return returnType;
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return null; // No need to maintain a state.
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        // Since there's no need to maintain a state, nothing needs to be done here.
     }
 
     @Override
@@ -152,8 +143,7 @@ public class IfThenElseFunctionExecutor extends FunctionExecutor {
                             condition,
                             (condition) ? attributeExpressionExecutors[1].execute(event) : null,
                             (!condition) ? attributeExpressionExecutors[2].execute(event) : null
-                    }
-            );
+                    });
         } catch (Exception e) {
             throw new SiddhiAppRuntimeException(e.getMessage() + ". Exception on class '" + this.getClass().getName()
                     + "'", e);

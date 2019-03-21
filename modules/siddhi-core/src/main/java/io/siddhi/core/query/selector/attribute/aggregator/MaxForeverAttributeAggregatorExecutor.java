@@ -28,6 +28,8 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
@@ -35,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link AttributeAggregator} to calculate max value for life time based on an event attribute.
+ * {@link AttributeAggregatorExecutor} to calculate max value for life time based on an event attribute.
  */
 @Extension(
         name = "maxForever",
@@ -58,9 +60,10 @@ import java.util.Map;
                         " the lifetime of the query."
         )
 )
-public class MaxForeverAttributeAggregator extends AttributeAggregator {
+public class MaxForeverAttributeAggregatorExecutor
+        extends AttributeAggregatorExecutor<MaxForeverAttributeAggregatorExecutor.MaxAggregatorState> {
 
-    private MaxForeverAttributeAggregator maxForeverAttributeAggregator;
+    private Attribute.Type returnType;
 
     /**
      * The initialization method for FunctionExecutor
@@ -68,103 +71,84 @@ public class MaxForeverAttributeAggregator extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link MaxForeverAttributeAggregator} configuration reader.
+     * @param configReader                 this hold the {@link MaxForeverAttributeAggregatorExecutor}
+     *                                     configuration reader.
      * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<MaxAggregatorState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                                    ProcessingMode processingMode,
+                                                    boolean outputExpectsExpiredEvents, ConfigReader configReader,
+                                                    SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("MaxForever aggregator has to have exactly 1 parameter, " +
                     "currently " +
                     attributeExpressionExecutors.length + " parameters provided");
         }
-        Attribute.Type type = attributeExpressionExecutors[0].getReturnType();
-        switch (type) {
-            case FLOAT:
-                maxForeverAttributeAggregator = new MaxForeverAttributeAggregatorFloat();
-                break;
-            case INT:
-                maxForeverAttributeAggregator = new MaxForeverAttributeAggregatorInt();
-                break;
-            case LONG:
-                maxForeverAttributeAggregator = new MaxForeverAttributeAggregatorLong();
-                break;
-            case DOUBLE:
-                maxForeverAttributeAggregator = new MaxForeverAttributeAggregatorDouble();
-                break;
-            default:
-                throw new OperationNotSupportedException("MaxForever not supported for " + type);
-        }
+        returnType = attributeExpressionExecutors[0].getReturnType();
+        return new StateFactory<MaxAggregatorState>() {
+            @Override
+            public MaxAggregatorState createNewState() {
+                switch (returnType) {
+                    case FLOAT:
+                        return new MaxForeverAttributeAggregatorStateFloat();
+                    case INT:
+                        return new MaxForeverAttributeAggregatorStateInt();
+                    case LONG:
+                        return new MaxForeverAttributeAggregatorStateLong();
+                    case DOUBLE:
+                        return new MaxForeverAttributeAggregatorStateDouble();
+                    default:
+                        throw new OperationNotSupportedException("MaxForever not supported for " + returnType);
+                }
+            }
+        };
+
     }
 
     public Attribute.Type getReturnType() {
-        return maxForeverAttributeAggregator.getReturnType();
+        return returnType;
     }
 
     @Override
-    public Object processAdd(Object data) {
+    public Object processAdd(Object data, MaxAggregatorState state) {
         if (data == null) {
-            return maxForeverAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return maxForeverAttributeAggregator.processAdd(data);
-    }
-
-    protected Object currentValue() {
-        return null;
+        return state.processAdd(data);
     }
 
     @Override
-    public Object processAdd(Object[] data) {
+    public Object processAdd(Object[] data, MaxAggregatorState state) {
         // will not occur
         return new IllegalStateException("MaxForever cannot process data array, but found " +
                 Arrays.deepToString(data));
     }
 
     @Override
-    public Object processRemove(Object data) {
+    public Object processRemove(Object data, MaxAggregatorState state) {
         if (data == null) {
-            return maxForeverAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return maxForeverAttributeAggregator.processRemove(data);
+        return state.processRemove(data);
     }
 
     @Override
-    public Object processRemove(Object[] data) {
+    public Object processRemove(Object[] data, MaxAggregatorState state) {
         // will not occur
         return new IllegalStateException("MaxForever cannot process data array, but found " +
                 Arrays.deepToString(data));
     }
 
-    @Override
-    public boolean canDestroy() {
-        return false;
-    }
 
     @Override
-    public Object reset() {
-        return maxForeverAttributeAggregator.reset();
+    public Object reset(MaxAggregatorState state) {
+        return state.reset();
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        return maxForeverAttributeAggregator.currentState();
-    }
+    class MaxForeverAttributeAggregatorStateDouble extends MaxAggregatorState {
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        maxForeverAttributeAggregator.restoreState(state);
-    }
-
-    class MaxForeverAttributeAggregatorDouble extends MaxForeverAttributeAggregator {
-
-        private final Attribute.Type type = Attribute.Type.DOUBLE;
         private volatile Double maxValue = null;
-
-        public Attribute.Type getReturnType() {
-            return type;
-        }
 
         @Override
         public synchronized Object processAdd(Object data) {
@@ -190,14 +174,19 @@ public class MaxForeverAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public boolean canDestroy() {
+            return maxValue == null;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("MaxValue", maxValue);
             return state;
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             maxValue = (Double) state.get("MaxValue");
         }
 
@@ -207,14 +196,9 @@ public class MaxForeverAttributeAggregator extends AttributeAggregator {
 
     }
 
-    class MaxForeverAttributeAggregatorFloat extends MaxForeverAttributeAggregator {
+    class MaxForeverAttributeAggregatorStateFloat extends MaxAggregatorState {
 
-        private final Attribute.Type type = Attribute.Type.FLOAT;
         private volatile Float maxValue = null;
-
-        public Attribute.Type getReturnType() {
-            return type;
-        }
 
         @Override
         public synchronized Object processAdd(Object data) {
@@ -240,14 +224,19 @@ public class MaxForeverAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public boolean canDestroy() {
+            return maxValue == null;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("MaxValue", maxValue);
             return state;
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             maxValue = (Float) state.get("MaxValue");
         }
 
@@ -257,14 +246,9 @@ public class MaxForeverAttributeAggregator extends AttributeAggregator {
 
     }
 
-    class MaxForeverAttributeAggregatorInt extends MaxForeverAttributeAggregator {
+    class MaxForeverAttributeAggregatorStateInt extends MaxAggregatorState {
 
-        private final Attribute.Type type = Attribute.Type.INT;
         private volatile Integer maxValue = null;
-
-        public Attribute.Type getReturnType() {
-            return type;
-        }
 
         @Override
         public synchronized Object processAdd(Object data) {
@@ -290,14 +274,19 @@ public class MaxForeverAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public boolean canDestroy() {
+            return maxValue == null;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("MaxValue", maxValue);
             return state;
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             maxValue = (Integer) state.get("MaxValue");
         }
 
@@ -306,14 +295,9 @@ public class MaxForeverAttributeAggregator extends AttributeAggregator {
         }
     }
 
-    class MaxForeverAttributeAggregatorLong extends MaxForeverAttributeAggregator {
+    class MaxForeverAttributeAggregatorStateLong extends MaxAggregatorState {
 
-        private final Attribute.Type type = Attribute.Type.LONG;
         private volatile Long maxValue = null;
-
-        public Attribute.Type getReturnType() {
-            return type;
-        }
 
         @Override
         public synchronized Object processAdd(Object data) {
@@ -339,20 +323,35 @@ public class MaxForeverAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public boolean canDestroy() {
+            return maxValue == null;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("MaxValue", maxValue);
             return state;
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             maxValue = (Long) state.get("MaxValue");
         }
 
         protected Object currentValue() {
             return maxValue;
         }
+    }
+
+    abstract class MaxAggregatorState extends State {
+        public abstract Object processAdd(Object data);
+
+        public abstract Object processRemove(Object data);
+
+        public abstract Object reset();
+
+        protected abstract Object currentValue();
     }
 
 }

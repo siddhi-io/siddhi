@@ -31,6 +31,7 @@ import io.siddhi.core.executor.incremental.IncrementalUnixTimeFunctionExecutor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.ThroughputTracker;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 
@@ -45,6 +46,7 @@ public class IncrementalAggregationProcessor implements Processor {
     private SiddhiAppContext siddhiAppContext;
     private AggregationRuntime aggregationRuntime;
     private boolean isFirstEventArrived;
+    private static final Logger log = Logger.getLogger(IncrementalAggregationProcessor.class);
 
     public IncrementalAggregationProcessor(AggregationRuntime aggregationRuntime,
                                            List<ExpressionExecutor> incomingExpressionExecutors,
@@ -114,17 +116,5 @@ public class IncrementalAggregationProcessor implements Processor {
     public void setToLast(Processor processor) {
         throw new SiddhiAppCreationException("IncrementalAggregationProcessor does not support any " +
                 "next/last processor");
-    }
-
-    @Override
-    public Processor cloneProcessor(String key) {
-        throw new SiddhiAppCreationException("IncrementalAggregationProcessor cannot be cloned");
-    }
-
-    @Override
-    public void clean() {
-        for (ExpressionExecutor expressionExecutor : incomingExpressionExecutors) {
-            expressionExecutor.clean();
-        }
     }
 }

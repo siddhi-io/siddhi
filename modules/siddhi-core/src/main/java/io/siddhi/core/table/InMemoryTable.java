@@ -39,8 +39,9 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.EventHolderPasser;
 import io.siddhi.core.util.parser.ExpressionParser;
 import io.siddhi.core.util.parser.OperatorParser;
-import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import io.siddhi.query.api.expression.Expression;
@@ -54,14 +55,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * In-memory event table implementation of SiddhiQL.
  */
-public class InMemoryTable extends Table implements Snapshotable {
+public class InMemoryTable extends Table {
 
     private TableDefinition tableDefinition;
     private StreamEventCloner tableStreamEventCloner;
     private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private EventHolder eventHolder;
-    private String elementId;
-    private SiddhiAppContext siddhiAppContext;
+    private StateHolder<TableState> stateHolder;
 
     @Override
     public void init(TableDefinition tableDefinition, StreamEventPool storeEventPool,
@@ -69,14 +68,10 @@ public class InMemoryTable extends Table implements Snapshotable {
                      RecordTableHandler recordTableHandler) {
         this.tableDefinition = tableDefinition;
         this.tableStreamEventCloner = storeEventCloner;
-        this.siddhiAppContext = siddhiAppContext;
+        EventHolder eventHolder = EventHolderPasser.parse(tableDefinition, storeEventPool, siddhiAppContext);
 
-        eventHolder = EventHolderPasser.parse(tableDefinition, storeEventPool, siddhiAppContext);
-
-        if (elementId == null) {
-            elementId = "InMemoryTable-" + siddhiAppContext.getElementIdGenerator().createNewId();
-        }
-        siddhiAppContext.getSnapshotService().addSnapshotable(tableDefinition.getId(), this);
+        stateHolder = siddhiAppContext.generateStateHolder(tableDefinition.getId(),
+                () -> new TableState(eventHolder));
     }
 
     @Override
@@ -86,10 +81,12 @@ public class InMemoryTable extends Table implements Snapshotable {
 
     @Override
     public void add(ComplexEventChunk<StreamEvent> addingEventChunk) {
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
         try {
-            readWriteLock.writeLock().lock();
-            eventHolder.add(addingEventChunk);
+            state.eventHolder.add(addingEventChunk);
         } finally {
+            stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
         }
 
@@ -97,10 +94,12 @@ public class InMemoryTable extends Table implements Snapshotable {
 
     @Override
     public void delete(ComplexEventChunk<StateEvent> deletingEventChunk, CompiledCondition compiledCondition) {
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
         try {
-            readWriteLock.writeLock().lock();
-            ((Operator) compiledCondition).delete(deletingEventChunk, eventHolder);
+            ((Operator) compiledCondition).delete(deletingEventChunk, state.eventHolder);
         } finally {
+            stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
         }
     }
@@ -108,11 +107,13 @@ public class InMemoryTable extends Table implements Snapshotable {
     @Override
     public void update(ComplexEventChunk<StateEvent> updatingEventChunk, CompiledCondition compiledCondition,
                        CompiledUpdateSet compiledUpdateSet) {
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
         try {
-            readWriteLock.writeLock().lock();
-            ((Operator) compiledCondition).update(updatingEventChunk, eventHolder,
+            ((Operator) compiledCondition).update(updatingEventChunk, state.eventHolder,
                     (InMemoryCompiledUpdateSet) compiledUpdateSet);
         } finally {
+            stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
         }
 
@@ -123,17 +124,19 @@ public class InMemoryTable extends Table implements Snapshotable {
                             CompiledCondition compiledCondition,
                             CompiledUpdateSet compiledUpdateSet,
                             AddingStreamEventExtractor addingStreamEventExtractor) {
+        readWriteLock.writeLock().lock();
+        TableState state = stateHolder.getState();
         try {
-            readWriteLock.writeLock().lock();
             ComplexEventChunk<StreamEvent> failedEvents = ((Operator) compiledCondition).tryUpdate(
                     updateOrAddingEventChunk,
-                    eventHolder,
+                    state.eventHolder,
                     (InMemoryCompiledUpdateSet) compiledUpdateSet,
                     addingStreamEventExtractor);
             if (failedEvents != null) {
-                eventHolder.add(failedEvents);
+                state.eventHolder.add(failedEvents);
             }
         } finally {
+            stateHolder.returnState(state);
             readWriteLock.writeLock().unlock();
         }
 
@@ -141,10 +144,12 @@ public class InMemoryTable extends Table implements Snapshotable {
 
     @Override
     public boolean contains(StateEvent matchingEvent, CompiledCondition compiledCondition) {
+        readWriteLock.readLock().lock();
+        TableState state = stateHolder.getState();
         try {
-            readWriteLock.readLock().lock();
-            return ((Operator) compiledCondition).contains(matchingEvent, eventHolder);
+            return ((Operator) compiledCondition).contains(matchingEvent, state.eventHolder);
         } finally {
+            stateHolder.returnState(state);
             readWriteLock.readLock().unlock();
         }
 
@@ -167,10 +172,12 @@ public class InMemoryTable extends Table implements Snapshotable {
 
     @Override
     public StreamEvent find(CompiledCondition compiledCondition, StateEvent matchingEvent) {
+        TableState state = stateHolder.getState();
+        readWriteLock.readLock().lock();
         try {
-            readWriteLock.readLock().lock();
-            return ((Operator) compiledCondition).find(matchingEvent, eventHolder, tableStreamEventCloner);
+            return ((Operator) compiledCondition).find(matchingEvent, state.eventHolder, tableStreamEventCloner);
         } finally {
+            stateHolder.returnState(state);
             readWriteLock.readLock().unlock();
         }
     }
@@ -179,8 +186,13 @@ public class InMemoryTable extends Table implements Snapshotable {
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
                                               Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        return OperatorParser.constructOperator(eventHolder, condition, matchingMetaInfoHolder,
-                variableExpressionExecutors, tableMap, siddhiQueryContext);
+        TableState state = stateHolder.getState();
+        try {
+            return OperatorParser.constructOperator(state.eventHolder, condition, matchingMetaInfoHolder,
+                    variableExpressionExecutors, tableMap, siddhiQueryContext);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     @Override
@@ -201,26 +213,29 @@ public class InMemoryTable extends Table implements Snapshotable {
         return new InMemoryCompiledUpdateSet(expressionExecutorMap);
     }
 
+    class TableState extends State {
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("EventHolder", eventHolder.getSnapshot());
-        return state;
-    }
+        private final EventHolder eventHolder;
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        eventHolder.restore((SnapshotStateList) state.get("EventHolder"));
-    }
+        public TableState(EventHolder eventHolder) {
+            this.eventHolder = eventHolder;
+        }
 
-    @Override
-    public String getElementId() {
-        return elementId;
-    }
+        @Override
+        public boolean canDestroy() {
+            return false;
+        }
 
-    @Override
-    public void clean() {
-        siddhiAppContext.getSnapshotService().removeSnapshotable(tableDefinition.getId(), this);
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("EventHolder", eventHolder.getSnapshot());
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            eventHolder.restore((SnapshotStateList) state.get("EventHolder"));
+        }
     }
 }

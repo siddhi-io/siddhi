@@ -27,6 +27,8 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
@@ -34,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link AttributeAggregator} to calculate sum based on an event attribute.
+ * {@link AttributeAggregatorExecutor} to calculate sum based on an event attribute.
  */
 @Extension(
         name = "sum",
@@ -59,9 +61,10 @@ import java.util.Map;
                 )
         }
 )
-public class SumAttributeAggregator extends AttributeAggregator {
+public class SumAttributeAggregatorExecutor
+        extends AttributeAggregatorExecutor<SumAttributeAggregatorExecutor.AggregatorState> {
 
-    private SumAttributeAggregator sumOutputAttributeAggregator;
+    private Attribute.Type returnType;
 
     /**
      * The initialization method for FunctionExecutor
@@ -69,13 +72,14 @@ public class SumAttributeAggregator extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link SumAttributeAggregator} configuration reader.
+     * @param configReader                 this hold the {@link SumAttributeAggregatorExecutor} configuration reader.
      * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<AggregatorState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                                 ProcessingMode processingMode,
+                                                 boolean outputExpectsExpiredEvents, ConfigReader configReader,
+                                                 SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("Sum aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length
@@ -83,81 +87,76 @@ public class SumAttributeAggregator extends AttributeAggregator {
         }
         Attribute.Type type = attributeExpressionExecutors[0].getReturnType();
         switch (type) {
-            case FLOAT:
-                sumOutputAttributeAggregator = new SumAttributeAggregatorFloat();
-                break;
             case INT:
-                sumOutputAttributeAggregator = new SumAttributeAggregatorInt();
-                break;
             case LONG:
-                sumOutputAttributeAggregator = new SumAttributeAggregatorLong();
+                returnType = Attribute.Type.LONG;
                 break;
+            case FLOAT:
             case DOUBLE:
-                sumOutputAttributeAggregator = new SumAttributeAggregatorDouble();
+                returnType = Attribute.Type.DOUBLE;
                 break;
             default:
-                throw new OperationNotSupportedException("Sum not supported for " + type);
+                throw new OperationNotSupportedException("Sum not supported for " + returnType);
         }
+        return new StateFactory<AggregatorState>() {
+            @Override
+            public AggregatorState createNewState() {
+                switch (type) {
+                    case FLOAT:
+                        return new AggregatorStateFloat();
+                    case INT:
+                        return new AggregatorStateInt();
+                    case LONG:
+                        return new AggregatorStateLong();
+                    case DOUBLE:
+                        return new AggregatorStateDouble();
+                    default:
+                        throw new OperationNotSupportedException("Sum not supported for " + returnType);
+                }
+            }
+        };
+
 
     }
 
     public Attribute.Type getReturnType() {
-        return sumOutputAttributeAggregator.getReturnType();
+        return returnType;
     }
 
     @Override
-    public Object processAdd(Object data) {
+    public Object processAdd(Object data, AggregatorState state) {
         if (data == null) {
-            return sumOutputAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return sumOutputAttributeAggregator.processAdd(data);
+        return state.processAdd(data);
     }
 
     @Override
-    public Object processAdd(Object[] data) {
+    public Object processAdd(Object[] data, AggregatorState state) {
         // will not occur
         return new IllegalStateException("Sin cannot process data array, but found " + Arrays.deepToString(data));
     }
 
     @Override
-    public Object processRemove(Object data) {
+    public Object processRemove(Object data, AggregatorState state) {
         if (data == null) {
-            return sumOutputAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return sumOutputAttributeAggregator.processRemove(data);
+        return state.processRemove(data);
     }
 
     @Override
-    public Object processRemove(Object[] data) {
+    public Object processRemove(Object[] data, AggregatorState state) {
         // will not occur
         return new IllegalStateException("Sin cannot process data array, but found " + Arrays.deepToString(data));
     }
 
-    protected Object currentValue() {
-        return null;
-    }
-
     @Override
-    public boolean canDestroy() {
-        return sumOutputAttributeAggregator.canDestroy();
+    public Object reset(AggregatorState state) {
+        return state.reset();
     }
 
-    @Override
-    public Object reset() {
-        return sumOutputAttributeAggregator.reset();
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return sumOutputAttributeAggregator.currentState();
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        sumOutputAttributeAggregator.restoreState(state);
-    }
-
-    class SumAttributeAggregatorDouble extends SumAttributeAggregator {
+    class AggregatorStateDouble extends AggregatorState {
 
         private final Attribute.Type type = Attribute.Type.DOUBLE;
         private double sum = 0.0;
@@ -196,6 +195,7 @@ public class SumAttributeAggregator extends AttributeAggregator {
         @Override
         public Object reset() {
             sum = 0.0;
+            count = 0;
             return null;
         }
 
@@ -205,7 +205,7 @@ public class SumAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("Sum", sum);
             state.put("Count", count);
@@ -213,7 +213,7 @@ public class SumAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             sum = (double) state.get("Sum");
             count = (long) state.get("Count");
         }
@@ -228,7 +228,7 @@ public class SumAttributeAggregator extends AttributeAggregator {
 
     }
 
-    class SumAttributeAggregatorFloat extends SumAttributeAggregatorDouble {
+    class AggregatorStateFloat extends AggregatorStateDouble {
 
         @Override
         public Object processAdd(Object data) {
@@ -248,7 +248,7 @@ public class SumAttributeAggregator extends AttributeAggregator {
 
     }
 
-    class SumAttributeAggregatorLong extends SumAttributeAggregator {
+    class AggregatorStateLong extends AggregatorState {
 
         private final Attribute.Type type = Attribute.Type.LONG;
         private long sum = 0L;
@@ -288,6 +288,7 @@ public class SumAttributeAggregator extends AttributeAggregator {
 
         public Object reset() {
             sum = 0L;
+            count = 0;
             return sum;
         }
 
@@ -298,7 +299,7 @@ public class SumAttributeAggregator extends AttributeAggregator {
 
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("Sum", sum);
             state.put("Count", count);
@@ -306,7 +307,7 @@ public class SumAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             sum = (long) state.get("Sum");
             count = (long) state.get("Count");
         }
@@ -321,7 +322,7 @@ public class SumAttributeAggregator extends AttributeAggregator {
 
     }
 
-    class SumAttributeAggregatorInt extends SumAttributeAggregatorLong {
+    class AggregatorStateInt extends AggregatorStateLong {
 
         @Override
         public Object processAdd(Object data) {
@@ -335,4 +336,15 @@ public class SumAttributeAggregator extends AttributeAggregator {
 
     }
 
+    abstract class AggregatorState extends State {
+
+        protected abstract Object currentValue();
+
+        public abstract Object processAdd(Object data);
+
+        public abstract Object processRemove(Object data);
+
+        public abstract Object reset();
+
+    }
 }

@@ -28,8 +28,8 @@ import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class DistinctCountAttributeAggregatorTestCase {
-    private static final Logger log = Logger.getLogger(DistinctCountAttributeAggregatorTestCase.class);
+public class DistinctCountAttributeAggregatorExecutorTestCase {
+    private static final Logger log = Logger.getLogger(DistinctCountAttributeAggregatorExecutorTestCase.class);
     private volatile int count;
 
     @BeforeMethod

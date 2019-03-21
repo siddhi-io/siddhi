@@ -24,63 +24,72 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Implementation of {@link PerSnapshotOutputRateLimiter} for queries with Aggregators which will output all events.
  */
-public class AllAggregationPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimiter {
+public class AllAggregationPerSnapshotOutputRateLimiter
+        extends SnapshotOutputRateLimiter<AllAggregationPerSnapshotOutputRateLimiter.RateLimiterState> {
     private final Long value;
-    private final ScheduledExecutorService scheduledExecutorService;
-    private String id;
-    private ComplexEvent lastEvent = null;
     private Scheduler scheduler;
     private long scheduledTime;
 
-    public AllAggregationPerSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService
-            scheduledExecutorService, WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
-                                                      SiddhiQueryContext siddhiQueryContext) {
-        super(wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
-        this.id = id;
+    public AllAggregationPerSnapshotOutputRateLimiter(Long value,
+                                                      WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
+                                                      boolean groupBy, SiddhiQueryContext siddhiQueryContext) {
+        super(wrappedSnapshotOutputRateLimiter, siddhiQueryContext, groupBy);
         this.value = value;
-        this.scheduledExecutorService = scheduledExecutorService;
+    }
+
+    @Override
+    protected StateFactory<RateLimiterState> init() {
+        return () -> new RateLimiterState();
     }
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         List<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
         complexEventChunk.reset();
-        synchronized (this) {
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.TIMER) {
-                    tryFlushEvents(outputEventChunks, event);
-                } else {
-                    tryFlushEvents(outputEventChunks, event);
-                    if (event.getType() == ComplexEvent.Type.CURRENT) {
-                        complexEventChunk.remove();
-                        lastEvent = event;
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event.getType() == ComplexEvent.Type.TIMER) {
+                        tryFlushEvents(outputEventChunks, event, state);
                     } else {
-                        lastEvent = null;
+                        tryFlushEvents(outputEventChunks, event, state);
+                        if (event.getType() == ComplexEvent.Type.CURRENT) {
+                            complexEventChunk.remove();
+                            state.lastEvent = event;
+                        } else {
+                            state.lastEvent = null;
+                        }
                     }
                 }
             }
+        } finally {
+            stateHolder.returnState(state);
         }
         for (ComplexEventChunk<ComplexEvent> eventChunk : outputEventChunks) {
             sendToCallBacks(eventChunk);
         }
     }
 
-    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event) {
+
+    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
+                                RateLimiterState state) {
         if (event.getTimestamp() >= scheduledTime) {
             ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
-            if (lastEvent != null) {
-                outputEventChunk.add(cloneComplexEvent(lastEvent));
+            if (state.lastEvent != null) {
+                outputEventChunk.add(cloneComplexEvent(state.lastEvent));
             }
             outputEventChunks.add(outputEventChunk);
             scheduledTime += value;
@@ -89,16 +98,8 @@ public class AllAggregationPerSnapshotOutputRateLimiter extends SnapshotOutputRa
     }
 
     @Override
-    public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter
-            wrappedSnapshotOutputRateLimiter) {
-        return new AllAggregationPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService,
-                wrappedSnapshotOutputRateLimiter,
-                siddhiQueryContext);
-    }
-
-    @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiQueryContext.getSiddhiAppContext());
+        scheduler = SchedulerParser.parse(this, siddhiQueryContext);
         scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
         scheduler.init(lockWrapper, siddhiQueryContext.getName());
         long currentTime = System.currentTimeMillis();
@@ -111,18 +112,26 @@ public class AllAggregationPerSnapshotOutputRateLimiter extends SnapshotOutputRa
         //Nothing to stop
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
-            state.put("LastEvent", lastEvent);
+    class RateLimiterState extends State {
+        private ComplexEvent lastEvent = null;
+
+        @Override
+        public boolean canDestroy() {
+            return lastEvent == null;
         }
-        return state;
-    }
 
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        lastEvent = (ComplexEvent) state.get("LastEvent");
-    }
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            synchronized (this) {
+                state.put("LastEvent", lastEvent);
+            }
+            return state;
+        }
 
+        @Override
+        public void restore(Map<String, Object> state) {
+            lastEvent = (ComplexEvent) state.get("LastEvent");
+        }
+    }
 }

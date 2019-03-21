@@ -25,7 +25,7 @@ import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
-import io.siddhi.core.util.snapshot.state.SnapshotState;
+import io.siddhi.core.util.snapshot.state.Snapshot;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 import io.siddhi.query.api.definition.Attribute;
 import org.apache.log4j.Logger;
@@ -98,7 +98,7 @@ public class SnapshotableEventQueueTestCase {
         }
 
         HashMap<Long, String> snapshots = new HashMap<>();
-        SnapshotState snapshot1 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot1 = snapshotableStreamEventQueue.getSnapshot();
         StreamEvent streamEvents = (StreamEvent) snapshot1.getState();
         Assert.assertTrue(streamEvents != null);
         snapshots.put(3L, toString(snapshot1));
@@ -108,7 +108,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.add(streamEventCloner.copyStreamEvent(streamEvent));
         }
 
-        SnapshotState snapshot2 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot2 = snapshotableStreamEventQueue.getSnapshot();
         ArrayList<Operation> operationLog = (ArrayList<Operation>) snapshot2.getState();
         Assert.assertTrue(operationLog != null);
         snapshots.put(4L, toString(snapshot2));
@@ -118,7 +118,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.add(streamEventCloner.copyStreamEvent(streamEvent));
         }
 
-        SnapshotState snapshot3 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot3 = snapshotableStreamEventQueue.getSnapshot();
         operationLog = (ArrayList<Operation>) snapshot3.getState();
         Assert.assertTrue(operationLog != null);
         snapshots.put(5L, toString(snapshot3));
@@ -127,7 +127,7 @@ public class SnapshotableEventQueueTestCase {
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
         SnapshotStateList snapshotStateList = new SnapshotStateList();
         for (Map.Entry<Long, String> entry : snapshots.entrySet()) {
-            snapshotStateList.putSnapshotState(entry.getKey(), (SnapshotState) fromString(entry.getValue()));
+            snapshotStateList.putSnapshotState(entry.getKey(), (Snapshot) fromString(entry.getValue()));
         }
         snapshotableStreamEventQueue2.restore(snapshotStateList);
 
@@ -138,7 +138,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.add(streamEventCloner.copyStreamEvent(streamEvent));
         }
 
-        SnapshotState snapshot4 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot4 = snapshotableStreamEventQueue.getSnapshot();
         streamEvents = (StreamEvent) snapshot1.getState();
         Assert.assertTrue(streamEvents != null);
         snapshots = new HashMap<>();
@@ -148,7 +148,7 @@ public class SnapshotableEventQueueTestCase {
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
         snapshotStateList = new SnapshotStateList();
         for (Map.Entry<Long, String> entry : snapshots.entrySet()) {
-            snapshotStateList.putSnapshotState(entry.getKey(), (SnapshotState) fromString(entry.getValue()));
+            snapshotStateList.putSnapshotState(entry.getKey(), (Snapshot) fromString(entry.getValue()));
         }
         snapshotableStreamEventQueue3.restore(snapshotStateList);
 
@@ -178,7 +178,7 @@ public class SnapshotableEventQueueTestCase {
         }
 
         HashMap<Long, String> snapshots = new HashMap<>();
-        SnapshotState snapshot1 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot1 = snapshotableStreamEventQueue.getSnapshot();
         StreamEvent streamEvents = (StreamEvent) snapshot1.getState();
         Assert.assertTrue(streamEvents != null);
         snapshots.put(3L, toString(snapshot1));
@@ -188,7 +188,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.remove();
         }
 
-        SnapshotState snapshot2 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot2 = snapshotableStreamEventQueue.getSnapshot();
         ArrayList<Operation> operationLog = (ArrayList<Operation>) snapshot2.getState();
         Assert.assertTrue(operationLog != null);
         snapshots.put(4L, toString(snapshot2));
@@ -198,7 +198,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.add(streamEventCloner.copyStreamEvent(streamEvent));
         }
 
-        SnapshotState snapshot3 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot3 = snapshotableStreamEventQueue.getSnapshot();
         operationLog = (ArrayList<Operation>) snapshot3.getState();
         Assert.assertTrue(operationLog != null);
         snapshots.put(5L, toString(snapshot3));
@@ -207,7 +207,7 @@ public class SnapshotableEventQueueTestCase {
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
         SnapshotStateList snapshotStateList = new SnapshotStateList();
         for (Map.Entry<Long, String> entry : snapshots.entrySet()) {
-            snapshotStateList.putSnapshotState(entry.getKey(), (SnapshotState) fromString(entry.getValue()));
+            snapshotStateList.putSnapshotState(entry.getKey(), (Snapshot) fromString(entry.getValue()));
         }
         snapshotableStreamEventQueue2.restore(snapshotStateList);
 
@@ -236,7 +236,7 @@ public class SnapshotableEventQueueTestCase {
         }
 
         HashMap<Long, String> snapshots = new HashMap<>();
-        SnapshotState snapshot1 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot1 = snapshotableStreamEventQueue.getSnapshot();
         StreamEvent streamEvents = (StreamEvent) snapshot1.getState();
         Assert.assertTrue(streamEvents != null);
         snapshots.put(3L, toString(snapshot1));
@@ -250,7 +250,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.remove();
         }
 
-        SnapshotState snapshot2 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot2 = snapshotableStreamEventQueue.getSnapshot();
         ArrayList<Operation> operationLog = (ArrayList<Operation>) snapshot2.getState();
         Assert.assertTrue(operationLog != null);
         snapshots.put(4L, toString(snapshot2));
@@ -260,7 +260,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.add(streamEventCloner.copyStreamEvent(streamEvent));
         }
 
-        SnapshotState snapshot3 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot3 = snapshotableStreamEventQueue.getSnapshot();
         operationLog = (ArrayList<Operation>) snapshot3.getState();
         Assert.assertTrue(operationLog != null);
         snapshots.put(5L, toString(snapshot3));
@@ -269,7 +269,7 @@ public class SnapshotableEventQueueTestCase {
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
         SnapshotStateList snapshotStateList = new SnapshotStateList();
         for (Map.Entry<Long, String> entry : snapshots.entrySet()) {
-            snapshotStateList.putSnapshotState(entry.getKey(), (SnapshotState) fromString(entry.getValue()));
+            snapshotStateList.putSnapshotState(entry.getKey(), (Snapshot) fromString(entry.getValue()));
         }
         snapshotableStreamEventQueue2.restore(snapshotStateList);
         Assert.assertEquals(snapshotableStreamEventQueue, snapshotableStreamEventQueue2);
@@ -297,7 +297,7 @@ public class SnapshotableEventQueueTestCase {
         }
 
         HashMap<Long, String> snapshots = new HashMap<>();
-        SnapshotState snapshot1 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot1 = snapshotableStreamEventQueue.getSnapshot();
         StreamEvent streamEvents = (StreamEvent) snapshot1.getState();
         Assert.assertTrue(streamEvents != null);
         snapshots.put(3L, toString(snapshot1));
@@ -313,7 +313,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.poll();
         }
 
-        SnapshotState snapshot2 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot2 = snapshotableStreamEventQueue.getSnapshot();
         ArrayList<Operation> operationLog = (ArrayList<Operation>) snapshot2.getState();
         Assert.assertTrue(operationLog != null);
         snapshots.put(4L, toString(snapshot2));
@@ -323,7 +323,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.add(streamEventCloner.copyStreamEvent(streamEvent));
         }
 
-        SnapshotState snapshot3 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot3 = snapshotableStreamEventQueue.getSnapshot();
         operationLog = (ArrayList<Operation>) snapshot3.getState();
         Assert.assertTrue(operationLog != null);
         snapshots.put(5L, toString(snapshot3));
@@ -332,7 +332,7 @@ public class SnapshotableEventQueueTestCase {
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
         SnapshotStateList snapshotStateList = new SnapshotStateList();
         for (Map.Entry<Long, String> entry : snapshots.entrySet()) {
-            snapshotStateList.putSnapshotState(entry.getKey(), (SnapshotState) fromString(entry.getValue()));
+            snapshotStateList.putSnapshotState(entry.getKey(), (Snapshot) fromString(entry.getValue()));
         }
         snapshotableStreamEventQueue2.restore(snapshotStateList);
         Assert.assertEquals(snapshotableStreamEventQueue, snapshotableStreamEventQueue2);
@@ -360,7 +360,7 @@ public class SnapshotableEventQueueTestCase {
         }
 
         HashMap<Long, String> snapshots = new HashMap<>();
-        SnapshotState snapshot1 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot1 = snapshotableStreamEventQueue.getSnapshot();
         StreamEvent streamEvents = (StreamEvent) snapshot1.getState();
         Assert.assertTrue(streamEvents != null);
         snapshots.put(3L, toString(snapshot1));
@@ -375,7 +375,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.overwrite(streamEventCloner.copyStreamEvent(streamEvent));
         }
 
-        SnapshotState snapshot2 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot2 = snapshotableStreamEventQueue.getSnapshot();
         ArrayList<Operation> operationLog = (ArrayList<Operation>) snapshot2.getState();
         Assert.assertTrue(operationLog != null);
         snapshots.put(4L, toString(snapshot2));
@@ -385,7 +385,7 @@ public class SnapshotableEventQueueTestCase {
             snapshotableStreamEventQueue.add(streamEventCloner.copyStreamEvent(streamEvent));
         }
 
-        SnapshotState snapshot3 = snapshotableStreamEventQueue.getSnapshot();
+        Snapshot snapshot3 = snapshotableStreamEventQueue.getSnapshot();
         operationLog = (ArrayList<Operation>) snapshot3.getState();
         Assert.assertTrue(operationLog != null);
         snapshots.put(5L, toString(snapshot3));
@@ -394,7 +394,7 @@ public class SnapshotableEventQueueTestCase {
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
         SnapshotStateList snapshotStateList = new SnapshotStateList();
         for (Map.Entry<Long, String> entry : snapshots.entrySet()) {
-            snapshotStateList.putSnapshotState(entry.getKey(), (SnapshotState) fromString(entry.getValue()));
+            snapshotStateList.putSnapshotState(entry.getKey(), (Snapshot) fromString(entry.getValue()));
         }
         snapshotableStreamEventQueue2.restore(snapshotStateList);
         Assert.assertEquals(snapshotableStreamEventQueue, snapshotableStreamEventQueue2);

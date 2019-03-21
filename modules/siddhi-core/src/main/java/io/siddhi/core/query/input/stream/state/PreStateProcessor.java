@@ -55,6 +55,4 @@ public interface PreStateProcessor extends Processor {
 
     void setStartStateIds(int[] stateIds);
 
-    PreStateProcessor cloneProcessor(String key);
-
 }

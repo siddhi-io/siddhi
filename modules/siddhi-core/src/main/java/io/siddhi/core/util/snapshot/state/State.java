@@ -18,7 +18,19 @@
 
 package io.siddhi.core.util.snapshot.state;
 
-public interface State {
+import java.util.Map;
 
-    boolean canDestroy();
+/**
+ * State to hold the data
+ */
+public abstract class State {
+
+    int activeUseCount = 0;
+
+    public abstract boolean canDestroy();
+
+    public abstract Map<String, Object> snapshot();
+
+    public abstract void restore(Map<String, Object> state);
+
 }

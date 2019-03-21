@@ -112,9 +112,9 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                 }
             } else {
                 List<ReturnEventHolder> returnEventHolderList = new ArrayList<>(eventSequence.length);
-                try {
-                    multiProcessReturn.set(new ReturnEventHolder());
-                    synchronized (this) {
+                synchronized (this) {
+                    try {
+                        multiProcessReturn.set(new ReturnEventHolder());
                         stabilizeStates();
                         for (int anEventSequence : eventSequence) {
                             StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
@@ -128,9 +128,9 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                                 multiProcessReturn.set(new ReturnEventHolder());
                             }
                         }
+                    } finally {
+                        multiProcessReturn.set(null);
                     }
-                } finally {
-                    multiProcessReturn.set(null);
                 }
                 for (ReturnEventHolder returnEventHolder : returnEventHolderList) {
                     outputRateLimiter.sendToCallBacks(returnEventHolder.complexEventChunk);
@@ -155,9 +155,10 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
             }
         } else {
             List<ReturnEventHolder> returnEventHolderList = new ArrayList<>(eventSequence.length);
-            try {
-                multiProcessReturn.set(new ReturnEventHolder());
-                synchronized (this) {
+            synchronized (this) {
+                try {
+                    multiProcessReturn.set(new ReturnEventHolder());
+
                     stabilizeStates();
                     for (int anEventSequence : eventSequence) {
                         StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
@@ -171,9 +172,9 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                             multiProcessReturn.set(new ReturnEventHolder());
                         }
                     }
+                } finally {
+                    multiProcessReturn.set(null);
                 }
-            } finally {
-                multiProcessReturn.set(null);
             }
             for (ReturnEventHolder returnEventHolder : returnEventHolderList) {
                 outputRateLimiter.sendToCallBacks(returnEventHolder.complexEventChunk);
@@ -197,9 +198,9 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                 }
             } else {
                 List<ReturnEventHolder> returnEventHolderList = new ArrayList<>(eventSequence.length);
-                try {
-                    multiProcessReturn.set(new ReturnEventHolder());
-                    synchronized (this) {
+                synchronized (this) {
+                    try {
+                        multiProcessReturn.set(new ReturnEventHolder());
                         stabilizeStates();
                         for (int anEventSequence : eventSequence) {
                             StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
@@ -213,9 +214,9 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                                 multiProcessReturn.set(new ReturnEventHolder());
                             }
                         }
+                    } finally {
+                        multiProcessReturn.set(null);
                     }
-                } finally {
-                    multiProcessReturn.set(null);
                 }
                 for (ReturnEventHolder returnEventHolder : returnEventHolderList) {
                     outputRateLimiter.sendToCallBacks(returnEventHolder.complexEventChunk);
@@ -240,9 +241,10 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                 }
             } else {
                 List<ReturnEventHolder> returnEventHolderList = new ArrayList<>(eventSequence.length);
-                try {
-                    multiProcessReturn.set(new ReturnEventHolder());
-                    synchronized (this) {
+                synchronized (this) {
+                    try {
+                        multiProcessReturn.set(new ReturnEventHolder());
+
                         stabilizeStates();
                         for (int anEventSequence : eventSequence) {
                             StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
@@ -256,9 +258,9 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                                 multiProcessReturn.set(new ReturnEventHolder());
                             }
                         }
+                    } finally {
+                        multiProcessReturn.set(null);
                     }
-                } finally {
-                    multiProcessReturn.set(null);
                 }
                 for (ReturnEventHolder returnEventHolder : returnEventHolderList) {
                     outputRateLimiter.sendToCallBacks(returnEventHolder.complexEventChunk);
@@ -282,9 +284,9 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
             }
         } else {
             List<ReturnEventHolder> returnEventHolderList = new ArrayList<>(eventSequence.length);
-            try {
-                multiProcessReturn.set(new ReturnEventHolder());
-                synchronized (this) {
+            synchronized (this) {
+                try {
+                    multiProcessReturn.set(new ReturnEventHolder());
                     stabilizeStates();
                     for (int anEventSequence : eventSequence) {
                         StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
@@ -298,9 +300,9 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                             multiProcessReturn.set(new ReturnEventHolder());
                         }
                     }
+                } finally {
+                    multiProcessReturn.set(null);
                 }
-            } finally {
-                multiProcessReturn.set(null);
             }
             for (ReturnEventHolder returnEventHolder : returnEventHolderList) {
                 outputRateLimiter.sendToCallBacks(returnEventHolder.complexEventChunk);

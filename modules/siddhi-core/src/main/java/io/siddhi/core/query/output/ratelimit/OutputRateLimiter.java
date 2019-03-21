@@ -23,9 +23,11 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.query.input.MultiProcessStreamReceiver;
 import io.siddhi.core.query.output.callback.OutputCallback;
 import io.siddhi.core.query.output.callback.QueryCallback;
-import io.siddhi.core.util.extension.holder.EternalReferencedHolder;
+import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.core.util.lock.LockWrapper;
-import io.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.LatencyTracker;
 
 import java.util.ArrayList;
@@ -34,8 +36,10 @@ import java.util.List;
 /**
  * Abstract parent implementation of Output Rate Limiting. Output Rate Limiting is used to throttle the output of
  * Siddhi queries based on various criteria.
+ *
+ * @param <S> current state of the RateLimiter
  */
-public abstract class OutputRateLimiter implements EternalReferencedHolder, Snapshotable {
+public abstract class OutputRateLimiter<S extends State> implements ExternalReferencedHolder {
 
     protected List<QueryCallback> queryCallbacks = new ArrayList<QueryCallback>();
     protected OutputCallback outputCallback = null;
@@ -43,20 +47,17 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
     protected SiddhiQueryContext siddhiQueryContext;
     protected LockWrapper lockWrapper;
     private boolean hasCallBack = false;
-    private String elementId;
+    protected StateHolder<S> stateHolder;
 
-    public void init(LockWrapper lockWrapper, SiddhiQueryContext siddhiQueryContext) {
+    public void init(LockWrapper lockWrapper, boolean groupBy, SiddhiQueryContext siddhiQueryContext) {
         this.siddhiQueryContext = siddhiQueryContext;
         if (outputCallback != null) {
             this.lockWrapper = lockWrapper;
         }
-        if (elementId == null) {
-            elementId = "OutputRateLimiter-" +
-                    siddhiQueryContext.getSiddhiAppContext().getElementIdGenerator().createNewId();
-        }
-        siddhiQueryContext.getSiddhiAppContext().getSnapshotService().addSnapshotable(
-                siddhiQueryContext.getName(), this);
+        stateHolder = siddhiQueryContext.generateStateHolder(this.getClass().getName(), groupBy, init());
     }
+
+    protected abstract StateFactory<S> init();
 
     public void sendToCallBacks(ComplexEventChunk complexEventChunk) {
         MultiProcessStreamReceiver.ReturnEventHolder returnEventHolder =
@@ -121,20 +122,9 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
         return hasCallBack;
     }
 
-    public abstract OutputRateLimiter clone(String key);
-
-    public String getElementId() {
-        return elementId;
-    }
-
     public void setLatencyTracker(LatencyTracker latencyTracker) {
         this.latencyTracker = latencyTracker;
     }
 
-    @Override
-    public void clean() {
-        siddhiQueryContext.getSiddhiAppContext().getSnapshotService().removeSnapshotable(
-                siddhiQueryContext.getName(), this);
-    }
 }
 

@@ -43,11 +43,6 @@ public class PatternMultiProcessStreamReceiver extends StateMultiProcessStreamRe
         }
     }
 
-    public PatternMultiProcessStreamReceiver clone(String key) {
-        return new PatternMultiProcessStreamReceiver(streamId + key, processCount,
-                siddhiQueryContext);
-    }
-
     protected void stabilizeStates() {
         if (stateProcessorsSize != 0) {
             for (PreStateProcessor preStateProcessor : stateProcessors) {

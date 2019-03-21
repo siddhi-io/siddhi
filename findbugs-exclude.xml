@@ -172,6 +172,22 @@
         <Class name="io.siddhi.core.table.holder.ListEventHolder"/>
         <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS"/>
     </Match>
+    <Match>
+        <Class name="io.siddhi.core.query.output.ratelimit.snapshot.AggregationGroupByWindowedPerSnapshotOutputRateLimiter"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.core.query.processor.stream.window.DelayWindowProcessor"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.core.query.processor.stream.window.SessionWindowProcessor"/>
+        <Bug pattern="DMI_ENTRY_SETS_MAY_REUSE_ENTRY_OBJECTS"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.core.util.Scheduler$SchedulerState"/>
+        <Bug pattern="EQ_COMPARETO_USE_OBJECT_EQUALS"/>
+    </Match>
 
 
     <Match>

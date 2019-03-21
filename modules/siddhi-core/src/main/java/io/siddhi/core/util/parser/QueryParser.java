@@ -78,6 +78,7 @@ public class QueryParser {
      * @param windowMap                keyvalue containing event window map.
      * @param lockSynchronizer         Lock synchronizer for sync the lock across queries.
      * @param queryIndex               query index to identify unknown query by number
+     * @param partitioned              is the query partitioned
      * @return queryRuntime
      */
     public static QueryRuntime parse(Query query, SiddhiAppContext siddhiAppContext,
@@ -88,7 +89,7 @@ public class QueryParser {
                                      Map<String, Table> tableMap,
                                      Map<String, AggregationRuntime> aggregationMap, Map<String, Window> windowMap,
                                      LockSynchronizer lockSynchronizer,
-                                     String queryIndex) {
+                                     String queryIndex, boolean partitioned) {
         List<VariableExpressionExecutor> executors = new ArrayList<VariableExpressionExecutor>();
         QueryRuntime queryRuntime;
         Element nameElement = null;
@@ -104,6 +105,7 @@ public class QueryParser {
                 queryName = "query_" + queryIndex;
             }
             SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+            siddhiQueryContext.setPartitioned(partitioned);
             latencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, siddhiQueryContext.getName(),
                     SiddhiConstants.METRIC_INFIX_QUERIES, null);
             siddhiQueryContext.setLatencyTracker(latencyTracker);
@@ -208,12 +210,13 @@ public class QueryParser {
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
                 selector.setBatchingEnabled(false);
             }
-            siddhiAppContext.addEternalReferencedHolder(outputRateLimiter);
+
+            boolean groupBy = !query.getSelector().getGroupByList().isEmpty();
 
             OutputCallback outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(),
                     streamRuntime.getMetaComplexEvent().getOutputStreamDefinition(), tableMap, windowMap,
                     !(streamRuntime instanceof SingleStreamRuntime) ||
-                            !query.getSelector().getGroupByList().isEmpty(), siddhiQueryContext);
+                            groupBy, siddhiQueryContext);
 
             QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
@@ -222,7 +225,7 @@ public class QueryParser {
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
                     .getMetaComplexEvent()));
             queryRuntime = new QueryRuntime(query, streamRuntime, selector, outputRateLimiter, outputCallback,
-                    streamRuntime.getMetaComplexEvent(), lockWrapper != null, siddhiQueryContext);
+                    streamRuntime.getMetaComplexEvent(), siddhiQueryContext);
 
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
                 selector.setBatchingEnabled(false);
@@ -230,7 +233,7 @@ public class QueryParser {
                         .init(streamRuntime.getMetaComplexEvent().getOutputStreamDefinition().getAttributeList().size(),
                                 selector.getAttributeProcessorList(), streamRuntime.getMetaComplexEvent());
             }
-            outputRateLimiter.init(lockWrapper, siddhiQueryContext);
+            outputRateLimiter.init(lockWrapper, groupBy, siddhiQueryContext);
 
         } catch (DuplicateDefinitionException e) {
             if (nameElement != null) {

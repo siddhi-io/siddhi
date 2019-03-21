@@ -23,25 +23,28 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.stream.AbstractStreamProcessor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.AbstractDefinition;
-import io.siddhi.query.api.definition.Attribute;
-
-import java.util.List;
 
 /**
  * Stream Processor to handle Stream Functions.
+ *
+ * @param <S> current state of the processor
  */
-public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
+public abstract class StreamFunctionProcessor<S extends State> extends AbstractStreamProcessor<S> {
 
     @Override
     protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                                     StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
+                                     StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater,
+                                     S state) {
         while (streamEventChunk.hasNext()) {
             ComplexEvent complexEvent = streamEventChunk.next();
             Object[] outputData;
@@ -96,14 +99,16 @@ public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
      * @param inputDefinition              the incoming stream definition
      * @param attributeExpressionExecutors the executors of each function parameters
      * @param configReader                 this hold the {@link StreamFunctionProcessor} extensions configuration
-     *                                     reader.
+     * @param streamEventClonerHolder      stream event cloner Holder
      * @param outputExpectsExpiredEvents   is expired events sent as output
+     * @param findToBeExecuted             find operation will be performed
      * @param siddhiQueryContext           siddhi query context
-     * @return the additional output attributes introduced by the function
      */
-    protected List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
+    protected StateFactory<S> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                   boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
+                                   StreamEventClonerHolder streamEventClonerHolder,
+                                   boolean outputExpectsExpiredEvents, boolean findToBeExecuted,
+                                   SiddhiQueryContext siddhiQueryContext) {
         return init(inputDefinition, attributeExpressionExecutors, configReader, outputExpectsExpiredEvents,
                 siddhiQueryContext);
     }
@@ -119,7 +124,7 @@ public abstract class StreamFunctionProcessor extends AbstractStreamProcessor {
      * @param siddhiQueryContext           the context of the siddhi query
      * @return the additional output attributes introduced by the function
      */
-    protected abstract List<Attribute> init(AbstractDefinition inputDefinition,
+    protected abstract StateFactory<S> init(AbstractDefinition inputDefinition,
                                             ExpressionExecutor[] attributeExpressionExecutors,
                                             ConfigReader configReader, boolean outputExpectsExpiredEvents,
                                             SiddhiQueryContext siddhiQueryContext);

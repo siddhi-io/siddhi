@@ -27,6 +27,8 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -39,6 +41,9 @@ import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.OperatorParser;
+import io.siddhi.core.util.snapshot.state.SnapshotStateList;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
@@ -77,13 +82,11 @@ import java.util.Map;
                         "last 2 seconds and gets updated for every event arrival and expiry."
         )
 )
-public class TimeLengthWindowProcessor extends SlidingWindowProcessor
-        implements SchedulingProcessor, FindableProcessor {
+public class TimeLengthWindowProcessor extends SlidingFindableWindowProcessor<TimeLengthWindowProcessor.WindowState>
+        implements SchedulingProcessor {
 
     private long timeInMilliSeconds;
     private int length;
-    private int count = 0;
-    private ComplexEventChunk<StreamEvent> expiredEventChunk;
     private Scheduler scheduler;
     private SiddhiQueryContext siddhiQueryContext;
 
@@ -98,10 +101,9 @@ public class TimeLengthWindowProcessor extends SlidingWindowProcessor
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         this.siddhiQueryContext = siddhiQueryContext;
-        expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
         if (attributeExpressionExecutors.length == 2) {
             length = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue();
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
@@ -126,24 +128,27 @@ public class TimeLengthWindowProcessor extends SlidingWindowProcessor
                     "windowTime,<int> windowLength), but found " + attributeExpressionExecutors.length + " input " +
                     "attributes");
         }
+        return () -> new WindowState(streamEventClonerHolder);
+
     }
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner) {
-        synchronized (this) {
+                           StreamEventCloner streamEventCloner, WindowState state) {
+
+        synchronized (state) {
             long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
 
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
 
-                expiredEventChunk.reset();
-                while (expiredEventChunk.hasNext()) {
-                    StreamEvent expiredEvent = expiredEventChunk.next();
+                state.expiredEventQueue.reset();
+                while (state.expiredEventQueue.hasNext()) {
+                    StreamEvent expiredEvent = state.expiredEventQueue.next();
                     long timeDiff = expiredEvent.getTimestamp() - currentTime + timeInMilliSeconds;
                     if (timeDiff <= 0) {
-                        expiredEventChunk.remove();
-                        count--;
+                        state.expiredEventQueue.remove();
+                        state.count--;
                         expiredEvent.setTimestamp(currentTime);
                         streamEventChunk.insertBeforeCurrent(expiredEvent);
                     } else {
@@ -151,20 +156,20 @@ public class TimeLengthWindowProcessor extends SlidingWindowProcessor
                     }
                 }
 
-                expiredEventChunk.reset();
+                state.expiredEventQueue.reset();
 
                 if (streamEvent.getType() == StreamEvent.Type.CURRENT) {
                     StreamEvent clonedEvent = streamEventCloner.copyStreamEvent(streamEvent);
                     clonedEvent.setType(StreamEvent.Type.EXPIRED);
-                    if (count < length) {
-                        count++;
-                        this.expiredEventChunk.add(clonedEvent);
+                    if (state.count < length) {
+                        state.count++;
+                        state.expiredEventQueue.add(clonedEvent);
                     } else {
-                        StreamEvent firstEvent = this.expiredEventChunk.poll();
+                        StreamEvent firstEvent = state.expiredEventQueue.poll();
                         if (firstEvent != null) {
                             firstEvent.setTimestamp(currentTime);
                             streamEventChunk.insertBeforeCurrent(firstEvent);
-                            this.expiredEventChunk.add(clonedEvent);
+                            state.expiredEventQueue.add(clonedEvent);
                         }
                     }
                     scheduler.notifyAt(clonedEvent.getTimestamp() + timeInMilliSeconds);
@@ -179,18 +184,19 @@ public class TimeLengthWindowProcessor extends SlidingWindowProcessor
         }
     }
 
-
-    @Override
-    public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, expiredEventChunk, streamEventCloner);
-    }
-
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
+                                              Map<String, Table> tableMap, WindowState state,
+                                              SiddhiQueryContext siddhiQueryContext) {
+        return OperatorParser.constructOperator(state.expiredEventQueue, condition, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
+    }
+
+    @Override
+    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                            StreamEventCloner streamEventCloner, WindowState state) {
+        return ((Operator) compiledCondition).find(matchingEvent, state.expiredEventQueue, streamEventCloner);
     }
 
     @Override
@@ -203,18 +209,31 @@ public class TimeLengthWindowProcessor extends SlidingWindowProcessor
         //Do nothing
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("ExpiredEventChunk", expiredEventChunk.getFirst());
-        return state;
-    }
+    class WindowState extends State {
+        private SnapshotableStreamEventQueue expiredEventQueue;
+        private int count = 0;
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        expiredEventChunk.clear();
-        expiredEventChunk.add((StreamEvent) state.get("ExpiredEventChunk"));
-    }
+        WindowState(StreamEventClonerHolder streamEventClonerHolder) {
+            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+        }
 
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
+            state.put("Count", count);
+            return state;
+        }
+
+        public void restore(Map<String, Object> state) {
+            expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
+            count = (Integer) state.get("ExpiredEventQueue");
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return expiredEventQueue.getFirst() == null && count == 0;
+        }
+    }
 }
 

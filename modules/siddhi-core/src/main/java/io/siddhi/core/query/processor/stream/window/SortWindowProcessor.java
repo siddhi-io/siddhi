@@ -37,6 +37,8 @@ import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.OperatorParser;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.expression.Expression;
 
@@ -92,17 +94,16 @@ import java.util.Map;
                         "Therefore, at any given time, the window contains the 5 lowest prices."
         )
 )
-public class SortWindowProcessor extends SlidingWindowProcessor implements FindableProcessor {
+public class SortWindowProcessor extends SlidingFindableWindowProcessor<SortWindowProcessor.WindowState> {
     private static final String ASC = "asc";
     private static final String DESC = "desc";
     private int lengthToKeep;
-    private List<StreamEvent> sortedWindow = new ArrayList<StreamEvent>();
     private List<Object[]> parameterInfo;
     private EventComparator eventComparator;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
             lengthToKeep = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
                     attributeExpressionExecutors[0]).getValue()));
@@ -138,14 +139,15 @@ public class SortWindowProcessor extends SlidingWindowProcessor implements Finda
                 parameterInfo.add(new Object[]{variableExpressionExecutor, order});
             }
         }
-
+        return () -> new WindowState();
     }
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner) {
+                           StreamEventCloner streamEventCloner, WindowState state) {
 
-        synchronized (this) {
+
+        synchronized (state) {
             long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
 
             StreamEvent streamEvent = streamEventChunk.getFirst();
@@ -158,10 +160,10 @@ public class SortWindowProcessor extends SlidingWindowProcessor implements Finda
                 streamEvent.setNext(null);
                 streamEventChunk.add(streamEvent);
 
-                sortedWindow.add(clonedEvent);
-                if (sortedWindow.size() > lengthToKeep) {
-                    Collections.sort(sortedWindow, eventComparator);
-                    StreamEvent expiredEvent = sortedWindow.remove(sortedWindow.size() - 1);
+                state.sortedWindow.add(clonedEvent);
+                if (state.sortedWindow.size() > lengthToKeep) {
+                    Collections.sort(state.sortedWindow, eventComparator);
+                    StreamEvent expiredEvent = state.sortedWindow.remove(state.sortedWindow.size() - 1);
                     expiredEvent.setTimestamp(currentTime);
                     streamEventChunk.add(expiredEvent);
                 }
@@ -183,31 +185,19 @@ public class SortWindowProcessor extends SlidingWindowProcessor implements Finda
     }
 
     @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
-            state.put("SortedWindow", sortedWindow);
-        }
-        return state;
-    }
-
-
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        sortedWindow = (List<StreamEvent>) state.get("SortedWindow");
-    }
-
-    @Override
-    public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, sortedWindow, streamEventCloner);
-    }
-
-    @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        return OperatorParser.constructOperator(sortedWindow, condition, matchingMetaInfoHolder,
+                                              Map<String, Table> tableMap, WindowState state,
+                                              SiddhiQueryContext siddhiQueryContext) {
+        return OperatorParser.constructOperator(state.sortedWindow, condition, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
+    }
+
+    @Override
+    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                            StreamEventCloner streamEventCloner, WindowState state) {
+        return ((Operator) compiledCondition).find(matchingEvent, state.sortedWindow, streamEventCloner);
+
     }
 
     private class EventComparator implements Comparator<StreamEvent> {
@@ -227,4 +217,26 @@ public class SortWindowProcessor extends SlidingWindowProcessor implements Finda
         }
     }
 
+    class WindowState extends State {
+        private List<StreamEvent> sortedWindow = new ArrayList<StreamEvent>();
+
+        @Override
+        public boolean canDestroy() {
+            return sortedWindow.isEmpty();
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            synchronized (this) {
+                state.put("SortedWindow", sortedWindow);
+            }
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            sortedWindow = (List<StreamEvent>) state.get("SortedWindow");
+        }
+    }
 }

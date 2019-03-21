@@ -65,13 +65,6 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         return streamId;
     }
 
-    public ProcessStreamReceiver clone(String key) {
-        ProcessStreamReceiver processStreamReceiver = new ProcessStreamReceiver(
-                streamId + key, siddhiQueryContext);
-        processStreamReceiver.batchProcessingAllowed = this.batchProcessingAllowed;
-        return processStreamReceiver;
-    }
-
     public void setSiddhiDebugger(SiddhiDebugger siddhiDebugger) {
         this.siddhiDebugger = siddhiDebugger;
     }

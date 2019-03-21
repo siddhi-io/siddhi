@@ -20,7 +20,7 @@ package io.siddhi.core.table.holder;
 
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.util.snapshot.state.SnapshotState;
+import io.siddhi.core.util.snapshot.state.Snapshot;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 
 /**
@@ -30,7 +30,7 @@ import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 public interface EventHolder {
     void add(ComplexEventChunk<StreamEvent> addingEventChunk);
 
-    SnapshotState getSnapshot();
+    Snapshot getSnapshot();
 
     void restore(SnapshotStateList snapshotStatelist);
 }

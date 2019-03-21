@@ -27,11 +27,12 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -61,8 +62,8 @@ import java.util.Set;
 public class CreateSetFunctionExecutor extends FunctionExecutor {
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new SiddhiAppValidationException("createSet() function has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
@@ -71,10 +72,11 @@ public class CreateSetFunctionExecutor extends FunctionExecutor {
             throw new OperationNotSupportedException("createSet() function not supported for type: " +
                     attributeExpressionExecutors[0].getReturnType());
         }
+        return null;
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         return null; //Since the createSet function takes in only 1 parameter, this method does not get called.
         // Hence, not implemented.
     }
@@ -83,10 +85,11 @@ public class CreateSetFunctionExecutor extends FunctionExecutor {
      * return set object, containing only one element: data.
      *
      * @param data array of Double values
+     * @param state
      * @return the set object
      */
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         Set set = new HashSet();
         set.add(data);
         return set;
@@ -95,16 +98,6 @@ public class CreateSetFunctionExecutor extends FunctionExecutor {
     @Override
     public Attribute.Type getReturnType() {
         return Attribute.Type.OBJECT;
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return null;    //no state is maintained.
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Does nothing as no state is maintained.
     }
 
     private boolean isAttributeTypeSupported(Attribute.Type type) {

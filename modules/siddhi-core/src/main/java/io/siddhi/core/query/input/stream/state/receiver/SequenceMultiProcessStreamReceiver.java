@@ -46,15 +46,6 @@ public class SequenceMultiProcessStreamReceiver extends StateMultiProcessStreamR
         }
     }
 
-    public SequenceMultiProcessStreamReceiver clone(String key) {
-        return new SequenceMultiProcessStreamReceiver(streamId + key, processCount, null,
-                siddhiQueryContext);
-    }
-
-    public void setStateStreamRuntime(StateStreamRuntime stateStreamRuntime) {
-        this.stateStreamRuntime = stateStreamRuntime;
-    }
-
     protected void stabilizeStates() {
         stateStreamRuntime.resetAndUpdate();
     }

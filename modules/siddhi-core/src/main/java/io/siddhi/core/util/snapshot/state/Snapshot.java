@@ -23,16 +23,16 @@ import java.io.Serializable;
 /**
  * The class which encloses the state to be serialized.
  */
-public class SnapshotState implements Serializable {
+public class Snapshot implements Serializable {
     private Object state;
     private boolean isIncrementalSnapshot;
 
-    public SnapshotState(Object state) {
+    public Snapshot(Object state) {
         this.state = state;
         this.isIncrementalSnapshot = false;
     }
 
-    public SnapshotState(Object state, boolean isIncrementalSnapshot) {
+    public Snapshot(Object state, boolean isIncrementalSnapshot) {
         this.state = state;
         this.isIncrementalSnapshot = isIncrementalSnapshot;
     }

@@ -24,6 +24,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.event.stream.populater.SelectiveComplexEventPopulater;
 import io.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
@@ -31,6 +32,8 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 
@@ -39,23 +42,27 @@ import java.util.List;
 
 /**
  * Performs event processing in a hopping manner
+ *
+ * @param <S> current state of the processor
  */
-public abstract class HopingWindowProcessor extends WindowProcessor {
+public abstract class HopingWindowProcessor<S extends State> extends WindowProcessor<S> {
 
     protected List<Attribute> internalAttributes;
     protected HopingTimestampPopulator hopingTimestampPopulator;
 
     @Override
-    protected List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
+    protected StateFactory<S> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors,
-                                   ConfigReader configReader,
-                                   boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
-        init(attributeExpressionExecutors, configReader, outputExpectsExpiredEvents, siddhiQueryContext);
+                                   ConfigReader configReader, StreamEventClonerHolder streamEventClonerHolder,
+                                   boolean outputExpectsExpiredEvents, boolean findToBeExecuted,
+                                   SiddhiQueryContext siddhiQueryContext) {
+        StateFactory<S> stateFactory = init(attributeExpressionExecutors, configReader, outputExpectsExpiredEvents,
+                siddhiQueryContext);
         Attribute groupingKey = new Attribute("_hopingTimestamp", Attribute.Type.STRING);
         internalAttributes = new ArrayList<Attribute>(1);
         internalAttributes.add(groupingKey);
         metaStreamEvent.addData(groupingKey);
-        return new ArrayList<>(0);
+        return stateFactory;
     }
 
     /**
@@ -66,12 +73,14 @@ public abstract class HopingWindowProcessor extends WindowProcessor {
      * @param outputExpectsExpiredEvents   is expired events sent as output
      * @param siddhiQueryContext           the context of the siddhi query
      */
-    protected abstract void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                 boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext);
+    protected abstract StateFactory<S> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                            ConfigReader configReader,
+                                            boolean outputExpectsExpiredEvents,
+                                            SiddhiQueryContext siddhiQueryContext);
 
     protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                                      StreamEventCloner streamEventCloner,
-                                     ComplexEventPopulater complexEventPopulater) {
+                                     ComplexEventPopulater complexEventPopulater, S state) {
         processEventChunk(streamEventChunk, nextProcessor, streamEventCloner, hopingTimestampPopulator);
     }
 

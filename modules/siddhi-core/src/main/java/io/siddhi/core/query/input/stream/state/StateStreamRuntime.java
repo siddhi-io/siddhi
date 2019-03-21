@@ -22,14 +22,12 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
-import io.siddhi.core.query.input.ProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
-import io.siddhi.core.query.input.stream.state.receiver.SequenceMultiProcessStreamReceiver;
-import io.siddhi.core.query.input.stream.state.receiver.SequenceSingleProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.state.runtime.InnerStateRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
+import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 
 import java.util.List;
 
@@ -40,10 +38,9 @@ public class StateStreamRuntime implements StreamRuntime {
 
     private MetaStateEvent metaStateEvent;
     private InnerStateRuntime innerStateRuntime;
-    private SiddhiQueryContext siddhiQueryContext;
+    private List<PreStateProcessor> startupPreStateProcessors;
 
     public StateStreamRuntime(SiddhiQueryContext siddhiQueryContext, MetaStateEvent metaStateEvent) {
-        this.siddhiQueryContext = siddhiQueryContext;
         this.metaStateEvent = metaStateEvent;
     }
 
@@ -52,27 +49,9 @@ public class StateStreamRuntime implements StreamRuntime {
     }
 
     @Override
-    public StreamRuntime clone(String key) {
-        StateStreamRuntime stateStreamRuntime = new StateStreamRuntime(siddhiQueryContext, metaStateEvent);
-        stateStreamRuntime.innerStateRuntime = this.innerStateRuntime.clone(key);
-        for (SingleStreamRuntime singleStreamRuntime : stateStreamRuntime.getSingleStreamRuntimes()) {
-            ProcessStreamReceiver processStreamReceiver = singleStreamRuntime.getProcessStreamReceiver();
-            if (processStreamReceiver instanceof SequenceMultiProcessStreamReceiver) {
-                ((SequenceMultiProcessStreamReceiver) processStreamReceiver).setStateStreamRuntime(stateStreamRuntime);
-            } else if (processStreamReceiver instanceof SequenceSingleProcessStreamReceiver) {
-                ((SequenceSingleProcessStreamReceiver) processStreamReceiver).setStateStreamRuntime(stateStreamRuntime);
-            }
-        }
-        ((StreamPreStateProcessor) stateStreamRuntime.innerStateRuntime.getFirstProcessor()).setThisLastProcessor(
-                (StreamPostStateProcessor)
-                        stateStreamRuntime.innerStateRuntime.getLastProcessor());
-        return stateStreamRuntime;
-    }
-
-    @Override
     public void setCommonProcessor(Processor commonProcessor) {
         innerStateRuntime.setQuerySelector(commonProcessor);
-        innerStateRuntime.init();
+        innerStateRuntime.setup();
     }
 
     @Override
@@ -96,5 +75,18 @@ public class StateStreamRuntime implements StreamRuntime {
     public void resetAndUpdate() {
         innerStateRuntime.reset();
         innerStateRuntime.update();
+    }
+
+    public void setStartupPreStateProcessors(List<PreStateProcessor> startupPreStateProcessors) {
+        this.startupPreStateProcessors = startupPreStateProcessors;
+    }
+
+    public void start() {
+        innerStateRuntime.init();
+        for (PreStateProcessor preStateProcessor : startupPreStateProcessors) {
+            if (preStateProcessor instanceof ExternalReferencedHolder) {
+                ((ExternalReferencedHolder) preStateProcessor).start();
+            }
+        }
     }
 }

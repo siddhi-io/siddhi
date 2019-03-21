@@ -32,9 +32,9 @@ import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.query.api.definition.StreamDefinition;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Specific {@link StreamJunction.Receiver} implementation to pump events into partitions. This will send the event
@@ -50,7 +50,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
     private SiddhiAppContext siddhiAppContext;
     private PartitionRuntime partitionRuntime;
     private List<PartitionExecutor> partitionExecutors;
-    private Map<String, StreamJunction> cachedStreamJunctionMap = new ConcurrentHashMap<String, StreamJunction>();
+    private Map<String, StreamJunction> streamJunctionMap = new HashMap<>();
 
 
     public PartitionStreamReceiver(SiddhiAppContext siddhiAppContext, MetaStreamEvent metaStreamEvent,
@@ -269,20 +269,24 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
 
     private void send(String key, ComplexEvent event) {
         if (key != null) {
-            //todo fix partition
-            PartitionRuntime.partitionKey.set(key);
+            SiddhiAppContext.startPartitionFlow(key);
             try {
-                partitionRuntime.cloneIfNotExist(key);
-                cachedStreamJunctionMap.get(streamId + key).sendEvent(event);
+                partitionRuntime.start();
+                streamJunctionMap.get(streamId).sendEvent(event);
             } finally {
-                PartitionRuntime.partitionKey.set(null);
+                SiddhiAppContext.stopPartitionFlow();
             }
         }
     }
 
     private void send(ComplexEvent event) {
-        for (StreamJunction streamJunction : cachedStreamJunctionMap.values()) {
-            streamJunction.sendEvent(event);
+        for (String key : partitionRuntime.getPartitionKeys()) {
+            SiddhiAppContext.startPartitionFlow(key);
+            try {
+                streamJunctionMap.get(streamId).sendEvent(event);
+            } finally {
+                SiddhiAppContext.stopPartitionFlow();
+            }
         }
     }
 
@@ -290,24 +294,27 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
      * create local streamJunctions through which events received by partitionStreamReceiver, are sent to
      * queryStreamReceivers
      *
-     * @param key              partitioning key
      * @param queryRuntimeList queryRuntime list of the partition
      */
-    public void addStreamJunction(String key, List<QueryRuntime> queryRuntimeList) {
-        StreamJunction streamJunction = cachedStreamJunctionMap.get(streamId + key);
+    public void addStreamJunction(List<QueryRuntime> queryRuntimeList) {
+        StreamJunction streamJunction = streamJunctionMap.get(streamId);
         if (streamJunction == null) {
-            streamJunction = partitionRuntime.getLocalStreamJunctionMap().get(streamId + key);
+            streamJunction = partitionRuntime.getInnerpartitionStreamReceiverStreamJunctionMap().get(streamId);
             if (streamJunction == null) {
                 streamJunction = createStreamJunction();
-                partitionRuntime.addStreamJunction(streamId + key, streamJunction);
+                partitionRuntime.addInnerpartitionStreamReceiverStreamJunction(streamId, streamJunction);
             }
-            cachedStreamJunctionMap.put(streamId + key, streamJunction);
+            streamJunctionMap.put(streamId , streamJunction);
         }
+//        if (streamJunction == null) {
+//            streamJunction = createStreamJunction();
+//            this.streamJunctionMap.put(streamId, streamJunction);
+//        }
         for (QueryRuntime queryRuntime : queryRuntimeList) {
             StreamRuntime streamRuntime = queryRuntime.getStreamRuntime();
             for (int i = 0; i < queryRuntime.getInputStreamId().size(); i++) {
                 if ((streamRuntime.getSingleStreamRuntimes().get(i)).
-                        getProcessStreamReceiver().getStreamId().equals(streamId + key)) {
+                        getProcessStreamReceiver().getStreamId().equals(streamId)) {
                     streamJunction.subscribe((streamRuntime.getSingleStreamRuntimes().get(i))
                             .getProcessStreamReceiver());
                 }

@@ -27,6 +27,8 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
@@ -37,7 +39,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 /**
- * {@link AttributeAggregator} to calculate min value based on an event attribute.
+ * {@link AttributeAggregatorExecutor} to calculate min value based on an event attribute.
  */
 @Extension(
         name = "min",
@@ -59,9 +61,10 @@ import java.util.Map;
                         "arrival and expiry."
         )
 )
-public class MinAttributeAggregator extends AttributeAggregator {
+public class MinAttributeAggregatorExecutor
+        extends AttributeAggregatorExecutor<MinAttributeAggregatorExecutor.MinAggregatorState> {
 
-    private MinAttributeAggregator minOutputAttributeAggregator;
+    private Attribute.Type returnType;
 
     public void init(Attribute.Type type) {
     }
@@ -72,13 +75,14 @@ public class MinAttributeAggregator extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link MinAttributeAggregator} configuration reader.
+     * @param configReader                 this hold the {@link MinAttributeAggregatorExecutor} configuration reader.
      * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<MinAggregatorState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                                    ProcessingMode processingMode,
+                                                    boolean outputExpectsExpiredEvents, ConfigReader configReader,
+                                                    SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("Min aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
@@ -87,88 +91,72 @@ public class MinAttributeAggregator extends AttributeAggregator {
         if (processingMode == ProcessingMode.SLIDE || outputExpectsExpiredEvents) {
             trackFutureStates = true;
         }
-        Attribute.Type type = attributeExpressionExecutors[0].getReturnType();
-        switch (type) {
-            case FLOAT:
-                minOutputAttributeAggregator = new MinAttributeAggregatorFloat(trackFutureStates);
-                break;
-            case INT:
-                minOutputAttributeAggregator = new MinAttributeAggregatorInt(trackFutureStates);
-                break;
-            case LONG:
-                minOutputAttributeAggregator = new MinAttributeAggregatorLong(trackFutureStates);
-                break;
-            case DOUBLE:
-                minOutputAttributeAggregator = new MinAttributeAggregatorDouble(trackFutureStates);
-                break;
-            default:
-                throw new OperationNotSupportedException("Min not supported for " + type);
-        }
+        returnType = attributeExpressionExecutors[0].getReturnType();
+        boolean finalTrackFutureStates = trackFutureStates;
+        return new StateFactory<MinAggregatorState>() {
+            @Override
+            public MinAggregatorState createNewState() {
+                switch (returnType) {
+                    case FLOAT:
+                        return new MinAttributeAggregatorStateFloat(finalTrackFutureStates);
+                    case INT:
+                        return new MinAttributeAggregatorStateInt(finalTrackFutureStates);
+                    case LONG:
+                        return new MinAttributeAggregatorStateLong(finalTrackFutureStates);
+                    case DOUBLE:
+                        return new MinAttributeAggregatorStateDouble(finalTrackFutureStates);
+                    default:
+                        throw new OperationNotSupportedException("Min not supported for " + returnType);
+                }
+            }
+        };
+
     }
 
     public Attribute.Type getReturnType() {
-        return minOutputAttributeAggregator.getReturnType();
+        return returnType;
     }
 
     @Override
-    public Object processAdd(Object data) {
+    public Object processAdd(Object data, MinAggregatorState state) {
         if (data == null) {
-            return minOutputAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return minOutputAttributeAggregator.processAdd(data);
+        return state.processAdd(data);
     }
 
     @Override
-    public Object processAdd(Object[] data) {
+    public Object processAdd(Object[] data, MinAggregatorState state) {
         // will not occur
         return new IllegalStateException("Min cannot process data array, but found " + Arrays.deepToString(data));
     }
 
     @Override
-    public Object processRemove(Object data) {
+    public Object processRemove(Object data, MinAggregatorState state) {
         if (data == null) {
-            return minOutputAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return minOutputAttributeAggregator.processRemove(data);
+        return state.processRemove(data);
     }
 
     @Override
-    public Object processRemove(Object[] data) {
+    public Object processRemove(Object[] data, MinAggregatorState state) {
         // will not occur
         return new IllegalStateException("Min cannot process data array, but found " + Arrays.deepToString(data));
     }
 
-    protected Object currentValue() {
-        return null;
-    }
-
     @Override
-    public boolean canDestroy() {
-        return minOutputAttributeAggregator.canDestroy();
+    public Object reset(MinAggregatorState state) {
+        return state.reset();
     }
 
-    @Override
-    public Object reset() {
-        return minOutputAttributeAggregator.reset();
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return minOutputAttributeAggregator.currentState();
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        minOutputAttributeAggregator.restoreState(state);
-    }
-
-    class MinAttributeAggregatorDouble extends MinAttributeAggregator {
+    class MinAttributeAggregatorStateDouble extends MinAggregatorState {
 
         private final Attribute.Type type = Attribute.Type.DOUBLE;
         private Deque<Double> minDeque = null;
         private volatile Double minValue = null;
 
-        public MinAttributeAggregatorDouble(boolean trackFutureStates) {
+        public MinAttributeAggregatorStateDouble(boolean trackFutureStates) {
             if (trackFutureStates) {
                 minDeque = new LinkedList<>();
             }
@@ -225,7 +213,7 @@ public class MinAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             synchronized (this) {
                 state.put("MinValue", minValue);
@@ -235,7 +223,7 @@ public class MinAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public synchronized void restoreState(Map<String, Object> state) {
+        public synchronized void restore(Map<String, Object> state) {
             minValue = (Double) state.get("MinValue");
             minDeque = (Deque<Double>) state.get("MinDeque");
         }
@@ -246,13 +234,13 @@ public class MinAttributeAggregator extends AttributeAggregator {
 
     }
 
-    class MinAttributeAggregatorFloat extends MinAttributeAggregator {
+    class MinAttributeAggregatorStateFloat extends MinAggregatorState {
 
         private final Attribute.Type type = Attribute.Type.FLOAT;
         private Deque<Float> minDeque = null;
         private volatile Float minValue = null;
 
-        public MinAttributeAggregatorFloat(boolean trackFutureStates) {
+        public MinAttributeAggregatorStateFloat(boolean trackFutureStates) {
             if (trackFutureStates) {
                 minDeque = new LinkedList<>();
             }
@@ -309,7 +297,7 @@ public class MinAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             synchronized (this) {
                 state.put("MinValue", minValue);
@@ -319,7 +307,7 @@ public class MinAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public synchronized void restoreState(Map<String, Object> state) {
+        public synchronized void restore(Map<String, Object> state) {
             minValue = (Float) state.get("MinValue");
             minDeque = (Deque<Float>) state.get("MinDeque");
         }
@@ -329,13 +317,13 @@ public class MinAttributeAggregator extends AttributeAggregator {
         }
     }
 
-    class MinAttributeAggregatorInt extends MinAttributeAggregator {
+    class MinAttributeAggregatorStateInt extends MinAggregatorState {
 
         private final Attribute.Type type = Attribute.Type.INT;
         private Deque<Integer> minDeque = null;
         private volatile Integer minValue = null;
 
-        public MinAttributeAggregatorInt(boolean trackFutureStates) {
+        public MinAttributeAggregatorStateInt(boolean trackFutureStates) {
             if (trackFutureStates) {
                 minDeque = new LinkedList<>();
             }
@@ -393,7 +381,7 @@ public class MinAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             synchronized (this) {
                 state.put("MinValue", minValue);
@@ -403,7 +391,7 @@ public class MinAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public synchronized void restoreState(Map<String, Object> state) {
+        public synchronized void restore(Map<String, Object> state) {
             minValue = (Integer) state.get("MinValue");
             minDeque = (Deque<Integer>) state.get("MinDeque");
         }
@@ -413,13 +401,13 @@ public class MinAttributeAggregator extends AttributeAggregator {
         }
     }
 
-    class MinAttributeAggregatorLong extends MinAttributeAggregator {
+    class MinAttributeAggregatorStateLong extends MinAggregatorState {
 
         private final Attribute.Type type = Attribute.Type.LONG;
         private Deque<Long> minDeque = null;
         private volatile Long minValue = null;
 
-        public MinAttributeAggregatorLong(boolean trackFutureStates) {
+        public MinAttributeAggregatorStateLong(boolean trackFutureStates) {
             if (trackFutureStates) {
                 minDeque = new LinkedList<>();
             }
@@ -476,7 +464,7 @@ public class MinAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             synchronized (this) {
                 state.put("MinValue", minValue);
@@ -486,7 +474,7 @@ public class MinAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public synchronized void restoreState(Map<String, Object> state) {
+        public synchronized void restore(Map<String, Object> state) {
             minValue = (Long) state.get("MinValue");
             minDeque = (Deque<Long>) state.get("MinDeque");
         }
@@ -495,6 +483,16 @@ public class MinAttributeAggregator extends AttributeAggregator {
             return minValue;
         }
 
+    }
+
+    abstract class MinAggregatorState extends State {
+        public abstract Object processAdd(Object data);
+
+        public abstract Object processRemove(Object data);
+
+        public abstract Object reset();
+
+        protected abstract Object currentValue();
     }
 
 }

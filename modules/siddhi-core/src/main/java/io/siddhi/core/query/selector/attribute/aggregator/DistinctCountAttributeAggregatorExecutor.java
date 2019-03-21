@@ -28,6 +28,8 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
@@ -35,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link AttributeAggregator} to calculate distinct count based on an event attribute.
+ * {@link AttributeAggregatorExecutor} to calculate distinct count based on an event attribute.
  */
 @Extension(
         name = "distinctCount",
@@ -64,8 +66,8 @@ import java.util.Map;
                         " The three distinct occurences identified are 'WEB_PAGE_1', 'WEB_PAGE_2', and 'WEB_PAGE_3'."
         )
 )
-public class DistinctCountAttributeAggregator extends AttributeAggregator {
-    private Map<Object, Long> distinctValues = new HashMap<Object, Long>();
+public class DistinctCountAttributeAggregatorExecutor
+        extends AttributeAggregatorExecutor<DistinctCountAttributeAggregatorExecutor.AggregatorState> {
 
     /**
      * The initialization method for FunctionExecutor
@@ -73,18 +75,21 @@ public class DistinctCountAttributeAggregator extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link DistinctCountAttributeAggregator} configuration reader.
+     * @param configReader                 this hold the {@link DistinctCountAttributeAggregatorExecutor}
+     *                                     configuration reader.
      * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<AggregatorState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                                 ProcessingMode processingMode,
+                                                 boolean outputExpectsExpiredEvents, ConfigReader configReader,
+                                                 SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("Distinct count aggregator has to have exactly 1 parameter, " +
                     "currently " + attributeExpressionExecutors.length +
                     " parameters provided");
         }
+        return () -> new AggregatorState();
     }
 
     public Attribute.Type getReturnType() {
@@ -92,64 +97,70 @@ public class DistinctCountAttributeAggregator extends AttributeAggregator {
     }
 
     @Override
-    public Object processAdd(Object data) {
-        Long preVal = distinctValues.get(data);
+    public Object processAdd(Object data, AggregatorState state) {
+        Long preVal = state.distinctValues.get(data);
         if (preVal != null) {
-            distinctValues.put(data, ++preVal);
+            state.distinctValues.put(data, ++preVal);
         } else {
-            distinctValues.put(data, 1L);
+            state.distinctValues.put(data, 1L);
         }
-        return getDistinctCount();
+        return state.getDistinctCount();
     }
 
     @Override
-    public Object processAdd(Object[] data) {
+    public Object processAdd(Object[] data, AggregatorState state) {
         return new IllegalStateException(
                 "Distinct count aggregator cannot process data array, but found " + Arrays.deepToString(data));
     }
 
     @Override
-    public Object processRemove(Object data) {
-        Long preVal = distinctValues.get(data);
+    public Object processRemove(Object data, AggregatorState state) {
+        Long preVal = state.distinctValues.get(data);
         preVal--;
         if (preVal > 0) {
-            distinctValues.put(data, preVal);
+            state.distinctValues.put(data, preVal);
         } else {
-            distinctValues.remove(data);
+            state.distinctValues.remove(data);
         }
-        return getDistinctCount();
+        return state.getDistinctCount();
     }
 
     @Override
-    public Object processRemove(Object[] data) {
+    public Object processRemove(Object[] data, AggregatorState state) {
         return new IllegalStateException(
                 "Distinct count aggregator cannot process data array, but found " + Arrays.deepToString(data));
     }
 
     @Override
-    public Object reset() {
-        distinctValues.clear();
-        return getDistinctCount();
+    public Object reset(AggregatorState state) {
+        state.distinctValues.clear();
+        return state.getDistinctCount();
     }
 
-    @Override
-    public boolean canDestroy() {
-        return distinctValues.size() == 0;
-    }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("DistinctValues", distinctValues);
-        return state;
-    }
+    class AggregatorState extends State {
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        distinctValues = (Map<Object, Long>) state.get("DistinctValues");
-    }
+        private Map<Object, Long> distinctValues = new HashMap<Object, Long>();
 
-    private long getDistinctCount() {
-        return distinctValues.size();
+        @Override
+        public boolean canDestroy() {
+            return distinctValues.size() == 0;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("DistinctValues", distinctValues);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            distinctValues = (Map<Object, Long>) state.get("DistinctValues");
+        }
+
+        protected long getDistinctCount() {
+            return distinctValues.size();
+        }
     }
 }

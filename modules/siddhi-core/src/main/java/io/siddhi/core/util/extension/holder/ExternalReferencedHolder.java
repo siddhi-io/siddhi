@@ -21,7 +21,7 @@ package io.siddhi.core.util.extension.holder;
  * Primary interface used to give start and stop method to Siddhi components which will be called once during Siddhi
  * start up and shutting down so that user can perform actions such as resource allocation and de-allocation.
  */
-public interface EternalReferencedHolder {
+public interface ExternalReferencedHolder {
 
     /**
      * This will be called only once and this can be used to acquire

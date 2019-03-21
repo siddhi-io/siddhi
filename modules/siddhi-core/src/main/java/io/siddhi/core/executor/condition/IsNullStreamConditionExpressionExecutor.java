@@ -21,7 +21,6 @@ package io.siddhi.core.executor.condition;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.executor.ExpressionExecutor;
 
 /**
  * Executor class for IsNullStream condition. Condition evaluation logic is implemented within executor.
@@ -49,16 +48,6 @@ public class IsNullStreamConditionExpressionExecutor extends ConditionExpression
                 return Boolean.FALSE;
             }
         }
-    }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new IsNullStreamConditionExpressionExecutor(eventPosition);
-    }
-
-    @Override
-    public void clean() {
-        //ignore
     }
 
 }

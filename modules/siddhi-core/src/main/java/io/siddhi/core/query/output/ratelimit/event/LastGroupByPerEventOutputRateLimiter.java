@@ -23,6 +23,8 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,50 +35,51 @@ import java.util.Map;
  * Implementation of {@link OutputRateLimiter} which will collect pre-defined number of events and the emit only the
  * last event. This implementation specifically handle queries with group by.
  */
-public class LastGroupByPerEventOutputRateLimiter extends OutputRateLimiter {
+public class LastGroupByPerEventOutputRateLimiter extends
+        OutputRateLimiter<LastGroupByPerEventOutputRateLimiter.RateLimiterState> {
     private final Integer value;
-    private String id;
-    private volatile int counter = 0;
-    private Map<String, ComplexEvent> allGroupByKeyEvents = new LinkedHashMap<String, ComplexEvent>();
 
     public LastGroupByPerEventOutputRateLimiter(String id, Integer value) {
-        this.id = id;
         this.value = value;
     }
 
     @Override
-    public OutputRateLimiter clone(String key) {
-        LastGroupByPerEventOutputRateLimiter instance = new LastGroupByPerEventOutputRateLimiter(id + key, value);
-        instance.setLatencyTracker(latencyTracker);
-        return instance;
+    protected StateFactory<RateLimiterState> init() {
+        return () -> new RateLimiterState();
     }
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
-        synchronized (this) {
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
-                    complexEventChunk.remove();
-                    GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
-                    allGroupByKeyEvents.put(groupedComplexEvent.getGroupKey(), groupedComplexEvent.getComplexEvent());
-                    if (++counter == value) {
-                        counter = 0;
-                        if (allGroupByKeyEvents.size() != 0) {
-                            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
-                                    (complexEventChunk.isBatch());
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
+                        complexEventChunk.remove();
+                        GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
+                        state.allGroupByKeyEvents.put(groupedComplexEvent.getGroupKey(),
+                                groupedComplexEvent.getComplexEvent());
+                        if (++state.counter == value) {
+                            state.counter = 0;
+                            if (state.allGroupByKeyEvents.size() != 0) {
+                                ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
+                                        (complexEventChunk.isBatch());
 
-                            for (ComplexEvent complexEvent : allGroupByKeyEvents.values()) {
-                                outputEventChunk.add(complexEvent);
+                                for (ComplexEvent complexEvent : state.allGroupByKeyEvents.values()) {
+                                    outputEventChunk.add(complexEvent);
+                                }
+                                state.allGroupByKeyEvents.clear();
+                                outputEventChunks.add(outputEventChunk);
                             }
-                            allGroupByKeyEvents.clear();
-                            outputEventChunks.add(outputEventChunk);
                         }
                     }
                 }
             }
+        } finally {
+            stateHolder.returnState(state);
         }
         for (ComplexEventChunk eventChunk : outputEventChunks) {
             sendToCallBacks(eventChunk);
@@ -93,19 +96,30 @@ public class LastGroupByPerEventOutputRateLimiter extends OutputRateLimiter {
         //Nothing to stop
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
-            state.put("Counter", counter);
-            state.put("AllGroupByKeyEvents", allGroupByKeyEvents);
-        }
-        return state;
-    }
+    class RateLimiterState extends State {
 
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        counter = (int) state.get("Counter");
-        allGroupByKeyEvents = (Map<String, ComplexEvent>) state.get("AllGroupByKeyEvents");
+        private volatile int counter = 0;
+        private Map<String, ComplexEvent> allGroupByKeyEvents = new LinkedHashMap<String, ComplexEvent>();
+
+        @Override
+        public boolean canDestroy() {
+            return counter == 0 && allGroupByKeyEvents.isEmpty();
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            synchronized (this) {
+                state.put("Counter", counter);
+                state.put("AllGroupByKeyEvents", allGroupByKeyEvents);
+            }
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            counter = (int) state.get("Counter");
+            allGroupByKeyEvents = (Map<String, ComplexEvent>) state.get("AllGroupByKeyEvents");
+        }
     }
 }

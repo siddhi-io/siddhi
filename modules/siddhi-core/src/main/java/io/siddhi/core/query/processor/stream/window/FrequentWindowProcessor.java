@@ -37,6 +37,8 @@ import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.OperatorParser;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.expression.Expression;
 
 import java.util.ArrayList;
@@ -85,27 +87,28 @@ import java.util.concurrent.ConcurrentHashMap;
         }
 )
 @Deprecated
-public class FrequentWindowProcessor extends SlidingWindowProcessor implements FindableProcessor {
-    private ConcurrentHashMap<String, Integer> countMap = new ConcurrentHashMap<String, Integer>();
-    private ConcurrentHashMap<String, StreamEvent> map = new ConcurrentHashMap<String, StreamEvent>();
+public class FrequentWindowProcessor extends SlidingFindableWindowProcessor<FrequentWindowProcessor.WindowState> {
     private VariableExpressionExecutor[] variableExpressionExecutors;
 
     private int mostFrequentCount;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<WindowState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                             ConfigReader configReader,
+                                             SiddhiQueryContext siddhiQueryContext) {
         mostFrequentCount = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
                 attributeExpressionExecutors[0]).getValue()));
         variableExpressionExecutors = new VariableExpressionExecutor[attributeExpressionExecutors.length - 1];
         for (int i = 1; i < attributeExpressionExecutors.length; i++) {
             variableExpressionExecutors[i - 1] = (VariableExpressionExecutor) attributeExpressionExecutors[i];
         }
+        return () -> new WindowState();
     }
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner) {
+                           StreamEventCloner streamEventCloner, WindowState state) {
+
         synchronized (this) {
             StreamEvent streamEvent = streamEventChunk.getFirst();
             streamEventChunk.clear();
@@ -118,39 +121,39 @@ public class FrequentWindowProcessor extends SlidingWindowProcessor implements F
                 clonedEvent.setType(StreamEvent.Type.EXPIRED);
 
                 String key = generateKey(streamEvent);
-                StreamEvent oldEvent = map.put(key, clonedEvent);
+                StreamEvent oldEvent = state.map.put(key, clonedEvent);
                 if (oldEvent != null) {
-                    countMap.put(key, countMap.get(key) + 1);
+                    state.countMap.put(key, state.countMap.get(key) + 1);
                     streamEventChunk.add(streamEvent);
                 } else {
                     //  This is a new event
-                    if (map.size() > mostFrequentCount) {
-                        List<String> keys = new ArrayList<String>(countMap.keySet());
+                    if (state.map.size() > mostFrequentCount) {
+                        List<String> keys = new ArrayList<String>(state.countMap.keySet());
                         for (int i = 0; i < mostFrequentCount; i++) {
-                            int count = countMap.get(keys.get(i)) - 1;
+                            int count = state.countMap.get(keys.get(i)) - 1;
                             if (count == 0) {
-                                countMap.remove(keys.get(i));
-                                StreamEvent expiredEvent = map.remove(keys.get(i));
+                                state.countMap.remove(keys.get(i));
+                                StreamEvent expiredEvent = state.map.remove(keys.get(i));
                                 expiredEvent.setTimestamp(currentTime);
                                 streamEventChunk.add(expiredEvent);
                             } else {
-                                countMap.put(keys.get(i), count);
+                                state.countMap.put(keys.get(i), count);
                             }
                         }
                         // now we have tried to remove one for newly added item
-                        if (map.size() > mostFrequentCount) {
+                        if (state.map.size() > mostFrequentCount) {
                             //nothing happend by the attempt to remove one from the
                             // map so we are ignoring this event
-                            map.remove(key);
+                            state.map.remove(key);
                             // Here we do nothing just drop the message
                         } else {
                             // we got some space, event is already there in map object
                             // we just have to add it to the countMap
-                            countMap.put(key, 1);
+                            state.countMap.put(key, 1);
                             streamEventChunk.add(streamEvent);
                         }
                     } else {
-                        countMap.put(generateKey(streamEvent), 1);
+                        state.countMap.put(generateKey(streamEvent), 1);
                         streamEventChunk.add(streamEvent);
                     }
                 }
@@ -170,20 +173,6 @@ public class FrequentWindowProcessor extends SlidingWindowProcessor implements F
         //Do nothing
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
-            state.put("CountMap", countMap);
-        }
-        return state;
-    }
-
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        countMap = (ConcurrentHashMap<String, Integer>) state.get("CountMap");
-    }
-
     private String generateKey(StreamEvent event) {      // for performance reason if its all attribute we don't do
         // the attribute list check
         StringBuilder stringBuilder = new StringBuilder();
@@ -200,15 +189,41 @@ public class FrequentWindowProcessor extends SlidingWindowProcessor implements F
     }
 
     @Override
-    public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, map.values(), streamEventCloner);
+    public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
+                                              List<VariableExpressionExecutor> variableExpressionExecutors,
+                                              Map<String, Table> tableMap, WindowState state,
+                                              SiddhiQueryContext siddhiQueryContext) {
+        return OperatorParser.constructOperator(state.map.values(), condition, matchingMetaInfoHolder,
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
     @Override
-    public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
-                                              List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        return OperatorParser.constructOperator(map.values(), condition, matchingMetaInfoHolder,
-                variableExpressionExecutors, tableMap, siddhiQueryContext);
+    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                            StreamEventCloner streamEventCloner, WindowState state) {
+        return ((Operator) compiledCondition).find(matchingEvent, state.map.values(), streamEventCloner);
+    }
+
+    class WindowState extends State {
+        private ConcurrentHashMap<String, Integer> countMap = new ConcurrentHashMap<String, Integer>();
+        private ConcurrentHashMap<String, StreamEvent> map = new ConcurrentHashMap<String, StreamEvent>();
+
+        @Override
+        public boolean canDestroy() {
+            return countMap.isEmpty() && map.isEmpty();
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            synchronized (this) {
+                state.put("CountMap", countMap);
+            }
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            countMap = (ConcurrentHashMap<String, Integer>) state.get("CountMap");
+        }
     }
 }

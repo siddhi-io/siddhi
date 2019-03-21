@@ -44,7 +44,6 @@ import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.parser.SingleInputStreamParser;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
-import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.MemoryCalculable;
 import io.siddhi.core.util.statistics.ThroughputTracker;
@@ -62,7 +61,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Window implementation of SiddhiQL.
  * It can be seen as a global Window which can be accessed from multiple queries.
  */
-public class Window implements FindableProcessor, Snapshotable, MemoryCalculable {
+public class Window implements FindableProcessor, MemoryCalculable {
 
     /**
      * WindowDefinition used to construct this window.
@@ -137,11 +136,13 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
     /**
      * Initialize the WindowEvent table by creating {@link WindowProcessor} to handle the events.
      *
-     * @param tableMap       map of {@link Table}s
-     * @param eventWindowMap map of EventWindows
-     * @param windowName     name of the query window belongs to.
+     * @param tableMap         map of {@link Table}s
+     * @param eventWindowMap   map of EventWindows
+     * @param windowName       name of the query window belongs to.
+     * @param findToBeExecuted will find will be executed on the window.
      */
-    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, String windowName) {
+    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, String windowName,
+                     boolean findToBeExecuted) {
         if (this.windowProcessor != null) {
             return;
         }
@@ -164,14 +165,14 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         WindowProcessor internalWindowProcessor = (WindowProcessor) SingleInputStreamParser.generateProcessor
                 (windowDefinition.getWindow(), metaStreamEvent, new ArrayList<VariableExpressionExecutor>(),
                         tableMap, false,
-                        outputExpectsExpiredEvents, siddhiQueryContext);
+                        outputExpectsExpiredEvents, findToBeExecuted, siddhiQueryContext);
         internalWindowProcessor.setStreamEventCloner(streamEventCloner);
         internalWindowProcessor.constructStreamEventPopulater(metaStreamEvent, 0);
 
         EntryValveProcessor entryValveProcessor = null;
         if (internalWindowProcessor instanceof SchedulingProcessor) {
             entryValveProcessor = new EntryValveProcessor(this.siddhiAppContext);
-            Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, this.siddhiAppContext);
+            Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiQueryContext);
             scheduler.init(this.lockWrapper, windowName);
             scheduler.setStreamEventPool(streamEventPool);
             ((SchedulingProcessor) internalWindowProcessor).setScheduler(scheduler);
@@ -290,43 +291,6 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         return lockWrapper;
     }
 
-
-    /**
-     * Return an object array containing the internal state of the internalWindowProcessor.
-     *
-     * @return current state of the Window
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        return this.internalWindowProcessor.currentState();
-    }
-
-    /**
-     * Restore the internalWindowProcessor using given state.
-     *
-     * @param state the stateful objects of the element as an array on
-     */
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        this.internalWindowProcessor.restoreState(state);
-    }
-
-
-    /**
-     * Return the elementId which may be used for snapshot creation.
-     *
-     * @return the element id of this {@link Snapshotable} object
-     */
-    @Override
-    public String getElementId() {
-        return this.internalWindowProcessor.getElementId();
-    }
-
-    @Override
-    public void clean() {
-        internalWindowProcessor.clean();
-    }
-
     public ProcessingMode getProcessingMode() {
         return internalWindowProcessor.getProcessingMode();
     }
@@ -395,14 +359,5 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
             // Do nothing
         }
 
-
-        public Processor cloneProcessor(String key) {
-            return new StreamPublishProcessor(this.outputEventType);
-        }
-
-        @Override
-        public void clean() {
-            //ignore
-        }
     }
 }

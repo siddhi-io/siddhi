@@ -25,6 +25,8 @@ import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.Schedulable;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -36,11 +38,11 @@ import java.util.concurrent.ScheduledExecutorService;
  * Implementation of {@link OutputRateLimiter} which will collect pre-defined time period and the emit only last
  * event.
  */
-public class LastPerTimeOutputRateLimiter extends OutputRateLimiter implements Schedulable {
+public class LastPerTimeOutputRateLimiter extends OutputRateLimiter<LastPerTimeOutputRateLimiter.RateLimiterState>
+        implements Schedulable {
     private static final Logger log = Logger.getLogger(LastPerTimeOutputRateLimiter.class);
     private final Long value;
     private String id;
-    private ComplexEvent lastEvent = null;
     private ScheduledExecutorService scheduledExecutorService;
     private Scheduler scheduler;
     private long scheduledTime;
@@ -51,40 +53,43 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter implements S
         this.scheduledExecutorService = scheduledExecutorService;
     }
 
+
     @Override
-    public OutputRateLimiter clone(String key) {
-        LastPerTimeOutputRateLimiter instance = new LastPerTimeOutputRateLimiter(id + key, value,
-                scheduledExecutorService);
-        instance.setLatencyTracker(latencyTracker);
-        return instance;
+    protected StateFactory init() {
+        return () -> new RateLimiterState();
     }
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
         complexEventChunk.reset();
-        synchronized (this) {
-            complexEventChunk.reset();
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.TIMER) {
-                    if (event.getTimestamp() >= scheduledTime) {
-                        if (lastEvent != null) {
-                            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
-                                    (complexEventChunk.isBatch());
-                            outputEventChunk.add(lastEvent);
-                            lastEvent = null;
-                            outputEventChunks.add(outputEventChunk);
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                complexEventChunk.reset();
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event.getType() == ComplexEvent.Type.TIMER) {
+                        if (event.getTimestamp() >= scheduledTime) {
+                            if (state.lastEvent != null) {
+                                ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
+                                        (complexEventChunk.isBatch());
+                                outputEventChunk.add(state.lastEvent);
+                                state.lastEvent = null;
+                                outputEventChunks.add(outputEventChunk);
+                            }
+                            scheduledTime = scheduledTime + value;
+                            scheduler.notifyAt(scheduledTime);
                         }
-                        scheduledTime = scheduledTime + value;
-                        scheduler.notifyAt(scheduledTime);
+                    } else if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type
+                            .EXPIRED) {
+                        complexEventChunk.remove();
+                        state.lastEvent = event;
                     }
-                } else if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type
-                        .EXPIRED) {
-                    complexEventChunk.remove();
-                    lastEvent = event;
                 }
             }
+        } finally {
+            stateHolder.returnState(state);
         }
         for (ComplexEventChunk eventChunk : outputEventChunks) {
             sendToCallBacks(eventChunk);
@@ -93,7 +98,7 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter implements S
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiQueryContext.getSiddhiAppContext());
+        scheduler = SchedulerParser.parse(this, siddhiQueryContext);
         scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
         scheduler.init(lockWrapper, siddhiQueryContext.getName());
         long currentTime = System.currentTimeMillis();
@@ -106,18 +111,29 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter implements S
         //Nothing to stop
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
-            state.put("LastEvent", lastEvent);
-        }
-        return state;
-    }
 
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        lastEvent = (ComplexEvent) state.get("LastEvent");
+    class RateLimiterState extends State {
+
+        private ComplexEvent lastEvent = null;
+
+        @Override
+        public boolean canDestroy() {
+            return lastEvent == null;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            synchronized (this) {
+                state.put("LastEvent", lastEvent);
+            }
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            lastEvent = (ComplexEvent) state.get("LastEvent");
+        }
     }
 
 }

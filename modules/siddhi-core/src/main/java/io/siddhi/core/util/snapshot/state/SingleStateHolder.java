@@ -18,20 +18,80 @@
 
 package io.siddhi.core.util.snapshot.state;
 
-public class SingleStateHolder implements StateHolder {
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import org.apache.log4j.Logger;
 
-    private State state;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * State holder for non partition use case
+ */
+public class SingleStateHolder implements StateHolder {
+    private static final Logger log = Logger.getLogger(SingleStateHolder.class);
+
+    private final StateFactory stateFactory;
+    private State state = null;
 
     public SingleStateHolder(StateFactory stateFactory) {
-        state = stateFactory.createNewState();
+        this.stateFactory = stateFactory;
     }
 
     @Override
-    public State getState() {
+    public synchronized State getState() {
+        if (state == null) {
+            state = stateFactory.createNewState();
+        }
+        state.activeUseCount++;
         return state;
     }
 
     @Override
-    public void returnState(State state) {
+    public synchronized void returnState(State state) {
+        state.activeUseCount--;
+        if (state.activeUseCount < 0) {
+            throw new SiddhiAppRuntimeException("State active count has reached less then zero, current value is "
+                    + state.activeUseCount);
+        }
+        try {
+            if (state.activeUseCount == 0 && state.canDestroy()) {
+                this.state = null;
+            }
+        } catch (Throwable t) {
+            log.error("Dropping state due to error! " + t.getMessage(), t);
+            this.state = null;
+        }
+
+    }
+
+    public synchronized Map<String, State> getAllStates() {
+        if (state == null) {
+            state = stateFactory.createNewState();
+        }
+        Map<String, State> result = new HashMap<>(1);
+        result.put(null, state);
+        state.activeUseCount++;
+        return result;
+    }
+
+    @Override
+    public synchronized void returnStates(Map states) {
+        for (Map.Entry<String, State> entry : (Set<Map.Entry<String, State>>) states.entrySet()) {
+            entry.getValue().activeUseCount--;
+            if (entry.getValue().activeUseCount < 0) {
+                throw new SiddhiAppRuntimeException("State active count has reached less then zero, current value is "
+                        + entry.getValue().activeUseCount);
+            }
+            try {
+                if (entry.getValue().activeUseCount == 0 && entry.getValue().canDestroy()) {
+                    this.state = null;
+                }
+            } catch (Throwable t) {
+                log.error("Dropping state due to error! " + t.getMessage(), t);
+                this.state = null;
+            }
+
+        }
     }
 }

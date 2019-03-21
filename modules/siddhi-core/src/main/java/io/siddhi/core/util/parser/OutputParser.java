@@ -27,8 +27,10 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.DeleteTableCallback;
 import io.siddhi.core.query.output.callback.InsertIntoStreamCallback;
+import io.siddhi.core.query.output.callback.InsertIntoStreamEndPartitionCallback;
 import io.siddhi.core.query.output.callback.InsertIntoTableCallback;
 import io.siddhi.core.query.output.callback.InsertIntoWindowCallback;
+import io.siddhi.core.query.output.callback.InsertIntoWindowEndPartitionCallback;
 import io.siddhi.core.query.output.callback.OutputCallback;
 import io.siddhi.core.query.output.callback.UpdateOrInsertTableCallback;
 import io.siddhi.core.query.output.callback.UpdateTableCallback;
@@ -113,13 +115,23 @@ public class OutputParser {
         //Construct CallBack
         if (outStream instanceof InsertIntoStream || outStream instanceof ReturnStream) {
             if (window != null) {
-                return new InsertIntoWindowCallback(window, outputStreamDefinition, siddhiQueryContext.getName());
+                if (!siddhiQueryContext.isPartitioned()) {
+                    return new InsertIntoWindowCallback(window, outputStreamDefinition, siddhiQueryContext.getName());
+                } else {
+                    return new InsertIntoWindowEndPartitionCallback(window, outputStreamDefinition,
+                            siddhiQueryContext.getName());
+                }
             } else if (table != null) {
                 DefinitionParserHelper.validateOutputStream(outputStreamDefinition, table.getTableDefinition());
                 return new InsertIntoTableCallback(table, outputStreamDefinition, convertToStreamEvent,
                         streamEventPool, streamEventConverter, siddhiQueryContext.getName());
             } else {
-                return new InsertIntoStreamCallback(outputStreamDefinition, siddhiQueryContext.getName());
+                if (!siddhiQueryContext.isPartitioned() || outputStreamDefinition.getId().startsWith("#")) {
+                    return new InsertIntoStreamCallback(outputStreamDefinition, siddhiQueryContext.getName());
+                } else {
+                    return new InsertIntoStreamEndPartitionCallback(
+                            outputStreamDefinition, siddhiQueryContext.getName());
+                }
             }
         } else if (outStream instanceof DeleteStream || outStream instanceof UpdateStream || outStream instanceof
                 UpdateOrInsertStream) {
@@ -320,8 +332,8 @@ public class OutputParser {
             throw new OperationNotSupportedException(((TimeOutputRate) outputRate).getType() + " not supported in " +
                     "output rate limiting");
         } else {
-            return new WrappedSnapshotOutputRateLimiter(id, ((SnapshotOutputRate) outputRate).getValue(),
-                    scheduledExecutorService, isGroupBy, isWindow, siddhiQueryContext);
+            return new WrappedSnapshotOutputRateLimiter(((SnapshotOutputRate) outputRate).getValue(),
+                    isGroupBy, isWindow, siddhiQueryContext);
         }
 
     }

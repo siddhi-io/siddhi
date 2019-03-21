@@ -101,7 +101,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
             IncrementalSnapshotInfo snapshotInfo = PersistenceHelper.convertRevision(fileName);
             if (snapshotInfo.getTime() <= restoreTime &&
                     siddhiAppName.equals(snapshotInfo.getSiddhiAppId()) &&
-                    snapshotInfo.getElementId() != null &&
+                    snapshotInfo.getId() != null &&
                     snapshotInfo.getQueryName() != null) {
                 //Note: Here we discard the (items.length == 2) scenario which is handled
                 // by the full snapshot handling
@@ -127,7 +127,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
             IncrementalSnapshotInfo snapshotInfo = PersistenceHelper.convertRevision(fileName);
             if (snapshotInfo.getTime() > restoreTime &&
                     siddhiAppName.equals(snapshotInfo.getSiddhiAppId()) &&
-                    snapshotInfo.getElementId() != null &&
+                    snapshotInfo.getId() != null &&
                     snapshotInfo.getQueryName() != null) {
                 //Note: Here we discard the (items.length == 2) scenario which is handled
                 // by the full snapshot handling
@@ -177,7 +177,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                     if (snapshotInfo.getTime() < baseTimeStamp &&
                             incrementalSnapshotInfo.getSiddhiAppId().equals(snapshotInfo.getSiddhiAppId()) &&
                             incrementalSnapshotInfo.getQueryName().equals(snapshotInfo.getQueryName()) &&
-                            incrementalSnapshotInfo.getElementId().equals(snapshotInfo.getElementId())) {
+                            incrementalSnapshotInfo.getId().equals(snapshotInfo.getId())) {
                         if (incrementalSnapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.BASE &&
                                 snapshotInfo.getType() != IncrementalSnapshotInfo.SnapshotType.PERIODIC) {
                             if (file.exists()) {

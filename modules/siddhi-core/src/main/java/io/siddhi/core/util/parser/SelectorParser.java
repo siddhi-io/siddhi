@@ -85,13 +85,13 @@ public class SelectorParser {
                 .getOutputEventType() == OutputStream.OutputEventType.ALL_EVENTS) {
             expiredOn = true;
         }
-
+        boolean groupBy = !selector.getGroupByList().isEmpty();
         id = outputStream.getId();
         containsAggregatorThreadLocal.remove();
         QuerySelector querySelector = new QuerySelector(id, selector, currentOn, expiredOn, siddhiQueryContext);
         List<AttributeProcessor> attributeProcessors = getAttributeProcessors(selector, id,
                 metaComplexEvent, tableMap, variableExpressionExecutors, outputStream, metaPosition,
-                processingMode, outputExpectsExpiredEvents, siddhiQueryContext);
+                processingMode, outputExpectsExpiredEvents, groupBy, siddhiQueryContext);
         querySelector.setAttributeProcessorList(attributeProcessors,
                 "true".equals(containsAggregatorThreadLocal.get()));
         containsAggregatorThreadLocal.remove();
@@ -144,8 +144,8 @@ public class SelectorParser {
      * @param outputStream                output stream
      * @param processingMode              processing mode of the query
      * @param outputExpectsExpiredEvents  is expired events sent as output
-     * @param siddhiQueryContext          current siddhi query context
-     * @return list of AttributeProcessors
+     * @param groupBy                     is Attributes groupBy
+     * @param siddhiQueryContext          current siddhi query context  @return list of AttributeProcessors
      */
     private static List<AttributeProcessor> getAttributeProcessors(Selector selector, String id,
                                                                    MetaComplexEvent metaComplexEvent,
@@ -155,7 +155,9 @@ public class SelectorParser {
                                                                    OutputStream outputStream,
                                                                    int metaPosition,
                                                                    ProcessingMode processingMode,
-                                                                   boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
+                                                                   boolean outputExpectsExpiredEvents,
+                                                                   boolean groupBy,
+                                                                   SiddhiQueryContext siddhiQueryContext) {
 
         List<AttributeProcessor> attributeProcessorList = new ArrayList<>();
         StreamDefinition outputDefinition = StreamDefinition.id(id);
@@ -201,7 +203,7 @@ public class SelectorParser {
 
             ExpressionExecutor expressionExecutor = ExpressionParser.parseExpression(outputAttribute.getExpression(),
                     metaComplexEvent, SiddhiConstants.UNKNOWN_STATE, tableMap, variableExpressionExecutors,
-                    !(selector.getGroupByList().isEmpty()), 0, processingMode,
+                    groupBy, 0, processingMode,
                     outputExpectsExpiredEvents, siddhiQueryContext);
             if (expressionExecutor instanceof VariableExpressionExecutor) {   //for variables we will directly put
                 // value at conversion stage

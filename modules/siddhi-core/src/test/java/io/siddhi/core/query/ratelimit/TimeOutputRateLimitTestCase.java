@@ -863,7 +863,7 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4", "WSO2"});
         Thread.sleep(1100);
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30", "WSO2"});
-        Thread.sleep(1000);
+        Thread.sleep(1100);
 
         AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
         AssertJUnit.assertTrue("Number of output event value", 3 == count.get());

@@ -27,6 +27,8 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
@@ -34,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link AttributeAggregator} to calculate average based on an event attribute.
+ * {@link AttributeAggregatorExecutor} to calculate average based on an event attribute.
  */
 @Extension(
         name = "avg",
@@ -54,9 +56,10 @@ import java.util.Map;
                         "arrival and expiry."
         )
 )
-public class AvgAttributeAggregator extends AttributeAggregator {
+public class AvgAttributeAggregatorExecutor
+        extends AttributeAggregatorExecutor<AvgAttributeAggregatorExecutor.AvgAttributeState> {
 
-    private AvgAttributeAggregator avgOutputAttributeAggregator;
+    private Attribute.Type returnType;
 
     /**
      * The initialization method for FunctionExecutor
@@ -64,101 +67,78 @@ public class AvgAttributeAggregator extends AttributeAggregator {
      * @param attributeExpressionExecutors are the executors of each attributes in the function
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
-     * @param configReader                 this hold the {@link AvgAttributeAggregator} configuration reader.
+     * @param configReader                 this hold the {@link AvgAttributeAggregatorExecutor} configuration reader.
      * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ProcessingMode processingMode,
-                        boolean outputExpectsExpiredEvents, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory<AvgAttributeState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                                   ProcessingMode processingMode,
+                                                   boolean outputExpectsExpiredEvents, ConfigReader configReader,
+                                                   SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new OperationNotSupportedException("Avg aggregator has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
         }
+        returnType = Attribute.Type.DOUBLE;
         Attribute.Type type = attributeExpressionExecutors[0].getReturnType();
-        switch (type) {
-            case FLOAT:
-                avgOutputAttributeAggregator = new AvgAttributeAggregatorFloat();
-                break;
-            case INT:
-                avgOutputAttributeAggregator = new AvgAttributeAggregatorInt();
-                break;
-            case LONG:
-                avgOutputAttributeAggregator = new AvgAttributeAggregatorLong();
-                break;
-            case DOUBLE:
-                avgOutputAttributeAggregator = new AvgAttributeAggregatorDouble();
-                break;
-            default:
-                throw new OperationNotSupportedException("Avg not supported for " + type);
-        }
+        return () -> {
+            switch (type) {
+                case FLOAT:
+                    return new AvgAttributeAggregatorStateFloat();
+                case INT:
+                    return new AvgAttributeAggregatorStateInt();
+                case LONG:
+                    return new AvgAttributeAggregatorStateLong();
+                case DOUBLE:
+                    return new AvgAttributeAggregatorStateDouble();
+                default:
+                    throw new OperationNotSupportedException("Avg not supported for " + returnType);
+            }
+        };
+
     }
 
     public Attribute.Type getReturnType() {
-        return avgOutputAttributeAggregator.getReturnType();
+        return returnType;
     }
 
     @Override
-    public Object processAdd(Object data) {
+    public Object processAdd(Object data, AvgAttributeState state) {
         if (data == null) {
-            return avgOutputAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return avgOutputAttributeAggregator.processAdd(data);
+        return state.processAdd(data);
     }
 
     @Override
-    public Object processAdd(Object[] data) {
+    public Object processAdd(Object[] data, AvgAttributeState state) {
         // will not occur
         return new IllegalStateException("Avg cannot process data array, but found " + Arrays.deepToString(data));
     }
 
     @Override
-    public Object processRemove(Object data) {
+    public Object processRemove(Object data, AvgAttributeState state) {
         if (data == null) {
-            return avgOutputAttributeAggregator.currentValue();
+            return state.currentValue();
         }
-        return avgOutputAttributeAggregator.processRemove(data);
+        return state.processRemove(data);
     }
 
     @Override
-    public Object processRemove(Object[] data) {
+    public Object processRemove(Object[] data, AvgAttributeState state) {
         // will not occur
         return new IllegalStateException("Avg cannot process data array, but found " + Arrays.deepToString(data));
     }
 
-    protected Object currentValue() {
-        return null;
-    }
-
     @Override
-    public boolean canDestroy() {
-        return avgOutputAttributeAggregator.canDestroy();
+    public Object reset(AvgAttributeState state) {
+        return state.reset();
     }
 
-    @Override
-    public Object reset() {
-        return avgOutputAttributeAggregator.reset();
-    }
+    class AvgAttributeAggregatorStateDouble extends AvgAttributeState {
 
-    @Override
-    public Map<String, Object> currentState() {
-        return avgOutputAttributeAggregator.currentState();
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        avgOutputAttributeAggregator.restoreState(state);
-    }
-
-    class AvgAttributeAggregatorDouble extends AvgAttributeAggregator {
-
-        private final Attribute.Type type = Attribute.Type.DOUBLE;
         private double value = 0.0;
         private long count = 0;
-
-        public Attribute.Type getReturnType() {
-            return type;
-        }
 
         @Override
         public Object processAdd(Object data) {
@@ -193,7 +173,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("Value", value);
             state.put("Count", count);
@@ -201,7 +181,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             value = (double) state.get("Value");
             count = (long) state.get("Count");
         }
@@ -214,15 +194,10 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         }
     }
 
-    class AvgAttributeAggregatorFloat extends AvgAttributeAggregator {
+    class AvgAttributeAggregatorStateFloat extends AvgAttributeState {
 
-        private final Attribute.Type type = Attribute.Type.DOUBLE;
         private double value = 0.0;
         private long count = 0;
-
-        public Attribute.Type getReturnType() {
-            return this.type;
-        }
 
         @Override
         public Object processAdd(Object data) {
@@ -257,7 +232,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("Value", value);
             state.put("Count", count);
@@ -265,7 +240,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             value = (double) state.get("Value");
             count = (long) state.get("Count");
         }
@@ -278,15 +253,10 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         }
     }
 
-    class AvgAttributeAggregatorInt extends AvgAttributeAggregator {
+    class AvgAttributeAggregatorStateInt extends AvgAttributeState {
 
-        private final Attribute.Type type = Attribute.Type.DOUBLE;
         private double value = 0.0;
         private long count = 0;
-
-        public Attribute.Type getReturnType() {
-            return this.type;
-        }
 
         @Override
         public Object processAdd(Object data) {
@@ -321,7 +291,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("Value", value);
             state.put("Count", count);
@@ -329,7 +299,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             value = (double) state.get("Value");
             count = (long) state.get("Count");
         }
@@ -340,18 +310,12 @@ public class AvgAttributeAggregator extends AttributeAggregator {
             }
             return value / count;
         }
-
     }
 
-    class AvgAttributeAggregatorLong extends AvgAttributeAggregator {
+    class AvgAttributeAggregatorStateLong extends AvgAttributeState {
 
-        private final Attribute.Type type = Attribute.Type.DOUBLE;
         private double value = 0.0;
         private long count = 0;
-
-        public Attribute.Type getReturnType() {
-            return type;
-        }
 
         @Override
         public Object processAdd(Object data) {
@@ -386,7 +350,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public Map<String, Object> currentState() {
+        public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("Value", value);
             state.put("Count", count);
@@ -394,7 +358,7 @@ public class AvgAttributeAggregator extends AttributeAggregator {
         }
 
         @Override
-        public void restoreState(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             value = (double) state.get("Value");
             count = (long) state.get("Count");
         }
@@ -405,7 +369,16 @@ public class AvgAttributeAggregator extends AttributeAggregator {
             }
             return value / count;
         }
+    }
 
+    abstract class AvgAttributeState extends State {
+        public abstract Object processAdd(Object data);
+
+        public abstract Object processRemove(Object obj);
+
+        public abstract Object reset();
+
+        protected abstract Object currentValue();
     }
 
 

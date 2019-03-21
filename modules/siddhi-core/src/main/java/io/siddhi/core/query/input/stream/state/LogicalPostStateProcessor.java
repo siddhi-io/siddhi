@@ -118,19 +118,6 @@ public class LogicalPostStateProcessor extends StreamPostStateProcessor {
         }
     }
 
-    /**
-     * Clone a copy of processor
-     *
-     * @param key partition key
-     * @return clone of PostStateProcessor
-     */
-    @Override
-    public PostStateProcessor cloneProcessor(String key) {
-        LogicalPostStateProcessor logicalPostStateProcessor = new LogicalPostStateProcessor(type);
-        cloneProperties(logicalPostStateProcessor);
-        return logicalPostStateProcessor;
-    }
-
     public void setNextStatePreProcessor(PreStateProcessor preStateProcessor) {
         this.nextStatePreProcessor = preStateProcessor;
         partnerPostStateProcessor.nextStatePreProcessor = preStateProcessor;

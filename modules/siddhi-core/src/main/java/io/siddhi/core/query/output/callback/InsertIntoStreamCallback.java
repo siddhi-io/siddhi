@@ -28,8 +28,8 @@ import io.siddhi.query.api.definition.StreamDefinition;
  * Siddhi queries and put them into {@link StreamJunction}.
  */
 public class InsertIntoStreamCallback extends OutputCallback {
-    private StreamDefinition outputStreamDefinition;
-    private StreamJunction.Publisher publisher;
+    protected StreamDefinition outputStreamDefinition;
+    protected StreamJunction.Publisher publisher;
 
     public InsertIntoStreamCallback(StreamDefinition outputStreamDefinition, String queryName) {
         super(queryName);

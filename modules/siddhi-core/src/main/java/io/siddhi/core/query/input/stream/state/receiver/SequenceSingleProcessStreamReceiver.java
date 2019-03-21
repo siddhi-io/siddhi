@@ -40,15 +40,6 @@ public class SequenceSingleProcessStreamReceiver extends SingleProcessStreamRece
         this.stateStreamRuntime = stateStreamRuntime;
     }
 
-    public void setStateStreamRuntime(StateStreamRuntime stateStreamRuntime) {
-        this.stateStreamRuntime = stateStreamRuntime;
-    }
-
-    public SequenceSingleProcessStreamReceiver clone(String key) {
-        return new SequenceSingleProcessStreamReceiver(streamId + key, null, key,
-                siddhiQueryContext);
-    }
-
     protected void stabilizeStates() {
         stateStreamRuntime.resetAndUpdate();
     }

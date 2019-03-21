@@ -62,8 +62,8 @@ public abstract class AbstractRecordTable extends Table {
                      StreamEventCloner storeEventCloner, ConfigReader configReader, SiddhiAppContext
                              siddhiAppContext, RecordTableHandler recordTableHandler) {
         if (recordTableHandler != null) {
-            recordTableHandler.init(siddhiAppContext.getElementIdGenerator().createNewId(), tableDefinition,
-                    new RecordTableHandlerCallback(this));
+            recordTableHandler.init(tableDefinition, new RecordTableHandlerCallback(this),
+                    siddhiAppContext);
         }
         this.recordTableHandler = recordTableHandler;
         this.storeEventPool = storeEventPool;
@@ -402,14 +402,6 @@ public abstract class AbstractRecordTable extends Table {
             this.compiledCondition = compiledCondition;
         }
 
-        @Override
-        public CompiledCondition cloneCompilation(String key) {
-            Map<String, ExpressionExecutor> newVariableExpressionExecutorMap = new HashMap<>();
-            for (Map.Entry<String, ExpressionExecutor> entry : variableExpressionExecutorMap.entrySet()) {
-                newVariableExpressionExecutorMap.put(entry.getKey(), entry.getValue().cloneExecutor(key));
-            }
-            return new RecordStoreCompiledCondition(newVariableExpressionExecutorMap, compiledCondition);
-        }
     }
 
 }

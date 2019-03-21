@@ -27,6 +27,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -38,6 +39,7 @@ import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.OperatorParser;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
@@ -91,14 +93,11 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
 
     private long delayInMilliSeconds;
     private SiddhiQueryContext siddhiQueryContext;
-    private SnapshotableStreamEventQueue delayedEventQueue;
-    private volatile long lastTimestamp = Long.MIN_VALUE;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         this.siddhiQueryContext = siddhiQueryContext;
-        this.delayedEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT ||
@@ -117,23 +116,25 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
             throw new SiddhiAppValidationException("Delay window should only have one parameter (<int|long|time> " +
                     "delayTime), but found " + attributeExpressionExecutors.length + " input attributes");
         }
+        return () -> new WindowState(streamEventClonerHolder);
+
     }
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner) {
-        synchronized (this) {
-
+                           StreamEventCloner streamEventCloner, WindowState windowState) {
+        DelayedWindowState state = ((DelayedWindowState) windowState);
+        synchronized (state) {
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
 
-                delayedEventQueue.reset();
-                while (delayedEventQueue.hasNext()) {
-                    StreamEvent delayedEvent = delayedEventQueue.next();
+                state.delayedEventQueue.reset();
+                while (state.delayedEventQueue.hasNext()) {
+                    StreamEvent delayedEvent = state.delayedEventQueue.next();
                     long timeDiff = delayedEvent.getTimestamp() - currentTime + delayInMilliSeconds;
                     if (timeDiff <= 0) {
-                        delayedEventQueue.remove();
+                        state.delayedEventQueue.remove();
                         //insert delayed event before the current event to stream chunk
                         delayedEvent.setTimestamp(currentTime);
                         streamEventChunk.insertBeforeCurrent(delayedEvent);
@@ -143,17 +144,17 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
                 }
 
                 if (streamEvent.getType() == StreamEvent.Type.CURRENT) {
-                    this.delayedEventQueue.add(streamEvent);
+                    state.delayedEventQueue.add(streamEvent);
 
-                    if (lastTimestamp < streamEvent.getTimestamp()) {
+                    if (state.lastTimestamp < streamEvent.getTimestamp()) {
                         getScheduler().notifyAt(streamEvent.getTimestamp() + delayInMilliSeconds);
-                        lastTimestamp = streamEvent.getTimestamp();
+                        state.lastTimestamp = streamEvent.getTimestamp();
                     }
                 }
                 //current events are not processed, so remove the current event from the stream chunk
                 streamEventChunk.remove();
             }
-            delayedEventQueue.reset();
+            state.delayedEventQueue.reset();
         }
         //only pass to next processor if there are any events in the stream chunk
         if (streamEventChunk.getFirst() != null) {
@@ -162,27 +163,45 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
     }
 
     @Override
-    public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, delayedEventQueue, streamEventCloner);
+    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                            StreamEventCloner streamEventCloner, WindowState state) {
+        return ((Operator) compiledCondition).find(matchingEvent, ((DelayedWindowState) state).delayedEventQueue,
+                streamEventCloner);
     }
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        return OperatorParser.constructOperator(delayedEventQueue, condition, matchingMetaInfoHolder,
-                variableExpressionExecutors, tableMap, siddhiQueryContext);
+                                              Map<String, Table> tableMap, WindowState state,
+                                              SiddhiQueryContext siddhiQueryContext) {
+        return OperatorParser.constructOperator(((DelayedWindowState) state).delayedEventQueue,
+                condition, matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("DelayedEventQueue", delayedEventQueue.getSnapshot());
-        return state;
-    }
+    class DelayedWindowState extends WindowState {
+        private SnapshotableStreamEventQueue delayedEventQueue;
+        private volatile long lastTimestamp = Long.MIN_VALUE;
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        delayedEventQueue.restore((SnapshotStateList) state.get("DelayedEventQueue"));
+        DelayedWindowState(StreamEventClonerHolder streamEventClonerHolder) {
+            super(streamEventClonerHolder);
+            this.delayedEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("DelayedEventQueue", delayedEventQueue.getSnapshot());
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            delayedEventQueue.restore((SnapshotStateList) state.get("DelayedEventQueue"));
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return delayedEventQueue.getFirst() == null;
+        }
     }
 }

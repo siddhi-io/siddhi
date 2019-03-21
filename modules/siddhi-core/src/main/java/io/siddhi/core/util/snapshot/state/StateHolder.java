@@ -18,9 +18,20 @@
 
 package io.siddhi.core.util.snapshot.state;
 
-public interface StateHolder {
+import java.util.Map;
 
-    State getState();
+/**
+ * Holder to have all the states
+ *
+ * @param <S> state
+ */
+public interface StateHolder<S extends State> {
 
-    void returnState(State state);
+    S getState();
+
+    void returnState(S state);
+
+    Map<String, S> getAllStates();
+
+    void returnStates(Map<String, S> partitionKeyStates);
 }

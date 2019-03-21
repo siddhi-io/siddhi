@@ -31,10 +31,8 @@ public class EntryValveProcessor implements Processor, Schedulable {
 
     private Processor next;
     private ThreadBarrier threadBarrier;
-    private SiddhiAppContext siddhiAppContext;
 
     public EntryValveProcessor(SiddhiAppContext siddhiAppContext) {
-        this.siddhiAppContext = siddhiAppContext;
         threadBarrier = siddhiAppContext.getThreadBarrier();
     }
 
@@ -83,22 +81,6 @@ public class EntryValveProcessor implements Processor, Schedulable {
         } else {
             this.next.setToLast(processor);
         }
-    }
-
-    /**
-     * Clone a copy of processor
-     *
-     * @param key partition key
-     * @return cloned processor
-     */
-    @Override
-    public Processor cloneProcessor(String key) {
-        return new EntryValveProcessor(siddhiAppContext);
-    }
-
-    @Override
-    public void clean() {
-        //ignore
     }
 
 }
