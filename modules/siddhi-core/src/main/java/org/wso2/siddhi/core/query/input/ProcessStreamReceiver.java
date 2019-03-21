@@ -32,6 +32,7 @@ import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.stream.StreamJunction;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +86,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
             lockWrapper.lock();
         }
         try {
-            if (siddhiAppContext.isStatsEnabled() && latencyTracker != null) {
+            if (Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 && latencyTracker != null) {
                 try {
                     latencyTracker.markIn();
                     processAndClear(streamEventChunk);

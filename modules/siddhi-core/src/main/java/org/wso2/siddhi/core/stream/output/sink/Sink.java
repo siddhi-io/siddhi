@@ -31,6 +31,7 @@ import org.wso2.siddhi.core.util.parser.helper.QueryParserHelper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
 import org.wso2.siddhi.core.util.statistics.ThroughputTracker;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 import org.wso2.siddhi.core.util.transport.BackoffRetryCounter;
 import org.wso2.siddhi.core.util.transport.DynamicOptions;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
@@ -139,14 +140,14 @@ public abstract class Sink implements SinkListener, Snapshotable {
 
     @Override
     public final void publish(Object payload) {
-        if (mapperLatencyTracker != null && siddhiAppContext.isStatsEnabled()) {
+        if (mapperLatencyTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             mapperLatencyTracker.markOut();
         }
         if (isConnected()) {
             try {
                 DynamicOptions dynamicOptions = trpDynamicOptions.get();
                 publish(payload, dynamicOptions);
-                if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+                if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTracker.eventIn();
                 }
             } catch (ConnectionUnavailableException e) {
