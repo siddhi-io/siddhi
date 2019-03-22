@@ -89,6 +89,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
+        siddhiAppRuntime.enableStats(Level.DETAIL);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -159,6 +160,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
+        siddhiAppRuntime.enableStats(Level.OFF);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -228,6 +230,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
+        siddhiAppRuntime.enableStats(Level.DETAIL);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -333,7 +336,7 @@ public class StatisticsTestCase {
         eventArrived = false;
         count = 0;
 
-        siddhiAppRuntime.enableStats(Level.OFF);
+        siddhiAppRuntime.enableStats(Level.DETAIL);
         Thread.sleep(100);
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -395,6 +398,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
+        siddhiAppRuntime.enableStats(Level.DETAIL);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
@@ -453,6 +457,7 @@ public class StatisticsTestCase {
         System.setOut(ps);
 
         siddhiAppRuntime.start();
+        siddhiAppRuntime.enableStats(Level.DETAIL);
         inputHandler.send(new Object[]{"WSO2", 55.6f, 100});
         inputHandler.send(new Object[]{"IBM", 75.6f, 100});
 
