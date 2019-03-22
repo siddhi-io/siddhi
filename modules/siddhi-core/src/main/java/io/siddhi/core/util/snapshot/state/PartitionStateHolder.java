@@ -23,6 +23,7 @@ import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -103,44 +104,54 @@ public class PartitionStateHolder implements StateHolder {
     @Override
     public synchronized void returnGroupByStates(Map states) {
         String partitionFlowId = SiddhiAppContext.getPartitionFlowId();
-        for (Map.Entry<String, State> stateEntry : (Set<Map.Entry<String, State>>) states.entrySet()) {
+        for (Iterator<Map.Entry<String, State>> iterator =
+             ((Set<Map.Entry<String, State>>) states.entrySet()).iterator();
+             iterator.hasNext(); ) {
+            Map.Entry<String, State> stateEntry = iterator.next();
             State state = stateEntry.getValue();
             state.activeUseCount--;
             if (state.activeUseCount == 0) {
                 try {
                     if (state.canDestroy()) {
-                        removeState(partitionFlowId, stateEntry.getKey());
+                        iterator.remove();
                     }
                 } catch (Throwable t) {
                     log.error("Dropping partition state for partition key '" + partitionFlowId +
                             "' and the group by key '" + stateEntry.getKey() + "', due to error! " + t.getMessage(), t);
-                    removeState(partitionFlowId, stateEntry.getKey());
+                    iterator.remove();
                 }
             } else if (state.activeUseCount < 0) {
                 throw new SiddhiAppRuntimeException("State active count has reached less then zero for partition key '"
                         + partitionFlowId + "' and the group by key '" + stateEntry.getKey() + "', current value is " +
                         state.activeUseCount);
             }
+
+        }
+        if (states.isEmpty()) {
+            states.remove(partitionFlowId);
         }
     }
 
     @Override
     public synchronized void returnAllStates(Map states) {
-        for (Map.Entry<String, Map<String, State>> statesEntry :
-                (Set<Map.Entry<String, Map<String, State>>>) states.entrySet()) {
-            for (Map.Entry<String, State> stateEntry : statesEntry.getValue().entrySet()) {
+        for (Iterator<Map.Entry<String, Map<String, State>>> statesIterator =
+             ((Set<Map.Entry<String, Map<String, State>>>) states.entrySet()).iterator(); statesIterator.hasNext(); ) {
+            Map.Entry<String, Map<String, State>> statesEntry = statesIterator.next();
+            for (Iterator<Map.Entry<String, State>> stateIterator = statesEntry.getValue().entrySet().iterator();
+                 stateIterator.hasNext(); ) {
+                Map.Entry<String, State> stateEntry = stateIterator.next();
                 State state = stateEntry.getValue();
                 state.activeUseCount--;
                 if (state.activeUseCount == 0) {
                     try {
                         if (state.canDestroy()) {
-                            removeState(statesEntry.getKey(), stateEntry.getKey());
+                            stateIterator.remove();
                         }
                     } catch (Throwable t) {
                         log.error("Dropping partition state for partition key '" + statesEntry.getKey() +
                                 "' and the group by key '" + stateEntry.getKey() + "', due to error! " +
                                 t.getMessage(), t);
-                        removeState(statesEntry.getKey(), stateEntry.getKey());
+                        stateIterator.remove();
                     }
                 } else if (state.activeUseCount < 0) {
                     throw new SiddhiAppRuntimeException("State active count has reached less then zero for " +
@@ -148,6 +159,9 @@ public class PartitionStateHolder implements StateHolder {
                             stateEntry.getKey() + "', current value is " +
                             state.activeUseCount);
                 }
+            }
+            if (statesEntry.getValue().isEmpty()) {
+                statesIterator.remove();
             }
         }
     }
