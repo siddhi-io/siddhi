@@ -70,14 +70,14 @@ public class BaseIncrementalValueStore {
         this.initialTimestamp = startTimeOfNewAggregates;
         setTimestamp(startTimeOfNewAggregates);
         setProcessed(false);
-        Map<String, ValueState> states = this.valueStateHolder.getAllStates();
+        Map<String, ValueState> states = this.valueStateHolder.getAllGroupByStates();
         try {
             for (ValueState storeState : states.values()) {
                 storeState.values = null;
                 storeState.lastTimestamp = 0;
             }
         } finally {
-            this.valueStateHolder.returnStates(states);
+            this.valueStateHolder.returnGroupByStates(states);
         }
     }
 
@@ -134,7 +134,7 @@ public class BaseIncrementalValueStore {
         Map<String, StreamEvent> groupedByEvents = new HashMap<>();
 
         if (isProcessed()) {
-            Map<String, ValueState> baseIncrementalValueStoreMap = this.valueStateHolder.getAllStates();
+            Map<String, ValueState> baseIncrementalValueStoreMap = this.valueStateHolder.getAllGroupByStates();
             try {
                 for (Map.Entry<String, ValueState> state : baseIncrementalValueStoreMap.entrySet()) {
                     StreamEvent streamEvent = streamEventPool.borrowEvent();
@@ -145,41 +145,11 @@ public class BaseIncrementalValueStore {
                     groupedByEvents.put(state.getKey(), streamEvent);
                 }
             } finally {
-                this.valueStateHolder.returnStates(baseIncrementalValueStoreMap);
+                this.valueStateHolder.returnGroupByStates(baseIncrementalValueStoreMap);
             }
         }
         return groupedByEvents;
     }
-
-    public ComplexEventChunk<StreamEvent> getProcessedEventChunk() {
-        ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(true);
-        Map<String, ValueState> baseIncrementalValueStoreMap = this.valueStateHolder.getAllStates();
-        try {
-            for (ValueState state : baseIncrementalValueStoreMap.values()) {
-                if (isProcessed()) {
-                    StreamEvent streamEvent = streamEventPool.borrowEvent();
-                    long timestamp = getTimestamp();
-                    streamEvent.setTimestamp(timestamp);
-                    state.setValue(timestamp, 0);
-                    streamEvent.setOutputData(state.values);
-                    streamEventChunk.add(streamEvent);
-                }
-            }
-        } finally {
-            this.valueStateHolder.returnStates(baseIncrementalValueStoreMap);
-        }
-        return streamEventChunk;
-    }
-
-//    public BaseIncrementalValueStore cloneStore(String key, long timestamp) {
-//        List<ExpressionExecutor> newExpressionExecutors = new ArrayList<>(expressionExecutors.size());
-//        expressionExecutors
-//                .forEach(expressionExecutor -> newExpressionExecutors.add(expressionExecutor.cloneExecutor(key)));
-//        ExpressionExecutor newShouldUpdateExpressionExecutor =
-//                (shouldUpdateExpressionExecutor == null) ? null : shouldUpdateExpressionExecutor.cloneExecutor(key);
-//        return new BaseIncrementalValueStore(newExpressionExecutors, streamEventPool, siddhiAppContext,
-//                aggregatorName, newShouldUpdateExpressionExecutor);
-//    }
 
     public void process(StreamEvent streamEvent) {
         ValueState state = valueStateHolder.getState();

@@ -117,6 +117,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
     @Override
     public String getLastRevision(String siddhiAppName) {
         long restoreTime = -1;
+        IncrementalSnapshotInfo lastSnapshotInfo = null;
         File dir = new File(folder + File.separator + siddhiAppName);
         File[] files = dir.listFiles();
         if (files == null || files.length == 0) {
@@ -132,6 +133,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                 //Note: Here we discard the (items.length == 2) scenario which is handled
                 // by the full snapshot handling
                 restoreTime = snapshotInfo.getTime();
+                lastSnapshotInfo = snapshotInfo;
             }
         }
         if (restoreTime != -1) {
@@ -139,7 +141,7 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                 log.debug("Latest revision to load: " + restoreTime + PersistenceConstants.REVISION_SEPARATOR +
                         siddhiAppName);
             }
-            return restoreTime + PersistenceConstants.REVISION_SEPARATOR + siddhiAppName;
+            return lastSnapshotInfo.getRevision();
         }
         return null;
     }
@@ -175,8 +177,6 @@ public class IncrementalFileSystemPersistenceStore implements IncrementalPersist
                     String fileName = file.getName();
                     IncrementalSnapshotInfo snapshotInfo = PersistenceHelper.convertRevision(fileName);
                     if (snapshotInfo.getTime() < baseTimeStamp &&
-                            incrementalSnapshotInfo.getSiddhiAppId().equals(snapshotInfo.getSiddhiAppId()) &&
-                            incrementalSnapshotInfo.getQueryName().equals(snapshotInfo.getQueryName()) &&
                             incrementalSnapshotInfo.getId().equals(snapshotInfo.getId())) {
                         if (incrementalSnapshotInfo.getType() == IncrementalSnapshotInfo.SnapshotType.BASE &&
                                 snapshotInfo.getType() != IncrementalSnapshotInfo.SnapshotType.PERIODIC) {

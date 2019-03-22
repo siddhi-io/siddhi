@@ -26,7 +26,7 @@ public class IncrementalSnapshotInfo {
     private String id;
     private String siddhiAppId;
     private String partitionId;
-    private String partitionKey;
+    private String partitionGroupByKey;
     private String queryName;
     private String elementId;
     private long time;
@@ -34,22 +34,22 @@ public class IncrementalSnapshotInfo {
     private SnapshotType type;
 
     public IncrementalSnapshotInfo(String siddhiAppId, String partitionId, String queryName, String elementId,
-                                   long time, SnapshotType type, String partitionKey) {
+                                   long time, SnapshotType type, String partitionGroupByKey) {
         this.siddhiAppId = siddhiAppId;
         this.partitionId = partitionId;
         this.queryName = queryName;
         this.elementId = elementId;
         this.time = time;
         this.type = type;
-        this.partitionKey = partitionKey;
+        this.partitionGroupByKey = partitionGroupByKey;
         this.id = siddhiAppId +
                 PersistenceConstants.REVISION_SEPARATOR + partitionId +
-                PersistenceConstants.REVISION_SEPARATOR + partitionKey +
+                PersistenceConstants.REVISION_SEPARATOR + partitionGroupByKey +
                 PersistenceConstants.REVISION_SEPARATOR + queryName +
                 PersistenceConstants.REVISION_SEPARATOR + elementId;
         this.revision = time + PersistenceConstants.REVISION_SEPARATOR + siddhiAppId +
                 PersistenceConstants.REVISION_SEPARATOR + partitionId +
-                PersistenceConstants.REVISION_SEPARATOR + partitionKey +
+                PersistenceConstants.REVISION_SEPARATOR + partitionGroupByKey +
                 PersistenceConstants.REVISION_SEPARATOR + queryName +
                 PersistenceConstants.REVISION_SEPARATOR + elementId +
                 PersistenceConstants.REVISION_SEPARATOR + type;
@@ -103,8 +103,8 @@ public class IncrementalSnapshotInfo {
         return partitionId;
     }
 
-    public String getPartitionKey() {
-        return partitionKey;
+    public String getPartitionGroupByKey() {
+        return partitionGroupByKey;
     }
 
     public String getId() {

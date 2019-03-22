@@ -31,7 +31,11 @@ public interface StateHolder<S extends State> {
 
     void returnState(S state);
 
-    Map<String, S> getAllStates();
+    Map<String, Map<String, S>> getAllStates();
 
-    void returnStates(Map<String, S> partitionKeyStates);
+    void returnAllStates(Map<String, Map<String, S>> states);
+
+    Map<String, S> getAllGroupByStates();
+
+    void returnGroupByStates(Map<String, S> states);
 }

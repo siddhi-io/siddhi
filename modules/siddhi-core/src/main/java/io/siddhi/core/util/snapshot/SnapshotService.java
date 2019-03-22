@@ -116,56 +116,66 @@ public class SnapshotService {
                             partitionIdState.getValue().queryStateHolderMap.entrySet()) {
                         for (Map.Entry<String, StateHolder> elementState :
                                 queryState.getValue().elementHolderMap.entrySet()) {
-                            Map<String, State> partitionKeyStates = elementState.getValue().getAllStates();
+                            Map<String, Map<String, State>> partitionKeyStates = elementState.getValue().getAllStates();
                             try {
-                                for (Map.Entry<String, State> partitionKeyState : partitionKeyStates.entrySet()) {
-                                    State state = partitionKeyState.getValue();
-                                    Map<String, Object> itemStates = state.snapshot();
-                                    if (itemStates != null) {
-                                        Map<String, Object> itemSnapshots = new HashMap<>();
-                                        for (Map.Entry<String, Object> itemState : itemStates.entrySet()) {
-                                            if (itemState.getValue() instanceof Snapshot) {
-                                                if (((Snapshot) itemState.getValue()).isIncrementalSnapshot()) {
-                                                    throw new NoPersistenceStoreException("No incremental persistence "
-                                                            + "store exist to store incremental snapshot of siddhiApp:'"
-                                                            + siddhiAppContext.getName()
-                                                            + "' subElement:'" + queryState.getKey()
-                                                            + "' elementId:'" + elementState.getKey()
-                                                            + "' partitionKey:'" + partitionKeyState.getKey()
-                                                            + "' and itemKey:'" + itemState.getKey() + "'");
+                                for (Map.Entry<String, Map<String, State>> partitionKeyState :
+                                        partitionKeyStates.entrySet()) {
+                                    for (Map.Entry<String, State> groupByKeyState :
+                                            partitionKeyState.getValue().entrySet()) {
+                                        String partitionAndGroupByKey = partitionKeyState.getKey() + "--" +
+                                                groupByKeyState.getKey();
+                                        State state = groupByKeyState.getValue();
+                                        Map<String, Object> itemStates = state.snapshot();
+                                        if (itemStates != null) {
+                                            Map<String, Object> itemSnapshots = new HashMap<>();
+                                            for (Map.Entry<String, Object> itemState : itemStates.entrySet()) {
+                                                if (itemState.getValue() instanceof Snapshot) {
+                                                    if (((Snapshot) itemState.getValue()).isIncrementalSnapshot()) {
+                                                        throw new NoPersistenceStoreException("No incremental " +
+                                                                "persistence store exist to store incremental " +
+                                                                "snapshot of siddhiApp:'"
+                                                                + siddhiAppContext.getName()
+                                                                + "' subElement:'" + queryState.getKey()
+                                                                + "' elementId:'" + elementState.getKey()
+                                                                + "' partitionKey:'" + partitionKeyState.getKey()
+                                                                + "' groupByKey:'" + groupByKeyState.getKey()
+                                                                + "' and itemKey:'" + itemState.getKey() + "'");
+                                                    } else {
+                                                        itemSnapshots.put(itemState.getKey(), itemState.getValue());
+                                                    }
                                                 } else {
                                                     itemSnapshots.put(itemState.getKey(), itemState.getValue());
                                                 }
-                                            } else {
-                                                itemSnapshots.put(itemState.getKey(), itemState.getValue());
                                             }
-                                        }
-                                        Map<String, Map<String, Map<String, Map<String, Object>>>> partitionIdSnapshot =
-                                                fullSnapshot.computeIfAbsent(
-                                                        partitionIdState.getKey(),
-                                                        k -> new HashMap<>());
-                                        Map<String, Map<String, Map<String, Object>>> partitionKeySnapshot =
-                                                partitionIdSnapshot.computeIfAbsent(
-                                                        partitionKeyState.getKey(),
-                                                        k -> new HashMap<>());
-                                        Map<String, Map<String, Object>> querySnapshot =
-                                                partitionKeySnapshot.computeIfAbsent(
-                                                        queryState.getKey(),
-                                                        k -> new HashMap<>());
-                                        Map<String, Object> elementSnapshot = querySnapshot.get(elementState.getKey());
-                                        if (elementSnapshot == null) {
-                                            querySnapshot.put(elementState.getKey(), itemSnapshots);
-                                        } else {
-                                            throw new SiddhiAppRuntimeException("Duplicate state exist for siddhiApp:'"
-                                                    + siddhiAppContext.getName()
-                                                    + "' partitionKey:'" + partitionKeyState.getKey()
-                                                    + "' subElement:'" + queryState.getKey()
-                                                    + "' elementId:'" + elementState.getKey() + "'");
+                                            Map<String, Map<String, Map<String, Map<String, Object>>>>
+                                                    partitionIdSnapshot = fullSnapshot.computeIfAbsent(
+                                                    partitionIdState.getKey(),
+                                                    k -> new HashMap<>());
+                                            Map<String, Map<String, Map<String, Object>>> partitionKeySnapshot =
+                                                    partitionIdSnapshot.computeIfAbsent(
+                                                            partitionAndGroupByKey,
+                                                            k -> new HashMap<>());
+                                            Map<String, Map<String, Object>> querySnapshot =
+                                                    partitionKeySnapshot.computeIfAbsent(
+                                                            queryState.getKey(),
+                                                            k -> new HashMap<>());
+                                            Map<String, Object> elementSnapshot =
+                                                    querySnapshot.get(elementState.getKey());
+                                            if (elementSnapshot == null) {
+                                                querySnapshot.put(elementState.getKey(), itemSnapshots);
+                                            } else {
+                                                throw new SiddhiAppRuntimeException("Duplicate state exist for " +
+                                                        "siddhiApp:'" + siddhiAppContext.getName()
+                                                        + "' partitionKey:'" + partitionKeyState.getKey()
+                                                        + "' groupByKey:'" + groupByKeyState.getKey()
+                                                        + "' subElement:'" + queryState.getKey()
+                                                        + "' elementId:'" + elementState.getKey() + "'");
+                                            }
                                         }
                                     }
                                 }
                             } finally {
-                                elementState.getValue().returnStates(partitionKeyStates);
+                                elementState.getValue().returnAllStates(partitionKeyStates);
                             }
                         }
                     }
@@ -205,46 +215,53 @@ public class SnapshotService {
                             partitionIdState.getValue().queryStateHolderMap.entrySet()) {
                         for (Map.Entry<String, StateHolder> elementState :
                                 queryState.getValue().elementHolderMap.entrySet()) {
-                            Map<String, State> partitionKeyStates = elementState.getValue().getAllStates();
+                            Map<String, Map<String, State>> partitionKeyStates = elementState.getValue().getAllStates();
                             try {
-                                for (Map.Entry<String, State> partitionKeyState : partitionKeyStates.entrySet()) {
-                                    State state = partitionKeyState.getValue();
-                                    Map<String, Object> itemStates = state.snapshot();
-                                    if (itemStates != null) {
-                                        Map<String, Object> itemSnapshotsIncremental = new HashMap<>();
-                                        Map<String, Object> itemSnapshotsIncrementalBase = new HashMap<>();
-                                        Map<String, Object> itemSnapshotsPeriodic = new HashMap<>();
-                                        for (Map.Entry<String, Object> itemState : itemStates.entrySet()) {
-                                            if (itemState.getValue() instanceof Snapshot) {
-                                                if (((Snapshot) itemState).isIncrementalSnapshot()) {
-                                                    itemSnapshotsIncremental.put(itemState.getKey(),
-                                                            itemState.getValue());
+                                for (Map.Entry<String, Map<String, State>> partitionKeyState :
+                                        partitionKeyStates.entrySet()) {
+                                    for (Map.Entry<String, State> groupByKeyState :
+                                            partitionKeyState.getValue().entrySet()) {
+//                                        String partitionAndGroupByKey = partitionKeyState.getKey() + "--" +
+//                                                groupByKeyState.getKey();
+                                        State state = groupByKeyState.getValue();
+                                        Map<String, Object> itemStates = state.snapshot();
+                                        if (itemStates != null) {
+                                            Map<String, Object> itemSnapshotsIncremental = new HashMap<>();
+                                            Map<String, Object> itemSnapshotsIncrementalBase = new HashMap<>();
+                                            Map<String, Object> itemSnapshotsPeriodic = new HashMap<>();
+                                            for (Map.Entry<String, Object> itemState : itemStates.entrySet()) {
+                                                if (itemState.getValue() instanceof Snapshot) {
+                                                    if (((Snapshot) itemState.getValue()).isIncrementalSnapshot()) {
+                                                        itemSnapshotsIncremental.put(itemState.getKey(),
+                                                                itemState.getValue());
+                                                    } else {
+                                                        itemSnapshotsIncrementalBase.put(
+                                                                itemState.getKey(), itemState.getValue());
+                                                    }
                                                 } else {
-                                                    itemSnapshotsIncrementalBase.put(
-                                                            itemState.getKey(), itemState.getValue());
+                                                    itemSnapshotsPeriodic.put(itemState.getKey(), itemState.getValue());
                                                 }
-                                            } else {
-                                                itemSnapshotsPeriodic.put(itemState.getKey(), itemState.getValue());
                                             }
-                                        }
-                                        if (!itemSnapshotsIncremental.isEmpty()) {
-                                            addToSnapshotIncrements(incrementalSnapshotMap, partitionIdState,
-                                                    queryState, elementState, partitionKeyState,
-                                                    itemSnapshotsIncremental);
-                                        }
-                                        if (!itemSnapshotsIncrementalBase.isEmpty()) {
-                                            addToSnapshotIncrements(incrementalBaseSnapshotMap, partitionIdState,
-                                                    queryState, elementState, partitionKeyState,
-                                                    itemSnapshotsIncrementalBase);
-                                        }
-                                        if (!itemSnapshotsPeriodic.isEmpty()) {
-                                            addToSnapshotIncrements(periodicSnapshotMap, partitionIdState, queryState,
-                                                    elementState, partitionKeyState, itemSnapshotsPeriodic);
+                                            if (!itemSnapshotsIncremental.isEmpty()) {
+                                                addToSnapshotIncrements(incrementalSnapshotMap, partitionIdState,
+                                                        queryState, elementState, partitionKeyState, groupByKeyState,
+                                                        itemSnapshotsIncremental);
+                                            }
+                                            if (!itemSnapshotsIncrementalBase.isEmpty()) {
+                                                addToSnapshotIncrements(incrementalBaseSnapshotMap, partitionIdState,
+                                                        queryState, elementState, partitionKeyState, groupByKeyState,
+                                                        itemSnapshotsIncrementalBase);
+                                            }
+                                            if (!itemSnapshotsPeriodic.isEmpty()) {
+                                                addToSnapshotIncrements(periodicSnapshotMap, partitionIdState,
+                                                        queryState, elementState, partitionKeyState, groupByKeyState,
+                                                        itemSnapshotsPeriodic);
+                                            }
                                         }
                                     }
                                 }
                             } finally {
-                                elementState.getValue().returnStates(partitionKeyStates);
+                                elementState.getValue().returnAllStates(partitionKeyStates);
                             }
                         }
                     }
@@ -257,14 +274,14 @@ public class SnapshotService {
                 log.debug("Snapshot taken for Siddhi app '" + siddhiAppContext.getName() + "'");
             }
             IncrementalSnapshot snapshot = new IncrementalSnapshot();
-            if (!periodicSnapshotMap.isEmpty()) {
-                snapshot.setIncrementalState(periodicSnapshotMap);
+            if (!incrementalSnapshotMap.isEmpty()) {
+                snapshot.setIncrementalState(incrementalSnapshotMap);
             }
             if (!incrementalBaseSnapshotMap.isEmpty()) {
                 snapshot.setIncrementalStateBase(incrementalBaseSnapshotMap);
             }
-            if (!incrementalSnapshotMap.isEmpty()) {
-                snapshot.setPeriodicState(incrementalSnapshotMap);
+            if (!periodicSnapshotMap.isEmpty()) {
+                snapshot.setPeriodicState(periodicSnapshotMap);
             }
             return snapshot;
         } finally {
@@ -276,11 +293,12 @@ public class SnapshotService {
                                          Map.Entry<String, PartitionIdStateHolder> partitionIdState,
                                          Map.Entry<String, ElementStateHolder> queryState,
                                          Map.Entry<String, StateHolder> elementState,
-                                         Map.Entry<String, State> partitionKeyState,
+                                         Map.Entry<String, Map<String, State>> partitionKeyState,
+                                         Map.Entry<String, State> groupByKeyState,
                                          Map<String, Object> itemSnapshotsIncremental) {
-        String id = partitionKeyState.getKey() + PersistenceConstants.REVISION_SEPARATOR
-                + queryState.getKey() + PersistenceConstants.REVISION_SEPARATOR
-                + elementState.getKey();
+        String id = partitionKeyState.getKey() + "--" + groupByKeyState.getKey() +
+                PersistenceConstants.REVISION_SEPARATOR + queryState.getKey() +
+                PersistenceConstants.REVISION_SEPARATOR + elementState.getKey();
         Map<String, byte[]> partitionIdSnapshot =
                 incrementalSnapshotMap.computeIfAbsent(
                         partitionIdState.getKey(),
@@ -299,16 +317,19 @@ public class SnapshotService {
                 ElementStateHolder elementStateHolder = partitionIdStateHolder.queryStateHolderMap.get(queryName);
                 if (elementStateHolder != null) {
                     for (Map.Entry<String, StateHolder> elementState : elementStateHolder.elementHolderMap.entrySet()) {
-                        Map<String, State> partitionKeyStates = elementState.getValue().getAllStates();
+                        Map<String, Map<String, State>> partitionKeyStates = elementState.getValue().getAllStates();
                         try {
-                            for (Map.Entry<String, State> partitionKeyState : partitionKeyStates.entrySet()) {
-                                String id = partitionKeyState.getKey() + "_"
-                                        + queryName + "_"
-                                        + elementState.getKey();
-                                queryState.put(id, partitionKeyState.getValue().snapshot());
+                            for (Map.Entry<String, Map<String, State>> partitionKeyState :
+                                    partitionKeyStates.entrySet()) {
+                                for (Map.Entry<String, State> groupByKeyState :
+                                        partitionKeyState.getValue().entrySet()) {
+                                    String id = partitionKeyState.getKey() + "--" + groupByKeyState.getKey() + "_"
+                                            + queryName + "_" + elementState.getKey();
+                                    queryState.put(id, groupByKeyState.getValue().snapshot());
+                                }
                             }
                         } finally {
-                            elementState.getValue().returnStates(partitionKeyStates);
+                            elementState.getValue().returnAllStates(partitionKeyStates);
                         }
                     }
                 }
@@ -417,21 +438,22 @@ public class SnapshotService {
         }
     }
 
-    public void restore(Map<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>> snapshot)
+    public void restore(Map<String, Map<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>>
+                                snapshot)
             throws CannotRestoreSiddhiAppStateException {
         try {
             threadBarrier.lock();
             try {
-                for (Map.Entry<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>
+                for (Map.Entry<String, Map<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>>
                         partitionIdSnapshot : snapshot.entrySet()) {
                     PartitionIdStateHolder partitionStateHolder = partitionIdStates.get(partitionIdSnapshot.getKey());
                     if (partitionStateHolder == null) {
                         continue;
                     }
-                    for (Iterator<Map.Entry<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>> iterator =
-                         partitionIdSnapshot.getValue().entrySet().iterator(); iterator.hasNext(); ) {
-                        Map.Entry<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>> partitionKeySnapshot =
-                                iterator.next();
+                    for (Iterator<Map.Entry<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>>
+                         iterator = partitionIdSnapshot.getValue().entrySet().iterator(); iterator.hasNext(); ) {
+                        Map.Entry<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>
+                                partitionKeySnapshot = iterator.next();
                         restoreIncrementalSnapshot(partitionStateHolder, partitionKeySnapshot.getValue());
                         iterator.remove();
                     }
@@ -449,83 +471,108 @@ public class SnapshotService {
     }
 
     private void restoreIncrementalSnapshot(PartitionIdStateHolder partitionIdStateHolder,
-                                            Map<Long, Map<IncrementalSnapshotInfo, byte[]>> incrementalStateByTime) {
+                                            Map<String, Map<Long, Map<IncrementalSnapshotInfo,
+                                                    byte[]>>> incrementalStateByTime) {
         if (incrementalStateByTime != null) {
             String id = null;
             State state = null;
             StateHolder stateHolder = null;
             Map<String, Object> deserializedStateMap = null;
             try {
-                for (Iterator<Map.Entry<Long, Map<IncrementalSnapshotInfo, byte[]>>> iterator =
+                for (Iterator<Map.Entry<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>> iterator =
                      incrementalStateByTime.entrySet().iterator(); iterator.hasNext(); ) {
-                    Map.Entry<Long, Map<IncrementalSnapshotInfo, byte[]>> incrementalStateByTimeEntry = iterator.next();
+                    Map.Entry<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>> incrementalStateByTimeEntry =
+                            iterator.next();
                     iterator.remove();
-                    for (Iterator<Map.Entry<IncrementalSnapshotInfo, byte[]>> iterator1 =
-                         incrementalStateByTimeEntry.getValue().entrySet().iterator(); iterator1.hasNext(); ) {
-                        Map.Entry<IncrementalSnapshotInfo, byte[]> incrementalStateByInfoEntry = iterator1.next();
-                        iterator1.remove();
-                        IncrementalSnapshotInfo incrementalSnapshotInfo = incrementalStateByInfoEntry.getKey();
-                        Map<String, Object> singleIncrementSnapshot = (Map<String, Object>)
-                                ByteSerializer.byteToObject(incrementalStateByInfoEntry.getValue(), siddhiAppContext);
-                        if (singleIncrementSnapshot != null) {
-                            if (!incrementalSnapshotInfo.getId().equals(id)) {
-                                if (id != null) {
-                                    state.restore(deserializedStateMap);
-                                    SiddhiAppContext.startPartitionFlow(id);
+                    for (Iterator<Map.Entry<Long, Map<IncrementalSnapshotInfo, byte[]>>> partitionGroupByKeyIterator =
+                         incrementalStateByTimeEntry.getValue().entrySet().iterator();
+                         partitionGroupByKeyIterator.hasNext(); ) {
+                        Map.Entry<Long, Map<IncrementalSnapshotInfo, byte[]>>
+                                partitionGroupByKeyStateByTimeEntry = partitionGroupByKeyIterator.next();
+                        partitionGroupByKeyIterator.remove();
+                        for (Iterator<Map.Entry<IncrementalSnapshotInfo, byte[]>> iterator1 =
+                             partitionGroupByKeyStateByTimeEntry.getValue().entrySet().iterator();
+                             iterator1.hasNext(); ) {
+                            Map.Entry<IncrementalSnapshotInfo, byte[]> incrementalStateByInfoEntry = iterator1.next();
+                            iterator1.remove();
+                            IncrementalSnapshotInfo incrementalSnapshotInfo = incrementalStateByInfoEntry.getKey();
+                            Map<String, Object> singleIncrementSnapshot = (Map<String, Object>)
+                                    ByteSerializer.byteToObject(
+                                            incrementalStateByInfoEntry.getValue(),
+                                            siddhiAppContext);
+                            if (singleIncrementSnapshot != null) {
+                                if (!incrementalSnapshotInfo.getId().equals(id)) {
+                                    if (id != null) {
+                                        state.restore(deserializedStateMap);
+                                        SiddhiAppContext.startPartitionFlow(id);
+                                        try {
+                                            stateHolder.returnState(state);
+                                        } finally {
+                                            SiddhiAppContext.stopPartitionFlow();
+                                        }
+                                        id = null;
+                                        state = null;
+                                        stateHolder = null;
+                                        deserializedStateMap = null;
+                                    }
+                                    ElementStateHolder elementStateHolder = partitionIdStateHolder.
+                                            queryStateHolderMap.get(incrementalSnapshotInfo.getQueryName());
+                                    if (elementStateHolder == null) {
+                                        continue;
+                                    }
+                                    stateHolder = elementStateHolder.elementHolderMap.get(
+                                            incrementalSnapshotInfo.getElementId());
+                                    if (stateHolder == null) {
+                                        continue;
+                                    }
+                                    String partitionKey = null;
+                                    String groupByKey = null;
+                                    String[] keys = incrementalSnapshotInfo.getPartitionGroupByKey().split("--");
+                                    if (keys.length == 2) {
+                                        if (!keys[0].equals("null")) {
+                                            partitionKey = keys[0];
+                                        }
+                                        if (!keys[1].equals("null")) {
+                                            groupByKey = keys[1];
+                                        }
+                                    }
+                                    SiddhiAppContext.startPartitionFlow(partitionKey);
+                                    SiddhiAppContext.startGroupByFlow(groupByKey);
                                     try {
-                                        stateHolder.returnState(state);
+                                        state = stateHolder.getState();
                                     } finally {
+                                        SiddhiAppContext.stopGroupByFlow();
                                         SiddhiAppContext.stopPartitionFlow();
                                     }
-                                    id = null;
-                                    state = null;
-                                    stateHolder = null;
-                                    deserializedStateMap = null;
-                                }
-                                ElementStateHolder elementStateHolder = partitionIdStateHolder.queryStateHolderMap.get(
-                                        incrementalSnapshotInfo.getQueryName());
-                                if (elementStateHolder == null) {
-                                    continue;
-                                }
-                                stateHolder = elementStateHolder.elementHolderMap.get(
-                                        incrementalSnapshotInfo.getElementId());
-                                if (stateHolder == null) {
-                                    continue;
-                                }
-                                SiddhiAppContext.startPartitionFlow(incrementalSnapshotInfo.getPartitionKey());
-                                try {
-                                    state = stateHolder.getState();
-                                } finally {
-                                    SiddhiAppContext.stopPartitionFlow();
+                                    if (state != null) {
+                                        id = incrementalSnapshotInfo.getId();
+                                        deserializedStateMap = new HashMap<>();
+                                    }
                                 }
                                 if (state != null) {
-                                    id = incrementalSnapshotInfo.getId();
-                                    deserializedStateMap = new HashMap<>();
-                                }
-                            }
-                            if (state != null) {
-                                for (Map.Entry<String, Object> singleIncrementSnapshotEntry :
-                                        singleIncrementSnapshot.entrySet()) {
-                                    if (singleIncrementSnapshotEntry.getValue() instanceof Snapshot) {
-                                        Snapshot snapshot = (Snapshot)
-                                                singleIncrementSnapshotEntry.getValue();
-                                        SnapshotStateList snapshotStateList = (SnapshotStateList)
-                                                deserializedStateMap.computeIfAbsent(
-                                                        singleIncrementSnapshotEntry.getKey(),
-                                                        k -> new SnapshotStateList());
-                                        if (snapshot.isIncrementalSnapshot()) {
-                                            snapshotStateList.putSnapshotState(
-                                                    incrementalStateByTimeEntry.getKey(),
-                                                    snapshot);
+                                    for (Map.Entry<String, Object> singleIncrementSnapshotEntry :
+                                            singleIncrementSnapshot.entrySet()) {
+                                        if (singleIncrementSnapshotEntry.getValue() instanceof Snapshot) {
+                                            Snapshot snapshot = (Snapshot)
+                                                    singleIncrementSnapshotEntry.getValue();
+                                            SnapshotStateList snapshotStateList = (SnapshotStateList)
+                                                    deserializedStateMap.computeIfAbsent(
+                                                            singleIncrementSnapshotEntry.getKey(),
+                                                            k -> new SnapshotStateList());
+                                            if (snapshot.isIncrementalSnapshot()) {
+                                                snapshotStateList.putSnapshotState(
+                                                        partitionGroupByKeyStateByTimeEntry.getKey(),
+                                                        snapshot);
+                                            } else {
+                                                snapshotStateList.getSnapshotStates().clear();
+                                                snapshotStateList.putSnapshotState(
+                                                        partitionGroupByKeyStateByTimeEntry.getKey(),
+                                                        snapshot);
+                                            }
                                         } else {
-                                            snapshotStateList.getSnapshotStates().clear();
-                                            snapshotStateList.putSnapshotState(
-                                                    incrementalStateByTimeEntry.getKey(),
-                                                    snapshot);
+                                            deserializedStateMap.put(singleIncrementSnapshotEntry.getKey(),
+                                                    singleIncrementSnapshotEntry.getValue());
                                         }
-                                    } else {
-                                        deserializedStateMap.put(singleIncrementSnapshotEntry.getKey(),
-                                                singleIncrementSnapshotEntry.getValue());
                                     }
                                 }
                             }
@@ -558,6 +605,7 @@ public class SnapshotService {
                     stateHolder = null;
                 }
             }
+
         }
     }
 
@@ -628,15 +676,19 @@ public class SnapshotService {
                     }
                     lastId = snapshotInfo.getId();
                 }
-                Map<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>> incrementalState =
-                        new HashMap<>();
+                Map<String, Map<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>>
+                        incrementalState = new HashMap<>();
                 for (IncrementalSnapshotInfo snapshotInfo : incrementalSnapshotInfos) {
-                    Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>> incrementalStateByPartitionKey =
-                            incrementalState.computeIfAbsent(snapshotInfo.getPartitionId(), k -> new TreeMap<>());
-                    Map<Long, Map<IncrementalSnapshotInfo, byte[]>> incrementalStateByTime =
-                            incrementalStateByPartitionKey.computeIfAbsent(snapshotInfo.getPartitionKey(),
+                    Map<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>
+                            incrementalStateByPartitionKey = incrementalState.computeIfAbsent(
+                            snapshotInfo.getPartitionId(), k -> new TreeMap<>());
+                    Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>> incrementalStateByTime =
+                            incrementalStateByPartitionKey.computeIfAbsent(snapshotInfo.getPartitionGroupByKey(),
                                     k -> new TreeMap<>());
-                    Map<IncrementalSnapshotInfo, byte[]> incrementalStateByInfo = incrementalStateByTime.
+                    Map<Long, Map<IncrementalSnapshotInfo, byte[]>> idByTime =
+                            incrementalStateByTime.computeIfAbsent(snapshotInfo.getId(),
+                                    k -> new TreeMap<>());
+                    Map<IncrementalSnapshotInfo, byte[]> incrementalStateByInfo = idByTime.
                             computeIfAbsent(snapshotInfo.getTime(), k -> new HashMap<>());
                     incrementalStateByInfo.put(snapshotInfo, incrementalPersistenceStore.load(snapshotInfo));
                 }

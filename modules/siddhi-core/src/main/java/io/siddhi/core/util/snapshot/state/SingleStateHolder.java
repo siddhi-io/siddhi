@@ -31,10 +31,12 @@ public class SingleStateHolder implements StateHolder {
 
     private final StateFactory stateFactory;
     private State state = null;
-    final Map<String, State> states = new HashMap<>(1);
+    final Map<String, State> groupByStates = new HashMap<>(1);
+    final Map<String, Map<String, State>> allStates = new HashMap<>(1);
 
     public SingleStateHolder(StateFactory stateFactory) {
         this.stateFactory = stateFactory;
+        this.allStates.put(null, groupByStates);
     }
 
     @Override
@@ -43,7 +45,7 @@ public class SingleStateHolder implements StateHolder {
             synchronized (this) {
                 if (state == null) {
                     state = stateFactory.createNewState();
-                    states.put(null, state);
+                    groupByStates.put(null, state);
                 }
             }
         }
@@ -52,23 +54,42 @@ public class SingleStateHolder implements StateHolder {
 
     @Override
     public void returnState(State state) {
-//ignore
+        //ignore
     }
 
-    public Map<String, State> getAllStates() {
+    public Map<String, Map<String, State>> getAllStates() {
         if (state == null) {
             synchronized (this) {
                 if (state == null) {
                     state = stateFactory.createNewState();
-                    states.put(null, state);
+                    groupByStates.put(null, state);
                 }
             }
         }
-        return states;
+        return allStates;
     }
 
     @Override
-    public void returnStates(Map states) {
+    public void returnAllStates(Map states) {
+        //ignore
+
+    }
+
+    @Override
+    public Map<String, State> getAllGroupByStates() {
+        if (state == null) {
+            synchronized (this) {
+                if (state == null) {
+                    state = stateFactory.createNewState();
+                    groupByStates.put(null, state);
+                }
+            }
+        }
+        return groupByStates;
+    }
+
+    @Override
+    public void returnGroupByStates(Map states) {
         //ignore
     }
 }

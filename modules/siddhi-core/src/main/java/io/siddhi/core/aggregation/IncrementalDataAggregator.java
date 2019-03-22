@@ -179,7 +179,7 @@ public class IncrementalDataAggregator {
 
     private ComplexEventChunk<StreamEvent> getProcessedEventChunk() {
         ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(true);
-        Map<String, State> valueStoreMap = this.valueStateHolder.getAllStates();
+        Map<String, State> valueStoreMap = this.valueStateHolder.getAllGroupByStates();
         try {
             for (State aState : valueStoreMap.values()) {
                 ValueState state = (ValueState) aState;
@@ -191,7 +191,7 @@ public class IncrementalDataAggregator {
                 streamEventChunk.add(streamEvent);
             }
         } finally {
-            this.valueStateHolder.returnStates(valueStoreMap);
+            this.valueStateHolder.returnGroupByStates(valueStoreMap);
         }
         return streamEventChunk;
     }

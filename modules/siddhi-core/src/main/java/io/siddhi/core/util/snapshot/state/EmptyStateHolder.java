@@ -26,6 +26,8 @@ import java.util.Map;
  */
 public class EmptyStateHolder implements StateHolder {
 
+    private Map emptyMap = new HashMap(0);
+
     @Override
     public State getState() {
         return null;
@@ -37,11 +39,21 @@ public class EmptyStateHolder implements StateHolder {
 
     @Override
     public Map<String, State> getAllStates() {
-        return new HashMap<>(0);
+        return emptyMap;
     }
 
     @Override
-    public void returnStates(Map partitionKeyStates) {
+    public void returnAllStates(Map partitionKeyStates) {
+
+    }
+
+    @Override
+    public Map getAllGroupByStates() {
+        return emptyMap;
+    }
+
+    @Override
+    public void returnGroupByStates(Map states) {
 
     }
 }

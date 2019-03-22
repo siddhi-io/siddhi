@@ -180,47 +180,50 @@ public class CronWindowProcessor extends BatchingWindowProcessor<CronWindowProce
     }
 
     public void dispatchEvents() {
-
-        Map<String, WindowState> states = stateHolder.getAllStates();
+        Map<String, Map<String, WindowState>> allStates = stateHolder.getAllStates();
         try {
-            for (Map.Entry<String, WindowState> state : states.entrySet()) {
-                WindowState windowState = state.getValue();
-                ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<StreamEvent>(false);
-                synchronized (windowState) {
-                    if (windowState.currentEventQueue.getFirst() != null) {
-                        long currentTime = siddhiQueryContext.getSiddhiAppContext().
-                                getTimestampGenerator().currentTime();
-                        while (windowState.expiredEventQueue.hasNext()) {
-                            StreamEvent expiredEvent = windowState.expiredEventQueue.next();
-                            expiredEvent.setTimestamp(currentTime);
-                        }
-                        if (windowState.expiredEventQueue.getFirst() != null) {
-                            streamEventChunk.add(windowState.expiredEventQueue.getFirst());
-                        }
-                        windowState.expiredEventQueue.clear();
-                        while (windowState.currentEventQueue.hasNext()) {
-                            StreamEvent currentEvent = windowState.currentEventQueue.next();
-                            StreamEvent toExpireEvent =
-                                    streamEventClonerHolder.getStreamEventCloner().copyStreamEvent(currentEvent);
-                            toExpireEvent.setType(StreamEvent.Type.EXPIRED);
-                            windowState.expiredEventQueue.add(toExpireEvent);
-                        }
+            for (Map.Entry<String, Map<String, WindowState>> allStatesEntry : allStates.entrySet()) {
+                for (Map.Entry<String, WindowState> stateEntry : allStatesEntry.getValue().entrySet()) {
+                    WindowState windowState = stateEntry.getValue();
+                    ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<StreamEvent>(false);
+                    synchronized (windowState) {
+                        if (windowState.currentEventQueue.getFirst() != null) {
+                            long currentTime = siddhiQueryContext.getSiddhiAppContext().
+                                    getTimestampGenerator().currentTime();
+                            while (windowState.expiredEventQueue.hasNext()) {
+                                StreamEvent expiredEvent = windowState.expiredEventQueue.next();
+                                expiredEvent.setTimestamp(currentTime);
+                            }
+                            if (windowState.expiredEventQueue.getFirst() != null) {
+                                streamEventChunk.add(windowState.expiredEventQueue.getFirst());
+                            }
+                            windowState.expiredEventQueue.clear();
+                            while (windowState.currentEventQueue.hasNext()) {
+                                StreamEvent currentEvent = windowState.currentEventQueue.next();
+                                StreamEvent toExpireEvent =
+                                        streamEventClonerHolder.getStreamEventCloner().copyStreamEvent(currentEvent);
+                                toExpireEvent.setType(StreamEvent.Type.EXPIRED);
+                                windowState.expiredEventQueue.add(toExpireEvent);
+                            }
 
-                        streamEventChunk.add(windowState.currentEventQueue.getFirst());
-                        windowState.currentEventQueue.clear();
+                            streamEventChunk.add(windowState.currentEventQueue.getFirst());
+                            windowState.currentEventQueue.clear();
+                        }
                     }
-                }
-                SiddhiAppContext.startPartitionFlow(state.getKey());
-                try {
-                    if (streamEventChunk.getFirst() != null) {
-                        nextProcessor.process(streamEventChunk);
+                    SiddhiAppContext.startPartitionFlow(allStatesEntry.getKey());
+                    SiddhiAppContext.startGroupByFlow(stateEntry.getKey());
+                    try {
+                        if (streamEventChunk.getFirst() != null) {
+                            nextProcessor.process(streamEventChunk);
+                        }
+                    } finally {
+                        SiddhiAppContext.stopGroupByFlow();
+                        SiddhiAppContext.stopPartitionFlow();
                     }
-                } finally {
-                    SiddhiAppContext.stopPartitionFlow();
                 }
             }
         } finally {
-            stateHolder.returnStates(states);
+            stateHolder.returnAllStates(allStates);
         }
     }
 

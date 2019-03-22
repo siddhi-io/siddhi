@@ -143,14 +143,13 @@ public abstract class AttributeAggregatorExecutor<S extends State> implements Ex
 
     private Object processReset() {
         Object returnValue = null;
-        //todo get all stream per partition
-        Map<String, S> states = stateHolder.getAllStates();
+        Map<String, S> states = stateHolder.getAllGroupByStates();
         try {
             for (S aState : states.values()) {
                 returnValue = reset(aState);
             }
         } finally {
-            stateHolder.returnStates(states);
+            stateHolder.returnGroupByStates(states);
         }
         return returnValue;
     }

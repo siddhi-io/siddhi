@@ -106,7 +106,7 @@ public class SiddhiAppContext {
     }
 
     public static String getGroupByFlowId() {
-        return PARTITION_KEY.get();
+        return GROUP_BY_KEY.get();
     }
 
     public SiddhiContext getSiddhiContext() {
@@ -288,10 +288,10 @@ public class SiddhiAppContext {
     public StateHolder generateStateHolder(String name, StateFactory stateFactory) {
         if (stateFactory != null) {
             StateHolder stateHolder = new SingleStateHolder(stateFactory);
-            if (SnapshotService.getSkipStateStorageThreadLocal().get() != null &&
+            if (SnapshotService.getSkipStateStorageThreadLocal().get() == null ||
                     !SnapshotService.getSkipStateStorageThreadLocal().get()) {
                 Map<String, StateHolder> stateHolderMap = getSnapshotService().getStateHolderMap(
-                        SiddhiConstants.PARTITION_ID_DEFAULT, this.getName());
+                        SiddhiConstants.PARTITION_ID_DEFAULT, SiddhiConstants.PARTITION_ID_DEFAULT);
                 stateHolderMap.put(name + "-" + idGenerator.createNewId(), stateHolder);
             }
             return stateHolder;

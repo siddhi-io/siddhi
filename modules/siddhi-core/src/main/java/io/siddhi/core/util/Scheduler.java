@@ -69,13 +69,17 @@ public class Scheduler {
                 .addTimeChangeListener(new TimestampGeneratorImpl.TimeChangeListener() {
                     @Override
                     public synchronized void onTimeChange(long currentTimestamp) {
-                        Map<String, SchedulerState> states = stateHolder.getAllStates();
+                        Map<String, Map<String, SchedulerState>> allStates = stateHolder.getAllStates();
                         try {
                             TreeMultimap<Long, SchedulerState> sortedExpires = TreeMultimap.create();
-                            for (Map.Entry<String, SchedulerState> stateEntry : states.entrySet()) {
-                                Long lastTime = stateEntry.getValue().toNotifyQueue.peek();
-                                if (lastTime != null && lastTime <= currentTimestamp) {
-                                    sortedExpires.put(lastTime, stateEntry.getValue());
+                            for (Map.Entry<String, Map<String, SchedulerState>> allStatesEntry :
+                                    allStates.entrySet()) {
+                                for (Map.Entry<String, SchedulerState> stateEntry :
+                                        allStatesEntry.getValue().entrySet()) {
+                                    Long lastTime = stateEntry.getValue().toNotifyQueue.peek();
+                                    if (lastTime != null && lastTime <= currentTimestamp) {
+                                        sortedExpires.put(lastTime, stateEntry.getValue());
+                                    }
                                 }
                             }
                             for (Map.Entry<Long, SchedulerState> entry : sortedExpires.entries()) {
@@ -90,7 +94,7 @@ public class Scheduler {
                                 }
                             }
                         } finally {
-                            stateHolder.returnStates(states);
+                            stateHolder.returnAllStates(allStates);
                         }
                     }
                 });
@@ -201,21 +205,25 @@ public class Scheduler {
      * Schedule events which are not scheduled in the queue when switching back from event time to system current time
      */
     public void switchToLiveMode() {
-        Map<String, SchedulerState> states = stateHolder.getAllStates();
+        Map<String, Map<String, SchedulerState>> allStates = stateHolder.getAllStates();
         try {
-            for (Map.Entry<String, SchedulerState> stateEntry : states.entrySet()) {
-                SiddhiAppContext.startPartitionFlow(stateEntry.getKey());
-                try {
+            for (Map.Entry<String, Map<String, SchedulerState>> allStatesEntry : allStates.entrySet()) {
+                for (Map.Entry<String, SchedulerState> stateEntry : allStatesEntry.getValue().entrySet()) {
                     Long toNotifyTime = stateEntry.getValue().toNotifyQueue.peek();
                     if (toNotifyTime != null) {
-                        schedule(toNotifyTime, stateEntry.getValue());
+                        SiddhiAppContext.startPartitionFlow(allStatesEntry.getKey());
+                        SiddhiAppContext.startGroupByFlow(stateEntry.getKey());
+                        try {
+                            schedule(toNotifyTime, stateEntry.getValue());
+                        } finally {
+                            SiddhiAppContext.stopGroupByFlow();
+                            SiddhiAppContext.stopPartitionFlow();
+                        }
                     }
-                } finally {
-                    SiddhiAppContext.stopPartitionFlow();
                 }
             }
         } finally {
-            stateHolder.returnStates(states);
+            stateHolder.returnAllStates(allStates);
         }
     }
 
@@ -224,24 +232,20 @@ public class Scheduler {
      * the acquired resources for processing.
      */
     public void switchToPlayBackMode() {
-        Map<String, SchedulerState> states = stateHolder.getAllStates();
+        Map<String, Map<String, SchedulerState>> allStates = stateHolder.getAllStates();
         try {
-            for (Map.Entry<String, SchedulerState> stateEntry : states.entrySet()) {
-                SiddhiAppContext.startPartitionFlow(stateEntry.getKey());
-                try {
+            for (Map.Entry<String, Map<String, SchedulerState>> allStatesEntry : allStates.entrySet()) {
+                for (Map.Entry<String, SchedulerState> stateEntry : allStatesEntry.getValue().entrySet()) {
                     if (stateEntry.getValue().scheduledFuture != null) {
                         stateEntry.getValue().scheduledFuture.cancel(true);
                     }
                     //Make the scheduler running flag to false to make sure scheduler will schedule next time starts
                     stateEntry.getValue().running = false;
-                } finally {
-                    SiddhiAppContext.stopPartitionFlow();
                 }
             }
         } finally {
-            stateHolder.returnStates(states);
+            stateHolder.returnAllStates(allStates);
         }
-
     }
 
     private class EventCaller implements Runnable {
