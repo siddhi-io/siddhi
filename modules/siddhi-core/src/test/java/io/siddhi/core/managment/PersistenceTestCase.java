@@ -572,7 +572,7 @@ public class PersistenceTestCase {
                         AssertJUnit.assertEquals(300L, inEvent.getData(2));
                     }
                     if (count == 6) {
-                        AssertJUnit.assertEquals(300L, inEvent.getData(2));
+                        AssertJUnit.assertEquals(100L, inEvent.getData(2));
                     }
                 }
             }

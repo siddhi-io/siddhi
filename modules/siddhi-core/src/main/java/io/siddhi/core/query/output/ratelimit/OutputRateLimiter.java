@@ -62,16 +62,13 @@ public abstract class OutputRateLimiter<S extends State> implements ExternalRefe
     public void sendToCallBacks(ComplexEventChunk complexEventChunk) {
         MultiProcessStreamReceiver.ReturnEventHolder returnEventHolder =
                 MultiProcessStreamReceiver.getMultiProcessReturn().get();
+        if (siddhiQueryContext.getSiddhiAppContext().isStatsEnabled() && latencyTracker != null) {
+            latencyTracker.markOut();
+        }
         if (returnEventHolder != null) {
             returnEventHolder.setReturnEvents(complexEventChunk);
             return;
         } else if (lockWrapper != null) {
-            lockWrapper.unlock();
-        }
-        if (siddhiQueryContext.getSiddhiAppContext().isStatsEnabled() && latencyTracker != null) {
-            latencyTracker.markOut();
-        }
-        if (lockWrapper != null) {
             lockWrapper.unlock();
         }
         if (!queryCallbacks.isEmpty()) {

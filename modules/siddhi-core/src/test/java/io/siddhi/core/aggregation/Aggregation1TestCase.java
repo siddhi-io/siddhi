@@ -274,8 +274,8 @@ public class Aggregation1TestCase {
                     new Object[]{1496289950000L, "WSO2", 60.0, 240.0, 700f},
                     new Object[]{1496289951000L, "IBM", 100.0, 200.0, 9600f},
                     new Object[]{1496289952000L, "IBM", 700.0, 1400.0, 3500f},
-                    new Object[]{1496289953000L, "IBM", 400.0, 400.0, 3600f},
                     new Object[]{1496289953000L, "WSO2", 100.0, 300.0, 1540f},
+                    new Object[]{1496289953000L, "IBM", 400.0, 400.0, 3600f},
                     new Object[]{1496289954000L, "IBM", 600.0, 600.0, 3600f},
                     new Object[]{1496290016000L, "IBM", 1000.0, 1000.0, 9000f}
             );
@@ -939,7 +939,7 @@ public class Aggregation1TestCase {
                     "2017-06-01 09:35:52 +05:30", "seconds"});
             Thread.sleep(100);
 
-            List<Object[]> expected = Arrays.asList(
+            List<Object[]> expected1 = Arrays.asList(
                     new Object[]{1496289950000L, 240.0, 60.0, 700f, "WSO2", 70f, 50f},
                     new Object[]{1496289951000L, 200.0, 100.0, 9600f, "IBM", 100f, 100f},
                     new Object[]{1496289952000L, 1400.0, 700.0, 3500f, "IBM", 900f, 500f},
@@ -948,10 +948,21 @@ public class Aggregation1TestCase {
                     new Object[]{1496289954000L, 600.0, 600.0, 3600f, "IBM", 600f, 600f},
                     new Object[]{1496290016000L, 1000.0, 1000.0, 9000f, "IBM", 1000f, 1000f}
             );
+            List<Object[]> expected2 = Arrays.asList(
+                    new Object[]{1496289950000L, 240.0, 60.0, 700f, "WSO2", 70f, 50f},
+                    new Object[]{1496289951000L, 200.0, 100.0, 9600f, "IBM", 100f, 100f},
+                    new Object[]{1496289952000L, 1400.0, 700.0, 3500f, "IBM", 900f, 500f},
+                    new Object[]{1496289953000L, 300.0, 100.0, 1540f, "WSO2", 140f, 60f},
+                    new Object[]{1496289953000L, 400.0, 400.0, 3600f, "IBM", 400f, 400f},
+                    new Object[]{1496289954000L, 600.0, 600.0, 3600f, "IBM", 600f, 600f},
+                    new Object[]{1496290016000L, 1000.0, 1000.0, 9000f, "IBM", 1000f, 1000f}
+            );
             SiddhiTestHelper.waitForEvents(100, 7, inEventCount, 60000);
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
             AssertJUnit.assertEquals("Number of success events", 7, inEventCount.get());
-            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
+            AssertJUnit.assertEquals("In events matched", true,
+                    SiddhiTestHelper.isEventsMatch(inEventsList, expected1) ||
+                            SiddhiTestHelper.isEventsMatch(inEventsList, expected2));
         } finally {
             siddhiAppRuntime.shutdown();
         }

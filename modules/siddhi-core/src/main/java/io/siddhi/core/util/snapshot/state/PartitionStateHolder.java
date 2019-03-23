@@ -92,7 +92,7 @@ public class PartitionStateHolder implements StateHolder {
     }
 
     @Override
-    public Map<String, State> getAllGroupByStates() {
+    public synchronized Map<String, State> getAllGroupByStates() {
         String partitionFlowId = SiddhiAppContext.getPartitionFlowId();
         Map<String, State> groupByStates = states.computeIfAbsent(partitionFlowId, k -> new HashMap<>());
         for (State state : groupByStates.values()) {
