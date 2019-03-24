@@ -189,7 +189,7 @@
         <Bug pattern="EQ_COMPARETO_USE_OBJECT_EQUALS"/>
     </Match>
     <Match>
-        <Class name="io.siddhi.core.util.snapshot.state.SingleStateHolder"/>
+        <Class name="io.siddhi.core.util.snapshot.state.SingleSyncStateHolder"/>
         <Bug pattern="DC_DOUBLECHECK"/>
     </Match>
 
