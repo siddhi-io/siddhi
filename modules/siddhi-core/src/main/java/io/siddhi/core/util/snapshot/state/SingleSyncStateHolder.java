@@ -26,15 +26,15 @@ import java.util.Map;
 /**
  * State holder for non partition use case
  */
-public class SingleStateHolder implements StateHolder {
-    private static final Logger log = Logger.getLogger(SingleStateHolder.class);
+public class SingleSyncStateHolder implements StateHolder {
+    private static final Logger log = Logger.getLogger(SingleSyncStateHolder.class);
 
     private final StateFactory stateFactory;
     private State state = null;
     final Map<String, State> groupByStates = new HashMap<>(1);
     final Map<String, Map<String, State>> allStates = new HashMap<>(1);
 
-    public SingleStateHolder(StateFactory stateFactory) {
+    public SingleSyncStateHolder(StateFactory stateFactory) {
         this.stateFactory = stateFactory;
         this.allStates.put(null, groupByStates);
     }
@@ -42,8 +42,12 @@ public class SingleStateHolder implements StateHolder {
     @Override
     public State getState() {
         if (state == null) {
-            state = stateFactory.createNewState();
-            groupByStates.put(null, state);
+            synchronized (this) {
+                if (state == null) {
+                    state = stateFactory.createNewState();
+                    groupByStates.put(null, state);
+                }
+            }
         }
         return state;
     }
@@ -55,8 +59,12 @@ public class SingleStateHolder implements StateHolder {
 
     public Map<String, Map<String, State>> getAllStates() {
         if (state == null) {
-            state = stateFactory.createNewState();
-            groupByStates.put(null, state);
+            synchronized (this) {
+                if (state == null) {
+                    state = stateFactory.createNewState();
+                    groupByStates.put(null, state);
+                }
+            }
         }
         return allStates;
     }
@@ -70,14 +78,18 @@ public class SingleStateHolder implements StateHolder {
     @Override
     public Map<String, State> getAllGroupByStates() {
         if (state == null) {
-            state = stateFactory.createNewState();
-            groupByStates.put(null, state);
+            synchronized (this) {
+                if (state == null) {
+                    state = stateFactory.createNewState();
+                    groupByStates.put(null, state);
+                }
+            }
         }
         return groupByStates;
     }
 
     @Override
-    public State cleanGroupByStates() {
+    public synchronized State cleanGroupByStates() {
         State returnValue = state;
         state = null;
         groupByStates.clear();

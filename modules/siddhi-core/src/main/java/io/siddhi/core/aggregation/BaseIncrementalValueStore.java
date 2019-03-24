@@ -24,8 +24,8 @@ import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventPool;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
-import io.siddhi.core.util.snapshot.state.PartitionStateHolder;
-import io.siddhi.core.util.snapshot.state.SingleStateHolder;
+import io.siddhi.core.util.snapshot.state.PartitionSyncStateHolder;
+import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 
@@ -60,8 +60,8 @@ public class BaseIncrementalValueStore {
             this.storeStateHolder = siddhiQueryContext.generateStateHolder(aggregatorName + "-" +
                     this.getClass().getName(), false, () -> new StoreState());
         } else {
-            this.valueStateHolder = new PartitionStateHolder(() -> new ValueState());
-            this.storeStateHolder = new SingleStateHolder(() -> new StoreState());
+            this.valueStateHolder = new PartitionSyncStateHolder(() -> new ValueState());
+            this.storeStateHolder = new SingleSyncStateHolder(() -> new StoreState());
         }
     }
 

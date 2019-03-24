@@ -28,8 +28,8 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
 import io.siddhi.core.util.parser.AggregationParser;
-import io.siddhi.core.util.snapshot.state.PartitionStateHolder;
-import io.siddhi.core.util.snapshot.state.SingleStateHolder;
+import io.siddhi.core.util.snapshot.state.PartitionSyncStateHolder;
+import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.aggregation.TimePeriod;
@@ -73,9 +73,9 @@ public class IncrementalDataAggregator {
         this.baseExecutorsForFind = baseExecutorsForFind;
         streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         if (groupBy) {
-            this.valueStateHolder = new PartitionStateHolder(() -> new ValueState());
+            this.valueStateHolder = new PartitionSyncStateHolder(() -> new ValueState());
         } else {
-            this.valueStateHolder = new SingleStateHolder(() -> new ValueState());
+            this.valueStateHolder = new SingleSyncStateHolder(() -> new ValueState());
         }
         this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventPool.borrowEvent());
 

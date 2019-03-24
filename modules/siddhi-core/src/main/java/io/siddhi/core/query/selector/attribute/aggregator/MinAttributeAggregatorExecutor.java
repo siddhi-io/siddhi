@@ -167,7 +167,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Double value = (Double) data;
             if (minDeque != null) {
                 for (Iterator<Double> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
@@ -186,7 +186,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             if (minDeque != null) {
                 minDeque.removeFirstOccurrence(data);
                 minValue = minDeque.peekFirst();
@@ -199,7 +199,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object reset() {
+        public Object reset() {
             if (minDeque != null) {
                 minDeque.clear();
             }
@@ -215,15 +215,13 @@ public class MinAttributeAggregatorExecutor
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("MinValue", minValue);
-                state.put("MinDeque", minDeque);
-            }
+            state.put("MinValue", minValue);
+            state.put("MinDeque", minDeque);
             return state;
         }
 
         @Override
-        public synchronized void restore(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             minValue = (Double) state.get("MinValue");
             minDeque = (Deque<Double>) state.get("MinDeque");
         }
@@ -251,7 +249,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Float value = (Float) data;
             if (minDeque != null) {
                 for (Iterator<Float> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
@@ -270,7 +268,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             if (minDeque != null) {
                 minDeque.removeFirstOccurrence(data);
                 minValue = minDeque.peekFirst();
@@ -283,7 +281,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object reset() {
+        public Object reset() {
             if (minDeque != null) {
                 minDeque.clear();
             }
@@ -299,15 +297,13 @@ public class MinAttributeAggregatorExecutor
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("MinValue", minValue);
-                state.put("MinDeque", minDeque);
-            }
+            state.put("MinValue", minValue);
+            state.put("MinDeque", minDeque);
             return state;
         }
 
         @Override
-        public synchronized void restore(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             minValue = (Float) state.get("MinValue");
             minDeque = (Deque<Float>) state.get("MinDeque");
         }
@@ -334,7 +330,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Integer value = (Integer) data;
             if (minDeque != null) {
                 for (Iterator<Integer> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
@@ -354,7 +350,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object reset() {
+        public Object reset() {
             if (minDeque != null) {
                 minDeque.clear();
             }
@@ -368,7 +364,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             if (minDeque != null) {
                 minDeque.removeFirstOccurrence(data);
                 minValue = minDeque.peekFirst();
@@ -383,15 +379,13 @@ public class MinAttributeAggregatorExecutor
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("MinValue", minValue);
-                state.put("MinDeque", minDeque);
-            }
+            state.put("MinValue", minValue);
+            state.put("MinDeque", minDeque);
             return state;
         }
 
         @Override
-        public synchronized void restore(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             minValue = (Integer) state.get("MinValue");
             minDeque = (Deque<Integer>) state.get("MinDeque");
         }
@@ -418,7 +412,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Long value = (Long) data;
             if (minDeque != null) {
                 for (Iterator<Long> iterator = minDeque.descendingIterator(); iterator.hasNext(); ) {
@@ -437,7 +431,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object reset() {
+        public Object reset() {
             if (minDeque != null) {
                 minDeque.clear();
             }
@@ -451,7 +445,7 @@ public class MinAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             if (minDeque != null) {
                 minDeque.removeFirstOccurrence(data);
                 minValue = minDeque.peekFirst();
@@ -466,15 +460,13 @@ public class MinAttributeAggregatorExecutor
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("MinValue", minValue);
-                state.put("MinDeque", minDeque);
-            }
+            state.put("MinValue", minValue);
+            state.put("MinDeque", minDeque);
             return state;
         }
 
         @Override
-        public synchronized void restore(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             minValue = (Long) state.get("MinValue");
             minDeque = (Deque<Long>) state.get("MinDeque");
         }

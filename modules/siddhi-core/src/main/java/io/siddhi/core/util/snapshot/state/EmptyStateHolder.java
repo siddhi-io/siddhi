@@ -53,6 +53,11 @@ public class EmptyStateHolder implements StateHolder {
     }
 
     @Override
+    public State cleanGroupByStates() {
+        return null;
+    }
+
+    @Override
     public void returnGroupByStates(Map states) {
 
     }

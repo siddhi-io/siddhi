@@ -28,6 +28,7 @@ import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.core.util.snapshot.SnapshotService;
 import io.siddhi.core.util.snapshot.state.EmptyStateHolder;
 import io.siddhi.core.util.snapshot.state.SingleStateHolder;
+import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.StatisticsManager;
@@ -286,8 +287,17 @@ public class SiddhiAppContext {
     }
 
     public StateHolder generateStateHolder(String name, StateFactory stateFactory) {
+        return generateStateHolder(name, stateFactory, false);
+    }
+
+    public StateHolder generateStateHolder(String name, StateFactory stateFactory, boolean unSafe) {
         if (stateFactory != null) {
-            StateHolder stateHolder = new SingleStateHolder(stateFactory);
+            StateHolder stateHolder;
+            if (unSafe) {
+                stateHolder = new SingleStateHolder(stateFactory);
+            } else {
+                stateHolder = new SingleSyncStateHolder(stateFactory);
+            }
             if (SnapshotService.getSkipStateStorageThreadLocal().get() == null ||
                     !SnapshotService.getSkipStateStorageThreadLocal().get()) {
                 Map<String, StateHolder> stateHolderMap = getSnapshotService().getStateHolderMap(

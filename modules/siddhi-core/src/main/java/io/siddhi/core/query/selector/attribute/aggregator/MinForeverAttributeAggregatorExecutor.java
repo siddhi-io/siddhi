@@ -71,7 +71,7 @@ public class MinForeverAttributeAggregatorExecutor
      * @param processingMode               query processing mode
      * @param outputExpectsExpiredEvents   is expired events sent as output
      * @param configReader                 this hold the {@link MinForeverAttributeAggregatorExecutor}
-     *                                    configuration reader.
+     *                                     configuration reader.
      * @param siddhiQueryContext           Siddhi query runtime context
      */
     @Override
@@ -153,7 +153,7 @@ public class MinForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Double value = (Double) data;
             if (minValue == null || minValue > value) {
                 minValue = value;
@@ -162,7 +162,7 @@ public class MinForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             Double value = (Double) data;
             if (minValue == null || minValue > value) {
                 minValue = value;
@@ -208,7 +208,7 @@ public class MinForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Float value = (Float) data;
             if (minValue == null || minValue > value) {
                 minValue = value;
@@ -217,7 +217,7 @@ public class MinForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             Float value = (Float) data;
             if (minValue == null || minValue > value) {
                 minValue = value;
@@ -262,7 +262,7 @@ public class MinForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Integer value = (Integer) data;
             if (minValue == null || minValue > value) {
                 minValue = value;
@@ -276,7 +276,7 @@ public class MinForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             Integer value = (Integer) data;
             if (minValue == null || minValue > value) {
                 minValue = value;
@@ -316,7 +316,7 @@ public class MinForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Long value = (Long) data;
             if (minValue == null || minValue > value) {
                 minValue = value;
@@ -330,7 +330,7 @@ public class MinForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             Long value = (Long) data;
             if (minValue == null || minValue > value) {
                 minValue = value;

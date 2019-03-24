@@ -23,7 +23,9 @@ import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.snapshot.SnapshotService;
 import io.siddhi.core.util.snapshot.state.EmptyStateHolder;
 import io.siddhi.core.util.snapshot.state.PartitionStateHolder;
+import io.siddhi.core.util.snapshot.state.PartitionSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.SingleStateHolder;
+import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.LatencyTracker;
@@ -106,13 +108,26 @@ public class SiddhiQueryContext {
     }
 
     public StateHolder generateStateHolder(String name, boolean groupBy, StateFactory stateFactory) {
+        return generateStateHolder(name, groupBy, stateFactory, false);
+    }
+
+    public StateHolder generateStateHolder(String name, boolean groupBy, StateFactory stateFactory, boolean unSafe) {
         if (stateFactory != null) {
             StateHolder stateHolder;
-            if (partitioned || groupBy) {
-                stateHolder = new PartitionStateHolder(stateFactory);
+            if (unSafe) {
+                if (partitioned || groupBy) {
+                    stateHolder = new PartitionStateHolder(stateFactory);
+                } else {
+                    stateHolder = new SingleStateHolder(stateFactory);
+                }
             } else {
-                stateHolder = new SingleStateHolder(stateFactory);
+                if (partitioned || groupBy) {
+                    stateHolder = new PartitionSyncStateHolder(stateFactory);
+                } else {
+                    stateHolder = new SingleSyncStateHolder(stateFactory);
+                }
             }
+
             if (SnapshotService.getSkipStateStorageThreadLocal().get() == null ||
                     !SnapshotService.getSkipStateStorageThreadLocal().get()) {
                 stateHolderMap = siddhiAppContext.getSnapshotService().getStateHolderMap(partitionId, this.getName());

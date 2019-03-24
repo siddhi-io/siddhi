@@ -27,8 +27,6 @@ import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 
-import java.util.Map;
-
 /**
  * Abstract parent class for attribute aggregators. Attribute aggregators are used to perform aggregate operations
  * such as count, average, etc.
@@ -49,7 +47,8 @@ public abstract class AttributeAggregatorExecutor<S extends State> implements Ex
             this.attributeSize = attributeExpressionExecutors.length;
             StateFactory<S> stateFactory = init(attributeExpressionExecutors, processingMode,
                     outputExpectsExpiredEvents, configReader, siddhiQueryContext);
-            stateHolder = siddhiQueryContext.generateStateHolder(this.getClass().getName(), groupBy, stateFactory);
+            stateHolder = siddhiQueryContext.generateStateHolder(this.getClass().getName(),
+                    groupBy, stateFactory, true);
         } catch (Throwable t) {
             throw new SiddhiAppCreationException(t);
         }
@@ -142,16 +141,11 @@ public abstract class AttributeAggregatorExecutor<S extends State> implements Ex
     }
 
     private Object processReset() {
-        Object returnValue = null;
-        Map<String, S> states = stateHolder.getAllGroupByStates();
-        try {
-            for (S aState : states.values()) {
-                returnValue = reset(aState);
-            }
-        } finally {
-            stateHolder.returnGroupByStates(states);
+        S state = stateHolder.cleanGroupByStates();
+        if (state != null) {
+            return reset(state);
         }
-        return returnValue;
+        return null;
     }
 
     /**

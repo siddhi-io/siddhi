@@ -159,7 +159,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Double value = (Double) data;
             if (maxDeque != null) {
                 for (Iterator<Double> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
@@ -178,7 +178,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             if (maxDeque != null) {
                 maxDeque.removeFirstOccurrence(data);
                 maxValue = maxDeque.peekFirst();
@@ -191,7 +191,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object reset() {
+        public Object reset() {
             if (maxDeque != null) {
                 maxDeque.clear();
             }
@@ -207,15 +207,13 @@ public class MaxAttributeAggregatorExecutor
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("MaxValue", maxValue);
-                state.put("MaxDeque", maxDeque);
-            }
+            state.put("MaxValue", maxValue);
+            state.put("MaxDeque", maxDeque);
             return state;
         }
 
         @Override
-        public synchronized void restore(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             maxValue = (Double) state.get("MaxValue");
             maxDeque = (Deque<Double>) state.get("MaxDeque");
         }
@@ -237,7 +235,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Float value = (Float) data;
             if (maxDeque != null) {
                 for (Iterator<Float> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
@@ -256,7 +254,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             if (maxDeque != null) {
                 maxDeque.removeFirstOccurrence(data);
                 maxValue = maxDeque.peekFirst();
@@ -269,7 +267,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object reset() {
+        public Object reset() {
             if (maxDeque != null) {
                 maxDeque.clear();
             }
@@ -285,15 +283,13 @@ public class MaxAttributeAggregatorExecutor
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("MaxValue", maxValue);
-                state.put("MaxDeque", maxDeque);
-            }
+            state.put("MaxValue", maxValue);
+            state.put("MaxDeque", maxDeque);
             return state;
         }
 
         @Override
-        public synchronized void restore(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             maxValue = (Float) state.get("MaxValue");
             maxDeque = (Deque<Float>) state.get("MaxDeque");
         }
@@ -316,7 +312,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Integer value = (Integer) data;
             if (maxDeque != null) {
                 for (Iterator<Integer> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
@@ -335,7 +331,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             if (maxDeque != null) {
                 maxDeque.removeFirstOccurrence(data);
                 maxValue = maxDeque.peekFirst();
@@ -348,7 +344,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object reset() {
+        public Object reset() {
             if (maxDeque != null) {
                 maxDeque.clear();
             }
@@ -364,15 +360,13 @@ public class MaxAttributeAggregatorExecutor
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("MaxValue", maxValue);
-                state.put("MaxDeque", maxDeque);
-            }
+            state.put("MaxValue", maxValue);
+            state.put("MaxDeque", maxDeque);
             return state;
         }
 
         @Override
-        public synchronized void restore(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             maxValue = (Integer) state.get("MaxValue");
             maxDeque = (Deque<Integer>) state.get("MaxDeque");
         }
@@ -395,7 +389,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Long value = (Long) data;
             if (maxDeque != null) {
                 for (Iterator<Long> iterator = maxDeque.descendingIterator(); iterator.hasNext(); ) {
@@ -414,7 +408,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             if (maxDeque != null) {
                 maxDeque.removeFirstOccurrence(data);
                 maxValue = maxDeque.peekFirst();
@@ -427,7 +421,7 @@ public class MaxAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object reset() {
+        public Object reset() {
             if (maxDeque != null) {
                 maxDeque.clear();
             }
@@ -443,15 +437,13 @@ public class MaxAttributeAggregatorExecutor
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("MaxValue", maxValue);
-                state.put("MaxDeque", maxDeque);
-            }
+            state.put("MaxValue", maxValue);
+            state.put("MaxDeque", maxDeque);
             return state;
         }
 
         @Override
-        public synchronized void restore(Map<String, Object> state) {
+        public void restore(Map<String, Object> state) {
             maxValue = (Long) state.get("MaxValue");
             maxDeque = (Deque<Long>) state.get("MaxDeque");
         }

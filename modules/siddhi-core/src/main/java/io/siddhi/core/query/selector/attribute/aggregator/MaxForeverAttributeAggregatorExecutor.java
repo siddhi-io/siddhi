@@ -151,7 +151,7 @@ public class MaxForeverAttributeAggregatorExecutor
         private volatile Double maxValue = null;
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Double value = (Double) data;
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
@@ -160,7 +160,7 @@ public class MaxForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             Double value = (Double) data;
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
@@ -201,7 +201,7 @@ public class MaxForeverAttributeAggregatorExecutor
         private volatile Float maxValue = null;
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Float value = (Float) data;
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
@@ -210,7 +210,7 @@ public class MaxForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             Float value = (Float) data;
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
@@ -251,7 +251,7 @@ public class MaxForeverAttributeAggregatorExecutor
         private volatile Integer maxValue = null;
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Integer value = (Integer) data;
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
@@ -260,7 +260,7 @@ public class MaxForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             Integer value = (Integer) data;
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
@@ -300,7 +300,7 @@ public class MaxForeverAttributeAggregatorExecutor
         private volatile Long maxValue = null;
 
         @Override
-        public synchronized Object processAdd(Object data) {
+        public Object processAdd(Object data) {
             Long value = (Long) data;
             if (maxValue == null || maxValue < value) {
                 maxValue = value;
@@ -309,7 +309,7 @@ public class MaxForeverAttributeAggregatorExecutor
         }
 
         @Override
-        public synchronized Object processRemove(Object data) {
+        public Object processRemove(Object data) {
             Long value = (Long) data;
             if (maxValue == null || maxValue < value) {
                 maxValue = value;

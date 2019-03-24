@@ -32,7 +32,6 @@ import java.util.Set;
  */
 public class PartitionStateHolder implements StateHolder {
     private static final Logger log = Logger.getLogger(PartitionStateHolder.class);
-
     private StateFactory stateFactory;
     private Map<String, Map<String, State>> states = new HashMap<>();
 
@@ -41,20 +40,17 @@ public class PartitionStateHolder implements StateHolder {
     }
 
     @Override
-    public synchronized State getState() {
+    public State getState() {
         String partitionFlowId = SiddhiAppContext.getPartitionFlowId();
         String groupByFlowId = SiddhiAppContext.getGroupByFlowId();
         Map<String, State> partitionStates = states.computeIfAbsent(partitionFlowId, k -> new HashMap<>());
-        State state = partitionStates.computeIfAbsent(groupByFlowId, s -> stateFactory.createNewState());
-        state.activeUseCount++;
-        return state;
+        return partitionStates.computeIfAbsent(groupByFlowId, s -> stateFactory.createNewState());
     }
 
     @Override
-    public synchronized void returnState(State state) {
+    public void returnState(State state) {
         String partitionFlowId = SiddhiAppContext.getPartitionFlowId();
         String groupByFlowId = SiddhiAppContext.getGroupByFlowId();
-        state.activeUseCount--;
         if (state.activeUseCount == 0) {
             try {
                 if (state.canDestroy()) {
@@ -82,34 +78,34 @@ public class PartitionStateHolder implements StateHolder {
         }
     }
 
-    public synchronized Map<String, Map<String, State>> getAllStates() {
-        for (Map<String, State> groupByStates : states.values()) {
-            for (State state : groupByStates.values()) {
-                state.activeUseCount++;
-            }
-        }
+    public Map<String, Map<String, State>> getAllStates() {
         return states;
     }
 
     @Override
-    public synchronized Map<String, State> getAllGroupByStates() {
+    public Map<String, State> getAllGroupByStates() {
         String partitionFlowId = SiddhiAppContext.getPartitionFlowId();
-        Map<String, State> groupByStates = states.computeIfAbsent(partitionFlowId, k -> new HashMap<>());
-        for (State state : groupByStates.values()) {
-            state.activeUseCount++;
-        }
-        return groupByStates;
+        return states.computeIfAbsent(partitionFlowId, k -> new HashMap<>());
     }
 
     @Override
-    public synchronized void returnGroupByStates(Map states) {
+    public State cleanGroupByStates() {
+        String partitionFlowId = SiddhiAppContext.getPartitionFlowId();
+        Map<String, State> groupByStates = states.remove(partitionFlowId);
+        if (groupByStates != null) {
+            return groupByStates.values().stream().findFirst().orElse(null);
+        }
+        return null;
+    }
+
+    @Override
+    public void returnGroupByStates(Map states) {
         String partitionFlowId = SiddhiAppContext.getPartitionFlowId();
         for (Iterator<Map.Entry<String, State>> iterator =
              ((Set<Map.Entry<String, State>>) states.entrySet()).iterator();
              iterator.hasNext(); ) {
             Map.Entry<String, State> stateEntry = iterator.next();
             State state = stateEntry.getValue();
-            state.activeUseCount--;
             if (state.activeUseCount == 0) {
                 try {
                     if (state.canDestroy()) {
@@ -133,7 +129,7 @@ public class PartitionStateHolder implements StateHolder {
     }
 
     @Override
-    public synchronized void returnAllStates(Map states) {
+    public void returnAllStates(Map states) {
         for (Iterator<Map.Entry<String, Map<String, State>>> statesIterator =
              ((Set<Map.Entry<String, Map<String, State>>>) states.entrySet()).iterator(); statesIterator.hasNext(); ) {
             Map.Entry<String, Map<String, State>> statesEntry = statesIterator.next();
@@ -141,7 +137,6 @@ public class PartitionStateHolder implements StateHolder {
                  stateIterator.hasNext(); ) {
                 Map.Entry<String, State> stateEntry = stateIterator.next();
                 State state = stateEntry.getValue();
-                state.activeUseCount--;
                 if (state.activeUseCount == 0) {
                     try {
                         if (state.canDestroy()) {

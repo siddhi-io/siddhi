@@ -37,5 +37,7 @@ public interface StateHolder<S extends State> {
 
     Map<String, S> getAllGroupByStates();
 
+    S cleanGroupByStates();
+
     void returnGroupByStates(Map<String, S> states);
 }
