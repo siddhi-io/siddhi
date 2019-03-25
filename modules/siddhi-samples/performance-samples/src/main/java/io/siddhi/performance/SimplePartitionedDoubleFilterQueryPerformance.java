@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -23,62 +23,65 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 
-public class SimpleFilterMultipleQueryPerformance {
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class SimplePartitionedDoubleFilterQueryPerformance {
 
     public static void main(String[] args) throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String siddhiApp = "" +
-                "define stream cseEventStream (symbol string, price float, volume int, timestamp long);" +
+                "define stream cseEventStream (symbol string, price float, volume long, timestamp long);" +
                 "" +
-                "@info(name = 'query1') " +
-                "from cseEventStream[70 > price] " +
-                "select * " +
-                "insert into outputStream ;" +
+                "partition with (symbol of cseEventStream) " +
+                "begin " +
+                "   @info(name = 'query1') " +
+                "   from cseEventStream[700 > price] " +
+                "   select * " +
+                "   insert into #innerOutputStream ; " +
                 "" +
-                "@info(name = 'query2') " +
-                "from cseEventStream[volume > 90] " +
-                "select * " +
-                "insert into outputStream ;";
+                "   @info(name = 'query2') " +
+                "   from #innerOutputStream[700 > price] " +
+                "   select * " +
+                "   insert into outputStream ;" +
+                "end;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
-            public int eventCount = 0;
+            public AtomicInteger eventCount = new AtomicInteger();
             public int timeSpent = 0;
             long startTime = System.currentTimeMillis();
 
             @Override
             public void receive(Event[] events) {
                 for (Event event : events) {
-                    eventCount++;
+                    int count = eventCount.incrementAndGet();
                     timeSpent += (System.currentTimeMillis() - (Long) event.getData(3));
-                    if (eventCount % 10000000 == 0) {
-                        System.out.println("Throughput : " + (eventCount * 1000) / ((System.currentTimeMillis()) -
+                    if (count % 10000000 == 0) {
+                        System.out.println("Throughput : " + (count * 1000) / ((System.currentTimeMillis()) -
                                 startTime));
-                        System.out.println("Time spent :  " + (timeSpent * 1.0 / eventCount));
+                        System.out.println("Time spent :  " + (timeSpent * 1.0 / count));
                         startTime = System.currentTimeMillis();
-                        eventCount = 0;
+                        eventCount.set(0);
                         timeSpent = 0;
                     }
                 }
             }
-
         });
+
 
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-
-        for (int i = 0; i <= 100; i++) {
+        for (int i = 0; i <= 10; i++) {
             EventPublisher eventPublisher = new EventPublisher(inputHandler);
-            eventPublisher.run();
+            eventPublisher.start();
         }
         //siddhiAppRuntime.shutdown();
     }
 
 
-    static class EventPublisher implements Runnable {
+    static class EventPublisher extends Thread {
 
         InputHandler inputHandler;
 
@@ -90,19 +93,20 @@ public class SimpleFilterMultipleQueryPerformance {
         public void run() {
             while (true) {
                 try {
-                    inputHandler.send(new Object[]{"WSO2", 55.6f, 100, System.currentTimeMillis()});
-                    inputHandler.send(new Object[]{"IBM", 75.6f, 100, System.currentTimeMillis()});
-                    inputHandler.send(new Object[]{"WSO2", 100f, 80, System.currentTimeMillis()});
-                    inputHandler.send(new Object[]{"IBM", 75.6f, 100, System.currentTimeMillis()});
-                    inputHandler.send(new Object[]{"WSO2", 55.6f, 100, System.currentTimeMillis()});
-                    inputHandler.send(new Object[]{"IBM", 75.6f, 100, System.currentTimeMillis()});
-                    inputHandler.send(new Object[]{"WSO2", 100f, 80, System.currentTimeMillis()});
-                    inputHandler.send(new Object[]{"IBM", 75.6f, 100, System.currentTimeMillis()});
+                    inputHandler.send(new Object[]{"1", 55.6f, 100, System.currentTimeMillis()});
+                    inputHandler.send(new Object[]{"2", 75.6f, 100, System.currentTimeMillis()});
+                    inputHandler.send(new Object[]{"3", 100f, 80, System.currentTimeMillis()});
+                    inputHandler.send(new Object[]{"4", 75.6f, 100, System.currentTimeMillis()});
+                    inputHandler.send(new Object[]{"5", 55.6f, 100, System.currentTimeMillis()});
+                    inputHandler.send(new Object[]{"6", 75.6f, 100, System.currentTimeMillis()});
+                    inputHandler.send(new Object[]{"7", 100f, 80, System.currentTimeMillis()});
+                    inputHandler.send(new Object[]{"8", 75.6f, 100, System.currentTimeMillis()});
+                    inputHandler.send(new Object[]{"9", 75.6f, 100, System.currentTimeMillis()});
+                    inputHandler.send(new Object[]{"10", 75.6f, 100, System.currentTimeMillis()});
                 } catch (InterruptedException e) {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
             }
-
 
         }
     }
