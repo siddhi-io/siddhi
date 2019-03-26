@@ -74,6 +74,6 @@ Please find details at: [https://chris.beams.io/posts/git-commit/](https://chris
 
 ## Proposing changes/improvements to Siddhi
 
-Start with the discussion in the Siddhi-Dev Google Group.
+Start with the discussion in the [Siddhi-Dev Google Group](https://groups.google.com/forum/#!forum/siddhi-dev).
 
 Once there is enough consensus around the proposal, you will likely be asked to file an Issue in GitHub and label it as Proposal, to continue the discussion on details there.
