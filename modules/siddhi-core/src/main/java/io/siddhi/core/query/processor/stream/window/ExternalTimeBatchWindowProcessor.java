@@ -511,16 +511,14 @@ public class ExternalTimeBatchWindowProcessor
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("StartTime", startTime);
-                state.put("EndTime", endTime);
-                state.put("LastScheduledTime", lastScheduledTime);
-                state.put("LastCurrentEventTime", lastCurrentEventTime);
-                state.put("CurrentEventChunk", currentEventChunk.getFirst());
-                state.put("ExpiredEventChunk", expiredEventChunk != null ? expiredEventChunk.getFirst() : null);
-                state.put("ResetEvent", resetEvent);
-                state.put("Flushed", flushed);
-            }
+            state.put("StartTime", startTime);
+            state.put("EndTime", endTime);
+            state.put("LastScheduledTime", lastScheduledTime);
+            state.put("LastCurrentEventTime", lastCurrentEventTime);
+            state.put("CurrentEventChunk", currentEventChunk.getFirst());
+            state.put("ExpiredEventChunk", expiredEventChunk != null ? expiredEventChunk.getFirst() : null);
+            state.put("ResetEvent", resetEvent);
+            state.put("Flushed", flushed);
             return state;
         }
 

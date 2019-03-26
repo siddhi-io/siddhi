@@ -59,7 +59,7 @@ public class UpdateTableCallback extends OutputCallback {
     }
 
     @Override
-    public synchronized void send(ComplexEventChunk updatingEventChunk, int noOfEvents) {
+    public void send(ComplexEventChunk updatingEventChunk, int noOfEvents) {
         if (getSiddhiDebugger() != null) {
             getSiddhiDebugger()
                     .checkBreakPoint(getQueryName(), SiddhiDebugger.QueryTerminal.OUT, updatingEventChunk.getFirst());

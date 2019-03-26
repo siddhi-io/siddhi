@@ -152,9 +152,7 @@ public class WindowedPerSnapshotOutputRateLimiter
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("EventList", eventList);
-            }
+            state.put("EventList", eventList);
             return state;
         }
 

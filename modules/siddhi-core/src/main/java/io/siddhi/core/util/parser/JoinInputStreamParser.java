@@ -126,12 +126,12 @@ public class JoinInputStreamParser {
                     leftMetaStreamEvent.setEventType(WINDOW);
                     rightMetaStreamEvent.setEventType(WINDOW);
                     rightProcessStreamReceiver = new MultiProcessStreamReceiver(
-                            joinInputStream.getAllStreamIds().get(0), 1, siddhiQueryContext);
+                            joinInputStream.getAllStreamIds().get(0), 1, new Object(), siddhiQueryContext);
                     rightProcessStreamReceiver.setBatchProcessingAllowed(true);
                     leftProcessStreamReceiver = rightProcessStreamReceiver;
                 } else if (streamDefinitionMap.containsKey(joinInputStream.getAllStreamIds().get(0))) {
                     rightProcessStreamReceiver = new MultiProcessStreamReceiver(
-                            joinInputStream.getAllStreamIds().get(0), 2, siddhiQueryContext);
+                            joinInputStream.getAllStreamIds().get(0), 2, new Object(), siddhiQueryContext);
                     leftProcessStreamReceiver = rightProcessStreamReceiver;
                 } else {
                     throw new SiddhiAppCreationException("Input of join is from static source " + leftInputStreamId +

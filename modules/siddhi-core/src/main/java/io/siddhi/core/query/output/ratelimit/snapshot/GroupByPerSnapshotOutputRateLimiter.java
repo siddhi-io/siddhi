@@ -67,20 +67,20 @@ public class GroupByPerSnapshotOutputRateLimiter
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
-            complexEventChunk.reset();
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.TIMER) {
-                    tryFlushEvents(outputEventChunks, event, state);
-                } else if (event.getType() == ComplexEvent.Type.CURRENT) {
-                    complexEventChunk.remove();
-                    tryFlushEvents(outputEventChunks, event, state);
-                    GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
-                    state.groupByKeyEvents.put(groupedComplexEvent.getGroupKey(),
-                            groupedComplexEvent.getComplexEvent());
+                complexEventChunk.reset();
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event.getType() == ComplexEvent.Type.TIMER) {
+                        tryFlushEvents(outputEventChunks, event, state);
+                    } else if (event.getType() == ComplexEvent.Type.CURRENT) {
+                        complexEventChunk.remove();
+                        tryFlushEvents(outputEventChunks, event, state);
+                        GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
+                        state.groupByKeyEvents.put(groupedComplexEvent.getGroupKey(),
+                                groupedComplexEvent.getComplexEvent());
+                    }
                 }
             }
-        }
         } finally {
             stateHolder.returnState(state);
         }
@@ -129,9 +129,7 @@ public class GroupByPerSnapshotOutputRateLimiter
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("GroupByKeyEvents", groupByKeyEvents);
-            }
+            state.put("GroupByKeyEvents", groupByKeyEvents);
             return state;
         }
 

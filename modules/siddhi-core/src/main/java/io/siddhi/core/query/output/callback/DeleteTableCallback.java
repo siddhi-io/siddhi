@@ -56,7 +56,7 @@ public class DeleteTableCallback extends OutputCallback {
     }
 
     @Override
-    public synchronized void send(ComplexEventChunk deletingEventChunk, int noOfEvents) {
+    public void send(ComplexEventChunk deletingEventChunk, int noOfEvents) {
         if (getSiddhiDebugger() != null) {
             getSiddhiDebugger()
                     .checkBreakPoint(getQueryName(), SiddhiDebugger.QueryTerminal.OUT, deletingEventChunk.getFirst());

@@ -428,7 +428,7 @@ public class SiddhiAppRuntime {
         this.incrementalDataPurging = purgingEnabled;
     }
 
-    public synchronized void startSources() {
+    public void startSources() {
         if (running) {
             log.warn("Error calling startSources() for Siddhi App '" + siddhiAppContext.getName() + "', " +
                     "SiddhiApp already started with the sources.");

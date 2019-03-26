@@ -119,7 +119,7 @@ public class BatchWindowProcessor extends BatchingFindableWindowProcessor<BatchW
                            StreamEventCloner streamEventCloner, WindowState state) {
         List<ComplexEventChunk<StreamEvent>> streamEventChunks = new ArrayList<ComplexEventChunk<StreamEvent>>();
         ComplexEventChunk<StreamEvent> currentEventChunk = new ComplexEventChunk<StreamEvent>(true);
-        synchronized (state) {
+         synchronized (state) {
             long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
             if (outputExpectsExpiredEvents) {
                 if (state.expiredEventQueue.getFirst() != null) {

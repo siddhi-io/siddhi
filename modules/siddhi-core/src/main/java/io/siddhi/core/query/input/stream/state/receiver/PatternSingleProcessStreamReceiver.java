@@ -18,11 +18,7 @@
 package io.siddhi.core.query.input.stream.state.receiver;
 
 import io.siddhi.core.config.SiddhiQueryContext;
-import io.siddhi.core.event.ComplexEvent;
-import io.siddhi.core.event.Event;
 import io.siddhi.core.query.input.SingleProcessStreamReceiver;
-
-import java.util.List;
 
 /**
  * {StreamJunction.Receiver} implementation to receive events into pattern queries
@@ -30,38 +26,14 @@ import java.util.List;
  */
 public class PatternSingleProcessStreamReceiver extends SingleProcessStreamReceiver {
 
-    public PatternSingleProcessStreamReceiver(String streamId, String lockKey, SiddhiQueryContext siddhiQueryContext) {
-        super(streamId, lockKey, siddhiQueryContext);
+    public PatternSingleProcessStreamReceiver(String streamId, Object patternSyncObject,
+                                              SiddhiQueryContext siddhiQueryContext) {
+        super(streamId, patternSyncObject, siddhiQueryContext);
     }
 
     protected void stabilizeStates() {
         if (stateProcessorsSize != 0) {
             stateProcessors.get(0).updateState();
         }
-    }
-
-    @Override
-    public void receive(ComplexEvent complexEvent) {
-        super.receive(complexEvent);
-    }
-
-    @Override
-    public void receive(Event event) {
-        super.receive(event);
-    }
-
-    @Override
-    public void receive(Event[] events) {
-        super.receive(events);
-    }
-
-    @Override
-    public void receive(List<Event> events) {
-        super.receive(events);
-    }
-
-    @Override
-    public void receive(long timestamp, Object[] data) {
-        super.receive(timestamp, data);
     }
 }

@@ -282,11 +282,9 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
             if (!state.isStarted()) {
                 state.started();
                 if (isStartState && waitingTime != -1 && state.active) {
-                    synchronized (this) {
-                        state.lastScheduledTime = this.siddhiQueryContext.getSiddhiAppContext()
-                                .getTimestampGenerator().currentTime() + waitingTime;
-                        this.scheduler.notifyAt(state.lastScheduledTime);
-                    }
+                    state.lastScheduledTime = this.siddhiQueryContext.getSiddhiAppContext()
+                            .getTimestampGenerator().currentTime() + waitingTime;
+                    this.scheduler.notifyAt(state.lastScheduledTime);
                 }
             }
         } finally {

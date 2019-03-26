@@ -48,18 +48,15 @@ public class IncrementalExecutor implements Executor {
 
     private final StreamEvent resetEvent;
     private final ExpressionExecutor timestampExpressionExecutor;
-    private final String aggregatorName;
     private final StateHolder<ExecutorState> stateHolder;
     private TimePeriod.Duration duration;
     private Table table;
     private GroupByKeyGenerator groupByKeyGenerator;
     private StreamEventPool streamEventPool;
-    //    private boolean groupBy;
     private Executor next;
     private Scheduler scheduler;
     private boolean isRoot;
     private boolean isProcessingExecutor;
-    private SiddhiQueryContext siddhiQueryContext;
 
     private BaseIncrementalValueStore baseIncrementalValueStore = null;
 
@@ -72,15 +69,10 @@ public class IncrementalExecutor implements Executor {
         this.next = child;
         this.isRoot = isRoot;
         this.table = table;
-        this.siddhiQueryContext = siddhiQueryContext;
-        this.aggregatorName = aggregatorName;
         this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
         this.isProcessingExecutor = false;
-//        if (groupByKeyGenerator != null) {
-//            this.groupBy = true;
         this.groupByKeyGenerator = groupByKeyGenerator;
-//        }
         this.baseIncrementalValueStore = new BaseIncrementalValueStore(processExpressionExecutors, streamEventPool,
                 siddhiQueryContext, aggregatorName, shouldUpdateTimestamp, -1, true, false);
         this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventPool.borrowEvent());
@@ -169,29 +161,19 @@ public class IncrementalExecutor implements Executor {
                 try {
                     String groupedByKey = groupByKeyGenerator.constructEventKey(streamEvent);
                     SiddhiAppContext.startGroupByFlow(groupedByKey);
-//                    GroupByAggregationAttributeExecutor.getKeyThreadLocal().set(groupedByKey);
                     baseIncrementalValueStore.process(streamEvent);
-//                    process(streamEvent, baseIncrementalValueStore);
                 } finally {
                     SiddhiAppContext.stopGroupByFlow();
-//                    GroupByAggregationAttributeExecutor.getKeyThreadLocal().remove();
                 }
             } else {
                 baseIncrementalValueStore.process(streamEvent);
-
-//                process(streamEvent, baseIncrementalValueStore);
             }
         }
     }
 
 
     private void dispatchAggregateEvents(long startTimeOfNewAggregates) {
-//        if (groupBy) {
-//        dispatchEvent(startTimeOfNewAggregates, baseIncrementalValueStore);
-//            dispatchEvents(baseIncrementalValueStoreGroupByMap);
-//        } else {
         dispatchEvent(startTimeOfNewAggregates, baseIncrementalValueStore);
-//        }
     }
 
     private void dispatchEvent(long startTimeOfNewAggregates, BaseIncrementalValueStore aBaseIncrementalValueStore) {
@@ -214,43 +196,13 @@ public class IncrementalExecutor implements Executor {
         cleanBaseIncrementalValueStore(startTimeOfNewAggregates, aBaseIncrementalValueStore);
     }
 
-//    private void dispatchEvents(Map<String, BaseIncrementalValueStore> baseIncrementalValueGroupByStore) {
-//        int noOfEvents = baseIncrementalValueGroupByStore.size();
-//        if (noOfEvents > 0) {
-//            ComplexEventChunk<StreamEvent> eventChunk = new ComplexEventChunk<>(true);
-//            for (BaseIncrementalValueStore aBaseIncrementalValueStore : baseIncrementalValueGroupByStore.values()) {
-//                StreamEvent streamEvent = aBaseIncrementalValueStore.createStreamEvent();
-//                eventChunk.add(streamEvent);
-//            }
-//            if (LOG.isDebugEnabled()) {
-//                LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
-//            }
-//            if (isProcessingExecutor) {
-//                table.addEvents(eventChunk, noOfEvents);
-//            }
-//            if (getNextExecutor() != null) {
-//                next.execute(eventChunk);
-//            }
-//        }
-//        for (BaseIncrementalValueStore baseIncrementalValueStore : baseIncrementalValueGroupByStore.values()) {
-//            baseIncrementalValueStore.clean();
-//        }
-//        baseIncrementalValueGroupByStore.clear();
-//    }
-
     private void cleanBaseIncrementalValueStore(long startTimeOfNewAggregates,
                                                 BaseIncrementalValueStore baseIncrementalValueStore) {
         baseIncrementalValueStore.clearValues(startTimeOfNewAggregates, resetEvent);
-//        baseIncrementalValueStore.setProcessed(false);
         for (ExpressionExecutor expressionExecutor : baseIncrementalValueStore.getExpressionExecutors()) {
             expressionExecutor.execute(resetEvent);
         }
     }
-
-
-//    Map<String, BaseIncrementalValueStore> getBaseIncrementalValueStoreGroupByMap() {
-//        return baseIncrementalValueStoreGroupByMap;
-//    }
 
     BaseIncrementalValueStore getBaseIncrementalValueStore() {
         return baseIncrementalValueStore;
@@ -292,13 +244,7 @@ public class IncrementalExecutor implements Executor {
     }
 
     public void clearExecutor() {
-//        if (groupBy) {
-//            this.baseIncrementalValueStoreGroupByMap.clear();
-//        } else {
-//        if (!groupBy) {
         cleanBaseIncrementalValueStore(-1, this.baseIncrementalValueStore);
-//        }
-//        }
     }
 
     class ExecutorState extends State {

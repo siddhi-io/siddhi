@@ -68,7 +68,7 @@ public class SimplePartitionedFilterQueryPerformance {
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
         siddhiAppRuntime.start();
 
-        for (int i = 0; i <= 100; i++) {
+        for (int i = 0; i <= 10; i++) {
             EventPublisher eventPublisher = new EventPublisher(inputHandler);
             eventPublisher.start();
         }

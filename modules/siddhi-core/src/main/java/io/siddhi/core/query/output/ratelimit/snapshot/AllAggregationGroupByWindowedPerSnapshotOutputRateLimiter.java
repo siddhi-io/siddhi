@@ -168,9 +168,7 @@ public class AllAggregationGroupByWindowedPerSnapshotOutputRateLimiter
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("GroupByKeyEvents", groupByKeyEvents);
-            }
+            state.put("GroupByKeyEvents", groupByKeyEvents);
             return state;
         }
 

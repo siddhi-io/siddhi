@@ -88,19 +88,6 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         this.isProcessingOnExternalTime = isProcessingOnExternalTime;
     }
 
-//    @Override
-//    public CompiledCondition cloneCompilation(String key) {
-//        Map<TimePeriod.Duration, CompiledCondition> copyOfWithinTableCompiledConditions = new HashMap<>();
-//        for (Map.Entry<TimePeriod.Duration, CompiledCondition> entry : withinTableCompiledConditions.entrySet()) {
-//            copyOfWithinTableCompiledConditions.put(entry.getKey(), entry.getValue().cloneCompilation(key));
-//        }
-//        return new IncrementalAggregateCompileCondition(copyOfWithinTableCompiledConditions,
-//                inMemoryStoreCompileCondition.cloneCompilation(key),
-//                onCompiledCondition.cloneCompilation(key), tableMetaStreamEvent, aggregateMetaStreamEvent,
-//                additionalAttributes, alteredMatchingMetaInfoHolder, perExpressionExecutor,
-//                startTimeEndTimeExpressionExecutor, isProcessingOnExternalTime);
-//    }
-
     public StreamEvent find(StateEvent matchingEvent, AggregationDefinition aggregationDefinition,
                             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                             Map<TimePeriod.Duration, Table> aggregationTables,
@@ -152,17 +139,12 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         long oldestInMemoryEventTimestamp = getOldestInMemoryEventTimestamp(incrementalExecutorMap,
                 incrementalDurations, perValue);
 
-//        ExpressionExecutor shouldUpdateExpressionExecutorClone =
-//                (shouldUpdateExpressionExecutor == null) ? null : shouldUpdateExpressionExecutor.cloneExecutor(null);
-//
         //If processing on external time, the in-memory data also needs to be queried
         if (isProcessingOnExternalTime || requiresAggregatingInMemoryData(oldestInMemoryEventTimestamp,
                 startTimeEndTime)) {
-//            List<ExpressionExecutor> clonedBaseExecutors = baseExecutorsForFind.stream().map(expressionExecutor ->
-//                    expressionExecutor.cloneExecutor("")).collect(Collectors.toList());
             IncrementalDataAggregator incrementalDataAggregator = new IncrementalDataAggregator(incrementalDurations,
                     perValue, oldestInMemoryEventTimestamp, baseExecutorsForFind, tableMetaStreamEvent,
-                    siddhiQueryContext, shouldUpdateTimestamp, groupbyKeyGeneratorList.get(0) != null);
+                    shouldUpdateTimestamp, groupbyKeyGeneratorList.get(0) != null);
             ComplexEventChunk<StreamEvent> aggregatedInMemoryEventChunk;
             // Aggregate in-memory data and create an event chunk out of it
             if (incrementalExecutorMapForPartitions != null) {
@@ -183,10 +165,6 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             int durationIndex = incrementalDurations.indexOf(perValue);
             List<ExpressionExecutor> expressionExecutors = aggregateProcessingExecutorsListForFind.get(durationIndex);
             GroupByKeyGenerator groupByKeyGenerator = groupbyKeyGeneratorList.get(durationIndex);
-
-//            ExpressionExecutor shouldUpdateExpressionExecutorCloneExt =
-//                    (shouldUpdateExpressionExecutor == null) ? null :
-//                            shouldUpdateExpressionExecutor.cloneExecutor(null);
             IncrementalExternalTimestampDataAggregator incrementalExternalTimestampDataAggregator =
                     new IncrementalExternalTimestampDataAggregator(expressionExecutors, groupByKeyGenerator,
                             tableMetaStreamEvent, siddhiQueryContext,

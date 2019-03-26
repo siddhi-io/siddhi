@@ -288,12 +288,10 @@ public class LossyFrequentWindowProcessor extends
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("CountMap", countMap);
-                state.put("Map", map);
-                state.put("TotalCount", totalCount);
-                state.put("CurrentBucketId", currentBucketId);
-            }
+            state.put("CountMap", countMap);
+            state.put("Map", map);
+            state.put("TotalCount", totalCount);
+            state.put("CurrentBucketId", currentBucketId);
             return state;
         }
 

@@ -124,9 +124,7 @@ public class FirstPerTimeOutputRateLimiter
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("FirstEvent", firstEvent);
-            }
+            state.put("FirstEvent", firstEvent);
             return state;
         }
 

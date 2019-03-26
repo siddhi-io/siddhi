@@ -54,7 +54,7 @@ public abstract class AttributeAggregatorExecutor<S extends State> implements Ex
         }
     }
 
-    public synchronized Object execute(ComplexEvent event) {
+    public Object execute(ComplexEvent event) {
         if (attributeSize > 1) {
             return processAttributeArray(event);
         } else if (attributeSize == 1) {

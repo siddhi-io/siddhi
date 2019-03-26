@@ -166,7 +166,7 @@ public class SiddhiAppContext {
         this.scheduledExecutorService = scheduledExecutorService;
     }
 
-    public synchronized void addEternalReferencedHolder(ExternalReferencedHolder externalReferencedHolder) {
+    public void addEternalReferencedHolder(ExternalReferencedHolder externalReferencedHolder) {
         externalReferencedHolders.add(externalReferencedHolder);
     }
 

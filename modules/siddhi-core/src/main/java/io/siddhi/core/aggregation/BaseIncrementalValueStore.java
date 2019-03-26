@@ -173,23 +173,6 @@ public class BaseIncrementalValueStore {
         } finally {
             valueStateHolder.returnState(state);
         }
-//        List<ExpressionExecutor> expressionExecutors = baseIncrementalValueStore.getExpressionExecutors();
-//        boolean shouldUpdate = baseIncrementalValueStore.;
-//        if (shouldUpdateExpressionExecutor != null) {
-//            shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
-//        }
-//        baseIncrementalValueStore.setProcessed(true);
-//        for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
-//            if (shouldUpdate) {
-//                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-//                baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-//            } else {
-//                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-//                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-//                    baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-//                }
-//            }
-//        }
     }
 
     public void process(Map<String, StreamEvent> groupedByEvents) {
@@ -247,36 +230,6 @@ public class BaseIncrementalValueStore {
         }
 
     }
-
-//    public void process() {
-//        ValueStoreState state = this.stateHolder.getState();
-//        try {
-//            StreamEvent streamEvent = streamEventPool.borrowEvent();
-//            streamEvent.setTimestamp(state.timestamp);
-//            state.setValue(state.timestamp, 0);
-//            streamEvent.setOutputData(state.values);
-//
-//            boolean shouldUpdate = true;
-//            if (shouldUpdateExpressionExecutor != null) {
-//                shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
-//            }
-//
-//            for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
-//                if (shouldUpdate) {
-//                    ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-//                    state.setValue(expressionExecutor.execute(streamEvent), i + 1);
-//                } else {
-//                    ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-//                    if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-//                        state.setValue(expressionExecutor.execute(streamEvent), i + 1);
-//                    }
-//                }
-//            }
-//            state.isProcessed = true;
-//        } finally {
-//            this.stateHolder.returnState(state);
-//        }
-//    }
 
     class StoreState extends State {
         private long timestamp;

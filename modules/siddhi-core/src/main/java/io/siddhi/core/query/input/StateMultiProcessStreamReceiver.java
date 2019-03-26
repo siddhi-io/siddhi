@@ -33,8 +33,9 @@ public class StateMultiProcessStreamReceiver extends MultiProcessStreamReceiver 
 
     private QuerySelector querySelector;
 
-    public StateMultiProcessStreamReceiver(String streamId, int processCount, SiddhiQueryContext siddhiQueryContext) {
-        super(streamId, processCount, siddhiQueryContext);
+    public StateMultiProcessStreamReceiver(String streamId, int processCount, Object patternSyncObject,
+                                           SiddhiQueryContext siddhiQueryContext) {
+        super(streamId, processCount, patternSyncObject, siddhiQueryContext);
     }
 
     public void setNext(Processor next) {

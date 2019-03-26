@@ -123,9 +123,7 @@ public class AllAggregationPerSnapshotOutputRateLimiter
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("LastEvent", lastEvent);
-            }
+            state.put("LastEvent", lastEvent);
             return state;
         }
 

@@ -53,16 +53,11 @@ public abstract class OutputCallback {
         return queryName;
     }
 
-    protected ComplexEventChunk<StateEvent> constructMatchingStateEventChunk(ComplexEventChunk
-                                                                                     matchingComplexEventChunk,
-                                                                             boolean convertToStreamEvent,
-                                                                             StateEventPool stateEventPool,
-                                                                             int matchingStreamIndex, StreamEventPool
-                                                                                     streamEventPool,
-                                                                             StreamEventConverter
-                                                                                     streamEventConverter) {
-        ComplexEventChunk<StateEvent> stateEventChunk = new ComplexEventChunk<StateEvent>(matchingComplexEventChunk
-                .isBatch());
+    protected ComplexEventChunk<StateEvent> constructMatchingStateEventChunk(
+            ComplexEventChunk matchingComplexEventChunk, boolean convertToStreamEvent, StateEventPool stateEventPool,
+            int matchingStreamIndex, StreamEventPool streamEventPool, StreamEventConverter streamEventConverter) {
+        ComplexEventChunk<StateEvent> stateEventChunk = new ComplexEventChunk<StateEvent>(
+                matchingComplexEventChunk.isBatch());
         while (matchingComplexEventChunk.hasNext()) {
             ComplexEvent matchingComplexEvent = matchingComplexEventChunk.next();
             matchingComplexEventChunk.remove();

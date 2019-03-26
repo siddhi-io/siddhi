@@ -19,12 +19,8 @@
 package io.siddhi.core.query.input.stream.state.receiver;
 
 import io.siddhi.core.config.SiddhiQueryContext;
-import io.siddhi.core.event.ComplexEvent;
-import io.siddhi.core.event.Event;
 import io.siddhi.core.query.input.StateMultiProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.state.PreStateProcessor;
-
-import java.util.List;
 
 /**
  * {StreamJunction.Receiver} implementation to receive events into pattern queries
@@ -33,8 +29,8 @@ import java.util.List;
 public class PatternMultiProcessStreamReceiver extends StateMultiProcessStreamReceiver {
 
     public PatternMultiProcessStreamReceiver(String streamId, int processCount,
-                                             SiddhiQueryContext siddhiQueryContext) {
-        super(streamId, processCount, siddhiQueryContext);
+                                             Object patternSyncObject, SiddhiQueryContext siddhiQueryContext) {
+        super(streamId, processCount, patternSyncObject, siddhiQueryContext);
         eventSequence = new int[processCount];
         int count = 0;
         for (int i = eventSequence.length - 1; i >= 0; i--) {
@@ -49,30 +45,5 @@ public class PatternMultiProcessStreamReceiver extends StateMultiProcessStreamRe
                 preStateProcessor.updateState();
             }
         }
-    }
-
-    @Override
-    public void receive(ComplexEvent complexEvent) {
-        super.receive(complexEvent);
-    }
-
-    @Override
-    public void receive(Event event) {
-        super.receive(event);
-    }
-
-    @Override
-    public void receive(Event[] events) {
-        super.receive(events);
-    }
-
-    @Override
-    public void receive(List<Event> events) {
-        super.receive(events);
-    }
-
-    @Override
-    public void receive(long timestamp, Object[] data) {
-        super.receive(timestamp, data);
     }
 }

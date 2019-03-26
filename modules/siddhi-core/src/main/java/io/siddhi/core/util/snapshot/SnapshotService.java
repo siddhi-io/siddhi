@@ -58,7 +58,7 @@ public class SnapshotService {
     public SnapshotService(SiddhiAppContext siddhiAppContext) {
         this.siddhiAppContext = siddhiAppContext;
         this.threadBarrier = siddhiAppContext.getThreadBarrier();
-        this.partitionIdStates = new ConcurrentHashMap<String, PartitionIdStateHolder>();
+        this.partitionIdStates = new ConcurrentHashMap<>();
     }
 
     public static ThreadLocal<Boolean> getSkipStateStorageThreadLocal() {
@@ -69,8 +69,7 @@ public class SnapshotService {
         return partitionIdStates;
     }
 
-    public synchronized Map<String, StateHolder> getStateHolderMap(String partitionId,
-                                                                   String queryName) {
+    public Map<String, StateHolder> getStateHolderMap(String partitionId, String queryName) {
         Boolean skipSnapshotable = skipStateStorageThreadLocal.get();
         if (skipSnapshotable == null || !skipSnapshotable) {
             PartitionIdStateHolder partitionIdStateHolder = this.partitionIdStates.get(partitionId);
@@ -86,19 +85,6 @@ public class SnapshotService {
             return elementStateHolder.elementHolderMap;
         }
         return null;
-    }
-
-    public synchronized void removeStateHolderMap(String partitionId, String queryName) {
-        Boolean skipSnapshotable = skipStateStorageThreadLocal.get();
-        if (skipSnapshotable == null || !skipSnapshotable) {
-            PartitionIdStateHolder partitionIdStateHolder = this.partitionIdStates.get(partitionId);
-            if (partitionIdStateHolder != null) {
-                partitionIdStateHolder.queryStateHolderMap.remove(queryName);
-                if (partitionIdStateHolder.queryStateHolderMap.isEmpty()) {
-                    this.partitionIdStates.remove(partitionId);
-                }
-            }
-        }
     }
 
     public byte[] fullSnapshot() {
@@ -221,8 +207,6 @@ public class SnapshotService {
                                         partitionKeyStates.entrySet()) {
                                     for (Map.Entry<String, State> groupByKeyState :
                                             partitionKeyState.getValue().entrySet()) {
-//                                        String partitionAndGroupByKey = partitionKeyState.getKey() + "--" +
-//                                                groupByKeyState.getKey();
                                         State state = groupByKeyState.getValue();
                                         Map<String, Object> itemStates = state.snapshot();
                                         if (itemStates != null) {

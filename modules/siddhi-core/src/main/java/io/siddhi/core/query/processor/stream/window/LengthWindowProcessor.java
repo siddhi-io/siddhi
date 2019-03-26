@@ -95,7 +95,7 @@ public class LengthWindowProcessor extends SlidingFindableWindowProcessor<Length
             throw new SiddhiAppValidationException("Length window should only have one parameter (<int> " +
                     "window.length), but found " + attributeExpressionExecutors.length + " input parameters.");
         }
-        return ()-> new WindowState();
+        return () -> new WindowState();
     }
 
     @Override
@@ -178,10 +178,8 @@ public class LengthWindowProcessor extends SlidingFindableWindowProcessor<Length
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("Count", count);
-                state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
-            }
+            state.put("Count", count);
+            state.put("ExpiredEventQueue", expiredEventQueue.getSnapshot());
             return state;
         }
 

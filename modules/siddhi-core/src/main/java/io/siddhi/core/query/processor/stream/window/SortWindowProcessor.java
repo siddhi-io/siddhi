@@ -228,9 +228,7 @@ public class SortWindowProcessor extends SlidingFindableWindowProcessor<SortWind
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("SortedWindow", sortedWindow);
-            }
+            state.put("SortedWindow", sortedWindow);
             return state;
         }
 

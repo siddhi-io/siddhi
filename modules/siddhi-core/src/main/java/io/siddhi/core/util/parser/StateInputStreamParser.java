@@ -87,25 +87,24 @@ public class StateInputStreamParser {
 
         StateStreamRuntime stateStreamRuntime = new StateStreamRuntime(siddhiQueryContext, metaStateEvent);
 
-        String defaultLockKey = "";
-
+        Object patternSyncObject = new Object();
         for (String streamId : stateInputStream.getAllStreamIds()) {
             int streamCount = stateInputStream.getStreamCount(streamId);
             if (streamCount == 1) {
                 if (stateInputStream.getStateType() == StateInputStream.Type.SEQUENCE) {
                     processStreamReceiverMap.put(streamId, new SequenceSingleProcessStreamReceiver(streamId,
-                            stateStreamRuntime, defaultLockKey, siddhiQueryContext));
+                            stateStreamRuntime, patternSyncObject, siddhiQueryContext));
                 } else {
                     processStreamReceiverMap.put(streamId, new PatternSingleProcessStreamReceiver(streamId,
-                            defaultLockKey, siddhiQueryContext));
+                            patternSyncObject, siddhiQueryContext));
                 }
             } else {
                 if (stateInputStream.getStateType() == StateInputStream.Type.SEQUENCE) {
                     processStreamReceiverMap.put(streamId, new SequenceMultiProcessStreamReceiver(streamId,
-                            streamCount, stateStreamRuntime, siddhiQueryContext));
+                            streamCount, stateStreamRuntime, patternSyncObject, siddhiQueryContext));
                 } else {
                     processStreamReceiverMap.put(streamId, new PatternMultiProcessStreamReceiver(streamId,
-                            streamCount, siddhiQueryContext));
+                            streamCount, patternSyncObject, siddhiQueryContext));
                 }
             }
         }

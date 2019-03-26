@@ -131,9 +131,7 @@ public class LastGroupByPerTimeOutputRateLimiter
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("AllGroupByKeyEvents", allGroupByKeyEvents);
-            }
+            state.put("AllGroupByKeyEvents", allGroupByKeyEvents);
             return state;
         }
 

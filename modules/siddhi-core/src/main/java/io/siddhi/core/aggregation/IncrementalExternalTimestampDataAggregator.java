@@ -48,8 +48,6 @@ public class IncrementalExternalTimestampDataAggregator {
     private final List<ExpressionExecutor> baseExecutors;
     private final StateHolder valueStateHolder;
     private final StreamEvent resetEvent;
-    //    private final BaseIncrementalValueStore baseIncrementalValueStore;
-//    private final ExpressionExecutor shouldUpdateExpressionExecutorForFind;
     private StreamEventPool streamEventPool;
     private final ExpressionExecutor shouldUpdateTimestamp;
 
@@ -59,13 +57,8 @@ public class IncrementalExternalTimestampDataAggregator {
                                                       SiddhiQueryContext siddhiQueryContext,
                                                       ExpressionExecutor shouldUpdateTimestamp) {
         this.baseExecutors = baseExecutors.subList(1, baseExecutors.size());
-        streamEventPool = new StreamEventPool(metaStreamEvent, 10);
+        this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
         this.shouldUpdateTimestamp = shouldUpdateTimestamp;
-
-//        List<ExpressionExecutor> expressionExecutorsWithoutTime = baseExecutors.subList(1, baseExecutors.size());
-//        this.baseIncrementalValueStore = new BaseIncrementalValueStore(
-//                expressionExecutorsWithoutTime, streamEventPool, siddhiQueryContext, null,
-//                shouldUpdateExpressionExecutorForFind, -1, groupBy, true);
         this.groupByKeyGenerator = groupByKeyGenerator;
         if (groupByKeyGenerator != null) {
             this.valueStateHolder = new PartitionSyncStateHolder(() -> new ValueState());
@@ -73,8 +66,6 @@ public class IncrementalExternalTimestampDataAggregator {
             this.valueStateHolder = new SingleSyncStateHolder(() -> new ValueState());
         }
         this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventPool.borrowEvent());
-
-//        this.shouldUpdateExpressionExecutorForFind = shouldUpdateExpressionExecutorForFind;
     }
 
     public ComplexEventChunk<StreamEvent> aggregateData(ComplexEventChunk<StreamEvent> retrievedData) {
@@ -86,15 +77,6 @@ public class IncrementalExternalTimestampDataAggregator {
             groupByKeys.add(groupByKey);
             SiddhiAppContext.startGroupByFlow(groupByKey);
             ValueState state = (ValueState) valueStateHolder.getState();
-
-//            try {
-//            BaseIncrementalValueStore baseIncrementalValueStore = baseIncrementalValueGroupByStore
-//                    .computeIfAbsent(
-//                            groupByKey, k -> this.baseIncrementalValueStore.cloneStore(k, -1)
-//                    );
-//                process(streamEvent, baseIncrementalValueStore);
-//                process(streamEvent);
-
             try {
                 boolean shouldUpdate = true;
                 if (shouldUpdateTimestamp != null) {
@@ -115,9 +97,6 @@ public class IncrementalExternalTimestampDataAggregator {
                 valueStateHolder.returnState(state);
                 SiddhiAppContext.stopGroupByFlow();
             }
-//            } finally {
-//                SiddhiAppContext.stopGroupByFlow();
-//            }
         }
 
         //clean all executors
@@ -134,52 +113,6 @@ public class IncrementalExternalTimestampDataAggregator {
         return createEventChunkFromAggregatedData();
     }
 
-//    private void process(StreamEvent streamEvent, BaseIncrementalValueStore baseIncrementalValueStore) {
-//        List<ExpressionExecutor> expressionExecutors = baseIncrementalValueStore.getExpressionExecutors();
-//        boolean shouldUpdate = true;
-//        ExpressionExecutor shouldUpdateExpressionExecutor =
-//                baseIncrementalValueStore.getShouldUpdateExpressionExecutor();
-//        if (shouldUpdateExpressionExecutor != null) {
-//            shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
-//        }
-//        baseIncrementalValueStore.setProcessed(true);
-//        for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
-//            if (shouldUpdate) {
-//                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-//                baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-//            } else {
-//                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-//                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-//                    baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-//                }
-//            }
-//        }
-//    }
-
-//    private void process(StreamEvent streamEvent) {
-//        IncrementalDataAggregator.ValueState state = (IncrementalDataAggregator.ValueState)
-// valueStateHolder.getState();
-//        try {
-//            boolean shouldUpdate = true;
-//            if (shouldUpdateTimestamp != null) {
-//                shouldUpdate = ((boolean) shouldUpdate(shouldUpdateTimestamp.execute(streamEvent), );
-//            }
-//            for (int i = 0; i < baseExecutors.size(); i++) { // keeping timestamp value location as null
-//                if (shouldUpdate) {
-//                    ExpressionExecutor expressionExecutor = baseExecutors.get(i);
-//                    baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-//                } else {
-//                    ExpressionExecutor expressionExecutor = baseExecutors.get(i);
-//                    if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-//                        baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-//                    }
-//                }
-//            }
-//        } finally {
-//            valueStateHolder.returnState(state);
-//        }
-//    }
-
     private Object shouldUpdate(Object data, ValueState state) {
         long timestamp = (long) data;
         if (timestamp >= state.lastTimestamp) {
@@ -191,14 +124,6 @@ public class IncrementalExternalTimestampDataAggregator {
 
 
     private ComplexEventChunk<StreamEvent> createEventChunkFromAggregatedData() {
-//        ComplexEventChunk<StreamEvent> processedInMemoryEventChunk = new ComplexEventChunk<>(true);
-//        return baseIncrementalValueStore.getProcessedEventChunk();
-//        for (Map.Entry<String, BaseIncrementalValueStore> entryAgainstTime :
-//                baseIncrementalValueGroupByStore.entrySet()) {
-//            processedInMemoryEventChunk.add(entryAgainstTime.getValue().createStreamEvent());
-//        }
-//        return processedInMemoryEventChunk;
-
         ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(true);
         Map<String, State> valueStoreMap = this.valueStateHolder.getAllGroupByStates();
         try {

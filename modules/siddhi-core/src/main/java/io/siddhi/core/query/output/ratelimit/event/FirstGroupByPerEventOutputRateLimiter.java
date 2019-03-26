@@ -113,22 +113,18 @@ public class FirstGroupByPerEventOutputRateLimiter
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("Counter", counter);
-                state.put("GroupByKeys", groupByKeys);
-                state.put("AllComplexEventChunk", allComplexEventChunk.getFirst());
-            }
+            state.put("Counter", counter);
+            state.put("GroupByKeys", groupByKeys);
+            state.put("AllComplexEventChunk", allComplexEventChunk.getFirst());
             return state;
         }
 
         @Override
         public void restore(Map<String, Object> state) {
-            synchronized (this) {
-                counter = (int) state.get("Counter");
-                groupByKeys = (List<String>) state.get("GroupByKeys");
-                allComplexEventChunk.clear();
-                allComplexEventChunk.add((ComplexEvent) state.get("AllComplexEventChunk"));
-            }
+            counter = (int) state.get("Counter");
+            groupByKeys = (List<String>) state.get("GroupByKeys");
+            allComplexEventChunk.clear();
+            allComplexEventChunk.add((ComplexEvent) state.get("AllComplexEventChunk"));
         }
     }
 

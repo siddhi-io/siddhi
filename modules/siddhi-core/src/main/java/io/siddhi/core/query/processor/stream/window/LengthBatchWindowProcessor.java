@@ -322,12 +322,10 @@ public class LengthBatchWindowProcessor extends
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("Count", count);
-                state.put("CurrentEventQueue", currentEventQueue != null ? currentEventQueue.getSnapshot() : null);
-                state.put("ExpiredEventQueue", expiredEventQueue != null ? expiredEventQueue.getSnapshot() : null);
-                state.put("ResetEvent", resetEvent);
-            }
+            state.put("Count", count);
+            state.put("CurrentEventQueue", currentEventQueue != null ? currentEventQueue.getSnapshot() : null);
+            state.put("ExpiredEventQueue", expiredEventQueue != null ? expiredEventQueue.getSnapshot() : null);
+            state.put("ResetEvent", resetEvent);
             return state;
         }
 

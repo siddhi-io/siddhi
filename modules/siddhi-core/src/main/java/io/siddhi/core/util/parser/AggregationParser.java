@@ -228,17 +228,8 @@ public class AggregationParser {
                             incrementalDuration))
                     .collect(Collectors.toList());
 
-//            ExpressionExecutor shouldUpdateExpressionExecutor = null;
             ExpressionExecutor shouldUpdateTimestamp = null;
             if (isLatestEventAdded) {
-//                Expression shouldUpdateExp = AttributeFunction.function(
-//                        "incrementalAggregator",
-//                        "shouldUpdate",
-//                        new Variable(AGG_LAST_TIMESTAMP_COL));
-//                shouldUpdateExpressionExecutor = ExpressionParser.parseExpression(shouldUpdateExp,
-//                        processedMetaStreamEvent, 0, tableMap, processVariableExpressionExecutors,
-//                        true, 0, ProcessingMode.BATCH, false,
-//                        siddhiQueryContext);
                 Expression shouldUpdateTimestampExp = new Variable(AGG_LAST_TIMESTAMP_COL);
                 shouldUpdateTimestamp = ExpressionParser.parseExpression(shouldUpdateTimestampExp,
                         processedMetaStreamEvent, 0, tableMap, processVariableExpressionExecutors,

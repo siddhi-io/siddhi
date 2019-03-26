@@ -100,36 +100,36 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter
         AggregationRateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.TIMER) {
-                    tryFlushEvents(outputEventChunks, event, state);
-                } else {
-                    complexEventChunk.remove();
-                    tryFlushEvents(outputEventChunks, event, state);
-                    if (event.getType() == ComplexEvent.Type.CURRENT) {
-                        state.eventList.add(event);
-                        for (Integer position : aggregateAttributePositionList) {
-                            state.aggregateAttributeValueMap.put(position, event.getOutputData()[position]);
-                        }
-                    } else if (event.getType() == ComplexEvent.Type.EXPIRED) {
-                        for (Iterator<ComplexEvent> iterator = state.eventList.iterator(); iterator.hasNext(); ) {
-                            ComplexEvent complexEvent = iterator.next();
-                            if (comparator.compare(event, complexEvent) == 0) {
-                                iterator.remove();
-                                for (Integer position : aggregateAttributePositionList) {
-                                    state.aggregateAttributeValueMap.put(position, event.getOutputData()[position]);
-                                }
-                                break;
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event.getType() == ComplexEvent.Type.TIMER) {
+                        tryFlushEvents(outputEventChunks, event, state);
+                    } else {
+                        complexEventChunk.remove();
+                        tryFlushEvents(outputEventChunks, event, state);
+                        if (event.getType() == ComplexEvent.Type.CURRENT) {
+                            state.eventList.add(event);
+                            for (Integer position : aggregateAttributePositionList) {
+                                state.aggregateAttributeValueMap.put(position, event.getOutputData()[position]);
                             }
+                        } else if (event.getType() == ComplexEvent.Type.EXPIRED) {
+                            for (Iterator<ComplexEvent> iterator = state.eventList.iterator(); iterator.hasNext(); ) {
+                                ComplexEvent complexEvent = iterator.next();
+                                if (comparator.compare(event, complexEvent) == 0) {
+                                    iterator.remove();
+                                    for (Integer position : aggregateAttributePositionList) {
+                                        state.aggregateAttributeValueMap.put(position, event.getOutputData()[position]);
+                                    }
+                                    break;
+                                }
+                            }
+                        } else if (event.getType() == ComplexEvent.Type.RESET) {
+                            state.eventList.clear();
+                            state.aggregateAttributeValueMap.clear();
                         }
-                    } else if (event.getType() == ComplexEvent.Type.RESET) {
-                        state.eventList.clear();
-                        state.aggregateAttributeValueMap.clear();
                     }
                 }
             }
-        }
         } finally {
             stateHolder.returnState(state);
         }
@@ -188,10 +188,8 @@ public class AggregationWindowedPerSnapshotOutputRateLimiter
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("EventList", eventList);
-                state.put("AggregateAttributeValueMap", aggregateAttributeValueMap);
-            }
+            state.put("EventList", eventList);
+            state.put("AggregateAttributeValueMap", aggregateAttributeValueMap);
             return state;
         }
 

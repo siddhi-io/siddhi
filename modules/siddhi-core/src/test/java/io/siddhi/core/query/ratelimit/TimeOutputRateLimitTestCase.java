@@ -106,7 +106,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery1")
     public void testTimeOutputRateLimitQuery2() throws InterruptedException {
         log.info("TimeOutputRateLimit test2");
 
@@ -163,7 +163,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery2")
     public void testTimeOutputRateLimitQuery3() throws InterruptedException {
         log.info("TimeOutputRateLimit test3");
 
@@ -220,7 +220,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery3")
     public void testTimeOutputRateLimitQuery4() throws InterruptedException {
         log.info("TimeOutputRateLimit test4");
 
@@ -279,7 +279,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery4")
     public void testTimeOutputRateLimitQuery5() throws InterruptedException {
         log.info("TimeOutputRateLimit test5");
 
@@ -338,7 +338,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery5")
     public void testTimeOutputRateLimitQuery6() throws InterruptedException {
         log.info("TimeOutputRateLimit test6");
 
@@ -397,7 +397,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery6")
     public void testTimeOutputRateLimitQuery7() throws InterruptedException {
         log.info("TimeOutputRateLimit test7");
 
@@ -456,7 +456,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery7")
     public void testTimeOutputRateLimitQuery8() throws InterruptedException {
         log.info("TimeOutputRateLimit test8");
 
@@ -515,7 +515,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery8")
     public void testTimeOutputRateLimitQuery9() throws InterruptedException {
         log.info("TimeOutputRateLimit test9");
 
@@ -574,7 +574,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery9")
     public void testTimeOutputRateLimitQuery10() throws InterruptedException {
         log.info("TimeOutputRateLimit test10");
 
@@ -633,7 +633,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery10")
     public void testTimeOutputRateLimitQuery11() throws InterruptedException {
         log.info("TimeOutputRateLimit test11");
 
@@ -694,7 +694,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery11")
     public void testTimeOutputRateLimitQuery12() throws InterruptedException {
         log.info("TimeOutputRateLimit test12");
 
@@ -755,7 +755,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery12")
     public void testTimeOutputRateLimitQuery13() throws InterruptedException {
         log.info("TimeOutputRateLimit test13");
 
@@ -816,7 +816,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery13")
     public void testTimeOutputRateLimitQuery14() throws InterruptedException {
         log.info("TimeOutputRateLimit test14");
 

@@ -170,7 +170,13 @@ public class SelectorParser {
                 List<Attribute> attributeList = ((MetaStreamEvent) metaComplexEvent).getLastInputDefinition()
                         .getAttributeList();
                 for (Attribute attribute : attributeList) {
-                    outputAttributes.add(new OutputAttribute(new Variable(attribute.getName())));
+                    Variable variable = new Variable(attribute.getName());
+                    variable.setQueryContextStartIndex(selector.getQueryContextStartIndex());
+                    variable.setQueryContextEndIndex(selector.getQueryContextEndIndex());
+                    OutputAttribute outputAttribute = new OutputAttribute(variable);
+                    outputAttribute.setQueryContextStartIndex(selector.getQueryContextStartIndex());
+                    outputAttribute.setQueryContextEndIndex(selector.getQueryContextEndIndex());
+                    outputAttributes.add(outputAttribute);
                 }
             } else {
                 int position = 0;
@@ -178,7 +184,12 @@ public class SelectorParser {
                     if (metaPosition == SiddhiConstants.UNKNOWN_STATE || metaPosition == position) {
                         List<Attribute> attributeList = metaStreamEvent.getLastInputDefinition().getAttributeList();
                         for (Attribute attribute : attributeList) {
-                            OutputAttribute outputAttribute = new OutputAttribute(new Variable(attribute.getName()));
+                            Variable variable = new Variable(attribute.getName());
+                            variable.setQueryContextStartIndex(selector.getQueryContextStartIndex());
+                            variable.setQueryContextEndIndex(selector.getQueryContextEndIndex());
+                            OutputAttribute outputAttribute = new OutputAttribute(variable);
+                            outputAttribute.setQueryContextStartIndex(selector.getQueryContextStartIndex());
+                            outputAttribute.setQueryContextEndIndex(selector.getQueryContextEndIndex());
                             if (!outputAttributes.contains(outputAttribute)) {
                                 outputAttributes.add(outputAttribute);
                             } else {

@@ -232,7 +232,6 @@ public class PassThroughTestCase {
 
         };
         siddhiAppRuntime.addCallback("query2", queryCallback);
-        queryCallback.startProcessing();
 
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
 
@@ -243,7 +242,6 @@ public class PassThroughTestCase {
         SiddhiTestHelper.waitForEvents(10, eventArrived, 100);
         AssertJUnit.assertEquals(2, count);
         AssertJUnit.assertTrue(eventArrived.get());
-        queryCallback.stopProcessing();
 
         siddhiAppRuntime.shutdown();
     }

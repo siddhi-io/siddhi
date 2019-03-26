@@ -165,10 +165,8 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("EventList", eventList);
-                state.put("GroupByAggregateAttributeValueMap", groupByAggregateAttributeValueMap);
-            }
+            state.put("EventList", eventList);
+            state.put("GroupByAggregateAttributeValueMap", groupByAggregateAttributeValueMap);
             return state;
         }
 

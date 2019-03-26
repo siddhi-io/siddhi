@@ -124,9 +124,7 @@ public class PerSnapshotOutputRateLimiter
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            synchronized (this) {
-                state.put("EventChunk", eventChunk.getFirst());
-            }
+            state.put("EventChunk", eventChunk.getFirst());
             return state;
         }
 
