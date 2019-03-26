@@ -93,7 +93,7 @@
                         </goals>
                         <configuration>
                             <dataFile>${basedir}/target/jacoco.exec</dataFile>
-                            <outputDirectory>${basedir}/target/coverage-reports/</outputDirectory>
+                            <outputDirectory>${basedir}/target/coverage-reports/site/</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
