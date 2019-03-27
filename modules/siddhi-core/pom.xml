@@ -133,28 +133,24 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>prepare-it-test-agent</id>
+                        <id>pre-unit-test</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
-                            <append>true</append>
-                            <inclNoLocationClasses>true</inclNoLocationClasses>
-                            <propertyName>jacoco.agent.argLine</propertyName>
                             <destFile>${project.build.directory}/coverage-reports/jacoco.exec</destFile>
+                            <propertyName>jacoco.agent.argLine</propertyName>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>it-report</id>
-                        <phase>verify</phase>
+                        <id>post-unit-test</id>
+                        <phase>post-integration-test</phase>
                         <goals>
-                            <goal>report-aggregate</goal>
+                            <goal>report</goal>
                         </goals>
                         <configuration>
-                            <dataFileIncludes>
-                                <dataFileInclude>**/coverage-reports/jacoco.exec</dataFileInclude>
-                            </dataFileIncludes>
-                            <outputDirectory>${project.build.directory}/coverage-reports/site</outputDirectory>
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco.exec</dataFile>
+                            <outputDirectory>${project.build.directory}/coverage-reports/site/</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
