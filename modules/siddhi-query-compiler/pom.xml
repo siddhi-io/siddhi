@@ -103,6 +103,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>${jacoco.agent.argLine}</argLine>
+                    <environmentVariables>
+                        <testEnvironmentVariable>EnvironmentVariable</testEnvironmentVariable>
+                    </environmentVariables>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
@@ -124,13 +127,18 @@
                     </execution>
                     <execution>
                         <id>jacoco-site</id>
-                        <phase>post-integration-test</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
                         <configuration>
+                            <excludes>
+                                <exclude>**/SiddhiQLBaseVisitor.class</exclude>
+                                <exclude>**/SiddhiQLParser*</exclude>
+                                <exclude>**/SiddhiQLLexer*</exclude>
+                            </excludes>
                             <dataFile>${basedir}/target/jacoco.exec</dataFile>
-                            <outputDirectory>${basedir}/target/coverage-reports/site/</outputDirectory>
+                            <outputDirectory>${basedir}/target/coverage-reports/site</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

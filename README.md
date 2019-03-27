@@ -5,6 +5,7 @@ Siddhi
   [![GitHub (pre-)release](https://img.shields.io/github/release/siddhi-io/siddhi/all.svg)](https://github.com/siddhi-io/siddhi/releases)
   [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/releases)
   [![GitHub last commit](https://img.shields.io/github/last-commit/siddhi-io/siddhi.svg)](https://github.com/siddhi-io/siddhi/commits/master)
+  [![codecov](https://codecov.io/gh/siddhi-io/siddhi/branch/master/graph/badge.svg)](https://codecov.io/gh/siddhi-io/siddhi)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Siddhi is a **_Streaming_** and **_Complex Event Processing_** engine that listens to events from data streams, detects complex conditions described via a **Streaming
