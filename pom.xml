@@ -43,7 +43,7 @@
         <module>modules/siddhi-annotations</module>
         <module>modules/siddhi-doc-gen</module>
         <module>modules/siddhi-core/siddhi-core-doc-gen</module>
-        <!--<module>coverage-reports</module>-->
+        <module>coverage-reports</module>
     </modules>
 
     <dependencyManagement>
@@ -266,28 +266,6 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${org.jacoco.version}</version>
-                    <executions>
-                        <execution>
-                            <id>jacoco-initialize</id>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>jacoco-site</id>
-                            <phase>post-integration-test</phase>
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                            <configuration>
-                                <excludes>
-                                    <exclude>**/SiddhiQLBaseVisitor.class</exclude>
-                                    <exclude>**/SiddhiQLParser*</exclude>
-                                    <exclude>**/SiddhiQLLexer*</exclude>
-                                </excludes>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
