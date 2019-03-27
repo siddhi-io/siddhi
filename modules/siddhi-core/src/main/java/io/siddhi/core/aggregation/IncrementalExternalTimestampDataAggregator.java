@@ -22,7 +22,7 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
@@ -48,7 +48,7 @@ public class IncrementalExternalTimestampDataAggregator {
     private final List<ExpressionExecutor> baseExecutors;
     private final StateHolder valueStateHolder;
     private final StreamEvent resetEvent;
-    private StreamEventPool streamEventPool;
+    private StreamEventFactory streamEventFactory;
     private final ExpressionExecutor shouldUpdateTimestamp;
 
     public IncrementalExternalTimestampDataAggregator(List<ExpressionExecutor> baseExecutors,
@@ -57,7 +57,7 @@ public class IncrementalExternalTimestampDataAggregator {
                                                       SiddhiQueryContext siddhiQueryContext,
                                                       ExpressionExecutor shouldUpdateTimestamp) {
         this.baseExecutors = baseExecutors.subList(1, baseExecutors.size());
-        this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
         this.shouldUpdateTimestamp = shouldUpdateTimestamp;
         this.groupByKeyGenerator = groupByKeyGenerator;
         if (groupByKeyGenerator != null) {
@@ -65,7 +65,7 @@ public class IncrementalExternalTimestampDataAggregator {
         } else {
             this.valueStateHolder = new SingleSyncStateHolder(() -> new ValueState());
         }
-        this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventPool.borrowEvent());
+        this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventFactory.newInstance());
     }
 
     public ComplexEventChunk<StreamEvent> aggregateData(ComplexEventChunk<StreamEvent> retrievedData) {
@@ -129,7 +129,7 @@ public class IncrementalExternalTimestampDataAggregator {
         try {
             for (State aState : valueStoreMap.values()) {
                 ValueState state = (ValueState) aState;
-                StreamEvent streamEvent = streamEventPool.borrowEvent();
+                StreamEvent streamEvent = streamEventFactory.newInstance();
                 long timestamp = state.lastTimestamp;
                 streamEvent.setTimestamp(timestamp);
                 state.setValue(timestamp, 0);

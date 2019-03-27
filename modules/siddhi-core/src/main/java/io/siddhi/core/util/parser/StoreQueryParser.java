@@ -22,7 +22,7 @@ import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.state.MetaStateEvent;
-import io.siddhi.core.event.state.StateEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.state.populater.StateEventPopulatorFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent.EventType;
@@ -392,8 +392,8 @@ public class StoreQueryParser {
 
                 InsertStoreQueryRuntime insertStoreQueryRuntime =
                         new InsertStoreQueryRuntime(siddhiQueryContext.getName(), metaStreamEvent);
-                insertStoreQueryRuntime.setStateEventPool(
-                        new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
+                insertStoreQueryRuntime.setStateEventFactory(
+                        new StateEventFactory(matchingMetaInfoHolder.getMetaStateEvent()));
                 insertStoreQueryRuntime.setSelector(querySelector);
                 insertStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent()
                         .getOutputStreamDefinition().getAttributeList());
@@ -408,8 +408,8 @@ public class StoreQueryParser {
 
                 DeleteStoreQueryRuntime deleteStoreQueryRuntime =
                         new DeleteStoreQueryRuntime(siddhiQueryContext.getName(), metaStreamEvent);
-                deleteStoreQueryRuntime.setStateEventPool(
-                        new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
+                deleteStoreQueryRuntime.setStateEventFactory(
+                        new StateEventFactory(matchingMetaInfoHolder.getMetaStateEvent()));
                 deleteStoreQueryRuntime.setSelector(querySelector);
                 deleteStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent()
                         .getOutputStreamDefinition().getAttributeList());
@@ -424,8 +424,8 @@ public class StoreQueryParser {
 
                 UpdateStoreQueryRuntime updateStoreQueryRuntime =
                         new UpdateStoreQueryRuntime(siddhiQueryContext.getName(), metaStreamEvent);
-                updateStoreQueryRuntime.setStateEventPool(
-                        new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
+                updateStoreQueryRuntime.setStateEventFactory(
+                        new StateEventFactory(matchingMetaInfoHolder.getMetaStateEvent()));
                 updateStoreQueryRuntime.setSelector(querySelector);
                 updateStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent()
                         .getOutputStreamDefinition().getAttributeList());
@@ -440,8 +440,8 @@ public class StoreQueryParser {
 
                 UpdateOrInsertStoreQueryRuntime updateOrInsertIntoStoreQueryRuntime =
                         new UpdateOrInsertStoreQueryRuntime(siddhiQueryContext.getName(), metaStreamEvent);
-                updateOrInsertIntoStoreQueryRuntime.setStateEventPool(
-                        new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 5));
+                updateOrInsertIntoStoreQueryRuntime.setStateEventFactory(
+                        new StateEventFactory(matchingMetaInfoHolder.getMetaStateEvent()));
                 updateOrInsertIntoStoreQueryRuntime.setSelector(querySelector);
                 updateOrInsertIntoStoreQueryRuntime.setOutputAttributes(matchingMetaInfoHolder.getMetaStateEvent()
                         .getOutputStreamDefinition().getAttributeList());
@@ -485,7 +485,7 @@ public class StoreQueryParser {
         QueryParserHelper.updateVariablePosition(metaStreamInfoHolder.getMetaStateEvent(), variableExpressionExecutors);
         querySelector.setEventPopulator(
                 StateEventPopulatorFactory.constructEventPopulator(metaStreamInfoHolder.getMetaStateEvent()));
-        findStoreQueryRuntime.setStateEventPool(new StateEventPool(metaStreamInfoHolder.getMetaStateEvent(), 5));
+        findStoreQueryRuntime.setStateEventFactory(new StateEventFactory(metaStreamInfoHolder.getMetaStateEvent()));
         findStoreQueryRuntime.setSelector(querySelector);
         findStoreQueryRuntime.setOutputAttributes(metaStreamInfoHolder.getMetaStateEvent().
                 getOutputStreamDefinition().getAttributeList());

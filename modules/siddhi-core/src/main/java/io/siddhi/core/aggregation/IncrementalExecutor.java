@@ -24,7 +24,7 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
 import io.siddhi.core.table.Table;
@@ -52,7 +52,7 @@ public class IncrementalExecutor implements Executor {
     private TimePeriod.Duration duration;
     private Table table;
     private GroupByKeyGenerator groupByKeyGenerator;
-    private StreamEventPool streamEventPool;
+    private StreamEventFactory streamEventFactory;
     private Executor next;
     private Scheduler scheduler;
     private boolean isRoot;
@@ -69,13 +69,13 @@ public class IncrementalExecutor implements Executor {
         this.next = child;
         this.isRoot = isRoot;
         this.table = table;
-        this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
         this.isProcessingExecutor = false;
         this.groupByKeyGenerator = groupByKeyGenerator;
-        this.baseIncrementalValueStore = new BaseIncrementalValueStore(processExpressionExecutors, streamEventPool,
+        this.baseIncrementalValueStore = new BaseIncrementalValueStore(processExpressionExecutors, streamEventFactory,
                 siddhiQueryContext, aggregatorName, shouldUpdateTimestamp, -1, true, false);
-        this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventPool.borrowEvent());
+        this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventFactory.newInstance());
         setNextExecutor(child);
 
         this.stateHolder = siddhiQueryContext.generateStateHolder(
@@ -118,7 +118,7 @@ public class IncrementalExecutor implements Executor {
 
     private void sendTimerEvent(ExecutorState executorState) {
         if (getNextExecutor() != null) {
-            StreamEvent timerEvent = streamEventPool.borrowEvent();
+            StreamEvent timerEvent = streamEventFactory.newInstance();
             timerEvent.setType(ComplexEvent.Type.TIMER);
             timerEvent.setTimestamp(executorState.startTimeOfAggregates);
             ComplexEventChunk<StreamEvent> timerStreamEventChunk = new ComplexEventChunk<>(true);

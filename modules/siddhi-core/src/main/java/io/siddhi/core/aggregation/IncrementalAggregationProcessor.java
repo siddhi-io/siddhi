@@ -23,7 +23,7 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class IncrementalAggregationProcessor implements Processor {
     private final List<ExpressionExecutor> incomingExpressionExecutors;
-    private final StreamEventPool streamEventPool;
+    private final StreamEventFactory streamEventFactory;
     private final LatencyTracker latencyTrackerInsert;
     private final ThroughputTracker throughputTrackerInsert;
     private SiddhiAppContext siddhiAppContext;
@@ -57,7 +57,7 @@ public class IncrementalAggregationProcessor implements Processor {
         this.isFirstEventArrived = false;
         this.aggregationRuntime = aggregationRuntime;
         this.incomingExpressionExecutors = incomingExpressionExecutors;
-        this.streamEventPool = new StreamEventPool(processedMetaStreamEvent, 5);
+        this.streamEventFactory = new StreamEventFactory(processedMetaStreamEvent);
         this.latencyTrackerInsert = latencyTrackerInsert;
         this.throughputTrackerInsert = throughputTrackerInsert;
         this.siddhiAppContext = siddhiAppContext;
@@ -78,16 +78,16 @@ public class IncrementalAggregationProcessor implements Processor {
                     aggregationRuntime.recreateInMemoryData(true, false);
                     isFirstEventArrived = true;
                 }
-                StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+                StreamEvent newEvent = streamEventFactory.newInstance();
                 for (int i = 0; i < incomingExpressionExecutors.size(); i++) {
                     ExpressionExecutor expressionExecutor = incomingExpressionExecutors.get(i);
                     Object outputData = expressionExecutor.execute(complexEvent);
                     if (expressionExecutor instanceof IncrementalUnixTimeFunctionExecutor && outputData == null) {
                         throw new SiddhiAppRuntimeException("Cannot retrieve the timestamp of event");
                     }
-                    borrowedEvent.setOutputData(outputData, i);
+                    newEvent.setOutputData(outputData, i);
                 }
-                streamEventChunk.add(borrowedEvent);
+                streamEventChunk.add(newEvent);
                 noOfEvents++;
             }
             aggregationRuntime.processEvents(streamEventChunk);

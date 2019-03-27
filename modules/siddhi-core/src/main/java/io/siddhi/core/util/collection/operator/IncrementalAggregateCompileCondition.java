@@ -28,7 +28,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -49,9 +49,9 @@ import static io.siddhi.query.api.expression.Expression.Time.normalizeDuration;
  * based on the logical conditions defined herewith.
  */
 public class IncrementalAggregateCompileCondition implements CompiledCondition {
-    private final StreamEventPool streamEventPoolForTableMeta;
+    private final StreamEventFactory streamEventFactoryForTableMeta;
     private final StreamEventCloner tableEventCloner;
-    private final StreamEventPool streamEventPoolForAggregateMeta;
+    private final StreamEventFactory streamEventFactoryForAggregateMeta;
     private final StreamEventCloner aggregateEventCloner;
     private final List<Attribute> additionalAttributes;
     private Map<TimePeriod.Duration, CompiledCondition> withinTableCompiledConditions;
@@ -76,11 +76,11 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
         this.onCompiledCondition = onCompiledCondition;
         this.tableMetaStreamEvent = tableMetaStreamEvent;
 
-        this.streamEventPoolForTableMeta = new StreamEventPool(tableMetaStreamEvent, 10);
-        this.tableEventCloner = new StreamEventCloner(tableMetaStreamEvent, streamEventPoolForTableMeta);
+        this.streamEventFactoryForTableMeta = new StreamEventFactory(tableMetaStreamEvent);
+        this.tableEventCloner = new StreamEventCloner(tableMetaStreamEvent, streamEventFactoryForTableMeta);
 
-        this.streamEventPoolForAggregateMeta = new StreamEventPool(aggregateMetaSteamEvent, 10);
-        this.aggregateEventCloner = new StreamEventCloner(aggregateMetaSteamEvent, streamEventPoolForAggregateMeta);
+        this.streamEventFactoryForAggregateMeta = new StreamEventFactory(aggregateMetaSteamEvent);
+        this.aggregateEventCloner = new StreamEventCloner(aggregateMetaSteamEvent, streamEventFactoryForAggregateMeta);
         this.additionalAttributes = additionalAttributes;
         this.alteredMatchingMetaInfoHolder = alteredMatchingMetaInfoHolder;
         this.perExpressionExecutor = perExpressionExecutor;
@@ -189,12 +189,12 @@ public class IncrementalAggregateCompileCondition implements CompiledCondition {
             ComplexEventChunk<StreamEvent> complexEventChunkToHoldMatches,
             List<ExpressionExecutor> outputExpressionExecutors) {
         ComplexEventChunk<StreamEvent> aggregateSelectionComplexEventChunk = new ComplexEventChunk<>(true);
-        StreamEvent resetEvent = streamEventPoolForTableMeta.borrowEvent();
+        StreamEvent resetEvent = streamEventFactoryForTableMeta.newInstance();
         resetEvent.setType(ComplexEvent.Type.RESET);
 
         while (complexEventChunkToHoldMatches.hasNext()) {
             StreamEvent streamEvent = complexEventChunkToHoldMatches.next();
-            StreamEvent newStreamEvent = streamEventPoolForAggregateMeta.borrowEvent();
+            StreamEvent newStreamEvent = streamEventFactoryForAggregateMeta.newInstance();
             Object outputData[] = new Object[newStreamEvent.getOutputData().length];
             for (int i = 0; i < outputExpressionExecutors.size(); i++) {
                 outputData[i] = outputExpressionExecutors.get(i).execute(streamEvent);

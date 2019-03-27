@@ -23,7 +23,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
@@ -45,7 +45,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
     private final Object patternSyncObject;
     protected OutputRateLimiter outputRateLimiter;
     private MetaStreamEvent[] metaStreamEvents;
-    private StreamEventPool[] streamEventPools;
+    private StreamEventFactory[] streamEventFactorys;
     private StreamEventConverter[] streamEventConverters;
 
 
@@ -54,7 +54,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
         super(streamId, siddhiQueryContext);
         nextProcessors = new Processor[processCount];
         metaStreamEvents = new MetaStreamEvent[processCount];
-        streamEventPools = new StreamEventPool[processCount];
+        streamEventFactorys = new StreamEventFactory[processCount];
         streamEventConverters = new StreamEventConverter[processCount];
         eventSequence = new int[processCount];
         this.patternSyncObject = patternSyncObject;
@@ -67,7 +67,7 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
         return multiProcessReturn;
     }
 
-    private void process(int eventSequence, StreamEvent borrowedEvent) {
+    private void process(int eventSequence, StreamEvent newEvent) {
         if (lockWrapper != null) {
             lockWrapper.lock();
         }
@@ -76,12 +76,12 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
             if (latencyTracker != null) {
                 try {
                     latencyTracker.markIn();
-                    processAndClear(eventSequence, borrowedEvent);
+                    processAndClear(eventSequence, newEvent);
                 } finally {
                     latencyTracker.markOut();
                 }
             } else {
-                processAndClear(eventSequence, borrowedEvent);
+                processAndClear(eventSequence, newEvent);
             }
         } finally {
             if (lockWrapper != null) {
@@ -101,10 +101,10 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                     stabilizeStates();
                     for (int anEventSequence : eventSequence) {
                         StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
-                        StreamEventPool aStreamEventPool = streamEventPools[anEventSequence];
-                        StreamEvent borrowedEvent = aStreamEventPool.borrowEvent();
-                        aStreamEventConverter.convertComplexEvent(aComplexEvent, borrowedEvent);
-                        process(anEventSequence, borrowedEvent);
+                        StreamEventFactory aStreamEventFactory = streamEventFactorys[anEventSequence];
+                        StreamEvent newEvent = aStreamEventFactory.newInstance();
+                        aStreamEventConverter.convertComplexEvent(aComplexEvent, newEvent);
+                        process(anEventSequence, newEvent);
                         if (multiProcessReturn.get() != null &&
                                 multiProcessReturn.get().complexEventChunk != null) {
                             returnEventHolderList.add(multiProcessReturn.get());
@@ -133,10 +133,10 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                 stabilizeStates();
                 for (int anEventSequence : eventSequence) {
                     StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
-                    StreamEventPool aStreamEventPool = streamEventPools[anEventSequence];
-                    StreamEvent borrowedEvent = aStreamEventPool.borrowEvent();
-                    aStreamEventConverter.convertEvent(event, borrowedEvent);
-                    process(anEventSequence, borrowedEvent);
+                    StreamEventFactory aStreamEventFactory = streamEventFactorys[anEventSequence];
+                    StreamEvent newEvent = aStreamEventFactory.newInstance();
+                    aStreamEventConverter.convertEvent(event, newEvent);
+                    process(anEventSequence, newEvent);
                     if (multiProcessReturn.get() != null &&
                             multiProcessReturn.get().complexEventChunk != null) {
                         returnEventHolderList.add(multiProcessReturn.get());
@@ -162,10 +162,10 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                     stabilizeStates();
                     for (int anEventSequence : eventSequence) {
                         StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
-                        StreamEventPool aStreamEventPool = streamEventPools[anEventSequence];
-                        StreamEvent borrowedEvent = aStreamEventPool.borrowEvent();
-                        aStreamEventConverter.convertEvent(event, borrowedEvent);
-                        process(anEventSequence, borrowedEvent);
+                        StreamEventFactory aStreamEventFactory = streamEventFactorys[anEventSequence];
+                        StreamEvent newEvent = aStreamEventFactory.newInstance();
+                        aStreamEventConverter.convertEvent(event, newEvent);
+                        process(anEventSequence, newEvent);
                         if (multiProcessReturn.get() != null &&
                                 multiProcessReturn.get().complexEventChunk != null) {
                             returnEventHolderList.add(multiProcessReturn.get());
@@ -192,10 +192,10 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                     stabilizeStates();
                     for (int anEventSequence : eventSequence) {
                         StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
-                        StreamEventPool aStreamEventPool = streamEventPools[anEventSequence];
-                        StreamEvent borrowedEvent = aStreamEventPool.borrowEvent();
-                        aStreamEventConverter.convertEvent(event, borrowedEvent);
-                        process(anEventSequence, borrowedEvent);
+                        StreamEventFactory aStreamEventFactory = streamEventFactorys[anEventSequence];
+                        StreamEvent newEvent = aStreamEventFactory.newInstance();
+                        aStreamEventConverter.convertEvent(event, newEvent);
+                        process(anEventSequence, newEvent);
                         if (multiProcessReturn.get() != null &&
                                 multiProcessReturn.get().complexEventChunk != null) {
                             returnEventHolderList.add(multiProcessReturn.get());
@@ -221,10 +221,10 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                 stabilizeStates();
                 for (int anEventSequence : eventSequence) {
                     StreamEventConverter aStreamEventConverter = streamEventConverters[anEventSequence];
-                    StreamEventPool aStreamEventPool = streamEventPools[anEventSequence];
-                    StreamEvent borrowedEvent = aStreamEventPool.borrowEvent();
-                    aStreamEventConverter.convertData(timestamp, data, borrowedEvent);
-                    process(anEventSequence, borrowedEvent);
+                    StreamEventFactory aStreamEventFactory = streamEventFactorys[anEventSequence];
+                    StreamEvent newEvent = aStreamEventFactory.newInstance();
+                    aStreamEventConverter.convertData(timestamp, data, newEvent);
+                    process(anEventSequence, newEvent);
                     if (multiProcessReturn.get() != null &&
                             multiProcessReturn.get().complexEventChunk != null) {
                         returnEventHolderList.add(multiProcessReturn.get());
@@ -276,11 +276,11 @@ public class MultiProcessStreamReceiver extends ProcessStreamReceiver {
                 metaStreamEvents[0].getEventType() == MetaStreamEvent.EventType.WINDOW;
     }
 
-    public void setStreamEventPool(StreamEventPool streamEventPool) {
-        for (int i = 0, nextLength = streamEventPools.length; i < nextLength; i++) {
-            StreamEventPool eventPool = streamEventPools[i];
+    public void setStreamEventFactory(StreamEventFactory streamEventFactory) {
+        for (int i = 0, nextLength = streamEventFactorys.length; i < nextLength; i++) {
+            StreamEventFactory eventPool = streamEventFactorys[i];
             if (eventPool == null) {
-                streamEventPools[i] = streamEventPool;
+                streamEventFactorys[i] = streamEventFactory;
                 break;
             }
         }

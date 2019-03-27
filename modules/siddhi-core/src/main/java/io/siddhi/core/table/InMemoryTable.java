@@ -24,7 +24,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -63,7 +63,7 @@ public class InMemoryTable extends Table {
     private StateHolder<TableState> stateHolder;
 
     @Override
-    public void init(TableDefinition tableDefinition, StreamEventPool storeEventPool,
+    public void init(TableDefinition tableDefinition, StreamEventFactory storeEventPool,
                      StreamEventCloner storeEventCloner, ConfigReader configReader, SiddhiAppContext siddhiAppContext,
                      RecordTableHandler recordTableHandler) {
         this.tableDefinition = tableDefinition;

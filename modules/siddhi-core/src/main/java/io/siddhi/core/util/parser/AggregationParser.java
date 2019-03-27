@@ -28,7 +28,7 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
@@ -276,7 +276,7 @@ public class AggregationParser {
 
             Scheduler scheduler = SchedulerParser.parse(entryValveExecutor, siddhiQueryContext);
             scheduler.init(lockWrapper, aggregatorName);
-            scheduler.setStreamEventPool(new StreamEventPool(processedMetaStreamEvent, 10));
+            scheduler.setStreamEventFactory(new StreamEventFactory(processedMetaStreamEvent));
 
             QueryParserHelper.reduceMetaComplexEvent(incomingMetaStreamEvent);
             QueryParserHelper.reduceMetaComplexEvent(processedMetaStreamEvent);
@@ -315,7 +315,7 @@ public class AggregationParser {
                                 aggregationTables, siddhiQueryContext, aggregatorName, shouldUpdateTimestamp);
             }
             IncrementalDataPurging incrementalDataPurging = new IncrementalDataPurging();
-            incrementalDataPurging.init(aggregationDefinition, new StreamEventPool(processedMetaStreamEvent, 10)
+            incrementalDataPurging.init(aggregationDefinition, new StreamEventFactory(processedMetaStreamEvent)
                     , aggregationTables, isProcessingOnExternalTime, siddhiQueryContext);
 
             //Recreate in-memory data from tables

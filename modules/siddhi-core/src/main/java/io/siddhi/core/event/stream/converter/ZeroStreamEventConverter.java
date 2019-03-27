@@ -30,26 +30,25 @@ public class ZeroStreamEventConverter implements StreamEventConverter, Serializa
 
     private static final long serialVersionUID = 2223375413250580450L;
 
-    public void convertData(long timestamp, Object[] data, StreamEvent.Type type, StreamEvent borrowedEvent) {
-        System.arraycopy(data, 0, borrowedEvent.getOutputData(), 0, data.length);
-        borrowedEvent.setType(type);
-        borrowedEvent.setTimestamp(timestamp);
+    public void convertData(long timestamp, Object[] data, StreamEvent.Type type, StreamEvent newEvent) {
+        System.arraycopy(data, 0, newEvent.getOutputData(), 0, data.length);
+        newEvent.setType(type);
+        newEvent.setTimestamp(timestamp);
     }
 
-    public void convertEvent(Event event, StreamEvent borrowedEvent) {
-        convertData(event.getTimestamp(), event.getData(), event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent
-                        .Type.CURRENT,
-                borrowedEvent);
+    public void convertEvent(Event event, StreamEvent newEvent) {
+        convertData(event.getTimestamp(), event.getData(), event.isExpired() ? StreamEvent.Type.EXPIRED :
+                StreamEvent.Type.CURRENT, newEvent);
     }
 
-    public void convertComplexEvent(ComplexEvent complexEvent, StreamEvent borrowedEvent) {
+    public void convertComplexEvent(ComplexEvent complexEvent, StreamEvent newEvent) {
         convertData(complexEvent.getTimestamp(), complexEvent.getOutputData(), complexEvent.getType(),
-                borrowedEvent);
+                newEvent);
     }
 
     @Override
-    public void convertData(long timestamp, Object[] data, StreamEvent borrowedEvent) {
-        convertData(timestamp, data, StreamEvent.Type.CURRENT, borrowedEvent);
+    public void convertData(long timestamp, Object[] data, StreamEvent newEvent) {
+        convertData(timestamp, data, StreamEvent.Type.CURRENT, newEvent);
     }
 
 }

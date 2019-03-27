@@ -20,7 +20,7 @@ package io.siddhi.core.query.output.ratelimit.time;
 
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.Schedulable;
 import io.siddhi.core.util.Scheduler;
@@ -100,7 +100,7 @@ public class FirstPerTimeOutputRateLimiter
     @Override
     public void start() {
         scheduler = SchedulerParser.parse(this, siddhiQueryContext);
-        scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
+        scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
         scheduler.init(lockWrapper, siddhiQueryContext.getName());
         long currentTime = System.currentTimeMillis();
         scheduledTime = currentTime + value;

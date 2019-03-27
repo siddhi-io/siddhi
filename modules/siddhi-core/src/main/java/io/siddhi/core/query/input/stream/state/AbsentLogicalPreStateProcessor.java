@@ -133,7 +133,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                             state.getNewAndEveryStateEventList().isEmpty() &&
                             state.getPendingStateEventList().isEmpty()) {
 
-                        StateEvent stateEvent = stateEventPool.borrowEvent();
+                        StateEvent stateEvent = stateEventFactory.newInstance();
                         addState(stateEvent);
                     } else if (stateType == StateInputStream.Type.SEQUENCE &&
                             !state.getNewAndEveryStateEventList().isEmpty()) {
@@ -158,7 +158,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                             if (logicalType == LogicalStateElement.Type.OR && stateEvent.getStreamEvent
                                     (partnerStatePreProcessor.getStateId()) == null) {
                                 // OR Partner not received
-                                stateEvent.addEvent(stateId, streamEventPool.borrowEvent());
+                                stateEvent.addEvent(stateId, streamEventFactory.newInstance());
                                 retEventChunk.add(stateEvent);
                             } else if (logicalType == LogicalStateElement.Type.AND && stateEvent.getStreamEvent
                                     (partnerStatePreProcessor.getStateId()) != null) {
@@ -168,7 +168,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
                                     (partnerStatePreProcessor.getStateId()) == null) {
                                 // AND partner didn't receive
                                 // Let the partner to process or not
-                                stateEvent.addEvent(stateId, streamEventPool.borrowEvent());
+                                stateEvent.addEvent(stateId, streamEventFactory.newInstance());
                             }
                         }
                     }

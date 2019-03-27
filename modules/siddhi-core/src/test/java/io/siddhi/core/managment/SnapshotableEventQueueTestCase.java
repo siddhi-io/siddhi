@@ -22,7 +22,7 @@ import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.Operation;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.util.snapshot.state.Snapshot;
@@ -84,7 +84,7 @@ public class SnapshotableEventQueueTestCase {
         metaStreamEvent.addOutputData(new Attribute("volume", Attribute.Type.LONG));
 
         StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent,
-                new StreamEventPool(metaStreamEvent, 5));
+                new StreamEventFactory(metaStreamEvent));
 
         SnapshotableStreamEventQueue snapshotableStreamEventQueue =
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
@@ -164,7 +164,7 @@ public class SnapshotableEventQueueTestCase {
         metaStreamEvent.addOutputData(new Attribute("volume", Attribute.Type.LONG));
 
         StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent,
-                new StreamEventPool(metaStreamEvent, 5));
+                new StreamEventFactory(metaStreamEvent));
 
         SnapshotableStreamEventQueue snapshotableStreamEventQueue =
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
@@ -223,7 +223,7 @@ public class SnapshotableEventQueueTestCase {
         metaStreamEvent.addOutputData(new Attribute("volume", Attribute.Type.LONG));
 
         StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent,
-                new StreamEventPool(metaStreamEvent, 5));
+                new StreamEventFactory(metaStreamEvent));
         SnapshotableStreamEventQueue snapshotableStreamEventQueue =
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
         StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getBeforeWindowData().size(),
@@ -284,7 +284,7 @@ public class SnapshotableEventQueueTestCase {
         metaStreamEvent.addOutputData(new Attribute("volume", Attribute.Type.LONG));
 
         StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent,
-                new StreamEventPool(metaStreamEvent, 5));
+                new StreamEventFactory(metaStreamEvent));
         SnapshotableStreamEventQueue snapshotableStreamEventQueue =
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
         StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getBeforeWindowData().size(),
@@ -347,7 +347,7 @@ public class SnapshotableEventQueueTestCase {
         metaStreamEvent.addOutputData(new Attribute("volume", Attribute.Type.LONG));
 
         StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent,
-                new StreamEventPool(metaStreamEvent, 5));
+                new StreamEventFactory(metaStreamEvent));
         SnapshotableStreamEventQueue snapshotableStreamEventQueue =
                 new SnapshotableStreamEventQueue(new StreamEventClonerHolder(streamEventCloner));
         StreamEvent streamEvent = new StreamEvent(metaStreamEvent.getBeforeWindowData().size(),

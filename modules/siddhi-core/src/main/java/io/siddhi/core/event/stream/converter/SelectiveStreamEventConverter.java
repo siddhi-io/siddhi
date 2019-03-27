@@ -36,44 +36,44 @@ public class SelectiveStreamEventConverter implements StreamEventConverter, Seri
         this.conversionMappings = conversionMappings;
     }
 
-    public void convertData(long timestamp, Object[] data, StreamEvent.Type type, StreamEvent borrowedEvent) {
+    public void convertData(long timestamp, Object[] data, StreamEvent.Type type, StreamEvent newEvent) {
         for (ConversionMapping conversionMapping : conversionMappings) {
             int[] position = conversionMapping.getToPosition();
             int fromPosition = conversionMapping.getFromPosition();
             switch (position[0]) {
                 case 0:
-                    borrowedEvent.setBeforeWindowData(data[fromPosition], position[1]);
+                    newEvent.setBeforeWindowData(data[fromPosition], position[1]);
                     break;
                 case 1:
-                    borrowedEvent.setOnAfterWindowData(data[fromPosition], position[1]);
+                    newEvent.setOnAfterWindowData(data[fromPosition], position[1]);
                     break;
                 case 2:
-                    borrowedEvent.setOutputData(data[fromPosition], position[1]);
+                    newEvent.setOutputData(data[fromPosition], position[1]);
                     break;
                 default:
                     //can not happen
             }
         }
 
-        borrowedEvent.setType(type);
-        borrowedEvent.setTimestamp(timestamp);
+        newEvent.setType(type);
+        newEvent.setTimestamp(timestamp);
     }
 
 
-    public void convertEvent(Event event, StreamEvent borrowedEvent) {
+    public void convertEvent(Event event, StreamEvent newEvent) {
         convertData(event.getTimestamp(), event.getData(), event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent
                         .Type.CURRENT,
-                borrowedEvent);
+                newEvent);
     }
 
-    public void convertComplexEvent(ComplexEvent complexEvent, StreamEvent borrowedEvent) {
+    public void convertComplexEvent(ComplexEvent complexEvent, StreamEvent newEvent) {
         convertData(complexEvent.getTimestamp(), complexEvent.getOutputData(), complexEvent.getType(),
-                borrowedEvent);
+                newEvent);
     }
 
     @Override
-    public void convertData(long timeStamp, Object[] data, StreamEvent borrowedEvent) {
-        convertData(timeStamp, data, StreamEvent.Type.CURRENT, borrowedEvent);
+    public void convertData(long timeStamp, Object[] data, StreamEvent newEvent) {
+        convertData(timeStamp, data, StreamEvent.Type.CURRENT, newEvent);
     }
 
 }

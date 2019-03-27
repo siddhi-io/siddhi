@@ -95,7 +95,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (records != null) {
             while (records.hasNext()) {
                 Object[] record = records.next();
-                StreamEvent streamEvent = storeEventPool.borrowEvent();
+                StreamEvent streamEvent = storeEventPool.newInstance();
                 streamEvent.setOutputData(new Object[outputAttributes.length]);
                 System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
                 streamEventComplexEventChunk.add(streamEvent);

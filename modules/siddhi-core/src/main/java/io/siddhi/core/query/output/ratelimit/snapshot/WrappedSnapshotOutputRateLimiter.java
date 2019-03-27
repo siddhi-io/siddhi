@@ -23,10 +23,10 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEventCloner;
-import io.siddhi.core.event.state.StateEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregatorExecutor;
 import io.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
@@ -116,13 +116,13 @@ public class WrappedSnapshotOutputRateLimiter<S extends State> extends OutputRat
 
 
         if (metaComplexEvent instanceof MetaStateEvent) {
-            StateEventPool stateEventPool = new StateEventPool((MetaStateEvent) metaComplexEvent, 5);
+            StateEventFactory stateEventFactory = new StateEventFactory((MetaStateEvent) metaComplexEvent);
             outputRateLimiter.setStateEventCloner(new StateEventCloner((MetaStateEvent) metaComplexEvent,
-                    stateEventPool));
+                    stateEventFactory));
         } else {
-            StreamEventPool streamEventPool = new StreamEventPool((MetaStreamEvent) metaComplexEvent, 5);
+            StreamEventFactory streamEventFactory = new StreamEventFactory((MetaStreamEvent) metaComplexEvent);
             outputRateLimiter.setStreamEventCloner(new StreamEventCloner((MetaStreamEvent) metaComplexEvent,
-                    streamEventPool));
+                    streamEventFactory));
         }
 
     }

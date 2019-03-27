@@ -24,7 +24,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -96,9 +96,9 @@ public class Window implements FindableProcessor, MemoryCalculable {
      */
     private WindowProcessor internalWindowProcessor;
     /**
-     * StreamEventPool to create new empty StreamEvent.
+     * StreamEventFactory to create new empty StreamEvent.
      */
-    private StreamEventPool streamEventPool;
+    private StreamEventFactory streamEventFactory;
 
     /**
      * window operation latency and throughput trackers
@@ -156,8 +156,8 @@ public class Window implements FindableProcessor, MemoryCalculable {
             metaStreamEvent.addOutputData(attribute);
         }
 
-        this.streamEventPool = new StreamEventPool(metaStreamEvent, 5);
-        StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent, this.streamEventPool);
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
+        StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent, this.streamEventFactory);
         OutputStream.OutputEventType outputEventType = windowDefinition.getOutputEventType();
         boolean outputExpectsExpiredEvents = outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS;
 
@@ -174,7 +174,7 @@ public class Window implements FindableProcessor, MemoryCalculable {
             entryValveProcessor = new EntryValveProcessor(this.siddhiAppContext);
             Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiQueryContext);
             scheduler.init(this.lockWrapper, windowName);
-            scheduler.setStreamEventPool(streamEventPool);
+            scheduler.setStreamEventFactory(streamEventFactory);
             ((SchedulingProcessor) internalWindowProcessor).setScheduler(scheduler);
         }
         if (entryValveProcessor != null) {
@@ -220,14 +220,14 @@ public class Window implements FindableProcessor, MemoryCalculable {
 
             // Convert all events to StreamEvent because StateEvents can be passed if directly received from a join
             ComplexEvent complexEvents = complexEventChunk.getFirst();
-            StreamEvent firstEvent = streamEventPool.borrowEvent();
+            StreamEvent firstEvent = streamEventFactory.newInstance();
             eventConverter.convertComplexEvent(complexEvents, firstEvent);
             StreamEvent currentEvent = firstEvent;
             complexEvents = complexEvents.getNext();
             int numberOfEvents = 0;
             while (complexEvents != null) {
                 numberOfEvents++;
-                StreamEvent nextEvent = streamEventPool.borrowEvent();
+                StreamEvent nextEvent = streamEventFactory.newInstance();
                 eventConverter.convertComplexEvent(complexEvents, nextEvent);
                 currentEvent.setNext(nextEvent);
                 currentEvent = nextEvent;

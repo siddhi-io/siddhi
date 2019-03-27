@@ -24,7 +24,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import io.siddhi.core.query.input.stream.state.PreStateProcessor;
@@ -51,7 +51,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     protected boolean batchProcessingAllowed;
     private StreamEventConverter streamEventConverter;
     private MetaStreamEvent metaStreamEvent;
-    private StreamEventPool streamEventPool;
+    private StreamEventFactory streamEventFactory;
     private SiddhiDebugger siddhiDebugger;
 
     public ProcessStreamReceiver(String streamId,
@@ -98,12 +98,12 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
             siddhiDebugger.checkBreakPoint(siddhiQueryContext.getName(),
                     SiddhiDebugger.QueryTerminal.IN, complexEvents);
         }
-        StreamEvent firstEvent = streamEventPool.borrowEvent();
+        StreamEvent firstEvent = streamEventFactory.newInstance();
         streamEventConverter.convertComplexEvent(complexEvents, firstEvent);
         StreamEvent currentEvent = firstEvent;
         complexEvents = complexEvents.getNext();
         while (complexEvents != null) {
-            StreamEvent nextEvent = streamEventPool.borrowEvent();
+            StreamEvent nextEvent = streamEventFactory.newInstance();
             streamEventConverter.convertComplexEvent(complexEvents, nextEvent);
             currentEvent.setNext(nextEvent);
             currentEvent = nextEvent;
@@ -115,23 +115,23 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
     @Override
     public void receive(Event event) {
         if (event != null) {
-            StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-            streamEventConverter.convertEvent(event, borrowedEvent);
+            StreamEvent newEvent = streamEventFactory.newInstance();
+            streamEventConverter.convertEvent(event, newEvent);
             if (siddhiDebugger != null) {
                 siddhiDebugger.checkBreakPoint(siddhiQueryContext.getName(),
-                        SiddhiDebugger.QueryTerminal.IN, borrowedEvent);
+                        SiddhiDebugger.QueryTerminal.IN, newEvent);
             }
-            process(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, this.batchProcessingAllowed));
+            process(new ComplexEventChunk<StreamEvent>(newEvent, newEvent, this.batchProcessingAllowed));
         }
     }
 
     @Override
     public void receive(Event[] events) {
-        StreamEvent firstEvent = streamEventPool.borrowEvent();
+        StreamEvent firstEvent = streamEventFactory.newInstance();
         streamEventConverter.convertEvent(events[0], firstEvent);
         StreamEvent currentEvent = firstEvent;
         for (int i = 1, eventsLength = events.length; i < eventsLength; i++) {
-            StreamEvent nextEvent = streamEventPool.borrowEvent();
+            StreamEvent nextEvent = streamEventFactory.newInstance();
             streamEventConverter.convertEvent(events[i], nextEvent);
             currentEvent.setNext(nextEvent);
             currentEvent = nextEvent;
@@ -147,7 +147,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         StreamEvent firstEvent = null;
         StreamEvent currentEvent = null;
         for (Event event : events) {
-            StreamEvent nextEvent = streamEventPool.borrowEvent();
+            StreamEvent nextEvent = streamEventFactory.newInstance();
             streamEventConverter.convertEvent(event, nextEvent);
             if (firstEvent == null) {
                 firstEvent = nextEvent;
@@ -165,14 +165,14 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
 
     @Override
     public void receive(long timestamp, Object[] data) {
-        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-        streamEventConverter.convertData(timestamp, data, borrowedEvent);
+        StreamEvent newEvent = streamEventFactory.newInstance();
+        streamEventConverter.convertData(timestamp, data, newEvent);
         // Send to debugger
         if (siddhiDebugger != null) {
             siddhiDebugger.checkBreakPoint(siddhiQueryContext.getName(),
-                    SiddhiDebugger.QueryTerminal.IN, borrowedEvent);
+                    SiddhiDebugger.QueryTerminal.IN, newEvent);
         }
-        process(new ComplexEventChunk<StreamEvent>(borrowedEvent, borrowedEvent, this.batchProcessingAllowed));
+        process(new ComplexEventChunk<StreamEvent>(newEvent, newEvent, this.batchProcessingAllowed));
     }
 
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {
@@ -197,8 +197,8 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         this.next = next;
     }
 
-    public void setStreamEventPool(StreamEventPool streamEventPool) {
-        this.streamEventPool = streamEventPool;
+    public void setStreamEventFactory(StreamEventFactory streamEventFactory) {
+        this.streamEventFactory = streamEventFactory;
     }
 
     public void setLockWrapper(LockWrapper lockWrapper) {

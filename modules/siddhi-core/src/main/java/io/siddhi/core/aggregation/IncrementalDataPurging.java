@@ -24,7 +24,7 @@ import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.DataPurgingException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -66,7 +66,7 @@ public class IncrementalDataPurging implements Runnable {
     private long purgeExecutionInterval = Expression.Time.minute(15).value();
     private boolean purgingEnabled = true;
     private Map<TimePeriod.Duration, Long> retentionPeriods = new EnumMap<>(TimePeriod.Duration.class);
-    private StreamEventPool streamEventPool;
+    private StreamEventFactory streamEventFactory;
     private Map<TimePeriod.Duration, Table> aggregationTables;
     private SiddhiQueryContext siddhiQueryContext;
     private ScheduledFuture scheduledPurgingTaskStatus;
@@ -80,13 +80,13 @@ public class IncrementalDataPurging implements Runnable {
     private Map<String, Table> tableMap = new HashMap<>();
     private AggregationDefinition aggregationDefinition;
 
-    public void init(AggregationDefinition aggregationDefinition, StreamEventPool streamEventPool,
+    public void init(AggregationDefinition aggregationDefinition, StreamEventFactory streamEventFactory,
                      Map<TimePeriod.Duration, Table> aggregationTables, Boolean isProcessingOnExternalTime,
                      SiddhiQueryContext siddhiQueryContext) {
         this.siddhiQueryContext = siddhiQueryContext;
         this.aggregationDefinition = aggregationDefinition;
         List<Annotation> annotations = aggregationDefinition.getAnnotations();
-        this.streamEventPool = streamEventPool;
+        this.streamEventFactory = streamEventFactory;
         this.aggregationTables = aggregationTables;
         if (isProcessingOnExternalTime) {
             purgingTimestampField = EXTERNAL_AGG_TIMESTAMP_FIELD;
@@ -296,7 +296,7 @@ public class IncrementalDataPurging implements Runnable {
      * creating stream event method
      **/
     private StateEvent createStreamEvent(Object[] values, Long timestamp) {
-        StreamEvent streamEvent = streamEventPool.borrowEvent();
+        StreamEvent streamEvent = streamEventFactory.newInstance();
         streamEvent.setTimestamp(timestamp);
         streamEvent.setOutputData(values);
         StateEvent stateEvent = new StateEvent(2, 1);

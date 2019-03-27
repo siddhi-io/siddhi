@@ -21,7 +21,7 @@ package io.siddhi.core.query.output.ratelimit.snapshot;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.snapshot.state.State;
@@ -100,7 +100,7 @@ public class AllAggregationPerSnapshotOutputRateLimiter
     @Override
     public void start() {
         scheduler = SchedulerParser.parse(this, siddhiQueryContext);
-        scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
+        scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
         scheduler.init(lockWrapper, siddhiQueryContext.getName());
         long currentTime = System.currentTimeMillis();
         scheduledTime = currentTime + value;

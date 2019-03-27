@@ -26,7 +26,7 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.FaultStreamEventConverter;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputProcessor;
@@ -93,11 +93,9 @@ public class StreamJunction implements EventBufferHolder {
         this.faultStreamJunction = faultStreamJunction;
         if (faultStreamJunction != null) {
             StreamDefinition faultStreamDefinition = faultStreamJunction.getStreamDefinition();
-            StreamEventPool faultStreamEventPool = new StreamEventPool(0, 0,
-                    faultStreamDefinition.getAttributeList().size(), 5);
-            faultStreamEventPool.borrowEvent();
-            faultStreamEventConverter = new FaultStreamEventConverter(faultStreamEventPool);
-
+            StreamEventFactory faultStreamEventFactory = new StreamEventFactory(0, 0,
+                    faultStreamDefinition.getAttributeList().size());
+            faultStreamEventConverter = new FaultStreamEventConverter(faultStreamEventFactory);
         }
         try {
             Annotation asyncAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ASYNC,

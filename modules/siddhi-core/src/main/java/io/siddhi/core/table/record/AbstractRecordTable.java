@@ -24,7 +24,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -54,11 +54,11 @@ public abstract class AbstractRecordTable extends Table {
 
     private static final Logger log = Logger.getLogger(AbstractRecordTable.class);
 
-    protected StreamEventPool storeEventPool;
+    protected StreamEventFactory storeEventPool;
     protected RecordTableHandler recordTableHandler;
 
     @Override
-    public void init(TableDefinition tableDefinition, StreamEventPool storeEventPool,
+    public void init(TableDefinition tableDefinition, StreamEventFactory storeEventPool,
                      StreamEventCloner storeEventCloner, ConfigReader configReader, SiddhiAppContext
                              siddhiAppContext, RecordTableHandler recordTableHandler) {
         if (recordTableHandler != null) {
@@ -132,7 +132,7 @@ public abstract class AbstractRecordTable extends Table {
         if (records != null) {
             while (records.hasNext()) {
                 Object[] record = records.next();
-                StreamEvent streamEvent = storeEventPool.borrowEvent();
+                StreamEvent streamEvent = storeEventPool.newInstance();
                 System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
                 streamEventComplexEventChunk.add(streamEvent);
             }

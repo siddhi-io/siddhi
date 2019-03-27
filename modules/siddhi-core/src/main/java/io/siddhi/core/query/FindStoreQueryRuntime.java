@@ -133,7 +133,7 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
                 metaStreamEvent.getOnAfterWindowData().size(), metaStreamEvent.getOutputData().size());
         streamEvent.setType(ComplexEvent.Type.RESET);
 
-        StateEvent stateEvent = stateEventPool.borrowEvent();
+        StateEvent stateEvent = stateEventFactory.newInstance();
         if (eventType == MetaStreamEvent.EventType.AGGREGATE) {
             stateEvent.addEvent(1, streamEvent);
         } else {
@@ -154,7 +154,7 @@ public class FindStoreQueryRuntime extends StoreQueryRuntime {
             streamEvents = streamEvents.getNext();
             streamEvent.setNext(null);
 
-            StateEvent stateEvent = stateEventPool.borrowEvent();
+            StateEvent stateEvent = stateEventFactory.newInstance();
             if (eventType == MetaStreamEvent.EventType.AGGREGATE) {
                 stateEvent.addEvent(1, streamEvent);
             } else {

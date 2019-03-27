@@ -21,7 +21,7 @@ package io.siddhi.core.util.parser.helper;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.function.Script;
 import io.siddhi.core.stream.StreamJunction;
@@ -168,9 +168,9 @@ public class DefinitionParserHelper {
                 tableMetaStreamEvent.addOutputData(attribute);
             }
 
-            StreamEventPool tableStreamEventPool = new StreamEventPool(tableMetaStreamEvent, 10);
+            StreamEventFactory tableStreamEventFactory = new StreamEventFactory(tableMetaStreamEvent);
             StreamEventCloner tableStreamEventCloner = new StreamEventCloner(tableMetaStreamEvent,
-                    tableStreamEventPool);
+                    tableStreamEventFactory);
 
             Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_STORE,
                     tableDefinition.getAnnotations());
@@ -209,7 +209,7 @@ public class DefinitionParserHelper {
             } else {
                 table = new InMemoryTable();
             }
-            table.initTable(tableDefinition, tableStreamEventPool, tableStreamEventCloner, configReader,
+            table.initTable(tableDefinition, tableStreamEventFactory, tableStreamEventCloner, configReader,
                     siddhiAppContext, recordTableHandler);
             if (recordTableHandler != null) {
                 recordTableHandlerManager.registerRecordTableHandler(recordTableHandler.getId(),

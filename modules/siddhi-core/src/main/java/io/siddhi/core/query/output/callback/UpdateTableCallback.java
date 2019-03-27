@@ -21,8 +21,8 @@ package io.siddhi.core.query.output.callback;
 import io.siddhi.core.debugger.SiddhiDebugger;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
-import io.siddhi.core.event.state.StateEventPool;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.table.CompiledUpdateSet;
 import io.siddhi.core.table.Table;
@@ -39,13 +39,15 @@ public class UpdateTableCallback extends OutputCallback {
     private CompiledCondition compiledCondition;
     private CompiledUpdateSet compiledUpdateSet;
     private boolean convertToStreamEvent;
-    private StateEventPool stateEventPool;
-    private StreamEventPool streamEventPool;
+    private StateEventFactory stateEventFactory;
+    private StreamEventFactory streamEventFactory;
     private StreamEventConverter streamEventConverter;
 
-    public UpdateTableCallback(Table table, CompiledCondition compiledCondition, CompiledUpdateSet compiledUpdateSet,
-                               int matchingStreamIndex, boolean convertToStreamEvent, StateEventPool stateEventPool,
-                               StreamEventPool streamEventPool, StreamEventConverter streamEventConverter,
+    public UpdateTableCallback(Table table, CompiledCondition compiledCondition,
+                               CompiledUpdateSet compiledUpdateSet,
+                               int matchingStreamIndex, boolean convertToStreamEvent,
+                               StateEventFactory stateEventFactory, StreamEventFactory streamEventFactory,
+                               StreamEventConverter streamEventConverter,
                                String queryName) {
         super(queryName);
         this.table = table;
@@ -53,8 +55,8 @@ public class UpdateTableCallback extends OutputCallback {
         this.compiledUpdateSet = compiledUpdateSet;
         this.matchingStreamIndex = matchingStreamIndex;
         this.convertToStreamEvent = convertToStreamEvent;
-        this.stateEventPool = stateEventPool;
-        this.streamEventPool = streamEventPool;
+        this.stateEventFactory = stateEventFactory;
+        this.streamEventFactory = streamEventFactory;
         this.streamEventConverter = streamEventConverter;
     }
 
@@ -66,8 +68,9 @@ public class UpdateTableCallback extends OutputCallback {
         }
         updatingEventChunk.reset();
         if (updatingEventChunk.hasNext()) {
-            ComplexEventChunk<StateEvent> updatingStateEventChunk = constructMatchingStateEventChunk(updatingEventChunk,
-                    convertToStreamEvent, stateEventPool, matchingStreamIndex, streamEventPool, streamEventConverter);
+            ComplexEventChunk<StateEvent> updatingStateEventChunk = constructMatchingStateEventChunk(
+                    updatingEventChunk, convertToStreamEvent, stateEventFactory, matchingStreamIndex,
+                    streamEventFactory, streamEventConverter);
             table.updateEvents(updatingStateEventChunk, compiledCondition, compiledUpdateSet, noOfEvents);
         }
     }

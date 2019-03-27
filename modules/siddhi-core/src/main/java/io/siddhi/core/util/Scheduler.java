@@ -23,7 +23,7 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
@@ -53,7 +53,7 @@ public class Scheduler {
     private SiddhiQueryContext siddhiQueryContext;
     private LockWrapper lockWrapper;
     private ScheduledExecutorService scheduledExecutorService;
-    private StreamEventPool streamEventPool;
+    private StreamEventFactory streamEventFactory;
     private LatencyTracker latencyTracker;
     private StateHolder<SchedulerState> stateHolder;
 
@@ -149,9 +149,8 @@ public class Scheduler {
     }
 
 
-    public void setStreamEventPool(StreamEventPool streamEventPool) {
-        this.streamEventPool = streamEventPool;
-//        streamEventChunk = new ConversionStreamEventChunk((StreamEventConverter) null, streamEventPool);
+    public void setStreamEventFactory(StreamEventFactory streamEventFactory) {
+        this.streamEventFactory = streamEventFactory;
     }
 
     public void setLatencyTracker(LatencyTracker latencyTracker) {
@@ -168,7 +167,7 @@ public class Scheduler {
         long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
         while (toNotifyTime != null && toNotifyTime - currentTime <= 0) {
             state.toNotifyQueue.poll();
-            StreamEvent timerEvent = streamEventPool.borrowEvent();
+            StreamEvent timerEvent = streamEventFactory.newInstance();
             timerEvent.setType(StreamEvent.Type.TIMER);
             timerEvent.setTimestamp(toNotifyTime);
             if (lockWrapper != null) {

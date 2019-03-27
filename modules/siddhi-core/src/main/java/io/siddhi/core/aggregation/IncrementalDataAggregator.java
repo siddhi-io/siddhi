@@ -22,7 +22,7 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
@@ -54,7 +54,7 @@ public class IncrementalDataAggregator {
     private final StreamEvent resetEvent;
     private final long oldestEventTimestamp;
     private ExpressionExecutor shouldUpdateTimestamp;
-    private final StreamEventPool streamEventPool;
+    private final StreamEventFactory streamEventFactory;
 
     public IncrementalDataAggregator(List<TimePeriod.Duration> incrementalDurations,
                                      TimePeriod.Duration durationToAggregate, long oldestEventTimestamp,
@@ -66,13 +66,13 @@ public class IncrementalDataAggregator {
         this.durationToAggregate = durationToAggregate;
         this.oldestEventTimestamp = oldestEventTimestamp;
         this.baseExecutorsForFind = baseExecutorsForFind;
-        streamEventPool = new StreamEventPool(metaStreamEvent, 10);
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
         if (groupBy) {
             this.valueStateHolder = new PartitionSyncStateHolder(() -> new ValueState());
         } else {
             this.valueStateHolder = new SingleSyncStateHolder(() -> new ValueState());
         }
-        this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventPool.borrowEvent());
+        this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventFactory.newInstance());
         this.shouldUpdateTimestamp = shouldUpdateTimestamp;
     }
 
@@ -142,7 +142,7 @@ public class IncrementalDataAggregator {
         try {
             for (State aState : valueStoreMap.values()) {
                 ValueState state = (ValueState) aState;
-                StreamEvent streamEvent = streamEventPool.borrowEvent();
+                StreamEvent streamEvent = streamEventFactory.newInstance();
                 long timestamp = state.lastTimestamp;
                 streamEvent.setTimestamp(timestamp);
                 state.setValue(timestamp, 0);

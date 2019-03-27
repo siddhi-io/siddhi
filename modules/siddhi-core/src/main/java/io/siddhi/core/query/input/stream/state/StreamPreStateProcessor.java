@@ -21,10 +21,10 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.state.StateEventCloner;
-import io.siddhi.core.event.state.StateEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.snapshot.state.State;
@@ -55,10 +55,10 @@ public class StreamPreStateProcessor implements PreStateProcessor {
 
     protected ReentrantLock lock = new ReentrantLock();
 
-    protected StateEventPool stateEventPool;
+    protected StateEventFactory stateEventFactory;
     protected StreamEventCloner streamEventCloner;
     protected StateEventCloner stateEventCloner;
-    protected StreamEventPool streamEventPool;
+    protected StreamEventFactory streamEventFactory;
     protected SiddhiQueryContext siddhiQueryContext;
     protected StateHolder<StreamPreState> stateHolder;
 
@@ -161,7 +161,7 @@ public class StreamPreStateProcessor implements PreStateProcessor {
                             instanceof AbsentPreStateProcessor))) {
                 // For 'every' sequence, the 'thisStatePostProcessor.nextEveryStatePreProcessor != null'
                 // check is not enough
-                StateEvent stateEvent = stateEventPool.borrowEvent();
+                StateEvent stateEvent = stateEventFactory.newInstance();
                 addState(stateEvent);
                 state.initialized = true;
             }
@@ -241,12 +241,12 @@ public class StreamPreStateProcessor implements PreStateProcessor {
         this.isStartState = isStartState;
     }
 
-    public void setStateEventPool(StateEventPool stateEventPool) {
-        this.stateEventPool = stateEventPool;
+    public void setStateEventFactory(StateEventFactory stateEventFactory) {
+        this.stateEventFactory = stateEventFactory;
     }
 
-    public void setStreamEventPool(StreamEventPool streamEventPool) {
-        this.streamEventPool = streamEventPool;
+    public void setStreamEventFactory(StreamEventFactory streamEventFactory) {
+        this.streamEventFactory = streamEventFactory;
     }
 
     public void setStreamEventCloner(StreamEventCloner streamEventCloner) {
@@ -381,20 +381,6 @@ public class StreamPreStateProcessor implements PreStateProcessor {
         private volatile boolean stateChanged = false;
         private boolean initialized;
         private boolean started;
-
-//        public StreamPreState() {
-//            if (initAtStartup && isStartState &&
-//                    (!initialized || thisStatePostProcessor.nextEveryStatePreProcessor != null ||
-//                            (stateType == StateInputStream.Type.SEQUENCE &&
-//                                    thisStatePostProcessor.nextStatePreProcessor instanceof
-//                                                      AbsentPreStateProcessor))) {
-//                // For 'every' sequence, the 'thisStatePostProcessor.nextEveryStatePreProcessor != null'
-//                // check is not enough
-//                StateEvent stateEvent = stateEventPool.borrowEvent();
-//                addState(stateEvent, this);
-//                initialized = true;
-//            }
-//        }
 
         @Override
         public boolean canDestroy() {

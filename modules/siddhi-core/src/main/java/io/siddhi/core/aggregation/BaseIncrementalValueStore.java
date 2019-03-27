@@ -21,7 +21,7 @@ package io.siddhi.core.aggregation;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.util.snapshot.state.PartitionSyncStateHolder;
@@ -41,17 +41,17 @@ public class BaseIncrementalValueStore {
     private StateHolder<ValueState> valueStateHolder;
     private StateHolder<StoreState> storeStateHolder;
     private List<ExpressionExecutor> expressionExecutors;
-    private StreamEventPool streamEventPool;
+    private StreamEventFactory streamEventFactory;
     private ExpressionExecutor shouldUpdateTimestamp;
     private long initialTimestamp;
 
     public BaseIncrementalValueStore(List<ExpressionExecutor> expressionExecutors,
-                                     StreamEventPool streamEventPool,
+                                     StreamEventFactory streamEventFactory,
                                      SiddhiQueryContext siddhiQueryContext, String aggregatorName,
                                      ExpressionExecutor shouldUpdateTimestamp, long initialTimestamp,
                                      boolean groupBy, boolean local) {
         this.expressionExecutors = expressionExecutors;
-        this.streamEventPool = streamEventPool;
+        this.streamEventFactory = streamEventFactory;
         this.shouldUpdateTimestamp = shouldUpdateTimestamp;
         this.initialTimestamp = initialTimestamp;
         if (!local) {
@@ -128,7 +128,7 @@ public class BaseIncrementalValueStore {
             Map<String, ValueState> baseIncrementalValueStoreMap = this.valueStateHolder.getAllGroupByStates();
             try {
                 for (Map.Entry<String, ValueState> state : baseIncrementalValueStoreMap.entrySet()) {
-                    StreamEvent streamEvent = streamEventPool.borrowEvent();
+                    StreamEvent streamEvent = streamEventFactory.newInstance();
                     long timestamp = getTimestamp();
                     streamEvent.setTimestamp(timestamp);
                     state.getValue().setValue(timestamp, 0);

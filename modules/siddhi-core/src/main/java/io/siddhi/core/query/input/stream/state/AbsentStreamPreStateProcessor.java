@@ -165,7 +165,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
 
                 if (initialize) {
                     // This is the first processor and no events received so far
-                    StateEvent stateEvent = stateEventPool.borrowEvent();
+                    StateEvent stateEvent = stateEventFactory.newInstance();
                     addState(stateEvent);
                 } else if (stateType == StateInputStream.Type.SEQUENCE &&
                         !state.getNewAndEveryStateEventList().isEmpty()) {
