@@ -745,7 +745,7 @@ public class SnapshotService {
                     partitionIdState.getValue().queryStateHolderMap.entrySet()) {
                 for (Map.Entry<String, StateHolder> elementState :
                         queryState.getValue().elementHolderMap.entrySet()) {
-                    elementState.getValue().getAllGroupByStates();
+                    elementState.getValue().cleanGroupByStates();
                 }
             }
         }

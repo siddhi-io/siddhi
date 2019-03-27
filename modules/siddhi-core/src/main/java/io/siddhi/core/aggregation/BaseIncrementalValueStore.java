@@ -69,15 +69,7 @@ public class BaseIncrementalValueStore {
         this.initialTimestamp = startTimeOfNewAggregates;
         setTimestamp(startTimeOfNewAggregates);
         setProcessed(false);
-        Map<String, ValueState> states = this.valueStateHolder.getAllGroupByStates();
-        try {
-            for (ValueState storeState : states.values()) {
-                storeState.values = null;
-                storeState.lastTimestamp = 0;
-            }
-        } finally {
-            this.valueStateHolder.returnGroupByStates(states);
-        }
+        this.valueStateHolder.cleanGroupByStates();
     }
 
     public void setValue(Object value, int position) {
