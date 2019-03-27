@@ -121,7 +121,7 @@
                             <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
-                            <destFile>${basedir}/target/coverage-reports/jacoco.exec</destFile>
+                            <destFile>${basedir}/target/jacoco.exec</destFile>
                             <propertyName>jacoco.agent.argLine</propertyName>
                         </configuration>
                     </execution>
@@ -137,7 +137,7 @@
                                 <exclude>**/SiddhiQLParser*</exclude>
                                 <exclude>**/SiddhiQLLexer*</exclude>
                             </excludes>
-                            <dataFile>${basedir}/target/coverage-reports/jacoco.exec</dataFile>
+                            <dataFile>${basedir}/target/jacoco.exec</dataFile>
                             <outputDirectory>${basedir}/target/coverage-reports/site</outputDirectory>
                         </configuration>
                     </execution>
