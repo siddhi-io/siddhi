@@ -97,6 +97,7 @@ public class SnapshotService {
             }
             try {
                 threadBarrier.lock();
+                waitForSystemStabilization();
                 for (Map.Entry<String, PartitionIdStateHolder> partitionIdState : partitionIdStates.entrySet()) {
                     for (Map.Entry<String, ElementStateHolder> queryState :
                             partitionIdState.getValue().queryStateHolderMap.entrySet()) {
@@ -196,6 +197,7 @@ public class SnapshotService {
             }
             try {
                 threadBarrier.lock();
+                waitForSystemStabilization();
                 for (Map.Entry<String, PartitionIdStateHolder> partitionIdState : partitionIdStates.entrySet()) {
                     for (Map.Entry<String, ElementStateHolder> queryState :
                             partitionIdState.getValue().queryStateHolderMap.entrySet()) {
@@ -296,6 +298,7 @@ public class SnapshotService {
         try {
             // Lock the threads in Siddhi
             threadBarrier.lock();
+            waitForSystemStabilization();
             PartitionIdStateHolder partitionIdStateHolder = partitionIdStates.get("");
             if (partitionIdStateHolder != null) {
                 ElementStateHolder elementStateHolder = partitionIdStateHolder.queryStateHolderMap.get(queryName);
@@ -341,7 +344,11 @@ public class SnapshotService {
         }
         try {
             threadBarrier.lock();
+            waitForSystemStabilization();
             try {
+                //cleaning old group by states
+                cleanGroupByStates();
+                //restore data
                 for (Map.Entry<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> partitionIdSnapshot :
                         fullSnapshot.entrySet()) {
                     PartitionIdStateHolder partitionStateHolder = partitionIdStates.get(partitionIdSnapshot.getKey());
@@ -427,7 +434,11 @@ public class SnapshotService {
             throws CannotRestoreSiddhiAppStateException {
         try {
             threadBarrier.lock();
+            waitForSystemStabilization();
             try {
+                //cleaning old group by states
+                cleanGroupByStates();
+                //restore data
                 for (Map.Entry<String, Map<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>>
                         partitionIdSnapshot : snapshot.entrySet()) {
                     PartitionIdStateHolder partitionStateHolder = partitionIdStates.get(partitionIdSnapshot.getKey());
@@ -725,6 +736,44 @@ public class SnapshotService {
             incrementalPersistenceStore.clearAllRevisions(siddhiAppName);
         } else {
             throw new NoPersistenceStoreException("No persistence store assigned for siddhi app " + siddhiAppName);
+        }
+    }
+
+    private void cleanGroupByStates() {
+        for (Map.Entry<String, PartitionIdStateHolder> partitionIdState : partitionIdStates.entrySet()) {
+            for (Map.Entry<String, ElementStateHolder> queryState :
+                    partitionIdState.getValue().queryStateHolderMap.entrySet()) {
+                for (Map.Entry<String, StateHolder> elementState :
+                        queryState.getValue().elementHolderMap.entrySet()) {
+                    elementState.getValue().getAllGroupByStates();
+                }
+            }
+        }
+    }
+
+    private void waitForSystemStabilization() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new SiddhiAppRuntimeException("Stabilization of Siddhi App " + siddhiAppContext.getName() +
+                    " for snapshot/restore interrupted. " + e.getMessage(), e);
+        }
+        int retryCount = 100;
+        int activeThreads = siddhiAppContext.getThreadBarrier().getActiveThreads();
+        while (activeThreads != 0 && retryCount > 0) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new SiddhiAppRuntimeException("Stabilization of Siddhi App " + siddhiAppContext.getName() +
+                        " for snapshot/restore interrupted. " + e.getMessage(), e);
+            }
+            activeThreads = siddhiAppContext.getThreadBarrier().getActiveThreads();
+            retryCount--;
+        }
+        if (retryCount == 0) {
+            throw new SiddhiAppRuntimeException("Siddhi App " + siddhiAppContext.getName() +
+                    " not stabilized for snapshot/restore, Active thread count is " +
+                    activeThreads);
         }
     }
 

@@ -174,7 +174,7 @@ public class Scheduler {
             if (lockWrapper != null) {
                 lockWrapper.lock();
             }
-            threadBarrier.pass();
+            threadBarrier.enter();
             try {
                 ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(false);
                 streamEventChunk.add(timerEvent);
@@ -194,6 +194,7 @@ public class Scheduler {
                 if (lockWrapper != null) {
                     lockWrapper.unlock();
                 }
+                threadBarrier.exit();
             }
 
             toNotifyTime = state.toNotifyQueue.peek();
