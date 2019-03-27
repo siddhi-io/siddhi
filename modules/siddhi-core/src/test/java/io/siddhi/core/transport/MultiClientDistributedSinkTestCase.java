@@ -20,6 +20,7 @@ package io.siddhi.core.transport;
 
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.core.util.transport.InMemoryBroker;
@@ -408,7 +409,11 @@ public class MultiClientDistributedSinkTestCase {
         InMemoryBroker.Subscriber subscriptionWSO2 = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object msg) {
-                topic1Count.incrementAndGet();
+                if (msg instanceof Event) {
+                    topic1Count.incrementAndGet();
+                    return;
+                }
+                topic1Count.addAndGet(((Event[]) msg).length);
             }
 
             @Override
@@ -420,7 +425,11 @@ public class MultiClientDistributedSinkTestCase {
         InMemoryBroker.Subscriber subscriptionIBM = new InMemoryBroker.Subscriber() {
             @Override
             public void onMessage(Object msg) {
-                topic2Count.incrementAndGet();
+                if (msg instanceof Event) {
+                    topic2Count.incrementAndGet();
+                    return;
+                }
+                topic2Count.addAndGet(((Event[]) msg).length);
             }
 
             @Override
@@ -449,39 +458,43 @@ public class MultiClientDistributedSinkTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-        InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
 
-        siddhiAppRuntime.start();
-        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(3000);
-                    TestFailingInMemorySink2.fail = false;
-                } catch (InterruptedException ignore) {
+        try {
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
+
+            siddhiAppRuntime.start();
+            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+            stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+            stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        TestFailingInMemorySink2.fail = false;
+                    } catch (InterruptedException ignore) {
+                    }
                 }
-            }
 
-        }.start();
-        TestFailingInMemorySink2.fail = true;
-        stockStream.send(new Object[]{"IBM", 57.6f, 100L});
-        Thread.sleep(6000);
-        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
-        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            }.start();
+            TestFailingInMemorySink2.fail = true;
+            stockStream.send(new Object[]{"IBM", 57.6f, 100L});
+            Thread.sleep(6000);
+            stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
 
-        Thread.sleep(100);
+            Thread.sleep(100);
 
-        //assert event count
-        AssertJUnit.assertEquals("Number of topic 1 events", 6, topic1Count.get());
-        AssertJUnit.assertEquals("Number of topic 2 events", 6, topic2Count.get());
-        siddhiAppRuntime.shutdown();
+            //assert event count
+            AssertJUnit.assertEquals("Number of topic 1 events", 6, topic1Count.get());
+            AssertJUnit.assertEquals("Number of topic 2 events", 6, topic2Count.get());
+        } finally {
+            siddhiAppRuntime.shutdown();
 
-        //unsubscribe from "inMemory" broker per topic
-        InMemoryBroker.unsubscribe(subscriptionWSO2);
-        InMemoryBroker.unsubscribe(subscriptionIBM);
+            //unsubscribe from "inMemory" broker per topic
+            InMemoryBroker.unsubscribe(subscriptionWSO2);
+            InMemoryBroker.unsubscribe(subscriptionIBM);
+        }
     }
 
 
@@ -541,26 +554,30 @@ public class MultiClientDistributedSinkTestCase {
         siddhiManager.setConfigManager(inMemoryConfigManager);
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-        InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
 
-        siddhiAppRuntime.start();
-        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
-        stockStream.send(new Object[]{"IBM", 57.6f, 100L});
-        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
-        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        try {
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
 
-        Thread.sleep(100);
+            siddhiAppRuntime.start();
+            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+            stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+            stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            stockStream.send(new Object[]{"IBM", 57.6f, 100L});
+            stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+            stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
 
-        //assert event count
-        AssertJUnit.assertEquals("Number of topic 1 events", 6, topic1Count.get());
-        AssertJUnit.assertEquals("Number of topic 2 events", 6, topic2Count.get());
-        siddhiAppRuntime.shutdown();
+            Thread.sleep(100);
 
-        //unsubscribe from "inMemory" broker per topic
-        InMemoryBroker.unsubscribe(subscriptionWSO2);
-        InMemoryBroker.unsubscribe(subscriptionIBM);
+            //assert event count
+            AssertJUnit.assertEquals("Number of topic 1 events", 6, topic1Count.get());
+            AssertJUnit.assertEquals("Number of topic 2 events", 6, topic2Count.get());
+        } finally {
 
+            siddhiAppRuntime.shutdown();
+
+            //unsubscribe from "inMemory" broker per topic
+            InMemoryBroker.unsubscribe(subscriptionWSO2);
+            InMemoryBroker.unsubscribe(subscriptionIBM);
+        }
     }
 }

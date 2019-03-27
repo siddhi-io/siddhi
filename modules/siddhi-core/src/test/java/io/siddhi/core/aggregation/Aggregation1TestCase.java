@@ -282,7 +282,11 @@ public class Aggregation1TestCase {
             SiddhiTestHelper.waitForEvents(100, 7, inEventCount, 60000);
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
             AssertJUnit.assertEquals("Number of success events", 7, inEventCount.get());
-            AssertJUnit.assertEquals("In events matched", true, SiddhiTestHelper.isEventsMatch(inEventsList, expected));
+            boolean isEventsMatched = SiddhiTestHelper.isEventsMatch(inEventsList, expected);
+            if (!isEventsMatched) {
+                LOG.info(Arrays.deepToString(inEventsList.toArray()));
+            }
+            AssertJUnit.assertEquals("In events matched", true, isEventsMatched);
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -392,8 +396,11 @@ public class Aggregation1TestCase {
             SiddhiTestHelper.waitForEvents(100, 4, inEventCount, 60000);
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
             AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
-            AssertJUnit.assertEquals("In events matched", true,
-                    SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
+            boolean isEventsMatched = SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected);
+            if (!isEventsMatched) {
+                LOG.info(Arrays.deepToString(inEventsList.toArray()));
+            }
+            AssertJUnit.assertEquals("In events matched", true, isEventsMatched);
         } finally {
             siddhiAppRuntime.shutdown();
         }
@@ -2943,8 +2950,11 @@ public class Aggregation1TestCase {
             SiddhiTestHelper.waitForEvents(100, 2, inEventCount, 60000);
             AssertJUnit.assertEquals("Event arrived", true, eventArrived);
             AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
-            AssertJUnit.assertEquals("In events matched", true,
-                    SiddhiTestHelper.isEventsMatch(inEventsList, expected));
+            boolean isEventsMatched = SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected);
+            if (isEventsMatched) {
+                LOG.info(Arrays.deepToString(inEventsList.toArray()));
+            }
+            AssertJUnit.assertEquals("In events matched", true, isEventsMatched);
         } finally {
             siddhiAppRuntime.shutdown();
         }

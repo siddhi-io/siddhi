@@ -96,7 +96,7 @@ public class Constants {
      */
     public static final String FREEMARKER_FEATURES_HEADING = "## Features";
     public static final String FREEMARKER_LATEST_API_DOCS_HEADING = "## Latest API Docs";
-    public static final String FREEMARKER_SIDDHI_HOME_PAGE = "https://wso2.github.io/siddhi";
+    public static final String FREEMARKER_SIDDHI_HOME_PAGE = "http://siddhi.io";
     public static final String FREEMARKER_SIDDHI_REPOSITORY_ARTIFACT_ID = "siddhi";
     public static final String FREEMARKER_EXTENSION_REPOSITORY_PARENT_POSTFIX = "-parent";
 }

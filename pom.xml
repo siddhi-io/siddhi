@@ -311,7 +311,7 @@
                 <plugin>
                     <groupId>net.alchim31.maven</groupId>
                     <artifactId>scala-maven-plugin</artifactId>
-                    <version>3.1.6</version>
+                    <version>4.0.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.antlr</groupId>
@@ -722,72 +722,72 @@
     </profiles>
 
     <properties>
-        <testng.version>6.8</testng.version>
+        <testng.version>6.14.3</testng.version>
         <log4j.version>1.2.17</log4j.version>
         <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
-        <slf4j.version>1.7.12</slf4j.version>
-        <mvel2.version>2.2.1.Final</mvel2.version>
-        <antlr.runtime.version>4.5.1</antlr.runtime.version>
-        <disruptor.version>3.3.2</disruptor.version>
-        <guava.version>19.0</guava.version>
-        <gson.version>2.8.0</gson.version>
-        <classindex.version>3.4</classindex.version>
-        <quartz.version>2.1.1</quartz.version>
+        <slf4j.version>1.7.26</slf4j.version>
+        <mvel2.version>2.4.4.Final</mvel2.version>
+        <antlr.runtime.version>4.7.2</antlr.runtime.version>
+        <disruptor.version>3.4.2</disruptor.version>
+        <guava.version>23.0</guava.version>
+        <gson.version>2.8.5</gson.version>
+        <classindex.version>3.6</classindex.version>
+        <quartz.version>2.3.0</quartz.version>
         <org.osgi.core.version>6.0.0</org.osgi.core.version>
-        <version.equinox.osgi.services>3.3.100.v20120522-1822</version.equinox.osgi.services>
+        <version.equinox.osgi.services>3.3.100.v20130513-1956</version.equinox.osgi.services>
         <equinox.osgi.services.imp.pkg.version.range>[1.2.0, 1.3.0)
         </equinox.osgi.services.imp.pkg.version.range>
         <hazelcast.imp.pkg.version.range>[3.5, 3.6.0)</hazelcast.imp.pkg.version.range>
         <metrics.version>3.1.0</metrics.version>
-        <jsonpath.version>2.2.0</jsonpath.version>
+        <jsonpath.version>2.4.0</jsonpath.version>
         <msf4j.version>2.1.1</msf4j.version>
-        <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
+        <maven.shadeplugin.version>3.2.1</maven.shadeplugin.version>
         <servlet-api-version>2.5</servlet-api-version>
-        <jackson-datatype-joda-version>2.9.6</jackson-datatype-joda-version>
-        <maven.core.version>3.3.9</maven.core.version>
-        <maven.plugin.api.version>3.0</maven.plugin.api.version>
-        <maven.plugin.annotations.version>3.4</maven.plugin.annotations.version>
-        <freemarker.version>2.3.25-incubating</freemarker.version>
+        <jackson-datatype-joda-version>2.9.8</jackson-datatype-joda-version>
+        <maven.core.version>3.6.0</maven.core.version>
+        <maven.plugin.api.version>3.6.0</maven.plugin.api.version>
+        <maven.plugin.annotations.version>3.6.0</maven.plugin.annotations.version>
+        <freemarker.version>2.3.28</freemarker.version>
         <commons.io.version>1.3.2</commons.io.version>
-        <snakeyaml.version>1.21</snakeyaml.version>
-        <org.jacoco.version>0.7.9</org.jacoco.version>
+        <snakeyaml.version>1.24</snakeyaml.version>
+        <org.jacoco.version>0.8.3</org.jacoco.version>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <mavan.checkstyle.suppression.file>checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
-        <apache.source.release.assembly.descriptor.version>1.0.5</apache.source.release.assembly.descriptor.version>
-        <maven.remote.resources.plugin.version>1.5</maven.remote.resources.plugin.version>
+        <apache.source.release.assembly.descriptor.version>1.0.6</apache.source.release.assembly.descriptor.version>
+        <maven.remote.resources.plugin.version>1.6.0</maven.remote.resources.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
-        <clirr.maven.plugin.version>2.7</clirr.maven.plugin.version>
+        <clirr.maven.plugin.version>2.8</clirr.maven.plugin.version>
 
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
-        <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
-        <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
+        <maven.assembly.plugin.version>3.1.1</maven.assembly.plugin.version>
+        <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
         <maven.docck.plugin.version>1.1</maven.docck.plugin.version>
         <maven.enforcer.plugin.version>1.4.1</maven.enforcer.plugin.version>
-        <maven.failsafe.plugin.version>2.19.1</maven.failsafe.plugin.version>
+        <maven.failsafe.plugin.version>2.22.1</maven.failsafe.plugin.version>
         <maven.gpg.plugin.version>1.6</maven.gpg.plugin.version>
         <maven.install.plugin.version>2.5.2</maven.install.plugin.version>
-        <maven.invoker.plugin.version>2.0.0</maven.invoker.plugin.version>
-        <maven.jar.plugin.version>2.6</maven.jar.plugin.version>
-        <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
-        <maven.scm.plugin.version>1.9.4</maven.scm.plugin.version>
-        <maven.scm.publish.plugin.version>1.1</maven.scm.publish.plugin.version>
-        <maven.site.plugin.version>3.5</maven.site.plugin.version>
-        <maven.source.plugin.version>3.0.0</maven.source.plugin.version>
-        <apache.rat.plugin.version>0.11</apache.rat.plugin.version>
+        <maven.invoker.plugin.version>3.2.0</maven.invoker.plugin.version>
+        <maven.jar.plugin.version>3.1.1</maven.jar.plugin.version>
+        <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
+        <maven.scm.plugin.version>1.11.2</maven.scm.plugin.version>
+        <maven.scm.publish.plugin.version>3.0.0</maven.scm.publish.plugin.version>
+        <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
+        <maven.source.plugin.version>3.0.1</maven.source.plugin.version>
+        <apache.rat.plugin.version>0.13</apache.rat.plugin.version>
 
-        <maven.plugin.plugin.version>3.4</maven.plugin.plugin.version>
+        <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
         <maven.checkstyleplugin.version>3.0.0</maven.checkstyleplugin.version>
-        <maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
-        <maven.findbugsplugin.version>3.0.3</maven.findbugsplugin.version>
-        <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
+        <maven.surefire.plugin.version>2.22.1</maven.surefire.plugin.version>
+        <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
+        <maven.compiler.plugin.version>3.8.0-jboss-2</maven.compiler.plugin.version>
         <wso2.maven.compiler.source>1.8</wso2.maven.compiler.source>
         <wso2.maven.compiler.target>1.8</wso2.maven.compiler.target>
         <sourceReleaseAssemblyDescriptor>source-release</sourceReleaseAssemblyDescriptor>
         <project.scm.id>my-scm-server</project.scm.id>
 
         <!--Maven bundle plugin configuration -->
-        <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
+        <maven.bundle.plugin.version>4.1.0</maven.bundle.plugin.version>
         <maven.bundle.plugin.vendor>WSO2 Inc</maven.bundle.plugin.vendor>
         <maven.bundle.plugin.extensions>true</maven.bundle.plugin.extensions>
         <bundle.classpath>.</bundle.classpath>
@@ -798,10 +798,10 @@
         <bundle.name>${project.artifactId}</bundle.name>
         <import.package>*</import.package>
 
-        <maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
-        <maven.javadoc.plugin.version>2.10.3</maven.javadoc.plugin.version>
+        <maven.dependency.plugin.version>3.1.1</maven.dependency.plugin.version>
+        <maven.javadoc.plugin.version>3.1.0</maven.javadoc.plugin.version>
         <maven.release.plugin.version>2.5.3</maven.release.plugin.version>
-        <maven.wagon.ssh.version>2.10</maven.wagon.ssh.version>
+        <maven.wagon.ssh.version>3.3.2</maven.wagon.ssh.version>
     </properties>
 
     <scm>

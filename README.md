@@ -104,9 +104,9 @@ For more information please contact us via <a target="_blank" href="http://wso2.
      
     Find the released Siddhi libraries <a target="_blank" href="https://mvnrepository.com/artifact/io.siddhi/siddhi-core">here</a>.
 
-    <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v5.x.x
+    <a target="_blank" href="http://siddhi.io/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v5.x.x
     
-    <a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v5.x.x
+    <a target="_blank" href="http://siddhi.io/documentation/siddhi-architecture/">Architecture</a> of Siddhi v5.x.x
 
 * **Latest Stable Release of Siddhi v4.x.x** : **v4.4.8** _built on Java 8. (Recommended for production use)_
      
@@ -125,7 +125,7 @@ For more information please contact us via <a target="_blank" href="http://wso2.
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.0.0-m1">5.0.0-m1</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.0.0-m4">5.0.0-m4</a>.
 
 ## How to Contribute
 * Report issues at <a target="_blank" href="https://github.com/wso2/siddhi/issues">GitHub Issue Tracker</a>.

@@ -55,12 +55,11 @@ public class AbsentPatternTestCase {
         TestUtil.TestCallback callback = TestUtil.addQueryCallback(siddhiAppRuntime, "query1", new Object[]{"WSO2"});
 
         InputHandler stream1 = siddhiAppRuntime.getInputHandler("Stream1");
-
         siddhiAppRuntime.start();
 
         stream1.send(new Object[]{"WSO2", 55.6f, 100});
-        Thread.sleep(1100);
 
+        TestUtil.waitForInEvents(500, callback, 10);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -96,8 +95,8 @@ public class AbsentPatternTestCase {
         stream1.send(new Object[]{"WSO2", 55.6f, 100});
         Thread.sleep(1100);
         stream2.send(new Object[]{"IBM", 58.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -133,8 +132,8 @@ public class AbsentPatternTestCase {
         stream1.send(new Object[]{"WSO2", 55.6f, 100});
         Thread.sleep(100);
         stream2.send(new Object[]{"IBM", 58.7f, 100});
-        Thread.sleep(1000);
 
+        TestUtil.waitForInEvents(500, callback, 10);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -170,8 +169,8 @@ public class AbsentPatternTestCase {
         stream1.send(new Object[]{"WSO2", 55.6f, 100});
         Thread.sleep(100);
         stream2.send(new Object[]{"IBM", 50.7f, 100});
-        Thread.sleep(1100);
 
+        TestUtil.waitForInEvents(500, callback, 10);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -202,11 +201,10 @@ public class AbsentPatternTestCase {
         InputHandler stream2 = siddhiAppRuntime.getInputHandler("Stream2");
 
         siddhiAppRuntime.start();
-
         Thread.sleep(1100);
         stream2.send(new Object[]{"IBM", 58.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
         AssertJUnit.assertTrue("Event not arrived", callback.isEventArrived());
@@ -242,8 +240,8 @@ public class AbsentPatternTestCase {
         stream1.send(new Object[]{"WSO2", 59.6f, 100});
         Thread.sleep(2100);
         stream2.send(new Object[]{"IBM", 58.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -279,8 +277,8 @@ public class AbsentPatternTestCase {
         stream1.send(new Object[]{"WSO2", 5.6f, 100});
         Thread.sleep(100);
         stream2.send(new Object[]{"IBM", 58.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -316,8 +314,8 @@ public class AbsentPatternTestCase {
         stream1.send(new Object[]{"WSO2", 55.6f, 100});
         Thread.sleep(100);
         stream2.send(new Object[]{"IBM", 58.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -357,8 +355,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(100);
         stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
-        Thread.sleep(1100);
 
+        TestUtil.waitForInEvents(500, callback, 10);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -399,8 +397,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(100);
         stream3.send(new Object[]{"GOOGLE", 25.7f, 100});
-        Thread.sleep(1100);
 
+        TestUtil.waitForInEvents(500, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -438,8 +436,8 @@ public class AbsentPatternTestCase {
         stream1.send(new Object[]{"WSO2", 15.6f, 100});
         Thread.sleep(100);
         stream2.send(new Object[]{"IBM", 28.7f, 100});
-        Thread.sleep(1100);
 
+        TestUtil.waitForInEvents(500, callback, 10);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -478,8 +476,8 @@ public class AbsentPatternTestCase {
         stream1.send(new Object[]{"WSO2", 15.6f, 100});
         Thread.sleep(1100);
         stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -520,8 +518,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 8.7f, 100});
         Thread.sleep(1100);
         stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -561,8 +559,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(100);
         stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -602,8 +600,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(100);
         stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -642,8 +640,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(100);
         stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -686,8 +684,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(100);
         stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -728,8 +726,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(100);
         stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -772,8 +770,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(100);
         stream3.send(new Object[]{"GOOGLE", 35.7f, 100});
-        Thread.sleep(1100);
 
+        TestUtil.waitForInEvents(500, callback, 10);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -818,8 +816,8 @@ public class AbsentPatternTestCase {
         stream3.send(new Object[]{"GOOGLE", 35.7f, 100});
         Thread.sleep(100);
         stream4.send(new Object[]{"ORACLE", 44.7f, 100});
-        Thread.sleep(1100);
 
+        TestUtil.waitForInEvents(500, callback, 10);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -862,8 +860,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(1100);
         stream4.send(new Object[]{"ORACLE", 44.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -908,8 +906,8 @@ public class AbsentPatternTestCase {
         stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
         Thread.sleep(1100);
         stream4.send(new Object[]{"ORACLE", 44.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -954,8 +952,8 @@ public class AbsentPatternTestCase {
         stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
         Thread.sleep(100);
         stream4.send(new Object[]{"ORACLE", 44.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -996,8 +994,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(1100);
         stream4.send(new Object[]{"ORACLE", 44.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1042,8 +1040,8 @@ public class AbsentPatternTestCase {
         stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
         Thread.sleep(100);
         stream4.send(new Object[]{"ORACLE", 44.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1085,8 +1083,8 @@ public class AbsentPatternTestCase {
         stream3.send(new Object[]{"GOOGLE", 38.7f, 100});
         Thread.sleep(100);
         stream4.send(new Object[]{"ORACLE", 44.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1119,8 +1117,8 @@ public class AbsentPatternTestCase {
         siddhiAppRuntime.start();
 
         stream2.send(new Object[]{"IBM", 58.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1164,8 +1162,8 @@ public class AbsentPatternTestCase {
         stream3.send(new Object[]{"WSO2", 35.0f, 100});
         Thread.sleep(100);
         stream4.send(new Object[]{"GOOGLE", 56.86f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1208,8 +1206,8 @@ public class AbsentPatternTestCase {
         stream3.send(new Object[]{"WSO2", 35.0f, 100});
         Thread.sleep(100);
         stream4.send(new Object[]{"GOOGLE", 56.86f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1249,8 +1247,8 @@ public class AbsentPatternTestCase {
         stream1.send(new Object[]{"IBM", 18.7f, 100});
         Thread.sleep(1100);
         stream3.send(new Object[]{"WSO2", 35.0f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1291,8 +1289,8 @@ public class AbsentPatternTestCase {
         stream1.send(new Object[]{"IBM", 18.7f, 100});
         Thread.sleep(1100);
         stream4.send(new Object[]{"GOOGLE", 56.86f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1335,8 +1333,8 @@ public class AbsentPatternTestCase {
         stream3.send(new Object[]{"WSO2", 35.0f, 100});
         Thread.sleep(100);
         stream4.send(new Object[]{"GOOGLE", 56.86f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1382,8 +1380,8 @@ public class AbsentPatternTestCase {
         stream3.send(new Object[]{"WSO2", 35.0f, 100});
         Thread.sleep(100);
         stream4.send(new Object[]{"GOOGLE", 56.86f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1429,8 +1427,8 @@ public class AbsentPatternTestCase {
         stream3.send(new Object[]{"WSO2", 35.0f, 100});
         Thread.sleep(100);
         stream4.send(new Object[]{"GOOGLE", 56.86f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1470,8 +1468,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"GOOGLE", 35.0f, 100});
         Thread.sleep(100);
         stream2.send(new Object[]{"ORACLE", 45.0f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1502,16 +1500,14 @@ public class AbsentPatternTestCase {
                 "IBM", null, null});
 
         InputHandler stream2 = siddhiAppRuntime.getInputHandler("Stream2");
-
-
         siddhiAppRuntime.start();
 
         Thread.sleep(1100);
         stream2.send(new Object[]{"WSO2", 35.0f, 100});
         Thread.sleep(100);
         stream2.send(new Object[]{"IBM", 45.0f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1540,16 +1536,13 @@ public class AbsentPatternTestCase {
         TestUtil.TestCallback callback = TestUtil.addQueryCallback(siddhiAppRuntime, "query1", new Object[]{"WSO2"});
 
         InputHandler stream2 = siddhiAppRuntime.getInputHandler("Stream2");
-
-
         siddhiAppRuntime.start();
-
         Thread.sleep(2100);
         stream2.send(new Object[]{"WSO2", 35.0f, 100});
         Thread.sleep(100);
         stream2.send(new Object[]{"IBM", 45.0f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1589,8 +1582,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"IBM", 28.7f, 100});
         Thread.sleep(1100);
         stream3.send(new Object[]{"GOOGLE", 55.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1633,8 +1626,8 @@ public class AbsentPatternTestCase {
         stream2.send(new Object[]{"WSO2", 25.5f, 100});
         Thread.sleep(1100);
         stream4.send(new Object[]{"GOOGLE", 56.86f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1672,8 +1665,8 @@ public class AbsentPatternTestCase {
 
         Thread.sleep(1100);
         stream2.send(new Object[]{"WSO2", 68.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1703,10 +1696,9 @@ public class AbsentPatternTestCase {
         InputHandler stream1 = siddhiAppRuntime.getInputHandler("Stream1");
 
         siddhiAppRuntime.start();
-
         stream1.send(new Object[]{"WSO2", 55.6f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 0, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
@@ -1741,8 +1733,8 @@ public class AbsentPatternTestCase {
 
         Thread.sleep(3100);
         stream2.send(new Object[]{"IBM", 58.7f, 100});
-        Thread.sleep(100);
 
+        TestUtil.waitForInEvents(100, callback, 5);
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertEquals("Number of remove events", 0, callback.getRemoveEventCount());
         AssertJUnit.assertTrue("Event arrived", callback.isEventArrived());
@@ -1779,12 +1771,12 @@ public class AbsentPatternTestCase {
         customerStream.send(new Object[]{"customerB"});
         Thread.sleep(500);
         customerStream.send(new Object[]{"customerB"});
-        Thread.sleep(600);
 
-        siddhiAppRuntime.shutdown();
-
+        TestUtil.waitForInEvents(500, callback, 5);
         callback.throwAssertionErrors();
         AssertJUnit.assertEquals("Number of success events", 1, callback.getInEventCount());
         AssertJUnit.assertTrue("Event not arrived", callback.isEventArrived());
+
+        siddhiAppRuntime.shutdown();
     }
 }

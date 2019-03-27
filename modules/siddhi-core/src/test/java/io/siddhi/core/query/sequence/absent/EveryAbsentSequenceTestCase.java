@@ -752,7 +752,7 @@ public class EveryAbsentSequenceTestCase {
 
         Thread.sleep(1100);
         stream2.send(new Object[]{"WSO2", 35.0f, 100});
-        Thread.sleep(1100);
+        Thread.sleep(3000);
         stream2.send(new Object[]{"IBM", 45.0f, 100});
         Thread.sleep(100);
 

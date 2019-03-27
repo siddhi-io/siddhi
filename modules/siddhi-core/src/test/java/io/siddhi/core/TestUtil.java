@@ -233,4 +233,16 @@ public class TestUtil {
             }
         }
     }
+
+    public static void waitForInEvents(long sleepTime, TestUtil.TestCallback callback, int retryCount)
+            throws InterruptedException {
+        int count = 0;
+        while (true) {
+            Thread.sleep(sleepTime);
+            count += 1;
+            if (callback.getInEventCount() == 1 || count == retryCount) {
+                break;
+            }
+        }
+    }
 }

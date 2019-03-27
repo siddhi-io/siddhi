@@ -1,7 +1,7 @@
 site_name: Siddhi
 site_description: Stream Processing and Complex Event Processing Engine
 site_author: WSO2
-site_url: https://wso2.github.io/siddhi
+site_url: http://siddhi.io
 extra_css:
 - stylesheets/extra.css
 repo_name: Siddhi
@@ -38,6 +38,9 @@ pages:
 - Contribute: documentation/contribution.md
 - Extensions: extensions.md
 - API Docs:
+  - 5.0.0-m4: api/5.0.0-m4.md
+  - 5.0.0-m3: api/5.0.0-m3.md
+  - 5.0.0-m2: api/5.0.0-m2.md
   - 5.0.0-m1: api/5.0.0-m1.md
   - 4.4.8: api/4.4.8.md
   - 4.4.0: api/4.4.0.md
@@ -45,6 +48,7 @@ pages:
   - 4.3.0: api/4.3.0.md
   - 4.2.40: api/4.2.40.md
   - 4.2.20: api/4.2.20.md
+  - 4.2.0: api/4.2.0.md
   - 4.1.64: api/4.1.64.md
   - 4.1.46: api/4.1.46.md
   - 4.1.7: api/4.1.7.md
