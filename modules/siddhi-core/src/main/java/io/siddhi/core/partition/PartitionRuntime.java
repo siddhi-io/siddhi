@@ -36,6 +36,7 @@ import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.MemoryUsageTracker;
+import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.StreamDefinition;
@@ -52,6 +53,7 @@ import io.siddhi.query.api.execution.query.input.stream.JoinInputStream;
 import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
 import io.siddhi.query.api.execution.query.output.stream.InsertIntoStream;
+import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.ArrayList;
@@ -62,6 +64,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Runtime class to handle partitioning. It will hold all information regarding current partitions and wil create
@@ -71,6 +74,10 @@ public class PartitionRuntime {
 
 
     private final StateHolder<PartitionState> stateHolder;
+    //default every 5 min
+    private long purgeExecutionInterval = 300000;
+    private boolean purgingEnabled = false;
+    private long purgeRetentionPeriod = 0;
     private String partitionName;
     private Partition partition;
     private ConcurrentMap<String, StreamJunction> localStreamJunctionMap = new ConcurrentHashMap<>();
@@ -106,6 +113,35 @@ public class PartitionRuntime {
         }
         if (partitionName == null) {
             this.partitionName = "partition_" + partitionIndex;
+        }
+
+        Annotation purge = AnnotationHelper.getAnnotation(SiddhiConstants.NAMESPACE_PURGE, partition.getAnnotations());
+        if (purge != null) {
+            if (purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_ENABLE) != null) {
+                String purgeEnable = purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_ENABLE);
+                if (!("true".equalsIgnoreCase(purgeEnable) || "false".equalsIgnoreCase(purgeEnable))) {
+                    throw new SiddhiAppCreationException("Invalid value for enable: " + purgeEnable + "." +
+                            " Please use 'true' or 'false'");
+                } else {
+                    purgingEnabled = Boolean.parseBoolean(purgeEnable);
+                }
+            } else {
+                throw new SiddhiAppCreationException("Annotation @" + SiddhiConstants.NAMESPACE_PURGE +
+                        " is missing element '" + SiddhiConstants.ANNOTATION_ELEMENT_ENABLE + "'");
+            }
+            if (purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_RETENTION_PERIOD) != null) {
+                String purgeRetention = purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_RETENTION_PERIOD);
+                purgeRetentionPeriod = Expression.Time.timeToLong(purgeRetention);
+
+            } else {
+                throw new SiddhiAppCreationException("Annotation @" + SiddhiConstants.NAMESPACE_PURGE +
+                        " is missing element '" + SiddhiConstants.ANNOTATION_ELEMENT_RETENTION_PERIOD + "'");
+            }
+
+            if (purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_INTERVAL) != null) {
+                String interval = purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_INTERVAL);
+                purgeExecutionInterval = Expression.Time.timeToLong(interval);
+            }
         }
         this.partition = partition;
         this.streamDefinitionMap = streamDefinitionMap;
@@ -308,21 +344,65 @@ public class PartitionRuntime {
     public void start() {
         PartitionState state = stateHolder.getState();
         try {
-            if (!state.partitionKeys.contains(SiddhiAppContext.getPartitionFlowId())) {
-                state.partitionKeys.add(SiddhiAppContext.getPartitionFlowId());
-                for (QueryRuntime queryRuntime : queryRuntimeList) {
-                    queryRuntime.start();
+            Long time = state.partitionKeys.get(SiddhiAppContext.getPartitionFlowId());
+            if (time == null) {
+                synchronized (state) {
+                    time = state.partitionKeys.get(SiddhiAppContext.getPartitionFlowId());
+                    if (time == null) {
+                        for (QueryRuntime queryRuntime : queryRuntimeList) {
+                            queryRuntime.start();
+                        }
+                    }
+                    state.partitionKeys.put(SiddhiAppContext.getPartitionFlowId(),
+                            siddhiAppContext.getTimestampGenerator().currentTime());
                 }
+            } else {
+                state.partitionKeys.put(SiddhiAppContext.getPartitionFlowId(),
+                        siddhiAppContext.getTimestampGenerator().currentTime());
             }
         } finally {
             stateHolder.returnState(state);
+        }
+        if (purgingEnabled) {
+            siddhiAppContext.getScheduledExecutorService().scheduleWithFixedDelay(new Runnable() {
+                @Override
+                public void run() {
+                    long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                    PartitionState state = stateHolder.getState();
+                    try {
+                        synchronized (state) {
+                            HashMap<String, Long> partitions = new HashMap<>(state.partitionKeys);
+                            for (Map.Entry<String, Long> partition : partitions.entrySet()) {
+                                if (partition.getValue() + purgeRetentionPeriod < currentTime) {
+                                    state.partitionKeys.remove(partition.getKey());
+                                    SiddhiAppContext.startPartitionFlow(partition.getKey());
+                                    try {
+                                        for (QueryRuntime queryRuntime : queryRuntimeList) {
+                                            Map<String, StateHolder> elementHolderMap =
+                                                    siddhiAppContext.getSnapshotService().getStateHolderMap(
+                                                            partitionName, queryRuntime.getQueryId());
+                                            for (StateHolder stateHolder : elementHolderMap.values()) {
+                                                stateHolder.cleanGroupByStates();
+                                            }
+                                        }
+                                    } finally {
+                                        SiddhiAppContext.stopPartitionFlow();
+                                    }
+                                }
+                            }
+                        }
+                    } finally {
+                        stateHolder.returnState(state);
+                    }
+                }
+            }, purgeExecutionInterval, purgeExecutionInterval, TimeUnit.MILLISECONDS);
         }
     }
 
     public Set<String> getPartitionKeys() {
         PartitionState state = stateHolder.getState();
         try {
-            return state.partitionKeys;
+            return new HashSet<>(state.partitionKeys.keySet());
         } finally {
             stateHolder.returnState(state);
         }
@@ -333,7 +413,7 @@ public class PartitionRuntime {
      */
     public class PartitionState extends State {
 
-        private Set<String> partitionKeys = new HashSet<>();
+        private Map<String, Long> partitionKeys = new ConcurrentHashMap<>();
 
         @Override
         public boolean canDestroy() {
@@ -349,7 +429,7 @@ public class PartitionRuntime {
 
         @Override
         public void restore(Map<String, Object> state) {
-            partitionKeys = (Set<String>) state.get("PartitionKeys");
+            partitionKeys = (Map<String, Long>) state.get("PartitionKeys");
         }
     }
 

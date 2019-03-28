@@ -294,8 +294,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
 
     @Override
     public void stop() {
-        // Scheduler will be stopped automatically
-        // Nothing to stop here
+        scheduler.stop();
     }
 
     class LogicalStreamPreState extends StreamPreState {

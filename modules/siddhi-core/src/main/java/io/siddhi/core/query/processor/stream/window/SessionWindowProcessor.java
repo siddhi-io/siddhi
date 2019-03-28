@@ -559,7 +559,9 @@ public class SessionWindowProcessor extends GroupingFindableWindowProcessor<Sess
 
     @Override
     public void stop() {
-        //Do nothing
+        if (scheduler != null) {
+            scheduler.stop();
+        }
     }
 
     @Override

@@ -209,7 +209,7 @@ public class MinAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return (minDeque == null || minDeque.size() == 0) && minValue == null;
+            return (minDeque == null || minDeque.isEmpty()) && minValue == null;
         }
 
         @Override
@@ -291,7 +291,7 @@ public class MinAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return (minDeque == null || minDeque.size() == 0) && minValue == null;
+            return (minDeque == null || minDeque.isEmpty()) && minValue == null;
         }
 
         @Override
@@ -360,7 +360,7 @@ public class MinAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return (minDeque == null || minDeque.size() == 0) && minValue == null;
+            return (minDeque == null || minDeque.isEmpty()) && minValue == null;
         }
 
         @Override
@@ -441,7 +441,7 @@ public class MinAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return (minDeque == null || minDeque.size() == 0) && minValue == null;
+            return (minDeque == null || minDeque.isEmpty()) && minValue == null;
         }
 
         @Override

@@ -56,6 +56,7 @@ public class Scheduler {
     private StreamEventFactory streamEventFactory;
     private LatencyTracker latencyTracker;
     private StateHolder<SchedulerState> stateHolder;
+    private boolean stop;
 
 
     public Scheduler(Schedulable singleThreadEntryValve, SiddhiQueryContext siddhiQueryContext) {
@@ -248,6 +249,10 @@ public class Scheduler {
         }
     }
 
+    public void stop() {
+        stop = true;
+    }
+
     private class EventCaller implements Runnable {
         private SchedulerState state;
         private String key;
@@ -270,6 +275,9 @@ public class Scheduler {
          */
         @Override
         public synchronized void run() {
+            if (stop) {
+                return;
+            }
             SiddhiAppContext.startPartitionFlow(key);
             try {
                 if (!siddhiQueryContext.getSiddhiAppContext().isPlayback()) {

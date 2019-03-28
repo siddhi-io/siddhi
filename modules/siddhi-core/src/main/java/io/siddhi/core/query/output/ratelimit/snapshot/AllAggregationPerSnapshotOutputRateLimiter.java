@@ -39,7 +39,6 @@ public class AllAggregationPerSnapshotOutputRateLimiter
         extends SnapshotOutputRateLimiter<AllAggregationPerSnapshotOutputRateLimiter.RateLimiterState> {
     private final Long value;
     private Scheduler scheduler;
-    private long scheduledTime;
 
     public AllAggregationPerSnapshotOutputRateLimiter(Long value,
                                                       WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
@@ -50,6 +49,9 @@ public class AllAggregationPerSnapshotOutputRateLimiter
 
     @Override
     protected StateFactory<RateLimiterState> init() {
+        this.scheduler = SchedulerParser.parse(this, siddhiQueryContext);
+        this.scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
+        this.scheduler.init(lockWrapper, siddhiQueryContext.getName());
         return () -> new RateLimiterState();
     }
 
@@ -86,50 +88,58 @@ public class AllAggregationPerSnapshotOutputRateLimiter
 
     private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
                                 RateLimiterState state) {
-        if (event.getTimestamp() >= scheduledTime) {
+        if (event.getTimestamp() >= state.scheduledTime) {
             ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
             if (state.lastEvent != null) {
                 outputEventChunk.add(cloneComplexEvent(state.lastEvent));
             }
             outputEventChunks.add(outputEventChunk);
-            scheduledTime += value;
-            scheduler.notifyAt(scheduledTime);
+            state.scheduledTime += value;
+            scheduler.notifyAt(state.scheduledTime);
         }
     }
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiQueryContext);
-        scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
-        scheduler.init(lockWrapper, siddhiQueryContext.getName());
-        long currentTime = System.currentTimeMillis();
-        scheduledTime = currentTime + value;
-        scheduler.notifyAt(scheduledTime);
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                long currentTime = System.currentTimeMillis();
+                state.scheduledTime = currentTime + value;
+                scheduler.notifyAt(state.scheduledTime);
+            }
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
+
 
     @Override
     public void stop() {
-        //Nothing to stop
+        scheduler.stop();
     }
 
     class RateLimiterState extends State {
+        public long scheduledTime;
         private ComplexEvent lastEvent = null;
 
         @Override
         public boolean canDestroy() {
-            return lastEvent == null;
+            return lastEvent == null && scheduledTime == 0;
         }
 
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("LastEvent", lastEvent);
+            state.put("ScheduledTime", scheduledTime);
             return state;
         }
 
         @Override
         public void restore(Map<String, Object> state) {
             lastEvent = (ComplexEvent) state.get("LastEvent");
+            scheduledTime = (Long) state.get("ScheduledTime");
         }
     }
 }

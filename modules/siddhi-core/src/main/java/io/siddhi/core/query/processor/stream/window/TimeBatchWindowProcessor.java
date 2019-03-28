@@ -338,7 +338,9 @@ public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<Ti
 
     @Override
     public void stop() {
-        //Do nothing
+        if (scheduler != null) {
+            scheduler.stop();
+        }
     }
 
     @Override

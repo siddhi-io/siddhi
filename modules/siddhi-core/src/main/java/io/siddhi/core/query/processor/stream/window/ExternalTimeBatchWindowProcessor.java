@@ -210,8 +210,7 @@ public class ExternalTimeBatchWindowProcessor
                     "timeout, <bool> replaceTimestampWithBatchEndTime), but found " + attributeExpressionExecutors
                     .length + " input attributes");
         }
-        return () -> new WindowState(streamEventClonerHolder, outputExpectsExpiredEvents,
-                schedulerTimeout, commonStartTime);
+        return () -> new WindowState(outputExpectsExpiredEvents, schedulerTimeout, commonStartTime);
     }
 
     /**
@@ -445,8 +444,11 @@ public class ExternalTimeBatchWindowProcessor
         //Do nothing
     }
 
+    @Override
     public void stop() {
-        //Do nothing
+        if (scheduler != null) {
+            scheduler.stop();
+        }
     }
 
     @Override
@@ -487,15 +489,14 @@ public class ExternalTimeBatchWindowProcessor
         private boolean flushed = false;
 
 
-        public WindowState(StreamEventClonerHolder streamEventClonerHolder,
-                           boolean outputExpectsExpiredEvents, long schedulerTimeout, long startTime) {
+        public WindowState(boolean outputExpectsExpiredEvents, long schedulerTimeout, long startTime) {
             this.startTime = startTime;
             if (outputExpectsExpiredEvents || findToBeExecuted) {
-                this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+                this.expiredEventChunk = new ComplexEventChunk<>(false);
             }
             if (schedulerTimeout > 0) {
                 if (expiredEventChunk == null) {
-                    this.expiredEventChunk = new ComplexEventChunk<StreamEvent>(false);
+                    this.expiredEventChunk = new ComplexEventChunk<>(false);
                 }
             }
         }

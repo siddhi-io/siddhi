@@ -73,7 +73,6 @@ import io.siddhi.query.api.expression.Variable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Class to parse {@link OutputCallback}
@@ -280,10 +279,10 @@ public class OutputParser {
         }
     }
 
-    public static OutputRateLimiter constructOutputRateLimiter(String id, OutputRate outputRate, boolean isGroupBy,
-                                                               boolean isWindow, ScheduledExecutorService
-                                                                       scheduledExecutorService, SiddhiQueryContext
-                                                                       siddhiQueryContext) {
+    public static OutputRateLimiter constructOutputRateLimiter(String id, OutputRate outputRate,
+                                                               boolean isGroupBy,
+                                                               boolean isWindow,
+                                                               SiddhiQueryContext siddhiQueryContext) {
         if (outputRate == null) {
             return new PassThroughOutputRateLimiter(id);
         } else if (outputRate instanceof EventOutputRate) {
@@ -309,23 +308,18 @@ public class OutputParser {
         } else if (outputRate instanceof TimeOutputRate) {
             switch (((TimeOutputRate) outputRate).getType()) {
                 case ALL:
-                    return new AllPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue(),
-                            scheduledExecutorService);
+                    return new AllPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue());
                 case FIRST:
                     if (isGroupBy) {
-                        return new FirstGroupByPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue(),
-                                scheduledExecutorService);
+                        return new FirstGroupByPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue());
                     } else {
-                        return new FirstPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue(),
-                                scheduledExecutorService);
+                        return new FirstPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue());
                     }
                 case LAST:
                     if (isGroupBy) {
-                        return new LastGroupByPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue(),
-                                scheduledExecutorService);
+                        return new LastGroupByPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue());
                     } else {
-                        return new LastPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue(),
-                                scheduledExecutorService);
+                        return new LastPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue());
                     }
             }
             //never happens

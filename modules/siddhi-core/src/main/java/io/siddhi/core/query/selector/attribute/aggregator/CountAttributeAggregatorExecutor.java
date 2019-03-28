@@ -114,7 +114,7 @@ public class CountAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return count == 0;
+            return count == 0L;
         }
 
         @Override

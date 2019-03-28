@@ -107,7 +107,6 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                     ComplexEvent aEvent = complexEventChunk.next();
                     complexEventChunk.remove();
                     StreamEvent newEvent = streamEventFactory.newInstance();
-                    ;
                     streamEventConverter.convertComplexEvent(aEvent, newEvent);
                     boolean currentEventMatchedPrevPartitionExecutor = false;
                     for (PartitionExecutor partitionExecutor : partitionExecutors) {
@@ -127,7 +126,6 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                                     currentKey = key;
                                     outputEventChunk.clear();
                                     StreamEvent cloneEvent = streamEventFactory.newInstance();
-                                    ;
                                     streamEventConverter.convertComplexEvent(aEvent, cloneEvent);
                                     outputEventChunk.add(cloneEvent);
                                 }
@@ -149,7 +147,6 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
     @Override
     public void receive(Event event) {
         StreamEvent newEvent = streamEventFactory.newInstance();
-        ;
         streamEventConverter.convertEvent(event, newEvent);
         for (PartitionExecutor partitionExecutor : partitionExecutors) {
             String key = partitionExecutor.execute(newEvent);
@@ -163,7 +160,6 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
     @Override
     public void receive(long timestamp, Object[] data) {
         StreamEvent newEvent = streamEventFactory.newInstance();
-        ;
         streamEventConverter.convertData(timestamp, data, newEvent);
         if (partitionExecutors.size() == 0) {
             send(newEvent);
@@ -180,12 +176,10 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
         if (partitionExecutors.size() == 0) {
             StreamEvent currentEvent;
             StreamEvent firstEvent = streamEventFactory.newInstance();
-            ;
             streamEventConverter.convertEvent(events[0], firstEvent);
             currentEvent = firstEvent;
             for (int i = 1; i < events.length; i++) {
                 StreamEvent nextEvent = streamEventFactory.newInstance();
-                ;
                 streamEventConverter.convertEvent(events[i], nextEvent);
                 currentEvent.setNext(nextEvent);
                 currentEvent = nextEvent;
@@ -197,7 +191,6 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
             StreamEvent currentEvent = null;
             for (Event event : events) {
                 StreamEvent nextEvent = streamEventFactory.newInstance();
-                ;
                 streamEventConverter.convertEvent(event, nextEvent);
                 for (PartitionExecutor partitionExecutor : partitionExecutors) {
                     String currentKey = partitionExecutor.execute(nextEvent);
@@ -228,7 +221,6 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
             StreamEvent currentEvent = null;
             for (Event event : events) {
                 StreamEvent nextEvent = streamEventFactory.newInstance();
-                ;
                 streamEventConverter.convertEvent(event, nextEvent);
                 if (firstEvent == null) {
                     firstEvent = nextEvent;
@@ -244,7 +236,6 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
             StreamEvent currentEvent = null;
             for (Event event : events) {
                 StreamEvent nextEvent = streamEventFactory.newInstance();
-                ;
                 streamEventConverter.convertEvent(event, nextEvent);
                 for (PartitionExecutor partitionExecutor : partitionExecutors) {
                     String currentKey = partitionExecutor.execute(nextEvent);

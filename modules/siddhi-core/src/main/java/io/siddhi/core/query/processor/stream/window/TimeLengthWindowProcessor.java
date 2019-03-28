@@ -206,7 +206,9 @@ public class TimeLengthWindowProcessor extends SlidingFindableWindowProcessor<Ti
 
     @Override
     public void stop() {
-        //Do nothing
+        if (scheduler != null) {
+            scheduler.stop();
+        }
     }
 
     class WindowState extends State {

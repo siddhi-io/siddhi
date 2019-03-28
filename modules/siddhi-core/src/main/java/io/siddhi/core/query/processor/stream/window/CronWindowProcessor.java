@@ -132,8 +132,10 @@ public class CronWindowProcessor extends BatchingWindowProcessor<CronWindowProce
     }
 
     @Override
-    public void start() {
-        scheduleCronJob(cronString);
+    public synchronized void start() {
+        if (scheduler == null) {
+            scheduleCronJob(cronString);
+        }
     }
 
     @Override

@@ -279,7 +279,7 @@ public class EventTestCase {
         context.setSnapshotService(new SnapshotService(context));
         QueryRuntime runtime = QueryParser.parse(query, context, streamDefinitionMap, tableDefinitionMap,
                 windowDefinitionMap, aggregationDefinitionMap, tableMap, aggregationMap, eventWindowMap,
-                lockSynchronizer, "1", false);
+                lockSynchronizer, "1", false, SiddhiConstants.PARTITION_ID_DEFAULT);
         AssertJUnit.assertNotNull(runtime);
         AssertJUnit.assertTrue(runtime.getStreamRuntime() instanceof SingleStreamRuntime);
         AssertJUnit.assertNotNull(runtime.getSelector());

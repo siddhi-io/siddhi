@@ -181,7 +181,7 @@ public class UnionSetAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return set.size() == 0;
+            return set.isEmpty();
         }
 
         @Override

@@ -46,8 +46,8 @@ public abstract class OutputRateLimiter<S extends State> implements ExternalRefe
     protected LatencyTracker latencyTracker;
     protected SiddhiQueryContext siddhiQueryContext;
     protected LockWrapper lockWrapper;
-    private boolean hasCallBack = false;
     protected StateHolder<S> stateHolder;
+    private boolean hasCallBack = false;
 
     public void init(LockWrapper lockWrapper, boolean groupBy, SiddhiQueryContext siddhiQueryContext) {
         this.siddhiQueryContext = siddhiQueryContext;

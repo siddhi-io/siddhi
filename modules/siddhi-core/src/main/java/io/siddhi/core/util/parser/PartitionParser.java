@@ -68,7 +68,7 @@ public class PartitionParser {
                     siddhiAppRuntimeBuilder.getAggregationMap(),
                     siddhiAppRuntimeBuilder.getWindowMap(),
                     siddhiAppRuntimeBuilder.getLockSynchronizer(),
-                    String.valueOf(queryIndex), true);
+                    String.valueOf(queryIndex), true, partitionRuntime.getPartitionName());
             queryIndex++;
             MetaStateEvent metaStateEvent = createMetaEventForPartitioner(queryRuntime.getMetaComplexEvent());
             partitionRuntime.addQuery(queryRuntime);

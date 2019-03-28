@@ -144,7 +144,7 @@ public class DistinctCountAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return distinctValues.size() == 0;
+            return distinctValues.isEmpty();
         }
 
         @Override

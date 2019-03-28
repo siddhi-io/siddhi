@@ -258,7 +258,7 @@ public class SiddhiAppParser {
                             siddhiAppRuntimeBuilder.getAggregationMap(),
                             siddhiAppRuntimeBuilder.getWindowMap(),
                             siddhiAppRuntimeBuilder.getLockSynchronizer(),
-                            String.valueOf(queryIndex), false);
+                            String.valueOf(queryIndex), false, SiddhiConstants.PARTITION_ID_DEFAULT);
                     siddhiAppRuntimeBuilder.addQuery(queryRuntime);
                     siddhiAppContext.addEternalReferencedHolder(queryRuntime);
                     queryIndex++;

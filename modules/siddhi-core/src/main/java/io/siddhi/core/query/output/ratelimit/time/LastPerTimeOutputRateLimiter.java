@@ -32,7 +32,6 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Implementation of {@link OutputRateLimiter} which will collect pre-defined time period and the emit only last
@@ -43,19 +42,18 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter<LastPerTimeO
     private static final Logger log = Logger.getLogger(LastPerTimeOutputRateLimiter.class);
     private final Long value;
     private String id;
-    private ScheduledExecutorService scheduledExecutorService;
     private Scheduler scheduler;
-    private long scheduledTime;
 
-    public LastPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService) {
+    public LastPerTimeOutputRateLimiter(String id, Long value) {
         this.id = id;
         this.value = value;
-        this.scheduledExecutorService = scheduledExecutorService;
     }
-
 
     @Override
     protected StateFactory init() {
+        this.scheduler = SchedulerParser.parse(this, siddhiQueryContext);
+        this.scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
+        this.scheduler.init(lockWrapper, siddhiQueryContext.getName());
         return () -> new RateLimiterState();
     }
 
@@ -70,7 +68,7 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter<LastPerTimeO
                 while (complexEventChunk.hasNext()) {
                     ComplexEvent event = complexEventChunk.next();
                     if (event.getType() == ComplexEvent.Type.TIMER) {
-                        if (event.getTimestamp() >= scheduledTime) {
+                        if (event.getTimestamp() >= state.scheduledTime) {
                             if (state.lastEvent != null) {
                                 ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
                                         (complexEventChunk.isBatch());
@@ -78,8 +76,8 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter<LastPerTimeO
                                 state.lastEvent = null;
                                 outputEventChunks.add(outputEventChunk);
                             }
-                            scheduledTime = scheduledTime + value;
-                            scheduler.notifyAt(scheduledTime);
+                            state.scheduledTime = state.scheduledTime + value;
+                            scheduler.notifyAt(state.scheduledTime);
                         }
                     } else if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type
                             .EXPIRED) {
@@ -98,39 +96,45 @@ public class LastPerTimeOutputRateLimiter extends OutputRateLimiter<LastPerTimeO
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiQueryContext);
-        scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
-        scheduler.init(lockWrapper, siddhiQueryContext.getName());
-        long currentTime = System.currentTimeMillis();
-        scheduledTime = currentTime + value;
-        scheduler.notifyAt(scheduledTime);
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                long currentTime = System.currentTimeMillis();
+                state.scheduledTime = currentTime + value;
+                scheduler.notifyAt(state.scheduledTime);
+            }
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     @Override
     public void stop() {
-        //Nothing to stop
+        scheduler.stop();
     }
-
 
     class RateLimiterState extends State {
 
         private ComplexEvent lastEvent = null;
+        private long scheduledTime;
 
         @Override
         public boolean canDestroy() {
-            return lastEvent == null;
+            return lastEvent == null && scheduledTime == 0;
         }
 
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("LastEvent", lastEvent);
+            state.put("ScheduledTime", scheduledTime);
             return state;
         }
 
         @Override
         public void restore(Map<String, Object> state) {
             lastEvent = (ComplexEvent) state.get("LastEvent");
+            scheduledTime = (Long) state.get("ScheduledTime");
         }
     }
 

@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Implementation of {@link OutputRateLimiter} which will collect pre-defined time period and the emit only last
@@ -46,19 +45,18 @@ public class LastGroupByPerTimeOutputRateLimiter
     private static final Logger log = Logger.getLogger(LastGroupByPerTimeOutputRateLimiter.class);
     private final Long value;
     private String id;
-    private ScheduledExecutorService scheduledExecutorService;
     private Scheduler scheduler;
-    private long scheduledTime;
 
-    public LastGroupByPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService
-            scheduledExecutorService) {
+    public LastGroupByPerTimeOutputRateLimiter(String id, Long value) {
         this.id = id;
         this.value = value;
-        this.scheduledExecutorService = scheduledExecutorService;
     }
 
     @Override
     protected StateFactory<RateLimiterState> init() {
+        this.scheduler = SchedulerParser.parse(this, siddhiQueryContext);
+        this.scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
+        this.scheduler.init(lockWrapper, siddhiQueryContext.getName());
         return () -> new RateLimiterState();
     }
 
@@ -72,7 +70,7 @@ public class LastGroupByPerTimeOutputRateLimiter
                 while (complexEventChunk.hasNext()) {
                     ComplexEvent event = complexEventChunk.next();
                     if (event.getType() == ComplexEvent.Type.TIMER) {
-                        if (event.getTimestamp() >= scheduledTime) {
+                        if (event.getTimestamp() >= state.scheduledTime) {
                             if (state.allGroupByKeyEvents.size() != 0) {
                                 ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
                                         (complexEventChunk.isBatch());
@@ -82,8 +80,8 @@ public class LastGroupByPerTimeOutputRateLimiter
                                 outputEventChunks.add(outputEventChunk);
                                 state.allGroupByKeyEvents.clear();
                             }
-                            scheduledTime = scheduledTime + value;
-                            scheduler.notifyAt(scheduledTime);
+                            state.scheduledTime = state.scheduledTime + value;
+                            scheduler.notifyAt(state.scheduledTime);
                         }
                     } else if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type
                             .EXPIRED) {
@@ -105,39 +103,45 @@ public class LastGroupByPerTimeOutputRateLimiter
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiQueryContext);
-        scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
-        scheduler.init(lockWrapper, siddhiQueryContext.getName());
-        long currentTime = System.currentTimeMillis();
-        scheduledTime = currentTime + value;
-        scheduler.notifyAt(scheduledTime);
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                long currentTime = System.currentTimeMillis();
+                state.scheduledTime = currentTime + value;
+                scheduler.notifyAt(state.scheduledTime);
+            }
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     @Override
     public void stop() {
-        //Nothing to stop
+        scheduler.stop();
     }
-
 
     class RateLimiterState extends State {
 
+        public long scheduledTime;
         private Map<String, ComplexEvent> allGroupByKeyEvents = new LinkedHashMap<String, ComplexEvent>();
 
         @Override
         public boolean canDestroy() {
-            return allGroupByKeyEvents.size() == 0;
+            return allGroupByKeyEvents.size() == 0 && scheduledTime == 0;
         }
 
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("AllGroupByKeyEvents", allGroupByKeyEvents);
+            state.put("ScheduledTime", scheduledTime);
             return state;
         }
 
         @Override
         public void restore(Map<String, Object> state) {
             allGroupByKeyEvents = (Map<String, ComplexEvent>) state.get("AllGroupByKeyEvents");
+            scheduledTime = (Long) state.get("ScheduledTime");
         }
     }
 

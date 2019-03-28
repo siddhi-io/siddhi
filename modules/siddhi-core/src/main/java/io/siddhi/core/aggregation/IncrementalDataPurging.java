@@ -144,11 +144,11 @@ public class IncrementalDataPurging implements Runnable {
             }
             if (purgingEnabled) {
                 // If interval is defined, default value of 15 min will be replaced by user input value
-                if (purge.getElement(SiddhiConstants.NAMESPACE_INTERVAL) != null) {
-                    String interval = purge.getElement(SiddhiConstants.NAMESPACE_INTERVAL);
+                if (purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_INTERVAL) != null) {
+                    String interval = purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_INTERVAL);
                     purgeExecutionInterval = timeToLong(interval);
                 }
-                List<Annotation> retentions = purge.getAnnotations(SiddhiConstants.NAMESPACE_RETENTION);
+                List<Annotation> retentions = purge.getAnnotations(SiddhiConstants.NAMESPACE_RETENTION_PERIOD);
                 if (retentions != null && !retentions.isEmpty()) {
                     Annotation retention = retentions.get(0);
                     List<Element> elements = retention.getElements();

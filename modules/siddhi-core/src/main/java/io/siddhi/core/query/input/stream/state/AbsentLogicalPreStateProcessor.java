@@ -344,8 +344,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
 
     @Override
     public void stop() {
-        // Scheduler will be stopped automatically
-        // Nothing to stop here
+        scheduler.stop();
     }
 
     public boolean partnerCanProceed(StateEvent stateEvent) {

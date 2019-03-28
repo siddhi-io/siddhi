@@ -45,21 +45,17 @@ public class WindowedPerSnapshotOutputRateLimiter
     private final Long value;
     private Comparator comparator;
     private Scheduler scheduler;
-    private long scheduledTime;
 
     public WindowedPerSnapshotOutputRateLimiter(Long value,
                                                 WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
                                                 boolean groupBy, SiddhiQueryContext siddhiQueryContext) {
         super(wrappedSnapshotOutputRateLimiter, siddhiQueryContext, groupBy);
         this.value = value;
-        this.comparator = new Comparator<ComplexEvent>() {
-            @Override
-            public int compare(ComplexEvent event1, ComplexEvent event2) {
-                if (Arrays.equals(event1.getOutputData(), event2.getOutputData())) {
-                    return 0;
-                } else {
-                    return 1;
-                }
+        this.comparator = (Comparator<ComplexEvent>) (event1, event2) -> {
+            if (Arrays.equals(event1.getOutputData(), event2.getOutputData())) {
+                return 0;
+            } else {
+                return 1;
             }
         };
     }
@@ -67,6 +63,9 @@ public class WindowedPerSnapshotOutputRateLimiter
 
     @Override
     protected StateFactory<RateLimiterState> init() {
+        this.scheduler = SchedulerParser.parse(this, siddhiQueryContext);
+        this.scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
+        this.scheduler.init(lockWrapper, siddhiQueryContext.getName());
         return () -> new RateLimiterState();
     }
 
@@ -113,52 +112,58 @@ public class WindowedPerSnapshotOutputRateLimiter
 
     private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
                                 RateLimiterState state) {
-        if (event.getTimestamp() >= scheduledTime) {
+        if (event.getTimestamp() >= state.scheduledTime) {
             ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
             for (ComplexEvent complexEvent : state.eventList) {
                 outputEventChunk.add(cloneComplexEvent(complexEvent));
             }
             outputEventChunks.add(outputEventChunk);
-            scheduledTime = scheduledTime + value;
-            scheduler.notifyAt(scheduledTime);
+            state.scheduledTime = state.scheduledTime + value;
+            scheduler.notifyAt(state.scheduledTime);
         }
     }
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiQueryContext);
-        scheduler.setStreamEventFactory(new StreamEventFactory(0, 0,
-                0));
-        scheduler.init(lockWrapper, siddhiQueryContext.getName());
-        long currentTime = System.currentTimeMillis();
-        scheduledTime = currentTime + value;
-        scheduler.notifyAt(scheduledTime);
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                long currentTime = System.currentTimeMillis();
+                state.scheduledTime = currentTime + value;
+                scheduler.notifyAt(state.scheduledTime);
+            }
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     @Override
     public void stop() {
-        //Nothing to stop
+        scheduler.stop();
     }
 
     class RateLimiterState extends State {
 
-        List<ComplexEvent> eventList = new LinkedList<ComplexEvent>();
+        private List<ComplexEvent> eventList = new LinkedList<>();
+        private long scheduledTime;
 
         @Override
         public boolean canDestroy() {
-            return eventList.isEmpty();
+            return eventList.isEmpty() && scheduledTime == 0;
         }
 
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("EventList", eventList);
+            state.put("ScheduledTime", scheduledTime);
             return state;
         }
 
         @Override
         public void restore(Map<String, Object> state) {
             eventList = (List<ComplexEvent>) state.get("EventList");
+            scheduledTime = (Long) state.get("ScheduledTime");
         }
     }
 

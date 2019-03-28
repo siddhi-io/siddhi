@@ -52,22 +52,22 @@ public class FirstPerEventOutputRateLimiter
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
-                    if (state.counter == 0) {
-                        complexEventChunk.remove();
-                        ComplexEventChunk<ComplexEvent> firstPerEventChunk = new ComplexEventChunk<ComplexEvent>
-                                (complexEventChunk.isBatch());
-                        firstPerEventChunk.add(event);
-                        outputEventChunks.add(firstPerEventChunk);
-                    }
-                    if (++state.counter == value) {
-                        state.counter = 0;
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
+                        if (state.counter == 0) {
+                            complexEventChunk.remove();
+                            ComplexEventChunk<ComplexEvent> firstPerEventChunk = new ComplexEventChunk<ComplexEvent>
+                                    (complexEventChunk.isBatch());
+                            firstPerEventChunk.add(event);
+                            outputEventChunks.add(firstPerEventChunk);
+                        }
+                        if (++state.counter == value) {
+                            state.counter = 0;
+                        }
                     }
                 }
             }
-        }
         } finally {
             stateHolder.returnState(state);
         }

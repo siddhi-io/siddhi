@@ -91,21 +91,18 @@ public class MaxAttributeAggregatorExecutor
         }
         returnType = attributeExpressionExecutors[0].getReturnType();
         boolean finalTrackFutureStates = trackFutureStates;
-        return new StateFactory<MaxAggregatorState>() {
-            @Override
-            public MaxAggregatorState createNewState() {
-                switch (returnType) {
-                    case FLOAT:
-                        return new MaxAttributeAggregatorStateFloat(finalTrackFutureStates);
-                    case INT:
-                        return new MaxAttributeAggregatorStateInt(finalTrackFutureStates);
-                    case LONG:
-                        return new MaxAttributeAggregatorStateLong(finalTrackFutureStates);
-                    case DOUBLE:
-                        return new MaxAttributeAggregatorStateDouble(finalTrackFutureStates);
-                    default:
-                        throw new OperationNotSupportedException("Max not supported for " + returnType);
-                }
+        return () -> {
+            switch (returnType) {
+                case FLOAT:
+                    return new MaxAttributeAggregatorStateFloat(finalTrackFutureStates);
+                case INT:
+                    return new MaxAttributeAggregatorStateInt(finalTrackFutureStates);
+                case LONG:
+                    return new MaxAttributeAggregatorStateLong(finalTrackFutureStates);
+                case DOUBLE:
+                    return new MaxAttributeAggregatorStateDouble(finalTrackFutureStates);
+                default:
+                    throw new OperationNotSupportedException("Max not supported for " + returnType);
             }
         };
     }
@@ -201,7 +198,7 @@ public class MaxAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return (maxDeque == null || maxDeque.size() == 0) && maxValue == null;
+            return (maxDeque == null || maxDeque.isEmpty()) && maxValue == null;
         }
 
         @Override
@@ -277,7 +274,7 @@ public class MaxAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return (maxDeque == null || maxDeque.size() == 0) && maxValue == null;
+            return (maxDeque == null || maxDeque.isEmpty()) && maxValue == null;
         }
 
         @Override
@@ -354,7 +351,7 @@ public class MaxAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return (maxDeque == null || maxDeque.size() == 0) && maxValue == null;
+            return (maxDeque == null || maxDeque.isEmpty()) && maxValue == null;
         }
 
         @Override
@@ -431,7 +428,7 @@ public class MaxAttributeAggregatorExecutor
 
         @Override
         public boolean canDestroy() {
-            return (maxDeque == null || maxDeque.size() == 0) && maxValue == null;
+            return (maxDeque == null || maxDeque.isEmpty()) && maxValue == null;
         }
 
         @Override

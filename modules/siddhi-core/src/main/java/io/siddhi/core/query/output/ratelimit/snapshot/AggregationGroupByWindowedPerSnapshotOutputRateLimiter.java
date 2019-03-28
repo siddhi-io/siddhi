@@ -22,6 +22,8 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
+import io.siddhi.core.event.stream.StreamEventFactory;
+import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
 import java.util.ArrayList;
@@ -51,6 +53,9 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
 
     @Override
     protected StateFactory<AggregationRateLimiterState> init() {
+        this.scheduler = SchedulerParser.parse(this, siddhiQueryContext);
+        this.scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
+        this.scheduler.init(lockWrapper, siddhiQueryContext.getName());
         return () -> new AggregationGroupByRateLimiterState();
     }
 
@@ -119,10 +124,10 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
 
     private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
                                 AggregationGroupByRateLimiterState state) {
-        if (event.getTimestamp() >= scheduledTime) {
+        if (event.getTimestamp() >= state.scheduledTime) {
             constructOutputChunk(outputEventChunks, state);
-            scheduledTime = scheduledTime + value;
-            scheduler.notifyAt(scheduledTime);
+            state.scheduledTime = state.scheduledTime + value;
+            scheduler.notifyAt(state.scheduledTime);
         }
     }
 
@@ -146,6 +151,10 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         outputEventChunks.add(outputEventChunk);
     }
 
+    @Override
+    public void stop() {
+        scheduler.stop();
+    }
 
     class AggregationGroupByRateLimiterState extends AggregationRateLimiterState {
 
@@ -153,13 +162,13 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         private Map<String, Map<Integer, Object>> groupByAggregateAttributeValueMap;
 
         public AggregationGroupByRateLimiterState() {
-            groupByAggregateAttributeValueMap = new HashMap<String, Map<Integer, Object>>();
-            eventList = new LinkedList<GroupedComplexEvent>();
+            groupByAggregateAttributeValueMap = new HashMap<>();
+            eventList = new LinkedList<>();
         }
 
         @Override
         public boolean canDestroy() {
-            return groupByAggregateAttributeValueMap.isEmpty() && eventList.isEmpty();
+            return groupByAggregateAttributeValueMap.isEmpty() && eventList.isEmpty() && scheduledTime == 0;
         }
 
         @Override
@@ -167,6 +176,7 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
             Map<String, Object> state = new HashMap<>();
             state.put("EventList", eventList);
             state.put("GroupByAggregateAttributeValueMap", groupByAggregateAttributeValueMap);
+            state.put("ScheduledTime", scheduledTime);
             return state;
         }
 
@@ -175,6 +185,7 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
             eventList = (List<GroupedComplexEvent>) state.get("EventList");
             groupByAggregateAttributeValueMap = (Map<String, Map<Integer, Object>>) state.get
                     ("GroupByAggregateAttributeValueMap");
+            scheduledTime = (Long) state.get("ScheduledTime");
         }
     }
 }
