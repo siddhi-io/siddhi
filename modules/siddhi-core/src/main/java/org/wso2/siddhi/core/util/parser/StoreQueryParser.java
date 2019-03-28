@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.event.stream.MetaStreamEvent.EventType;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import org.wso2.siddhi.core.exception.QueryableRecordTableException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.StoreQueryCreationException;
 import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.DeleteStoreQueryRuntime;
@@ -287,7 +288,8 @@ public class StoreQueryParser {
             try {
                 return constructOptimizedStoreQueryRuntime(table, storeQuery, siddhiAppContext, tableMap,
                         queryName, metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors);
-            } catch (QueryableRecordTableException e) {
+            //In case of error, we try to create the regular store query runtime.
+            } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Store Query optimization failed for table: "
                             + table.getTableDefinition().getId() + ". Creating Store Query runtime in normal mode. " +
