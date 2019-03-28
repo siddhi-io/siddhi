@@ -27,6 +27,7 @@ import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import org.wso2.siddhi.core.util.lock.LockWrapper;
 import org.wso2.siddhi.core.util.snapshot.Snapshotable;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +68,7 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
         } else if (lockWrapper != null) {
             lockWrapper.unlock();
         }
-        if (siddhiAppContext.isStatsEnabled() && latencyTracker != null) {
+        if (Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 && latencyTracker != null) {
             latencyTracker.markOut();
         }
         if (lockWrapper != null) {

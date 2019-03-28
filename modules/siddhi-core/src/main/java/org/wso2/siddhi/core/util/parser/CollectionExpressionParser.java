@@ -64,6 +64,7 @@ import org.wso2.siddhi.query.api.expression.math.Multiply;
 import org.wso2.siddhi.query.api.expression.math.Subtract;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -273,6 +274,15 @@ public class CollectionExpressionParser {
         } else if (expression instanceof Constant) {
             return new BasicCollectionExpression(expression, NON);
         } else if (expression instanceof Variable) {
+            if (((Variable) expression).getStreamId() == null) {
+                List<String> attributeNameList = Arrays.asList(matchingMetaInfoHolder.getMatchingStreamDefinition().
+                        getAttributeNameArray());
+                if (attributeNameList.contains(((Variable) expression).getAttributeName())) {
+                    String streamId = matchingMetaInfoHolder.getMatchingStreamDefinition().getId();
+                    ((Variable) expression).setStreamId(streamId);
+                }
+            }
+
             if (isCollectionVariable(matchingMetaInfoHolder, (Variable) expression)) {
                 if (indexedEventHolder.isAttributeIndexed(((Variable) expression).getAttributeName())) {
                     return new AttributeCollectionExpression(expression, ((Variable) expression).getAttributeName(),

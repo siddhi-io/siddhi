@@ -23,6 +23,7 @@ import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.statistics.LatencyTracker;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 import org.wso2.siddhi.core.util.transport.DynamicOptions;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.siddhi.core.util.transport.TemplateBuilder;
@@ -125,14 +126,16 @@ public abstract class SinkMapper {
             for (ArrayList<Event> eventList : eventMap.values()) {
                 try {
                     trpDynamicOptions.set(new DynamicOptions(eventList.get(0)));
-                    if (mapperLatencyTracker != null && siddhiAppContext.isStatsEnabled()) {
+                    if (mapperLatencyTracker != null &&
+                            Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                         mapperLatencyTracker.markIn();
                     }
                     mapAndSend(eventList.toArray(new Event[eventList.size()]), optionHolder, templateBuilderMap,
                             sinkListener);
                 } finally {
                     trpDynamicOptions.remove();
-                    if (mapperLatencyTracker != null && siddhiAppContext.isStatsEnabled()) {
+                    if (mapperLatencyTracker != null &&
+                            Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                         mapperLatencyTracker.markOut();
                     }
                 }
@@ -140,13 +143,15 @@ public abstract class SinkMapper {
         } else {
             try {
                 trpDynamicOptions.set(new DynamicOptions(events[0]));
-                if (mapperLatencyTracker != null && siddhiAppContext.isStatsEnabled()) {
+                if (mapperLatencyTracker != null &&
+                        Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     mapperLatencyTracker.markIn();
                 }
                 mapAndSend(events, optionHolder, templateBuilderMap, sinkListener);
             } finally {
                 trpDynamicOptions.remove();
-                if (mapperLatencyTracker != null && siddhiAppContext.isStatsEnabled()) {
+                if (mapperLatencyTracker != null &&
+                        Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     mapperLatencyTracker.markOut();
                 }
             }

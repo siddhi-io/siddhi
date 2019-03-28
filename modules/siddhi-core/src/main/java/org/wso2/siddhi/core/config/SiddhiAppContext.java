@@ -26,6 +26,7 @@ import org.wso2.siddhi.core.util.ThreadBarrier;
 import org.wso2.siddhi.core.util.extension.holder.EternalReferencedHolder;
 import org.wso2.siddhi.core.util.snapshot.SnapshotService;
 import org.wso2.siddhi.core.util.statistics.StatisticsManager;
+import org.wso2.siddhi.core.util.statistics.metrics.Level;
 import org.wso2.siddhi.core.util.timestamp.TimestampGenerator;
 
 import java.beans.ExceptionListener;
@@ -47,7 +48,6 @@ public class SiddhiAppContext {
     private String name;
     private boolean playback;
     private boolean enforceOrder;
-    private boolean statsEnabled = false;
     private StatisticsManager statisticsManager = null;
 
     private ExecutorService executorService;
@@ -66,11 +66,13 @@ public class SiddhiAppContext {
     private List<String> includedMetrics;
     private boolean transportChannelCreationEnabled;
     private List<Scheduler> schedulerList;
+    private Level rootMetricsLevel;
 
     public SiddhiAppContext() {
         this.eternalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
         this.schedulerList = new ArrayList<Scheduler>();
+        this.rootMetricsLevel = Level.BASIC;
     }
 
     public SiddhiContext getSiddhiContext() {
@@ -103,14 +105,6 @@ public class SiddhiAppContext {
 
     public void setEnforceOrder(boolean enforceOrder) {
         this.enforceOrder = enforceOrder;
-    }
-
-    public boolean isStatsEnabled() {
-        return statsEnabled;
-    }
-
-    public void setStatsEnabled(boolean statsEnabled) {
-        this.statsEnabled = statsEnabled;
     }
 
     public StatisticsManager getStatisticsManager() {
@@ -247,5 +241,13 @@ public class SiddhiAppContext {
 
     public List<Scheduler> getSchedulerList() {
         return schedulerList;
+    }
+
+    public Level getRootMetricsLevel() {
+        return rootMetricsLevel;
+    }
+
+    public void setRootMetricsLevel(Level rootMetricsLevel) {
+        this.rootMetricsLevel = rootMetricsLevel;
     }
 }
