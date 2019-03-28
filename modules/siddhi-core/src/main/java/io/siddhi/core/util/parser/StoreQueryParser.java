@@ -29,6 +29,7 @@ import io.siddhi.core.event.stream.MetaStreamEvent.EventType;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import io.siddhi.core.exception.QueryableRecordTableException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.exception.StoreQueryCreationException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.DeleteStoreQueryRuntime;
@@ -299,7 +300,8 @@ public class StoreQueryParser {
             try {
                 return constructOptimizedStoreQueryRuntime(table, storeQuery, tableMap,
                         metaPosition, onCondition, metaStreamEvent, variableExpressionExecutors, siddhiQueryContext);
-            } catch (QueryableRecordTableException e) {
+            //In case of error, we try to create the regular store query runtime.
+            } catch (SiddhiAppCreationException | QueryableRecordTableException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Store Query optimization failed for table: "
                             + table.getTableDefinition().getId() + ". Creating Store Query runtime in normal mode. " +
