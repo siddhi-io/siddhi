@@ -123,6 +123,7 @@
             <class name="io.siddhi.core.window.TimeLengthWindowTestCase"/>
             <class name="io.siddhi.core.window.WindowDefinitionTestCase"/>
             <class name="io.siddhi.core.window.BatchWindowTestCase"/>
+            <class name="io.siddhi.core.window.SessionWindowTestCase"/>
 
             <class name="io.siddhi.core.query.BooleanCompareTestCase"/>
             <class name="io.siddhi.core.query.FilterTestCase1"/>
