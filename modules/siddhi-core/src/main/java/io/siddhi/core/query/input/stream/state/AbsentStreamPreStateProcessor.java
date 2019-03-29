@@ -273,7 +273,7 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
     }
 
     @Override
-    public void start() {
+    public void partitionCreated() {
         // Start automatically only if it is the start state and 'for' time is defined
         // Otherwise, scheduler will be started in the addState method
         LogicalStreamPreState state = (LogicalStreamPreState) stateHolder.getState();
@@ -290,11 +290,6 @@ public class AbsentStreamPreStateProcessor extends StreamPreStateProcessor imple
         } finally {
             stateHolder.returnState(state);
         }
-    }
-
-    @Override
-    public void stop() {
-        scheduler.stop();
     }
 
     class LogicalStreamPreState extends StreamPreState {

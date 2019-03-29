@@ -88,9 +88,7 @@ public abstract class SnapshotOutputRateLimiter<S extends State> implements Sche
         }
     }
 
-    public abstract void start();
-
-    public abstract void stop();
+    public abstract void partitionCreated();
 
     public void setQueryLock(LockWrapper lockWrapper) {
         this.lockWrapper = lockWrapper;

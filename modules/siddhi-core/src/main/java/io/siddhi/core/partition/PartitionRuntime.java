@@ -341,7 +341,7 @@ public class PartitionRuntime {
         }
     }
 
-    public void start() {
+    public void initPartition() {
         PartitionState state = stateHolder.getState();
         try {
             Long time = state.partitionKeys.get(SiddhiAppContext.getPartitionFlowId());
@@ -350,7 +350,7 @@ public class PartitionRuntime {
                     time = state.partitionKeys.get(SiddhiAppContext.getPartitionFlowId());
                     if (time == null) {
                         for (QueryRuntime queryRuntime : queryRuntimeList) {
-                            queryRuntime.start();
+                            queryRuntime.initPartition();
                         }
                     }
                     state.partitionKeys.put(SiddhiAppContext.getPartitionFlowId(),

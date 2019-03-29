@@ -262,7 +262,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
         if (key != null) {
             SiddhiAppContext.startPartitionFlow(key);
             try {
-                partitionRuntime.start();
+                partitionRuntime.initPartition();
                 streamJunctionMap.get(streamId).sendEvent(event);
             } finally {
                 SiddhiAppContext.stopPartitionFlow();

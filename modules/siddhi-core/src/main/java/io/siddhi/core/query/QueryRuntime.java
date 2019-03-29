@@ -156,15 +156,18 @@ public class QueryRuntime implements MemoryCalculable, ExternalReferencedHolder 
         return selector;
     }
 
-    public void start() {
+    public void initPartition() {
         if (streamRuntime instanceof StateStreamRuntime) {
-            ((StateStreamRuntime) streamRuntime).start();
+            ((StateStreamRuntime) streamRuntime).initPartition();
         }
-        outputRateLimiter.start();
+        outputRateLimiter.partitionCreated();
+    }
+
+    public void start() {
+        initPartition();
     }
 
     @Override
     public void stop() {
-        outputRateLimiter.stop();
     }
 }

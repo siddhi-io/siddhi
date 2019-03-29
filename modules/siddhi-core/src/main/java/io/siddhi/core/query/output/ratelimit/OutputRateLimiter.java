@@ -20,10 +20,10 @@ package io.siddhi.core.query.output.ratelimit;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
+import io.siddhi.core.partition.PartitionCreationListener;
 import io.siddhi.core.query.input.MultiProcessStreamReceiver;
 import io.siddhi.core.query.output.callback.OutputCallback;
 import io.siddhi.core.query.output.callback.QueryCallback;
-import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
@@ -39,7 +39,7 @@ import java.util.List;
  *
  * @param <S> current state of the RateLimiter
  */
-public abstract class OutputRateLimiter<S extends State> implements ExternalReferencedHolder {
+public abstract class OutputRateLimiter<S extends State> implements PartitionCreationListener {
 
     protected List<QueryCallback> queryCallbacks = new ArrayList<QueryCallback>();
     protected OutputCallback outputCallback = null;

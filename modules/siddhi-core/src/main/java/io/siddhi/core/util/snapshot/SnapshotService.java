@@ -752,12 +752,6 @@ public class SnapshotService {
     }
 
     private void waitForSystemStabilization() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new SiddhiAppRuntimeException("Stabilization of Siddhi App " + siddhiAppContext.getName() +
-                    " for snapshot/restore interrupted. " + e.getMessage(), e);
-        }
         int retryCount = 100;
         int activeThreads = siddhiAppContext.getThreadBarrier().getActiveThreads();
         while (activeThreads != 0 && retryCount > 0) {

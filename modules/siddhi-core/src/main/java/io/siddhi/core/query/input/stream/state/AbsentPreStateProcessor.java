@@ -18,13 +18,13 @@
 
 package io.siddhi.core.query.input.stream.state;
 
+import io.siddhi.core.partition.PartitionCreationListener;
 import io.siddhi.core.query.processor.SchedulingProcessor;
-import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 
 /**
  * PreStateProcessor of events not received by Siddhi.
  */
-public interface AbsentPreStateProcessor extends SchedulingProcessor, ExternalReferencedHolder {
+public interface AbsentPreStateProcessor extends SchedulingProcessor, PartitionCreationListener {
 
     /**
      * Update the timestamp of the event arrived to this processor and met the filter conditions.

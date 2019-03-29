@@ -74,13 +74,8 @@ public class LastPerEventOutputRateLimiter extends OutputRateLimiter<LastPerEven
     }
 
     @Override
-    public void start() {
-        //Nothing to start
-    }
-
-    @Override
-    public void stop() {
-        //Nothing to stop
+    public void partitionCreated() {
+        //Nothing to be done
     }
 
 

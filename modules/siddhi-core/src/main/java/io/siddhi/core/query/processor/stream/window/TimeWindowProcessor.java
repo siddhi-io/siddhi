@@ -186,14 +186,12 @@ public class TimeWindowProcessor extends SlidingFindableWindowProcessor<TimeWind
 
     @Override
     public void stop() {
-        if (scheduler != null) {
-            scheduler.stop();
-        }
+        //Do nothing
     }
 
     class WindowState extends State {
-        private SnapshotableStreamEventQueue expiredEventQueue;
-        private volatile long lastTimestamp = Long.MIN_VALUE;
+        protected SnapshotableStreamEventQueue expiredEventQueue;
+        protected volatile long lastTimestamp = Long.MIN_VALUE;
 
 
         WindowState(StreamEventClonerHolder streamEventClonerHolder) {

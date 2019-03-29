@@ -151,11 +151,6 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         outputEventChunks.add(outputEventChunk);
     }
 
-    @Override
-    public void stop() {
-        scheduler.stop();
-    }
-
     class AggregationGroupByRateLimiterState extends AggregationRateLimiterState {
 
         private List<GroupedComplexEvent> eventList;

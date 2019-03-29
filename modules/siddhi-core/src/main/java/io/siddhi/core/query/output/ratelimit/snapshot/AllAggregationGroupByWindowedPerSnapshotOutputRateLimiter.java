@@ -124,7 +124,7 @@ public class AllAggregationGroupByWindowedPerSnapshotOutputRateLimiter
     }
 
     @Override
-    public void start() {
+    public void partitionCreated() {
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
@@ -135,11 +135,6 @@ public class AllAggregationGroupByWindowedPerSnapshotOutputRateLimiter
         } finally {
             stateHolder.returnState(state);
         }
-    }
-
-    @Override
-    public void stop() {
-        scheduler.stop();
     }
 
     private class LastEventHolder {

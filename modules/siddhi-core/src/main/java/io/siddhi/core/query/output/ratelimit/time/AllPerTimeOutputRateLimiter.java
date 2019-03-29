@@ -98,7 +98,7 @@ public class AllPerTimeOutputRateLimiter
     }
 
     @Override
-    public void start() {
+    public void partitionCreated() {
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
@@ -109,11 +109,6 @@ public class AllPerTimeOutputRateLimiter
         } finally {
             stateHolder.returnState(state);
         }
-    }
-
-    @Override
-    public void stop() {
-        scheduler.stop();
     }
 
     class RateLimiterState extends State {

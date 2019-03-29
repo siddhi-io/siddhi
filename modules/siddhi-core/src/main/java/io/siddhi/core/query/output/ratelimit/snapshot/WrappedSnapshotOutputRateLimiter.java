@@ -127,15 +127,9 @@ public class WrappedSnapshotOutputRateLimiter<S extends State> extends OutputRat
 
     }
 
-
     @Override
-    public void start() {
-        outputRateLimiter.start();
-    }
-
-    @Override
-    public void stop() {
-        outputRateLimiter.stop();
+    public void partitionCreated() {
+        outputRateLimiter.partitionCreated();
     }
 
     @Override

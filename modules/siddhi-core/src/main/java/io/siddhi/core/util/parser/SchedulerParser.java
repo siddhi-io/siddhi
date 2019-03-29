@@ -42,6 +42,7 @@ public class SchedulerParser {
 
         Scheduler scheduler = new Scheduler(singleThreadEntryValve, siddhiQueryContext);
         siddhiQueryContext.getSiddhiAppContext().addScheduler(scheduler);
+        siddhiQueryContext.getSiddhiAppContext().addEternalReferencedHolder(scheduler);
         return scheduler;
     }
 }

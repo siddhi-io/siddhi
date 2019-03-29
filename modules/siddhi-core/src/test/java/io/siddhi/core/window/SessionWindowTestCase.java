@@ -119,8 +119,8 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("Session window's 1st parameter, session gap should be a constant parameter"
-                            + " attribute but found a dynamic attribute io.siddhi.core.executor.VariableExpressionExecutor",
-                    e.getCause().getMessage());
+                    + " attribute but found a dynamic attribute " +
+                    "io.siddhi.core.executor.VariableExpressionExecutor", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {

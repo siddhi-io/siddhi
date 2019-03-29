@@ -116,8 +116,7 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
             throw new SiddhiAppValidationException("Delay window should only have one parameter (<int|long|time> " +
                     "delayTime), but found " + attributeExpressionExecutors.length + " input attributes");
         }
-        return () -> new WindowState(streamEventClonerHolder);
-
+        return () -> new DelayedWindowState(streamEventClonerHolder);
     }
 
     @Override
@@ -145,7 +144,6 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
 
                 if (streamEvent.getType() == StreamEvent.Type.CURRENT) {
                     state.delayedEventQueue.add(streamEvent);
-
                     if (state.lastTimestamp < streamEvent.getTimestamp()) {
                         getScheduler().notifyAt(streamEvent.getTimestamp() + delayInMilliSeconds);
                         state.lastTimestamp = streamEvent.getTimestamp();
@@ -191,12 +189,14 @@ public class DelayWindowProcessor extends TimeWindowProcessor {
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
             state.put("DelayedEventQueue", delayedEventQueue.getSnapshot());
+            state.put("LastTimestamp", lastTimestamp);
             return state;
         }
 
         @Override
         public void restore(Map<String, Object> state) {
             delayedEventQueue.restore((SnapshotStateList) state.get("DelayedEventQueue"));
+            lastTimestamp = (long) state.get("LastTimestamp");
         }
 
         @Override

@@ -87,13 +87,8 @@ public class LastGroupByPerEventOutputRateLimiter extends
     }
 
     @Override
-    public void start() {
-        //Nothing to start
-    }
-
-    @Override
-    public void stop() {
-        //Nothing to stop
+    public void partitionCreated() {
+        //Nothing to be done
     }
 
     class RateLimiterState extends State {

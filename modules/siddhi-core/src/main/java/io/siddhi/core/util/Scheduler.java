@@ -24,6 +24,7 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventFactory;
+import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
@@ -43,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Scheduler implementation to take periodic snapshots
  */
-public class Scheduler {
+public class Scheduler implements ExternalReferencedHolder {
 
     private static final Logger log = Logger.getLogger(Scheduler.class);
     private final ThreadBarrier threadBarrier;
@@ -251,6 +252,10 @@ public class Scheduler {
 
     public void stop() {
         stop = true;
+    }
+
+    public void start() {
+        stop = false;
     }
 
     private class EventCaller implements Runnable {

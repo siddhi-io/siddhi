@@ -22,12 +22,12 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.partition.PartitionCreationListener;
 import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.input.stream.state.runtime.InnerStateRuntime;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
-import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 
 import java.util.List;
 
@@ -81,11 +81,11 @@ public class StateStreamRuntime implements StreamRuntime {
         this.startupPreStateProcessors = startupPreStateProcessors;
     }
 
-    public void start() {
+    public void initPartition() {
         innerStateRuntime.init();
         for (PreStateProcessor preStateProcessor : startupPreStateProcessors) {
-            if (preStateProcessor instanceof ExternalReferencedHolder) {
-                ((ExternalReferencedHolder) preStateProcessor).start();
+            if (preStateProcessor instanceof PartitionCreationListener) {
+                ((PartitionCreationListener) preStateProcessor).partitionCreated();
             }
         }
     }

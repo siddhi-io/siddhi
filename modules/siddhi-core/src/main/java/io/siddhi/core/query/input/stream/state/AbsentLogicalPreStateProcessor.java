@@ -321,7 +321,7 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
     }
 
     @Override
-    public void start() {
+    public void partitionCreated() {
         StreamPreState state = stateHolder.getState();
         try {
             if (!state.isStarted()) {
@@ -340,11 +340,6 @@ public class AbsentLogicalPreStateProcessor extends LogicalPreStateProcessor imp
         } finally {
             stateHolder.returnState(state);
         }
-    }
-
-    @Override
-    public void stop() {
-        scheduler.stop();
     }
 
     public boolean partnerCanProceed(StateEvent stateEvent) {

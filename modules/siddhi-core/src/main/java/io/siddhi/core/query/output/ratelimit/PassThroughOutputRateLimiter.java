@@ -45,12 +45,8 @@ public class PassThroughOutputRateLimiter extends OutputRateLimiter {
     }
 
     @Override
-    public void start() {
-        //Nothing to start
+    public void partitionCreated() {
+        //Nothing to be done
     }
 
-    @Override
-    public void stop() {
-        //Nothing to stop
-    }
 }
