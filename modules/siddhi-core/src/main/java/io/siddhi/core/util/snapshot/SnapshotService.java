@@ -45,8 +45,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Service level implementation to take/restore snapshots of processing elements.
- * Memory   : PartitionId + QueryName + ElementId + PartitionKey + Item
- * Snapshot : PartitionId + PartitionKey + QueryName + ElementId + Item
+ * Memory   : PartitionId + QueryName + ElementId + PartitionGroupByKey + Item
+ * Snapshot : PartitionId + PartitionGroupByKey + QueryName + ElementId + Item
  */
 public class SnapshotService {
     private static final Logger log = Logger.getLogger(SnapshotService.class);
@@ -138,12 +138,12 @@ public class SnapshotService {
                                                     partitionIdSnapshot = fullSnapshot.computeIfAbsent(
                                                     partitionIdState.getKey(),
                                                     k -> new HashMap<>());
-                                            Map<String, Map<String, Map<String, Object>>> partitionKeySnapshot =
+                                            Map<String, Map<String, Map<String, Object>>> partitionGroupByKeySnapshot =
                                                     partitionIdSnapshot.computeIfAbsent(
                                                             partitionAndGroupByKey,
                                                             k -> new HashMap<>());
                                             Map<String, Map<String, Object>> querySnapshot =
-                                                    partitionKeySnapshot.computeIfAbsent(
+                                                    partitionGroupByKeySnapshot.computeIfAbsent(
                                                             queryState.getKey(),
                                                             k -> new HashMap<>());
                                             Map<String, Object> elementSnapshot =
@@ -355,10 +355,10 @@ public class SnapshotService {
                     if (partitionStateHolder == null) {
                         continue;
                     }
-                    for (Map.Entry<String, Map<String, Map<String, Map<String, Object>>>> partitionKeySnapshot :
+                    for (Map.Entry<String, Map<String, Map<String, Map<String, Object>>>> partitionGroupByKeySnapshot :
                             partitionIdSnapshot.getValue().entrySet()) {
                         for (Map.Entry<String, Map<String, Map<String, Object>>> querySnapshot :
-                                partitionKeySnapshot.getValue().entrySet()) {
+                                partitionGroupByKeySnapshot.getValue().entrySet()) {
                             ElementStateHolder elementStateHolder =
                                     partitionStateHolder.queryStateHolderMap.get(querySnapshot.getKey());
                             if (elementStateHolder == null) {
@@ -374,8 +374,8 @@ public class SnapshotService {
                                 try {
                                     String partitionKey = null;
                                     String groupByKey = null;
-                                    if (partitionKeySnapshot.getKey() != null) {
-                                        String[] keys = partitionKeySnapshot.getKey().split("--");
+                                    if (partitionGroupByKeySnapshot.getKey() != null) {
+                                        String[] keys = partitionGroupByKeySnapshot.getKey().split("--");
                                         if (keys.length == 2) {
                                             if (!keys[0].equals("null")) {
                                                 partitionKey = keys[0];
@@ -448,8 +448,8 @@ public class SnapshotService {
                     for (Iterator<Map.Entry<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>>
                          iterator = partitionIdSnapshot.getValue().entrySet().iterator(); iterator.hasNext(); ) {
                         Map.Entry<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>
-                                partitionKeySnapshot = iterator.next();
-                        restoreIncrementalSnapshot(partitionStateHolder, partitionKeySnapshot.getValue());
+                                partitionGroupByKeySnapshot = iterator.next();
+                        restoreIncrementalSnapshot(partitionStateHolder, partitionGroupByKeySnapshot.getValue());
                         iterator.remove();
                     }
 
@@ -675,10 +675,10 @@ public class SnapshotService {
                         incrementalState = new HashMap<>();
                 for (IncrementalSnapshotInfo snapshotInfo : incrementalSnapshotInfos) {
                     Map<String, Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>>>
-                            incrementalStateByPartitionKey = incrementalState.computeIfAbsent(
+                            incrementalStateByPartitionGroupByKey = incrementalState.computeIfAbsent(
                             snapshotInfo.getPartitionId(), k -> new TreeMap<>());
                     Map<String, Map<Long, Map<IncrementalSnapshotInfo, byte[]>>> incrementalStateByTime =
-                            incrementalStateByPartitionKey.computeIfAbsent(snapshotInfo.getPartitionGroupByKey(),
+                            incrementalStateByPartitionGroupByKey.computeIfAbsent(snapshotInfo.getPartitionGroupByKey(),
                                     k -> new TreeMap<>());
                     Map<Long, Map<IncrementalSnapshotInfo, byte[]>> idByTime =
                             incrementalStateByTime.computeIfAbsent(snapshotInfo.getId(),

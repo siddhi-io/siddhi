@@ -77,7 +77,7 @@ public class PartitionRuntime {
     //default every 5 min
     private long purgeExecutionInterval = 300000;
     private boolean purgingEnabled = false;
-    private long purgeRetentionPeriod = 0;
+    private long purgeIdlePeriod = 0;
     private String partitionName;
     private Partition partition;
     private ConcurrentMap<String, StreamJunction> localStreamJunctionMap = new ConcurrentHashMap<>();
@@ -129,13 +129,13 @@ public class PartitionRuntime {
                 throw new SiddhiAppCreationException("Annotation @" + SiddhiConstants.NAMESPACE_PURGE +
                         " is missing element '" + SiddhiConstants.ANNOTATION_ELEMENT_ENABLE + "'");
             }
-            if (purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_RETENTION_PERIOD) != null) {
-                String purgeRetention = purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_RETENTION_PERIOD);
-                purgeRetentionPeriod = Expression.Time.timeToLong(purgeRetention);
+            if (purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_IDLE_PERIOD) != null) {
+                String purgeIdle = purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_IDLE_PERIOD);
+                purgeIdlePeriod = Expression.Time.timeToLong(purgeIdle);
 
             } else {
                 throw new SiddhiAppCreationException("Annotation @" + SiddhiConstants.NAMESPACE_PURGE +
-                        " is missing element '" + SiddhiConstants.ANNOTATION_ELEMENT_RETENTION_PERIOD + "'");
+                        " is missing element '" + SiddhiConstants.ANNOTATION_ELEMENT_IDLE_PERIOD + "'");
             }
 
             if (purge.getElement(SiddhiConstants.ANNOTATION_ELEMENT_INTERVAL) != null) {
@@ -373,7 +373,7 @@ public class PartitionRuntime {
                         synchronized (state) {
                             HashMap<String, Long> partitions = new HashMap<>(state.partitionKeys);
                             for (Map.Entry<String, Long> partition : partitions.entrySet()) {
-                                if (partition.getValue() + purgeRetentionPeriod < currentTime) {
+                                if (partition.getValue() + purgeIdlePeriod < currentTime) {
                                     state.partitionKeys.remove(partition.getKey());
                                     SiddhiAppContext.startPartitionFlow(partition.getKey());
                                     try {

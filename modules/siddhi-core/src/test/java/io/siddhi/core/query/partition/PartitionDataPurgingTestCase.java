@@ -56,7 +56,7 @@ public class PartitionDataPurgingTestCase {
                 "define stream streamA (symbol string, price int);" +
                 "" +
                 "" +
-                "@purge(enable='true', interval='1 sec', retention.period='1 sec') " +
+                "@purge(enable='true', interval='1 sec', idle.period='1 sec') " +
                 "partition with (symbol of streamA) " +
                 "begin " +
                 "   @info(name = 'query1') " +
