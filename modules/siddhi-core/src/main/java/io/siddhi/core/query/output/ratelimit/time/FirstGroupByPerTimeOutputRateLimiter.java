@@ -21,18 +21,13 @@ package io.siddhi.core.query.output.ratelimit.time;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
-import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.Schedulable;
-import io.siddhi.core.util.Scheduler;
-import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,7 +39,6 @@ public class FirstGroupByPerTimeOutputRateLimiter
     private static final Logger log = Logger.getLogger(FirstGroupByPerTimeOutputRateLimiter.class);
     private final Long value;
     private String id;
-    private Scheduler scheduler;
 
     public FirstGroupByPerTimeOutputRateLimiter(String id, Long value) {
         this.id = id;
@@ -53,95 +47,61 @@ public class FirstGroupByPerTimeOutputRateLimiter
 
     @Override
     protected StateFactory<RateLimiterState> init() {
-        this.scheduler = SchedulerParser.parse(this, siddhiQueryContext);
-        this.scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
-        this.scheduler.init(lockWrapper, siddhiQueryContext.getName());
         return () -> new RateLimiterState();
     }
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         complexEventChunk.reset();
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
+                long currentTime = siddhiQueryContext.getSiddhiAppContext().
+                        getTimestampGenerator().currentTime();
                 while (complexEventChunk.hasNext()) {
                     ComplexEvent event = complexEventChunk.next();
-                    if (event.getType() == ComplexEvent.Type.TIMER) {
-                        if (event.getTimestamp() >= state.scheduledTime) {
-                            if (state.allComplexEventChunk.getFirst() != null) {
-                                ComplexEventChunk<ComplexEvent> eventChunk = new ComplexEventChunk<ComplexEvent>
-                                        (complexEventChunk.isBatch());
-                                eventChunk.add(state.allComplexEventChunk.getFirst());
-                                state.allComplexEventChunk.clear();
-                                state.groupByKeys.clear();
-                                outputEventChunks.add(eventChunk);
-                            } else {
-                                state.groupByKeys.clear();
-                            }
-                            state.scheduledTime = state.scheduledTime + value;
-                            scheduler.notifyAt(state.scheduledTime);
-                        }
-                    } else if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type
-                            .EXPIRED) {
-                        GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
-                        if (!state.groupByKeys.contains(groupedComplexEvent.getGroupKey())) {
-                            complexEventChunk.remove();
-                            state.groupByKeys.add(groupedComplexEvent.getGroupKey());
-                            state.allComplexEventChunk.add(groupedComplexEvent.getComplexEvent());
-                        }
+                    complexEventChunk.remove();
+                    GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
+                    Long outputTime = state.groupByOutputTime.get(groupedComplexEvent.getGroupKey());
+                    if (outputTime == null || outputTime + value <= currentTime) {
+                        state.groupByOutputTime.put(groupedComplexEvent.getGroupKey(), currentTime);
+                        outputEventChunk.add(groupedComplexEvent);
                     }
                 }
             }
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        if (outputEventChunk.getFirst() != null) {
+            sendToCallBacks(outputEventChunk);
         }
     }
 
     @Override
     public void partitionCreated() {
-        RateLimiterState state = stateHolder.getState();
-        try {
-            synchronized (state) {
-                long currentTime = System.currentTimeMillis();
-                state.scheduledTime = currentTime + value;
-                scheduler.notifyAt(state.scheduledTime);
-            }
-        } finally {
-            stateHolder.returnState(state);
-        }
+
     }
 
     class RateLimiterState extends State {
 
-        private List<String> groupByKeys = new ArrayList<String>();
-        private ComplexEventChunk<ComplexEvent> allComplexEventChunk = new ComplexEventChunk<>(false);
-        private long scheduledTime;
+        private Map<String, Long> groupByOutputTime = new HashMap();
 
         @Override
         public boolean canDestroy() {
-            return groupByKeys.size() == 0 && scheduledTime == 0;
+            return groupByOutputTime.isEmpty();
         }
 
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            state.put("AllComplexEventChunk", allComplexEventChunk.getFirst());
-            state.put("GroupByKeys", groupByKeys);
-            state.put("ScheduledTime", scheduledTime);
+            state.put("GroupByOutputTime", groupByOutputTime);
             return state;
         }
 
         @Override
         public void restore(Map<String, Object> state) {
-            allComplexEventChunk.clear();
-            allComplexEventChunk.add((ComplexEvent) state.get("AllComplexEventChunk"));
-            groupByKeys = (List<String>) state.get("GroupByKeys");
-            scheduledTime = (Long) state.get("ScheduledTime");
+            groupByOutputTime = (Map<String, Long>) state.get("GroupByOutputTime");
         }
     }
 }

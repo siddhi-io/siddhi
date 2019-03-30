@@ -36,7 +36,6 @@ public class AllPerEventOutputRateLimiter extends OutputRateLimiter<AllPerEventO
 
     private final Integer value;
 
-
     public AllPerEventOutputRateLimiter(String id, Integer value) {
         this.value = value;
     }

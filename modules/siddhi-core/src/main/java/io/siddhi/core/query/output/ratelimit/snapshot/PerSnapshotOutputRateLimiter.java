@@ -41,7 +41,6 @@ import java.util.Map;
 public class PerSnapshotOutputRateLimiter
         extends SnapshotOutputRateLimiter<PerSnapshotOutputRateLimiter.RateLimiterState> {
     private final Long value;
-    private ComplexEvent lastEvent;
     private Scheduler scheduler;
 
     public PerSnapshotOutputRateLimiter(Long value,
@@ -73,7 +72,7 @@ public class PerSnapshotOutputRateLimiter
                     } else if (event.getType() == ComplexEvent.Type.CURRENT) {
                         complexEventChunk.remove();
                         tryFlushEvents(outputEventChunks, event, state);
-                        lastEvent = event;
+                        state.lastEvent = event;
                     } else {
                         tryFlushEvents(outputEventChunks, event, state);
                     }
@@ -91,8 +90,8 @@ public class PerSnapshotOutputRateLimiter
                                 RateLimiterState state) {
         if (event.getTimestamp() >= state.scheduledTime) {
             ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
-            if (lastEvent != null) {
-                outputEventChunk.add(cloneComplexEvent(lastEvent));
+            if (state.lastEvent != null) {
+                outputEventChunk.add(cloneComplexEvent(state.lastEvent));
             }
             outputEventChunks.add(outputEventChunk);
             state.scheduledTime += value;
@@ -118,10 +117,11 @@ public class PerSnapshotOutputRateLimiter
 
         public long scheduledTime;
         private ComplexEventChunk<ComplexEvent> eventChunk = new ComplexEventChunk<ComplexEvent>(false);
+        private ComplexEvent lastEvent;
 
         @Override
         public boolean canDestroy() {
-            return eventChunk.getFirst() == null && scheduledTime == 0;
+            return eventChunk.getFirst() == null && scheduledTime == 0 && lastEvent == null;
         }
 
         @Override
@@ -129,6 +129,7 @@ public class PerSnapshotOutputRateLimiter
             Map<String, Object> state = new HashMap<>();
             state.put("EventChunk", eventChunk.getFirst());
             state.put("ScheduledTime", scheduledTime);
+            state.put("LastEvent", lastEvent);
             return state;
         }
 
@@ -137,6 +138,7 @@ public class PerSnapshotOutputRateLimiter
             eventChunk.clear();
             eventChunk.add((ComplexEvent) state.get("EventList"));
             scheduledTime = (Long) state.get("ScheduledTime");
+            lastEvent = (ComplexEvent) state.get("LastEvent");
         }
     }
 
