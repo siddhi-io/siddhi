@@ -24,7 +24,6 @@ import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,33 +47,27 @@ public class FirstPerEventOutputRateLimiter
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
                 while (complexEventChunk.hasNext()) {
                     ComplexEvent event = complexEventChunk.next();
-                    if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
-                        if (state.counter == 0) {
-                            complexEventChunk.remove();
-                            ComplexEventChunk<ComplexEvent> firstPerEventChunk = new ComplexEventChunk<ComplexEvent>
-                                    (complexEventChunk.isBatch());
-                            firstPerEventChunk.add(event);
-                            outputEventChunks.add(firstPerEventChunk);
-                        }
-                        if (++state.counter == value) {
-                            state.counter = 0;
-                        }
+                    complexEventChunk.remove();
+                    state.counter++;
+                    if (state.counter == 1) {
+                        outputEventChunk.add(event);
+                    } else if (state.counter == value) {
+                        state.counter = 0;
                     }
                 }
             }
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        if (outputEventChunk.getFirst() != null) {
+            sendToCallBacks(outputEventChunk);
         }
-
     }
 
     @Override

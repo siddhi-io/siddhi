@@ -983,7 +983,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test//(dependsOnMethods = "testTimeOutputRateLimitQuery16")
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery16")
     public void testTimeOutputRateLimitQuery17() throws InterruptedException {
         log.info("TimeOutputRateLimit test17");
 

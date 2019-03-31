@@ -90,13 +90,13 @@ public class FirstPerTimeOutputRateLimiter
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            state.put("ScheduledTime", outputTime);
+            state.put("OutputTime", outputTime);
             return state;
         }
 
         @Override
         public void restore(Map<String, Object> state) {
-            outputTime = (Long) state.get("ScheduledTime");
+            outputTime = (Long) state.get("OutputTime");
         }
     }
 

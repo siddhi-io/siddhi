@@ -25,9 +25,7 @@ import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,42 +48,30 @@ public class FirstGroupByPerEventOutputRateLimiter
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         RateLimiterState state = stateHolder.getState();
         try {
             synchronized (state) {
                 while (complexEventChunk.hasNext()) {
                     ComplexEvent event = complexEventChunk.next();
-                    if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
-                        complexEventChunk.remove();
-                        GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
-                        if (!state.groupByKeys.contains(groupedComplexEvent.getGroupKey())) {
-                            state.groupByKeys.add(groupedComplexEvent.getGroupKey());
-                            state.allComplexEventChunk.add(groupedComplexEvent.getComplexEvent());
-                        }
-                        if (++state.counter == value) {
-                            if (state.allComplexEventChunk.getFirst() != null) {
-                                ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
-                                        (complexEventChunk.isBatch());
-                                outputEventChunk.add(state.allComplexEventChunk.getFirst());
-                                outputEventChunks.add(outputEventChunk);
-                                state.allComplexEventChunk.clear();
-                                state.counter = 0;
-                                state.groupByKeys.clear();
-                            } else {
-                                state.counter = 0;
-                                state.groupByKeys.clear();
-                            }
-
-                        }
+                    complexEventChunk.remove();
+                    GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
+                    Integer count = state.groupByOutputTime.get(groupedComplexEvent.getGroupKey());
+                    if (count == null) {
+                        state.groupByOutputTime.put(groupedComplexEvent.getGroupKey(), 1);
+                        outputEventChunk.add(groupedComplexEvent);
+                    } else if (count.equals(value - 1)) {
+                        state.groupByOutputTime.remove(groupedComplexEvent.getGroupKey());
+                    } else {
+                        state.groupByOutputTime.put(groupedComplexEvent.getGroupKey(), count + 1);
                     }
                 }
             }
         } finally {
             stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        if (outputEventChunk.getFirst() != null) {
+            sendToCallBacks(outputEventChunk);
         }
     }
 
@@ -95,31 +81,23 @@ public class FirstGroupByPerEventOutputRateLimiter
     }
 
     class RateLimiterState extends State {
-        private List<String> groupByKeys = new ArrayList<String>();
-        private ComplexEventChunk<ComplexEvent> allComplexEventChunk = new ComplexEventChunk<ComplexEvent>(false);
-
-        private volatile int counter = 0;
+        private Map<String, Integer> groupByOutputTime = new HashMap();
 
         @Override
         public boolean canDestroy() {
-            return counter == 0 && groupByKeys.isEmpty();
+            return groupByOutputTime.isEmpty();
         }
 
         @Override
         public Map<String, Object> snapshot() {
             Map<String, Object> state = new HashMap<>();
-            state.put("Counter", counter);
-            state.put("GroupByKeys", groupByKeys);
-            state.put("AllComplexEventChunk", allComplexEventChunk.getFirst());
+            state.put("GroupByOutputTime", groupByOutputTime);
             return state;
         }
 
         @Override
         public void restore(Map<String, Object> state) {
-            counter = (int) state.get("Counter");
-            groupByKeys = (List<String>) state.get("GroupByKeys");
-            allComplexEventChunk.clear();
-            allComplexEventChunk.add((ComplexEvent) state.get("AllComplexEventChunk"));
+            groupByOutputTime = (Map<String, Integer>) state.get("GroupByOutputTime");
         }
     }
 
