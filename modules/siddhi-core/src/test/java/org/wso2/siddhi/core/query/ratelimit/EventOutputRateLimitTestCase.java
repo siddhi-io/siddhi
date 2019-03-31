@@ -20,6 +20,7 @@ package org.wso2.siddhi.core.query.ratelimit;
 
 
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -470,7 +471,7 @@ public class EventOutputRateLimitTestCase {
         Thread.sleep(1000);
 
         AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 4, count);
+        AssertJUnit.assertEquals("Number of output event value", 5, count);
         siddhiAppRuntime.shutdown();
     }
 
@@ -584,7 +585,7 @@ public class EventOutputRateLimitTestCase {
         Thread.sleep(1000);
 
         AssertJUnit.assertEquals("Event arrived", true, eventArrived);
-        AssertJUnit.assertEquals("Number of output event value", 6, count);
+        AssertJUnit.assertEquals("Number of output event value", 5, count);
         siddhiAppRuntime.shutdown();
     }
 
@@ -945,4 +946,124 @@ public class EventOutputRateLimitTestCase {
 
         siddhiAppRuntime.shutdown();
     }
+
+    @Test
+    public void testEventOutputRateLimitQuery17() throws InterruptedException {
+        log.info("EventOutputRateLimit test17");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "@app:name('EventOutputRateLimitTest8') " +
+                "" +
+                "define stream LoginEvents (timestamp long, ip string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents " +
+                "select ip " +
+                "group by ip " +
+                "output first every 2 events " +
+                "insert into uniqueIps ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        log.info("Running : " + siddhiAppRuntime.getName());
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    count += inEvents.length;
+                } else {
+                    AssertJUnit.fail("Remove events emitted");
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("LoginEvents");
+
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.9"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
+        Thread.sleep(1000);
+
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("Number of output event value", 8, count);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testEventOutputRateLimitQuery18() throws InterruptedException {
+        log.info("EventOutputRateLimit test18");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "@app:name('EventOutputRateLimitTest8') " +
+                "" +
+                "define stream LoginEvents (timestamp long, ip string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents " +
+                "select ip " +
+                "output first every 2 events " +
+                "insert into uniqueIps ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        log.info("Running : " + siddhiAppRuntime.getName());
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    count += inEvents.length;
+                    for (Event event : inEvents) {
+                        Assert.assertTrue(event.getData(0).equals("192.10.1.5") ||
+                                event.getData(0).equals("192.10.1.4"));
+                    }
+                } else {
+                    AssertJUnit.fail("Remove events emitted");
+                }
+                eventArrived = true;
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("LoginEvents");
+
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.9"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        Thread.sleep(1000);
+
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived);
+        AssertJUnit.assertEquals("Number of output event value", 6, count);
+        siddhiAppRuntime.shutdown();
+    }
+
 }

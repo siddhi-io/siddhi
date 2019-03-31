@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.function;
 
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -342,7 +343,7 @@ public class MinimumFunctionExtensionTestCase {
                             AssertJUnit.assertEquals(37.75f, event.getData(0));
                             break;
                         default:
-                            org.junit.Assert.fail();
+                            Assert.fail();
                     }
                 }
             }
@@ -403,7 +404,7 @@ public class MinimumFunctionExtensionTestCase {
                             AssertJUnit.assertEquals(40L, event.getData(0));
                             break;
                         default:
-                            org.junit.Assert.fail();
+                            Assert.fail();
                     }
                 }
             }
