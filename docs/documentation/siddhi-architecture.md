@@ -1,4 +1,4 @@
-# Siddhi Architecture 
+# Siddhi 5.x Architecture 
 
 Siddhi is an open source, cloud native, stream processing and complex event processing engine, and it can be utilized in any of the following ways:
 
@@ -10,6 +10,9 @@ Siddhi is an open source, cloud native, stream processing and complex event proc
 Siddhi provides streaming data integration and data analytical operators. It connects multiple disparate live data sources, 
 orchestrates data flows, calculates analytics, and also detects complex event patterns. This allows developers to build 
 applications that collect data, performs data transformation and analytics, and publish the results to data sinks in real time.
+
+!!! info
+    Please find the Siddhi 4.x Architecture [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-architecture-4.x/)
 
 This section illustrates the architecture of Siddhi Engine and guides you through its key functionality. We hope this article 
 helps developers to understand Siddhi and its codebase better, and also help them to contribute and improve Siddhi.

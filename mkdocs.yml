@@ -34,8 +34,8 @@ pages:
 - Documentation:
   - User Guide: documentation/user-guide.md
   - Siddhi Query Guide: documentation/siddhi-4.0.md
+  - Siddhi Architecture 5.x: documentation/siddhi-architecture.md
   - Siddhi Architecture 4.x: documentation/siddhi-architecture-4.x.md
-  - Siddhi Architecture 5.x: documentation/siddhi-architecture-5.x.md
 - Contribute: documentation/contribution.md
 - Extensions: extensions.md
 - API Docs:

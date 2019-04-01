@@ -1,4 +1,7 @@
-# Siddhi Architecture 
+# Siddhi 4.x Architecture 
+
+!!! info
+    Please find the latest Siddhi Architecture [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-architecture/)
 
 Siddhi is a software library that can be utilized in any of the following ways:
 
