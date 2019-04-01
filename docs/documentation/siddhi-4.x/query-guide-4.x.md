@@ -1,4 +1,7 @@
-# Siddhi Streaming SQL Guide 4.0
+# Siddhi 4.x Streaming SQL Guide
+
+!!! info
+    Please find the latest Siddhi Streaming SQL Guide [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/query-guide-5.x/)
 
 ## Introduction
 
@@ -16,7 +19,7 @@ Each Siddhi Application is an isolated processing unit that allows you to deploy
 The following diagram depicts how **event flows** work with some of the key Siddhi Streaming SQL elements 
 of the Siddhi Application.
 
-![Event Flow](../images/event-flow.png?raw=true "Event Flow")
+![Event Flow](../../images/event-flow.png?raw=true "Event Flow")
 
 Below table provides brief description of a few key elements in the Siddhi Streaming SQL Language.
 
@@ -88,7 +91,7 @@ The following parameters are configured in a stream definition.
 To use and refer stream and attribute names that do not follow `[a-zA-Z_][a-zA-Z_0-9]*` format enclose them in ``. E.g. ``` `$test(0)` ```.
  
 To make the stream process events in asynchronous and multi-threading manner use the `@Async` annotation as shown in 
-[Threading and Asynchronous](http://siddhi.io/documentation/siddhi-4.0/#threading-and-asynchronous) configuration section.
+[Threading and Asynchronous](http://siddhi.io/documentation/siddhi-4.0/siddhi-4.x.md#threading-and-asynchronous) configuration section.
 
 **Example**
 ```sql

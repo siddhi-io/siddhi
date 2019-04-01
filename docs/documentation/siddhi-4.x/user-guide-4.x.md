@@ -1,4 +1,8 @@
-#User Guide
+# Siddhi 4.x User Guide
+
+!!! info
+    Please find the latest Siddhi User Guide [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/)
+
 
 ## **Using the Siddhi in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a>**
 
@@ -18,22 +22,22 @@
 
 ```xml
    <dependency>
-     <groupId>io.siddhi</groupId>
+     <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-core</artifactId>
      <version>4.x.x</version>
    </dependency>
    <dependency>
-     <groupId>io.siddhi</groupId>
+     <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-query-api</artifactId>
      <version>4.x.x</version>
    </dependency>
    <dependency>
-     <groupId>io.siddhi</groupId>
+     <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-query-compiler</artifactId>
      <version>4.x.x</version>
    </dependency>
    <dependency>
-     <groupId>io.siddhi</groupId>
+     <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-annotations</artifactId>
      <version>4.x.x</version>
    </dependency>   
