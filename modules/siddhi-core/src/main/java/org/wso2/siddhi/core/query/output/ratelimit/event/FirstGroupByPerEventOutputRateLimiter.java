@@ -23,9 +23,7 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.GroupedComplexEvent;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,15 +32,12 @@ import java.util.Map;
  */
 public class FirstGroupByPerEventOutputRateLimiter extends OutputRateLimiter {
     private final Integer value;
-    private List<String> groupByKeys = new ArrayList<String>();
     private String id;
-    private ComplexEventChunk<ComplexEvent> allComplexEventChunk;
-    private volatile int counter = 0;
+    private Map<String, Integer> groupByOutputTime = new HashMap();
 
     public FirstGroupByPerEventOutputRateLimiter(String id, Integer value) {
         this.id = id;
         this.value = value;
-        allComplexEventChunk = new ComplexEventChunk<ComplexEvent>(false);
     }
 
     @Override
@@ -54,38 +49,26 @@ public class FirstGroupByPerEventOutputRateLimiter extends OutputRateLimiter {
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         complexEventChunk.reset();
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
         synchronized (this) {
             while (complexEventChunk.hasNext()) {
                 ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
-                    complexEventChunk.remove();
-                    GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
-                    if (!groupByKeys.contains(groupedComplexEvent.getGroupKey())) {
-                        groupByKeys.add(groupedComplexEvent.getGroupKey());
-                        allComplexEventChunk.add(groupedComplexEvent.getComplexEvent());
-                    }
-                    if (++counter == value) {
-                        if (allComplexEventChunk.getFirst() != null) {
-                            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
-                                    (complexEventChunk.isBatch());
-                            outputEventChunk.add(allComplexEventChunk.getFirst());
-                            outputEventChunks.add(outputEventChunk);
-                            allComplexEventChunk.clear();
-                            counter = 0;
-                            groupByKeys.clear();
-                        } else {
-                            counter = 0;
-                            groupByKeys.clear();
-                        }
-
-                    }
+                complexEventChunk.remove();
+                GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
+                Integer count = groupByOutputTime.get(groupedComplexEvent.getGroupKey());
+                if (count == null) {
+                    groupByOutputTime.put(groupedComplexEvent.getGroupKey(), 1);
+                    outputEventChunk.add(groupedComplexEvent);
+                } else if (count.equals(value-1)) {
+                    groupByOutputTime.remove(groupedComplexEvent.getGroupKey());
+                } else {
+                    groupByOutputTime.put(groupedComplexEvent.getGroupKey(), count + 1);
                 }
             }
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        if (outputEventChunk.getFirst() != null) {
+            sendToCallBacks(outputEventChunk);
         }
     }
 
@@ -103,9 +86,7 @@ public class FirstGroupByPerEventOutputRateLimiter extends OutputRateLimiter {
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
-            state.put("Counter", counter);
-            state.put("GroupByKeys", groupByKeys);
-            state.put("AllComplexEventChunk", allComplexEventChunk.getFirst());
+            state.put("GroupByOutputCount", groupByOutputTime);
         }
         return state;
     }
@@ -113,10 +94,7 @@ public class FirstGroupByPerEventOutputRateLimiter extends OutputRateLimiter {
     @Override
     public void restoreState(Map<String, Object> state) {
         synchronized (this) {
-            counter = (int) state.get("Counter");
-            groupByKeys = (List<String>) state.get("GroupByKeys");
-            allComplexEventChunk.clear();
-            allComplexEventChunk.add((ComplexEvent) state.get("AllComplexEventChunk"));
+            groupByOutputTime = (Map<String, Integer>) state.get("GroupByOutputCount");
         }
     }
 

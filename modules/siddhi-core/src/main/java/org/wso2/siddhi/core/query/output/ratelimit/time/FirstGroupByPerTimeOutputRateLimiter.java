@@ -42,20 +42,16 @@ public class FirstGroupByPerTimeOutputRateLimiter extends OutputRateLimiter impl
     private static final Logger log = Logger.getLogger(FirstGroupByPerTimeOutputRateLimiter.class);
     private final Long value;
     private String id;
-    private List<String> groupByKeys = new ArrayList<String>();
-    private ComplexEventChunk<ComplexEvent> allComplexEventChunk;
+    private Map<String, Long> groupByOutputTime = new HashMap();
     private ScheduledExecutorService scheduledExecutorService;
-    private Scheduler scheduler;
-    private long scheduledTime;
     private String queryName;
 
     public FirstGroupByPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService
             scheduledExecutorService, String queryName) {
+        this.scheduledExecutorService = scheduledExecutorService;
         this.queryName = queryName;
         this.id = id;
         this.value = value;
-        this.scheduledExecutorService = scheduledExecutorService;
-        this.allComplexEventChunk = new ComplexEventChunk<ComplexEvent>(false);
     }
 
     @Override
@@ -68,50 +64,29 @@ public class FirstGroupByPerTimeOutputRateLimiter extends OutputRateLimiter impl
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         complexEventChunk.reset();
         synchronized (this) {
+            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
             while (complexEventChunk.hasNext()) {
                 ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.TIMER) {
-                    if (event.getTimestamp() >= scheduledTime) {
-                        if (allComplexEventChunk.getFirst() != null) {
-                            ComplexEventChunk<ComplexEvent> eventChunk = new ComplexEventChunk<ComplexEvent>
-                                    (complexEventChunk.isBatch());
-                            eventChunk.add(allComplexEventChunk.getFirst());
-                            allComplexEventChunk.clear();
-                            groupByKeys.clear();
-                            outputEventChunks.add(eventChunk);
-                        } else {
-                            groupByKeys.clear();
-                        }
-                        scheduledTime = scheduledTime + value;
-                        scheduler.notifyAt(scheduledTime);
-                    }
-                } else if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type
-                        .EXPIRED) {
-                    GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
-                    if (!groupByKeys.contains(groupedComplexEvent.getGroupKey())) {
-                        complexEventChunk.remove();
-                        groupByKeys.add(groupedComplexEvent.getGroupKey());
-                        allComplexEventChunk.add(groupedComplexEvent.getComplexEvent());
-                    }
+                complexEventChunk.remove();
+                GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
+                Long outputTime = groupByOutputTime.get(groupedComplexEvent.getGroupKey());
+                if (outputTime == null || outputTime + value <= currentTime) {
+                    groupByOutputTime.put(groupedComplexEvent.getGroupKey(), currentTime);
+                    outputEventChunk.add(groupedComplexEvent);
                 }
             }
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        if (outputEventChunk.getFirst() != null) {
+            sendToCallBacks(outputEventChunk);
         }
     }
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiAppContext);
-        scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
-        scheduler.init(lockWrapper, queryName);
-        long currentTime = System.currentTimeMillis();
-        scheduledTime = currentTime + value;
-        scheduler.notifyAt(scheduledTime);
+        //Nothing to start
     }
 
     @Override
@@ -123,17 +98,15 @@ public class FirstGroupByPerTimeOutputRateLimiter extends OutputRateLimiter impl
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
         synchronized (this) {
-            state.put("AllComplexEventChunk", allComplexEventChunk.getFirst());
-            state.put("GroupByKeys", groupByKeys);
+            state.put("GroupByOutputTime", groupByOutputTime);
         }
         return state;
     }
 
     @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        allComplexEventChunk.clear();
-        allComplexEventChunk.add((ComplexEvent) state.get("AllComplexEventChunk"));
-        groupByKeys = (List<String>) state.get("GroupByKeys");
+    public void restoreState(Map<String, Object> state) {
+        synchronized (this) {
+            groupByOutputTime = (Map<String, Long>) state.get("GroupByOutputTime");
+        }
     }
-
 }

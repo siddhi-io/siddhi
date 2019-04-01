@@ -40,11 +40,10 @@ public class FirstPerTimeOutputRateLimiter extends OutputRateLimiter implements 
     private static final Logger log = Logger.getLogger(FirstPerTimeOutputRateLimiter.class);
     private final Long value;
     private String id;
-    private ComplexEvent firstEvent = null;
     private ScheduledExecutorService scheduledExecutorService;
-    private Scheduler scheduler;
-    private long scheduledTime;
     private String queryName;
+    private Long outputTime;
+
 
     public FirstPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService,
                                          String queryName) {
@@ -64,46 +63,25 @@ public class FirstPerTimeOutputRateLimiter extends OutputRateLimiter implements 
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
         complexEventChunk.reset();
         synchronized (this) {
-            while (complexEventChunk.hasNext()) {
+            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            if (outputTime == null || outputTime + value <= currentTime) {
+                outputTime = currentTime;
                 ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.TIMER) {
-                    if (event.getTimestamp() >= scheduledTime) {
-                        if (firstEvent != null) {
-                            firstEvent = null;
-                        }
-                        scheduledTime += value;
-                        scheduler.notifyAt(scheduledTime);
-                    }
-                } else if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type
-                        .EXPIRED) {
-                    if (firstEvent == null) {
-                        complexEventChunk.remove();
-                        firstEvent = event;
-                        ComplexEventChunk<ComplexEvent> firstPerEventChunk = new ComplexEventChunk<ComplexEvent>
-                                (complexEventChunk.isBatch());
-                        firstPerEventChunk.add(event);
-                        outputEventChunks.add(firstPerEventChunk);
-                    }
-                }
+                complexEventChunk.remove();
+                outputEventChunk.add(event);
             }
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        if (outputEventChunk.getFirst() != null) {
+            sendToCallBacks(outputEventChunk);
         }
-
     }
 
     @Override
     public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiAppContext);
-        scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
-        scheduler.init(lockWrapper, queryName);
-        long currentTime = System.currentTimeMillis();
-        scheduledTime = currentTime + value;
-        scheduler.notifyAt(scheduledTime);
+        //Nothing to start
     }
 
     @Override
@@ -114,15 +92,13 @@ public class FirstPerTimeOutputRateLimiter extends OutputRateLimiter implements 
     @Override
     public Map<String, Object> currentState() {
         Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
-            state.put("FirstEvent", firstEvent);
-        }
+        state.put("OutputTime", outputTime);
         return state;
     }
 
     @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        firstEvent = (ComplexEvent) state.get("FirstEvent");
+    public void restoreState(Map<String, Object> state) {
+        outputTime = (Long) state.get("OutputTime");
     }
 
 }
