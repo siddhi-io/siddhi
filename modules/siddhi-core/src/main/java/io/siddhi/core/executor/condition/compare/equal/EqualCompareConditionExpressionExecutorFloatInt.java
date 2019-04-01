@@ -37,10 +37,4 @@ public class EqualCompareConditionExpressionExecutorFloatInt extends
         return (Float) left == ((Integer) right).floatValue();
 
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new EqualCompareConditionExpressionExecutorFloatInt(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

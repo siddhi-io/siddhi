@@ -31,14 +31,13 @@ import io.siddhi.core.query.selector.QuerySelector;
  */
 public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
 
-    protected final String lockKey;
-    protected ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<StreamEvent>
-            (batchProcessingAllowed);
+    private final Object patternSyncObject;
     private QuerySelector querySelector;
 
-    public SingleProcessStreamReceiver(String streamId, String lockKey, SiddhiQueryContext siddhiQueryContext) {
+    public SingleProcessStreamReceiver(String streamId, Object patternSyncObject,
+                                       SiddhiQueryContext siddhiQueryContext) {
         super(streamId, siddhiQueryContext);
-        this.lockKey = lockKey;
+        this.patternSyncObject = patternSyncObject;
     }
 
     public void setNext(Processor next) {
@@ -46,21 +45,18 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
         this.querySelector = (QuerySelector) ((StreamPreStateProcessor) next).getThisLastProcessor().getNextProcessor();
     }
 
-    public SingleProcessStreamReceiver clone(String key) {
-        return new SingleProcessStreamReceiver(streamId + key, key,
-                siddhiQueryContext);
-    }
-
     protected void processAndClear(ComplexEventChunk<StreamEvent> streamEventChunk) {
-        ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<StateEvent>(false);
-        synchronized (lockKey) {
+        ComplexEventChunk<StateEvent> retEventChunk = new ComplexEventChunk<>(false);
+        ComplexEventChunk<StreamEvent> currentStreamEventChunk = new ComplexEventChunk<>(
+                batchProcessingAllowed);
+        synchronized (patternSyncObject) {
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 streamEventChunk.remove();
                 stabilizeStates();
                 currentStreamEventChunk.add(streamEvent);
-                ComplexEventChunk<StateEvent> eventChunk = ((StreamPreStateProcessor) next).processAndReturn
-                        (currentStreamEventChunk);
+                ComplexEventChunk<StateEvent> eventChunk = ((StreamPreStateProcessor) next).
+                        processAndReturn(currentStreamEventChunk);
                 if (eventChunk.getFirst() != null) {
                     retEventChunk.add(eventChunk.getFirst());
                 }
@@ -72,7 +68,7 @@ public class SingleProcessStreamReceiver extends ProcessStreamReceiver {
         while (retEventChunk.hasNext()) {
             StateEvent stateEvent = retEventChunk.next();
             retEventChunk.remove();
-            querySelector.process(new ComplexEventChunk<StateEvent>(stateEvent, stateEvent, false));
+            querySelector.process(new ComplexEventChunk<>(stateEvent, stateEvent, false));
         }
     }
 

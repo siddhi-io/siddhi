@@ -18,15 +18,15 @@
 package io.siddhi.core.util.extension.holder;
 
 import io.siddhi.core.config.SiddhiAppContext;
-import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
+import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregatorExecutor;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Holder to store {@link AttributeAggregator} Extensions.
+ * Holder to store {@link AttributeAggregatorExecutor} Extensions.
  */
 public class AttributeAggregatorExtensionHolder extends AbstractExtensionHolder {
-    private static Class clazz = AttributeAggregator.class;
+    private static Class clazz = AttributeAggregatorExecutor.class;
 
     private AttributeAggregatorExtensionHolder(SiddhiAppContext siddhiAppContext) {
         super(clazz, siddhiAppContext);

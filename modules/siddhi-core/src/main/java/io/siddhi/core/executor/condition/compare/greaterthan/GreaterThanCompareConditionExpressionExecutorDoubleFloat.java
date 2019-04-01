@@ -34,12 +34,5 @@ public class GreaterThanCompareConditionExpressionExecutorDoubleFloat extends
     @Override
     protected Boolean execute(Object left, Object right) {
         return (Double) left > (Float) right;
-
-    }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new GreaterThanCompareConditionExpressionExecutorDoubleFloat(leftExpressionExecutor.cloneExecutor(key)
-                , rightExpressionExecutor.cloneExecutor(key));
     }
 }

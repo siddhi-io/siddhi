@@ -31,7 +31,6 @@ import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Implementation of {@link Sink} which can be used as a logger. This will log the output events in the output stream
@@ -164,16 +163,6 @@ public class LogSink extends Sink {
     @Override
     public void destroy() {
         // do nothing
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        // no state
     }
 
     private enum LogPriority {

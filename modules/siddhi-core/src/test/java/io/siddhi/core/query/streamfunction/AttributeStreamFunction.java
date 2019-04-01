@@ -24,14 +24,16 @@ import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.stream.function.StreamFunctionProcessor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class AttributeStreamFunction extends StreamFunctionProcessor {
+    private List<Attribute> newAttributes;
+
     @Override
     protected Object[] process(Object[] data) {
         return new Object[]{"test"};
@@ -43,9 +45,9 @@ public class AttributeStreamFunction extends StreamFunctionProcessor {
     }
 
     @Override
-    protected List<Attribute> init(AbstractDefinition inputDefinition,
-                                   ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                   boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(AbstractDefinition inputDefinition,
+                                ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new SiddhiAppCreationException("Only one attribute is expected but found " +
                     attributeExpressionExecutors.length);
@@ -53,11 +55,11 @@ public class AttributeStreamFunction extends StreamFunctionProcessor {
         if (!(attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor)) {
             throw new SiddhiAppCreationException("Attribute is expected to be constant, but its not!");
         }
-        List<Attribute> newAttributes = new ArrayList<>();
+        newAttributes = new ArrayList<>();
         newAttributes.add(
                 new Attribute(((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue().toString(),
                         inputDefinition.getAttributeList().get(0).getType()));
-        return newAttributes;
+        return null;
     }
 
     @Override
@@ -71,12 +73,7 @@ public class AttributeStreamFunction extends StreamFunctionProcessor {
     }
 
     @Override
-    public Map<String, Object> currentState() {
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-
+    public List<Attribute> getReturnAttributes() {
+        return newAttributes;
     }
 }

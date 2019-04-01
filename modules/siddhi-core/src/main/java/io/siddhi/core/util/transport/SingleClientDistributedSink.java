@@ -35,7 +35,6 @@ import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -128,28 +127,6 @@ public class SingleClientDistributedSink extends DistributedTransport {
         sink.destroy();
     }
 
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for the reconstructing the element to the same state on a different point of time
-     *
-     * @return stateful objects of the processing element as an array
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        return sink.currentState();
-    }
-
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     * the element to the same state as if was on a previous point of time.
-     *
-     * @param state the stateful objects of the element as an array on
-     *              the same order provided by currentState().
-     */
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        sink.restoreState(state);
-    }
 
     private Set<String> findAllDynamicOptions(List<OptionHolder> destinationOptionHolders) {
         Set<String> dynamicOptions = new HashSet<>();

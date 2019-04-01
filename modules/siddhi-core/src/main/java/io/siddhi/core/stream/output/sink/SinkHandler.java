@@ -18,47 +18,66 @@
 
 package io.siddhi.core.stream.output.sink;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
-import io.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
 
 /**
  * SinkHandler is an optional interface before {@link SinkMapper}.
  * It will do optional processing to the events before sending the events to the desired mapper
+ *
+ * @param <S> current state for the Sink Holder
  */
-public abstract class SinkHandler implements Snapshotable {
+public abstract class SinkHandler<S extends State> {
 
     private SinkHandlerCallback sinkHandlerCallback;
-    private String elementId;
+    private StateHolder<S> stateHolder;
+    private String id;
 
-    final void initSinkHandler(String elementId, StreamDefinition streamDefinition,
-                               SinkHandlerCallback sinkHandlerCallback) {
+    final void initSinkHandler(String siddhiAppName, StreamDefinition streamDefinition,
+                               SinkHandlerCallback sinkHandlerCallback,
+                               SiddhiAppContext siddhiAppContext) {
         this.sinkHandlerCallback = sinkHandlerCallback;
-        this.elementId = elementId;
-        init(elementId, streamDefinition, sinkHandlerCallback);
+        StateFactory<S> stateFactory = init(streamDefinition, sinkHandlerCallback);
+        id = siddhiAppName + "-" + streamDefinition.getId() + "-" + this.getClass().getName();
+        stateHolder = siddhiAppContext.generateStateHolder(
+                streamDefinition.getId() + "-" + this.getClass().getName(),
+                stateFactory);
     }
 
-    public abstract void init(String elementId, StreamDefinition streamDefinition,
-                              SinkHandlerCallback sinkHandlerCallback);
+    public abstract StateFactory<S> init(StreamDefinition streamDefinition,
+                                         SinkHandlerCallback sinkHandlerCallback);
 
     public void handle(Event event) {
-        handle(event, sinkHandlerCallback);
+        S state = stateHolder.getState();
+        try {
+            handle(event, sinkHandlerCallback, state);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     public void handle(Event[] events) {
-        handle(events, sinkHandlerCallback);
+        if (stateHolder != null) {
+            S state = stateHolder.getState();
+            try {
+                handle(events, sinkHandlerCallback, state);
+            } finally {
+                stateHolder.returnState(state);
+            }
+        } else {
+            handle(events, sinkHandlerCallback, null);
+        }
     }
 
-    public abstract void handle(Event event, SinkHandlerCallback sinkHandlerCallback);
+    public abstract void handle(Event event, SinkHandlerCallback sinkHandlerCallback, S state);
 
-    public abstract void handle(Event[] events, SinkHandlerCallback sinkHandlerCallback);
+    public abstract void handle(Event[] events, SinkHandlerCallback sinkHandlerCallback, S state);
 
-    public String getElementId() {
-        return elementId;
-    }
-
-    @Override
-    public void clean() {
-        //ignore
+    public String getId() {
+        return id;
     }
 }

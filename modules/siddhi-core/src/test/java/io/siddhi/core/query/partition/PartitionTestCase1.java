@@ -66,8 +66,10 @@ public class PartitionTestCase1 {
                 "define stream streamA (symbol string, price int);" +
                 "partition with (symbol of streamA) " +
                 "begin " +
-                "@info(name = 'query1') " +
-                "from streamA select symbol,price insert into StockQuote ;  " +
+                "   @info(name = 'query1') " +
+                "   from streamA " +
+                "   select symbol, price " +
+                "   insert into StockQuote ;  " +
                 "end ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
@@ -816,20 +818,48 @@ public class PartitionTestCase1 {
         log.info("Partition test15");
         SiddhiManager siddhiManager = new SiddhiManager();
 
-        String siddhiApp = "@app:name('PartitionTest15') " +
-                "define stream cseEventStream (symbol string, price float,volume int);"
-                + "define stream cseEventStream1 (symbol string, price float,volume int);"
-                + "define stream StockStream (symbol string, price float,volume int);"
-                + "partition with (symbol of cseEventStream) begin @info(name = 'query') from cseEventStream select " +
-                "symbol,price as price,volume insert into #StockStream ;"
-                + "@info(name = 'query1') from #StockStream select symbol,price,volume insert into OutStockStream ;"
-                + "@info(name = 'query2') from #StockStream select symbol,price,volume insert into StockStream ; end ;"
-                + "partition with (symbol of cseEventStream1) begin @info(name = 'query3') from cseEventStream1 " +
-                "select symbol,price+5 as price,volume insert into #StockStream ;"
-                + "@info(name = 'query4') from #StockStream select symbol,price,volume insert into OutStockStream ; " +
-                "end ;"
-                + "@info(name = 'query5') from StockStream select symbol,price+15  as price,volume group by symbol " +
-                "insert into OutStockStream ;";
+        String siddhiApp = "" +
+                "@app:name('PartitionTest15') " +
+                "define stream cseEventStream (symbol string, price float,volume int);" +
+                "define stream cseEventStream1 (symbol string, price float,volume int);" +
+                "define stream StockStream (symbol string, price float,volume int);" +
+                "partition with (symbol of cseEventStream) " +
+                "begin " +
+                "   @info(name = 'query') " +
+                "   from cseEventStream " +
+                "   select symbol,price as price,volume " +
+                "   insert into #StockStream ;" +
+                "   " +
+                "   @info(name = 'query1') " +
+                "   from #StockStream " +
+                "   select symbol,price,volume " +
+                "   insert into OutStockStream ;" +
+                "" +
+                "   @info(name = 'query2') " +
+                "   from #StockStream " +
+                "   select symbol,price,volume " +
+                "   insert into StockStream ; " +
+                "end ;" +
+                "" +
+                "partition with (symbol of cseEventStream1) " +
+                "begin " +
+                "   @info(name = 'query3') " +
+                "   from cseEventStream1 " +
+                "   select symbol, price + 5 as price, volume " +
+                "   insert into #StockStream ;" +
+                "" +
+                "   @info(name = 'query4') " +
+                "   from #StockStream " +
+                "   select symbol,price,volume " +
+                "   insert into OutStockStream ; " +
+                "end ;" +
+                "" +
+                "@info(name = 'query5') " +
+                "from StockStream " +
+                "select symbol,price+15 as price,volume " +
+                "group by symbol " +
+                "insert into OutStockStream ;" +
+                "";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
 
@@ -1463,12 +1493,15 @@ public class PartitionTestCase1 {
                 "define stream streamB (symbol string,  price int); " +
                 "partition with (symbol of streamA,  symbol of streamB) " +
                 "begin " +
-                "@info(name = 'query1') " +
-                "from streamA  " +
-                "select symbol, price insert into StockQuote ;  " +
-                "@info(name = 'query2') " +
-                "from streamB  " +
-                "select symbol, price insert into StockQuote ;  " +
+                "   @info(name = 'query1') " +
+                "   from streamA  " +
+                "   select symbol, price " +
+                "   insert into StockQuote ;  " +
+                "" +
+                "   @info(name = 'query2') " +
+                "   from streamB  " +
+                "   select symbol, price " +
+                "   insert into StockQuote ;  " +
                 "end ";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);

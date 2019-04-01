@@ -37,9 +37,4 @@ public class LessThanEqualCompareConditionExpressionExecutorFloatFloat extends
         return (Float) left <= (Float) right;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new LessThanEqualCompareConditionExpressionExecutorFloatFloat(leftExpressionExecutor.cloneExecutor
-                (key), rightExpressionExecutor.cloneExecutor(key));
-    }
 }

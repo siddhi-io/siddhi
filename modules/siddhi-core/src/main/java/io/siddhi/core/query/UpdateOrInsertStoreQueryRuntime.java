@@ -52,7 +52,7 @@ public class UpdateOrInsertStoreQueryRuntime extends StoreQueryRuntime {
                 metaStreamEvent.getOnAfterWindowData().size(), metaStreamEvent.getOutputData().size());
         streamEvent.setType(ComplexEvent.Type.RESET);
 
-        StateEvent stateEvent = stateEventPool.borrowEvent();
+        StateEvent stateEvent = stateEventFactory.newInstance();
         stateEvent.addEvent(0, streamEvent);
         stateEvent.setType(ComplexEvent.Type.RESET);
 

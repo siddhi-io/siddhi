@@ -26,6 +26,7 @@ import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -673,4 +674,61 @@ public class PartitionTestCase2 {
 
         }
     }
+
+    @Test
+    public void testPartitionQuery() throws InterruptedException {
+        log.info("Partition test1");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "@app:name('PartitionTest') " +
+                "define stream streamA (ts long, symbol string, price int);" +
+                "partition with (symbol of streamA) " +
+                "begin " +
+                "   @info(name = 'query1') " +
+                "   from streamA#window.lengthBatch(2, true) " +
+                "   select symbol, sum(price) as total " +
+                "   insert all events into StockQuote ;  " +
+                "end ";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                AssertJUnit.assertTrue("IBM".equals(events[0].getData(0)) || "WSO2".equals(events[0].getData(0)));
+                int eventCount = count.addAndGet(events.length);
+                eventArrived = true;
+                if (eventCount == 1) {
+                    Assert.assertEquals(events[0].getData(1), 700L);
+                } else if (eventCount == 2) {
+                    Assert.assertEquals(events[0].getData(1), 60L);
+                } else if (eventCount == 3) {
+                    Assert.assertEquals(events[0].getData(1), 120L);
+                } else if (eventCount == 4) {
+                    Assert.assertEquals(events[0].getData(1), 60L);
+                } else if (eventCount == 5) {
+                    Assert.assertEquals(events[0].getData(1), 1400L);
+                } else if (eventCount == 6) {
+                    Assert.assertEquals(events[0].getData(1), 700L);
+                }
+            }
+        };
+        siddhiAppRuntime.addCallback("StockQuote", streamCallback);
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("streamA");
+        siddhiAppRuntime.start();
+        inputHandler.send(new Object[]{100L, "IBM", 700});
+        inputHandler.send(new Object[]{101L, "WSO2", 60});
+        inputHandler.send(new Object[]{101L, "WSO2", 60});
+        inputHandler.send(new Object[]{1134L, "WSO2", 60});
+        inputHandler.send(new Object[]{100L, "IBM", 700});
+        inputHandler.send(new Object[]{1145L, "IBM", 700});
+        SiddhiTestHelper.waitForEvents(100, 6, count, 60000);
+        AssertJUnit.assertTrue(eventArrived);
+        AssertJUnit.assertEquals(6, count.get());
+
+        siddhiAppRuntime.shutdown();
+    }
+
 }

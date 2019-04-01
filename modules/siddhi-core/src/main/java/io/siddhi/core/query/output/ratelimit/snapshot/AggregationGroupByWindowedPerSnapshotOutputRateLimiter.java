@@ -22,6 +22,9 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
+import io.siddhi.core.event.stream.StreamEventFactory;
+import io.siddhi.core.util.parser.SchedulerParser;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,99 +34,112 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Implementation of {@link PerSnapshotOutputRateLimiter} for queries with GroupBy, Aggregators and Windows.
  */
 public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         AggregationWindowedPerSnapshotOutputRateLimiter {
-    private List<GroupedComplexEvent> eventList;
-    private Map<String, Map<Integer, Object>> groupByAggregateAttributeValueMap;
 
-    protected AggregationGroupByWindowedPerSnapshotOutputRateLimiter(String id, Long value,
-                                                                     ScheduledExecutorService scheduledExecutorService,
+    protected AggregationGroupByWindowedPerSnapshotOutputRateLimiter(Long value,
                                                                      List<Integer> aggregateAttributePositionList,
                                                                      WrappedSnapshotOutputRateLimiter
                                                                              wrappedSnapshotOutputRateLimiter,
+                                                                     boolean groupBy,
                                                                      SiddhiQueryContext siddhiQueryContext) {
-        super(id, value, scheduledExecutorService, aggregateAttributePositionList, wrappedSnapshotOutputRateLimiter,
-                siddhiQueryContext);
-        groupByAggregateAttributeValueMap = new HashMap<String, Map<Integer, Object>>();
-        eventList = new LinkedList<GroupedComplexEvent>();
+        super(value, aggregateAttributePositionList, wrappedSnapshotOutputRateLimiter,
+                groupBy, siddhiQueryContext);
+    }
+
+    @Override
+    protected StateFactory<AggregationRateLimiterState> init() {
+        this.scheduler = SchedulerParser.parse(this, siddhiQueryContext);
+        this.scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
+        this.scheduler.init(lockWrapper, siddhiQueryContext.getName());
+        return () -> new AggregationGroupByRateLimiterState();
     }
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         List<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
-        synchronized (this) {
-            complexEventChunk.reset();
-            String currentGroupByKey = null;
-            Map<Integer, Object> currentAggregateAttributeValueMap = null;
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.TIMER) {
-                    tryFlushEvents(outputEventChunks, event);
-                } else {
-                    complexEventChunk.remove();
-                    tryFlushEvents(outputEventChunks, event);
-                    GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
-                    if (currentGroupByKey == null || !currentGroupByKey.equals(groupedComplexEvent.getGroupKey())) {
-                        currentGroupByKey = groupedComplexEvent.getGroupKey();
-                        currentAggregateAttributeValueMap = groupByAggregateAttributeValueMap.get(currentGroupByKey);
-                        if (currentAggregateAttributeValueMap == null) {
-                            currentAggregateAttributeValueMap = new HashMap<Integer, Object>
-                                    (aggregateAttributePositionList.size());
-                            groupByAggregateAttributeValueMap.put(currentGroupByKey, currentAggregateAttributeValueMap);
-                        }
-                    }
-                    if (groupedComplexEvent.getType() == ComplexEvent.Type.CURRENT) {
-                        eventList.add(groupedComplexEvent);
-                        for (Integer position : aggregateAttributePositionList) {
-                            currentAggregateAttributeValueMap.put(position, event.getOutputData()[position]);
-                        }
-                    } else if (groupedComplexEvent.getType() == ComplexEvent.Type.EXPIRED) {
-                        for (Iterator<GroupedComplexEvent> iterator = eventList.iterator(); iterator.hasNext(); ) {
-                            GroupedComplexEvent currentEvent = iterator.next();
-                            if (comparator.compare(currentEvent.getComplexEvent(), groupedComplexEvent
-                                    .getComplexEvent()) == 0) {
-                                iterator.remove();
-                                for (Integer position : aggregateAttributePositionList) {
-                                    currentAggregateAttributeValueMap.put(position,
-                                            groupedComplexEvent.getOutputData()[position]);
-                                }
-                                break;
+        AggregationGroupByRateLimiterState state = (AggregationGroupByRateLimiterState) stateHolder.getState();
+        try {
+            synchronized (state) {
+                complexEventChunk.reset();
+                String currentGroupByKey = null;
+                Map<Integer, Object> currentAggregateAttributeValueMap = null;
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event.getType() == ComplexEvent.Type.TIMER) {
+                        tryFlushEvents(outputEventChunks, event, state);
+                    } else {
+                        complexEventChunk.remove();
+                        tryFlushEvents(outputEventChunks, event, state);
+                        GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
+                        if (currentGroupByKey == null || !currentGroupByKey.equals(groupedComplexEvent.getGroupKey())) {
+                            currentGroupByKey = groupedComplexEvent.getGroupKey();
+                            currentAggregateAttributeValueMap =
+                                    state.groupByAggregateAttributeValueMap.get(currentGroupByKey);
+                            if (currentAggregateAttributeValueMap == null) {
+                                currentAggregateAttributeValueMap = new HashMap<Integer, Object>
+                                        (aggregateAttributePositionList.size());
+                                state.groupByAggregateAttributeValueMap.put(currentGroupByKey,
+                                        currentAggregateAttributeValueMap);
                             }
                         }
-                    } else if (groupedComplexEvent.getType() == ComplexEvent.Type.RESET) {
-                        eventList.clear();
-                        groupByAggregateAttributeValueMap.clear();
+                        if (groupedComplexEvent.getType() == ComplexEvent.Type.CURRENT) {
+                            state.eventList.add(groupedComplexEvent);
+                            for (Integer position : aggregateAttributePositionList) {
+                                currentAggregateAttributeValueMap.put(position, event.getOutputData()[position]);
+                            }
+                        } else if (groupedComplexEvent.getType() == ComplexEvent.Type.EXPIRED) {
+                            for (Iterator<GroupedComplexEvent> iterator = state.eventList.iterator();
+                                 iterator.hasNext(); ) {
+                                GroupedComplexEvent currentEvent = iterator.next();
+                                if (comparator.compare(currentEvent.getComplexEvent(), groupedComplexEvent
+                                        .getComplexEvent()) == 0) {
+                                    iterator.remove();
+                                    for (Integer position : aggregateAttributePositionList) {
+                                        currentAggregateAttributeValueMap.put(position,
+                                                groupedComplexEvent.getOutputData()[position]);
+                                    }
+                                    break;
+                                }
+                            }
+                        } else if (groupedComplexEvent.getType() == ComplexEvent.Type.RESET) {
+                            state.eventList.clear();
+                            state.groupByAggregateAttributeValueMap.clear();
+                        }
                     }
                 }
             }
+        } finally {
+            stateHolder.returnState(state);
         }
         for (ComplexEventChunk eventChunk : outputEventChunks) {
             sendToCallBacks(eventChunk);
         }
     }
 
-    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event) {
-        if (event.getTimestamp() >= scheduledTime) {
-            constructOutputChunk(outputEventChunks);
-            scheduledTime = scheduledTime + value;
-            scheduler.notifyAt(scheduledTime);
+    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
+                                AggregationGroupByRateLimiterState state) {
+        if (event.getTimestamp() >= state.scheduledTime) {
+            constructOutputChunk(outputEventChunks, state);
+            state.scheduledTime = state.scheduledTime + value;
+            scheduler.notifyAt(state.scheduledTime);
         }
     }
 
-    private void constructOutputChunk(List<ComplexEventChunk<ComplexEvent>> outputEventChunks) {
+    private void constructOutputChunk(List<ComplexEventChunk<ComplexEvent>> outputEventChunks,
+                                      AggregationGroupByRateLimiterState state) {
         ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
         Set<String> outputGroupingKeys = new HashSet<>();
-        for (GroupedComplexEvent originalComplexEvent : eventList) {
+        for (GroupedComplexEvent originalComplexEvent : state.eventList) {
             String currentGroupByKey = originalComplexEvent.getGroupKey();
             if (!outputGroupingKeys.contains(currentGroupByKey)) {
                 outputGroupingKeys.add(currentGroupByKey);
-                Map<Integer, Object> currentAggregateAttributeValueMap = groupByAggregateAttributeValueMap.get
+                Map<Integer, Object> currentAggregateAttributeValueMap = state.groupByAggregateAttributeValueMap.get
                         (currentGroupByKey);
                 ComplexEvent eventCopy = cloneComplexEvent(originalComplexEvent.getComplexEvent());
                 for (Integer position : aggregateAttributePositionList) {
@@ -135,29 +151,36 @@ public class AggregationGroupByWindowedPerSnapshotOutputRateLimiter extends
         outputEventChunks.add(outputEventChunk);
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
+    class AggregationGroupByRateLimiterState extends AggregationRateLimiterState {
+
+        private List<GroupedComplexEvent> eventList;
+        private Map<String, Map<Integer, Object>> groupByAggregateAttributeValueMap;
+
+        public AggregationGroupByRateLimiterState() {
+            groupByAggregateAttributeValueMap = new HashMap<>();
+            eventList = new LinkedList<>();
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return groupByAggregateAttributeValueMap.isEmpty() && eventList.isEmpty() && scheduledTime == 0;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
             state.put("EventList", eventList);
             state.put("GroupByAggregateAttributeValueMap", groupByAggregateAttributeValueMap);
+            state.put("ScheduledTime", scheduledTime);
+            return state;
         }
-        return state;
-    }
 
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        eventList = (List<GroupedComplexEvent>) state.get("EventList");
-        groupByAggregateAttributeValueMap = (Map<String, Map<Integer, Object>>) state.get
-                ("GroupByAggregateAttributeValueMap");
-    }
-
-    @Override
-    public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter
-            wrappedSnapshotOutputRateLimiter) {
-        return new AggregationGroupByWindowedPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService,
-                aggregateAttributePositionList,
-                wrappedSnapshotOutputRateLimiter,
-                siddhiQueryContext);
+        @Override
+        public void restore(Map<String, Object> state) {
+            eventList = (List<GroupedComplexEvent>) state.get("EventList");
+            groupByAggregateAttributeValueMap = (Map<String, Map<Integer, Object>>) state.get
+                    ("GroupByAggregateAttributeValueMap");
+            scheduledTime = (Long) state.get("ScheduledTime");
+        }
     }
 }

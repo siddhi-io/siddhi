@@ -24,11 +24,11 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-
-import java.util.Map;
 
 /**
  * Executor class for finding the start time and end time of the within clause in incremental processing.
@@ -37,8 +37,8 @@ import java.util.Map;
 public class IncrementalAggregateBaseTimeFunctionExecutor extends FunctionExecutor {
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 2) {
             throw new SiddhiAppValidationException("incrementalAggregator:getAggregationStartTime() function accepts " +
                     "two arguments, but found " + attributeExpressionExecutors.length);
@@ -48,10 +48,11 @@ public class IncrementalAggregateBaseTimeFunctionExecutor extends FunctionExecut
                     "incrementalAggregator:getAggregationStartTime() function accepts should be of type 'STRING', " +
                     "but found '" + attributeExpressionExecutors[1].getReturnType() + "'.");
         }
+        return null;
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         long time = (long) data[0];
         String durationName = (String) data[1];
         TimePeriod.Duration duration;
@@ -83,7 +84,7 @@ public class IncrementalAggregateBaseTimeFunctionExecutor extends FunctionExecut
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         //More than one attribute executors
         return null;
     }
@@ -91,15 +92,5 @@ public class IncrementalAggregateBaseTimeFunctionExecutor extends FunctionExecut
     @Override
     public Attribute.Type getReturnType() {
         return Attribute.Type.OBJECT;
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return null; // No states
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        // Nothing to be done
     }
 }

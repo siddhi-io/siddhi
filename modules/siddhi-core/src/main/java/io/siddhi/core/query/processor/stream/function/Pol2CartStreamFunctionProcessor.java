@@ -25,13 +25,13 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created on 1/26/15.
@@ -73,6 +73,7 @@ public class Pol2CartStreamFunctionProcessor extends StreamFunctionProcessor {
 
 
     private int inputExecutorLength;
+    private List<Attribute> retrunAttributes;
 
     /**
      * The init method of the StreamFunction
@@ -83,10 +84,10 @@ public class Pol2CartStreamFunctionProcessor extends StreamFunctionProcessor {
      * @return the additional output attributes introduced by the function
      */
     @Override
-    protected List<Attribute> init(AbstractDefinition inputDefinition,
-                                   ExpressionExecutor[] attributeExpressionExecutors,
-                                   ConfigReader configReader, boolean outputExpectsExpiredEvents,
-                                   SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(AbstractDefinition inputDefinition,
+                                ExpressionExecutor[] attributeExpressionExecutors,
+                                ConfigReader configReader, boolean outputExpectsExpiredEvents,
+                                SiddhiQueryContext siddhiQueryContext) {
         inputExecutorLength = attributeExpressionExecutors.length;
 
         if (inputExecutorLength < 2 || inputExecutorLength > 3) {
@@ -109,7 +110,9 @@ public class Pol2CartStreamFunctionProcessor extends StreamFunctionProcessor {
                             "not contain attributes with name 'x' or 'y', but found " + attribute);
                 }
             }
-            return Arrays.asList(new Attribute("x", Attribute.Type.DOUBLE), new Attribute("y", Attribute.Type.DOUBLE));
+            retrunAttributes = Arrays.asList(
+                    new Attribute("x", Attribute.Type.DOUBLE),
+                    new Attribute("y", Attribute.Type.DOUBLE));
         } else {
             for (Attribute attribute : inputDefinition.getAttributeList()) {
                 if (attribute.getName().equals("x") || attribute.getName().equals("y") || attribute.getName().equals
@@ -118,9 +121,12 @@ public class Pol2CartStreamFunctionProcessor extends StreamFunctionProcessor {
                             "not contain attributes with name 'x' or 'y' or 'z', but found " + attribute);
                 }
             }
-            return Arrays.asList(new Attribute("x", Attribute.Type.DOUBLE), new Attribute("y", Attribute.Type.DOUBLE)
-                    , new Attribute("z", Attribute.Type.DOUBLE));
+            retrunAttributes = Arrays.asList(
+                    new Attribute("x", Attribute.Type.DOUBLE),
+                    new Attribute("y", Attribute.Type.DOUBLE),
+                    new Attribute("z", Attribute.Type.DOUBLE));
         }
+        return null;
     }
 
     /**
@@ -164,15 +170,8 @@ public class Pol2CartStreamFunctionProcessor extends StreamFunctionProcessor {
         //Do nothing
     }
 
-
     @Override
-    public Map<String, Object> currentState() {
-        //No state
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Nothing to be done
+    public List<Attribute> getReturnAttributes() {
+        return retrunAttributes;
     }
 }

@@ -35,12 +35,5 @@ public class GreaterThanCompareConditionExpressionExecutorDoubleDouble extends
     @Override
     protected Boolean execute(Object left, Object right) {
         return (Double) left > (Double) right;
-
-    }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new GreaterThanCompareConditionExpressionExecutorDoubleDouble(leftExpressionExecutor.cloneExecutor
-                (key), rightExpressionExecutor.cloneExecutor(key));
     }
 }

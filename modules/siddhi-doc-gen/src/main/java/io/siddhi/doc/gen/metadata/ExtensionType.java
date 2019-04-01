@@ -22,7 +22,7 @@ import io.siddhi.core.function.Script;
 import io.siddhi.core.query.processor.stream.StreamProcessor;
 import io.siddhi.core.query.processor.stream.function.StreamFunctionProcessor;
 import io.siddhi.core.query.processor.stream.window.WindowProcessor;
-import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
+import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregatorExecutor;
 import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.input.source.SourceMapper;
 import io.siddhi.core.stream.output.sink.Sink;
@@ -65,7 +65,7 @@ public enum ExtensionType {
         // Populating the processor super class map
         superClassMap = new HashMap<>();
         superClassMap.put(ExtensionType.FUNCTION, FunctionExecutor.class);
-        superClassMap.put(ExtensionType.ATTRIBUTE_AGGREGATOR, AttributeAggregator.class);
+        superClassMap.put(ExtensionType.ATTRIBUTE_AGGREGATOR, AttributeAggregatorExecutor.class);
         superClassMap.put(ExtensionType.WINDOW, WindowProcessor.class);
         superClassMap.put(ExtensionType.STREAM_FUNCTION, StreamFunctionProcessor.class);
         superClassMap.put(ExtensionType.STREAM_PROCESSOR, StreamProcessor.class);

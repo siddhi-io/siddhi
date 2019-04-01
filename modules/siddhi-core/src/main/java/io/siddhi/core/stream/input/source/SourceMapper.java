@@ -60,8 +60,8 @@ public abstract class SourceMapper implements SourceEventListener {
         this.sourceType = sourceType;
         this.transportMappings = transportMappings;
         if (sourceHandler != null) {
-            sourceHandler.initSourceHandler(siddhiAppContext.getName(), sourceSyncCallback,
-                    siddhiAppContext.getElementIdGenerator().createNewId(), streamDefinition);
+            sourceHandler.initSourceHandler(siddhiAppContext.getName(), sourceSyncCallback, streamDefinition,
+                    siddhiAppContext);
         }
         this.sourceHandler = sourceHandler;
         this.siddhiAppContext = siddhiAppContext;
@@ -105,7 +105,6 @@ public abstract class SourceMapper implements SourceEventListener {
         } else {
             inputEventHandlerCallback = new PassThroughSourceHandler(inputHandler);
         }
-        LatencyTracker mapperLatencyTracker = null;
         this.inputEventHandler = new InputEventHandler(inputHandler, transportMappings,
                 trpProperties, trpSyncProperties, sourceType, mapperLatencyTracker, siddhiAppContext,
                 inputEventHandlerCallback);

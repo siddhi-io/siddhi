@@ -49,12 +49,6 @@ public class IndexOperator implements Operator {
     }
 
     @Override
-    public CompiledCondition cloneCompilation(String key) {
-        //todo check if there are any issues when not cloning
-        return new IndexOperator(collectionExecutor, queryName);
-    }
-
-    @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
         return collectionExecutor.find(matchingEvent, (IndexedEventHolder) storeEvents, storeEventCloner);
     }

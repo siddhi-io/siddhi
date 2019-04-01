@@ -28,11 +28,11 @@ public class StateEventCloner {
     private final int streamEventSize;
     //    private final int preOutputDataSize;
     private final int outputDataSize;
-    private final StateEventPool stateEventPool;
+    private final StateEventFactory stateEventFactory;
 
-    public StateEventCloner(MetaStateEvent metaStateEvent, StateEventPool stateEventPool) {
+    public StateEventCloner(MetaStateEvent metaStateEvent, StateEventFactory stateEventFactory) {
 
-        this.stateEventPool = stateEventPool;
+        this.stateEventFactory = stateEventFactory;
         this.streamEventSize = metaStateEvent.getStreamEventCount();
 //        this.preOutputDataSize = metaStateEvent.getPreOutputDataAttributes().size();
         this.outputDataSize = metaStateEvent.getOutputDataAttributes().size();
@@ -46,16 +46,16 @@ public class StateEventCloner {
      * @return StateEvent
      */
     public StateEvent copyStateEvent(StateEvent stateEvent) {
-        StateEvent borrowedEvent = stateEventPool.borrowEvent();
+        StateEvent newEvent = stateEventFactory.newInstance();
         if (outputDataSize > 0) {
-            System.arraycopy(stateEvent.getOutputData(), 0, borrowedEvent.getOutputData(), 0, outputDataSize);
+            System.arraycopy(stateEvent.getOutputData(), 0, newEvent.getOutputData(), 0, outputDataSize);
         }
         if (streamEventSize > 0) {
-            System.arraycopy(stateEvent.getStreamEvents(), 0, borrowedEvent.getStreamEvents(), 0, streamEventSize);
+            System.arraycopy(stateEvent.getStreamEvents(), 0, newEvent.getStreamEvents(), 0, streamEventSize);
         }
-        borrowedEvent.setType(stateEvent.getType());
-        borrowedEvent.setTimestamp(stateEvent.getTimestamp());
-        borrowedEvent.setId(stateEvent.getId());
-        return borrowedEvent;
+        newEvent.setType(stateEvent.getType());
+        newEvent.setTimestamp(stateEvent.getTimestamp());
+        newEvent.setId(stateEvent.getId());
+        return newEvent;
     }
 }

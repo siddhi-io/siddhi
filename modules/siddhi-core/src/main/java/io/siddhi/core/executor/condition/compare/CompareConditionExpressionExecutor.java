@@ -44,9 +44,4 @@ public abstract class CompareConditionExpressionExecutor extends ConditionExpres
 
     protected abstract Boolean execute(Object left, Object right);
 
-    @Override
-    public void clean() {
-        leftExpressionExecutor.clean();
-        rightExpressionExecutor.clean();
-    }
 }

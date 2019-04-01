@@ -119,8 +119,8 @@ public class SessionWindowTestCase {
 
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("Session window's 1st parameter, session gap should be a constant parameter"
-                    + " attribute but found a dynamic attribute "
-                    + "VariableExpressionExecutor", e.getCause().getMessage());
+                    + " attribute but found a dynamic attribute " +
+                    "io.siddhi.core.executor.VariableExpressionExecutor", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -183,9 +183,9 @@ public class SessionWindowTestCase {
             siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(purchaseEventStream + query);
 
         } catch (SiddhiAppCreationException e) {
-            AssertJUnit.assertEquals("Session window's 2nd parameter, session key should be a dynamic parameter"
-                    + " attribute but found a constant attribute "
-                    + "ConstantExpressionExecutor", e.getCause().getMessage());
+            AssertJUnit.assertEquals("Session window's 2nd parameter, session key should be a " +
+                    "dynamic parameter attribute but found a constant attribute " +
+                    "io.siddhi.core.executor.ConstantExpressionExecutor", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {
@@ -250,7 +250,7 @@ public class SessionWindowTestCase {
         } catch (SiddhiAppCreationException e) {
             AssertJUnit.assertEquals("Session window's 3rd parameter, allowedLatency should be a "
                     + "constant parameter attribute but found a dynamic attribute "
-                    + "VariableExpressionExecutor", e.getCause().getMessage());
+                    + "io.siddhi.core.executor.VariableExpressionExecutor", e.getCause().getMessage());
             throw e;
         } finally {
             if (siddhiAppRuntime != null) {

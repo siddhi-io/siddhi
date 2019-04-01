@@ -36,10 +36,4 @@ public class EqualCompareConditionExpressionExecutorIntInt
         return ((Integer) left).intValue() == (Integer) right;
 
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new EqualCompareConditionExpressionExecutorIntInt(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

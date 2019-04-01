@@ -38,11 +38,6 @@ public class MapOperator extends CollectionOperator {
     }
 
     @Override
-    public CompiledCondition cloneCompilation(String key) {
-        return new MapOperator(expressionExecutor.cloneExecutor(key), storeEventPosition);
-    }
-
-    @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
         return super.find(matchingEvent, ((Map<Object, StreamEvent>) storeEvents).values(), storeEventCloner);
     }

@@ -18,34 +18,17 @@
 
 package io.siddhi.core.query.input.stream.state.runtime;
 
-import io.siddhi.core.query.input.stream.state.CountPostStateProcessor;
-import io.siddhi.core.query.input.stream.state.CountPreStateProcessor;
-
 /**
  * Created on 12/19/14.
  */
 public class CountInnerStateRuntime extends StreamInnerStateRuntime {
 
-    protected StreamInnerStateRuntime streamInnerStateRuntime;
 
     public CountInnerStateRuntime(StreamInnerStateRuntime streamInnerStateRuntime) {
         super(streamInnerStateRuntime.getStateType());
-        this.streamInnerStateRuntime = streamInnerStateRuntime;
         singleStreamRuntimeList = streamInnerStateRuntime.singleStreamRuntimeList;
         firstProcessor = streamInnerStateRuntime.firstProcessor;
         lastProcessor = streamInnerStateRuntime.lastProcessor;
     }
 
-    @Override
-    public InnerStateRuntime clone(String key) {
-        StreamInnerStateRuntime clonedStreamInnerStateRuntime = (StreamInnerStateRuntime) streamInnerStateRuntime
-                .clone(key);
-        CountPreStateProcessor countPreStateProcessor = (CountPreStateProcessor) clonedStreamInnerStateRuntime
-                .getFirstProcessor();
-        CountPostStateProcessor countPostStateProcessor = (CountPostStateProcessor) clonedStreamInnerStateRuntime
-                .getLastProcessor();
-        countPreStateProcessor.setCountPostStateProcessor(countPostStateProcessor);
-        return new CountInnerStateRuntime(clonedStreamInnerStateRuntime);
-
-    }
 }

@@ -18,6 +18,7 @@
 
 package io.siddhi.core.util;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -26,12 +27,23 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ThreadBarrier {
 
     private ReentrantLock lock = new ReentrantLock();
+    private AtomicInteger counter = new AtomicInteger();
 
-    public void pass() {
+    public void enter() {
         if (lock.isLocked()) {
             lock.lock();
             lock.unlock();
         }
+        counter.incrementAndGet();
+    }
+
+
+    public void exit() {
+        counter.decrementAndGet();
+    }
+
+    public int getActiveThreads() {
+        return counter.get();
     }
 
     public void lock() {

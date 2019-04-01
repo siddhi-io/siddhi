@@ -74,16 +74,4 @@ public class AndConditionExpressionExecutor extends ConditionExpressionExecutor 
         return Boolean.FALSE;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new AndConditionExpressionExecutor(leftConditionExecutor.cloneExecutor(key), rightConditionExecutor
-                .cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        leftConditionExecutor.clean();
-        rightConditionExecutor.clean();
-    }
-
 }

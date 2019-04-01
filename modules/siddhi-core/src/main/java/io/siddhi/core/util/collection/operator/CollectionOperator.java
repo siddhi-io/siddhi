@@ -43,11 +43,6 @@ public class CollectionOperator implements Operator {
     }
 
     @Override
-    public CompiledCondition cloneCompilation(String key) {
-        return new CollectionOperator(expressionExecutor.cloneExecutor(key), storeEventPosition);
-    }
-
-    @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
 
         ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);

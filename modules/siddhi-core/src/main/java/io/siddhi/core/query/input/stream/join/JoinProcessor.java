@@ -20,7 +20,7 @@ package io.siddhi.core.query.input.stream.join;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
-import io.siddhi.core.event.state.StateEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.processor.stream.window.FindableProcessor;
@@ -39,7 +39,7 @@ public class JoinProcessor implements Processor {
     private boolean outerJoinProcessor = false;
     private int matchingStreamIndex;
     private boolean preJoinProcessor;
-    private StateEventPool stateEventPool;
+    private StateEventFactory stateEventFactory;
     private CompiledCondition compiledCondition;
     private FindableProcessor findableProcessor;
     private Processor nextProcessor;
@@ -162,28 +162,6 @@ public class JoinProcessor implements Processor {
         }
     }
 
-    /**
-     * Clone a copy of processor.
-     *
-     * @param key partition key
-     * @return Cloned Processor
-     */
-    @Override
-    public Processor cloneProcessor(String key) {
-        JoinProcessor joinProcessor = new JoinProcessor(leftJoinProcessor, preJoinProcessor, outerJoinProcessor,
-                matchingStreamIndex);
-        joinProcessor.setTrigger(trigger);
-        if (trigger) {
-            joinProcessor.setCompiledCondition(compiledCondition.cloneCompilation(key));
-        }
-        return joinProcessor;
-    }
-
-    @Override
-    public void clean() {
-        //ignore
-    }
-
     public void setFindableProcessor(FindableProcessor findableProcessor) {
         this.findableProcessor = findableProcessor;
     }
@@ -200,8 +178,8 @@ public class JoinProcessor implements Processor {
         this.trigger = trigger;
     }
 
-    public void setStateEventPool(StateEventPool stateEventPool) {
-        this.stateEventPool = stateEventPool;
+    public void setStateEventFactory(StateEventFactory stateEventFactory) {
+        this.stateEventFactory = stateEventFactory;
     }
 
     /**
@@ -213,7 +191,7 @@ public class JoinProcessor implements Processor {
      * @return StateEvent state event
      */
     public StateEvent joinEventBuilder(StreamEvent leftStream, StreamEvent rightStream, ComplexEvent.Type type) {
-        StateEvent returnEvent = stateEventPool.borrowEvent();
+        StateEvent returnEvent = stateEventFactory.newInstance();
         returnEvent.setEvent(0, leftStream);
         returnEvent.setEvent(1, rightStream);
         returnEvent.setType(type);
