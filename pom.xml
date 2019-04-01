@@ -29,7 +29,7 @@
     <groupId>org.wso2.siddhi</groupId>
     <artifactId>siddhi</artifactId>
     <packaging>pom</packaging>
-    <version>4.4.11-SNAPSHOT</version>
+    <version>4.4.13-SNAPSHOT</version>
     <name>Siddhi</name>
     <description>Siddhi, high performing Complex Event Processing Engine</description>
 
@@ -414,7 +414,7 @@
                         <phase>validate</phase>
                         <configuration>
                             <configLocation>
-                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml
+                                https://raw.githubusercontent.com/wso2/code-quality-tools/v1.2/checkstyle/checkstyle.xml
                             </configLocation>
                             <suppressionsLocation>
                                 ${mavan.checkstyle.suppression.file}

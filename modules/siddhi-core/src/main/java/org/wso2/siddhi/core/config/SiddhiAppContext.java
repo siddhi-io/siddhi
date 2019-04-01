@@ -72,7 +72,7 @@ public class SiddhiAppContext {
         this.eternalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
         this.schedulerList = new ArrayList<Scheduler>();
-        this.rootMetricsLevel = Level.BASIC;
+        this.rootMetricsLevel = Level.OFF;
     }
 
     public SiddhiContext getSiddhiContext() {
