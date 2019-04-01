@@ -60,7 +60,7 @@ public class FirstGroupByPerEventOutputRateLimiter extends OutputRateLimiter {
                 if (count == null) {
                     groupByOutputTime.put(groupedComplexEvent.getGroupKey(), 1);
                     outputEventChunk.add(groupedComplexEvent);
-                } else if (count.equals(value-1)) {
+                } else if (count.equals(value - 1)) {
                     groupByOutputTime.remove(groupedComplexEvent.getGroupKey());
                 } else {
                     groupByOutputTime.put(groupedComplexEvent.getGroupKey(), count + 1);

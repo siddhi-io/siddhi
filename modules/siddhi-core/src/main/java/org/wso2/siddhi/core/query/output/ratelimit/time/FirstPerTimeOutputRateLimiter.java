@@ -21,13 +21,9 @@ package org.wso2.siddhi.core.query.output.ratelimit.time;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
-import org.wso2.siddhi.core.event.stream.StreamEventPool;
 import org.wso2.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import org.wso2.siddhi.core.util.Schedulable;
-import org.wso2.siddhi.core.util.Scheduler;
-import org.wso2.siddhi.core.util.parser.SchedulerParser;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
