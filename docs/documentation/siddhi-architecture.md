@@ -3,7 +3,7 @@
 Siddhi is an open source, cloud native, stream processing and complex event processing engine, and it can be utilized in any of the following ways:
 
 - Run as a server on its own
-- Run with WSO2 Stream Processor as a service
+- Run with [WSO2 Stream Processor](https://wso2.com/analytics-and-stream-processing/) as a service
 - Embedded into any Java or Python based application
 - Run on an Android application
  
