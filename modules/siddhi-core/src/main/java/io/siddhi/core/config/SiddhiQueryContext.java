@@ -18,9 +18,21 @@
 
 package io.siddhi.core.config;
 
+import io.siddhi.core.util.IdGenerator;
+import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.snapshot.SnapshotService;
+import io.siddhi.core.util.snapshot.state.EmptyStateHolder;
+import io.siddhi.core.util.snapshot.state.PartitionStateHolder;
+import io.siddhi.core.util.snapshot.state.PartitionSyncStateHolder;
+import io.siddhi.core.util.snapshot.state.SingleStateHolder;
+import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.query.api.SiddhiApp;
 import io.siddhi.query.api.execution.query.output.stream.OutputStream;
+
+import java.util.Map;
 
 /**
  * Holder object for context information of {@link SiddhiApp}.
@@ -29,13 +41,22 @@ public class SiddhiQueryContext {
 
     private SiddhiAppContext siddhiAppContext = null;
     private String name;
+    private String partitionId;
+    private boolean partitioned;
     private OutputStream.OutputEventType outputEventType;
     private LatencyTracker latencyTracker;
+    private Map<String, StateHolder> stateHolderMap;
+    private IdGenerator idGenerator;
 
     public SiddhiQueryContext(SiddhiAppContext siddhiAppContext, String queryName) {
+        this(siddhiAppContext, queryName, SiddhiConstants.PARTITION_ID_DEFAULT);
+    }
 
+    public SiddhiQueryContext(SiddhiAppContext siddhiAppContext, String queryName, String partitionId) {
         this.siddhiAppContext = siddhiAppContext;
         this.name = queryName;
+        this.partitionId = partitionId;
+        this.idGenerator = new IdGenerator();
     }
 
     public String getName() {
@@ -72,5 +93,49 @@ public class SiddhiQueryContext {
 
     public LatencyTracker getLatencyTracker() {
         return latencyTracker;
+    }
+
+    public boolean isPartitioned() {
+        return partitioned;
+    }
+
+    public void setPartitioned(boolean partitionable) {
+        partitioned = partitionable;
+    }
+
+    public String generateNewId() {
+        return idGenerator.createNewId();
+    }
+
+    public StateHolder generateStateHolder(String name, boolean groupBy, StateFactory stateFactory) {
+        return generateStateHolder(name, groupBy, stateFactory, false);
+    }
+
+    public StateHolder generateStateHolder(String name, boolean groupBy, StateFactory stateFactory, boolean unSafe) {
+        if (stateFactory != null) {
+            StateHolder stateHolder;
+            if (unSafe) {
+                if (partitioned || groupBy) {
+                    stateHolder = new PartitionStateHolder(stateFactory);
+                } else {
+                    stateHolder = new SingleStateHolder(stateFactory);
+                }
+            } else {
+                if (partitioned || groupBy) {
+                    stateHolder = new PartitionSyncStateHolder(stateFactory);
+                } else {
+                    stateHolder = new SingleSyncStateHolder(stateFactory);
+                }
+            }
+
+            if (SnapshotService.getSkipStateStorageThreadLocal().get() == null ||
+                    !SnapshotService.getSkipStateStorageThreadLocal().get()) {
+                stateHolderMap = siddhiAppContext.getSnapshotService().getStateHolderMap(partitionId, this.getName());
+                stateHolderMap.put(idGenerator.createNewId() + "-" + name, stateHolder);
+            }
+            return stateHolder;
+        } else {
+            return new EmptyStateHolder();
+        }
     }
 }

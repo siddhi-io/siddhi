@@ -26,11 +26,11 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.timestamp.TimestampGenerator;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-
-import java.util.Map;
 
 /**
  * Executor class for getting Siddhi application timestamp.
@@ -56,14 +56,15 @@ public class CurrentTimeMillisFunctionExecutor extends FunctionExecutor {
     private TimestampGenerator timestampGenerator;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 0) {
             throw new SiddhiAppValidationException("Invalid no of arguments passed to eventTimestamp() function, " +
                     "required 0 parameters, but found " +
                     attributeExpressionExecutors.length);
         }
         timestampGenerator = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator();
+        return null;
     }
 
     @Override
@@ -72,13 +73,13 @@ public class CurrentTimeMillisFunctionExecutor extends FunctionExecutor {
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         //will not occur
         return null;
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         //will not occur
         return null;
     }
@@ -86,16 +87,6 @@ public class CurrentTimeMillisFunctionExecutor extends FunctionExecutor {
     @Override
     public Attribute.Type getReturnType() {
         return Attribute.Type.LONG;
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return null;    //No need to maintain a state.
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Since there's no need to maintain a state, nothing needs to be done here.
     }
 }
 

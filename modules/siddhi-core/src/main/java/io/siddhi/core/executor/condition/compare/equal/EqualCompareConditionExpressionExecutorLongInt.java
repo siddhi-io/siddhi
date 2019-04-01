@@ -35,12 +35,5 @@ public class EqualCompareConditionExpressionExecutorLongInt extends
     @Override
     protected Boolean execute(Object left, Object right) {
         return (Long) left == ((Integer) right).longValue();
-
-    }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new EqualCompareConditionExpressionExecutorLongInt(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
     }
 }

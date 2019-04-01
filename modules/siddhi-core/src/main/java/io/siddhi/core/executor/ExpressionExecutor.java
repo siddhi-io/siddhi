@@ -30,8 +30,4 @@ public interface ExpressionExecutor {
 
     Attribute.Type getReturnType();
 
-    ExpressionExecutor cloneExecutor(String key);
-
-    void clean();
-
 }

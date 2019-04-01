@@ -23,30 +23,31 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.AbstractDefinition;
-import io.siddhi.query.api.definition.Attribute;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Performs event processing in a tumbling manner
+ *
+ * @param <S> current state of the processor
  */
-public abstract class BatchingWindowProcessor extends WindowProcessor {
+public abstract class BatchingWindowProcessor<S extends State> extends WindowProcessor<S> {
 
     @Override
-    protected List<Attribute> init(MetaStreamEvent metaStreamEvent,
-                                   AbstractDefinition inputDefinition,
-                                   ExpressionExecutor[] attributeExpressionExecutors,
-                                   ConfigReader configReader,
-                                   boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
-        init(attributeExpressionExecutors, configReader, outputExpectsExpiredEvents, siddhiQueryContext);
-        return new ArrayList<Attribute>(0);
+    protected StateFactory<S> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
+                                   ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                   StreamEventClonerHolder streamEventClonerHolder,
+                                   boolean outputExpectsExpiredEvents, boolean findToBeExecuted,
+                                   SiddhiQueryContext siddhiQueryContext) {
+        return init(attributeExpressionExecutors, configReader, streamEventClonerHolder,
+                outputExpectsExpiredEvents, findToBeExecuted, siddhiQueryContext);
     }
 
     /**
@@ -54,17 +55,23 @@ public abstract class BatchingWindowProcessor extends WindowProcessor {
      *
      * @param attributeExpressionExecutors the executors of each function parameters
      * @param configReader                 the config reader of window
+     * @param streamEventClonerHolder      stream event cloner holder
      * @param outputExpectsExpiredEvents   is expired events sent as output
+     * @param findToBeExecuted             find operation will be performed
      * @param siddhiQueryContext           the context of the siddhi query
      */
-    protected abstract void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                 boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext);
+    protected abstract StateFactory<S> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                            ConfigReader configReader,
+                                            StreamEventClonerHolder streamEventClonerHolder,
+                                            boolean outputExpectsExpiredEvents,
+                                            boolean findToBeExecuted, SiddhiQueryContext siddhiQueryContext);
 
     @Override
     protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                                     StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
+                                     StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater,
+                                     S state) {
         streamEventChunk.reset();
-        process(streamEventChunk, nextProcessor, streamEventCloner);
+        process(streamEventChunk, nextProcessor, streamEventCloner, state);
     }
 
     /**
@@ -73,9 +80,10 @@ public abstract class BatchingWindowProcessor extends WindowProcessor {
      * @param streamEventChunk  the stream event chunk that need to be processed
      * @param nextProcessor     the next processor to which the success events need to be passed
      * @param streamEventCloner helps to clone the incoming event for local storage or modification
+     * @param state             current state of the processor
      */
     protected abstract void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                                    StreamEventCloner streamEventCloner);
+                                    StreamEventCloner streamEventCloner, S state);
 
     @Override
     public ProcessingMode getProcessingMode() {

@@ -48,17 +48,4 @@ public class AddExpressionExecutorFloat implements ExpressionExecutor {
         return Attribute.Type.FLOAT;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new AddExpressionExecutorFloat(leftExpressionExecutor.cloneExecutor(key), rightExpressionExecutor
-                .cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        leftExpressionExecutor.clean();
-        rightExpressionExecutor.clean();
-    }
-
-
 }

@@ -21,7 +21,7 @@ package io.siddhi.core.util.parser;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.exception.OperationNotSupportedException;
@@ -48,7 +48,7 @@ import java.util.Map;
 public class EventHolderPasser {
     private static final Logger log = Logger.getLogger(EventHolderPasser.class);
 
-    public static EventHolder parse(AbstractDefinition tableDefinition, StreamEventPool tableStreamEventPool,
+    public static EventHolder parse(AbstractDefinition tableDefinition, StreamEventFactory tableStreamEventFactory,
                                     SiddhiAppContext siddhiAppContext) {
         ZeroStreamEventConverter eventConverter = new ZeroStreamEventConverter();
 
@@ -113,15 +113,15 @@ public class EventHolderPasser {
                 }
 
             }
-            return new IndexEventHolder(tableStreamEventPool, eventConverter, primaryKeyReferenceHolders, isNumeric,
+            return new IndexEventHolder(tableStreamEventFactory, eventConverter, primaryKeyReferenceHolders, isNumeric,
                     indexMetaData, tableDefinition, siddhiAppContext);
         } else {
             MetaStreamEvent metaStreamEvent = new MetaStreamEvent();
             for (Attribute attribute : tableDefinition.getAttributeList()) {
                 metaStreamEvent.addOutputData(attribute);
             }
-            StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent, tableStreamEventPool);
-            return new ListEventHolder(tableStreamEventPool, eventConverter,
+            StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent, tableStreamEventFactory);
+            return new ListEventHolder(tableStreamEventFactory, eventConverter,
                     new StreamEventClonerHolder(streamEventCloner));
         }
     }

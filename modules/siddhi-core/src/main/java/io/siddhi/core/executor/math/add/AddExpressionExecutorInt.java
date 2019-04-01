@@ -49,17 +49,4 @@ public class AddExpressionExecutorInt implements ExpressionExecutor {
         return Attribute.Type.INT;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new AddExpressionExecutorInt(leftExpressionExecutor.cloneExecutor(key), rightExpressionExecutor
-                .cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        leftExpressionExecutor.clean();
-        rightExpressionExecutor.clean();
-    }
-
-
 }

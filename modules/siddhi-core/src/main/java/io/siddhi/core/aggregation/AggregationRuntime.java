@@ -18,7 +18,6 @@
 
 package io.siddhi.core.aggregation;
 
-import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.MetaStateEvent;
@@ -68,61 +67,61 @@ public class AggregationRuntime implements MemoryCalculable {
     private final AggregationDefinition aggregationDefinition;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions;
+    private final List<ExpressionExecutor> baseExecutorsForFind;
+    private ExpressionExecutor shouldUpdateTimestamp;
     private final Map<TimePeriod.Duration, Table> aggregationTables;
-    private final SiddhiAppContext siddhiAppContext;
     private final MetaStreamEvent tableMetaStreamEvent;
     private final MetaStreamEvent aggregateMetaSteamEvent;
     private final LatencyTracker latencyTrackerFind;
     private final ThroughputTracker throughputTrackerFind;
-    private final List<List<ExpressionExecutor>> aggregateProcessingExecutorsList;
     private final List<GroupByKeyGenerator> groupByKeyGeneratorList;
     private List<TimePeriod.Duration> incrementalDurations;
     private SingleStreamRuntime singleStreamRuntime;
-    private List<ExpressionExecutor> baseExecutors;
     private List<ExpressionExecutor> outputExpressionExecutors;
     private RecreateInMemoryData recreateInMemoryData;
     private boolean processingOnExternalTime;
     private boolean isFirstEventArrived;
     private long lastExecutorsRefreshedTime = -1;
     private IncrementalDataPurging incrementalDataPurging;
-    private ExpressionExecutor shouldUpdateExpressionExecutor;
     private String shardId;
+    private List<List<ExpressionExecutor>> aggregateProcessExpressionExecutorsListForFind;
 
     public AggregationRuntime(AggregationDefinition aggregationDefinition,
                               Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap,
                               Map<TimePeriod.Duration, Table> aggregationTables,
                               SingleStreamRuntime singleStreamRuntime,
                               List<TimePeriod.Duration> incrementalDurations,
-                              SiddhiAppContext siddhiAppContext, List<ExpressionExecutor> baseExecutors,
                               MetaStreamEvent tableMetaStreamEvent,
                               List<ExpressionExecutor> outputExpressionExecutors,
                               LatencyTracker latencyTrackerFind, ThroughputTracker throughputTrackerFind,
                               RecreateInMemoryData recreateInMemoryData, boolean processingOnExternalTime,
-                              List<List<ExpressionExecutor>> aggregateProcessingExecutorsList,
                               List<GroupByKeyGenerator> groupByKeyGeneratorList,
                               IncrementalDataPurging incrementalDataPurging,
-                              ExpressionExecutor shouldUpdateExpressionExecutor, String shardId,
-                              Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions) {
+                              String shardId,
+                              Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions,
+                              ExpressionExecutor shouldUpdateTimestamp,
+                              List<List<ExpressionExecutor>> aggregateProcessExpressionExecutorsListForFind) {
         this.aggregationDefinition = aggregationDefinition;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.aggregationTables = aggregationTables;
         this.incrementalDurations = incrementalDurations;
-        this.siddhiAppContext = siddhiAppContext;
         this.singleStreamRuntime = singleStreamRuntime;
-        this.baseExecutors = baseExecutors;
         this.tableMetaStreamEvent = tableMetaStreamEvent;
         this.outputExpressionExecutors = outputExpressionExecutors;
         this.latencyTrackerFind = latencyTrackerFind;
         this.throughputTrackerFind = throughputTrackerFind;
         this.recreateInMemoryData = recreateInMemoryData;
         this.processingOnExternalTime = processingOnExternalTime;
-        this.aggregateProcessingExecutorsList = aggregateProcessingExecutorsList;
         this.groupByKeyGeneratorList = groupByKeyGeneratorList;
         this.incrementalDataPurging = incrementalDataPurging;
-        this.shouldUpdateExpressionExecutor = shouldUpdateExpressionExecutor;
         this.shardId = shardId;
         this.incrementalExecutorMapForPartitions = incrementalExecutorMapForPartitions;
-        aggregateMetaSteamEvent = new MetaStreamEvent();
+        this.shouldUpdateTimestamp = shouldUpdateTimestamp;
+        this.aggregateProcessExpressionExecutorsListForFind = aggregateProcessExpressionExecutorsListForFind;
+        this.aggregateMetaSteamEvent = new MetaStreamEvent();
+        //Without timestamp executor
+        this.baseExecutorsForFind = aggregateProcessExpressionExecutorsListForFind.get(0).subList(1,
+                aggregateProcessExpressionExecutorsListForFind.get(0).size());
         aggregationDefinition.getAttributeList().forEach(aggregateMetaSteamEvent::addOutputData);
     }
 
@@ -196,11 +195,11 @@ public class AggregationRuntime implements MemoryCalculable {
         return singleStreamRuntime;
     }
 
-    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-
+    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                            SiddhiQueryContext siddhiQueryContext) {
         try {
-            SnapshotService.getSkipSnapshotableThreadLocal().set(true);
-            if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
+            SnapshotService.getSkipStateStorageThreadLocal().set(true);
+            if (latencyTrackerFind != null && siddhiQueryContext.getSiddhiAppContext().isStatsEnabled()) {
                 latencyTrackerFind.markIn();
                 throughputTrackerFind.eventIn();
             }
@@ -215,12 +214,13 @@ public class AggregationRuntime implements MemoryCalculable {
             }
             return ((IncrementalAggregateCompileCondition) compiledCondition).find(matchingEvent,
                     aggregationDefinition, incrementalExecutorMap, aggregationTables, incrementalDurations,
-                    baseExecutors, outputExpressionExecutors, siddhiAppContext,
-                    aggregateProcessingExecutorsList, groupByKeyGeneratorList, shouldUpdateExpressionExecutor,
+                    baseExecutorsForFind, outputExpressionExecutors, siddhiQueryContext,
+                    aggregateProcessExpressionExecutorsListForFind,
+                    groupByKeyGeneratorList, shouldUpdateTimestamp,
                     incrementalExecutorMapForPartitions);
         } finally {
-            SnapshotService.getSkipSnapshotableThreadLocal().set(null);
-            if (latencyTrackerFind != null && siddhiAppContext.isStatsEnabled()) {
+            SnapshotService.getSkipStateStorageThreadLocal().set(null);
+            if (latencyTrackerFind != null && siddhiQueryContext.getSiddhiAppContext().isStatsEnabled()) {
                 latencyTrackerFind.markOut();
             }
         }
@@ -348,8 +348,7 @@ public class AggregationRuntime implements MemoryCalculable {
         // "on stream1.name == aggregator.nickName ..." in the join query) must be executed on that data.
         // This condition is used for that purpose.
         onCompiledCondition = OperatorParser.constructOperator(new ComplexEventChunk<>(true), expression,
-                matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
-                siddhiQueryContext);
+                matchingMetaInfoHolder, variableExpressionExecutors, tableMap, siddhiQueryContext);
 
         return new IncrementalAggregateCompileCondition(withinTableCompiledConditions, withinInMemoryCompileCondition,
                 onCompiledCondition, tableMetaStreamEvent, aggregateMetaSteamEvent, additionalAttributes,

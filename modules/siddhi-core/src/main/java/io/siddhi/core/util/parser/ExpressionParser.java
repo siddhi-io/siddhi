@@ -158,10 +158,7 @@ import io.siddhi.core.executor.math.subtract.SubtractExpressionExecutorFloat;
 import io.siddhi.core.executor.math.subtract.SubtractExpressionExecutorInt;
 import io.siddhi.core.executor.math.subtract.SubtractExpressionExecutorLong;
 import io.siddhi.core.query.processor.ProcessingMode;
-import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator;
-import io.siddhi.core.query.selector.attribute.processor.executor.AbstractAggregationAttributeExecutor;
-import io.siddhi.core.query.selector.attribute.processor.executor.AggregationAttributeExecutor;
-import io.siddhi.core.query.selector.attribute.processor.executor.GroupByAggregationAttributeExecutor;
+import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregatorExecutor;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiClassLoader;
@@ -449,29 +446,29 @@ public class ExpressionParser {
                             processingMode, outputExpectsExpiredEvents, siddhiQueryContext);
 
                     expressionExecutor.initExecutor(innerExpressionExecutors,
-                            processingMode, configReader, siddhiQueryContext);
+                            processingMode, configReader, groupBy, siddhiQueryContext);
                     if (expressionExecutor.getReturnType() == Attribute.Type.BOOL) {
                         return new BoolConditionExpressionExecutor(expressionExecutor);
                     }
                     return expressionExecutor;
                 } else {
-                    AttributeAggregator attributeAggregator = (AttributeAggregator) executor;
+                    AttributeAggregatorExecutor attributeAggregatorExecutor = (AttributeAggregatorExecutor) executor;
                     Expression[] innerExpressions = ((AttributeFunction) expression).getParameters();
                     ExpressionExecutor[] innerExpressionExecutors = parseInnerExpression(innerExpressions, metaEvent,
                             currentState, tableMap, executorList, groupBy, defaultStreamEventIndex,
                             processingMode, outputExpectsExpiredEvents, siddhiQueryContext);
-                    attributeAggregator.initAggregator(innerExpressionExecutors, processingMode,
-                            outputExpectsExpiredEvents, configReader, siddhiQueryContext);
-                    AbstractAggregationAttributeExecutor aggregationAttributeProcessor;
-                    if (groupBy) {
-                        aggregationAttributeProcessor = new GroupByAggregationAttributeExecutor(attributeAggregator,
-                                innerExpressionExecutors, configReader, siddhiQueryContext);
-                    } else {
-                        aggregationAttributeProcessor = new AggregationAttributeExecutor(attributeAggregator,
-                                innerExpressionExecutors, siddhiQueryContext);
-                    }
+                    attributeAggregatorExecutor.initAggregator(innerExpressionExecutors, processingMode,
+                            outputExpectsExpiredEvents, configReader, groupBy, siddhiQueryContext);
+//                    AbstractAggregationAttributeExecutor aggregationAttributeProcessor;
+//                    if (groupBy) {
+//                        aggregationAttributeProcessor = new GroupByAggregationAttributeExecutor(attributeAggregatorExecutor,
+//                                innerExpressionExecutors, configReader, siddhiQueryContext);
+//                    } else {
+//                        aggregationAttributeProcessor = new AggregationAttributeExecutor(attributeAggregatorExecutor,
+//                                innerExpressionExecutors, siddhiQueryContext);
+//                    }
                     SelectorParser.getContainsAggregatorThreadLocal().set("true");
-                    return aggregationAttributeProcessor;
+                    return attributeAggregatorExecutor;
                 }
             } else if (expression instanceof In) {
 
@@ -1451,7 +1448,8 @@ public class ExpressionParser {
                                                              boolean groupBy,
                                                              int defaultStreamEventIndex,
                                                              ProcessingMode processingMode,
-                                                             boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
+                                                             boolean outputExpectsExpiredEvents,
+                                                             SiddhiQueryContext siddhiQueryContext) {
         ExpressionExecutor[] innerExpressionExecutors;
         if (innerExpressions != null) {
             if (innerExpressions.length > 0) {

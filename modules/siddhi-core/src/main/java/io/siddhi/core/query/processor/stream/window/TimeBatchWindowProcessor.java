@@ -28,6 +28,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -41,6 +42,8 @@ import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.OperatorParser;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
@@ -110,14 +113,11 @@ import java.util.Map;
                 )
         }
 )
-public class TimeBatchWindowProcessor extends BatchingWindowProcessor
+public class TimeBatchWindowProcessor extends BatchingFindableWindowProcessor<TimeBatchWindowProcessor.WindowState>
         implements SchedulingProcessor, FindableProcessor {
 
     private long timeInMilliSeconds;
     private long nextEmitTime = -1;
-    private SnapshotableStreamEventQueue currentEventQueue = null;
-    private SnapshotableStreamEventQueue expiredEventQueue = null;
-    private StreamEvent resetEvent = null;
     private Scheduler scheduler;
     private boolean outputExpectsExpiredEvents;
     private SiddhiQueryContext siddhiQueryContext;
@@ -140,16 +140,12 @@ public class TimeBatchWindowProcessor extends BatchingWindowProcessor
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader, boolean
-            outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                StreamEventClonerHolder streamEventClonerHolder, boolean
+                                        outputExpectsExpiredEvents, boolean findToBeExecuted,
+                                SiddhiQueryContext siddhiQueryContext) {
         this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
         this.siddhiQueryContext = siddhiQueryContext;
-        if (!isStreamCurrentEvents) {
-            this.currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
-        }
-        if (outputExpectsExpiredEvents) {
-            this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
-        }
         if (attributeExpressionExecutors.length == 1) {
             initTimeParameter(attributeExpressionExecutors[0]);
         } else if (attributeExpressionExecutors.length == 2) {
@@ -221,6 +217,8 @@ public class TimeBatchWindowProcessor extends BatchingWindowProcessor
                     attributeExpressionExecutors.length + " input " +
                     "attributes");
         }
+        return () -> new WindowState(streamEventClonerHolder, outputExpectsExpiredEvents, findToBeExecuted);
+
     }
 
     private void initTimeParameter(ExpressionExecutor attributeExpressionExecutor) {
@@ -243,11 +241,10 @@ public class TimeBatchWindowProcessor extends BatchingWindowProcessor
         }
     }
 
-
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner) {
-        synchronized (this) {
+                           StreamEventCloner streamEventCloner, WindowState state) {
+        synchronized (state) {
             if (nextEmitTime == -1) {
                 long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
                 if (isStartTimeEnabled) {
@@ -275,47 +272,47 @@ public class TimeBatchWindowProcessor extends BatchingWindowProcessor
                     continue;
                 }
                 StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                if (resetEvent == null) {
-                    resetEvent = streamEventCloner.copyStreamEvent(streamEvent);
-                    resetEvent.setType(ComplexEvent.Type.RESET);
+                if (state.resetEvent == null) {
+                    state.resetEvent = streamEventCloner.copyStreamEvent(streamEvent);
+                    state.resetEvent.setType(ComplexEvent.Type.RESET);
                 }
                 if (!isStreamCurrentEvents) {
-                    currentEventQueue.add(clonedStreamEvent);
-                } else if (expiredEventQueue != null) {
+                    state.currentEventQueue.add(clonedStreamEvent);
+                } else if (state.expiredEventQueue != null) {
                     clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
-                    expiredEventQueue.add(clonedStreamEvent);
+                    state.expiredEventQueue.add(clonedStreamEvent);
                 }
             }
             if (!isStreamCurrentEvents) {
                 streamEventChunk.clear();
             }
             if (sendEvents) {
-                if (outputExpectsExpiredEvents && expiredEventQueue.getFirst() != null) {
-                    while (expiredEventQueue.hasNext()) {
-                        StreamEvent expiredEvent = expiredEventQueue.next();
+                if (outputExpectsExpiredEvents && state.expiredEventQueue.getFirst() != null) {
+                    while (state.expiredEventQueue.hasNext()) {
+                        StreamEvent expiredEvent = state.expiredEventQueue.next();
                         expiredEvent.setTimestamp(currentTime);
                     }
-                    streamEventChunk.add(expiredEventQueue.getFirst());
-                    expiredEventQueue.clear();
+                    streamEventChunk.add(state.expiredEventQueue.getFirst());
+                    state.expiredEventQueue.clear();
                 }
 
-                if (resetEvent != null) {
-                    streamEventChunk.add(resetEvent);
-                    resetEvent = null;
+                if (state.resetEvent != null) {
+                    streamEventChunk.add(state.resetEvent);
+                    state.resetEvent = null;
                 }
 
-                if (currentEventQueue != null && currentEventQueue.getFirst() != null) {
-                    if (expiredEventQueue != null) {
-                        currentEventQueue.reset();
-                        while (currentEventQueue.hasNext()) {
-                            StreamEvent currentEvent = currentEventQueue.next();
+                if (state.currentEventQueue != null && state.currentEventQueue.getFirst() != null) {
+                    if (state.expiredEventQueue != null) {
+                        state.currentEventQueue.reset();
+                        while (state.currentEventQueue.hasNext()) {
+                            StreamEvent currentEvent = state.currentEventQueue.next();
                             StreamEvent toExpireEvent = streamEventCloner.copyStreamEvent(currentEvent);
                             toExpireEvent.setType(StreamEvent.Type.EXPIRED);
-                            expiredEventQueue.add(toExpireEvent);
+                            state.expiredEventQueue.add(toExpireEvent);
                         }
                     }
-                    streamEventChunk.add(currentEventQueue.getFirst());
-                    currentEventQueue.clear();
+                    streamEventChunk.add(state.currentEventQueue.getFirst());
+                    state.currentEventQueue.clear();
                 }
             }
         }
@@ -341,45 +338,66 @@ public class TimeBatchWindowProcessor extends BatchingWindowProcessor
 
     @Override
     public void stop() {
-        //Do nothing
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
-            state.put("CurrentEventQueue", currentEventQueue != null ? currentEventQueue.getSnapshot() : null);
-            state.put("ExpiredEventQueue", expiredEventQueue != null ? expiredEventQueue.getSnapshot() : null);
-            state.put("ResetEvent", resetEvent);
+        if (scheduler != null) {
+            scheduler.stop();
         }
-        return state;
-    }
-
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        if (expiredEventQueue != null) {
-            expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
-        }
-        if (currentEventQueue != null) {
-            currentEventQueue.restore((SnapshotStateList) state.get("CurrentEventQueue"));
-        }
-        resetEvent = (StreamEvent) state.get("ResetEvent");
-    }
-
-    @Override
-    public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, expiredEventQueue, streamEventCloner);
     }
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        if (expiredEventQueue == null) {
-            expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+                                              Map<String, Table> tableMap, WindowState state,
+                                              SiddhiQueryContext siddhiQueryContext) {
+        return OperatorParser.constructOperator(state.expiredEventQueue, condition, matchingMetaInfoHolder,
+                variableExpressionExecutors, tableMap, siddhiQueryContext);
+    }
+
+
+    @Override
+    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                            StreamEventCloner streamEventCloner, WindowState state) {
+        return ((Operator) compiledCondition).find(matchingEvent, state.expiredEventQueue, streamEventCloner);
+    }
+
+    class WindowState extends State {
+        private SnapshotableStreamEventQueue currentEventQueue;
+        private SnapshotableStreamEventQueue expiredEventQueue;
+        private StreamEvent resetEvent = null;
+
+        WindowState(StreamEventClonerHolder streamEventClonerHolder,
+                    boolean outputExpectsExpiredEvents, boolean findToBeExecuted) {
+            if (!isStreamCurrentEvents) {
+                this.currentEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+            }
+            if (outputExpectsExpiredEvents || findToBeExecuted) {
+                this.expiredEventQueue = new SnapshotableStreamEventQueue(streamEventClonerHolder);
+            }
         }
-        return OperatorParser.constructOperator(expiredEventQueue, condition, matchingMetaInfoHolder,
-                variableExpressionExecutors, tableMap,
-                siddhiQueryContext);
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("CurrentEventQueue", currentEventQueue != null ? currentEventQueue.getSnapshot() : null);
+            state.put("ExpiredEventQueue", expiredEventQueue != null ? expiredEventQueue.getSnapshot() : null);
+            state.put("ResetEvent", resetEvent);
+            return state;
+        }
+
+        public void restore(Map<String, Object> state) {
+            if (expiredEventQueue != null) {
+                expiredEventQueue.restore((SnapshotStateList) state.get("ExpiredEventQueue"));
+            }
+            if (currentEventQueue != null) {
+                currentEventQueue.restore((SnapshotStateList) state.get("CurrentEventQueue"));
+            }
+            resetEvent = (StreamEvent) state.get("ResetEvent");
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return (currentEventQueue == null || currentEventQueue.getFirst() == null)
+                    && (expiredEventQueue == null || expiredEventQueue.getFirst() == null)
+                    && resetEvent == null;
+        }
     }
 }

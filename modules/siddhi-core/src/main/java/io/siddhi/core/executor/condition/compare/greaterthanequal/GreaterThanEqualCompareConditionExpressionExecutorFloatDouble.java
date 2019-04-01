@@ -38,10 +38,4 @@ public class GreaterThanEqualCompareConditionExpressionExecutorFloatDouble exten
         return (Float) left >= (Double) right;
 
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new GreaterThanEqualCompareConditionExpressionExecutorFloatDouble(leftExpressionExecutor.cloneExecutor
-                (key), rightExpressionExecutor.cloneExecutor(key));
-    }
 }

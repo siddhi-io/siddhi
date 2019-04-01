@@ -41,11 +41,6 @@ public class EventChunkOperator implements Operator {
     }
 
     @Override
-    public CompiledCondition cloneCompilation(String key) {
-        return new EventChunkOperator(expressionExecutor.cloneExecutor(key), storeEventPosition);
-    }
-
-    @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
         ComplexEventChunk<StreamEvent> storeEventChunk = (ComplexEventChunk<StreamEvent>) storeEvents;
         ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);

@@ -22,9 +22,9 @@ import io.siddhi.core.debugger.SiddhiDebugger;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
-import io.siddhi.core.event.state.StateEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 
 /**
@@ -53,22 +53,19 @@ public abstract class OutputCallback {
         return queryName;
     }
 
-    protected ComplexEventChunk<StateEvent> constructMatchingStateEventChunk(ComplexEventChunk
-                                                                                     matchingComplexEventChunk,
-                                                                             boolean convertToStreamEvent,
-                                                                             StateEventPool stateEventPool,
-                                                                             int matchingStreamIndex, StreamEventPool
-                                                                                     streamEventPool,
-                                                                             StreamEventConverter
-                                                                                     streamEventConverter) {
-        ComplexEventChunk<StateEvent> stateEventChunk = new ComplexEventChunk<StateEvent>(matchingComplexEventChunk
-                .isBatch());
+    protected ComplexEventChunk<StateEvent> constructMatchingStateEventChunk(
+            ComplexEventChunk matchingComplexEventChunk, boolean convertToStreamEvent,
+            StateEventFactory stateEventFactory,
+            int matchingStreamIndex, StreamEventFactory streamEventFactory,
+            StreamEventConverter streamEventConverter) {
+        ComplexEventChunk<StateEvent> stateEventChunk = new ComplexEventChunk<StateEvent>(
+                matchingComplexEventChunk.isBatch());
         while (matchingComplexEventChunk.hasNext()) {
             ComplexEvent matchingComplexEvent = matchingComplexEventChunk.next();
             matchingComplexEventChunk.remove();
-            StateEvent stateEvent = stateEventPool.borrowEvent();
+            StateEvent stateEvent = stateEventFactory.newInstance();
             if (convertToStreamEvent) {
-                StreamEvent borrowEvent = streamEventPool.borrowEvent();
+                StreamEvent borrowEvent = streamEventFactory.newInstance();
                 streamEventConverter.convertData(
                         matchingComplexEvent.getTimestamp(),
                         matchingComplexEvent.getOutputData(),

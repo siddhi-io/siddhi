@@ -23,6 +23,8 @@ import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
@@ -30,7 +32,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -66,8 +67,8 @@ public class IncrementalUnixTimeFunctionExecutor extends FunctionExecutor {
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new SiddhiAppValidationException("incrementalAggregator:timestampInMilliseconds() function " +
                     "accepts only one argument, but found " + attributeExpressionExecutors.length);
@@ -76,16 +77,17 @@ public class IncrementalUnixTimeFunctionExecutor extends FunctionExecutor {
             throw new SiddhiAppValidationException("Only string values can be converted to unix time, but found " +
                     attributeExpressionExecutors[0].getReturnType());
         }
+        return null;
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         return null; //Since the timestampInMilliseconds function takes in 1 parameter, this method does not get called.
         // Hence, not implemented.
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         return getUnixTimeStamp(data.toString());
     }
 
@@ -94,13 +96,4 @@ public class IncrementalUnixTimeFunctionExecutor extends FunctionExecutor {
         return Attribute.Type.LONG;
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        return null;    //No states
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Nothing to be done
-    }
 }

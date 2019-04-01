@@ -23,61 +23,51 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.StateEventCloner;
-import io.siddhi.core.event.state.StateEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
+import io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregatorExecutor;
 import io.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
-import io.siddhi.core.query.selector.attribute.processor.executor.AbstractAggregationAttributeExecutor;
 import io.siddhi.core.util.lock.LockWrapper;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Implementation of {@link OutputRateLimiter} to be used by Snapshot Output Rate Limiting implementations.
+ *
+ * @param <S> current state of the RateLimiter
  */
-public class WrappedSnapshotOutputRateLimiter extends OutputRateLimiter {
+public class WrappedSnapshotOutputRateLimiter<S extends State> extends OutputRateLimiter<S> {
     private final Long value;
-    private final ScheduledExecutorService scheduledExecutorService;
     private final boolean groupBy;
     private final boolean windowed;
     private SiddhiQueryContext siddhiQueryContext;
     private SnapshotOutputRateLimiter outputRateLimiter;
-    private String id;
     private List<Integer> aggregateAttributePositionList = new ArrayList<Integer>();
 
-    public WrappedSnapshotOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService,
-                                            boolean isGroupBy, boolean isWindowed,
+    public WrappedSnapshotOutputRateLimiter(Long value,
+                                            boolean groupBy, boolean isWindowed,
                                             SiddhiQueryContext siddhiQueryContext) {
-        this.id = id;
         this.value = value;
-        this.scheduledExecutorService = scheduledExecutorService;
-        this.groupBy = isGroupBy;
+        this.groupBy = groupBy;
         this.windowed = isWindowed;
         this.siddhiQueryContext = siddhiQueryContext;
     }
 
-    @Override
-    public OutputRateLimiter clone(String key) {
-        WrappedSnapshotOutputRateLimiter instance = new WrappedSnapshotOutputRateLimiter(id + key, value,
-                scheduledExecutorService, groupBy, windowed, siddhiQueryContext);
-        instance.outputRateLimiter = this.outputRateLimiter.clone(key, instance);
-        return instance;
-    }
-
     public void init(SiddhiQueryContext siddhiQueryContext, LockWrapper lockWrapper) {
-        super.init(lockWrapper, siddhiQueryContext);
+        super.init(lockWrapper, groupBy, siddhiQueryContext);
         outputRateLimiter.setQueryLock(lockWrapper);
     }
 
     public void init(int outPutAttributeSize, List<AttributeProcessor> attributeProcessorList, MetaComplexEvent
             metaComplexEvent) {
         for (AttributeProcessor attributeProcessor : attributeProcessorList) {
-            if (attributeProcessor.getExpressionExecutor() instanceof AbstractAggregationAttributeExecutor) {
+            if (attributeProcessor.getExpressionExecutor() instanceof AttributeAggregatorExecutor<?>) {
                 aggregateAttributePositionList.add(attributeProcessor.getOutputPosition());
             }
         }
@@ -86,66 +76,65 @@ public class WrappedSnapshotOutputRateLimiter extends OutputRateLimiter {
             if (groupBy) {
                 if (outPutAttributeSize == aggregateAttributePositionList.size()) {   //All Aggregation
                     outputRateLimiter = new AllAggregationGroupByWindowedPerSnapshotOutputRateLimiter(
-                            id, value, scheduledExecutorService, this,
+                            value, this, groupBy,
                             siddhiQueryContext);
                 } else if (aggregateAttributePositionList.size() > 0) {   //Some Aggregation
                     outputRateLimiter = new AggregationGroupByWindowedPerSnapshotOutputRateLimiter(
-                            id, value, scheduledExecutorService, aggregateAttributePositionList,
-                            this, siddhiQueryContext);
+                            value, aggregateAttributePositionList,
+                            this, groupBy, siddhiQueryContext);
                 } else { // No aggregation
                     //GroupBy is same as Non GroupBy
                     outputRateLimiter = new WindowedPerSnapshotOutputRateLimiter(
-                            id, value, scheduledExecutorService, this,
+                            value, this, groupBy,
                             siddhiQueryContext);
                 }
             } else {
                 if (outPutAttributeSize == aggregateAttributePositionList.size()) {   //All Aggregation
                     outputRateLimiter = new AllAggregationPerSnapshotOutputRateLimiter(
-                            id, value, scheduledExecutorService, this,
+                            value, this, groupBy,
                             siddhiQueryContext);
                 } else if (aggregateAttributePositionList.size() > 0) {   //Some Aggregation
                     outputRateLimiter = new AggregationWindowedPerSnapshotOutputRateLimiter(
-                            id, value, scheduledExecutorService, aggregateAttributePositionList,
-                            this, siddhiQueryContext);
+                            value, aggregateAttributePositionList,
+                            this, groupBy, siddhiQueryContext);
                 } else { // No aggregation
                     outputRateLimiter = new WindowedPerSnapshotOutputRateLimiter(
-                            id, value, scheduledExecutorService, this,
-                            siddhiQueryContext);
+                            value, this,
+                            groupBy, siddhiQueryContext);
                 }
             }
 
         } else {
             if (groupBy) {
-                outputRateLimiter = new GroupByPerSnapshotOutputRateLimiter(id, value, scheduledExecutorService,
-                        this, siddhiQueryContext);
+                outputRateLimiter = new GroupByPerSnapshotOutputRateLimiter(value,
+                        this, groupBy, siddhiQueryContext);
             } else {
-                outputRateLimiter = new PerSnapshotOutputRateLimiter(id, value, scheduledExecutorService,
-                        this, siddhiQueryContext);
+                outputRateLimiter = new PerSnapshotOutputRateLimiter(value,
+                        this, groupBy, siddhiQueryContext);
             }
         }
 
 
         if (metaComplexEvent instanceof MetaStateEvent) {
-            StateEventPool stateEventPool = new StateEventPool((MetaStateEvent) metaComplexEvent, 5);
+            StateEventFactory stateEventFactory = new StateEventFactory((MetaStateEvent) metaComplexEvent);
             outputRateLimiter.setStateEventCloner(new StateEventCloner((MetaStateEvent) metaComplexEvent,
-                    stateEventPool));
+                    stateEventFactory));
         } else {
-            StreamEventPool streamEventPool = new StreamEventPool((MetaStreamEvent) metaComplexEvent, 5);
+            StreamEventFactory streamEventFactory = new StreamEventFactory((MetaStreamEvent) metaComplexEvent);
             outputRateLimiter.setStreamEventCloner(new StreamEventCloner((MetaStreamEvent) metaComplexEvent,
-                    streamEventPool));
+                    streamEventFactory));
         }
 
     }
 
-
     @Override
-    public void start() {
-        outputRateLimiter.start();
+    public void partitionCreated() {
+        outputRateLimiter.partitionCreated();
     }
 
     @Override
-    public void stop() {
-        outputRateLimiter.stop();
+    protected StateFactory<S> init() {
+        return null;
     }
 
     @Override
@@ -157,13 +146,4 @@ public class WrappedSnapshotOutputRateLimiter extends OutputRateLimiter {
         sendToCallBacks(complexEventChunk);
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        return outputRateLimiter.currentState();
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        outputRateLimiter.restoreState(state);
-    }
 }

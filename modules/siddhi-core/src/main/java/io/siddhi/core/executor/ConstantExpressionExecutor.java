@@ -42,18 +42,8 @@ public class ConstantExpressionExecutor implements ExpressionExecutor {
         return type;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return this;
-    }
-
     public Object getValue() {
         return value;
-    }
-
-    @Override
-    public void clean() {
-        //ignore
     }
 
 }

@@ -20,46 +20,43 @@ package io.siddhi.core.query.output.ratelimit.time;
 
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.util.Schedulable;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Implementation of {@link OutputRateLimiter} which will collect pre-defined time period and the emit all
  * collected events as a batch.
  */
 
-public class AllPerTimeOutputRateLimiter extends OutputRateLimiter implements Schedulable {
+public class AllPerTimeOutputRateLimiter
+        extends OutputRateLimiter<AllPerTimeOutputRateLimiter.RateLimiterState> implements Schedulable {
 
     private static final Logger log = Logger.getLogger(AllPerTimeOutputRateLimiter.class);
     private final Long value;
     private String id;
-    private ScheduledExecutorService scheduledExecutorService;
     private Scheduler scheduler;
-    private ComplexEventChunk<ComplexEvent> allComplexEventChunk;
-    private long scheduledTime;
 
-    public AllPerTimeOutputRateLimiter(String id, Long value, ScheduledExecutorService scheduledExecutorService) {
+    public AllPerTimeOutputRateLimiter(String id, Long value) {
         this.id = id;
         this.value = value;
-        this.scheduledExecutorService = scheduledExecutorService;
-        allComplexEventChunk = new ComplexEventChunk<ComplexEvent>(false);
     }
 
     @Override
-    public OutputRateLimiter clone(String key) {
-        AllPerTimeOutputRateLimiter instance = new AllPerTimeOutputRateLimiter(id + key, value,
-                scheduledExecutorService);
-        instance.setLatencyTracker(latencyTracker);
-        return instance;
+    protected StateFactory<RateLimiterState> init() {
+        this.scheduler = SchedulerParser.parse(this, siddhiQueryContext);
+        this.scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
+        this.scheduler.init(lockWrapper, siddhiQueryContext.getName());
+        return () -> new RateLimiterState();
     }
 
     @Override
@@ -67,28 +64,33 @@ public class AllPerTimeOutputRateLimiter extends OutputRateLimiter implements Sc
 
         ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
         complexEventChunk.reset();
-        synchronized (this) {
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.TIMER) {
-                    if (event.getTimestamp() >= scheduledTime) {
-                        ComplexEvent first = allComplexEventChunk.getFirst();
-                        if (first != null) {
-                            allComplexEventChunk.clear();
-                            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
-                                    (complexEventChunk.isBatch());
-                            outputEventChunk.add(first);
-                            outputEventChunks.add(outputEventChunk);
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event.getType() == ComplexEvent.Type.TIMER) {
+                        if (event.getTimestamp() >= state.scheduledTime) {
+                            ComplexEvent first = state.allComplexEventChunk.getFirst();
+                            if (first != null) {
+                                state.allComplexEventChunk.clear();
+                                ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
+                                        (complexEventChunk.isBatch());
+                                outputEventChunk.add(first);
+                                outputEventChunks.add(outputEventChunk);
+                            }
+                            state.scheduledTime = state.scheduledTime + value;
+                            scheduler.notifyAt(state.scheduledTime);
                         }
-                        scheduledTime = scheduledTime + value;
-                        scheduler.notifyAt(scheduledTime);
+                    } else if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type
+                            .EXPIRED) {
+                        complexEventChunk.remove();
+                        state.allComplexEventChunk.add(event);
                     }
-                } else if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type
-                        .EXPIRED) {
-                    complexEventChunk.remove();
-                    allComplexEventChunk.add(event);
                 }
             }
+        } finally {
+            stateHolder.returnState(state);
         }
         for (ComplexEventChunk eventChunk : outputEventChunks) {
             sendToCallBacks(eventChunk);
@@ -96,33 +98,42 @@ public class AllPerTimeOutputRateLimiter extends OutputRateLimiter implements Sc
     }
 
     @Override
-    public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiQueryContext.getSiddhiAppContext());
-        scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
-        scheduler.init(lockWrapper, siddhiQueryContext.getName());
-        long currentTime = System.currentTimeMillis();
-        scheduledTime = currentTime + value;
-        scheduler.notifyAt(scheduledTime);
-    }
-
-    @Override
-    public void stop() {
-        //Nothing to stop
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
-            state.put("AllComplexEventChunk", allComplexEventChunk.getFirst());
+    public void partitionCreated() {
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                long currentTime = System.currentTimeMillis();
+                state.scheduledTime = currentTime + value;
+                scheduler.notifyAt(state.scheduledTime);
+            }
+        } finally {
+            stateHolder.returnState(state);
         }
-        return state;
     }
 
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        allComplexEventChunk.clear();
-        allComplexEventChunk.add((ComplexEvent) state.get("AllComplexEventChunk"));
-    }
+    class RateLimiterState extends State {
 
+        private ComplexEventChunk<ComplexEvent> allComplexEventChunk = new ComplexEventChunk<>(false);
+        private long scheduledTime;
+
+        @Override
+        public boolean canDestroy() {
+            return allComplexEventChunk.getFirst() == null && scheduledTime == 0;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("AllComplexEventChunk", allComplexEventChunk.getFirst());
+            state.put("ScheduledTime", scheduledTime);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            allComplexEventChunk.clear();
+            allComplexEventChunk.add((ComplexEvent) state.get("AllComplexEventChunk"));
+            scheduledTime = (Long) state.get("ScheduledTime");
+        }
+    }
 }

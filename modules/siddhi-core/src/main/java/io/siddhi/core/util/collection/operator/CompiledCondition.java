@@ -23,6 +23,4 @@ package io.siddhi.core.util.collection.operator;
  */
 public interface CompiledCondition extends CompiledExpression {
 
-    CompiledCondition cloneCompilation(String key);
-
 }

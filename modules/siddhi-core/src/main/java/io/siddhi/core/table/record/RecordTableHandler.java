@@ -16,10 +16,14 @@
 
 package io.siddhi.core.table.record;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
 import io.siddhi.core.util.collection.operator.CompiledSelection;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 
@@ -31,33 +35,46 @@ import java.util.Map;
 /**
  * RecordTableHandler is an optional handler that can be implemented to do processing on output events before sending
  * to the AbstractRecordTable.
+ *
+ * @param <S> current state
  */
-public abstract class RecordTableHandler {
+public abstract class RecordTableHandler<S extends State> {
 
-    private String elementId;
+    private String id;
     private RecordTableHandlerCallback recordTableHandlerCallback;
+    private StateHolder<S> stateHolder;
 
-    public String getElementId() {
-        return elementId;
+    protected final void init(TableDefinition tableDefinition, RecordTableHandlerCallback recordTableHandlerCallback,
+                              SiddhiAppContext siddhiAppContext) {
+        this.recordTableHandlerCallback = recordTableHandlerCallback;
+
+        id = siddhiAppContext.getName() + "-" + tableDefinition.getId() + "-" + this.getClass().getName();
+        StateFactory<S> stateFactory = init(id, tableDefinition);
+        stateHolder = siddhiAppContext.generateStateHolder(
+                tableDefinition.getId() + "-" + this.getClass().getName(),
+                stateFactory);
+
     }
 
-    protected final void init(String elementId, TableDefinition tableDefinition,
-                              RecordTableHandlerCallback recordTableHandlerCallback) {
-        this.elementId = elementId;
-        this.recordTableHandlerCallback = recordTableHandlerCallback;
-        init(elementId, tableDefinition);
+    public String getId() {
+        return id;
     }
 
     /**
      * Initialize the Record Table Handler
      *
-     * @param elementId       is the generated id for the record table handler
+     * @param id              is the generated id for the record table handler
      * @param tableDefinition is the definition of the table with annotations if any
      */
-    public abstract void init(String elementId, TableDefinition tableDefinition);
+    public abstract StateFactory<S> init(String id, TableDefinition tableDefinition);
 
     public void add(long timestamp, List<Object[]> records) throws ConnectionUnavailableException {
-        add(timestamp, records, recordTableHandlerCallback);
+        S state = stateHolder.getState();
+        try {
+            add(timestamp, records, recordTableHandlerCallback, state);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     /**
@@ -65,15 +82,21 @@ public abstract class RecordTableHandler {
      * @param records                    records that need to be added to the table, each Object[] represent a
      *                                   record and it will match the attributes of the Table Definition.
      * @param recordTableHandlerCallback call back to do operations on the record table
+     * @param state                      current state
      * @throws ConnectionUnavailableException
      */
     public abstract void add(long timestamp, List<Object[]> records,
-                             RecordTableHandlerCallback recordTableHandlerCallback)
+                             RecordTableHandlerCallback recordTableHandlerCallback, S state)
             throws ConnectionUnavailableException;
 
     public void delete(long timestamp, List<Map<String, Object>> deleteConditionParameterMaps,
                        CompiledCondition compiledCondition) throws ConnectionUnavailableException {
-        delete(timestamp, deleteConditionParameterMaps, compiledCondition, recordTableHandlerCallback);
+        S state = stateHolder.getState();
+        try {
+            delete(timestamp, deleteConditionParameterMaps, compiledCondition, recordTableHandlerCallback, state);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     /**
@@ -82,19 +105,25 @@ public abstract class RecordTableHandler {
      *                                     compiled condition
      * @param compiledCondition            the compiledCondition against which records should be matched for deletion
      * @param recordTableHandlerCallback   call back to do operations on the record table
+     * @param state                        current state
      * @throws ConnectionUnavailableException
      */
     public abstract void delete(long timestamp, List<Map<String, Object>> deleteConditionParameterMaps,
                                 CompiledCondition compiledCondition,
-                                RecordTableHandlerCallback recordTableHandlerCallback)
+                                RecordTableHandlerCallback recordTableHandlerCallback, S state)
             throws ConnectionUnavailableException;
 
     public void update(long timestamp, CompiledCondition compiledCondition,
                        List<Map<String, Object>> updateConditionParameterMaps,
                        LinkedHashMap<String, CompiledExpression> updateSetMap,
                        List<Map<String, Object>> updateSetParameterMaps) throws ConnectionUnavailableException {
-        update(timestamp, compiledCondition, updateConditionParameterMaps, updateSetMap, updateSetParameterMaps,
-                recordTableHandlerCallback);
+        S state = stateHolder.getState();
+        try {
+            update(timestamp, compiledCondition, updateConditionParameterMaps, updateSetMap, updateSetParameterMaps,
+                    recordTableHandlerCallback, state);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     /**
@@ -105,13 +134,14 @@ public abstract class RecordTableHandler {
      * @param updateSetExpressions         the set of updates mappings and related complied expressions
      * @param updateSetParameterMaps       map of matching StreamVariable Ids and their values corresponding to the
      * @param recordTableHandlerCallback   call back to do operations on the record table
+     * @param state                        current state
      * @throws ConnectionUnavailableException
      */
     public abstract void update(long timestamp, CompiledCondition updateCondition,
                                 List<Map<String, Object>> updateConditionParameterMaps,
                                 LinkedHashMap<String, CompiledExpression> updateSetExpressions,
                                 List<Map<String, Object>> updateSetParameterMaps,
-                                RecordTableHandlerCallback recordTableHandlerCallback)
+                                RecordTableHandlerCallback recordTableHandlerCallback, S state)
             throws ConnectionUnavailableException;
 
     public void updateOrAdd(long timestamp, CompiledCondition compiledCondition,
@@ -145,7 +175,12 @@ public abstract class RecordTableHandler {
     public Iterator<Object[]> find(long timestamp, Map<String, Object> findConditionParameterMap,
                                    CompiledCondition compiledCondition) throws
             ConnectionUnavailableException {
-        return find(timestamp, findConditionParameterMap, compiledCondition, recordTableHandlerCallback);
+        S state = stateHolder.getState();
+        try {
+            return find(timestamp, findConditionParameterMap, compiledCondition, recordTableHandlerCallback, state);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     /**
@@ -154,17 +189,24 @@ public abstract class RecordTableHandler {
      *                                   corresponding to the compiled condition
      * @param compiledCondition          the compiledCondition against which records should be matched
      * @param recordTableHandlerCallback call back to do operations on the record table
+     * @param state
      * @return RecordIterator of matching records
      * @throws ConnectionUnavailableException
      */
     public abstract Iterator<Object[]> find(long timestamp, Map<String, Object> findConditionParameterMap,
                                             CompiledCondition compiledCondition,
-                                            RecordTableHandlerCallback recordTableHandlerCallback)
+                                            RecordTableHandlerCallback recordTableHandlerCallback, S state)
             throws ConnectionUnavailableException;
 
     public boolean contains(long timestamp, Map<String, Object> containsConditionParameterMap,
                             CompiledCondition compiledCondition) throws ConnectionUnavailableException {
-        return contains(timestamp, containsConditionParameterMap, compiledCondition, recordTableHandlerCallback);
+        S state = stateHolder.getState();
+        try {
+            return contains(timestamp, containsConditionParameterMap, compiledCondition,
+                    recordTableHandlerCallback, state);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     /**
@@ -173,12 +215,13 @@ public abstract class RecordTableHandler {
      *                                      compiled condition
      * @param compiledCondition             the compiledCondition against which records should be matched
      * @param recordTableHandlerCallback    call back to do operations on the record table
+     * @param state                         current state
      * @return if matching record found or not
      * @throws ConnectionUnavailableException
      */
     public abstract boolean contains(long timestamp, Map<String, Object> containsConditionParameterMap,
                                      CompiledCondition compiledCondition,
-                                     RecordTableHandlerCallback recordTableHandlerCallback)
+                                     RecordTableHandlerCallback recordTableHandlerCallback, S state)
             throws ConnectionUnavailableException;
 
 
@@ -186,15 +229,26 @@ public abstract class RecordTableHandler {
     public Iterator<Object[]> query(long timestamp, Map<String, Object> parameterMap,
                                     CompiledCondition compiledCondition, CompiledSelection compiledSelection)
             throws ConnectionUnavailableException {
-        return query(timestamp, parameterMap, compiledCondition, compiledSelection, recordTableHandlerCallback);
+        S state = stateHolder.getState();
+        try {
+            return query(timestamp, parameterMap, compiledCondition, compiledSelection, recordTableHandlerCallback,
+                    state);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     public Iterator<Object[]> query(long timestamp, Map<String, Object> parameterMap,
                                     CompiledCondition compiledCondition, CompiledSelection compiledSelection,
                                     Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
-        return query(timestamp, parameterMap, compiledCondition, compiledSelection, outputAttributes,
-                recordTableHandlerCallback);
+        S state = stateHolder.getState();
+        try {
+            return query(timestamp, parameterMap, compiledCondition, compiledSelection, outputAttributes,
+                    recordTableHandlerCallback, state);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     /**
@@ -204,6 +258,7 @@ public abstract class RecordTableHandler {
      * @param compiledCondition          the compiledCondition against which records should be matched
      * @param compiledSelection          the compiledSelection which maps the events based on selection
      * @param recordTableHandlerCallback call back to do operations on the record table
+     * @param state                      current state
      * @return RecordIterator of matching records
      * @throws ConnectionUnavailableException
      */
@@ -211,13 +266,14 @@ public abstract class RecordTableHandler {
     public abstract Iterator<Object[]> query(long timestamp, Map<String, Object> parameterMap,
                                              CompiledCondition compiledCondition,
                                              CompiledSelection compiledSelection,
-                                             RecordTableHandlerCallback recordTableHandlerCallback)
+                                             RecordTableHandlerCallback recordTableHandlerCallback, S state)
             throws ConnectionUnavailableException;
 
     public abstract Iterator<Object[]> query(long timestamp, Map<String, Object> parameterMap,
                                              CompiledCondition compiledCondition,
                                              CompiledSelection compiledSelection,
                                              Attribute[] outputAttributes,
-                                             RecordTableHandlerCallback recordTableHandlerCallback)
+                                             RecordTableHandlerCallback recordTableHandlerCallback, S state)
             throws ConnectionUnavailableException;
+
 }

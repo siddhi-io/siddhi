@@ -33,9 +33,7 @@ import io.siddhi.query.api.extension.Extension;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This is the distributed transport to publish to multiple endpoints using client/publisher for each endpoint. There
@@ -115,39 +113,6 @@ public class MultiClientDistributedSink extends DistributedTransport {
     @Override
     public void destroy() {
         transports.forEach(Sink::destroy);
-    }
-
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for the reconstructing the element to the same state on a different point of time
-     *
-     * @return stateful objects of the processing element as an array
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        // No state specific to this class. But, fetching and returning state from underlying transports as it's state
-        Map<String, Object> state = new HashMap<>();
-        for (int i = 0; i < transports.size(); i++) {
-            state.put(Integer.toString(i), transports.get(i).currentState());
-        }
-        return state;
-    }
-
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     * the element to the same state as if was on a previous point of time.
-     *
-     * @param state the stateful objects of the element as an array on
-     *              the same order provided by currentState().
-     */
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        if (transports != null) {
-            for (int i = 0; i < transports.size(); i++) {
-                Map<String, Object> transportState = (Map<String, Object>) state.get(Integer.toString(i));
-                transports.get(i).restoreState(transportState);
-            }
-        }
     }
 
     /**

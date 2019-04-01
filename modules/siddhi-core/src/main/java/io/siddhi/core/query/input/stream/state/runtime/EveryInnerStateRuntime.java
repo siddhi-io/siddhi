@@ -39,22 +39,13 @@ public class EveryInnerStateRuntime extends StreamInnerStateRuntime {
     }
 
     @Override
+    public void setup() {
+        innerStateRuntime.setup();
+    }
+
+    @Override
     public void init() {
         innerStateRuntime.init();
     }
 
-    @Override
-    public InnerStateRuntime clone(String key) {
-        InnerStateRuntime clonedStreamInnerStateRuntime = innerStateRuntime.clone(key);
-        EveryInnerStateRuntime everyInnerStateRuntime = new EveryInnerStateRuntime(clonedStreamInnerStateRuntime,
-                stateType);
-
-        everyInnerStateRuntime.firstProcessor = clonedStreamInnerStateRuntime.getFirstProcessor();
-        everyInnerStateRuntime.lastProcessor = clonedStreamInnerStateRuntime.getLastProcessor();
-        everyInnerStateRuntime.singleStreamRuntimeList.addAll(clonedStreamInnerStateRuntime
-                .getSingleStreamRuntimeList());
-        everyInnerStateRuntime.getLastProcessor().setNextEveryStatePreProcessor(everyInnerStateRuntime
-                .getFirstProcessor());
-        return everyInnerStateRuntime;
-    }
 }

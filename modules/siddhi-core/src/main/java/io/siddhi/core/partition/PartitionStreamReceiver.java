@@ -23,7 +23,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.converter.StreamEventConverterFactory;
 import io.siddhi.core.partition.executor.PartitionExecutor;
@@ -32,9 +32,9 @@ import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.query.api.definition.StreamDefinition;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Specific {@link StreamJunction.Receiver} implementation to pump events into partitions. This will send the event
@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class PartitionStreamReceiver implements StreamJunction.Receiver {
 
-    private final StreamEventPool eventPool;
+    private final StreamEventFactory streamEventFactory;
     private StreamEventConverter streamEventConverter;
     private String streamId;
     private MetaStreamEvent metaStreamEvent;
@@ -50,7 +50,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
     private SiddhiAppContext siddhiAppContext;
     private PartitionRuntime partitionRuntime;
     private List<PartitionExecutor> partitionExecutors;
-    private Map<String, StreamJunction> cachedStreamJunctionMap = new ConcurrentHashMap<String, StreamJunction>();
+    private Map<String, StreamJunction> streamJunctionMap = new HashMap<>();
 
 
     public PartitionStreamReceiver(SiddhiAppContext siddhiAppContext, MetaStreamEvent metaStreamEvent,
@@ -63,7 +63,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
         this.partitionExecutors = partitionExecutors;
         this.siddhiAppContext = siddhiAppContext;
         this.streamId = streamDefinition.getId();
-        this.eventPool = new StreamEventPool(metaStreamEvent, 5);
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
 
     }
 
@@ -84,19 +84,19 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
             ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
             ComplexEvent aComplexEvent = complexEvent;
             while (aComplexEvent != null) {
-                StreamEvent borrowedEvent = borrowEvent();
-                streamEventConverter.convertComplexEvent(aComplexEvent, borrowedEvent);
-                outputEventChunk.add(borrowedEvent);
+                StreamEvent newEvent = streamEventFactory.newInstance();
+                streamEventConverter.convertComplexEvent(aComplexEvent, newEvent);
+                outputEventChunk.add(newEvent);
                 aComplexEvent = aComplexEvent.getNext();
             }
             send(outputEventChunk.getFirst());
         } else {
             if (complexEvent.getNext() == null) {
                 for (PartitionExecutor partitionExecutor : partitionExecutors) {
-                    StreamEvent borrowedEvent = borrowEvent();
-                    streamEventConverter.convertComplexEvent(complexEvent, borrowedEvent);
-                    String key = partitionExecutor.execute(borrowedEvent);
-                    send(key, borrowedEvent);
+                    StreamEvent newEvent = streamEventFactory.newInstance();
+                    streamEventConverter.convertComplexEvent(complexEvent, newEvent);
+                    String key = partitionExecutor.execute(newEvent);
+                    send(key, newEvent);
                 }
             } else {
                 ComplexEventChunk<ComplexEvent> complexEventChunk = new ComplexEventChunk<ComplexEvent>(false);
@@ -106,11 +106,11 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                 while (complexEventChunk.hasNext()) {
                     ComplexEvent aEvent = complexEventChunk.next();
                     complexEventChunk.remove();
-                    StreamEvent borrowedEvent = borrowEvent();
-                    streamEventConverter.convertComplexEvent(aEvent, borrowedEvent);
+                    StreamEvent newEvent = streamEventFactory.newInstance();
+                    streamEventConverter.convertComplexEvent(aEvent, newEvent);
                     boolean currentEventMatchedPrevPartitionExecutor = false;
                     for (PartitionExecutor partitionExecutor : partitionExecutors) {
-                        String key = partitionExecutor.execute(borrowedEvent);
+                        String key = partitionExecutor.execute(newEvent);
                         if (key != null) {
                             if (currentKey == null) {
                                 currentKey = key;
@@ -125,13 +125,13 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                                     send(currentKey, firstEvent);
                                     currentKey = key;
                                     outputEventChunk.clear();
-                                    StreamEvent cloneEvent = borrowEvent();
+                                    StreamEvent cloneEvent = streamEventFactory.newInstance();
                                     streamEventConverter.convertComplexEvent(aEvent, cloneEvent);
                                     outputEventChunk.add(cloneEvent);
                                 }
                             }
                             if (!currentEventMatchedPrevPartitionExecutor) {
-                                outputEventChunk.add(borrowedEvent);
+                                outputEventChunk.add(newEvent);
                             }
                             currentEventMatchedPrevPartitionExecutor = true;
                         }
@@ -146,55 +146,51 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
 
     @Override
     public void receive(Event event) {
-        StreamEvent borrowedEvent = borrowEvent();
-        streamEventConverter.convertEvent(event, borrowedEvent);
+        StreamEvent newEvent = streamEventFactory.newInstance();
+        streamEventConverter.convertEvent(event, newEvent);
         for (PartitionExecutor partitionExecutor : partitionExecutors) {
-            String key = partitionExecutor.execute(borrowedEvent);
-            send(key, borrowedEvent);
+            String key = partitionExecutor.execute(newEvent);
+            send(key, newEvent);
         }
         if (partitionExecutors.size() == 0) {
-            send(borrowedEvent);
+            send(newEvent);
         }
-        returnEvents(borrowedEvent);
     }
 
     @Override
     public void receive(long timestamp, Object[] data) {
-        StreamEvent borrowedEvent = borrowEvent();
-        streamEventConverter.convertData(timestamp, data, borrowedEvent);
+        StreamEvent newEvent = streamEventFactory.newInstance();
+        streamEventConverter.convertData(timestamp, data, newEvent);
         if (partitionExecutors.size() == 0) {
-            send(borrowedEvent);
+            send(newEvent);
         } else {
             for (PartitionExecutor partitionExecutor : partitionExecutors) {
-                String key = partitionExecutor.execute(borrowedEvent);
-                send(key, borrowedEvent);
+                String key = partitionExecutor.execute(newEvent);
+                send(key, newEvent);
             }
         }
-        returnEvents(borrowedEvent);
     }
 
     @Override
     public void receive(Event[] events) {
         if (partitionExecutors.size() == 0) {
             StreamEvent currentEvent;
-            StreamEvent firstEvent = borrowEvent();
+            StreamEvent firstEvent = streamEventFactory.newInstance();
             streamEventConverter.convertEvent(events[0], firstEvent);
             currentEvent = firstEvent;
             for (int i = 1; i < events.length; i++) {
-                StreamEvent nextEvent = borrowEvent();
+                StreamEvent nextEvent = streamEventFactory.newInstance();
                 streamEventConverter.convertEvent(events[i], nextEvent);
                 currentEvent.setNext(nextEvent);
                 currentEvent = nextEvent;
             }
             send(firstEvent);
-            returnEvents(firstEvent);
-
         } else {
             String key = null;
             StreamEvent firstEvent = null;
             StreamEvent currentEvent = null;
             for (Event event : events) {
-                StreamEvent nextEvent = borrowEvent();
+                StreamEvent nextEvent = streamEventFactory.newInstance();
                 streamEventConverter.convertEvent(event, nextEvent);
                 for (PartitionExecutor partitionExecutor : partitionExecutors) {
                     String currentKey = partitionExecutor.execute(nextEvent);
@@ -204,7 +200,6 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                             firstEvent = nextEvent;
                         } else if (!currentKey.equals(key)) {
                             send(key, firstEvent);
-                            returnEvents(firstEvent);
                             key = currentKey;
                             firstEvent = nextEvent;
                         } else {
@@ -215,7 +210,6 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                 }
             }
             send(key, firstEvent);
-            returnEvents(firstEvent);
         }
 
     }
@@ -226,7 +220,7 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
             StreamEvent firstEvent = null;
             StreamEvent currentEvent = null;
             for (Event event : events) {
-                StreamEvent nextEvent = borrowEvent();
+                StreamEvent nextEvent = streamEventFactory.newInstance();
                 streamEventConverter.convertEvent(event, nextEvent);
                 if (firstEvent == null) {
                     firstEvent = nextEvent;
@@ -236,13 +230,12 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                 currentEvent = nextEvent;
             }
             send(firstEvent);
-            returnEvents(firstEvent);
         } else {
             String key = null;
             StreamEvent firstEvent = null;
             StreamEvent currentEvent = null;
             for (Event event : events) {
-                StreamEvent nextEvent = borrowEvent();
+                StreamEvent nextEvent = streamEventFactory.newInstance();
                 streamEventConverter.convertEvent(event, nextEvent);
                 for (PartitionExecutor partitionExecutor : partitionExecutors) {
                     String currentKey = partitionExecutor.execute(nextEvent);
@@ -252,7 +245,6 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                             firstEvent = nextEvent;
                         } else if (!currentKey.equals(key)) {
                             send(key, firstEvent);
-                            returnEvents(firstEvent);
                             key = currentKey;
                             firstEvent = nextEvent;
                         } else {
@@ -263,20 +255,29 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                 }
             }
             send(key, firstEvent);
-            returnEvents(firstEvent);
         }
     }
 
     private void send(String key, ComplexEvent event) {
         if (key != null) {
-            partitionRuntime.cloneIfNotExist(key);
-            cachedStreamJunctionMap.get(streamId + key).sendEvent(event);
+            SiddhiAppContext.startPartitionFlow(key);
+            try {
+                partitionRuntime.initPartition();
+                streamJunctionMap.get(streamId).sendEvent(event);
+            } finally {
+                SiddhiAppContext.stopPartitionFlow();
+            }
         }
     }
 
     private void send(ComplexEvent event) {
-        for (StreamJunction streamJunction : cachedStreamJunctionMap.values()) {
-            streamJunction.sendEvent(event);
+        for (String key : partitionRuntime.getPartitionKeys()) {
+            SiddhiAppContext.startPartitionFlow(key);
+            try {
+                streamJunctionMap.get(streamId).sendEvent(event);
+            } finally {
+                SiddhiAppContext.stopPartitionFlow();
+            }
         }
     }
 
@@ -284,24 +285,23 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
      * create local streamJunctions through which events received by partitionStreamReceiver, are sent to
      * queryStreamReceivers
      *
-     * @param key              partitioning key
      * @param queryRuntimeList queryRuntime list of the partition
      */
-    public void addStreamJunction(String key, List<QueryRuntime> queryRuntimeList) {
-        StreamJunction streamJunction = cachedStreamJunctionMap.get(streamId + key);
+    public void addStreamJunction(List<QueryRuntime> queryRuntimeList) {
+        StreamJunction streamJunction = streamJunctionMap.get(streamId);
         if (streamJunction == null) {
-            streamJunction = partitionRuntime.getLocalStreamJunctionMap().get(streamId + key);
+            streamJunction = partitionRuntime.getInnerPartitionStreamReceiverStreamJunctionMap().get(streamId);
             if (streamJunction == null) {
                 streamJunction = createStreamJunction();
-                partitionRuntime.addStreamJunction(streamId + key, streamJunction);
+                partitionRuntime.addInnerpartitionStreamReceiverStreamJunction(streamId, streamJunction);
             }
-            cachedStreamJunctionMap.put(streamId + key, streamJunction);
+            streamJunctionMap.put(streamId, streamJunction);
         }
         for (QueryRuntime queryRuntime : queryRuntimeList) {
             StreamRuntime streamRuntime = queryRuntime.getStreamRuntime();
             for (int i = 0; i < queryRuntime.getInputStreamId().size(); i++) {
                 if ((streamRuntime.getSingleStreamRuntimes().get(i)).
-                        getProcessStreamReceiver().getStreamId().equals(streamId + key)) {
+                        getProcessStreamReceiver().getStreamId().equals(streamId)) {
                     streamJunction.subscribe((streamRuntime.getSingleStreamRuntimes().get(i))
                             .getProcessStreamReceiver());
                 }
@@ -314,11 +314,4 @@ public class PartitionStreamReceiver implements StreamJunction.Receiver {
                 siddhiAppContext.getBufferSize(), null, siddhiAppContext);
     }
 
-    private synchronized StreamEvent borrowEvent() {
-        return eventPool.borrowEvent();
-    }
-
-    private synchronized void returnEvents(StreamEvent events) {
-        eventPool.returnEvents(events);
-    }
 }

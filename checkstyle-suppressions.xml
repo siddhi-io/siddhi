@@ -24,8 +24,8 @@
 <suppressions>
 
     <suppress checks="Javadoc.*" files=".*[/\\]src[/\\]test[/\\]java[/\\].*"/>
-    <suppress checks=".*" files=".*[/\\]antlr4[/\\]io[/\\]siddhi[/\\]query[/\\]compiler[/\\]*" />
-    <suppress checks=".*" files=".*[/\\]src[/\\]gen[/\\]java[/\\]io[/\\]siddhi[/\\]service[/\\]*" />
+    <suppress checks=".*" files=".*[/\\]antlr4[/\\]io[/\\]siddhi[/\\]query[/\\]compiler[/\\]*"/>
+    <suppress checks=".*" files=".*[/\\]src[/\\]gen[/\\]java[/\\]io[/\\]siddhi[/\\]service[/\\]*"/>
 
     <suppress checks="JavadocPackage" files=".*[/\\]src[/\\](main|integration)[/\\]java[/\\].*"/>
     <suppress checks="JavadocPackage" files=".*[/\\]src[/\\].*[/\\]internal[/\\].*"/>

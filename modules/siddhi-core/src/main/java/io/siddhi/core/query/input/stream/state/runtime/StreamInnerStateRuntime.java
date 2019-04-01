@@ -20,8 +20,6 @@ package io.siddhi.core.query.input.stream.state.runtime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.input.stream.state.PostStateProcessor;
 import io.siddhi.core.query.input.stream.state.PreStateProcessor;
-import io.siddhi.core.query.input.stream.state.StreamPostStateProcessor;
-import io.siddhi.core.query.input.stream.state.StreamPreStateProcessor;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
@@ -79,9 +77,13 @@ public class StreamInnerStateRuntime implements InnerStateRuntime {
     }
 
     @Override
-    public void init() {
+    public void setup() {
         singleStreamRuntimeList.get(0).getProcessStreamReceiver().setNext(firstProcessor);
         singleStreamRuntimeList.get(0).getProcessStreamReceiver().addStatefulProcessor(firstProcessor);
+    }
+
+    @Override
+    public void init() {
         firstProcessor.init();
     }
 
@@ -95,31 +97,4 @@ public class StreamInnerStateRuntime implements InnerStateRuntime {
         firstProcessor.updateState();
     }
 
-    @Override
-    public InnerStateRuntime clone(String key) {
-        StreamInnerStateRuntime streamInnerStateRuntime = new StreamInnerStateRuntime(stateType);
-        for (SingleStreamRuntime singleStreamRuntime : singleStreamRuntimeList) {
-            streamInnerStateRuntime.singleStreamRuntimeList.add((SingleStreamRuntime) singleStreamRuntime.clone(key));
-        }
-
-        Processor processor = streamInnerStateRuntime.singleStreamRuntimeList.get(0).getProcessorChain();
-        streamInnerStateRuntime.firstProcessor = (StreamPreStateProcessor) processor;
-
-        while (processor != null) {
-            if (processor instanceof StreamPostStateProcessor) {
-                streamInnerStateRuntime.lastProcessor = (StreamPostStateProcessor) processor;
-                break;
-            } else {
-                processor = processor.getNextProcessor();
-            }
-        }
-
-        ((StreamPostStateProcessor) streamInnerStateRuntime.lastProcessor).setThisStatePreProcessor(
-                (StreamPreStateProcessor) streamInnerStateRuntime.firstProcessor);
-        ((StreamPreStateProcessor) streamInnerStateRuntime.firstProcessor).setThisStatePostProcessor(
-                (StreamPostStateProcessor) streamInnerStateRuntime.lastProcessor);
-        ((StreamPreStateProcessor) streamInnerStateRuntime.firstProcessor).setThisLastProcessor(
-                (StreamPostStateProcessor) streamInnerStateRuntime.lastProcessor);
-        return streamInnerStateRuntime;
-    }
 }

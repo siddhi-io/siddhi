@@ -94,14 +94,6 @@ public abstract class QueryCallback {
         eventBuffer.add(new Event(complexEvent.getOutputData().length).copyFrom(complexEvent));
     }
 
-    public synchronized void startProcessing() {
-
-    }
-
-    public synchronized void stopProcessing() {
-
-    }
-
     public abstract void receive(long timestamp, Event[] inEvents, Event[] removeEvents);
 
 }

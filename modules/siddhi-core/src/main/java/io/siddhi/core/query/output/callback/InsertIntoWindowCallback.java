@@ -31,12 +31,12 @@ public class InsertIntoWindowCallback extends OutputCallback {
     /**
      * Window to which the events have to be inserted.
      */
-    private final Window window;
+    protected final Window window;
 
     /**
      * StreamDefinition of the window.
      */
-    private final StreamDefinition outputStreamDefinition;
+    protected final StreamDefinition outputStreamDefinition;
 
     public InsertIntoWindowCallback(Window window, StreamDefinition outputStreamDefinition, String queryName) {
         super(queryName);
