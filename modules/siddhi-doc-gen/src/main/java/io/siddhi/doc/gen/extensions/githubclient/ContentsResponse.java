@@ -34,7 +34,7 @@ import javax.net.ssl.HttpsURLConnection;
 public abstract class ContentsResponse<T> {
 
     /**
-     * Response body either as an instance of InputStream or ErrorStream.
+     * Response body.
      */
     final InputStream stream;
 
@@ -56,10 +56,20 @@ public abstract class ContentsResponse<T> {
         contentReader = null;
     }
 
+    /**
+     * @return the media type of the body
+     */
     abstract String mediaType();
 
+    /**
+     * @return the body of the response
+     * @throws IOException if error occurs while parsing the response body as a type T instance
+     */
     public abstract T getContent() throws IOException;
 
+    /**
+     * @return the ContentReader instance
+     */
     public ContentReader getContentReader() {
         if (contentReader == null) {
             throw new IllegalStateException(this.getClass().getCanonicalName()
@@ -69,6 +79,13 @@ public abstract class ContentsResponse<T> {
         return contentReader;
     }
 
+    /**
+     * Because of all API error responses are in JSON format the getError method always returns
+     * an instance of {@code org.json.JSONObject}.
+     *
+     * @return the error message as a JSONObject
+     * @throws IOException if error occurs while parsing the response body as a JSONObject
+     */
     public JSONObject getError() throws IOException {
         if (status == 200) {
             throw new IllegalStateException("Response does not contain an error.");
@@ -79,6 +96,9 @@ public abstract class ContentsResponse<T> {
         return new JSONObject(IOUtils.toString(stream, "UTF-8"));
     }
 
+    /**
+     * @return the HTTP status code in the response.
+     */
     public int getStatus() {
         return status;
     }

@@ -28,6 +28,7 @@ import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.doc.gen.core.freemarker.FormatDescriptionMethod;
+import io.siddhi.doc.gen.extensions.ExtensionDocRetriever;
 import io.siddhi.doc.gen.metadata.ExampleMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionType;
@@ -40,6 +41,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -59,6 +61,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -354,8 +358,11 @@ public class DocumentationUtils {
      * @param extensionsIndexFileName    The name of the index file that will be generated
      * @throws MojoFailureException if the Mojo fails to find template file or create new documentation file
      */
-    public static void createExtensionsIndex(List<String> extensionRepositories, String extensionRepositoryOwner,
-                                             String documentationBaseDirectory, String extensionsIndexFileName)
+    public static void createExtensionsIndex(List<String> extensionRepositories,
+                                             String extensionRepositoryOwner,
+                                             String documentationBaseDirectory,
+                                             String projectBaseDir,
+                                             String extensionsIndexFileName)
             throws MojoFailureException {
         // Separating Apache and GPL extensions based on siddhi repository prefix conventions
         List<String> gplExtensionRepositories = new ArrayList<>();
@@ -371,8 +378,21 @@ public class DocumentationUtils {
         // Generating data model
         Map<String, Object> rootDataModel = new HashMap<>();
         rootDataModel.put("extensionsOwner", extensionRepositoryOwner);
-        rootDataModel.put("gplExtensionRepositories", gplExtensionRepositories);
-        rootDataModel.put("apacheExtensionRepositories", apacheExtensionRepositories);
+
+        Path gplDocCachePath = Paths.get(
+                projectBaseDir, "src", "main", "resources", "gpl.docs.properties");
+        Path apacheDocCachePath = Paths.get(
+                projectBaseDir, "src", "main", "resources", "apache.docs.properties");
+        ExtensionDocRetriever gplRetriever = new ExtensionDocRetriever(
+                extensionRepositoryOwner, gplExtensionRepositories, gplDocCachePath);
+        ExtensionDocRetriever apacheRetriever = new ExtensionDocRetriever(
+                extensionRepositoryOwner, apacheExtensionRepositories, apacheDocCachePath);
+
+        gplRetriever.pull();
+        apacheRetriever.pull();
+
+        rootDataModel.put("gplExtensions", gplRetriever.asMap());
+        rootDataModel.put("apacheExtensions", apacheRetriever.asMap());
 
         generateFileFromTemplate(
                 Constants.MARKDOWN_EXTENSIONS_INDEX_TEMPLATE + Constants.MARKDOWN_FILE_EXTENSION

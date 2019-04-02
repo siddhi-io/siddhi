@@ -2,68 +2,69 @@
 
 ## Available Extensions
 
-Following are some prewritten extensions that are supported with Siddhi;
+Following are some pre-written extensions that are supported with Siddhi;
 
 ### Extensions released under Apache 2.0 License
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-string">execution string</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-math">execution math</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-time">execution time</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-streamingml">execution streamingml</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-regex">execution regex</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-markov">execution markov</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-unique">execution unique</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-map">execution map</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-unitconversion">execution unitconversion</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-extrema">execution extrema</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-timeseries">execution timeseries</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-var">execution var</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-priority">execution priority</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-reorder">execution reorder</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-sentiment">execution sentiment</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-stats">execution stats</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-geo">execution geo</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-kalmanfilter">execution kalmanfilter</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-approximate">execution approximate</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-graph">execution graph</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-tensorflow">execution tensorflow</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-env">execution env</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http">io http</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka">io kafka</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp">io tcp</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event">io wso2event</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email">io email</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms">io jms</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file">io file</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq">io rabbitmq</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt">io mqtt</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket">io websocket</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs">io sqs</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter">io twitter</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc">io cdc</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-prometheus">io prometheus</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json">map json</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml">map xml</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary">map binary</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text">map text</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event">map wso2event</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue">map keyvalue</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv">map csv</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-rdbms">store rdbms</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr">store solr</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb">store mongodb</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-hbase">store hbase</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-redis">store redis</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-cassandra">store cassandra</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-script-js">script js</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-script-scala">script scala</a>
+Name | reference | description
+:-- | :-- | :--
+siddhi-io-rabbitmq | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq">io rabbitmq</a> | The siddhi-io-rabbitmq is an extension to Siddhi that publish and receive events from rabbitmq broker.
+siddhi-store-hbase | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-hbase">store hbase</a> | The siddhi-store-hbase extension is an extension to Siddhi that can be used to persist events to a HBase instance of the users choice. Find some useful links below:
+siddhi-execution-regex | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-regex">execution regex</a> | The siddhi-execution-regex extension is an extension to Siddhi that provides basic RegEx execution capabilities.
+siddhi-map-wso2event | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event">map wso2event</a> | The siddhi-map-wso2event extension is an extension to Siddhi that can be used to convert WSO2 events to/from Siddhi events.
+siddhi-map-text | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text">map text</a> | The siddhi-map-text extension is an extension to Siddhi that supports mapping incoming text messages to a stream at the source, and mapping a stream to text messages at the sink.
+siddhi-io-sqs | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs">io sqs</a> | The siddhi-io-sqs extension is an extension to Siddhi that used to receive and publish events via AWS SQS Service. This extension allows users to subscribe to a SQS queue and receive/publish SQS messages.
+siddhi-execution-unique | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-unique">execution unique</a> | The siddhi-execution-unique extension is an extension to Siddhi that processes event streams based on unique events. Different types of unique windows are available to hold unique events based on the given unique key parameter.
+siddhi-script-js | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-script-js">script js</a> | The siddhi-script-js is an extension to Siddhi that allows to include JavaScript functions within the Siddhi Query Language.
+siddhi-io-wso2event | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event">io wso2event</a> | The siddhi-io-wso2event extension is an extension to Siddhi that receives and publishes events in the WSO2Event format via Thrift or Binary protocols.
+siddhi-execution-math | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-math">execution math</a> | The siddhi-execution-math is an extension to Siddhi, which provides useful mathematical functions that can make your siddhi queries more flexible.
+siddhi-execution-priority | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-priority">execution priority</a> | The siddhi-execution-priority extension is an extension to Siddhi that keeps track of the priority of events in a stream.
+siddhi-store-cassandra | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-cassandra">store cassandra</a> | The siddhi-store-cassandra extension is an extension to Siddhi that can be used to persist events to a Cassandra instance of the users choice. Find some useful links below:
+siddhi-io-prometheus | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-prometheus">io prometheus</a> | The siddhi-io-prometheus extension is an extension to Siddhi. The Prometheus-sink publishes Siddhi events as Prometheus metrics and expose them to Prometheus server. The Prometheus-source retrieves Prometheus metrics from an endpoint and send them as Siddhi events.
+siddhi-execution-unitconversion | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-unitconversion">execution unitconversion</a> | The siddhi-execution-unitconversion extension is an extension to Siddhi that enables conversions of length, mass, time and volume units.
+siddhi-store-redis | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-redis">store redis</a> | The siddhi-store-redis extension is an extension for siddhi redis event table implementation. This extension can be used to persist events to a redis cloud instance of version 4.x.x.
+siddhi-io-websocket | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket">io websocket</a> | The siddhi-io-websocket extension is an extension to Siddhi that allows to receive and publish events through WebSocket.
+siddhi-execution-geo | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-geo">execution geo</a> | The siddhi-execution-geo extension is an extension to Siddhi that provides geo data related functionality such as checking whether a given geo coordinate is within a predefined geo-fence, etc. Following are the functions of the Geo extension.
+siddhi-execution-timeseries | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-timeseries">execution timeseries</a> | The siddhi-execution-timeseries extension is an extension to Siddhi which enables users to forecast and detect outliers in time series data, using Linear Regression Models.
+siddhi-io-http | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http">io http</a> | The siddhi-io-http extension is an extension to Siddhi that allows you to receive and publish events via http and https transports and also allow you perform synchronous request and response. This extension works with WSO2 Stream Processor and with standalone Siddhi.
+siddhi-execution-kalmanfilter | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-kalmanfilter">execution kalmanfilter</a> | The siddhi-execution-kalman-filter extension is an extension to Siddhi provides that Kalman filtering capabilities to Siddhi. This allows you to detect outliers of input data.
+siddhi-map-json | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json">map json</a> | The siddhi-map-json extension is an extension to Siddhi which is used to convert JSON message to/from Siddhi events.
+siddhi-execution-streamingml | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-streamingml">execution streamingml</a> | The siddhi-execution-streamingml is an extension to Siddhi that performs streaming machine learning on event streams.
+siddhi-map-keyvalue | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue">map keyvalue</a> | The siddhi-map-keyvalue extension is an extension to Siddhi that supports mapping incoming events with Key-Value map format to a stream at the source, and mapping a stream to Key-Value map events at the sink.
+siddhi-execution-string | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-string">execution string</a> | The siddhi-execution-string is an extension to Siddhi that provides basic string handling capabilities such as con-cat, length, convert to lowercase, and replace all.
+siddhi-io-twitter | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter">io twitter</a> | The siddhi-io-twitter extension is an extension to Siddhi. It publishes event data from Twitter Applications in the key-value map format.
+siddhi-io-cdc | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc">io cdc</a> | The siddhi-io-cdc extension is an extension to Siddhi. It receives change data from MySQL, MS SQL Server, Postgresql, H2 and Oracle in the key-value format.
+siddhi-execution-sentiment | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-sentiment">execution sentiment</a> | The siddhi-execution-sentiment extension is an extension to Siddhi that performs sentiment analysis using Afinn Wordlist-based approach.
+siddhi-store-mongodb | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb">store mongodb</a> | The siddhi-store-mongodb extension is an extension to Siddhi that can be used to persist events to a MongoDB instance of the users choice. Find some useful links below:
+siddhi-map-xml | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml">map xml</a> | The siddhi-map-xml extension is an extension to Siddhi that supports mapping incoming XML events to a stream at the source, and mapping a stream to XML events at the sink.
+siddhi-execution-extrema | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-extrema">execution extrema</a> | The siddhi-execution-extrema extension is an extension to Siddhi that processes event streams based on different arithmetic properties. Different types of processors are available to extract the extremas from the event streams according to the specified attribute in the stream.
+siddhi-io-email | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email">io email</a> | The siddhi-io-email extension is an extension to Siddhi that receives and publishes events via email. Using the extension, events can be published through smtp mail server and received through 'pop3' or 'imap' mail serves.
+siddhi-execution-time | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-time">execution time</a> | The siddhi-execution-time extension is an extension to Siddhi that provides time related functionality to Siddhi such as getting current time, current date, manipulating/formatting dates and etc.
+siddhi-io-jms | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms">io jms</a> | The siddhi-io-jms extension is an extension to Siddhi that used to receive and publishe events via JMS Message. This extension allows users to subscribe to a JMS broker and receive/publish JMS messages.
+siddhi-io-file | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file">io file</a> | The siddhi-io-file extension is an extension to Siddhi which is used to receive/publish event data from/to file. It supports both binary and text formats.
+siddhi-execution-env | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-env">execution env</a> | The siddhi-execution-env extension is an extension to Siddhi that provides the capability to read environment properties inside Siddhi stream definitions and use it inside queries. Functions of the env extension are as follows..
+siddhi-execution-tensorflow | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-tensorflow">execution tensorflow</a> | The siddhi-execution-tensorflow is an extension to Siddhi that adds support for inferences from pre-built TensorFlow SavedModels using Siddhi.
+siddhi-execution-reorder | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-reorder">execution reorder</a> | The siddhi-execution-reorder extension is an extension to Siddhi that is used for reordering events from an unordered event stream. Reorder extension is implemented using the K-Slack and alpha K-Stack algorithms.
+siddhi-io-tcp | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp">io tcp</a> | The siddhi-io-tcp extension is an extension to Siddhi that allows to receive and publish events through TCP.
+siddhi-execution-approximate | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-approximate">execution approximate</a> | The siddhi-execution-approximate is an extension to Siddhi that performs approximate computing on event streams.
+siddhi-execution-graph | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-graph">execution graph</a> | The siddhi-execution-graph extension is an extension to Siddhi that provides graph related functionality to Siddhi such as getting size of largest connected component of a graph, maximum clique size of a graph, etc.
+siddhi-io-mqtt | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt">io mqtt</a> | The siddhi-io-mqtt is an extension to Siddhi mqtt source and sink implementation,that publish and receive events from mqtt broker.
+siddhi-execution-markov | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-markov">execution markov</a> | The siddhi-execution-markov extension is an extension to Siddhi that allows abnormal patterns relating to user activity to be detected when carrying out real time analysis.
+siddhi-store-solr | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-solr">store solr</a> | The siddhi-store-solr extension is an extension for siddhi Solr event table implementation. This extension can be used to persist events to a Solr cloud instance of version 6.x.x.
+siddhi-map-csv | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv">map csv</a> | The siddhi-map-csv extension is an extension to Siddhi that supports mapping incoming events with csv format to a stream at the source, and mapping a stream to csv format events at the sink.
+siddhi-io-kafka | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka">io kafka</a> | The siddhi-io-kafka extension is an extension to Siddhi. This implements siddhi kafka source and sink that can be used to receive events from a kafka cluster and to publish events to a kafka cluster.
+siddhi-execution-stats | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-stats">execution stats</a> | The siddhi-execution-stats extension is an extension to Siddhi that provides statistical functions for aggregated events. Currently this contains median function which calculate the median of aggregated events. Calculation of median is done for each event arrival and expiry, it is not recommended to use this extension for large window sizes.
+siddhi-store-rdbms | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-rdbms">store rdbms</a> | The siddhi-store-rdbms extension is an extension to Siddhi that can be used to persist events to an RDBMS instance of the user's choice. Find some useful links below:
+siddhi-map-binary | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary">map binary</a> | The siddhi-map-binary extension is an extension to Siddhi that can be used to convert binary events to/from Siddhi events.
+siddhi-execution-map | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-map">execution map</a> | The siddhi-execution-map extension is an extension to Siddhi that provides the capability to send a map object inside Siddhi stream definitions and use it inside queries. The following are the functions of the map extension..
 
 ### Extensions released under GPL License
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-pmml">execution pmml</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-geo">execution geo</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-nlp">execution nlp</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-r">execution r</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-streamingml">execution streamingml</a>
-1. <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-script-r">script r</a>
+Name | reference | description
+:-- | :-- | :--
+siddhi-gpl-execution-streamingml | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-streamingml">execution streamingml</a> | The siddhi-execution-streamingml is an extension to Siddhi that performs streaming machine learning on event streams.
+siddhi-gpl-execution-geo | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-geo">execution geo</a> | The siddhi-gpl-execution-geo extension is an extension to Siddhi that provides geo data related functionality such as checking whether a given geo coordinate is within a predefined geo-fence, etc. Following are the functions of the Geo extension.
+siddhi-gpl-execution-r | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-r">execution r</a> | The siddhi-gpl-execution-r extension is an extension to Siddhi that can be used to process events with R scripts.
+siddhi-gpl-execution-pmml | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-pmml">execution pmml</a> | The siddhi-gpl-execution-pmml extension is an extension to Siddhi that can be used to process texts based on a PMML processing model.
+siddhi-gpl-execution-nlp | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-nlp">execution nlp</a> | The siddhi-gpl-execution-nlp extension is an extension to Siddhi that can be used to process natural language.
 
 
 ## Extension Repositories

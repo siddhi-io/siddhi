@@ -23,16 +23,23 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
- * This class works as a client to the GitHub Contents API.
+ * The GithubContentsClient class offers the ability to make requests to fetch certain
+ * contents from Github using Github Contents REST API.
  */
 public class GithubContentsClient {
 
+    /**
+     * The domain of the API.
+     */
     private static final String API_DOMAIN = "api.github.com";
 
+    /**
+     * The HTTPS connection to the API.
+     */
     private final HttpsURLConnection connection;
 
     /**
-     * This class constructs an instance of the GithubContentsClient class.
+     * The GithubContentsClient builder.
      */
     public static class Builder {
         private final String owner;
@@ -94,10 +101,26 @@ public class GithubContentsClient {
         connection = (HttpsURLConnection) url.openConnection();
     }
 
+    /**
+     * Sets a header in HTTPS request.
+     *
+     * @param key the name of the header
+     * @param val the value of the header
+     */
     public void setHeader(String key, String val) {
         connection.setRequestProperty(key, val);
     }
 
+    /**
+     * The getContentsResponse method returns an instance of class T which extends the
+     * {@code ContentsResponse} class.
+     *
+     * @param tClass the Class instance of the type T
+     * @param <T> the class which holds API response
+     * @return a instance of ContentsResponse
+     * @throws ReflectiveOperationException if tClass does not exist or
+     * if constructor fails to create an instance of T
+     */
     public <T extends ContentsResponse> T getContentsResponse(Class<T> tClass) throws ReflectiveOperationException {
         Constructor<T> constructor = tClass.getDeclaredConstructor(HttpsURLConnection.class);
         constructor.setAccessible(true);
