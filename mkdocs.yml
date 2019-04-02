@@ -25,8 +25,10 @@ google_analytics:
 - auto
 markdown_extensions:
 - admonition
-- toc(permalink=true)
-- codehilite(guess_lang=false)
+- toc:
+    permalink: True
+- codehilite:
+    guess_lang: false
 pages:
 - Welcome to Siddhi: index.md
 - Features: features.md
