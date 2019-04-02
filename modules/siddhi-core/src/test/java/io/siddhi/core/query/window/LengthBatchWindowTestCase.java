@@ -242,7 +242,7 @@ public class LengthBatchWindowTestCase {
 
             @Override
             public void receive(Event[] events) {
-                EventPrinter.print(events);
+                EventPrinter.print(toMap(events));
                 for (Event event : events) {
                     count++;
                     AssertJUnit.assertEquals("Remove event order", count, event.getData(2));
@@ -283,6 +283,7 @@ public class LengthBatchWindowTestCase {
             public void receive(Event[] events) {
                 EventPrinter.print(events);
                 for (Event event : events) {
+                    EventPrinter.print(toMap(event));
                     AssertJUnit.assertEquals("Events cannot be expired", false, event.isExpired());
                     inEventCount++;
                     if (inEventCount == 1) {
