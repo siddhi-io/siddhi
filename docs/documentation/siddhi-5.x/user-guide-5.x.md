@@ -1,14 +1,18 @@
 # Siddhi 5.x User Guide
 
-## **Using the Siddhi in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a>**
+## **Using Siddhi as Local Micro Service**
 
-* You can use Siddhi in the latest <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a> that is a part of <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support. 
+WIP
 
-* All <a target="_blank" href="http://siddhi.io/extensions/">Siddhi extensions</a> are shipped by default with WSO2 Stream Processor.
+## **Using Siddhi as Docker Micro Service**
 
-* Refer the <a target="_blank" href="https://docs.wso2.com/display/SP400/Quick+Start+Guide">WSO2 SP Quick Start Guide</a> for more information.
- 
-## **Using Siddhi as a java library**
+WIP
+
+## **Using Siddhi as kubernetes Micro Service**
+
+WIP
+
+## **Using Siddhi as a Java library**
 
 * To embed Siddhi as a java library into your project and to get a working sample follow the bellow steps:
 
@@ -125,6 +129,8 @@ When the events are sent, you can see the output logged by the event printer.
 Find the executable Java code of this example [here](https://github.com/wso2/siddhi/tree/master/modules/siddhi-samples/quick-start-samples/src/main/java/io/siddhi/sample/TimeWindowSample.java)
 
 For more code examples, see [quick start samples for Siddhi](https://github.com/wso2/siddhi/tree/master/modules/siddhi-samples/quick-start-samples).
+
+## **Using Siddhi as a Python Library**
 
 ## System Requirements
 1. Minimum memory - 500 MB (based on in-memory data stored for processing)
