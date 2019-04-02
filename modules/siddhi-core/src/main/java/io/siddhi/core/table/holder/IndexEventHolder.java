@@ -23,12 +23,12 @@ import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.Operation;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.snapshot.SnapshotRequest;
-import io.siddhi.core.util.snapshot.state.SnapshotState;
+import io.siddhi.core.util.snapshot.state.Snapshot;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.expression.condition.Compare;
@@ -67,7 +67,7 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     private final String tableName;
     private final String siddhiAppName;
     private String primaryKeyAttributes = null;
-    private StreamEventPool tableStreamEventPool;
+    private StreamEventFactory tableStreamEventFactory;
     private StreamEventConverter eventConverter;
     private Map<String, Integer> indexMetaData;
     private Map<String, Integer> multiPrimaryKeyMetaData = new LinkedHashMap<>();
@@ -77,11 +77,11 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     private boolean forceFullSnapshot = true;
     private boolean isOperationLogEnabled = true;
 
-    public IndexEventHolder(StreamEventPool tableStreamEventPool, StreamEventConverter eventConverter,
+    public IndexEventHolder(StreamEventFactory tableStreamEventFactory, StreamEventConverter eventConverter,
                             PrimaryKeyReferenceHolder[] primaryKeyReferenceHolders,
                             boolean isPrimaryNumeric, Map<String, Integer> indexMetaData,
                             AbstractDefinition tableDefinition, SiddhiAppContext siddhiAppContext) {
-        this.tableStreamEventPool = tableStreamEventPool;
+        this.tableStreamEventFactory = tableStreamEventFactory;
         this.eventConverter = eventConverter;
         this.primaryKeyReferenceHolders = primaryKeyReferenceHolders;
         this.indexMetaData = indexMetaData;
@@ -157,12 +157,12 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         addingEventChunk.reset();
         while (addingEventChunk.hasNext()) {
             ComplexEvent complexEvent = addingEventChunk.next();
-            StreamEvent streamEvent = tableStreamEventPool.borrowEvent();
+            StreamEvent streamEvent = tableStreamEventFactory.newInstance();
             eventConverter.convertComplexEvent(complexEvent, streamEvent);
             eventsCount++;
             if (isOperationLogEnabled) {
                 if (!isFullSnapshot()) {
-                    StreamEvent streamEvent2 = tableStreamEventPool.borrowEvent();
+                    StreamEvent streamEvent2 = tableStreamEventFactory.newInstance();
                     eventConverter.convertComplexEvent(complexEvent, streamEvent2);
                     operationChangeLog.add(new Operation(ADD, streamEvent2));
                 } else {
@@ -220,7 +220,7 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
     public void overwrite(StreamEvent streamEvent) {
         if (isOperationLogEnabled) {
             if (!isFullSnapshot()) {
-                StreamEvent streamEvent2 = tableStreamEventPool.borrowEvent();
+                StreamEvent streamEvent2 = tableStreamEventFactory.newInstance();
                 eventConverter.convertComplexEvent(streamEvent, streamEvent2);
                 operationChangeLog.add(new Operation(OVERWRITE, streamEvent2));
             } else {
@@ -389,7 +389,7 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
         for (StreamEvent streamEvent : storeEventSet) {
             if (isOperationLogEnabled) {
                 if (!isFullSnapshot()) {
-                    StreamEvent streamEvent2 = tableStreamEventPool.borrowEvent();
+                    StreamEvent streamEvent2 = tableStreamEventFactory.newInstance();
                     eventConverter.convertComplexEvent(streamEvent, streamEvent2);
                     operationChangeLog.add(new Operation(REMOVE, streamEvent));
                 } else {
@@ -617,23 +617,23 @@ public class IndexEventHolder implements IndexedEventHolder, Serializable {
                 || SnapshotRequest.isRequestForFullSnapshot();
     }
 
-    public SnapshotState getSnapshot() {
+    public Snapshot getSnapshot() {
         if (isFullSnapshot()) {
             forceFullSnapshot = false;
-            return new SnapshotState(this, false);
+            return new Snapshot(this, false);
         } else {
-            SnapshotState snapshot = new SnapshotState(operationChangeLog, true);
+            Snapshot snapshot = new Snapshot(operationChangeLog, true);
             operationChangeLog = new ArrayList<>();
             return snapshot;
         }
     }
 
     public void restore(SnapshotStateList snapshotStatelist) {
-        TreeMap<Long, SnapshotState> revisions = snapshotStatelist.getSnapshotStates();
-        Iterator<Map.Entry<Long, SnapshotState>> itr = revisions.entrySet().iterator();
+        TreeMap<Long, Snapshot> revisions = snapshotStatelist.getSnapshotStates();
+        Iterator<Map.Entry<Long, Snapshot>> itr = revisions.entrySet().iterator();
         this.isOperationLogEnabled = false;
         while (itr.hasNext()) {
-            Map.Entry<Long, SnapshotState> snapshotEntry = itr.next();
+            Map.Entry<Long, Snapshot> snapshotEntry = itr.next();
             if (!snapshotEntry.getValue().isIncrementalSnapshot()) {
                 this.deleteAll();
                 IndexEventHolder snapshotEventHolder = (IndexEventHolder) snapshotEntry.getValue().getState();

@@ -39,35 +39,20 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
         this.logicalType = type;
     }
 
-    /**
-     * Clone a copy of processor
-     *
-     * @param key partition key
-     * @return clone of LogicalPreStateProcessor
-     */
-    @Override
-    public PreStateProcessor cloneProcessor(String key) {
-        LogicalPreStateProcessor logicalPreStateProcessor = new LogicalPreStateProcessor(logicalType, stateType);
-        cloneProperties(logicalPreStateProcessor, key);
-        logicalPreStateProcessor.init(siddhiQueryContext);
-        return logicalPreStateProcessor;
-    }
-
-    @Override
-    public void addState(StateEvent stateEvent) {
+    protected void addState(StateEvent stateEvent, StreamPreState state) {
         lock.lock();
         try {
             if (isStartState || stateType == StateInputStream.Type.SEQUENCE) {
-                if (newAndEveryStateEventList.isEmpty()) {
-                    newAndEveryStateEventList.add(stateEvent);
+                if (state.getNewAndEveryStateEventList().isEmpty()) {
+                    state.getNewAndEveryStateEventList().add(stateEvent);
                 }
-                if (partnerStatePreProcessor != null && partnerStatePreProcessor.newAndEveryStateEventList.isEmpty()) {
-                    partnerStatePreProcessor.newAndEveryStateEventList.add(stateEvent);
+                if (partnerStatePreProcessor != null && partnerStatePreProcessor.isNewAndEveryStateEventListEmpty()) {
+                    partnerStatePreProcessor.addEventToNewAndEveryStateEventList(stateEvent);
                 }
             } else {
-                newAndEveryStateEventList.add(stateEvent);
+                state.getNewAndEveryStateEventList().add(stateEvent);
                 if (partnerStatePreProcessor != null) {
-                    partnerStatePreProcessor.newAndEveryStateEventList.add(stateEvent);
+                    partnerStatePreProcessor.addEventToNewAndEveryStateEventList(stateEvent);
                 }
             }
         } finally {
@@ -79,32 +64,35 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
     public void addEveryState(StateEvent stateEvent) {
         StateEvent clonedEvent = stateEventCloner.copyStateEvent(stateEvent);
         clonedEvent.setEvent(stateId, null);
+        StreamPreState state = stateHolder.getState();
         lock.lock();
         try {
-            newAndEveryStateEventList.add(clonedEvent);
+            state.getNewAndEveryStateEventList().add(clonedEvent);
             if (partnerStatePreProcessor != null) {
                 clonedEvent.setEvent(partnerStatePreProcessor.stateId, null);
-                partnerStatePreProcessor.newAndEveryStateEventList.add(clonedEvent);
+                partnerStatePreProcessor.addEventToNewAndEveryStateEventList(clonedEvent);
             }
         } finally {
             lock.unlock();
+            stateHolder.returnState(state);
         }
     }
 
     @Override
     public void resetState() {
+        StreamPreState state = stateHolder.getState();
         lock.lock();
         try {
-            if (logicalType == LogicalStateElement.Type.OR || pendingStateEventList.size() ==
-                    partnerStatePreProcessor.pendingStateEventList.size()) {
-                pendingStateEventList.clear();
-                partnerStatePreProcessor.pendingStateEventList.clear();
+            if (logicalType == LogicalStateElement.Type.OR || state.getPendingStateEventList().size() ==
+                    partnerStatePreProcessor.getPendingStateEventList().size()) {
+                state.getPendingStateEventList().clear();
+                partnerStatePreProcessor.getPendingStateEventList().clear();
 
-                if (isStartState && newAndEveryStateEventList.isEmpty()) {
+                if (isStartState && state.getNewAndEveryStateEventList().isEmpty()) {
                     if (stateType == StateInputStream.Type.SEQUENCE &&
                             thisStatePostProcessor.nextEveryStatePreProcessor == null &&
                             !((StreamPreStateProcessor) thisStatePostProcessor.nextStatePreProcessor)
-                                    .pendingStateEventList.isEmpty()) {
+                                    .getPendingStateEventList().isEmpty()) {
                         return;
                     }
                     init();
@@ -112,20 +100,21 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
             }
         } finally {
             lock.unlock();
+            stateHolder.returnState(state);
         }
     }
 
     @Override
     public void updateState() {
+        StreamPreState state = stateHolder.getState();
         lock.lock();
         try {
-            pendingStateEventList.addAll(newAndEveryStateEventList);
-            newAndEveryStateEventList.clear();
-
-            partnerStatePreProcessor.pendingStateEventList.addAll(partnerStatePreProcessor.newAndEveryStateEventList);
-            partnerStatePreProcessor.newAndEveryStateEventList.clear();
+            state.getPendingStateEventList().addAll(state.getNewAndEveryStateEventList());
+            state.getNewAndEveryStateEventList().clear();
+            partnerStatePreProcessor.moveAllNewAndEveryStateEventListEventsToPendingStateEventList();
         } finally {
             lock.unlock();
+            stateHolder.returnState(state);
         }
     }
 
@@ -134,9 +123,10 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
         ComplexEventChunk<StateEvent> returnEventChunk = new ComplexEventChunk<StateEvent>(false);
         complexEventChunk.reset();
         StreamEvent streamEvent = (StreamEvent) complexEventChunk.next(); //Sure only one will be sent
+        StreamPreState state = stateHolder.getState();
         lock.lock();
         try {
-            for (Iterator<StateEvent> iterator = pendingStateEventList.iterator(); iterator.hasNext(); ) {
+            for (Iterator<StateEvent> iterator = state.getPendingStateEventList().iterator(); iterator.hasNext(); ) {
                 StateEvent stateEvent = iterator.next();
                 if (isExpired(stateEvent, streamEvent.getTimestamp())) {
                     iterator.remove();
@@ -157,7 +147,7 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
                     this.thisLastProcessor.clearProcessedEvent();
                     returnEventChunk.add(stateEvent);
                 }
-                if (stateChanged) {
+                if (state.isStateChanged()) {
                     iterator.remove();
                 } else {
                     switch (stateType) {
@@ -173,6 +163,7 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
             }
         } finally {
             lock.unlock();
+            stateHolder.returnState(state);
         }
         return returnEventChunk;
     }
@@ -180,5 +171,33 @@ public class LogicalPreStateProcessor extends StreamPreStateProcessor {
     public void setPartnerStatePreProcessor(LogicalPreStateProcessor partnerStatePreProcessor) {
         this.partnerStatePreProcessor = partnerStatePreProcessor;
         partnerStatePreProcessor.lock = lock;
+    }
+
+    public void moveAllNewAndEveryStateEventListEventsToPendingStateEventList() {
+        StreamPreState state = stateHolder.getState();
+        try {
+            state.getPendingStateEventList().addAll(state.getNewAndEveryStateEventList());
+            state.getNewAndEveryStateEventList().clear();
+        } finally {
+            stateHolder.returnState(state);
+        }
+    }
+
+    public boolean isNewAndEveryStateEventListEmpty() {
+        StreamPreState state = stateHolder.getState();
+        try {
+            return state.getNewAndEveryStateEventList().isEmpty();
+        } finally {
+            stateHolder.returnState(state);
+        }
+    }
+
+    public void addEventToNewAndEveryStateEventList(StateEvent event) {
+        StreamPreState state = stateHolder.getState();
+        try {
+            state.getNewAndEveryStateEventList().add(event);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 }

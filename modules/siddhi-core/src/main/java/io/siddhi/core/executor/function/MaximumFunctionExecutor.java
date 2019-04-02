@@ -26,10 +26,10 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-
-import java.util.Map;
 
 /**
  * Executor class for Maximum function. Function execution logic is implemented in execute here.
@@ -60,8 +60,8 @@ public class MaximumFunctionExecutor extends FunctionExecutor {
     private Attribute.Type returnType;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         Attribute.Type attributeTypeOne = attributeExpressionExecutors[0].getReturnType();
         if (!((attributeTypeOne == Attribute.Type.DOUBLE) || (attributeTypeOne == Attribute.Type.INT) ||
                 (attributeTypeOne == Attribute.Type.FLOAT) || (attributeTypeOne == Attribute.Type.LONG))) {
@@ -89,16 +89,18 @@ public class MaximumFunctionExecutor extends FunctionExecutor {
 
         }
         returnType = attributeTypeOne;
+        return null;
     }
 
     /**
      * return maximum of arbitrary long set of Double values
      *
      * @param data array of Double values
+     * @param state
      * @return max
      */
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
 
         double max = Double.MIN_VALUE;
         for (Object aObj : data) {
@@ -133,7 +135,7 @@ public class MaximumFunctionExecutor extends FunctionExecutor {
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         return data;
     }
 
@@ -142,13 +144,4 @@ public class MaximumFunctionExecutor extends FunctionExecutor {
         return returnType;
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-
-    }
 }

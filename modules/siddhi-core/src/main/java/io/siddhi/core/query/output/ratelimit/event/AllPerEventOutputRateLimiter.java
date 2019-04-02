@@ -21,6 +21,8 @@ package io.siddhi.core.query.output.ratelimit.event;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,48 +32,46 @@ import java.util.Map;
  * Implementation of {@link OutputRateLimiter} which will collect pre-defined number of events and the emit all
  * collected events as a batch.
  */
-public class AllPerEventOutputRateLimiter extends OutputRateLimiter {
+public class AllPerEventOutputRateLimiter extends OutputRateLimiter<AllPerEventOutputRateLimiter.RateLimiterState> {
 
     private final Integer value;
-    private String id;
-
-    private volatile int counter = 0;
-    private ComplexEventChunk<ComplexEvent> allComplexEventChunk;
 
     public AllPerEventOutputRateLimiter(String id, Integer value) {
-        this.id = id;
         this.value = value;
-        allComplexEventChunk = new ComplexEventChunk<ComplexEvent>(false);
     }
 
     @Override
-    public OutputRateLimiter clone(String key) {
-        AllPerEventOutputRateLimiter instance = new AllPerEventOutputRateLimiter(id + key, value);
-        instance.setLatencyTracker(latencyTracker);
-        return instance;
+    protected StateFactory<RateLimiterState> init() {
+        return () -> new RateLimiterState();
     }
+
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
         ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
-        synchronized (this) {
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
-                    complexEventChunk.remove();
-                    allComplexEventChunk.add(event);
-                    counter++;
-                    if (counter == value) {
-                        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
-                                (complexEventChunk.isBatch());
-                        outputEventChunk.add(allComplexEventChunk.getFirst());
-                        allComplexEventChunk.clear();
-                        counter = 0;
-                        outputEventChunks.add(outputEventChunk);
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
+                        complexEventChunk.remove();
+                        state.allComplexEventChunk.add(event);
+                        state.counter++;
+                        if (state.counter == value) {
+                            ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>
+                                    (complexEventChunk.isBatch());
+                            outputEventChunk.add(state.allComplexEventChunk.getFirst());
+                            state.allComplexEventChunk.clear();
+                            state.counter = 0;
+                            outputEventChunks.add(outputEventChunk);
+                        }
                     }
                 }
             }
+        } finally {
+            stateHolder.returnState(state);
         }
         for (ComplexEventChunk eventChunk : outputEventChunks) {
             sendToCallBacks(eventChunk);
@@ -79,28 +79,34 @@ public class AllPerEventOutputRateLimiter extends OutputRateLimiter {
     }
 
     @Override
-    public void start() {
-        //Nothing to start
+    public void partitionCreated() {
+        //Nothing to be done
     }
 
-    @Override
-    public void stop() {
-        //Nothing to stop
-    }
+    class RateLimiterState extends State {
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("Counter", counter);
-        state.put("AllComplexEventChunk", allComplexEventChunk.getFirst());
-        return state;
-    }
+        private volatile int counter = 0;
+        private ComplexEventChunk<ComplexEvent> allComplexEventChunk = new ComplexEventChunk<ComplexEvent>(false);
 
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        allComplexEventChunk.clear();
-        allComplexEventChunk.add((ComplexEvent) state.get("AllComplexEventChunk"));
-        counter = (int) state.get("Counter");
+        @Override
+        public boolean canDestroy() {
+            return counter == 0;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("Counter", counter);
+            state.put("AllComplexEventChunk", allComplexEventChunk.getFirst());
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            allComplexEventChunk.clear();
+            allComplexEventChunk.add((ComplexEvent) state.get("AllComplexEventChunk"));
+            counter = (int) state.get("Counter");
+        }
     }
 
 }

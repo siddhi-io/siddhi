@@ -19,19 +19,20 @@
 package io.siddhi.core.aggregation;
 
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.executor.ExpressionExecutor;
-import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.selector.GroupByKeyGenerator;
-import io.siddhi.core.query.selector.attribute.processor.executor.GroupByAggregationAttributeExecutor;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
 import io.siddhi.core.util.Scheduler;
-import io.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.parser.AggregationParser;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import org.apache.log4j.Logger;
 
@@ -42,64 +43,43 @@ import java.util.Map;
 /**
  * Incremental executor class which is responsible for performing incremental aggregation.
  */
-public class IncrementalExecutor implements Executor, Snapshotable {
+public class IncrementalExecutor implements Executor {
     private static final Logger LOG = Logger.getLogger(IncrementalExecutor.class);
 
     private final StreamEvent resetEvent;
     private final ExpressionExecutor timestampExpressionExecutor;
-    private final String aggregatorName;
+    private final StateHolder<ExecutorState> stateHolder;
     private TimePeriod.Duration duration;
     private Table table;
     private GroupByKeyGenerator groupByKeyGenerator;
-    private StreamEventPool streamEventPool;
-    private long nextEmitTime = -1;
-    private long startTimeOfAggregates = -1;
-    private boolean timerStarted = false;
-    private boolean isGroupBy;
+    private StreamEventFactory streamEventFactory;
     private Executor next;
     private Scheduler scheduler;
     private boolean isRoot;
-    private String elementId;
     private boolean isProcessingExecutor;
-    private SiddhiAppContext siddhiAppContext;
 
     private BaseIncrementalValueStore baseIncrementalValueStore = null;
-    private Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap = null;
 
     public IncrementalExecutor(TimePeriod.Duration duration, List<ExpressionExecutor> processExpressionExecutors,
                                GroupByKeyGenerator groupByKeyGenerator, MetaStreamEvent metaStreamEvent,
                                IncrementalExecutor child, boolean isRoot, Table table,
-                               SiddhiAppContext siddhiAppContext, String aggregatorName,
-                               ExpressionExecutor shouldUpdateExpressionExecutor) {
+                               SiddhiQueryContext siddhiQueryContext, String aggregatorName,
+                               ExpressionExecutor shouldUpdateTimestamp) {
         this.duration = duration;
         this.next = child;
         this.isRoot = isRoot;
         this.table = table;
-        this.siddhiAppContext = siddhiAppContext;
-        this.aggregatorName = aggregatorName;
-        this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
         this.timestampExpressionExecutor = processExpressionExecutors.remove(0);
-        this.baseIncrementalValueStore = new BaseIncrementalValueStore(-1, processExpressionExecutors,
-                streamEventPool, siddhiAppContext, aggregatorName, shouldUpdateExpressionExecutor);
         this.isProcessingExecutor = false;
-
-        if (groupByKeyGenerator != null) {
-            this.isGroupBy = true;
-            this.groupByKeyGenerator = groupByKeyGenerator;
-            this.baseIncrementalValueStoreGroupByMap = new HashMap<>();
-        } else {
-            this.isGroupBy = false;
-        }
-
-        this.resetEvent = streamEventPool.borrowEvent();
-        this.resetEvent.setType(ComplexEvent.Type.RESET);
+        this.groupByKeyGenerator = groupByKeyGenerator;
+        this.baseIncrementalValueStore = new BaseIncrementalValueStore(processExpressionExecutors, streamEventFactory,
+                siddhiQueryContext, aggregatorName, shouldUpdateTimestamp, -1, true, false);
+        this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventFactory.newInstance());
         setNextExecutor(child);
 
-        if (elementId == null) {
-            elementId = "IncrementalExecutor-" + siddhiAppContext.getElementIdGenerator().createNewId();
-        }
-        siddhiAppContext.getSnapshotService().addSnapshotable(aggregatorName, this);
-
+        this.stateHolder = siddhiQueryContext.generateStateHolder(
+                aggregatorName + "-" + this.getClass().getName(), false, () -> new ExecutorState());
     }
 
     public void setScheduler(Scheduler scheduler) {
@@ -116,40 +96,44 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         while (streamEventChunk.hasNext()) {
             StreamEvent streamEvent = (StreamEvent) streamEventChunk.next();
             streamEventChunk.remove();
-
-            long timestamp = getTimestamp(streamEvent);
-
-            startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(timestamp, duration);
-
-            if (timestamp >= nextEmitTime) {
-                nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null);
-                dispatchAggregateEvents(startTimeOfAggregates);
-                sendTimerEvent();
-            }
-            if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
-                processAggregates(streamEvent);
+            ExecutorState executorState = stateHolder.getState();
+            try {
+                long timestamp = getTimestamp(streamEvent, executorState);
+                executorState.startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
+                        timestamp, duration);
+                if (timestamp >= executorState.nextEmitTime) {
+                    executorState.nextEmitTime = IncrementalTimeConverterUtil.getNextEmitTime(
+                            timestamp, duration, null);
+                    dispatchAggregateEvents(executorState.startTimeOfAggregates);
+                    sendTimerEvent(executorState);
+                }
+                if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
+                    processAggregates(streamEvent, executorState);
+                }
+            } finally {
+                stateHolder.returnState(executorState);
             }
         }
     }
 
-    private void sendTimerEvent() {
+    private void sendTimerEvent(ExecutorState executorState) {
         if (getNextExecutor() != null) {
-            StreamEvent timerEvent = streamEventPool.borrowEvent();
+            StreamEvent timerEvent = streamEventFactory.newInstance();
             timerEvent.setType(ComplexEvent.Type.TIMER);
-            timerEvent.setTimestamp(startTimeOfAggregates);
+            timerEvent.setTimestamp(executorState.startTimeOfAggregates);
             ComplexEventChunk<StreamEvent> timerStreamEventChunk = new ComplexEventChunk<>(true);
             timerStreamEventChunk.add(timerEvent);
             next.execute(timerStreamEventChunk);
         }
     }
 
-    private long getTimestamp(StreamEvent streamEvent) {
+    private long getTimestamp(StreamEvent streamEvent, ExecutorState executorState) {
         long timestamp;
         if (streamEvent.getType() == ComplexEvent.Type.CURRENT) {
             timestamp = (long) timestampExpressionExecutor.execute(streamEvent);
-            if (isRoot && !timerStarted) {
+            if (isRoot && !executorState.timerStarted) {
                 scheduler.notifyAt(IncrementalTimeConverterUtil.getNextEmitTime(timestamp, duration, null));
-                timerStarted = true;
+                executorState.timerStarted = true;
             }
         } else {
             timestamp = streamEvent.getTimestamp();
@@ -171,66 +155,39 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         next = nextExecutor;
     }
 
-    private void processAggregates(StreamEvent streamEvent) {
+    private void processAggregates(StreamEvent streamEvent, ExecutorState executorState) {
         synchronized (this) {
-            if (isGroupBy) {
+            if (groupByKeyGenerator != null) {
                 try {
                     String groupedByKey = groupByKeyGenerator.constructEventKey(streamEvent);
-                    GroupByAggregationAttributeExecutor.getKeyThreadLocal().set(groupedByKey);
-                    BaseIncrementalValueStore aBaseIncrementalValueStore = baseIncrementalValueStoreGroupByMap
-                            .computeIfAbsent(groupedByKey,
-                                    k -> baseIncrementalValueStore.cloneStore(k, startTimeOfAggregates));
-                    process(streamEvent, aBaseIncrementalValueStore);
+                    SiddhiAppContext.startGroupByFlow(groupedByKey);
+                    baseIncrementalValueStore.process(streamEvent);
                 } finally {
-                    GroupByAggregationAttributeExecutor.getKeyThreadLocal().remove();
+                    SiddhiAppContext.stopGroupByFlow();
                 }
             } else {
-                process(streamEvent, baseIncrementalValueStore);
+                baseIncrementalValueStore.process(streamEvent);
             }
         }
     }
 
-    private void process(StreamEvent streamEvent, BaseIncrementalValueStore baseIncrementalValueStore) {
-        List<ExpressionExecutor> expressionExecutors = baseIncrementalValueStore.getExpressionExecutors();
-        boolean shouldUpdate = true;
-        ExpressionExecutor shouldUpdateExpressionExecutor =
-                baseIncrementalValueStore.getShouldUpdateExpressionExecutor();
-        if (shouldUpdateExpressionExecutor != null) {
-            shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
-        }
-
-        for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
-            if (shouldUpdate) {
-                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-                baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-            } else {
-                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-                    baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-                }
-            }
-        }
-        baseIncrementalValueStore.setProcessed(true);
-    }
 
     private void dispatchAggregateEvents(long startTimeOfNewAggregates) {
-        if (isGroupBy) {
-            dispatchEvents(baseIncrementalValueStoreGroupByMap);
-        } else {
-            dispatchEvent(startTimeOfNewAggregates, baseIncrementalValueStore);
-        }
+        dispatchEvent(startTimeOfNewAggregates, baseIncrementalValueStore);
     }
 
     private void dispatchEvent(long startTimeOfNewAggregates, BaseIncrementalValueStore aBaseIncrementalValueStore) {
         if (aBaseIncrementalValueStore.isProcessed()) {
-            StreamEvent streamEvent = aBaseIncrementalValueStore.createStreamEvent();
+            Map<String, StreamEvent> streamEventMap = aBaseIncrementalValueStore.getGroupedByEvents();
             ComplexEventChunk<StreamEvent> eventChunk = new ComplexEventChunk<>(true);
-            eventChunk.add(streamEvent);
+            for (StreamEvent event : streamEventMap.values()) {
+                eventChunk.add(event);
+            }
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                table.addEvents(eventChunk, 1);
+                table.addEvents(eventChunk, streamEventMap.size());
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
@@ -239,43 +196,12 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         cleanBaseIncrementalValueStore(startTimeOfNewAggregates, aBaseIncrementalValueStore);
     }
 
-    private void dispatchEvents(Map<String, BaseIncrementalValueStore> baseIncrementalValueGroupByStore) {
-        int noOfEvents = baseIncrementalValueGroupByStore.size();
-        if (noOfEvents > 0) {
-            ComplexEventChunk<StreamEvent> eventChunk = new ComplexEventChunk<>(true);
-            for (BaseIncrementalValueStore aBaseIncrementalValueStore : baseIncrementalValueGroupByStore.values()) {
-                StreamEvent streamEvent = aBaseIncrementalValueStore.createStreamEvent();
-                eventChunk.add(streamEvent);
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
-            }
-            if (isProcessingExecutor) {
-                table.addEvents(eventChunk, noOfEvents);
-            }
-            if (getNextExecutor() != null) {
-                next.execute(eventChunk);
-            }
-        }
-        for (BaseIncrementalValueStore baseIncrementalValueStore : baseIncrementalValueGroupByStore.values()) {
-            baseIncrementalValueStore.clean();
-        }
-        baseIncrementalValueGroupByStore.clear();
-    }
-
     private void cleanBaseIncrementalValueStore(long startTimeOfNewAggregates,
                                                 BaseIncrementalValueStore baseIncrementalValueStore) {
-        baseIncrementalValueStore.clearValues();
-        baseIncrementalValueStore.setTimestamp(startTimeOfNewAggregates);
-        baseIncrementalValueStore.setProcessed(false);
+        baseIncrementalValueStore.clearValues(startTimeOfNewAggregates, resetEvent);
         for (ExpressionExecutor expressionExecutor : baseIncrementalValueStore.getExpressionExecutors()) {
             expressionExecutor.execute(resetEvent);
         }
-    }
-
-
-    Map<String, BaseIncrementalValueStore> getBaseIncrementalValueStoreGroupByMap() {
-        return baseIncrementalValueStoreGroupByMap;
     }
 
     BaseIncrementalValueStore getBaseIncrementalValueStore() {
@@ -283,15 +209,30 @@ public class IncrementalExecutor implements Executor, Snapshotable {
     }
 
     public long getAggregationStartTimestamp() {
-        return this.startTimeOfAggregates;
+        ExecutorState state = stateHolder.getState();
+        try {
+            return state.startTimeOfAggregates;
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     public long getNextEmitTime() {
-        return nextEmitTime;
+        ExecutorState state = stateHolder.getState();
+        try {
+            return state.nextEmitTime;
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     public void setValuesForInMemoryRecreateFromTable(long emitTimeOfLatestEventInTable) {
-        this.nextEmitTime = emitTimeOfLatestEventInTable;
+        ExecutorState state = stateHolder.getState();
+        try {
+            state.nextEmitTime = emitTimeOfLatestEventInTable;
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     public boolean isProcessingExecutor() {
@@ -303,45 +244,38 @@ public class IncrementalExecutor implements Executor, Snapshotable {
     }
 
     public void clearExecutor() {
-        if (isGroupBy) {
-            this.baseIncrementalValueStoreGroupByMap.clear();
-        } else {
-            cleanBaseIncrementalValueStore(-1, this.baseIncrementalValueStore);
+        cleanBaseIncrementalValueStore(-1, this.baseIncrementalValueStore);
+    }
+
+    class ExecutorState extends State {
+        private long nextEmitTime = -1;
+        private long startTimeOfAggregates = -1;
+        private boolean timerStarted = false;
+        private boolean canDestroy = false;
+
+        @Override
+        public boolean canDestroy() {
+            return canDestroy;
         }
-    }
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-
-        state.put("NextEmitTime", nextEmitTime);
-        state.put("StartTimeOfAggregates", startTimeOfAggregates);
-        state.put("TimerStarted", timerStarted);
-        return state;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        nextEmitTime = (long) state.get("NextEmitTime");
-        startTimeOfAggregates = (long) state.get("StartTimeOfAggregates");
-        timerStarted = (boolean) state.get("TimerStarted");
-    }
-
-    @Override
-    public String getElementId() {
-        return elementId;
-    }
-
-    @Override
-    public void clean() {
-        timestampExpressionExecutor.clean();
-        baseIncrementalValueStore.clean();
-        scheduler.clean();
-        if (baseIncrementalValueStoreGroupByMap != null) {
-            for (BaseIncrementalValueStore aBaseIncrementalValueStore : baseIncrementalValueStoreGroupByMap.values()) {
-                aBaseIncrementalValueStore.clean();
-            }
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("NextEmitTime", nextEmitTime);
+            state.put("StartTimeOfAggregates", startTimeOfAggregates);
+            state.put("TimerStarted", timerStarted);
+            return state;
         }
-        siddhiAppContext.getSnapshotService().removeSnapshotable(aggregatorName, this);
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            nextEmitTime = (long) state.get("NextEmitTime");
+            startTimeOfAggregates = (long) state.get("StartTimeOfAggregates");
+            timerStarted = (boolean) state.get("TimerStarted");
+        }
+
+        public void setCanDestroy(boolean canDestroy) {
+            this.canDestroy = canDestroy;
+        }
     }
 }

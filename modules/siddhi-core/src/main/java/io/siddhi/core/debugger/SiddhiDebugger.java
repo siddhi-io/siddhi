@@ -20,7 +20,6 @@ package io.siddhi.core.debugger;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.util.snapshot.SnapshotService;
-import io.siddhi.core.util.snapshot.Snapshotable;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
@@ -204,8 +203,7 @@ public class SiddhiDebugger {
     }
 
     /**
-     * Get all the events stored in the {@link Snapshotable} entities of the given
-     * query.
+     * Get all the event states stored in the given query.
      *
      * @param queryName name of the Siddhi query
      * @return QueryState internal state of the query

@@ -33,10 +33,4 @@ public class EqualCompareConditionExpressionExecutorStringString extends EqualCo
     protected Boolean execute(Object left, Object right) {
         return left.equals(right);
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new EqualCompareConditionExpressionExecutorStringString(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

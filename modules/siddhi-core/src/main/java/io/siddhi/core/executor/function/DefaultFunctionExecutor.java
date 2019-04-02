@@ -26,11 +26,11 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
-
-import java.util.Map;
 
 /**
  * Executor class for default function. Function execution sets the default value assigned by the user when attribute
@@ -66,8 +66,8 @@ public class DefaultFunctionExecutor extends FunctionExecutor {
     Attribute.Type returnType;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors,
-                        ConfigReader configReader, SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors,
+                                ConfigReader configReader, SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 2) {
             // check whether all the arguments passed
             throw new SiddhiAppValidationException("Invalid no of parameters passed to default() function, " +
@@ -87,10 +87,11 @@ public class DefaultFunctionExecutor extends FunctionExecutor {
                     attributeExpressionExecutors[1].getReturnType());
         }
         returnType = attributeExpressionExecutors[0].getReturnType();
+        return null;
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         if (data[0] == null) {
             return data[1];
         } else {
@@ -99,7 +100,7 @@ public class DefaultFunctionExecutor extends FunctionExecutor {
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         //this will not occur
         return null;
     }
@@ -107,16 +108,6 @@ public class DefaultFunctionExecutor extends FunctionExecutor {
     @Override
     public Attribute.Type getReturnType() {
         return returnType;
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return null; // No need to maintain a state.
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        // Since there's no need to maintain a state, nothing needs to be done here.
     }
 
 }

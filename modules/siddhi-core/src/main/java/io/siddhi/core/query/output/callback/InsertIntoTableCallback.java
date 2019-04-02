@@ -21,7 +21,7 @@ import io.siddhi.core.debugger.SiddhiDebugger;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.table.Table;
 import io.siddhi.query.api.definition.StreamDefinition;
@@ -35,17 +35,17 @@ public class InsertIntoTableCallback extends OutputCallback {
     private Table table;
     private StreamDefinition outputStreamDefinition;
     private boolean convertToStreamEvent;
-    private StreamEventPool streamEventPool;
+    private StreamEventFactory streamEventFactory;
     private StreamEventConverter streamEventConverter;
 
     public InsertIntoTableCallback(Table table, StreamDefinition outputStreamDefinition,
-                                   boolean convertToStreamEvent, StreamEventPool streamEventPool,
+                                   boolean convertToStreamEvent, StreamEventFactory streamEventFactory,
                                    StreamEventConverter streamEventConverter, String queryName) {
         super(queryName);
         this.table = table;
         this.outputStreamDefinition = outputStreamDefinition;
         this.convertToStreamEvent = convertToStreamEvent;
-        this.streamEventPool = streamEventPool;
+        this.streamEventFactory = streamEventFactory;
         this.streamEventConverter = streamEventConverter;
     }
 
@@ -61,7 +61,7 @@ public class InsertIntoTableCallback extends OutputCallback {
             complexEventChunk.reset();
             while (complexEventChunk.hasNext()) {
                 ComplexEvent complexEvent = complexEventChunk.next();
-                StreamEvent borrowEvent = streamEventPool.borrowEvent();
+                StreamEvent borrowEvent = streamEventFactory.newInstance();
                 streamEventConverter.convertData(
                         complexEvent.getTimestamp(),
                         complexEvent.getOutputData(),

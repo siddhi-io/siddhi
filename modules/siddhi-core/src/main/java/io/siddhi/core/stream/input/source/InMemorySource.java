@@ -29,8 +29,6 @@ import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.OptionHolder;
 import org.apache.log4j.Logger;
 
-import java.util.Map;
-
 /**
  * Implementation of {@link Source} to receive events through in-memory transport.
  */
@@ -103,13 +101,4 @@ public class InMemorySource extends Source {
         InMemoryBroker.subscribe(subscriber);
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        // no state
-    }
 }

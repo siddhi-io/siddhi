@@ -25,9 +25,9 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
-
-import java.util.Map;
 
 @Extension(
         name = "fault",
@@ -50,10 +50,11 @@ public class FaultFunctionExtension extends FunctionExecutor {
     private Attribute.Type returnType;
 
     @Override
-    public void init(ExpressionExecutor[] attributeExpressionExecutors,
-                     ConfigReader configReader,
-                     SiddhiQueryContext siddhiQueryContext) {
+    public StateFactory init(ExpressionExecutor[] attributeExpressionExecutors,
+                             ConfigReader configReader,
+                             SiddhiQueryContext siddhiQueryContext) {
         returnType = Attribute.Type.DOUBLE;
+        return null;
     }
 
     /**
@@ -68,24 +69,14 @@ public class FaultFunctionExtension extends FunctionExecutor {
 
 
     @Override
-    protected Object execute(Object[] obj) {
+    protected Object execute(Object[] obj, State state) {
         throw new RuntimeException("Error when running faultAdd()");
 
     }
 
     @Override
-    protected Object execute(Object obj) {
+    protected Object execute(Object obj, State state) {
         throw new RuntimeException("Error when running faultAdd()");
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        //No state
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Nothing to be done
-    }
 }

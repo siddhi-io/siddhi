@@ -24,13 +24,14 @@ import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.aggregation.TimePeriod;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -73,8 +74,8 @@ public class IncrementalStartTimeEndTimeFunctionExecutor extends FunctionExecuto
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0].getReturnType() != Attribute.Type.STRING) {
                 throw new SiddhiAppValidationException("Only string values are supported for single within clause "
@@ -95,10 +96,11 @@ public class IncrementalStartTimeEndTimeFunctionExecutor extends FunctionExecuto
             throw new SiddhiAppValidationException("incrementalAggregator:startTimeEndTime() function accepts " +
                     "only one or two arguments, but found " + attributeExpressionExecutors.length);
         }
+        return null;
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         long startTime;
         long endTime;
 
@@ -122,23 +124,13 @@ public class IncrementalStartTimeEndTimeFunctionExecutor extends FunctionExecuto
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         return getStartTimeEndTime(data.toString().trim());
     }
 
     @Override
     public Attribute.Type getReturnType() {
         return Attribute.Type.OBJECT;
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return null; // No states
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        // Nothing to be done
     }
 
     private Long[] getStartTimeEndTime(String singleWithinTimeAsString) {

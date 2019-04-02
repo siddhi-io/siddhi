@@ -35,9 +35,4 @@ public class NotEqualCompareConditionExpressionExecutorBoolBool extends NotEqual
         return ((Boolean) left).booleanValue() != ((Boolean) right).booleanValue();
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new NotEqualCompareConditionExpressionExecutorBoolBool(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

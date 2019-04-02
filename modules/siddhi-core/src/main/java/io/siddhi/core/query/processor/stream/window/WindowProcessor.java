@@ -18,11 +18,23 @@
 package io.siddhi.core.query.processor.stream.window;
 
 import io.siddhi.core.query.processor.stream.AbstractStreamProcessor;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.query.api.definition.Attribute;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Abstract parent implementation of Processor to represent Windows. Common window behaviors will be handled
  * here through this class and different implementations should extend this
+ *
+ * @param <S> current state of the processor
  */
-public abstract class WindowProcessor extends AbstractStreamProcessor {
+public abstract class WindowProcessor<S extends State> extends AbstractStreamProcessor<S> {
 
+
+    @Override
+    public List<Attribute> getReturnAttributes() {
+        return new ArrayList<>(0);
+    }
 }

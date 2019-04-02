@@ -27,7 +27,6 @@ import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.StringUtil;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
-import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
@@ -46,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * This is a Sink type. these let users to publish events according to
  * some type. this type can either be local, jms or ws (or any custom extension)
  */
-public abstract class Sink implements SinkListener, Snapshotable {
+public abstract class Sink implements SinkListener {
 
     private static final Logger LOG = Logger.getLogger(Sink.class);
     protected AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
@@ -55,7 +54,6 @@ public abstract class Sink implements SinkListener, Snapshotable {
     private SinkMapper mapper;
     private SinkHandler handler;
     private DistributedTransport.ConnectionCallback connectionCallback = null;
-    private String elementId;
     private SiddhiAppContext siddhiAppContext;
     private OnErrorAction onErrorAction;
     private BackoffRetryCounter backoffRetryCounter = new BackoffRetryCounter();
@@ -72,7 +70,6 @@ public abstract class Sink implements SinkListener, Snapshotable {
                            ConfigReader mapperConfigReader, SiddhiAppContext siddhiAppContext) {
         this.streamDefinition = streamDefinition;
         this.type = type;
-        this.elementId = siddhiAppContext.getElementIdGenerator().createNewId();
         this.siddhiAppContext = siddhiAppContext;
         this.onErrorAction = OnErrorAction.valueOf(transportOptionHolder
                 .getOrCreateOption(SiddhiConstants.ANNOTATION_ELEMENT_ON_ERROR, "LOG")
@@ -93,8 +90,8 @@ public abstract class Sink implements SinkListener, Snapshotable {
             this.mapper = sinkMapper;
         }
         if (sinkHandler != null) {
-            sinkHandler.initSinkHandler(siddhiAppContext.getElementIdGenerator().createNewId(), streamDefinition,
-                    new SinkHandlerCallback(sinkMapper));
+            sinkHandler.initSinkHandler(siddhiAppContext.getName(), streamDefinition,
+                    new SinkHandlerCallback(sinkMapper), siddhiAppContext);
             this.handler = sinkHandler;
         }
 
@@ -112,7 +109,6 @@ public abstract class Sink implements SinkListener, Snapshotable {
         this.type = type;
         this.streamDefinition = streamDefinition;
         this.connectionCallback = connectionCallback;
-        this.elementId = siddhiAppContext.getElementIdGenerator().createNewId();
         this.siddhiAppContext = siddhiAppContext;
         init(streamDefinition, transportOptionHolder, sinkConfigReader, siddhiAppContext);
         scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
@@ -247,16 +243,6 @@ public abstract class Sink implements SinkListener, Snapshotable {
         if (connectionCallback != null) {
             connectionCallback.connectionFailed();
         }
-    }
-
-    @Override
-    public final String getElementId() {
-        return elementId;
-    }
-
-    @Override
-    public void clean() {
-        //ignore
     }
 
     void setTrpDynamicOptions(ThreadLocal<DynamicOptions> trpDynamicOptions) {

@@ -35,9 +35,4 @@ public class EqualCompareConditionExpressionExecutorBoolBool extends EqualCompar
         return ((Boolean) left).booleanValue() == ((Boolean) right).booleanValue();
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new EqualCompareConditionExpressionExecutorBoolBool(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

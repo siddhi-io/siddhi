@@ -26,7 +26,7 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.FaultStreamEventConverter;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputProcessor;
@@ -47,10 +47,8 @@ import org.apache.log4j.Logger;
 import java.beans.ExceptionListener;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -66,8 +64,8 @@ public class StreamJunction implements EventBufferHolder {
     private int batchSize;
     private int workers = -1;
     private int bufferSize;
-    private List<Receiver> receivers = new CopyOnWriteArrayList<Receiver>();
-    private List<Publisher> publishers = Collections.synchronizedList(new LinkedList<>());
+    private List<Receiver> receivers = new LinkedList<>();
+    private List<Publisher> publishers = new LinkedList<>();
     private ExecutorService executorService;
     private boolean async = false;
     private Disruptor<EventExchangeHolder> disruptor;
@@ -75,7 +73,7 @@ public class StreamJunction implements EventBufferHolder {
     private ThroughputTracker throughputTracker = null;
     private boolean isTraceEnabled;
     private StreamJunction faultStreamJunction = null;
-    private FaultStreamEventConverter faultStreamEventChunk = null;
+    private FaultStreamEventConverter faultStreamEventConverter = null;
     private OnErrorAction onErrorAction = OnErrorAction.LOG;
     private ExceptionListener exceptionListener;
 
@@ -95,11 +93,9 @@ public class StreamJunction implements EventBufferHolder {
         this.faultStreamJunction = faultStreamJunction;
         if (faultStreamJunction != null) {
             StreamDefinition faultStreamDefinition = faultStreamJunction.getStreamDefinition();
-            StreamEventPool faultStreamEventPool = new StreamEventPool(0, 0,
-                    faultStreamDefinition.getAttributeList().size(), 5);
-            faultStreamEventPool.borrowEvent();
-            faultStreamEventChunk = new FaultStreamEventConverter(faultStreamEventPool);
-
+            StreamEventFactory faultStreamEventFactory = new StreamEventFactory(0, 0,
+                    faultStreamDefinition.getAttributeList().size());
+            faultStreamEventConverter = new FaultStreamEventConverter(faultStreamEventFactory);
         }
         try {
             Annotation asyncAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_ASYNC,
@@ -277,7 +273,7 @@ public class StreamJunction implements EventBufferHolder {
     /**
      * Create and start disruptor based on annotations given in the streamDefinition.
      */
-    public synchronized void startProcessing() {
+    public void startProcessing() {
         if (!receivers.isEmpty() && async) {
             for (Constructor constructor : Disruptor.class.getConstructors()) {
                 if (constructor.getParameterTypes().length == 5) {      // If new disruptor classes available
@@ -315,7 +311,7 @@ public class StreamJunction implements EventBufferHolder {
         }
     }
 
-    public synchronized void stopProcessing() {
+    public void stopProcessing() {
         if (disruptor != null) {
             disruptor.shutdown();
         } else {
@@ -327,14 +323,14 @@ public class StreamJunction implements EventBufferHolder {
         }
     }
 
-    public synchronized Publisher constructPublisher() {
+    public Publisher constructPublisher() {
         Publisher publisher = new Publisher();
         publisher.setStreamJunction(this);
         publishers.add(publisher);
         return publisher;
     }
 
-    public synchronized void subscribe(Receiver receiver) {
+    public void subscribe(Receiver receiver) {
         // To have reverse order at the sequence/pattern processors.
         if (!receivers.contains(receiver)) {
             receivers.add(receiver);
@@ -461,24 +457,16 @@ public class StreamJunction implements EventBufferHolder {
                     if (faultStreamJunction != null) {
                         StreamEvent streamEvent = null;
                         if (event instanceof ComplexEvent) {
-                            synchronized (this) {
-                                streamEvent = faultStreamEventChunk.convert((ComplexEvent) event, e);
-                            }
+                            streamEvent = faultStreamEventConverter.convert((ComplexEvent) event, e);
                             faultStreamJunction.sendEvent(streamEvent);
                         } else if (event instanceof Event) {
-                            synchronized (this) {
-                                streamEvent = faultStreamEventChunk.convert((Event) event, e);
-                            }
+                            streamEvent = faultStreamEventConverter.convert((Event) event, e);
                             faultStreamJunction.sendEvent(streamEvent);
                         } else if (event instanceof Event[]) {
-                            synchronized (this) {
-                                streamEvent = faultStreamEventChunk.convert((Event[]) event, e);
-                            }
+                            streamEvent = faultStreamEventConverter.convert((Event[]) event, e);
                             faultStreamJunction.sendEvent(streamEvent);
                         } else if (event instanceof List) {
-                            synchronized (this) {
-                                streamEvent = faultStreamEventChunk.convert((List<Event>) event, e);
-                            }
+                            streamEvent = faultStreamEventConverter.convert((List<Event>) event, e);
                             faultStreamJunction.sendEvent(streamEvent);
                         }
                     } else {
@@ -505,10 +493,7 @@ public class StreamJunction implements EventBufferHolder {
                     break;
                 case STREAM:
                     if (faultStreamJunction != null) {
-                        StreamEvent streamEvent = null;
-                        synchronized (this) {
-                            streamEvent = faultStreamEventChunk.convert(timeStamp, data, e);
-                        }
+                        StreamEvent streamEvent = faultStreamEventConverter.convert(timeStamp, data, e);
                         faultStreamJunction.sendEvent(streamEvent);
                     } else {
                         log.error("Error in SiddhiApp '" + siddhiAppContext.getName() +

@@ -42,8 +42,12 @@ public class EntryValveExecutor implements Executor, Schedulable {
      */
     @Override
     public void execute(ComplexEventChunk complexEventChunk) {
-        threadBarrier.pass();
-        next.execute(complexEventChunk);
+        threadBarrier.enter();
+        try {
+            next.execute(complexEventChunk);
+        } finally {
+            threadBarrier.exit();
+        }
     }
 
     /**

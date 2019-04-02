@@ -2706,7 +2706,7 @@ Siddhi supports following extension types:
 
     For each event, it consumes zero or more parameters as input parameters and returns a single attribute with aggregated results. This can be used in conjunction with a window in order to find the aggregated results based on the given window like any Aggregate Function operation. 
     
-     This is implemented by extending `io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator`.
+     This is implemented by extending `io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregatorExecutor`.
 
     Example : 
     

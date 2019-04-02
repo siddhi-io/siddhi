@@ -35,28 +35,28 @@ public class SimpleStreamEventConverter implements StreamEventConverter, Seriali
         this.conversionMappings = conversionMappings;
     }
 
-    public void convertData(long timestamp, Object[] data, StreamEvent.Type type, StreamEvent borrowedEvent) {
+    public void convertData(long timestamp, Object[] data, StreamEvent.Type type, StreamEvent newEvent) {
         for (ConversionMapping element : conversionMappings) {
-            borrowedEvent.setOutputData(data[element.getFromPosition()], element.getToPosition()[1]);
+            newEvent.setOutputData(data[element.getFromPosition()], element.getToPosition()[1]);
         }
-        borrowedEvent.setType(type);
-        borrowedEvent.setTimestamp(timestamp);
+        newEvent.setType(type);
+        newEvent.setTimestamp(timestamp);
     }
 
-    public void convertEvent(Event event, StreamEvent borrowedEvent) {
+    public void convertEvent(Event event, StreamEvent newEvent) {
         convertData(event.getTimestamp(), event.getData(), event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent
                         .Type.CURRENT,
-                borrowedEvent);
+                newEvent);
     }
 
-    public void convertComplexEvent(ComplexEvent complexEvent, StreamEvent borrowedEvent) {
+    public void convertComplexEvent(ComplexEvent complexEvent, StreamEvent newEvent) {
         convertData(complexEvent.getTimestamp(), complexEvent.getOutputData(), complexEvent.getType(),
-                borrowedEvent);
+                newEvent);
     }
 
     @Override
-    public void convertData(long timestamp, Object[] data, StreamEvent borrowedEvent) {
-        convertData(timestamp, data, StreamEvent.Type.CURRENT, borrowedEvent);
+    public void convertData(long timestamp, Object[] data, StreamEvent newEvent) {
+        convertData(timestamp, data, StreamEvent.Type.CURRENT, newEvent);
     }
 
 }

@@ -25,10 +25,10 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-
-import java.util.Map;
 
 /**
  * Executor class for coalesce function. Returns the value of the first input parameter that is not null.
@@ -73,8 +73,8 @@ public class CoalesceFunctionExecutor extends FunctionExecutor {
     private Attribute.Type returnType;
 
     @Override
-    public void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                     SiddhiQueryContext siddhiQueryContext) {
+    public StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                             SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length == 0) {
             throw new SiddhiAppValidationException("Coalesce must have at least one parameter");
         }
@@ -85,6 +85,7 @@ public class CoalesceFunctionExecutor extends FunctionExecutor {
             }
         }
         returnType = type;
+        return null;
     }
 
     @Override
@@ -93,7 +94,7 @@ public class CoalesceFunctionExecutor extends FunctionExecutor {
     }
 
 
-    protected Object execute(Object[] obj) {
+    protected Object execute(Object[] obj, State state) {
         for (Object aObj : obj) {
             if (aObj != null) {
                 return aObj;
@@ -103,18 +104,7 @@ public class CoalesceFunctionExecutor extends FunctionExecutor {
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         return data;
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        //No states
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Nothing to be done
     }
 }

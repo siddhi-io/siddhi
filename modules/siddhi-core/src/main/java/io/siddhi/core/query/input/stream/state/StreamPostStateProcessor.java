@@ -113,28 +113,6 @@ public class StreamPostStateProcessor implements PostStateProcessor {
         }
     }
 
-    /**
-     * Clone a copy of processor
-     *
-     * @param key partition key
-     * @return clone of StreamPostStateProcessor
-     */
-    @Override
-    public PostStateProcessor cloneProcessor(String key) {
-        StreamPostStateProcessor streamPostStateProcessor = new StreamPostStateProcessor();
-        cloneProperties(streamPostStateProcessor);
-        return streamPostStateProcessor;
-    }
-
-    @Override
-    public void clean() {
-        //ignore
-    }
-
-    protected void cloneProperties(StreamPostStateProcessor streamPostStateProcessor) {
-        streamPostStateProcessor.stateId = stateId;
-    }
-
     public PreStateProcessor getNextStatePreProcessor() {
         return nextStatePreProcessor;
     }

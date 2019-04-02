@@ -79,7 +79,7 @@ public class SiddhiAnnotationProcessor extends AbstractProcessor {
                         AnnotationConstants.SINK_MAPPER_SUPER_CLASS,
                         AnnotationConstants.SINK_SUPER_CLASS,
                         AnnotationConstants.FUNCTION_EXECUTOR_SUPER_CLASS,
-                        AnnotationConstants.AGGREGATION_ATTRIBUTE_SUPER_CLASS,
+                        AnnotationConstants.AGGREGATION_ATTRIBUTE_EXECUTOR_SUPER_CLASS,
                         AnnotationConstants.DISTRIBUTION_STRATEGY_SUPER_CLASS,
                         AnnotationConstants.STREAM_PROCESSOR_SUPER_CLASS,
                         AnnotationConstants.STREAM_FUNCTION_PROCESSOR_SUPER_CLASS,
@@ -117,7 +117,7 @@ public class SiddhiAnnotationProcessor extends AbstractProcessor {
                             abstractAnnotationProcessor =
                                     new FunctionExecutorValidationAnnotationProcessor(extensionClassFullName);
                             break;
-                        case AnnotationConstants.AGGREGATION_ATTRIBUTE_SUPER_CLASS:
+                        case AnnotationConstants.AGGREGATION_ATTRIBUTE_EXECUTOR_SUPER_CLASS:
                             abstractAnnotationProcessor =
                                     new AggregationAttributeValidationAnnotationProcessor(extensionClassFullName);
                             break;

@@ -21,7 +21,7 @@ package io.siddhi.core.table.holder;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.holder.SnapshotableStreamEventQueue;
 import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
@@ -33,13 +33,13 @@ import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 public class ListEventHolder extends SnapshotableStreamEventQueue implements EventHolder {
 
     private static final long serialVersionUID = 4695745058501269511L;
-    private StreamEventPool tableStreamEventPool;
+    private StreamEventFactory tableStreamEventFactory;
     private StreamEventConverter eventConverter;
 
-    public ListEventHolder(StreamEventPool tableStreamEventPool, StreamEventConverter eventConverter,
+    public ListEventHolder(StreamEventFactory tableStreamEventFactory, StreamEventConverter eventConverter,
                            StreamEventClonerHolder streamEventClonerHolder) {
         super(streamEventClonerHolder);
-        this.tableStreamEventPool = tableStreamEventPool;
+        this.tableStreamEventFactory = tableStreamEventFactory;
         this.eventConverter = eventConverter;
     }
 
@@ -48,7 +48,7 @@ public class ListEventHolder extends SnapshotableStreamEventQueue implements Eve
         addingEventChunk.reset();
         while (addingEventChunk.hasNext()) {
             ComplexEvent complexEvent = addingEventChunk.next();
-            StreamEvent streamEvent = tableStreamEventPool.borrowEvent();
+            StreamEvent streamEvent = tableStreamEventFactory.newInstance();
             eventConverter.convertComplexEvent(complexEvent, streamEvent);
             this.add(streamEvent);
         }

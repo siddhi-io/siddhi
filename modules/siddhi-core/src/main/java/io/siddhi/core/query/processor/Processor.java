@@ -55,17 +55,4 @@ public interface Processor {
      */
     void setToLast(Processor processor);
 
-    /**
-     * Clone a copy of processor
-     *
-     * @param key partition key
-     * @return cloned processor
-     */
-    Processor cloneProcessor(String key);
-
-    /**
-     * Used to clean its references
-     */
-    void clean();
-
 }

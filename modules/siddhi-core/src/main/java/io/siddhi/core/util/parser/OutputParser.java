@@ -18,17 +18,19 @@
 package io.siddhi.core.util.parser;
 
 import io.siddhi.core.config.SiddhiQueryContext;
-import io.siddhi.core.event.state.StateEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.query.output.callback.DeleteTableCallback;
 import io.siddhi.core.query.output.callback.InsertIntoStreamCallback;
+import io.siddhi.core.query.output.callback.InsertIntoStreamEndPartitionCallback;
 import io.siddhi.core.query.output.callback.InsertIntoTableCallback;
 import io.siddhi.core.query.output.callback.InsertIntoWindowCallback;
+import io.siddhi.core.query.output.callback.InsertIntoWindowEndPartitionCallback;
 import io.siddhi.core.query.output.callback.OutputCallback;
 import io.siddhi.core.query.output.callback.UpdateOrInsertTableCallback;
 import io.siddhi.core.query.output.callback.UpdateTableCallback;
@@ -71,7 +73,6 @@ import io.siddhi.query.api.expression.Variable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Class to parse {@link OutputCallback}
@@ -91,7 +92,7 @@ public class OutputParser {
             table = tableMap.get(id);
             window = eventWindowMap.get(id);
         }
-        StreamEventPool streamEventPool = null;
+        StreamEventFactory streamEventFactory = null;
         StreamEventConverter streamEventConverter = null;
         MetaStreamEvent tableMetaStreamEvent = null;
         if (table != null) {
@@ -106,20 +107,30 @@ public class OutputParser {
             matchingTableDefinition.setQueryContextEndIndex(outStream.getQueryContextEndIndex());
             tableMetaStreamEvent.addInputDefinition(matchingTableDefinition);
 
-            streamEventPool = new StreamEventPool(tableMetaStreamEvent, 10);
+            streamEventFactory = new StreamEventFactory(tableMetaStreamEvent);
             streamEventConverter = new ZeroStreamEventConverter();
         }
 
         //Construct CallBack
         if (outStream instanceof InsertIntoStream || outStream instanceof ReturnStream) {
             if (window != null) {
-                return new InsertIntoWindowCallback(window, outputStreamDefinition, siddhiQueryContext.getName());
+                if (!siddhiQueryContext.isPartitioned()) {
+                    return new InsertIntoWindowCallback(window, outputStreamDefinition, siddhiQueryContext.getName());
+                } else {
+                    return new InsertIntoWindowEndPartitionCallback(window, outputStreamDefinition,
+                            siddhiQueryContext.getName());
+                }
             } else if (table != null) {
                 DefinitionParserHelper.validateOutputStream(outputStreamDefinition, table.getTableDefinition());
                 return new InsertIntoTableCallback(table, outputStreamDefinition, convertToStreamEvent,
-                        streamEventPool, streamEventConverter, siddhiQueryContext.getName());
+                        streamEventFactory, streamEventConverter, siddhiQueryContext.getName());
             } else {
-                return new InsertIntoStreamCallback(outputStreamDefinition, siddhiQueryContext.getName());
+                if (!siddhiQueryContext.isPartitioned() || outputStreamDefinition.getId().startsWith("#")) {
+                    return new InsertIntoStreamCallback(outputStreamDefinition, siddhiQueryContext.getName());
+                } else {
+                    return new InsertIntoStreamEndPartitionCallback(
+                            outputStreamDefinition, siddhiQueryContext.getName());
+                }
             }
         } else if (outStream instanceof DeleteStream || outStream instanceof UpdateStream || outStream instanceof
                 UpdateOrInsertStream) {
@@ -157,10 +168,10 @@ public class OutputParser {
                         CompiledCondition compiledCondition = table.compileCondition(
                                 (((DeleteStream) outStream).getOnDeleteExpression()), matchingMetaInfoHolder,
                                 null, tableMap, siddhiQueryContext);
-                        StateEventPool stateEventPool = new StateEventPool(
-                                matchingMetaInfoHolder.getMetaStateEvent(), 10);
+                        StateEventFactory stateEventFactory = new StateEventFactory(
+                                matchingMetaInfoHolder.getMetaStateEvent());
                         return new DeleteTableCallback(table, compiledCondition, matchingMetaInfoHolder.
-                                getMatchingStreamEventIndex(), convertToStreamEvent, stateEventPool, streamEventPool,
+                                getMatchingStreamEventIndex(), convertToStreamEvent, stateEventFactory, streamEventFactory,
                                 streamEventConverter, siddhiQueryContext.getName());
                     } catch (SiddhiAppValidationException e) {
                         throw new SiddhiAppCreationException("Cannot create delete for table '" + outStream.getId() +
@@ -186,11 +197,11 @@ public class OutputParser {
                         }
                         CompiledUpdateSet compiledUpdateSet = table.compileUpdateSet(updateSet, matchingMetaInfoHolder,
                                 null, tableMap, siddhiQueryContext);
-                        StateEventPool stateEventPool = new StateEventPool(
-                                matchingMetaInfoHolder.getMetaStateEvent(), 10);
+                        StateEventFactory stateEventFactory = new StateEventFactory(
+                                matchingMetaInfoHolder.getMetaStateEvent());
                         return new UpdateTableCallback(table, compiledCondition, compiledUpdateSet,
                                 matchingMetaInfoHolder.getMatchingStreamEventIndex(), convertToStreamEvent,
-                                stateEventPool, streamEventPool, streamEventConverter, siddhiQueryContext.getName());
+                                stateEventFactory, streamEventFactory, streamEventConverter, siddhiQueryContext.getName());
                     } catch (SiddhiAppValidationException e) {
                         throw new SiddhiAppCreationException("Cannot create update for table '" + outStream.getId() +
                                 "', " + e.getMessageWithOutContext(), e, e.getQueryContextStartIndex(),
@@ -217,10 +228,10 @@ public class OutputParser {
                         }
                         CompiledUpdateSet compiledUpdateSet = table.compileUpdateSet(updateSet, matchingMetaInfoHolder,
                                 null, tableMap, siddhiQueryContext);
-                        StateEventPool stateEventPool = new StateEventPool(matchingMetaInfoHolder.getMetaStateEvent(), 10);
+                        StateEventFactory stateEventFactory = new StateEventFactory(matchingMetaInfoHolder.getMetaStateEvent());
                         return new UpdateOrInsertTableCallback(table, compiledCondition, compiledUpdateSet,
                                 matchingMetaInfoHolder.getMatchingStreamEventIndex(), convertToStreamEvent,
-                                stateEventPool, streamEventPool, streamEventConverter, siddhiQueryContext.getName());
+                                stateEventFactory, streamEventFactory, streamEventConverter, siddhiQueryContext.getName());
 
                     } catch (SiddhiAppValidationException e) {
                         throw new SiddhiAppCreationException("Cannot create update or insert into for table '" +
@@ -268,10 +279,10 @@ public class OutputParser {
         }
     }
 
-    public static OutputRateLimiter constructOutputRateLimiter(String id, OutputRate outputRate, boolean isGroupBy,
-                                                               boolean isWindow, ScheduledExecutorService
-                                                                       scheduledExecutorService, SiddhiQueryContext
-                                                                       siddhiQueryContext) {
+    public static OutputRateLimiter constructOutputRateLimiter(String id, OutputRate outputRate,
+                                                               boolean isGroupBy,
+                                                               boolean isWindow,
+                                                               SiddhiQueryContext siddhiQueryContext) {
         if (outputRate == null) {
             return new PassThroughOutputRateLimiter(id);
         } else if (outputRate instanceof EventOutputRate) {
@@ -297,31 +308,26 @@ public class OutputParser {
         } else if (outputRate instanceof TimeOutputRate) {
             switch (((TimeOutputRate) outputRate).getType()) {
                 case ALL:
-                    return new AllPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue(),
-                            scheduledExecutorService);
+                    return new AllPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue());
                 case FIRST:
                     if (isGroupBy) {
-                        return new FirstGroupByPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue(),
-                                scheduledExecutorService);
+                        return new FirstGroupByPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue());
                     } else {
-                        return new FirstPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue(),
-                                scheduledExecutorService);
+                        return new FirstPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue());
                     }
                 case LAST:
                     if (isGroupBy) {
-                        return new LastGroupByPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue(),
-                                scheduledExecutorService);
+                        return new LastGroupByPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue());
                     } else {
-                        return new LastPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue(),
-                                scheduledExecutorService);
+                        return new LastPerTimeOutputRateLimiter(id, ((TimeOutputRate) outputRate).getValue());
                     }
             }
             //never happens
             throw new OperationNotSupportedException(((TimeOutputRate) outputRate).getType() + " not supported in " +
                     "output rate limiting");
         } else {
-            return new WrappedSnapshotOutputRateLimiter(id, ((SnapshotOutputRate) outputRate).getValue(),
-                    scheduledExecutorService, isGroupBy, isWindow, siddhiQueryContext);
+            return new WrappedSnapshotOutputRateLimiter(((SnapshotOutputRate) outputRate).getValue(),
+                    isGroupBy, isWindow, siddhiQueryContext);
         }
 
     }

@@ -53,17 +53,4 @@ public class DivideExpressionExecutorLong implements ExpressionExecutor {
         return Attribute.Type.LONG;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new DivideExpressionExecutorLong(leftExpressionExecutor.cloneExecutor(key), rightExpressionExecutor
-                .cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        leftExpressionExecutor.clean();
-        rightExpressionExecutor.clean();
-    }
-
-
 }

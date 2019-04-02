@@ -49,14 +49,4 @@ public class NotConditionExpressionExecutor extends ConditionExpressionExecutor 
         }
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new NotConditionExpressionExecutor(conditionExecutor.cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        conditionExecutor.clean();
-    }
-
 }

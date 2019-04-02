@@ -21,7 +21,6 @@ package io.siddhi.core.executor.condition;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.FinderStateEvent;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
@@ -36,19 +35,18 @@ public class InConditionExpressionExecutor extends ConditionExpressionExecutor {
     private final int matchingStreamIndex;
     private final CompiledCondition compiledCondition;
     private Table table;
-    private FinderStateEvent finderStateEvent;
 
     public InConditionExpressionExecutor(Table table, CompiledCondition compiledCondition, int
             streamEventSize, boolean isMatchingEventAStateEvent, int matchingStreamIndex) {
         this.streamEventSize = streamEventSize;
         this.isMatchingEventAStateEvent = isMatchingEventAStateEvent;
         this.matchingStreamIndex = matchingStreamIndex;
-        this.finderStateEvent = new FinderStateEvent(streamEventSize, 0);
         this.table = table;
         this.compiledCondition = compiledCondition;
     }
 
-    public synchronized Boolean execute(ComplexEvent event) {
+    public Boolean execute(ComplexEvent event) {
+        FinderStateEvent finderStateEvent = new FinderStateEvent(streamEventSize, 0);
         try {
             if (isMatchingEventAStateEvent) {
                 finderStateEvent.setEvent((StateEvent) event);
@@ -64,17 +62,5 @@ public class InConditionExpressionExecutor extends ConditionExpressionExecutor {
             }
         }
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new InConditionExpressionExecutor(table, compiledCondition.cloneCompilation(key),
-                streamEventSize, isMatchingEventAStateEvent, matchingStreamIndex);
-    }
-
-    @Override
-    public void clean() {
-        //ignore
-    }
-
 
 }

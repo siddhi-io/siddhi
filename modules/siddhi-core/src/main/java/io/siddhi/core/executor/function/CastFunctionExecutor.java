@@ -27,10 +27,10 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-
-import java.util.Map;
 
 /**
  * Executor class for Siddhi cast function. Converts the given parameter according to the castTo parameter.
@@ -69,8 +69,8 @@ public class CastFunctionExecutor extends FunctionExecutor {
     private Attribute.Type returnType = Attribute.Type.OBJECT;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 2) {
             throw new SiddhiAppValidationException("Invalid no of arguments passed to common:cast() function, " +
                     "required 2 parameters, but found " +
@@ -99,10 +99,11 @@ public class CastFunctionExecutor extends FunctionExecutor {
                         "string");
             }
         }
+        return null;
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         if (returnType == Attribute.Type.LONG && data[0] instanceof Integer) {
             return ((Integer) data[0]).longValue();
         }
@@ -110,7 +111,7 @@ public class CastFunctionExecutor extends FunctionExecutor {
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         return null;
     }
 
@@ -119,15 +120,6 @@ public class CastFunctionExecutor extends FunctionExecutor {
         return returnType;
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        return null;    //No need to maintain a state.
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Since there's no need to maintain a state, nothing needs to be done here.
-    }
 }
 
 

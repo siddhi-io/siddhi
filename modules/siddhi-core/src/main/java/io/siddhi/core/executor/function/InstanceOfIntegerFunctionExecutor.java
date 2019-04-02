@@ -26,10 +26,10 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-
-import java.util.Map;
 
 /**
  * Executor class for instanceOf Integer function. Function execution logic is implemented in execute here.
@@ -69,22 +69,23 @@ public class InstanceOfIntegerFunctionExecutor extends FunctionExecutor {
     Attribute.Type returnType = Attribute.Type.BOOL;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new SiddhiAppValidationException("Invalid no of arguments passed to instanceOfInteger() " +
                     "function, required only 1, but found " + attributeExpressionExecutors.length);
         }
+        return null;
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         return null; //Since the instanceOfInteger function takes in 1 parameter, this method does not get called.
         // Hence, not implemented.
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         return data instanceof Integer;
     }
 
@@ -93,13 +94,4 @@ public class InstanceOfIntegerFunctionExecutor extends FunctionExecutor {
         return returnType;
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-
-    }
 }

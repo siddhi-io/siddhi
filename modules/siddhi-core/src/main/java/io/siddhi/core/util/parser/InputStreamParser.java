@@ -83,7 +83,7 @@ public class InputStreamParser {
                     executors, streamDefinitionMap,
                     tableDefinitionMap, windowDefinitionMap, aggregationDefinitionMap, tableMap,
                     new MetaStreamEvent(), processStreamReceiver, true,
-                    outputExpectsExpiredEvents, siddhiQueryContext);
+                    outputExpectsExpiredEvents, false, siddhiQueryContext);
         } else if (inputStream instanceof JoinInputStream) {
             return JoinInputStreamParser.parseInputStream(((JoinInputStream) inputStream),
                     streamDefinitionMap, tableDefinitionMap, windowDefinitionMap,

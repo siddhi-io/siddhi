@@ -28,16 +28,20 @@ import io.siddhi.core.event.stream.StreamEventCloner;
 import io.siddhi.core.util.Schedulable;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.lock.LockWrapper;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import org.apache.log4j.Logger;
-
-import java.util.Map;
 
 /**
  * Parent implementation to run the {@link Scheduler} to handle periodic snapshot rate
  * limiting.
+ *
+ * @param <S> current state of the RateLimiter
  */
-public abstract class SnapshotOutputRateLimiter implements Schedulable {
+public abstract class SnapshotOutputRateLimiter<S extends State> implements Schedulable {
     private static final Logger log = Logger.getLogger(SnapshotOutputRateLimiter.class);
+    protected final StateHolder<S> stateHolder;
     protected StreamEventCloner streamEventCloner;
     protected StateEventCloner stateEventCloner;
     protected SiddhiQueryContext siddhiQueryContext;
@@ -46,15 +50,15 @@ public abstract class SnapshotOutputRateLimiter implements Schedulable {
     private boolean receiveStreamEvent;
 
     protected SnapshotOutputRateLimiter(WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
-                                        SiddhiQueryContext siddhiQueryContext) {
+                                        SiddhiQueryContext siddhiQueryContext, boolean groupBy) {
         this.wrappedSnapshotOutputRateLimiter = wrappedSnapshotOutputRateLimiter;
         this.siddhiQueryContext = siddhiQueryContext;
+        stateHolder = siddhiQueryContext.generateStateHolder(this.getClass().getName(), groupBy, init());
     }
 
-    public abstract void process(ComplexEventChunk complexEventChunk);
+    protected abstract StateFactory<S> init();
 
-    public abstract SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter
-            wrappedSnapshotOutputRateLimiter);
+    public abstract void process(ComplexEventChunk complexEventChunk);
 
     public void setStreamEventCloner(StreamEventCloner streamEventCloner) {
         this.streamEventCloner = streamEventCloner;
@@ -84,13 +88,7 @@ public abstract class SnapshotOutputRateLimiter implements Schedulable {
         }
     }
 
-    public abstract void start();
-
-    public abstract void stop();
-
-    public abstract Map<String, Object> currentState();
-
-    public abstract void restoreState(Map<String, Object> state);
+    public abstract void partitionCreated();
 
     public void setQueryLock(LockWrapper lockWrapper) {
         this.lockWrapper = lockWrapper;

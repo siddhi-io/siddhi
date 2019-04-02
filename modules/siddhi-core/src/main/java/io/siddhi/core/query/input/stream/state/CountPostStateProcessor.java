@@ -36,12 +36,6 @@ public class CountPostStateProcessor extends StreamPostStateProcessor {
         this.maxCount = maxCount;
     }
 
-    public PostStateProcessor cloneProcessor(String key) {
-        CountPostStateProcessor countPostStateProcessor = new CountPostStateProcessor(minCount, maxCount);
-        cloneProperties(countPostStateProcessor);
-        return countPostStateProcessor;
-    }
-
     protected void process(StateEvent stateEvent, ComplexEventChunk complexEventChunk) {
         StreamEvent streamEvent = stateEvent.getStreamEvent(stateId);
         int streamEvents = 1;

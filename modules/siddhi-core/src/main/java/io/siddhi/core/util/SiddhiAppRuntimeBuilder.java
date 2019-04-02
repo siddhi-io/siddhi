@@ -135,8 +135,6 @@ public class SiddhiAppRuntimeBuilder {
             windowDefinition = (WindowDefinition) currentDefinition;
         }
         DefinitionParserHelper.addWindow(windowDefinition, windowMap, siddhiAppContext);
-        // defineStream(windowDefinition);
-        // DefinitionParserHelper.addStreamJunction(windowDefinition, streamJunctionMap, siddhiQueryContext);
     }
 
     public void defineTrigger(TriggerDefinition triggerDefinition) {
@@ -164,7 +162,7 @@ public class SiddhiAppRuntimeBuilder {
     }
 
     public void addPartition(PartitionRuntime partitionRuntime) {
-        partitionMap.put(partitionRuntime.getPartitionId(), partitionRuntime);
+        partitionMap.put(partitionRuntime.getPartitionName(), partitionRuntime);
     }
 
     public String addQuery(QueryRuntime queryRuntime) {

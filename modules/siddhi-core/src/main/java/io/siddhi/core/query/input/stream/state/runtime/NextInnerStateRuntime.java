@@ -17,11 +17,8 @@
  */
 package io.siddhi.core.query.input.stream.state.runtime;
 
-import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
-
-import java.util.List;
 
 /**
  * Created on 12/19/14.
@@ -44,6 +41,12 @@ public class NextInnerStateRuntime extends StreamInnerStateRuntime {
     }
 
     @Override
+    public void setup() {
+        currentInnerStateRuntime.setup();
+        nextInnerStateRuntime.setup();
+    }
+
+    @Override
     public void init() {
         currentInnerStateRuntime.init();
         nextInnerStateRuntime.init();
@@ -59,34 +62,5 @@ public class NextInnerStateRuntime extends StreamInnerStateRuntime {
     public void update() {
         currentInnerStateRuntime.update();
         nextInnerStateRuntime.update();
-    }
-
-    @Override
-    public InnerStateRuntime clone(String key) {
-        InnerStateRuntime clonedCurrentInnerStateRuntime = currentInnerStateRuntime.clone(key);
-        InnerStateRuntime clonedNextInnerStateRuntime = nextInnerStateRuntime.clone(key);
-
-        NextInnerStateRuntime nextInnerStateRuntime = new NextInnerStateRuntime(clonedCurrentInnerStateRuntime,
-                clonedNextInnerStateRuntime, stateType);
-        nextInnerStateRuntime.singleStreamRuntimeList.addAll(clonedCurrentInnerStateRuntime
-                .getSingleStreamRuntimeList());
-        nextInnerStateRuntime.singleStreamRuntimeList.addAll(clonedNextInnerStateRuntime.getSingleStreamRuntimeList());
-        nextInnerStateRuntime.firstProcessor = clonedCurrentInnerStateRuntime.getFirstProcessor();
-        nextInnerStateRuntime.lastProcessor = clonedNextInnerStateRuntime.getLastProcessor();
-
-        clonedCurrentInnerStateRuntime.getLastProcessor().setNextStatePreProcessor(clonedNextInnerStateRuntime
-                .getFirstProcessor());
-
-        List<SingleStreamRuntime> runtimeList = nextInnerStateRuntime.getSingleStreamRuntimeList();
-        for (int i = 0; i < runtimeList.size(); i++) {
-            String streamId = runtimeList.get(i).getProcessStreamReceiver().getStreamId();
-            for (int j = i; j < runtimeList.size(); j++) {
-                if (streamId.equals(runtimeList.get(j).getProcessStreamReceiver().getStreamId())) {
-                    runtimeList.get(j).setProcessStreamReceiver(runtimeList.get(i).getProcessStreamReceiver());
-                }
-            }
-        }
-
-        return nextInnerStateRuntime;
     }
 }
