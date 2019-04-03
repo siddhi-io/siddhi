@@ -329,15 +329,18 @@ The `QueryRuntime`s process events by maintaining separate states for each parti
 When a partition query consumes a non partitioned global stream, the `QueryRuntime`s are executed for each available partition-key in the system such that 
 allowing all partitions to receive the same event. When the partitions are obsolete `PartitionRuntime` deletes all the partition states from its `QueryRuntime`s. 
 
-## Aggregation 
+## Siddhi Aggregation 
+
+![Siddhi Aggregation](../../images/architecture/siddhi-5.x-aggregation.png "Siddhi Aggregation")
 
 Siddhi supports long duration time series aggregations via its aggregation definition. [AggregationRuntime](https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/aggregation/AggregationRuntime.java) 
 implements this by the use of **_streaming lambda architecture_**, where it process part of the data in-memory and gets part of the data from data stores. 
 `AggregationRuntime` creates an in-memory table or external store for each time granularity (i.e seconds, minutes, days, etc) it has to process the events, 
-and when events enters it calculates the aggregations in-memory for its least granularity (usually seconds) using the [BaseIncrementalValueStore](https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/aggregation/BaseIncrementalValueStore.java). 
-At each clock end time of the granularity (end of each second) it stores the summarized values to the associated granularity 
-table and also passes the summarized values to the `BaseIncrementalValueStore` of the next granularity level, which also follows 
-the same methodology in processing the events. Through this approach each time granularities current time duration will be in-memory and all the historical time durations 
+and when events enters it calculates the aggregations in-memory for its least granularity (usually seconds) using the [IncrementalExecutor](https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/aggregation/IncrementalExecutor.java) 
+and maintains the running aggregation values in its [BaseIncrementalValueStore](https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/aggregation/BaseIncrementalValueStore.java). 
+At each clock end time of the granularity (end of each second) `IncrementalExecutor` stores the summarized values to the associated granularity 
+table and also passes the summarized values to the `IncrementalExecutor` of the next granularity level, which also follows 
+the same methodology in processing the events. Through this approach each time granularities, the current time duration will be in-memory and all the historical time durations 
 will be in stored in the tables. 
 
 The aggregations results are calculated by [IncrementalAttributeAggregator](https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/selector/attribute/aggregator/incremental/IncrementalAttributeAggregator.java)s 
