@@ -40,19 +40,20 @@ import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.collection.operator.Operator;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.OperatorParser;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.expression.Expression;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static java.util.stream.Collectors.toMap;
 
 /**
  * Implementation of {@link WindowProcessor} which represent a Window operating based on a session.
@@ -102,7 +103,8 @@ import static java.util.stream.Collectors.toMap;
                 )
         }
 )
-public class SessionWindowProcessor extends GroupingWindowProcessor implements SchedulingProcessor, FindableProcessor {
+public class SessionWindowProcessor extends GroupingFindableWindowProcessor<SessionWindowProcessor.WindowState>
+        implements SchedulingProcessor {
 
     private static final Logger log = Logger.getLogger(SessionWindowProcessor.class);
     private static final String DEFAULT_KEY = "default-key";
@@ -110,10 +112,6 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
     private long allowedLatency = 0;
     private VariableExpressionExecutor sessionKeyExecutor;
     private Scheduler scheduler;
-    private Map<String, SessionContainer> sessionMap;
-    private Map<String, Long> sessionKeyEndTimeMap;
-    private SessionContainer sessionContainer;
-    private SessionComplexEventChunk<StreamEvent> expiredEventChunk;
 
     @Override
     public Scheduler getScheduler() {
@@ -126,14 +124,9 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors,
-                        ConfigReader configReader, boolean outputExpectsExpiredEvents,
-                        SiddhiQueryContext siddhiQueryContext) {
-        this.sessionMap = new ConcurrentHashMap<>();
-        this.sessionKeyEndTimeMap = new HashMap<>();
-        this.sessionContainer = new SessionContainer();
-        this.expiredEventChunk = new SessionComplexEventChunk<>();
-
+    protected StateFactory<WindowState> init(ExpressionExecutor[] attributeExpressionExecutors,
+                                             ConfigReader configReader, boolean outputExpectsExpiredEvents,
+                                             SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length >= 1 && attributeExpressionExecutors.length <= 3) {
 
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
@@ -209,24 +202,18 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
 
         }
 
-    }
-
-    private void validateAllowedLatency(long allowedLatency, long sessionGap) {
-        if (allowedLatency > sessionGap) {
-            throw new SiddhiAppValidationException("Session window's allowedLatency parameter value "
-                    + "should not be greater than the session gap parameter value");
-
-        }
+        return () -> new WindowState();
     }
 
     @Override
     protected void processEventChunk(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                                     StreamEventCloner streamEventCloner,
-                                     GroupingKeyPopulator groupingKeyPopulater) {
+                                     StreamEventCloner streamEventCloner, GroupingKeyPopulator groupingKeyPopulater,
+                                     WindowState state) {
+
         String key = DEFAULT_KEY;
         SessionComplexEventChunk<StreamEvent> currentSession;
 
-        synchronized (this) {
+        synchronized (state) {
             while (streamEventChunk.hasNext()) {
                 StreamEvent streamEvent = streamEventChunk.next();
                 long eventTimestamp = streamEvent.getTimestamp();
@@ -246,18 +233,18 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
                     //get the session configuration based on session key
                     //if the map doesn't contain key, then a new sessionContainer
                     //object needs to be created.
-                    if ((sessionContainer = sessionMap.get(key)) == null) {
-                        sessionContainer = new SessionContainer(key);
+                    if ((state.sessionContainer = state.sessionMap.get(key)) == null) {
+                        state.sessionContainer = new SessionContainer(key);
                     }
-                    sessionMap.put(key, sessionContainer);
+                    state.sessionMap.put(key, state.sessionContainer);
 
                     StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
                     clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
 
-                    currentSession = sessionContainer.getCurrentSession();
+                    currentSession = state.sessionContainer.getCurrentSession();
 
                     //if current session is empty
-                    if (sessionContainer.getCurrentSession().getFirst() == null) {
+                    if (state.sessionContainer.getCurrentSession().getFirst() == null) {
                         currentSession.add(clonedStreamEvent);
                         currentSession.setTimestamps(eventTimestamp, maxTimestamp, aliveTimestamp);
                         scheduler.notifyAt(maxTimestamp);
@@ -272,7 +259,7 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
                             } else {
                                 //when a new session starts
                                 if (allowedLatency > 0) {
-                                    moveCurrentSessionToPreviousSession();
+                                    moveCurrentSessionToPreviousSession(state);
                                     currentSession.clear();
                                     currentSession.setTimestamps(eventTimestamp, maxTimestamp, aliveTimestamp);
                                     currentSession.add(clonedStreamEvent);
@@ -282,25 +269,34 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
 
                         } else {
                             //when a late event arrives
-                            addLateEvent(streamEventChunk, eventTimestamp, clonedStreamEvent);
+                            addLateEvent(streamEventChunk, eventTimestamp, clonedStreamEvent, state);
                         }
                     }
                 } else {
-                    currentSessionTimeout(eventTimestamp);
+                    currentSessionTimeout(eventTimestamp, state);
                     if (allowedLatency > 0) {
-                        previousSessionTimeout(eventTimestamp);
+                        previousSessionTimeout(eventTimestamp, state);
                     }
                 }
             }
         }
 
-        if (expiredEventChunk != null && expiredEventChunk.getFirst() != null) {
-            streamEventChunk.add((StreamEvent) expiredEventChunk.getFirst());
-            expiredEventChunk.clear();
+        if (state.expiredEventChunk != null && state.expiredEventChunk.getFirst() != null) {
+            streamEventChunk.add((StreamEvent) state.expiredEventChunk.getFirst());
+            state.expiredEventChunk.clear();
         }
 
         nextProcessor.process(streamEventChunk);
 
+    }
+
+
+    private void validateAllowedLatency(long allowedLatency, long sessionGap) {
+        if (allowedLatency > sessionGap) {
+            throw new SiddhiAppValidationException("Session window's allowedLatency parameter value "
+                    + "should not be greater than the session gap parameter value");
+
+        }
     }
 
     /**
@@ -324,20 +320,22 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
 
     /**
      * Moves the events in the current session into previous window.
+     *
+     * @param state
      */
-    private void moveCurrentSessionToPreviousSession() {
+    private void moveCurrentSessionToPreviousSession(WindowState state) {
 
-        SessionComplexEventChunk<StreamEvent> currentSession = sessionContainer.getCurrentSession();
-        SessionComplexEventChunk<StreamEvent> previousSession = sessionContainer.getPreviousSession();
+        SessionComplexEventChunk<StreamEvent> currentSession = state.sessionContainer.getCurrentSession();
+        SessionComplexEventChunk<StreamEvent> previousSession = state.sessionContainer.getPreviousSession();
 
         if (previousSession.getFirst() == null) {
             previousSession.add(currentSession.getFirst());
 
         } else {
-            expiredEventChunk.setKey(previousSession.getKey());
-            expiredEventChunk.setTimestamps(previousSession.getStartTimestamp(),
+            state.expiredEventChunk.setKey(previousSession.getKey());
+            state.expiredEventChunk.setTimestamps(previousSession.getStartTimestamp(),
                     previousSession.getEndTimestamp(), previousSession.getAliveTimestamp());
-            expiredEventChunk.add(previousSession.getFirst());
+            state.expiredEventChunk.add(previousSession.getFirst());
 
             previousSession.clear();
             previousSession.add(currentSession.getFirst());
@@ -354,10 +352,10 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
      * Handles when the late event arrives to the system.
      */
     private void addLateEvent(ComplexEventChunk<StreamEvent> streamEventChunk,
-                              long eventTimestamp, StreamEvent streamEvent) {
+                              long eventTimestamp, StreamEvent streamEvent, WindowState state) {
 
-        SessionComplexEventChunk<StreamEvent> currentSession = sessionContainer.getCurrentSession();
-        SessionComplexEventChunk<StreamEvent> previousSession = sessionContainer.getPreviousSession();
+        SessionComplexEventChunk<StreamEvent> currentSession = state.sessionContainer.getCurrentSession();
+        SessionComplexEventChunk<StreamEvent> previousSession = state.sessionContainer.getPreviousSession();
 
         if (allowedLatency > 0) {
 
@@ -417,21 +415,26 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
     /**
      * Checks all the sessions and get the expired session.
      */
-    private void currentSessionTimeout(long eventTimestamp) {
-        Map<String, Long> currentEndTimestamps = findAllCurrentEndTimestamps(sessionMap);
+    private void currentSessionTimeout(long eventTimestamp, WindowState state) {
+        Map<String, Long> currentEndTimestamps = findAllCurrentEndTimestamps(state);
 
         //sort on endTimestamps
         if (currentEndTimestamps.size() > 1) {
-            currentEndTimestamps = currentEndTimestamps.entrySet().stream().sorted(Map.Entry.comparingByValue())
-                    .collect(toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e1,
-                            LinkedHashMap::new));
+            List<Map.Entry<String, Long>> toSort = new ArrayList<>();
+            toSort.addAll(currentEndTimestamps.entrySet());
+            toSort.sort(Map.Entry.comparingByValue());
+            Map<String, Long> map = new LinkedHashMap<>();
+            for (Map.Entry<String, Long> e : toSort) {
+                map.putIfAbsent(e.getKey(), e.getValue());
+            }
+            currentEndTimestamps = map;
         }
 
         for (Map.Entry<String, Long> entry : currentEndTimestamps.entrySet()) {
             long sessionEndTime = entry.getValue();
-            SessionComplexEventChunk<StreamEvent> currentSession = sessionMap.get(entry.getKey())
+            SessionComplexEventChunk<StreamEvent> currentSession = state.sessionMap.get(entry.getKey())
                     .getCurrentSession();
-            SessionComplexEventChunk<StreamEvent> previousSession = sessionMap.get(entry.getKey())
+            SessionComplexEventChunk<StreamEvent> previousSession = state.sessionMap.get(entry.getKey())
                     .getPreviousSession();
             if (currentSession.getFirst() != null && eventTimestamp >= sessionEndTime) {
 
@@ -444,14 +447,13 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
                     scheduler.notifyAt(currentSession.getAliveTimestamp());
                     currentSession.clear();
                 } else {
-                    expiredEventChunk.setKey(currentSession.getKey());
-                    expiredEventChunk.setTimestamps(currentSession.getStartTimestamp(),
+                    state.expiredEventChunk.setKey(currentSession.getKey());
+                    state.expiredEventChunk.setTimestamps(currentSession.getStartTimestamp(),
                             currentSession.getEndTimestamp(),
                             currentSession.getAliveTimestamp());
-                    expiredEventChunk.add(currentSession.getFirst());
+                    state.expiredEventChunk.add(currentSession.getFirst());
                     currentSession.clear();
                 }
-
             } else {
                 break;
             }
@@ -461,29 +463,36 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
     /**
      * Checks all the previous sessions and get the expired sessions.
      */
-    private void previousSessionTimeout(long eventTimestamp) {
+    private void previousSessionTimeout(long eventTimestamp, WindowState state) {
 
-        Map<String, Long> previousEndTimestamps = findAllPreviousEndTimestamps(sessionMap);
+        Map<String, Long> previousEndTimestamps = findAllPreviousEndTimestamps(state);
         SessionComplexEventChunk<StreamEvent> previousSession;
 
         //sort on endTimestamps
         if (previousEndTimestamps.size() > 1) {
-            previousEndTimestamps = previousEndTimestamps.entrySet().stream().sorted(Map.Entry.comparingByValue())
-                    .collect(toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e1,
-                            LinkedHashMap::new));
+            List<Map.Entry<String, Long>> toSort = new ArrayList<>();
+            for (Map.Entry<String, Long> e : previousEndTimestamps.entrySet()) {
+                toSort.add(e);
+            }
+            toSort.sort(Map.Entry.comparingByValue());
+            LinkedHashMap<String, Long> map = new LinkedHashMap<>();
+            for (Map.Entry<String, Long> e : toSort) {
+                map.putIfAbsent(e.getKey(), e.getValue());
+            }
+            previousEndTimestamps = map;
         }
 
         for (Map.Entry<String, Long> entry : previousEndTimestamps.entrySet()) {
-            previousSession = sessionMap.get(entry.getKey()).getPreviousSession();
+            previousSession = state.sessionMap.get(entry.getKey()).getPreviousSession();
 
             if (previousSession != null && previousSession.getFirst() != null &&
                     eventTimestamp >= previousSession.getAliveTimestamp()) {
 
-                expiredEventChunk.setKey(previousSession.getKey());
-                expiredEventChunk.setTimestamps(previousSession.getStartTimestamp(),
+                state.expiredEventChunk.setKey(previousSession.getKey());
+                state.expiredEventChunk.setTimestamps(previousSession.getStartTimestamp(),
                         previousSession.getEndTimestamp(), previousSession.getAliveTimestamp());
 
-                expiredEventChunk.add(previousSession.getFirst());
+                state.expiredEventChunk.add(previousSession.getFirst());
                 previousSession.clear();
             } else {
                 break;
@@ -496,48 +505,51 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
     /**
      * Gets all end timestamps of current sessions.
      *
-     * @param sessionMap holds all the sessions with the session key
+     * @param state current state
      * @return map with the values of each current session's end timestamp and with the key as the session key
      */
-    private Map<String, Long> findAllCurrentEndTimestamps(Map<String, SessionContainer> sessionMap) {
+    private Map<String, Long> findAllCurrentEndTimestamps(WindowState state) {
 
-        Collection<SessionContainer> sessionContainerList = sessionMap.values();
+        Collection<SessionContainer> sessionContainerList = state.sessionMap.values();
 
-        if (!sessionKeyEndTimeMap.isEmpty()) {
-            sessionKeyEndTimeMap.clear();
+        if (!state.sessionKeyEndTimeMap.isEmpty()) {
+            state.sessionKeyEndTimeMap.clear();
         }
 
         for (SessionContainer sessionContainer : sessionContainerList) {
             //not getting empty session details
             if (sessionContainer.getCurrentSessionEndTimestamp() != -1) {
-                sessionKeyEndTimeMap.put(sessionContainer.getKey(), sessionContainer.getCurrentSessionEndTimestamp());
+                state.sessionKeyEndTimeMap.put(sessionContainer.getKey(),
+                        sessionContainer.getCurrentSessionEndTimestamp());
             }
         }
 
-        return sessionKeyEndTimeMap;
+        return state.sessionKeyEndTimeMap;
     }
 
     /**
      * Gets all the end timestamps of previous sessions.
      *
+     * @param state
      * @return map with the values of each previous session's end timestamp and with the key as the sesssio key
      */
-    private Map<String, Long> findAllPreviousEndTimestamps(Map<String, SessionContainer> sessionMap) {
+    private Map<String, Long> findAllPreviousEndTimestamps(WindowState state) {
 
-        Collection<SessionContainer> sessionContainerList = sessionMap.values();
+        Collection<SessionContainer> sessionContainerList = state.sessionMap.values();
 
-        if (!sessionKeyEndTimeMap.isEmpty()) {
-            sessionKeyEndTimeMap.clear();
+        if (!state.sessionKeyEndTimeMap.isEmpty()) {
+            state.sessionKeyEndTimeMap.clear();
         }
 
         for (SessionContainer sessionContainer : sessionContainerList) {
             //not getting empty session details
             if (sessionContainer.getPreviousSessionEndTimestamp() != -1) {
-                sessionKeyEndTimeMap.put(sessionContainer.getKey(), sessionContainer.getPreviousSessionEndTimestamp());
+                state.sessionKeyEndTimeMap.put(sessionContainer.getKey(),
+                        sessionContainer.getPreviousSessionEndTimestamp());
             }
         }
 
-        return sessionKeyEndTimeMap;
+        return state.sessionKeyEndTimeMap;
     }
 
     @Override
@@ -547,37 +559,24 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
 
     @Override
     public void stop() {
-        //Do nothing
-    }
-
-    @Override
-    public synchronized Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("sessionMap", sessionMap);
-        state.put("sessionContainer", sessionContainer);
-        state.put("expiredEventChunk", expiredEventChunk);
-        return state;
-    }
-
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        sessionMap = (ConcurrentHashMap<String, SessionContainer>) state.get("sessionMap");
-        sessionContainer = (SessionContainer) state.get("sessionContainer");
-        expiredEventChunk = (SessionComplexEventChunk<StreamEvent>) state.get("expiredEventChunk");
-    }
-
-    @Override
-    public synchronized StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return ((Operator) compiledCondition).find(matchingEvent, expiredEventChunk, streamEventCloner);
+        if (scheduler != null) {
+            scheduler.stop();
+        }
     }
 
     @Override
     public CompiledCondition compileCondition(Expression condition, MatchingMetaInfoHolder matchingMetaInfoHolder,
                                               List<VariableExpressionExecutor> variableExpressionExecutors,
-                                              Map<String, Table> tableMap, SiddhiQueryContext siddhiQueryContext) {
-        return OperatorParser.constructOperator(expiredEventChunk, condition, matchingMetaInfoHolder,
+                                              Map<String, Table> tableMap, WindowState state,
+                                              SiddhiQueryContext siddhiQueryContext) {
+        return OperatorParser.constructOperator(state.expiredEventChunk, condition, matchingMetaInfoHolder,
                 variableExpressionExecutors, tableMap, siddhiQueryContext);
+    }
 
+    @Override
+    public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition,
+                            StreamEventCloner streamEventCloner, WindowState state) {
+        return ((Operator) compiledCondition).find(matchingEvent, state.expiredEventChunk, streamEventCloner);
     }
 
     /**
@@ -637,6 +636,44 @@ public class SessionWindowProcessor extends GroupingWindowProcessor implements S
             this.startTimestamp = startTimestamp;
             this.endTimestamp = endTimestamp;
             this.aliveTimestamp = aliveTimestamp;
+        }
+    }
+
+    class WindowState extends State {
+
+        private Map<String, SessionContainer> sessionMap;
+        private Map<String, Long> sessionKeyEndTimeMap;
+        private SessionContainer sessionContainer;
+        private SessionComplexEventChunk<StreamEvent> expiredEventChunk;
+
+        public WindowState() {
+            this.sessionMap = new ConcurrentHashMap<>();
+            this.sessionKeyEndTimeMap = new HashMap<>();
+            this.sessionContainer = new SessionContainer();
+            this.expiredEventChunk = new SessionComplexEventChunk<>();
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return sessionMap.isEmpty() && expiredEventChunk.getFirst() == null
+                    && sessionContainer.getCurrentSession().getFirst() == null
+                    && sessionContainer.getPreviousSession().getFirst() == null;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("sessionMap", sessionMap);
+            state.put("sessionContainer", sessionContainer);
+            state.put("expiredEventChunk", expiredEventChunk);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            sessionMap = (ConcurrentHashMap<String, SessionContainer>) state.get("sessionMap");
+            sessionContainer = (SessionContainer) state.get("sessionContainer");
+            expiredEventChunk = (SessionComplexEventChunk<StreamEvent>) state.get("expiredEventChunk");
         }
     }
 }

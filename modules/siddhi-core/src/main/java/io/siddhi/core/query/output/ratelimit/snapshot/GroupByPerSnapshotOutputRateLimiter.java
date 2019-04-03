@@ -22,36 +22,39 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.GroupedComplexEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.parser.SchedulerParser;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Implementation of {@link PerSnapshotOutputRateLimiter} for queries with GroupBy.
  */
-public class GroupByPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimiter {
+public class GroupByPerSnapshotOutputRateLimiter
+        extends SnapshotOutputRateLimiter<GroupByPerSnapshotOutputRateLimiter.RateLimiterState> {
     private final Long value;
-    private String id;
-    private ScheduledExecutorService scheduledExecutorService;
-    private Map<String, ComplexEvent> groupByKeyEvents = new LinkedHashMap<String, ComplexEvent>();
     private Scheduler scheduler;
-    private long scheduledTime;
 
-    public GroupByPerSnapshotOutputRateLimiter(String id, Long value,
-                                               ScheduledExecutorService scheduledExecutorService,
+    public GroupByPerSnapshotOutputRateLimiter(Long value,
                                                WrappedSnapshotOutputRateLimiter wrappedSnapshotOutputRateLimiter,
-                                               SiddhiQueryContext siddhiQueryContext) {
-        super(wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
-        this.id = id;
+                                               boolean groupBy, SiddhiQueryContext siddhiQueryContext) {
+        super(wrappedSnapshotOutputRateLimiter, siddhiQueryContext, groupBy);
         this.value = value;
-        this.scheduledExecutorService = scheduledExecutorService;
+    }
+
+    @Override
+    protected StateFactory<RateLimiterState> init() {
+        this.scheduler = SchedulerParser.parse(this, siddhiQueryContext);
+        this.scheduler.setStreamEventFactory(new StreamEventFactory(0, 0, 0));
+        this.scheduler.init(lockWrapper, siddhiQueryContext.getName());
+        return () -> new RateLimiterState();
     }
 
     /**
@@ -63,71 +66,80 @@ public class GroupByPerSnapshotOutputRateLimiter extends SnapshotOutputRateLimit
     public void process(ComplexEventChunk complexEventChunk) {
         List<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
         complexEventChunk.reset();
-        synchronized (this) {
-            complexEventChunk.reset();
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.TIMER) {
-                    tryFlushEvents(outputEventChunks, event);
-                } else if (event.getType() == ComplexEvent.Type.CURRENT) {
-                    complexEventChunk.remove();
-                    tryFlushEvents(outputEventChunks, event);
-                    GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
-                    groupByKeyEvents.put(groupedComplexEvent.getGroupKey(), groupedComplexEvent.getComplexEvent());
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                complexEventChunk.reset();
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    if (event.getType() == ComplexEvent.Type.TIMER) {
+                        tryFlushEvents(outputEventChunks, event, state);
+                    } else if (event.getType() == ComplexEvent.Type.CURRENT) {
+                        complexEventChunk.remove();
+                        tryFlushEvents(outputEventChunks, event, state);
+                        GroupedComplexEvent groupedComplexEvent = ((GroupedComplexEvent) event);
+                        state.groupByKeyEvents.put(groupedComplexEvent.getGroupKey(),
+                                groupedComplexEvent.getComplexEvent());
+                    }
                 }
             }
+        } finally {
+            stateHolder.returnState(state);
         }
         for (ComplexEventChunk eventChunk : outputEventChunks) {
             sendToCallBacks(eventChunk);
         }
     }
 
-    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event) {
-        if (event.getTimestamp() >= scheduledTime) {
+
+    private void tryFlushEvents(List<ComplexEventChunk<ComplexEvent>> outputEventChunks, ComplexEvent event,
+                                RateLimiterState state) {
+        if (event.getTimestamp() >= state.scheduledTime) {
             ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<ComplexEvent>(false);
-            for (ComplexEvent complexEvent : groupByKeyEvents.values()) {
+            for (ComplexEvent complexEvent : state.groupByKeyEvents.values()) {
                 outputEventChunk.add(cloneComplexEvent(complexEvent));
             }
             outputEventChunks.add(outputEventChunk);
-            scheduledTime += value;
-            scheduler.notifyAt(scheduledTime);
+            state.scheduledTime += value;
+            scheduler.notifyAt(state.scheduledTime);
         }
     }
 
     @Override
-    public void start() {
-        scheduler = SchedulerParser.parse(this, siddhiQueryContext.getSiddhiAppContext());
-        scheduler.setStreamEventPool(new StreamEventPool(0, 0, 0, 5));
-        scheduler.init(lockWrapper, siddhiQueryContext.getName());
-        long currentTime = System.currentTimeMillis();
-        scheduledTime = currentTime + value;
-        scheduler.notifyAt(scheduledTime);
+    public void partitionCreated() {
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                long currentTime = System.currentTimeMillis();
+                state.scheduledTime = currentTime + value;
+                scheduler.notifyAt(state.scheduledTime);
+            }
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
-    @Override
-    public void stop() {
-        //Nothing to stop
-    }
+    class RateLimiterState extends State {
+        public long scheduledTime;
+        private Map<String, ComplexEvent> groupByKeyEvents = new LinkedHashMap<>();
 
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        synchronized (this) {
+        @Override
+        public boolean canDestroy() {
+            return groupByKeyEvents.isEmpty() && scheduledTime == 0;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
             state.put("GroupByKeyEvents", groupByKeyEvents);
+            state.put("ScheduledTime", scheduledTime);
+            return state;
         }
-        return state;
-    }
 
-    @Override
-    public synchronized void restoreState(Map<String, Object> state) {
-        groupByKeyEvents = (Map<String, ComplexEvent>) state.get("groupByKeyEvents");
+        @Override
+        public void restore(Map<String, Object> state) {
+            groupByKeyEvents = (Map<String, ComplexEvent>) state.get("groupByKeyEvents");
+            scheduledTime = (Long) state.get("ScheduledTime");
+        }
     }
-
-    @Override
-    public SnapshotOutputRateLimiter clone(String key, WrappedSnapshotOutputRateLimiter
-            wrappedSnapshotOutputRateLimiter) {
-        return new GroupByPerSnapshotOutputRateLimiter(id + key, value, scheduledExecutorService,
-                wrappedSnapshotOutputRateLimiter, siddhiQueryContext);
-    }
-
 }

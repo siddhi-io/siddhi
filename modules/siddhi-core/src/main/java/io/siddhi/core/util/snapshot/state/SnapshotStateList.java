@@ -25,24 +25,24 @@ import java.util.TreeMap;
  * The class which encloses multiple snapshot states.
  */
 public class SnapshotStateList implements Serializable {
-    private TreeMap<Long, SnapshotState> snapshotStates = new TreeMap<>();
+    private TreeMap<Long, Snapshot> snapshotStates = new TreeMap<>();
 
     public SnapshotStateList() {
     }
 
-    public SnapshotStateList(TreeMap<Long, SnapshotState> snapshotStates) {
+    public SnapshotStateList(TreeMap<Long, Snapshot> snapshotStates) {
         this.snapshotStates = snapshotStates;
     }
 
-    public TreeMap<Long, SnapshotState> getSnapshotStates() {
+    public TreeMap<Long, Snapshot> getSnapshotStates() {
         return snapshotStates;
     }
 
-    public void setSnapshotStates(TreeMap<Long, SnapshotState> snapshotStates) {
+    public void setSnapshotStates(TreeMap<Long, Snapshot> snapshotStates) {
         this.snapshotStates = snapshotStates;
     }
 
-    public void putSnapshotState(Long id, SnapshotState snapshotState) {
-        this.snapshotStates.put(id, snapshotState);
+    public void putSnapshotState(Long id, Snapshot snapshot) {
+        this.snapshotStates.put(id, snapshot);
     }
 }

@@ -18,15 +18,16 @@
 
 package io.siddhi.core.util;
 
+import com.google.common.collect.TreeMultimap;
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
-import io.siddhi.core.event.stream.converter.ConversionStreamEventChunk;
-import io.siddhi.core.event.stream.converter.StreamEventConverter;
-import io.siddhi.core.query.input.stream.single.EntryValveProcessor;
+import io.siddhi.core.event.stream.StreamEventFactory;
+import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.core.util.lock.LockWrapper;
-import io.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.timestamp.TimestampGeneratorImpl;
@@ -44,62 +45,98 @@ import java.util.concurrent.TimeUnit;
 /**
  * Scheduler implementation to take periodic snapshots
  */
-public class Scheduler implements Snapshotable {
+public class Scheduler implements ExternalReferencedHolder {
 
     private static final Logger log = Logger.getLogger(Scheduler.class);
-    private final BlockingQueue<Long> toNotifyQueue = new LinkedBlockingQueue<Long>();
     private final ThreadBarrier threadBarrier;
     private final Schedulable singleThreadEntryValve;
     private final Semaphore mutex;
     protected String queryName;
-    private SiddhiAppContext siddhiAppContext;
-    private String elementId;
+    private SiddhiQueryContext siddhiQueryContext;
     private LockWrapper lockWrapper;
     private ScheduledExecutorService scheduledExecutorService;
-    private EventCaller eventCaller;
-    private StreamEventPool streamEventPool;
-    private ComplexEventChunk<StreamEvent> streamEventChunk;
+    private StreamEventFactory streamEventFactory;
     private LatencyTracker latencyTracker;
-    private volatile boolean running = false;
-    private ScheduledFuture scheduledFuture;
+    private StateHolder<SchedulerState> stateHolder;
+    private boolean stop;
 
 
-    public Scheduler(Schedulable singleThreadEntryValve, SiddhiAppContext siddhiAppContext) {
-        this.threadBarrier = siddhiAppContext.getThreadBarrier();
-        this.siddhiAppContext = siddhiAppContext;
+    public Scheduler(Schedulable singleThreadEntryValve, SiddhiQueryContext siddhiQueryContext) {
+        this.threadBarrier = siddhiQueryContext.getSiddhiAppContext().getThreadBarrier();
+        this.siddhiQueryContext = siddhiQueryContext;
         this.singleThreadEntryValve = singleThreadEntryValve;
-        this.scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
-        this.eventCaller = new EventCaller();
-        mutex = new Semaphore(1);
+        this.scheduledExecutorService = siddhiQueryContext.getSiddhiAppContext().getScheduledExecutorService();
+        this.mutex = new Semaphore(1);
 
-        siddhiAppContext.getTimestampGenerator()
+        siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator()
                 .addTimeChangeListener(new TimestampGeneratorImpl.TimeChangeListener() {
                     @Override
-                    public void onTimeChange(long currentTimestamp) {
-                        Long lastTime = toNotifyQueue.peek();
-                        if (lastTime != null && lastTime <= currentTimestamp) {
-                            // If executed in a separate thread, while it is processing,
-                            // the new event will come into the window. As the result of it,
-                            // the window will emit the new event as an existing current event.
-                            sendTimerEvents();
+                    public synchronized void onTimeChange(long currentTimestamp) {
+                        Map<String, Map<String, SchedulerState>> allStates = stateHolder.getAllStates();
+                        try {
+                            TreeMultimap<Long, SchedulerState> sortedExpires = TreeMultimap.create();
+                            for (Map.Entry<String, Map<String, SchedulerState>> allStatesEntry :
+                                    allStates.entrySet()) {
+                                for (Map.Entry<String, SchedulerState> stateEntry :
+                                        allStatesEntry.getValue().entrySet()) {
+                                    Long lastTime = stateEntry.getValue().toNotifyQueue.peek();
+                                    if (lastTime != null && lastTime <= currentTimestamp) {
+                                        sortedExpires.put(lastTime, stateEntry.getValue());
+                                    }
+                                }
+                            }
+                            for (Map.Entry<Long, SchedulerState> entry : sortedExpires.entries()) {
+                                try {
+                                    SiddhiAppContext.startPartitionFlow(entry.getValue().key);
+                                    // If executed in a separate thread, while it is processing,
+                                    // the new event will come into the window. As the result of it,
+                                    // the window will emit the new event as an existing current event.
+                                    sendTimerEvents(entry.getValue());
+                                } finally {
+                                    SiddhiAppContext.stopPartitionFlow();
+                                }
+                            }
+                        } finally {
+                            stateHolder.returnAllStates(allStates);
                         }
                     }
                 });
     }
 
-    public void schedule(long time) {
-        if (!siddhiAppContext.isPlayback()) {
-            if (!running && toNotifyQueue.size() == 1) {
+    public void init(LockWrapper lockWrapper, String queryName) {
+        this.lockWrapper = lockWrapper;
+        this.queryName = queryName;
+        String id = "Scheduler_" + queryName + "_" + siddhiQueryContext.generateNewId();
+        this.stateHolder = siddhiQueryContext.generateStateHolder(id, false, () -> new SchedulerState());
+    }
+
+    public void notifyAt(long time) {
+        SchedulerState state = stateHolder.getState();
+        try {
+            // Insert the time into the queue
+            state.toNotifyQueue.put(time);
+            schedule(time, state);     // Let the subclasses to schedule the scheduler
+        } catch (InterruptedException e) {
+            log.error("Error when adding time:" + time + " to toNotifyQueue at Scheduler", e);
+        } finally {
+            stateHolder.returnState(state);
+        }
+    }
+
+    public void schedule(long time, SchedulerState state) {
+        if (!siddhiQueryContext.getSiddhiAppContext().isPlayback()) {
+            if (!state.running && state.toNotifyQueue.size() == 1) {
                 try {
                     mutex.acquire();
-                    if (!running) {
-                        running = true;
-                        long timeDiff = time - siddhiAppContext.getTimestampGenerator().currentTime();
+                    if (!state.running) {
+                        state.running = true;
+                        long timeDiff = time - siddhiQueryContext.getSiddhiAppContext().
+                                getTimestampGenerator().currentTime();
                         if (timeDiff > 0) {
-                            scheduledFuture = scheduledExecutorService.schedule(eventCaller,
+                            state.scheduledFuture = scheduledExecutorService.schedule(state.eventCaller,
                                     timeDiff, TimeUnit.MILLISECONDS);
                         } else {
-                            scheduledFuture = scheduledExecutorService.schedule(eventCaller,
+                            state.scheduledFuture = scheduledExecutorService.schedule(state.eventCaller,
                                     0, TimeUnit.MILLISECONDS);
                         }
                     }
@@ -114,60 +151,9 @@ public class Scheduler implements Snapshotable {
         }
     }
 
-    public Scheduler clone(String key, EntryValveProcessor entryValveProcessor) {
-        Scheduler scheduler = new Scheduler(entryValveProcessor,
-                siddhiAppContext);
-        scheduler.elementId = elementId + "-" + key;
-        return scheduler;
-    }
 
-    public void notifyAt(long time) {
-        try {
-            // Insert the time into the queue
-            toNotifyQueue.put(time);
-            schedule(time);     // Let the subclasses to schedule the scheduler
-        } catch (InterruptedException e) {
-            log.error("Error when adding time:" + time + " to toNotifyQueue at Scheduler", e);
-        }
-    }
-
-    public void setStreamEventPool(StreamEventPool streamEventPool) {
-        this.streamEventPool = streamEventPool;
-        streamEventChunk = new ConversionStreamEventChunk((StreamEventConverter) null, streamEventPool);
-    }
-
-    public void init(LockWrapper lockWrapper, String queryName) {
-        this.lockWrapper = lockWrapper;
-        this.queryName = queryName;
-        if (elementId == null) {
-            elementId = "Scheduler-" + siddhiAppContext.getElementIdGenerator().createNewId();
-        }
-        siddhiAppContext.getSnapshotService().addSnapshotable(queryName, this);
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("ToNotifyQueue", toNotifyQueue);
-        return state;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        BlockingQueue<Long> restoreToNotifyQueue = (BlockingQueue<Long>) state.get("ToNotifyQueue");
-        for (Long time : restoreToNotifyQueue) {
-            notifyAt(time);
-        }
-    }
-
-    @Override
-    public String getElementId() {
-        return elementId;
-    }
-
-    @Override
-    public void clean() {
-        siddhiAppContext.getSnapshotService().removeSnapshotable(queryName, this);
+    public void setStreamEventFactory(StreamEventFactory streamEventFactory) {
+        this.streamEventFactory = streamEventFactory;
     }
 
     public void setLatencyTracker(LatencyTracker latencyTracker) {
@@ -175,24 +161,26 @@ public class Scheduler implements Snapshotable {
     }
 
     /**
-     * Go through the timestamps stored in the {@link #toNotifyQueue} and send the TIMER events for the expired events.
+     * Go through the timestamps stored in the toNotifyQueue and send the TIMER events for the expired events.
+     *
+     * @param state current state
      */
-    protected void sendTimerEvents() {
-        Long toNotifyTime = toNotifyQueue.peek();
-        long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+    protected void sendTimerEvents(SchedulerState state) {
+        Long toNotifyTime = state.toNotifyQueue.peek();
+        long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
         while (toNotifyTime != null && toNotifyTime - currentTime <= 0) {
-            toNotifyQueue.poll();
-
-            StreamEvent timerEvent = streamEventPool.borrowEvent();
+            state.toNotifyQueue.poll();
+            StreamEvent timerEvent = streamEventFactory.newInstance();
             timerEvent.setType(StreamEvent.Type.TIMER);
             timerEvent.setTimestamp(toNotifyTime);
-            streamEventChunk.add(timerEvent);
             if (lockWrapper != null) {
                 lockWrapper.lock();
             }
-            threadBarrier.pass();
+            threadBarrier.enter();
             try {
-                if (Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 && latencyTracker != null) {
+                ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(false);
+                streamEventChunk.add(timerEvent);
+                if (siddhiQueryContext.getSiddhiAppContext().isStatsEnabled() && latencyTracker != null) {
                     try {
                         latencyTracker.markIn();
                         singleThreadEntryValve.process(streamEventChunk);
@@ -202,15 +190,17 @@ public class Scheduler implements Snapshotable {
                 } else {
                     singleThreadEntryValve.process(streamEventChunk);
                 }
+            } catch (Throwable t) {
+                log.error("Error while sending timer events, " + t.getMessage(), t);
             } finally {
                 if (lockWrapper != null) {
                     lockWrapper.unlock();
                 }
+                threadBarrier.exit();
             }
-            streamEventChunk.clear();
 
-            toNotifyTime = toNotifyQueue.peek();
-            currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+            toNotifyTime = state.toNotifyQueue.peek();
+            currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
         }
     }
 
@@ -218,9 +208,25 @@ public class Scheduler implements Snapshotable {
      * Schedule events which are not scheduled in the queue when switching back from event time to system current time
      */
     public void switchToLiveMode() {
-        Long toNotifyTime = toNotifyQueue.peek();
-        if (toNotifyTime != null) {
-            schedule(toNotifyTime);
+        Map<String, Map<String, SchedulerState>> allStates = stateHolder.getAllStates();
+        try {
+            for (Map.Entry<String, Map<String, SchedulerState>> allStatesEntry : allStates.entrySet()) {
+                for (Map.Entry<String, SchedulerState> stateEntry : allStatesEntry.getValue().entrySet()) {
+                    Long toNotifyTime = stateEntry.getValue().toNotifyQueue.peek();
+                    if (toNotifyTime != null) {
+                        SiddhiAppContext.startPartitionFlow(allStatesEntry.getKey());
+                        SiddhiAppContext.startGroupByFlow(stateEntry.getKey());
+                        try {
+                            schedule(toNotifyTime, stateEntry.getValue());
+                        } finally {
+                            SiddhiAppContext.stopGroupByFlow();
+                            SiddhiAppContext.stopPartitionFlow();
+                        }
+                    }
+                }
+            }
+        } finally {
+            stateHolder.returnAllStates(allStates);
         }
     }
 
@@ -229,14 +235,39 @@ public class Scheduler implements Snapshotable {
      * the acquired resources for processing.
      */
     public void switchToPlayBackMode() {
-        if (scheduledFuture != null) {
-            scheduledFuture.cancel(true);
+        Map<String, Map<String, SchedulerState>> allStates = stateHolder.getAllStates();
+        try {
+            for (Map.Entry<String, Map<String, SchedulerState>> allStatesEntry : allStates.entrySet()) {
+                for (Map.Entry<String, SchedulerState> stateEntry : allStatesEntry.getValue().entrySet()) {
+                    if (stateEntry.getValue().scheduledFuture != null) {
+                        stateEntry.getValue().scheduledFuture.cancel(true);
+                    }
+                    //Make the scheduler running flag to false to make sure scheduler will schedule next time starts
+                    stateEntry.getValue().running = false;
+                }
+            }
+        } finally {
+            stateHolder.returnAllStates(allStates);
         }
-        //Make the scheduler running flag to false to make sure scheduler will schedule next time starts
-        running = false;
+    }
+
+    public void stop() {
+        stop = true;
+    }
+
+    public void start() {
+        stop = false;
     }
 
     private class EventCaller implements Runnable {
+        private SchedulerState state;
+        private String key;
+
+        public EventCaller(SchedulerState state, String key) {
+            this.state = state;
+            this.key = key;
+        }
+
         /**
          * When an object implementing interface <code>Runnable</code> is used
          * to create a thread, starting the thread causes the object's
@@ -249,24 +280,28 @@ public class Scheduler implements Snapshotable {
          * @see Thread#run()
          */
         @Override
-        public void run() {
+        public synchronized void run() {
+            if (stop) {
+                return;
+            }
+            SiddhiAppContext.startPartitionFlow(key);
             try {
-                if (!siddhiAppContext.isPlayback()) {
-                    sendTimerEvents();
+                if (!siddhiQueryContext.getSiddhiAppContext().isPlayback()) {
+                    sendTimerEvents(state);
 
-                    Long toNotifyTime = toNotifyQueue.peek();
-                    long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
+                    Long toNotifyTime = state.toNotifyQueue.peek();
+                    long currentTime = siddhiQueryContext.getSiddhiAppContext().getTimestampGenerator().currentTime();
 
                     if (toNotifyTime != null) {
-                        scheduledFuture = scheduledExecutorService.
-                                schedule(eventCaller, toNotifyTime - currentTime, TimeUnit.MILLISECONDS);
+                        state.scheduledFuture = scheduledExecutorService.
+                                schedule(this, toNotifyTime - currentTime, TimeUnit.MILLISECONDS);
                     } else {
                         try {
                             mutex.acquire();
-                            running = false;
-                            if (toNotifyQueue.peek() != null) {
-                                running = true;
-                                scheduledFuture = scheduledExecutorService.schedule(eventCaller,
+                            state.running = false;
+                            if (state.toNotifyQueue.peek() != null) {
+                                state.running = true;
+                                state.scheduledFuture = scheduledExecutorService.schedule(this,
                                         0, TimeUnit.MILLISECONDS);
                             }
                         } catch (InterruptedException e) {
@@ -277,12 +312,53 @@ public class Scheduler implements Snapshotable {
                         }
                     }
                 } else {
-                    running = false;
+                    state.running = false;
                 }
             } catch (Throwable t) {
-                log.error(t);
+                log.error("Error while executing Scheduled Timer Event Caller, " + t.getMessage(), t);
+            } finally {
+                SiddhiAppContext.stopPartitionFlow();
             }
         }
 
+    }
+
+    class SchedulerState extends State implements Comparable {
+
+        private final BlockingQueue<Long> toNotifyQueue = new LinkedBlockingQueue<Long>();
+        private final String key;
+        private volatile boolean running = false;
+        private EventCaller eventCaller;
+        private ScheduledFuture scheduledFuture;
+
+        public SchedulerState() {
+            this.key = SiddhiAppContext.getPartitionFlowId();
+            this.eventCaller = new EventCaller(this, key);
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return toNotifyQueue.isEmpty() && (scheduledFuture == null || scheduledFuture.isDone());
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("ToNotifyQueue", toNotifyQueue);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            BlockingQueue<Long> restoreToNotifyQueue = (BlockingQueue<Long>) state.get("ToNotifyQueue");
+            for (Long time : restoreToNotifyQueue) {
+                notifyAt(time);
+            }
+        }
+
+        @Override
+        public int compareTo(Object o) {
+            return 0;
+        }
     }
 }

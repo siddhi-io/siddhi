@@ -21,7 +21,7 @@ package io.siddhi.core.event.stream.converter;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 
 import java.util.List;
 
@@ -30,32 +30,32 @@ import java.util.List;
  */
 public class FaultStreamEventConverter {
 
-    private StreamEventPool streamEventPool;
+    private StreamEventFactory streamEventFactory;
 
-    public FaultStreamEventConverter(StreamEventPool streamEventPool) {
-        this.streamEventPool = streamEventPool;
+    public FaultStreamEventConverter(StreamEventFactory streamEventFactory) {
+        this.streamEventFactory = streamEventFactory;
     }
 
 
     public StreamEvent convert(Event event, Exception e) {
-        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-        convertEvent(event, borrowedEvent, e);
-        return borrowedEvent;
+        StreamEvent newEvent = streamEventFactory.newInstance();
+        convertEvent(event, newEvent, e);
+        return newEvent;
     }
 
     public StreamEvent convert(long timestamp, Object[] data, Exception e) {
-        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
-        convertData(timestamp, data, borrowedEvent, e);
-        return borrowedEvent;
+        StreamEvent newEvent = streamEventFactory.newInstance();
+        convertData(timestamp, data, newEvent, e);
+        return newEvent;
     }
 
     public StreamEvent convert(ComplexEvent complexEvents, Exception e) {
-        StreamEvent firstEvent = streamEventPool.borrowEvent();
+        StreamEvent firstEvent = streamEventFactory.newInstance();
         convertComplexEvent(complexEvents, firstEvent, e);
         StreamEvent currentEvent = firstEvent;
         complexEvents = complexEvents.getNext();
         while (complexEvents != null) {
-            StreamEvent nextEvent = streamEventPool.borrowEvent();
+            StreamEvent nextEvent = streamEventFactory.newInstance();
             convertComplexEvent(complexEvents, nextEvent, e);
             currentEvent.setNext(nextEvent);
             currentEvent = nextEvent;
@@ -65,11 +65,11 @@ public class FaultStreamEventConverter {
     }
 
     public StreamEvent convert(Event[] events, Exception e) {
-        StreamEvent firstEvent = streamEventPool.borrowEvent();
+        StreamEvent firstEvent = streamEventFactory.newInstance();
         convertEvent(events[0], firstEvent, e);
         StreamEvent currentEvent = firstEvent;
         for (int i = 1, eventsLength = events.length; i < eventsLength; i++) {
-            StreamEvent nextEvent = streamEventPool.borrowEvent();
+            StreamEvent nextEvent = streamEventFactory.newInstance();
             convertEvent(events[i], nextEvent, e);
             currentEvent.setNext(nextEvent);
             currentEvent = nextEvent;
@@ -78,11 +78,11 @@ public class FaultStreamEventConverter {
     }
 
     public StreamEvent convert(List<Event> events, Exception e) {
-        StreamEvent firstEvent = streamEventPool.borrowEvent();
+        StreamEvent firstEvent = streamEventFactory.newInstance();
         convertEvent(events.get(0), firstEvent, e);
         StreamEvent currentEvent = firstEvent;
         for (int i = 1, eventsLength = events.size(); i < eventsLength; i++) {
-            StreamEvent nextEvent = streamEventPool.borrowEvent();
+            StreamEvent nextEvent = streamEventFactory.newInstance();
             convertEvent(events.get(i), nextEvent, e);
             currentEvent.setNext(nextEvent);
             currentEvent = nextEvent;
@@ -90,28 +90,28 @@ public class FaultStreamEventConverter {
         return firstEvent;
     }
 
-    private void convertData(long timestamp, Object[] data, StreamEvent.Type type, StreamEvent borrowedEvent,
+    private void convertData(long timestamp, Object[] data, StreamEvent.Type type, StreamEvent newEvent,
                              Exception e) {
-        System.arraycopy(data, 0, borrowedEvent.getOutputData(), 0, data.length);
-        borrowedEvent.setOutputData(e, data.length);
-        borrowedEvent.setType(type);
-        borrowedEvent.setTimestamp(timestamp);
+        System.arraycopy(data, 0, newEvent.getOutputData(), 0, data.length);
+        newEvent.setOutputData(e, data.length);
+        newEvent.setType(type);
+        newEvent.setTimestamp(timestamp);
     }
 
 
-    private void convertEvent(Event event, StreamEvent borrowedEvent, Exception e) {
+    private void convertEvent(Event event, StreamEvent newEvent, Exception e) {
         convertData(event.getTimestamp(), event.getData(),
                 event.isExpired() ? StreamEvent.Type.EXPIRED : StreamEvent.Type.CURRENT,
-                borrowedEvent, e);
+                newEvent, e);
     }
 
-    private void convertComplexEvent(ComplexEvent complexEvent, StreamEvent borrowedEvent, Exception e) {
+    private void convertComplexEvent(ComplexEvent complexEvent, StreamEvent newEvent, Exception e) {
         convertData(complexEvent.getTimestamp(), complexEvent.getOutputData(), complexEvent.getType(),
-                borrowedEvent, e);
+                newEvent, e);
     }
 
-    private void convertData(long timeStamp, Object[] data, StreamEvent borrowedEvent, Exception e) {
-        convertData(timeStamp, data, StreamEvent.Type.CURRENT, borrowedEvent, e);
+    private void convertData(long timeStamp, Object[] data, StreamEvent newEvent, Exception e) {
+        convertData(timeStamp, data, StreamEvent.Type.CURRENT, newEvent, e);
     }
 
 }

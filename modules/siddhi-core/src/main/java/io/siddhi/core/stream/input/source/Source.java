@@ -23,7 +23,6 @@ import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.StringUtil;
 import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
@@ -39,12 +38,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * transports. Each source represent a transport type. Whenever Siddhi need to support a new transport, a new Event
  * source should be implemented.
  */
-public abstract class Source implements Snapshotable {
+public abstract class Source {
     private static final Logger LOG = Logger.getLogger(Source.class);
     private String type;
     private SourceMapper mapper;
     private StreamDefinition streamDefinition;
-    private String elementId;
     private SiddhiAppContext siddhiAppContext;
 
     private AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
@@ -66,7 +64,6 @@ public abstract class Source implements Snapshotable {
                 sourceHandler, mapperConfigReader, siddhiAppContext);
         this.mapper = sourceMapper;
         this.streamDefinition = streamDefinition;
-        this.elementId = siddhiAppContext.getElementIdGenerator().createNewId();
         this.siddhiAppContext = siddhiAppContext;
         init(sourceMapper, transportOptionHolder, transportPropertyNames, configReader, siddhiAppContext);
         scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
@@ -172,16 +169,6 @@ public abstract class Source implements Snapshotable {
             isConnected.set(false);
             isTryingToConnect.set(false);
         }
-    }
-
-    @Override
-    public final String getElementId() {
-        return elementId;
-    }
-
-    @Override
-    public void clean() {
-        //ignore
     }
 
     public String getType() {

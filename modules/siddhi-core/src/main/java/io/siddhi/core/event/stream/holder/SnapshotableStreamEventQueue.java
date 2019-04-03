@@ -21,7 +21,7 @@ import io.siddhi.core.event.stream.Operation;
 import io.siddhi.core.event.stream.Operation.Operator;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.util.snapshot.SnapshotRequest;
-import io.siddhi.core.util.snapshot.state.SnapshotState;
+import io.siddhi.core.util.snapshot.state.Snapshot;
 import io.siddhi.core.util.snapshot.state.SnapshotStateList;
 
 import java.io.Serializable;
@@ -269,12 +269,12 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
         return result;
     }
 
-    public SnapshotState getSnapshot() {
+    public Snapshot getSnapshot() {
         if (isFullSnapshot()) {
             forceFullSnapshot = false;
-            return new SnapshotState(this.getFirst(), false);
+            return new Snapshot(this.getFirst(), false);
         } else {
-            SnapshotState snapshot = new SnapshotState(operationChangeLog, true);
+            Snapshot snapshot = new Snapshot(operationChangeLog, true);
             operationChangeLog = new ArrayList<>();
             return snapshot;
         }
@@ -287,11 +287,11 @@ public class SnapshotableStreamEventQueue implements Iterator<StreamEvent>, Seri
     }
 
     public void restore(SnapshotStateList snapshotStatelist) {
-        TreeMap<Long, SnapshotState> revisions = snapshotStatelist.getSnapshotStates();
-        Iterator<Map.Entry<Long, SnapshotState>> itr = revisions.entrySet().iterator();
+        TreeMap<Long, Snapshot> revisions = snapshotStatelist.getSnapshotStates();
+        Iterator<Map.Entry<Long, Snapshot>> itr = revisions.entrySet().iterator();
         this.isOperationLogEnabled = false;
         while (itr.hasNext()) {
-            Map.Entry<Long, SnapshotState> snapshotEntry = itr.next();
+            Map.Entry<Long, Snapshot> snapshotEntry = itr.next();
             if (!snapshotEntry.getValue().isIncrementalSnapshot()) {
                 this.clear();
                 this.add((StreamEvent) snapshotEntry.getValue().getState());

@@ -36,10 +36,4 @@ public class LessThanCompareConditionExpressionExecutorIntInt extends LessThanCo
         return (Integer) left < (Integer) right;
 
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new LessThanCompareConditionExpressionExecutorIntInt(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

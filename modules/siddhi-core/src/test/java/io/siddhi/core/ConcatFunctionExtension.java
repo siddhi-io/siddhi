@@ -22,10 +22,10 @@ import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-
-import java.util.Map;
 
 /*
 * concat(string1, string2, ..., stringN)
@@ -38,16 +38,17 @@ public class ConcatFunctionExtension extends FunctionExecutor {
     private Attribute.Type returnType = Attribute.Type.STRING;
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length < 2) {
             throw new SiddhiAppValidationException("str:concat() function requires at least two arguments, " +
                     "but found only " + attributeExpressionExecutors.length);
         }
+        return null;
     }
 
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         StringBuilder sb = new StringBuilder();
         for (Object aData : data) {
             if (aData != null) {
@@ -58,7 +59,7 @@ public class ConcatFunctionExtension extends FunctionExecutor {
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         return data;
     }
 
@@ -67,13 +68,4 @@ public class ConcatFunctionExtension extends FunctionExecutor {
         return returnType;
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        return null;    //No states
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Nothing to be done
-    }
 }

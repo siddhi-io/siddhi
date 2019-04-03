@@ -24,8 +24,8 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.partition.PartitionRuntime;
 import io.siddhi.core.query.QueryRuntime;
 import io.siddhi.core.stream.StreamJunction;
-import io.siddhi.core.util.ElementIdGenerator;
 import io.siddhi.core.util.ExceptionUtil;
+import io.siddhi.core.util.IdGenerator;
 import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.ThreadBarrier;
@@ -49,6 +49,11 @@ import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.execution.ExecutionElement;
 import io.siddhi.query.api.execution.partition.Partition;
 import io.siddhi.query.api.execution.query.Query;
+import io.siddhi.query.api.execution.query.input.handler.StreamHandler;
+import io.siddhi.query.api.execution.query.input.stream.JoinInputStream;
+import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
+import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
+import io.siddhi.query.api.expression.condition.In;
 import io.siddhi.query.api.util.AnnotationHelper;
 import io.siddhi.query.compiler.SiddhiCompiler;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
@@ -211,7 +216,7 @@ public class SiddhiAppParser {
                 siddhiAppContext.setTimestampGenerator(new TimestampGeneratorImpl(siddhiAppContext));
             }
             siddhiAppContext.setSnapshotService(new SnapshotService(siddhiAppContext));
-            siddhiAppContext.setElementIdGenerator(new ElementIdGenerator(siddhiAppContext.getName()));
+            siddhiAppContext.setIdGenerator(new IdGenerator());
 
         } catch (DuplicateAnnotationException e) {
             throw new DuplicateAnnotationException(e.getMessageWithOutContext() + " for the same Siddhi app " +
@@ -227,16 +232,21 @@ public class SiddhiAppParser {
         defineFunctionDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getFunctionDefinitionMap(), siddhiAppContext);
         defineAggregationDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getAggregationDefinitionMap(),
                 siddhiAppContext);
+        //todo fix for query API usecase
+        List<String> findExecutedElements = getFindExecutedElements(siddhiApp);
         for (Window window : siddhiAppRuntimeBuilder.getWindowMap().values()) {
+
             try {
-                window.init(siddhiAppRuntimeBuilder.getTableMap(), siddhiAppRuntimeBuilder
-                        .getWindowMap(), window.getWindowDefinition().getId());
+                window.init(siddhiAppRuntimeBuilder.getTableMap(), siddhiAppRuntimeBuilder.getWindowMap(),
+                        window.getWindowDefinition().getId(),
+                        findExecutedElements.contains(window.getWindowDefinition().getId()));
             } catch (Throwable t) {
                 ExceptionUtil.populateQueryContext(t, window.getWindowDefinition(), siddhiAppContext);
                 throw t;
             }
         }
         int queryIndex = 1;
+        int partitionIndex = 1;
         for (ExecutionElement executionElement : siddhiApp.getExecutionElementList()) {
             if (executionElement instanceof Query) {
                 try {
@@ -249,8 +259,9 @@ public class SiddhiAppParser {
                             siddhiAppRuntimeBuilder.getAggregationMap(),
                             siddhiAppRuntimeBuilder.getWindowMap(),
                             siddhiAppRuntimeBuilder.getLockSynchronizer(),
-                            String.valueOf(queryIndex));
+                            String.valueOf(queryIndex), false, SiddhiConstants.PARTITION_ID_DEFAULT);
                     siddhiAppRuntimeBuilder.addQuery(queryRuntime);
+                    siddhiAppContext.addEternalReferencedHolder(queryRuntime);
                     queryIndex++;
                 } catch (Throwable t) {
                     ExceptionUtil.populateQueryContext(t, (Query) executionElement, siddhiAppContext);
@@ -259,9 +270,10 @@ public class SiddhiAppParser {
             } else {
                 try {
                     PartitionRuntime partitionRuntime = PartitionParser.parse(siddhiAppRuntimeBuilder,
-                            (Partition) executionElement, siddhiAppContext, queryIndex);
+                            (Partition) executionElement, siddhiAppContext, queryIndex, partitionIndex);
                     siddhiAppRuntimeBuilder.addPartition(partitionRuntime);
                     queryIndex += ((Partition) executionElement).getQueryList().size();
+                    partitionIndex++;
                 } catch (Throwable t) {
                     ExceptionUtil.populateQueryContext(t, (Partition) executionElement, siddhiAppContext);
                     throw t;
@@ -271,6 +283,50 @@ public class SiddhiAppParser {
         //Done last as they have to be started last
         defineTriggerDefinitions(siddhiAppRuntimeBuilder, siddhiApp.getTriggerDefinitionMap(), siddhiAppContext);
         return siddhiAppRuntimeBuilder;
+    }
+
+    private static List<String> getFindExecutedElements(SiddhiApp siddhiApp) {
+        List<String> findExecutedElements = new ArrayList<>();
+        for (ExecutionElement executionElement : siddhiApp.getExecutionElementList()) {
+            if (executionElement instanceof Query) {
+                List<StreamHandler> streamHandlers = new ArrayList<>();
+                if (((Query) executionElement).getInputStream() instanceof JoinInputStream) {
+                    findExecutedElements.addAll(((Query) executionElement).getInputStream().getAllStreamIds());
+                    streamHandlers.addAll(((SingleInputStream) ((JoinInputStream) ((Query) executionElement).getInputStream()).getLeftInputStream()).getStreamHandlers());
+                    streamHandlers.addAll(((SingleInputStream) ((JoinInputStream) ((Query) executionElement).getInputStream()).getRightInputStream()).getStreamHandlers());
+                } else if (((Query) executionElement).getInputStream() instanceof SingleInputStream) {
+                    streamHandlers.addAll(((SingleInputStream) ((Query) executionElement).getInputStream()).getStreamHandlers());
+                } else if (((Query) executionElement).getInputStream() instanceof StateInputStream) {
+                    streamHandlers.addAll((((StateInputStream) ((Query) executionElement).getInputStream()).getStreamHandlers()));
+                }
+                for (StreamHandler streamHandler : streamHandlers) {
+                    if (streamHandler instanceof In) {
+                        findExecutedElements.add(((In) streamHandler).getSourceId());
+                    }
+                }
+            } else {
+                List<Query> queries = ((Partition) executionElement).getQueryList();
+                for (Query query : queries) {
+                    List<StreamHandler> streamHandlers = new ArrayList<>();
+                    if (query.getInputStream() instanceof JoinInputStream) {
+                        findExecutedElements.addAll(query.getInputStream().getAllStreamIds());
+                        streamHandlers.addAll(((SingleInputStream) ((JoinInputStream) query.getInputStream()).getLeftInputStream()).getStreamHandlers());
+                        streamHandlers.addAll(((SingleInputStream) ((JoinInputStream) query.getInputStream()).getRightInputStream()).getStreamHandlers());
+                    } else if (query.getInputStream() instanceof SingleInputStream) {
+                        streamHandlers.addAll(((SingleInputStream) query.getInputStream()).getStreamHandlers());
+                    } else if (query.getInputStream() instanceof StateInputStream) {
+                        streamHandlers.addAll((((StateInputStream) query.getInputStream()).getStreamHandlers()));
+                    }
+                    for (StreamHandler streamHandler : streamHandlers) {
+                        if (streamHandler instanceof In) {
+                            findExecutedElements.add(((In) streamHandler).getSourceId());
+                        }
+                    }
+                }
+            }
+
+        }
+        return findExecutedElements;
     }
 
     private static void defineTriggerDefinitions(SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder,

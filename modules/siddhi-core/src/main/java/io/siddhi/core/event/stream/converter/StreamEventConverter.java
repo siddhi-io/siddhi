@@ -31,37 +31,37 @@ public interface StreamEventConverter {
     /**
      * Method to construct StreamEvent form Event
      *
-     * @param event         Event to be converted
-     * @param borrowedEvent Event that will be populated
+     * @param event    Event to be converted
+     * @param newEvent Event that will be populated
      */
-    void convertEvent(Event event, StreamEvent borrowedEvent);
+    void convertEvent(Event event, StreamEvent newEvent);
 
     /**
      * Method to construct(change format) new StreamEvent from StreamEvent
      *
-     * @param complexEvent  StreamEvent to be Converted
-     * @param borrowedEvent Event that will be populated
+     * @param complexEvent StreamEvent to be Converted
+     * @param newEvent     Event that will be populated
      */
-    void convertComplexEvent(ComplexEvent complexEvent, StreamEvent borrowedEvent);
+    void convertComplexEvent(ComplexEvent complexEvent, StreamEvent newEvent);
 
     /**
      * Method to construct(change format) timeStamp and data from StreamEvent
      *
-     * @param timeStamp     timeStamp of the event
-     * @param data          output data of the event
-     * @param borrowedEvent Event that will be populated
+     * @param timeStamp timeStamp of the event
+     * @param data      output data of the event
+     * @param newEvent  Event that will be populated
      */
-    void convertData(long timeStamp, Object[] data, StreamEvent borrowedEvent);
+    void convertData(long timeStamp, Object[] data, StreamEvent newEvent);
 
     /**
      * Method to construct(change format) timeStamp and data from StreamEvent
      *
-     * @param timeStamp     timeStamp of the event
-     * @param data          output data of the event
-     * @param type          output type of the event
-     * @param borrowedEvent Event that will be populated
+     * @param timeStamp timeStamp of the event
+     * @param data      output data of the event
+     * @param type      output type of the event
+     * @param newEvent  Event that will be populated
      */
-    void convertData(long timeStamp, Object[] data, StreamEvent.Type type, StreamEvent borrowedEvent);
+    void convertData(long timeStamp, Object[] data, StreamEvent.Type type, StreamEvent newEvent);
 
     /**
      * Element to hold information about event conversion

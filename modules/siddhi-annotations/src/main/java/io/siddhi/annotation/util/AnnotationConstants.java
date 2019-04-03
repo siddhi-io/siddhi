@@ -28,8 +28,8 @@ public class AnnotationConstants {
             "io.siddhi.core.function.Script";
     public static final String FUNCTION_EXECUTOR_SUPER_CLASS =
             "io.siddhi.core.executor.function.FunctionExecutor";
-    public static final String AGGREGATION_ATTRIBUTE_SUPER_CLASS =
-            "io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregator";
+    public static final String AGGREGATION_ATTRIBUTE_EXECUTOR_SUPER_CLASS =
+            "io.siddhi.core.query.selector.attribute.aggregator.AttributeAggregatorExecutor";
     public static final String DISTRIBUTION_STRATEGY_SUPER_CLASS =
             "io.siddhi.core.stream.output.sink.distributed.DistributionStrategy";
     public static final String STREAM_PROCESSOR_SUPER_CLASS =

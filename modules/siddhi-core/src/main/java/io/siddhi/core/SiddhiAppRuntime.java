@@ -52,7 +52,7 @@ import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.Scheduler;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.StringUtil;
-import io.siddhi.core.util.extension.holder.EternalReferencedHolder;
+import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.core.util.parser.StoreQueryParser;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.persistence.util.PersistenceHelper;
@@ -244,7 +244,7 @@ public class SiddhiAppRuntime {
     public Map<String, Map<String, AbstractDefinition>> getPartitionedInnerStreamDefinitionMap() {
         Map<String, Map<String, AbstractDefinition>> innerStreams = new HashMap<>();
         for (PartitionRuntime partition : partitionMap.values()) {
-            innerStreams.put(partition.getElementId(), partition.getLocalStreamDefinitionMap());
+            innerStreams.put(partition.getPartitionName(), partition.getLocalStreamDefinitionMap());
         }
         return innerStreams;
     }
@@ -394,8 +394,9 @@ public class SiddhiAppRuntime {
                         siddhiAppContext.getStatisticsManager() != null) {
                     siddhiAppContext.getStatisticsManager().startReporting();
                 }
-                for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
-                    eternalReferencedHolder.start();
+                for (ExternalReferencedHolder externalReferencedHolder :
+                        siddhiAppContext.getExternalReferencedHolders()) {
+                    externalReferencedHolder.start();
                 }
                 for (List<Sink> sinks : sinkMap.values()) {
                     for (Sink sink : sinks) {
@@ -431,7 +432,7 @@ public class SiddhiAppRuntime {
         this.incrementalDataPurging = purgingEnabled;
     }
 
-    public synchronized void startSources() {
+    public void startSources() {
         if (running) {
             log.warn("Error calling startSources() for Siddhi App '" + siddhiAppContext.getName() + "', " +
                     "SiddhiApp already started with the sources.");
@@ -469,7 +470,7 @@ public class SiddhiAppRuntime {
                 try {
                     if (sourceHandlerManager != null) {
                         sourceHandlerManager.unregisterSourceHandler(source.getMapper().getHandler().
-                                getElementId());
+                                getId());
                     }
                     source.shutdown();
                 } catch (Throwable t) {
@@ -498,7 +499,7 @@ public class SiddhiAppRuntime {
             for (Sink sink : sinks) {
                 try {
                     if (sinkHandlerManager != null) {
-                        sinkHandlerManager.unregisterSinkHandler(sink.getHandler().getElementId());
+                        sinkHandlerManager.unregisterSinkHandler(sink.getHandler().getId());
                     }
                     sink.shutdown();
                 } catch (Throwable t) {
@@ -518,7 +519,7 @@ public class SiddhiAppRuntime {
                 String elementId = null;
                 RecordTableHandler recordTableHandler = table.getHandler();
                 if (recordTableHandler != null) {
-                    elementId = recordTableHandler.getElementId();
+                    elementId = recordTableHandler.getId();
                 }
                 if (elementId != null) {
                     recordTableHandlerManager.unregisterRecordTableHandler(elementId);
@@ -527,13 +528,13 @@ public class SiddhiAppRuntime {
             table.shutdown();
         }
 
-        for (EternalReferencedHolder eternalReferencedHolder : siddhiAppContext.getEternalReferencedHolders()) {
+        for (ExternalReferencedHolder externalReferencedHolder : siddhiAppContext.getExternalReferencedHolders()) {
             try {
-                eternalReferencedHolder.stop();
+                externalReferencedHolder.stop();
             } catch (Throwable t) {
                 log.error(StringUtil.removeCRLFCharacters(ExceptionUtil.getMessageWithContext(t, siddhiAppContext)) +
-                        " Error while stopping EternalReferencedHolder '" +
-                        StringUtil.removeCRLFCharacters(eternalReferencedHolder.toString()) + "' down Siddhi app '" +
+                        " Error while stopping ExternalReferencedHolder '" +
+                        StringUtil.removeCRLFCharacters(externalReferencedHolder.toString()) + "' down Siddhi app '" +
                         StringUtil.removeCRLFCharacters(siddhiAppContext.getName()) + "'.", t);
             }
         }

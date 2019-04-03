@@ -23,7 +23,5 @@ package io.siddhi.core.util.collection.operator;
  */
 public interface CompiledSelection extends CompiledExpression {
 
-    CompiledSelection cloneCompilation(String key);
-
 
 }

@@ -106,7 +106,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery1")
     public void testTimeOutputRateLimitQuery2() throws InterruptedException {
         log.info("TimeOutputRateLimit test2");
 
@@ -163,7 +163,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery2")
     public void testTimeOutputRateLimitQuery3() throws InterruptedException {
         log.info("TimeOutputRateLimit test3");
 
@@ -220,7 +220,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery3")
     public void testTimeOutputRateLimitQuery4() throws InterruptedException {
         log.info("TimeOutputRateLimit test4");
 
@@ -279,7 +279,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery4")
     public void testTimeOutputRateLimitQuery5() throws InterruptedException {
         log.info("TimeOutputRateLimit test5");
 
@@ -338,7 +338,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery5")
     public void testTimeOutputRateLimitQuery6() throws InterruptedException {
         log.info("TimeOutputRateLimit test6");
 
@@ -397,7 +397,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery6")
     public void testTimeOutputRateLimitQuery7() throws InterruptedException {
         log.info("TimeOutputRateLimit test7");
 
@@ -456,7 +456,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery7")
     public void testTimeOutputRateLimitQuery8() throws InterruptedException {
         log.info("TimeOutputRateLimit test8");
 
@@ -515,7 +515,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery8")
     public void testTimeOutputRateLimitQuery9() throws InterruptedException {
         log.info("TimeOutputRateLimit test9");
 
@@ -574,7 +574,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery9")
     public void testTimeOutputRateLimitQuery10() throws InterruptedException {
         log.info("TimeOutputRateLimit test10");
 
@@ -633,7 +633,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery10")
     public void testTimeOutputRateLimitQuery11() throws InterruptedException {
         log.info("TimeOutputRateLimit test11");
 
@@ -694,7 +694,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery11")
     public void testTimeOutputRateLimitQuery12() throws InterruptedException {
         log.info("TimeOutputRateLimit test12");
 
@@ -755,7 +755,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery12")
     public void testTimeOutputRateLimitQuery13() throws InterruptedException {
         log.info("TimeOutputRateLimit test13");
 
@@ -816,7 +816,7 @@ public class TimeOutputRateLimitTestCase {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery13")
     public void testTimeOutputRateLimitQuery14() throws InterruptedException {
         log.info("TimeOutputRateLimit test14");
 
@@ -863,7 +863,7 @@ public class TimeOutputRateLimitTestCase {
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4", "WSO2"});
         Thread.sleep(1100);
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30", "WSO2"});
-        Thread.sleep(1000);
+        Thread.sleep(1100);
 
         AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
         AssertJUnit.assertTrue("Number of output event value", 3 == count.get());
@@ -871,5 +871,179 @@ public class TimeOutputRateLimitTestCase {
         siddhiAppRuntime.shutdown();
 
     }
+
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery14")
+    public void testTimeOutputRateLimitQuery15() throws InterruptedException {
+        log.info("TimeOutputRateLimit test15");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "@app:name('EventOutputRateLimitTest15') " +
+                "" +
+                "define stream LoginEvents (timestamp long, ip string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents " +
+                "select ip, count(*) as total " +
+                "output first every 1 sec " +
+                "insert all events into uniqueIps ;";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        log.info("Running : " + siddhiAppRuntime.getName());
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount.addAndGet(inEvents.length);
+                }
+                if (removeEvents != null) {
+                    removeEventCount.addAndGet(removeEvents.length);
+                }
+                eventArrived.set(true);
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("LoginEvents");
+
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.9"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output in event value", 1, inEventCount.get());
+        AssertJUnit.assertEquals("Number of output remove event value", 0, removeEventCount.get());
+
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery15")
+    public void testTimeOutputRateLimitQuery16() throws InterruptedException {
+        log.info("TimeOutputRateLimit test16");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "@app:name('EventOutputRateLimitTest16') " +
+                "" +
+                "define stream LoginEvents (timestamp long, ip string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents " +
+                "select ip, count(*) as total " +
+                "group by ip " +
+                "output first every 1 sec " +
+                "insert all events into uniqueIps ;";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        log.info("Running : " + siddhiAppRuntime.getName());
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount.addAndGet(inEvents.length);
+                }
+                if (removeEvents != null) {
+                    removeEventCount.addAndGet(removeEvents.length);
+                }
+                eventArrived.set(true);
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("LoginEvents");
+
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.9"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output in event value", 4, inEventCount.get());
+        AssertJUnit.assertEquals("Number of output remove event value", 0, removeEventCount.get());
+
+        siddhiAppRuntime.shutdown();
+
+    }
+
+    @Test(dependsOnMethods = "testTimeOutputRateLimitQuery16")
+    public void testTimeOutputRateLimitQuery17() throws InterruptedException {
+        log.info("TimeOutputRateLimit test17");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        String siddhiApp = "" +
+                "@app:name('EventOutputRateLimitTest11') " +
+                "" +
+                "define stream LoginEvents (timestamp long, ip string);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from LoginEvents#window.lengthBatch(2) " +
+                "select ip, count(*) as total " +
+                "group by ip " +
+                "output first every 1 sec " +
+                "insert into uniqueIps ;";
+
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        log.info("Running : " + siddhiAppRuntime.getName());
+
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timestamp, inEvents, removeEvents);
+                if (inEvents != null) {
+                    inEventCount.addAndGet(inEvents.length);
+                }
+                if (removeEvents != null) {
+                    removeEventCount.addAndGet(removeEvents.length);
+                }
+                eventArrived.set(true);
+            }
+
+        });
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("LoginEvents");
+
+        siddhiAppRuntime.start();
+
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.9"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+        Thread.sleep(1100);
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.4"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5"});
+        inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.30"});
+        Thread.sleep(1100);
+
+        AssertJUnit.assertEquals("Event arrived", true, eventArrived.get());
+        AssertJUnit.assertEquals("Number of output in event value", 6, inEventCount.get());
+        AssertJUnit.assertEquals("Number of output remove event value", 0, removeEventCount.get());
+
+        siddhiAppRuntime.shutdown();
+
+    }
+
+
 
 }

@@ -23,10 +23,10 @@ import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.event.state.MetaStateEvent;
 import io.siddhi.core.event.state.MetaStateEventAttribute;
 import io.siddhi.core.event.state.StateEventCloner;
-import io.siddhi.core.event.state.StateEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.event.stream.populater.StreamEventPopulaterFactory;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -86,7 +86,7 @@ public class QueryParserHelper {
      *
      * @param metaStreamEvent MetaStreamEvent
      */
-    private static synchronized void reduceStreamAttributes(MetaStreamEvent metaStreamEvent) {
+    private static void reduceStreamAttributes(MetaStreamEvent metaStreamEvent) {
         for (Attribute attribute : metaStreamEvent.getOutputData()) {
             if (metaStreamEvent.getBeforeWindowData().contains(attribute)) {
                 metaStreamEvent.getBeforeWindowData().remove(attribute);
@@ -159,17 +159,17 @@ public class QueryParserHelper {
                     null, lockWrapper, queryName);
         } else {
             MetaStateEvent metaStateEvent = (MetaStateEvent) metaComplexEvent;
-            StateEventPool stateEventPool = new StateEventPool(metaStateEvent, 5);
+            StateEventFactory stateEventFactory = new StateEventFactory(metaStateEvent);
             MetaStreamEvent[] metaStreamEvents = metaStateEvent.getMetaStreamEvents();
             for (int i = 0, metaStreamEventsLength = metaStreamEvents.length; i < metaStreamEventsLength; i++) {
-                initSingleStreamRuntime(runtime.getSingleStreamRuntimes().get(i), i, metaStateEvent, stateEventPool,
+                initSingleStreamRuntime(runtime.getSingleStreamRuntimes().get(i), i, metaStateEvent, stateEventFactory,
                         lockWrapper, queryName);
             }
         }
     }
 
     private static void initSingleStreamRuntime(SingleStreamRuntime singleStreamRuntime, int streamEventChainIndex,
-                                                MetaComplexEvent metaComplexEvent, StateEventPool stateEventPool,
+                                                MetaComplexEvent metaComplexEvent, StateEventFactory stateEventFactory,
                                                 LockWrapper lockWrapper, String queryName) {
         MetaStreamEvent metaStreamEvent;
 
@@ -178,25 +178,25 @@ public class QueryParserHelper {
         } else {
             metaStreamEvent = (MetaStreamEvent) metaComplexEvent;
         }
-        StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 5);
+        StreamEventFactory streamEventFactory = new StreamEventFactory(metaStreamEvent);
         ProcessStreamReceiver processStreamReceiver = singleStreamRuntime.getProcessStreamReceiver();
         processStreamReceiver.setMetaStreamEvent(metaStreamEvent);
-        processStreamReceiver.setStreamEventPool(streamEventPool);
+        processStreamReceiver.setStreamEventFactory(streamEventFactory);
         processStreamReceiver.setLockWrapper(lockWrapper);
         processStreamReceiver.init();
         Processor processor = singleStreamRuntime.getProcessorChain();
         while (processor != null) {
             if (processor instanceof SchedulingProcessor) {
-                ((SchedulingProcessor) processor).getScheduler().setStreamEventPool(streamEventPool);
+                ((SchedulingProcessor) processor).getScheduler().setStreamEventFactory(streamEventFactory);
                 ((SchedulingProcessor) processor).getScheduler().init(lockWrapper, queryName);
             }
             if (processor instanceof AbstractStreamProcessor) {
                 ((AbstractStreamProcessor) processor)
-                        .setStreamEventCloner(new StreamEventCloner(metaStreamEvent, streamEventPool));
+                        .setStreamEventCloner(new StreamEventCloner(metaStreamEvent, streamEventFactory));
                 ((AbstractStreamProcessor) processor).constructStreamEventPopulater(metaStreamEvent,
                         streamEventChainIndex);
             }
-            if (stateEventPool != null && processor instanceof JoinProcessor) {
+            if (stateEventFactory != null && processor instanceof JoinProcessor) {
                 if (((JoinProcessor) processor)
                         .getCompiledCondition() instanceof IncrementalAggregateCompileCondition) {
                     IncrementalAggregateCompileCondition compiledCondition = (IncrementalAggregateCompileCondition) (
@@ -206,16 +206,16 @@ public class QueryParserHelper {
                     compiledCondition.setComplexEventPopulater(complexEventPopulater);
 
                 }
-                ((JoinProcessor) processor).setStateEventPool(stateEventPool);
+                ((JoinProcessor) processor).setStateEventFactory(stateEventFactory);
             }
-            if (stateEventPool != null && processor instanceof StreamPreStateProcessor) {
-                ((StreamPreStateProcessor) processor).setStateEventPool(stateEventPool);
-                ((StreamPreStateProcessor) processor).setStreamEventPool(streamEventPool);
+            if (stateEventFactory != null && processor instanceof StreamPreStateProcessor) {
+                ((StreamPreStateProcessor) processor).setStateEventFactory(stateEventFactory);
+                ((StreamPreStateProcessor) processor).setStreamEventFactory(streamEventFactory);
                 ((StreamPreStateProcessor) processor)
-                        .setStreamEventCloner(new StreamEventCloner(metaStreamEvent, streamEventPool));
+                        .setStreamEventCloner(new StreamEventCloner(metaStreamEvent, streamEventFactory));
                 if (metaComplexEvent instanceof MetaStateEvent) {
                     ((StreamPreStateProcessor) processor).setStateEventCloner(
-                            new StateEventCloner(((MetaStateEvent) metaComplexEvent), stateEventPool));
+                            new StateEventCloner(((MetaStateEvent) metaComplexEvent), stateEventFactory));
                 }
             }
 

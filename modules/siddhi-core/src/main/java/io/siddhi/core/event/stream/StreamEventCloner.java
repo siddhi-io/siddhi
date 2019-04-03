@@ -28,11 +28,11 @@ public class StreamEventCloner {
     private final int beforeWindowDataSize;
     private final int onAfterWindowDataSize;
     private final int outputDataSize;
-    private final StreamEventPool streamEventPool;
+    private final StreamEventFactory eventFactory;
 
-    public StreamEventCloner(MetaStreamEvent metaStreamEvent, StreamEventPool streamEventPool) {
+    public StreamEventCloner(MetaStreamEvent metaStreamEvent, StreamEventFactory eventFactory) {
 
-        this.streamEventPool = streamEventPool;
+        this.eventFactory = eventFactory;
         this.beforeWindowDataSize = metaStreamEvent.getBeforeWindowData().size();
         this.onAfterWindowDataSize = metaStreamEvent.getOnAfterWindowData().size();
         this.outputDataSize = metaStreamEvent.getOutputData().size();
@@ -46,20 +46,20 @@ public class StreamEventCloner {
      * @return StreamEvent
      */
     public StreamEvent copyStreamEvent(StreamEvent streamEvent) {
-        StreamEvent borrowedEvent = streamEventPool.borrowEvent();
+        StreamEvent newEvent = eventFactory.newInstance();
         if (beforeWindowDataSize > 0) {
-            System.arraycopy(streamEvent.getBeforeWindowData(), 0, borrowedEvent.getBeforeWindowData(), 0,
+            System.arraycopy(streamEvent.getBeforeWindowData(), 0, newEvent.getBeforeWindowData(), 0,
                     beforeWindowDataSize);
         }
         if (onAfterWindowDataSize > 0) {
-            System.arraycopy(streamEvent.getOnAfterWindowData(), 0, borrowedEvent.getOnAfterWindowData(), 0,
+            System.arraycopy(streamEvent.getOnAfterWindowData(), 0, newEvent.getOnAfterWindowData(), 0,
                     onAfterWindowDataSize);
         }
         if (outputDataSize > 0) {
-            System.arraycopy(streamEvent.getOutputData(), 0, borrowedEvent.getOutputData(), 0, outputDataSize);
+            System.arraycopy(streamEvent.getOutputData(), 0, newEvent.getOutputData(), 0, outputDataSize);
         }
-        borrowedEvent.setType(streamEvent.getType());
-        borrowedEvent.setTimestamp(streamEvent.getTimestamp());
-        return borrowedEvent;
+        newEvent.setType(streamEvent.getType());
+        newEvent.setTimestamp(streamEvent.getTimestamp());
+        return newEvent;
     }
 }

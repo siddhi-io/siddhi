@@ -102,7 +102,6 @@ public class FilterTestCase1 {
 
         };
         siddhiAppRuntime.addCallback("query2", queryCallback);
-        queryCallback.startProcessing();
 
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
 
@@ -112,7 +111,6 @@ public class FilterTestCase1 {
         inputHandler.send(new Object[]{"WSO2", 60.5f, 200L});
         SiddhiTestHelper.waitForEvents(10, 1, count, 100);
         AssertJUnit.assertTrue(eventArrived.get());
-        queryCallback.stopProcessing();
 
         siddhiAppRuntime.shutdown();
     }

@@ -61,8 +61,8 @@ public abstract class SourceMapper implements SourceEventListener {
         this.sourceType = sourceType;
         this.transportMappings = transportMappings;
         if (sourceHandler != null) {
-            sourceHandler.initSourceHandler(siddhiAppContext.getName(), sourceSyncCallback,
-                    siddhiAppContext.getElementIdGenerator().createNewId(), streamDefinition);
+            sourceHandler.initSourceHandler(siddhiAppContext.getName(), sourceSyncCallback, streamDefinition,
+                    siddhiAppContext);
         }
         this.sourceHandler = sourceHandler;
         this.siddhiAppContext = siddhiAppContext;

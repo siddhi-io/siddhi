@@ -23,7 +23,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.query.StoreQueryRuntime;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
@@ -50,7 +50,7 @@ public class RecreateInMemoryData {
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap;
     private final Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMapForPartitions;
     private final SiddhiAppContext siddhiAppContext;
-    private final StreamEventPool streamEventPool;
+    private final StreamEventFactory streamEventFactory;
     private final Map<String, Table> tableMap;
     private final Map<String, Window> windowMap;
     private final Map<String, AggregationRuntime> aggregationMap;
@@ -67,7 +67,7 @@ public class RecreateInMemoryData {
         this.aggregationTables = aggregationTables;
         this.incrementalExecutorMap = incrementalExecutorMap;
         this.siddhiAppContext = siddhiAppContext;
-        this.streamEventPool = new StreamEventPool(metaStreamEvent, 10);
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
         this.tableMap = tableMap;
         this.windowMap = windowMap;
         this.aggregationMap = aggregationMap;
@@ -163,7 +163,7 @@ public class RecreateInMemoryData {
 
                 ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
                 for (Event event : events) {
-                    StreamEvent streamEvent = streamEventPool.borrowEvent();
+                    StreamEvent streamEvent = streamEventFactory.newInstance();
                     streamEvent.setOutputData(event.getData());
                     complexEventChunk.add(streamEvent);
                 }

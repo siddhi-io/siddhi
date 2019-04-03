@@ -45,13 +45,13 @@ import java.util.concurrent.ConcurrentMap;
 public class PartitionParser {
 
     public static PartitionRuntime parse(SiddhiAppRuntimeBuilder siddhiAppRuntimeBuilder, Partition partition,
-                                         SiddhiAppContext siddhiAppContext, int queryIndex) {
+                                         SiddhiAppContext siddhiAppContext, int queryIndex, int partitionIndex) {
         ConcurrentMap<String, AbstractDefinition> streamDefinitionMap =
                 siddhiAppRuntimeBuilder.getStreamDefinitionMap();
         ConcurrentMap<String, AbstractDefinition> windowDefinitionMap =
                 siddhiAppRuntimeBuilder.getWindowDefinitionMap();
         PartitionRuntime partitionRuntime = new PartitionRuntime(streamDefinitionMap, windowDefinitionMap,
-                siddhiAppRuntimeBuilder.getStreamJunctions(), partition, siddhiAppContext);
+                siddhiAppRuntimeBuilder.getStreamJunctions(), partition, partitionIndex, siddhiAppContext);
         validateStreamPartitions(partition.getPartitionTypeMap(), streamDefinitionMap, windowDefinitionMap);
         for (Query query : partition.getQueryList()) {
             List<VariableExpressionExecutor> executors = new ArrayList<VariableExpressionExecutor>();
@@ -68,7 +68,7 @@ public class PartitionParser {
                     siddhiAppRuntimeBuilder.getAggregationMap(),
                     siddhiAppRuntimeBuilder.getWindowMap(),
                     siddhiAppRuntimeBuilder.getLockSynchronizer(),
-                    String.valueOf(queryIndex));
+                    String.valueOf(queryIndex), true, partitionRuntime.getPartitionName());
             queryIndex++;
             MetaStateEvent metaStateEvent = createMetaEventForPartitioner(queryRuntime.getMetaComplexEvent());
             partitionRuntime.addQuery(queryRuntime);
@@ -79,8 +79,8 @@ public class PartitionParser {
             } else {
                 QueryParserHelper.updateVariablePosition(metaStateEvent.getMetaStreamEvent(0), executors);
             }
-            partitionRuntime.init();
         }
+        partitionRuntime.init();
         return partitionRuntime;
 
     }

@@ -38,10 +38,4 @@ public class NotEqualCompareConditionExpressionExecutorIntFloat extends
         return ((Integer) left).floatValue() != (Float) right;
 
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new NotEqualCompareConditionExpressionExecutorIntFloat(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

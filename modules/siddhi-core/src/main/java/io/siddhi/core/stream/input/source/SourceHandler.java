@@ -18,48 +18,63 @@
 
 package io.siddhi.core.stream.input.source;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.stream.input.InputHandler;
-import io.siddhi.core.util.snapshot.Snapshotable;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
 
 /**
  * SourceHandler is an optional implementable class that wraps {@link InputHandler}.
  * It will do optional processing to the events before sending the events to the input handler
+ *
+ * @param <S> current state for the Source Holder
  */
-public abstract class SourceHandler implements InputEventHandlerCallback, Snapshotable {
+public abstract class SourceHandler<S extends State> implements InputEventHandlerCallback {
 
-    private String elementId;
     private InputHandler inputHandler;
+    private StateHolder<S> stateHolder;
+    private String id;
 
-    final void initSourceHandler(String siddhiAppName, SourceSyncCallback sourceSyncCallback, String elementId,
-                                 StreamDefinition streamDefinition) {
-        this.elementId = elementId;
-        init(siddhiAppName, sourceSyncCallback, elementId, streamDefinition);
+    final void initSourceHandler(String siddhiAppName, SourceSyncCallback sourceSyncCallback,
+                                 StreamDefinition streamDefinition, SiddhiAppContext siddhiAppContext) {
+        StateFactory<S> stateFactory = init(siddhiAppName, sourceSyncCallback, streamDefinition, siddhiAppContext);
+        id = siddhiAppName + "-" + streamDefinition.getId() + "-" + this.getClass().getName();
+        stateHolder = siddhiAppContext.generateStateHolder(
+                streamDefinition.getId() + "-" + this.getClass().getName(),
+                stateFactory);
     }
 
-    public abstract void init(String siddhiAppName, SourceSyncCallback sourceSyncCallback, String elementId,
-                              StreamDefinition streamDefinition);
+    public abstract StateFactory init(String siddhiAppName, SourceSyncCallback sourceSyncCallback,
+                                      StreamDefinition streamDefinition, SiddhiAppContext siddhiAppContext);
 
     @Override
     public void sendEvent(Event event, String[] transportSyncProperties) throws InterruptedException {
-        sendEvent(event, transportSyncProperties, inputHandler);
+        S state = stateHolder.getState();
+        try {
+            sendEvent(event, transportSyncProperties, state, inputHandler);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
     @Override
     public void sendEvents(Event[] events, String[] transportSyncProperties) throws InterruptedException {
-        sendEvent(events, transportSyncProperties, inputHandler);
+        S state = stateHolder.getState();
+        try {
+            sendEvent(events, transportSyncProperties, state, inputHandler);
+        } finally {
+            stateHolder.returnState(state);
+        }
     }
 
-    public abstract void sendEvent(Event event, String[] transportSyncProperties, InputHandler inputHandler)
+    public abstract void sendEvent(Event event, String[] transportSyncProperties, S state, InputHandler inputHandler)
             throws InterruptedException;
 
-    public abstract void sendEvent(Event[] events, String[] transportSyncProperties, InputHandler inputHandler)
+    public abstract void sendEvent(Event[] events, String[] transportSyncProperties, S state, InputHandler inputHandler)
             throws InterruptedException;
-
-    public String getElementId() {
-        return elementId;
-    }
 
     public InputHandler getInputHandler() {
         return inputHandler;
@@ -69,8 +84,7 @@ public abstract class SourceHandler implements InputEventHandlerCallback, Snapsh
         this.inputHandler = inputHandler;
     }
 
-    @Override
-    public void clean() {
-        //ignore
+    public String getId() {
+        return id;
     }
 }

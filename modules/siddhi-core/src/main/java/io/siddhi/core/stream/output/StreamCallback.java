@@ -128,11 +128,11 @@ public abstract class StreamCallback implements StreamJunction.Receiver {
 
     public abstract void receive(Event[] events);
 
-    public synchronized void startProcessing() {
+    public void startProcessing() {
 
     }
 
-    public synchronized void stopProcessing() {
+    public void stopProcessing() {
 
     }
 

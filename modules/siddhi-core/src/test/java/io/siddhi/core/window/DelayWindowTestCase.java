@@ -374,6 +374,7 @@ public class DelayWindowTestCase {
         siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
+                EventPrinter.print(events);
                 count.addAndGet(events.length);
                 for (Event event : events) {
                     AssertJUnit.assertTrue(("IBM".equals(event.getData(0)) || "WSO2".equals(event.getData(0))));

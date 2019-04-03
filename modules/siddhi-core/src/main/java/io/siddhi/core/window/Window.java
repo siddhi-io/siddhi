@@ -24,7 +24,7 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.ZeroStreamEventConverter;
 import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.executor.VariableExpressionExecutor;
@@ -44,7 +44,6 @@ import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.parser.SchedulerParser;
 import io.siddhi.core.util.parser.SingleInputStreamParser;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
-import io.siddhi.core.util.snapshot.Snapshotable;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.MemoryCalculable;
 import io.siddhi.core.util.statistics.ThroughputTracker;
@@ -63,7 +62,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Window implementation of SiddhiQL.
  * It can be seen as a global Window which can be accessed from multiple queries.
  */
-public class Window implements FindableProcessor, Snapshotable, MemoryCalculable {
+public class Window implements FindableProcessor, MemoryCalculable {
 
     /**
      * WindowDefinition used to construct this window.
@@ -98,9 +97,9 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
      */
     private WindowProcessor internalWindowProcessor;
     /**
-     * StreamEventPool to create new empty StreamEvent.
+     * StreamEventFactory to create new empty StreamEvent.
      */
-    private StreamEventPool streamEventPool;
+    private StreamEventFactory streamEventFactory;
 
     /**
      * window operation latency and throughput trackers
@@ -138,11 +137,13 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
     /**
      * Initialize the WindowEvent table by creating {@link WindowProcessor} to handle the events.
      *
-     * @param tableMap       map of {@link Table}s
-     * @param eventWindowMap map of EventWindows
-     * @param windowName     name of the query window belongs to.
+     * @param tableMap         map of {@link Table}s
+     * @param eventWindowMap   map of EventWindows
+     * @param windowName       name of the query window belongs to.
+     * @param findToBeExecuted will find will be executed on the window.
      */
-    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, String windowName) {
+    public void init(Map<String, Table> tableMap, Map<String, Window> eventWindowMap, String windowName,
+                     boolean findToBeExecuted) {
         if (this.windowProcessor != null) {
             return;
         }
@@ -156,8 +157,8 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
             metaStreamEvent.addOutputData(attribute);
         }
 
-        this.streamEventPool = new StreamEventPool(metaStreamEvent, 5);
-        StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent, this.streamEventPool);
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
+        StreamEventCloner streamEventCloner = new StreamEventCloner(metaStreamEvent, this.streamEventFactory);
         OutputStream.OutputEventType outputEventType = windowDefinition.getOutputEventType();
         boolean outputExpectsExpiredEvents = outputEventType != OutputStream.OutputEventType.CURRENT_EVENTS;
 
@@ -165,16 +166,16 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
         WindowProcessor internalWindowProcessor = (WindowProcessor) SingleInputStreamParser.generateProcessor
                 (windowDefinition.getWindow(), metaStreamEvent, new ArrayList<VariableExpressionExecutor>(),
                         tableMap, false,
-                        outputExpectsExpiredEvents, siddhiQueryContext);
+                        outputExpectsExpiredEvents, findToBeExecuted, siddhiQueryContext);
         internalWindowProcessor.setStreamEventCloner(streamEventCloner);
         internalWindowProcessor.constructStreamEventPopulater(metaStreamEvent, 0);
 
         EntryValveProcessor entryValveProcessor = null;
         if (internalWindowProcessor instanceof SchedulingProcessor) {
             entryValveProcessor = new EntryValveProcessor(this.siddhiAppContext);
-            Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, this.siddhiAppContext);
+            Scheduler scheduler = SchedulerParser.parse(entryValveProcessor, siddhiQueryContext);
             scheduler.init(this.lockWrapper, windowName);
-            scheduler.setStreamEventPool(streamEventPool);
+            scheduler.setStreamEventFactory(streamEventFactory);
             ((SchedulingProcessor) internalWindowProcessor).setScheduler(scheduler);
         }
         if (entryValveProcessor != null) {
@@ -220,14 +221,14 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
 
             // Convert all events to StreamEvent because StateEvents can be passed if directly received from a join
             ComplexEvent complexEvents = complexEventChunk.getFirst();
-            StreamEvent firstEvent = streamEventPool.borrowEvent();
+            StreamEvent firstEvent = streamEventFactory.newInstance();
             eventConverter.convertComplexEvent(complexEvents, firstEvent);
             StreamEvent currentEvent = firstEvent;
             complexEvents = complexEvents.getNext();
             int numberOfEvents = 0;
             while (complexEvents != null) {
                 numberOfEvents++;
-                StreamEvent nextEvent = streamEventPool.borrowEvent();
+                StreamEvent nextEvent = streamEventFactory.newInstance();
                 eventConverter.convertComplexEvent(complexEvents, nextEvent);
                 currentEvent.setNext(nextEvent);
                 currentEvent = nextEvent;
@@ -291,43 +292,6 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
 
     public LockWrapper getLock() {
         return lockWrapper;
-    }
-
-
-    /**
-     * Return an object array containing the internal state of the internalWindowProcessor.
-     *
-     * @return current state of the Window
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        return this.internalWindowProcessor.currentState();
-    }
-
-    /**
-     * Restore the internalWindowProcessor using given state.
-     *
-     * @param state the stateful objects of the element as an array on
-     */
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        this.internalWindowProcessor.restoreState(state);
-    }
-
-
-    /**
-     * Return the elementId which may be used for snapshot creation.
-     *
-     * @return the element id of this {@link Snapshotable} object
-     */
-    @Override
-    public String getElementId() {
-        return this.internalWindowProcessor.getElementId();
-    }
-
-    @Override
-    public void clean() {
-        internalWindowProcessor.clean();
     }
 
     public ProcessingMode getProcessingMode() {
@@ -399,14 +363,5 @@ public class Window implements FindableProcessor, Snapshotable, MemoryCalculable
             // Do nothing
         }
 
-
-        public Processor cloneProcessor(String key) {
-            return new StreamPublishProcessor(this.outputEventType);
-        }
-
-        @Override
-        public void clean() {
-            //ignore
-        }
     }
 }

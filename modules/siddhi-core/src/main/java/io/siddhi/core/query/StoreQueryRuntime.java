@@ -20,7 +20,7 @@ package io.siddhi.core.query;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.event.state.StateEvent;
-import io.siddhi.core.event.state.StateEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.StoreQueryRuntimeException;
@@ -37,7 +37,7 @@ public abstract class StoreQueryRuntime {
     String queryName;
     MetaStreamEvent.EventType eventType;
     QuerySelector selector;
-    StateEventPool stateEventPool;
+    StateEventFactory stateEventFactory;
     MetaStreamEvent metaStreamEvent;
     Attribute[] outputAttributes;
 
@@ -71,10 +71,10 @@ public abstract class StoreQueryRuntime {
     /**
      * This method sets a state event pool for store query runtime.
      *
-     * @param stateEventPool stateEventPool for the store query runtime
+     * @param stateEventFactory stateEventFactory for the store query runtime
      */
-    public void setStateEventPool(StateEventPool stateEventPool) {
-        this.stateEventPool = stateEventPool;
+    public void setStateEventFactory(StateEventFactory stateEventFactory) {
+        this.stateEventFactory = stateEventFactory;
     }
 
     /**
