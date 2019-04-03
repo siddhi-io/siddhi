@@ -17,6 +17,8 @@
  */
 package io.siddhi.doc.gen.extensions;
 
+import org.apache.maven.plugin.logging.SystemStreamLog;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -99,6 +101,7 @@ public class ExtensionDocStore {
             inMemory = false;
         } catch (IOException ignored) {
             storeLastModified = FileTime.fromMillis(0);
+            inMemory = true;
         }
     }
 

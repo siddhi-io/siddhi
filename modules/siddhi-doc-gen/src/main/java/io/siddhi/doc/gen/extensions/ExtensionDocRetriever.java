@@ -25,10 +25,15 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 
 import java.io.IOException;
+import java.nio.file.attribute.FileTime;
+import java.text.SimpleDateFormat;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeSet;
 
 /**
@@ -77,11 +82,7 @@ public class ExtensionDocRetriever {
      */
     public boolean pull() {
         try {
-            /* Last modified date of the extension cache storage in RFC 1123 standard
-               format. example: Fri, 31 Dec 1999 23:59:59 GMT */
-            String httpStandardLastModified = DateTimeFormatter.RFC_1123_DATE_TIME
-                    .withZone(ZoneOffset.UTC)
-                    .format(store.getLastModified().toInstant());
+            String httpStandardLastModified = getRfc1123StandardTime(store.getLastModified());
 
             log.info("Retrieving extension descriptions from remote repositories");
 
@@ -104,14 +105,41 @@ public class ExtensionDocRetriever {
 
             removeComplementOfGivenExtensionsFromStore();
 
-            boolean commit = store.commit();
-            if (!store.isInMemory() && !commit) {
-                log.debug("Error occurred while updating the doc cache.");
-            }
+            store.commit();
         } catch (IOException | ReflectiveOperationException e) {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Return the RFC 1123 standard datetime.
+     *
+     * Note
+     * ====
+     * Following datetime formatter may replaceable by more robust solutions like
+     * 'DateTimeFormatter.RFC_1123_DATE_TIME', while doing so will lead to some strange
+     * behaviours. Above formatter format date of month in following way.
+     *
+     * Wed, 1 Aug 2018 14:56:46 GMT
+     *
+     * If you set conditional request headers using above format in a Github API request,
+     * it will give you the correct result while silently reducing your request quota.
+     * So the correct format Github expects is,
+     *
+     * Wed, 01 Aug 2018 14:56:46 GMT
+     *
+     * That's why a custom pattern is used in this case.
+     *
+     * @param time the time to be converted
+     * @return the RFC 1123 standard datetime
+     */
+    private String getRfc1123StandardTime(FileTime time) {
+        DateTimeFormatter formatter = DateTimeFormatter
+                .ofPattern("EEE, dd MMM yyyy HH:mm:ss O")
+                .withZone(ZoneOffset.UTC);
+
+        return formatter.format(time.toInstant());
     }
 
     /**
