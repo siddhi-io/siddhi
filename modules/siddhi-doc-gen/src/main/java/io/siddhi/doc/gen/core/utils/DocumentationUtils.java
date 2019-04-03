@@ -29,6 +29,7 @@ import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.doc.gen.core.freemarker.FormatDescriptionMethod;
 import io.siddhi.doc.gen.extensions.ExtensionDocRetriever;
+import io.siddhi.doc.gen.extensions.ExtensionDocStore;
 import io.siddhi.doc.gen.metadata.ExampleMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionType;
@@ -383,16 +384,11 @@ public class DocumentationUtils {
                 projectBaseDir, "src", "main", "resources", "gpl.docs.properties");
         Path apacheDocCachePath = Paths.get(
                 projectBaseDir, "src", "main", "resources", "apache.docs.properties");
-        ExtensionDocRetriever gplRetriever = new ExtensionDocRetriever(
-                extensionRepositoryOwner, gplExtensionRepositories, gplDocCachePath);
-        ExtensionDocRetriever apacheRetriever = new ExtensionDocRetriever(
-                extensionRepositoryOwner, apacheExtensionRepositories, apacheDocCachePath);
 
-        gplRetriever.pull();
-        apacheRetriever.pull();
-
-        rootDataModel.put("gplExtensions", gplRetriever.asMap());
-        rootDataModel.put("apacheExtensions", apacheRetriever.asMap());
+        rootDataModel.put("gplExtensions", retrieveExtensionWithDescriptions(
+                gplDocCachePath, extensionRepositoryOwner, gplExtensionRepositories));
+        rootDataModel.put("apacheExtensions", retrieveExtensionWithDescriptions(
+                apacheDocCachePath, extensionRepositoryOwner, apacheExtensionRepositories));
 
         generateFileFromTemplate(
                 Constants.MARKDOWN_EXTENSIONS_INDEX_TEMPLATE + Constants.MARKDOWN_FILE_EXTENSION
@@ -400,6 +396,27 @@ public class DocumentationUtils {
                 rootDataModel, documentationBaseDirectory,
                 extensionsIndexFileName + Constants.MARKDOWN_FILE_EXTENSION
         );
+    }
+
+    private static Map<String, String> retrieveExtensionWithDescriptions(Path cachePath,
+                                                                         String extensionRepositoryOwner,
+                                                                         List<String> extensions)
+            throws MojoFailureException {
+        ExtensionDocStore store = new ExtensionDocStore(cachePath);
+        ExtensionDocRetriever retriever = new ExtensionDocRetriever(extensionRepositoryOwner, extensions, store);
+
+        retriever.pull();
+
+        boolean inMemory = store.isInMemory();
+        boolean throttled = retriever.isThrottled();
+
+        if (throttled && inMemory) {
+            throw new MojoFailureException(
+                    "The API has reached the throttling limits while fetching the extensions." +
+                    "The extension cache is also not available." +
+                    "Try again later or check whether cache is present in path: " + cachePath.toString());
+        }
+        return store.asMap();
     }
 
     /**

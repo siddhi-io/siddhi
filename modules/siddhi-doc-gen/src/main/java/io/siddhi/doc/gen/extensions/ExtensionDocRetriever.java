@@ -25,17 +25,15 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The ExtensionDocRetriever class provides ability to retrieve all the descriptions
- * for Siddhi extensions. It manages process to retrieve and save data from the remote
+ * for Siddhi extensions. It manages process of retrieving and saving data from remote
  * extension repositories.
  */
 public class ExtensionDocRetriever {
@@ -43,19 +41,15 @@ public class ExtensionDocRetriever {
     /**
      * A log to log various kind of state changes.
      */
-    private static final Log LOG = new SystemStreamLog();
-
-    private static final String CREDENTIALS = "credentials.properties";
-    private static final String CLIENT_ID = "client_id";
-    private static final String CLIENT_SECRET = "client_secret";
+    private static final Log log = new SystemStreamLog();
 
     /**
-     * The Github username which all extensions exist.
+     * The Github username where all extensions exist.
      */
     private final String baseGithubId;
 
     /**
-     * The extension name list.
+     * The extension names list.
      */
     private final List<String> extensions;
 
@@ -64,17 +58,20 @@ public class ExtensionDocRetriever {
      */
     private final ExtensionDocStore store;
 
-    public ExtensionDocRetriever(String baseGithubId, List<String> extensions, Path cachePath) {
+    /**
+     * Whether the API has reached it's limits.
+     */
+    private boolean throttled = false;
 
+    public ExtensionDocRetriever(String baseGithubId, List<String> extensions, ExtensionDocStore store) {
         this.baseGithubId = baseGithubId;
         this.extensions = extensions;
-
-        store = new ExtensionDocStore(cachePath);
+        this.store = store;
     }
 
     /**
      * The pull method retrieves corresponding descriptions from extension repositories.
-     * The method only retrieves data if they have modified in the repository.
+     * The method only retrieves data if they have been modified in the repository.
      *
      * @return whether it is a successful pull.
      */
@@ -86,63 +83,32 @@ public class ExtensionDocRetriever {
                     .withZone(ZoneOffset.UTC)
                     .format(store.getLastModified().toInstant());
 
-            int i = 0;
-            for (; i < extensions.size(); i++) {
-                final String extension = extensions.get(i);
+            log.info("Retrieving extension descriptions from remote repositories");
 
+            for (final String extension : extensions) {
                 GithubContentsClient githubClient = new GithubContentsClient.Builder(baseGithubId, extension)
                         .isReadme(true)
                         .build();
                 if (store.has(extension)) {
-                    /* Set HTTP header makes the request conditional. */
+                    /* Sets HTTP header to make the request conditional */
                     githubClient.setHeader("If-Modified-Since", httpStandardLastModified);
                 }
                 HtmlContentsResponse response = githubClient.getContentsResponse(HtmlContentsResponse.class);
                 /* API throttling limit reached, could not process further without credentials */
                 if (response.getStatus() == 403) {
+                    throttled = true;
                     break;
                 }
                 updateStore(extension, response);
             }
-            Properties credentials = new Properties();
-            if (!loadCredentials(credentials)) {
-                return false;
+
+            removeComplementOfGivenExtensionsFromStore();
+
+            boolean commit = store.commit();
+            if (!store.isInMemory() && !commit) {
+                log.debug("Error occurred while updating the doc cache.");
             }
-
-            for (; i < extensions.size(); i++) {
-                final String extension = extensions.get(i);
-
-                GithubContentsClient githubClient = new GithubContentsClient.Builder(baseGithubId, extension)
-                        .isReadme(true)
-                        .queryParam(CLIENT_ID, credentials.getProperty(CLIENT_ID))
-                        .queryParam(CLIENT_SECRET, credentials.getProperty(CLIENT_SECRET))
-                        .build();
-                if (store.has(extension)) {
-                    githubClient.setHeader("If-Modified-Since", httpStandardLastModified);
-                }
-                updateStore(extension, githubClient.getContentsResponse(HtmlContentsResponse.class));
-            }
-
-            return store.commit();
         } catch (IOException | ReflectiveOperationException e) {
-            return false;
-        }
-    }
-
-    /**
-     * !!!!!! WAINING !!!!!!
-     * TODO: Should not package credential properties to jar.
-     */
-    private boolean loadCredentials(Properties credentials) {
-        try (InputStream stream = ExtensionDocRetriever.class.getClassLoader().getResourceAsStream(CREDENTIALS)) {
-            if (stream == null) {
-                return false;
-            }
-            credentials.load(stream);
-            if (credentials.getProperty(CLIENT_ID) == null || credentials.getProperty(CLIENT_SECRET) == null) {
-                return false;
-            }
-        } catch (IOException e) {
             return false;
         }
         return true;
@@ -165,30 +131,38 @@ public class ExtensionDocRetriever {
                 if (firstParagraph == null) {
                     return;
                 }
-                LOG.info(String.format(
-                        "Request success for '%s' with status code '%d'", extension, status));
                 store.add(extension, firstParagraph);
+                log.debug(String.format("Request to '%s' succeed with status '%s'", extension, status));
                 break;
             }
             case 304:
-                LOG.info(String.format(
-                        "Request success for '%s' with status code '%d'", extension, status));
+                log.debug(String.format("Request to '%s' succeed with status '%s'", extension, status));
                 break;
             case 404:
+                log.debug(String.format("Request to '%s' failed with status '%s'", extension, status));
                 store.remove(extension);
                 break;
             default:
-                LOG.info(String.format(
-                        "Error while updating extension [%s]%n%s", extension, response.getError()));
+                log.error(String.format("Error occurred while retrieving the extension '%s': %s",
+                        extension, response.getError().toString()));
         }
     }
 
     /**
-     * Return the store data as a map.
-     *
-     * @return the store data as a map.
+     * Remove the relative compliment of {@link ExtensionDocRetriever#extensions}
+     * from {@link ExtensionDocRetriever#store}.
      */
-    public Map<String, String> asMap() {
-        return store.asMap();
+    private void removeComplementOfGivenExtensionsFromStore() {
+        Set<String> extensionSet = new TreeSet<>(extensions);
+        Set<String> storeKeys = store.asMap().keySet();
+
+        storeKeys.removeIf(e -> !extensionSet.contains(e));
+    }
+
+    /**
+     * @return whether API has reached it's throttling limits.
+     */
+    public boolean isThrottled() {
+        return throttled;
     }
 }

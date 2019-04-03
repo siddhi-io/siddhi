@@ -17,9 +17,6 @@
  */
 package io.siddhi.doc.gen.extensions;
 
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.logging.SystemStreamLog;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -38,8 +35,6 @@ import java.util.TreeSet;
  */
 public class ExtensionDocStore {
 
-    private static final Log LOG = new SystemStreamLog();
-
     /**
      * A Properties instance to hold the data.
      */
@@ -56,12 +51,21 @@ public class ExtensionDocStore {
      */
     private Path storePath;
 
+    /**
+     * The last modified date of the local storage.
+     */
     private FileTime storeLastModified;
+
+    /**
+     * Whether store is in-memory.
+     */
+    private boolean inMemory;
 
     /**
      * Constructs a new ExtensionDocStore with an in-memory storage.
      */
     public ExtensionDocStore() {
+        inMemory = true;
         this.store = new Properties() {
             @Override
             public synchronized Enumeration<Object> keys() {
@@ -92,6 +96,7 @@ public class ExtensionDocStore {
             memento.putAll(store);
 
             storeLastModified = Files.getLastModifiedTime(storePath);
+            inMemory = false;
         } catch (IOException ignored) {
             storeLastModified = FileTime.fromMillis(0);
         }
@@ -143,7 +148,7 @@ public class ExtensionDocStore {
      * @return whether changes has made to the underline local storage
      */
     public boolean commit() {
-        if (storePath == null) {
+        if (inMemory) {
             return false;
         }
         if (memento.equals(store)) {
@@ -168,12 +173,17 @@ public class ExtensionDocStore {
     }
 
     /**
-     * Return the data set as a Map.
-     *
      * @return the data set as a Map
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Map<String, String> asMap() {
         return (Map) store;
+    }
+
+    /**
+     * @return whether the store is in memory.
+     */
+    public boolean isInMemory() {
+        return inMemory;
     }
 }
