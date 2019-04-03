@@ -773,20 +773,19 @@ public class SiddhiAppRuntime {
                 } else if (level == Level.BASIC || level == Level.DETAIL) {
                     log.debug("Siddhi App '" + getName() + "' statistics reporting is already in " + level + " level!");
                 }
-                log.error("Siddhi App '" + getName() + "' statistics reporting didnt changed. ");
+                log.info("Siddhi App '" + getName() + "' statistics reporting didnt changed. ");
             } else {
                 if (level == Level.OFF) {
                     siddhiAppContext.setRootMetricsLevel(Level.OFF);
                     siddhiAppContext.getStatisticsManager().stopReporting();
-                    log.debug("Siddhi App '" + getName() + "' statistics reporting stopped!");
-                    log.error("Siddhi App '" + getName() + "' statistics reporting changed to: " + level.toString());
+                    log.info("Siddhi App '" + getName() + "' statistics reporting stopped!");
                 } else {
                     if (siddhiAppContext.getRootMetricsLevel().compareTo(Level.OFF) == 0) {
                         siddhiAppContext.getStatisticsManager().startReporting();
                         log.debug("Siddhi App '" + getName() + "' statistics reporting started!");
                     }
                     siddhiAppContext.setRootMetricsLevel(level);
-                    log.error("Siddhi App '" + getName() + "' statistics reporting changed to: " + level.toString());
+                    log.info("Siddhi App '" + getName() + "' statistics reporting changed to: " + level.toString());
                 }
             }
         } else {
