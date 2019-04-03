@@ -49,8 +49,7 @@ public class TimeLengthWindowTestCase {
     */
     @Test
     public void testTimeLengthWindow1() throws InterruptedException {
-        log.info("Testing timeLength window with no of events less than window length and time period less than " +
-                "window time");
+        log.info("testTimeLengthWindow1");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -103,10 +102,9 @@ public class TimeLengthWindowTestCase {
        Time Period > Window time
        Number of Events < Window length
     */
-    @Test
+    @Test(dependsOnMethods = {"testTimeLengthWindow1"})
     public void testTimeLengthWindow2() throws InterruptedException {
-        log.info("Testing timeLength window with no of events less than window length and time period greater than " +
-                "window time");
+        log.info("testTimeLengthWindow2");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -158,15 +156,14 @@ public class TimeLengthWindowTestCase {
         Time Period < Window time
         Number of Events > Window length
     */
-    @Test
+    @Test(dependsOnMethods = {"testTimeLengthWindow2"})
     public void testTimeLengthWindow3() throws InterruptedException {
-        log.info("Testing timeLength window with no of events greater than window length and time period less than " +
-                "window time");
+        log.info("testTimeLengthWindow3");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String sensorStream = "define stream sensorStream (id string, sensorValue float); " +
-                "define window sensorWindow (id string, sensorValue float) timeLength(20 sec,4); ";
+                "define window sensorWindow (id string, sensorValue float) timeLength(10 sec,4); ";
         String query = "@info(name = 'query0') from sensorStream " +
                 "insert into sensorWindow; " +
                 "@info(name = 'query1') from sensorWindow " +
@@ -215,6 +212,7 @@ public class TimeLengthWindowTestCase {
             AssertJUnit.assertTrue(eventArrived);
         } finally {
             siddhiAppRuntime.shutdown();
+            Thread.sleep(5000);
         }
     }
 
@@ -222,11 +220,10 @@ public class TimeLengthWindowTestCase {
            Time Period > Window time
            Number of Events > Window length
     */
-    @Test
+    @Test(dependsOnMethods = {"testTimeLengthWindow3"})
     public void testTimeLengthWindow4() throws InterruptedException {
 
-        log.info("Testing timeLength window with no of events greater than window length and time period greater than" +
-                " window time");
+        log.info("testTimeLengthWindow4");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -283,10 +280,9 @@ public class TimeLengthWindowTestCase {
         Time period > Window time
         Number of events > length
     */
-    @Test
+    @Test(dependsOnMethods = {"testTimeLengthWindow4"})
     public void testTimeLengthWindow6() throws InterruptedException {
-        log.info("Testing timeLength window with no of events greater than window length and time period greater than" +
-                " window time");
+        log.info("testTimeLengthWindow6");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -367,10 +363,9 @@ public class TimeLengthWindowTestCase {
         Time period < Window time
         Number of events < length
     */
-    @Test
+    @Test(dependsOnMethods = {"testTimeLengthWindow6"})
     public void testTimeLengthWindow7() throws InterruptedException {
-        log.info("Testing timeLength window with no of events less than window length and time period less than " +
-                "window time");
+        log.info("testTimeLengthWindow7");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -422,8 +417,7 @@ public class TimeLengthWindowTestCase {
 
     @Test
     public void testTimeLengthWindow10() throws InterruptedException {
-        log.info("Testing timeLength window with no of events greater than window length and time period less than " +
-                "window time");
+        log.info("testTimeLengthWindow10");
 
         SiddhiManager siddhiManager = new SiddhiManager();
 

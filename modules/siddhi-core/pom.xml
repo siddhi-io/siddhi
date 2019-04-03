@@ -120,6 +120,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <basedir>${project.build.outputDirectory}/org/wso2/siddhi/core</basedir>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
                 </configuration>
             </plugin>
             <plugin>
