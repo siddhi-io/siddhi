@@ -94,13 +94,13 @@ Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.or
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.4.12">4.4.12</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/4.5.0">4.5.0</a>.
 
 ## Jenkins Build Status
 
 |  Siddhi Branch | Jenkins Build Status |
 | :---------------------------------------- |:---------------------------------------
-| master         | [![Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi )|
+| master         | [![Build Status](https://wso2.org/jenkins/view/wso2-dependencies/job/siddhi/job/siddhi/badge/icon)](https://wso2.org/jenkins/job/siddhi/job/siddhi_4.4.x/)|
 
 ## How to Contribute
 * Report issues at <a target="_blank" href="https://github.com/wso2/siddhi/issues">GitHub Issue Tracker</a>.
