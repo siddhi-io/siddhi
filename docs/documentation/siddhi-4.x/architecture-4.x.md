@@ -1,4 +1,7 @@
-# Siddhi Architecture 
+# Siddhi 4.x Architecture 
+
+!!! info
+    Please find the latest Siddhi Architecture [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/architecture-5.x/)
 
 Siddhi is a software library that can be utilized in any of the following ways:
 
@@ -28,7 +31,7 @@ aggregation operations, windows, etc.
 
 ## High Level Architecture
 
-![Simple Siddhi Overview](../images/architecture/siddhi-overview-simple.png?raw=true "Simple Siddhi Overview")
+![Simple Siddhi Overview](../../images/architecture/siddhi-overview-simple.png?raw=true "Simple Siddhi Overview")
  
 At a high level, Siddhi consumes events from various events sources, processes them according to the defined Siddhi application, 
 and produces results to the subscribed event sinks. 
@@ -40,22 +43,22 @@ retrieve data from its in-memory and other stores.
 
 Siddhi comprises four main modules, they are: 
 
-- **[Siddhi Query API](https://github.com/wso2/siddhi/tree/master/modules/siddhi-query-api)** : This allows you to define the execution logic of the Siddhi application as queries and definitions using POJO classes. 
+- **[Siddhi Query API](https://github.com/siddhi-io/siddhi/tree/4.4.x/modules/siddhi-query-api)** : This allows you to define the execution logic of the Siddhi application as queries and definitions using POJO classes. 
 Internally, Siddhi uses these objects to identify the tasks that it is expected to perform. 
 
-- **[Siddhi Query Compiler](https://github.com/wso2/siddhi/tree/master/modules/siddhi-query-compiler)** : This allows you to define the Siddhi application using the Siddhi Streaming SQL, 
+- **[Siddhi Query Compiler](https://github.com/siddhi-io/siddhi/tree/4.4.x/modules/siddhi-query-compiler)** : This allows you to define the Siddhi application using the Siddhi Streaming SQL, 
  and then it converts the Streaming SQL script to Siddhi Query POJO Objects so that Siddhi can execute them. 
  
-- **[Siddhi Core](https://github.com/wso2/siddhi/tree/master/modules/siddhi-core)** : This builds the execution runtime based on the defined Siddhi Application and processes the events as and when they arrive. 
+- **[Siddhi Core](https://github.com/siddhi-io/siddhi/tree/4.4.x/modules/siddhi-core)** : This builds the execution runtime based on the defined Siddhi Application and processes the events as and when they arrive. 
  
-- **[Siddhi Annotation](https://github.com/wso2/siddhi/tree/master/modules/siddhi-annotations)** : This is a helper module that allows all extensions to be annotated, so that they can be 
+- **[Siddhi Annotation](https://github.com/siddhi-io/siddhi/tree/4.4.x/modules/siddhi-annotations)** : This is a helper module that allows all extensions to be annotated, so that they can be 
 picked by Siddhi Core for processing. This also helps Siddhi to generate the extension documentation. 
 
 ## Siddhi Component Architecture 
 
 The following diagram illustrates the main components of Siddhi and how they work together. 
 
-![Siddhi Component Architecture](../images/architecture/siddhi-architecture-highlevel.png "Siddhi Component Architecture")
+![Siddhi Component Architecture](../../images/architecture/siddhi-architecture-highlevel.png "Siddhi Component Architecture")
  
 Here the [Siddhi Core](https://github.com/wso2/siddhi/tree/master/modules/siddhi-core) module maintains
 the execution logic. It also interacts with the external environment and systems 
@@ -92,7 +95,7 @@ for the **SiddhiAppRuntime** creation.
 
 Following diagram depicts the execution flow within a Siddhi App Runtime. 
 
-![Execution Flow in Siddhi App](../images/architecture/siddhi-event-flow.png "Execution Flow in Siddhi App")
+![Execution Flow in Siddhi App](../../images/architecture/siddhi-event-flow.png "Execution Flow in Siddhi App")
  
 The path taken by events within Siddhi is indicated in blue. 
 
@@ -194,7 +197,7 @@ Following section explains the internals of each query type.
 
 ### [SingleInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/io/siddhi/query/api/execution/query/input/stream/SingleInputStream.java) Query Runtime (Filter & Windows)
 
-![Single Input Stream Query](../images/architecture/siddhi-query-single.png "Single Input Stream Query (Filter & Window)")
+![Single Input Stream Query](../../images/architecture/siddhi-query-single.png "Single Input Stream Query (Filter & Window)")
  
 A single input stream query runtime is generated for filter and window queries. They consume events from a stream junction or a window
 and convert the incoming events according to the expected output stream format at the [ProcessStreamReceiver](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/input/ProcessStreamReceiver.java)
@@ -217,7 +220,7 @@ to formulate the least successful case in the leftmost side of the condition, th
 
 The condition expression `price >= 100 and ( Symbol == 'IBM' or Symbol == 'MSFT' )` is represented as shown below.
 
-![Siddhi Expression](../images/architecture/siddhi-expressions.png "Single Input Query (Filter & Window)")
+![Siddhi Expression](../../images/architecture/siddhi-expressions.png "Single Input Query (Filter & Window)")
 
 These expressions also support the execution of user defined functions (UDFs), and they can be implemented by extending the [FunctionExecutor](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/executor/function/FunctionExecutor.java) class. 
 
@@ -265,11 +268,11 @@ finally sends the current event to the next processor for subsequent processing.
 When the window receives an indication that the expected expiry time has come for the oldest event in the window via a 
 a timer event or other means, it removes the expired event from the window and passes that to the next processor. 
 
-![Siddhi Time Window](../images/architecture/siddhi-time-window.png "Siddhi Time Window")
+![Siddhi Time Window](../../images/architecture/siddhi-time-window.png "Siddhi Time Window")
 
 ### [JoinInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/io/siddhi/query/api/execution/query/input/stream/JoinInputStream.java) Query Runtime (Join)
  
-![Join Input Stream Query](../images/architecture/siddhi-query-join.png "Join Input Stream Query")
+![Join Input Stream Query](../../images/architecture/siddhi-query-join.png "Join Input Stream Query")
  
 Join input stream query runtime is generated for join queries. This can consume events from two stream junctions and perform a join operation as depicted above. 
 It can also perform a join by consuming events from one stream junction and join against itself, or it can join against a 
@@ -290,7 +293,7 @@ Note: Despite the optimizations, a join query is quite expensive when it comes t
  
 ### [StateInputStream](https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/io/siddhi/query/api/execution/query/input/stream/StateInputStream.java) Query Runtime (Pattern & Sequence)
 
-![State Input Stream Query (Pattern & Sequence)](../images/architecture/siddhi-query-state.png "State Input Stream Query (Pattern & Sequence)")
+![State Input Stream Query (Pattern & Sequence)](../../images/architecture/siddhi-query-state.png "State Input Stream Query (Pattern & Sequence)")
 
 
 The state input stream query runtime is generated for pattern and sequence queries. This consumes events from one or more stream junctions 
@@ -304,7 +307,7 @@ the output event is generated and emitted by `QuerySelector`.
 
 ## Siddhi Partition Execution 
 
-![Siddhi Partition](../images/architecture/siddhi-partition.png "Siddhi Partition")
+![Siddhi Partition](../../images/architecture/siddhi-partition.png "Siddhi Partition")
 
 A partition is a wrapper around one or more Siddhi queries and inner streams that connect them. 
 A partition is implemented in Siddhi as a [PartitionRuntime](https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/partition/PartitionRuntime.java),

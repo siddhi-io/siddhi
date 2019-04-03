@@ -1,12 +1,21 @@
-#User Guide
+# Siddhi 4.x User Guide
 
-## **Using the Siddhi in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a>**
+!!! info
+    Please find the latest Siddhi User Guide [here](https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/user-guide-5.x/)
 
-* You can use Siddhi in the latest <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Stream Processor</a> that is a part of <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support. 
 
-* All <a target="_blank" href="http://siddhi.io/extensions/">Siddhi extensions</a> are shipped by default with WSO2 Stream Processor.
+## **Using Siddhi in <a target="_blank" href="https://wso2.com/analytics-and-stream-processing/">WSO2 Stream Processor</a>**
 
-* Refer the <a target="_blank" href="https://docs.wso2.com/display/SP400/Quick+Start+Guide">WSO2 SP Quick Start Guide</a> for more information.
+* You can use Siddhi in the latest <a target="_blank" href="https://wso2.com/analytics-and-stream-processing/">WSO2 Stream 
+Processor</a>. It is equipped with a graphical and source query editor, debugger, event simulator, monitoring, data visualization and reporting support. 
+All none GPL <a target="_blank" href="http://siddhi.io/extensions/">Siddhi extensions</a> are shipped by default with 
+WSO2 Stream Processor, and you can add other Siddhi extensions or upgrade existing Siddhi extensions, by removing and 
+adding relevant Siddhi extension and its dependent OSGi bundles to `<SP_HOME>/lib` directory. If the Siddhi Extension depends on non OSGi jars 
+convert them to OSGi bundles by following <a target="_blank" href="https://docs.wso2.com/display/SP4xx/Adding+Third+Party+Non+OSGi+Libraries">the steps provided in the SP docs</a>. 
+
+* Refer the <a target="_blank" href="https://docs.wso2.com/display/SP4xx/Quick+Start+Guide">WSO2 SP Quick Start Guide</a> to try out Siddhi within WSO2 Stream Processor. 
+
+* Refer <a target="_blank" href="https://docs.wso2.com/display/SP4xx">WSO2 Stream Processor Documentation</a> for more information.
  
 ## **Using Siddhi as a java library**
 
@@ -18,22 +27,22 @@
 
 ```xml
    <dependency>
-     <groupId>io.siddhi</groupId>
+     <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-core</artifactId>
      <version>4.x.x</version>
    </dependency>
    <dependency>
-     <groupId>io.siddhi</groupId>
+     <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-query-api</artifactId>
      <version>4.x.x</version>
    </dependency>
    <dependency>
-     <groupId>io.siddhi</groupId>
+     <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-query-compiler</artifactId>
      <version>4.x.x</version>
    </dependency>
    <dependency>
-     <groupId>io.siddhi</groupId>
+     <groupId>org.wso2.siddhi</groupId>
      <artifactId>siddhi-annotations</artifactId>
      <version>4.x.x</version>
    </dependency>   
