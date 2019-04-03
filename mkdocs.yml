@@ -58,6 +58,7 @@ pages:
 - Extensions: extensions.md
 - API Docs:
   - 5.0.0: api/5.0.0.md
+  - 4.5.0: api/4.5.0.md
   - 4.4.8: api/4.4.8.md
   - 4.4.0: api/4.4.0.md
   - 4.3.19: api/4.3.19.md
