@@ -180,7 +180,8 @@ public class Scheduler implements ExternalReferencedHolder {
             try {
                 ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(false);
                 streamEventChunk.add(timerEvent);
-                if (siddhiQueryContext.getSiddhiAppContext().isStatsEnabled() && latencyTracker != null) {
+                if (Level.DETAIL.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0 &&
+                        latencyTracker != null) {
                     try {
                         latencyTracker.markIn();
                         singleThreadEntryValve.process(streamEventChunk);

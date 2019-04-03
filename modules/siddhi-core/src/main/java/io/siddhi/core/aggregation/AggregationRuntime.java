@@ -200,7 +200,8 @@ public class AggregationRuntime implements MemoryCalculable {
                             SiddhiQueryContext siddhiQueryContext) {
         try {
             SnapshotService.getSkipStateStorageThreadLocal().set(true);
-            if (latencyTrackerFind != null && siddhiQueryContext.getSiddhiAppContext().isStatsEnabled()) {
+            if (latencyTrackerFind != null &&
+                    Level.DETAIL.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0) {
                 latencyTrackerFind.markIn();
                 throughputTrackerFind.eventIn();
             }
@@ -221,7 +222,8 @@ public class AggregationRuntime implements MemoryCalculable {
                     incrementalExecutorMapForPartitions);
         } finally {
             SnapshotService.getSkipStateStorageThreadLocal().set(null);
-            if (latencyTrackerFind != null && siddhiQueryContext.getSiddhiAppContext().isStatsEnabled()) {
+            if (latencyTrackerFind != null &&
+                    Level.DETAIL.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0) {
                 latencyTrackerFind.markOut();
             }
         }

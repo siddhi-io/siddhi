@@ -63,7 +63,8 @@ public abstract class OutputRateLimiter<S extends State> implements PartitionCre
     public void sendToCallBacks(ComplexEventChunk complexEventChunk) {
         MultiProcessStreamReceiver.ReturnEventHolder returnEventHolder =
                 MultiProcessStreamReceiver.getMultiProcessReturn().get();
-        if (siddhiQueryContext.getSiddhiAppContext().isStatsEnabled() && latencyTracker != null) {
+        if (Level.DETAIL.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0 &&
+                latencyTracker != null) {
             latencyTracker.markOut();
         }
         if (returnEventHolder != null) {
