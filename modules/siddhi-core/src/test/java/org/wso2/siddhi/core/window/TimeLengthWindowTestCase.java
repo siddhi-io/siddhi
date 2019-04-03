@@ -166,7 +166,7 @@ public class TimeLengthWindowTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String sensorStream = "define stream sensorStream (id string, sensorValue float); " +
-                "define window sensorWindow (id string, sensorValue float) timeLength(15 sec,4); ";
+                "define window sensorWindow (id string, sensorValue float) timeLength(20 sec,4); ";
         String query = "@info(name = 'query0') from sensorStream " +
                 "insert into sensorWindow; " +
                 "@info(name = 'query1') from sensorWindow " +
