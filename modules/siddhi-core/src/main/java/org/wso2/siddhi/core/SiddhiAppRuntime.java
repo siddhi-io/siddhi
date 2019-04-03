@@ -125,8 +125,8 @@ public class SiddhiAppRuntime {
     private BufferedEventsTracker bufferedEventsTracker;
     private LatencyTracker storeQueryLatencyTracker;
     private SiddhiDebugger siddhiDebugger;
-    private boolean runningWithoutSources = false;
     private boolean running = false;
+    private boolean runningWithoutSources = false;
     private Future futureIncrementalPersistor;
     private boolean incrementalDataPurging = true;
 
