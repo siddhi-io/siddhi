@@ -125,7 +125,6 @@ public class SiddhiAppRuntime {
     private BufferedEventsTracker bufferedEventsTracker;
     private LatencyTracker storeQueryLatencyTracker;
     private SiddhiDebugger siddhiDebugger;
-    private boolean running = false;
     private boolean runningWithoutSources = false;
     private Future futureIncrementalPersistor;
     private boolean incrementalDataPurging = true;
@@ -789,7 +788,7 @@ public class SiddhiAppRuntime {
                 }
             }
         } else {
-            log.debug("Siddhi App '" + getName() + "' statistics reporting not changed!");
+            log.info("Siddhi App '" + getName() + "' statistics reporting not changed!");
         }
     }
 
