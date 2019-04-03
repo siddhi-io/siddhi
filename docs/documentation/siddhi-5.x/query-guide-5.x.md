@@ -118,93 +118,101 @@ The following parameters are used to configure a stream definition.
 To use and refer stream and attribute names that do not follow `[a-zA-Z_][a-zA-Z_0-9]*` format enclose them in ``` ` ```. E.g. ``` `$test(0)` ```.
 
 To make the stream process events in multi-threading and asynchronous way use the `@Async` annotation as shown in
-[Multi-threading and Asynchronous Processing](http://siddhi.io/documentation/siddhi-4.0/siddhi-4.x.md#multi-threading-and-asynchronous-processing) configuration section.
+[Multi-threading and Asynchronous Processing](##multi-threading-and-asynchronous-processing) configuration section.
 
 **Example**
 ```sql
 define stream TempStream (deviceID long, roomNo int, temp double);
 ```
-The above creates a stream named `TempStream` with the following attributes.
+The above creates a stream with name `TempStream` having the following attributes.
 
 + `deviceID` of type `long`
 + `roomNo` of type `int`
 + `temp` of type `double`
 
+
 ### Source
 Sources receive events via multiple transports and in various data formats, and direct them into streams for processing.
 
-A source configuration allows you to define a mapping in order to convert each incoming event from its native data format to a Siddhi event. When customizations to such mappings are not provided, Siddhi assumes that the arriving event adheres to the predefined format based on the stream definition and the selected message format. </br>
+A source configuration allows you to define a mapping in order to convert each incoming event from its native data format to a Siddhi event. When customizations to such mappings are not provided, Siddhi assumes that the arriving event adheres to the predefined format based on the stream definition and the configured message format.
 
 **Purpose**
 
-Source allows Siddhi to consume events from external systems, and map the events to adhere to the associated stream.
+Source provides a way to consume events from external systems using standard protocols, and converts them to adhere the associated stream for processing.
 
 **Syntax**
 
 To configure a stream that consumes events via a source, add the source configuration to a stream definition by adding the `@source` annotation with the required parameter values.
+
 The source syntax is as follows:
+
 ```sql
-@source(type='source_type', static.option.key1='static_option_value1', static.option.keyN='static_option_valueN',
-    @map(type='map_type', static.option_key1='static_option_value1', static.option.keyN='static_option_valueN',
-        @attributes( attributeN='attribute_mapping_N', attribute1='attribute_mapping_1')
+@source(type='<source type>', <static.key>='<value>', <static.key>='<value>',
+    @map(type='<map type>', <static.key>='<value>', <static.key>='<value>',
+        @attributes( <attribute1>='<attribute mapping>', <attributeN>='<attribute mapping>')
     )
 )
-define stream StreamName (attribute1 Type1, attributeN TypeN);
+define stream <stream name> (<attribute1> <type>, <attributeN> <Type>);
 ```
+
 This syntax includes the following annotations.
+
 **Source**
 
-The `type` parameter of `@source` defines the source type that receives events. The other parameters to be configured
-depends on the source type selected, some of the the parameters are optional. </br>
+The `type` parameter of `@source` annotation defines the source type that receives events.
+The other parameters of `@source` annotation depends upon the selected source type, and here
+some of the other parameters can be optional.
 
-For detailed information about the parameters see the documentation for the relevant source.
+For detailed information about the supported parameters see the documentation of the relevant source.
 
-The following is the list of source types that are currently supported:
+The following is the list of source types supported by Siddhi:
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
-* <a target="_blank" href="http://siddhi.io/api/latest/#inmemory-source">In-memory</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter/">Twitter</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/">CDC</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-prometheus/">Prometheus</a>
+|Source types | Description|
+| ------------- |-------------|
+| <a target="_blank" href="http://siddhi.io/api/latest/#inmemory-source">In-memory</a> | Allow SiddhiApp to consume events from other SiddhiApps running on the same JVM. |
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> | Expose an HTTP service to consume messages.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a> | Subscribe to Kafka topic to consume events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a> | Expose a TCP service to consume messages.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a> | Expose a Thrift and TCP services to consume events formatted as WSO2Events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> | Consume emails via POP3 and SMTP protocols.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> | Subscribe to JMS topic or queue to consume events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> | Reads files by tailing or as a whole to extract events out of them.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a> | Subscribe to RabbitMQ topic to consume events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a> | Subscribe to MQTT brokers to consume events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a> | Create a web-socket connection to consume messages.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter/">Twitter</a> | Subscribe to Twitter to consume tweets.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a> | Subscribe to Amazon SQS to consume events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/">CDC</a> | Perform change data capture on databases.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-prometheus/">Prometheus</a> | Consume data from Prometheus agent.|
+
+ [In-memory](http://siddhi.io/api/latest/#inmemory-source) is the only source inbuilt in Siddhi, and all other source types are implemented as extensions to Siddhi.   
 
 #### Source Mapper
 
-Each `@source` configuration has a mapping denoted by the `@map` annotation that converts the incoming messages format to Siddhi events.
+Each `@source` configuration has a mapping denoted by the `@map` annotation that defines how to convert the incoming event format to Siddhi events.
 
-The `type` parameter of the `@map` defines the map type to be used to map the data. The other parameters to be
-configured depends on the mapper selected. Some of these parameters are optional. </br>
-For detailed information about the parameters see the documentation for the relevant mapper.
+The `type` parameter of the `@map` defines the map type to be used in converting the incoming events. The other parameters
+of `@map` annotation depends on the mapper selected, and some of its parameters can be optional.
 
-!!! tip
-    When the `@map` annotation is not provided, `@map(type='passThrough')` is used as default. This default mapper type can be used when source consumes Siddhi events and when it does not need any mappings.
-
+For detailed information about the parameters see the documentation of the relevant mapper.
 
 **Map Attributes**
 
 `@attributes` is an optional annotation used with `@map` to define custom mapping. When `@attributes` is not provided, each mapper
-assumes that the incoming events  adhere to its own default data format. By adding the `@attributes` annotation, you
-can configure mappers to extract data from the incoming message selectively, and assign them to attributes.
+assumes that the incoming events adheres to its own default message format and attempt to convert the events from that format. 
+By adding the `@attributes` annotation, you can selectively extract data from the incoming message and assign them to the attributes.
 
-There are two ways you can configure map attributes.
+There are two ways to configure `@attributes`.
 
-1. Defining attributes as keys and mapping content as values in the following format: <br/>
-```@attributes( attributeN='mapping_N', attribute1='mapping_1')```
-2. Defining the mapping content of all attributes in the same order as how the attributes are defined in stream definition: <br/>
-```@attributes( 'mapping_1', 'mapping_N')```
+1. Define attribute names as keys, and mapping configurations as values:<br/>
+  `@attributes( <attribute1>='<mapping>', <attributeN>='<mapping>')`
+
+2. Define the mapping configurations in the same order as the attributes defined in stream definition:<br/>
+  `@attributes( '<mapping for attribute1>', '<mapping for attributeN>')`
 
 **Supported Mapping Types**
 
-The following is a list of currently supported source mapping types:
+The following is a list of supported source mapping types supported by Siddhi:
 
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event/">WSO2Event</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml/">XML</a>
@@ -214,6 +222,10 @@ The following is a list of currently supported source mapping types:
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a>
 * <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/">Avro</a>
+
+!!! tip
+    When the `@map` annotation is not provided, `@map(type='passThrough')` is used as default. This can be used when source consumes Siddhi events directly which it does not need any conversion.
+
 
 **Example**
 
@@ -399,6 +411,58 @@ or `http://localhost:8006/endpoint2` based on the partitioning key `country`. It
      @destination(publisher.url='http://localhost:8005/endpoint1'),
      @destination(publisher.url='http://localhost:8006/endpoint2')))
 define stream OutputStream (name string, ang int, country string);
+```
+### Error Handling
+
+When errors are thrown by Siddhi elements subscribed to the stream, the error gets propagated up to the stream which delivered
+the event to those Siddhi elements. By default the error is logged and dropped at the stream, but we can capture the error and
+the associated event and handle them gracefully by adding `@OnError` annotation to the corresponding stream definition.
+
+The `@OnError` annotation requires an `action` to be specified as bellow.
+
+```sql
+@OnError(action='on_error_action')
+define stream <stream name> (<attribute name> <attribute type>,
+                             <attribute name> <attribute type>, ... );
+```
+
+The `action` parameter of the `@OnError` annotation defines the action to be executed during failure scenarios.
+The following actions can be specified to `@OnError` annotation to handle erroneous scenarios.
+
+* `LOG` : Logs the event with the error, and drops the event. This is the default action performed even when `@OnError` annotation is not defined
+* `STREAM`: Creates a fault stream and redirects the event and the error to it. The created fault stream will have all the attributes defined in the base stream to include the error causing event, and in addition it contains `_error` attribute of type `object` to capture the error information. The fault stream can be referred by adding `!` in front of the base stream name.
+
+**Example**
+
+Following `TempStream` is defined with `@OnError` annotation to redirect errors to a fault stream.
+
+```sql
+@OnError(name='STREAM')
+define stream TempStream (deviceID long, roomNo int, temp double);
+```
+Siddhi will infer and automatically defines the fault stream of `TempStream` as given bellow.
+
+```sql
+define stream !TempStream (deviceID long, roomNo int, temp double, _error object);
+```
+
+Following SiddhiApp demonstrate failure generation and handling with the use of [queries](#query).
+Note: Details on writing processing logics via [queries](#query) will be explained in later sections.
+
+```sql
+@OnError(name='STREAM')
+define stream TempStream (deviceID long, roomNo int, temp double);
+
+-- Failure generation through a custom function `createError`
+@name('failure-generation')
+from TempStream#custom:createError()
+insert into IgnoreStream1;
+
+-- Handling failure by simply logging the event and error.
+@name('handle-failure')
+from !TempStream#log("Error Occoured!")
+select deviceID, roomNo, temp, _error
+insert into IgnoreStream2;
 ```
 
 ## Query
