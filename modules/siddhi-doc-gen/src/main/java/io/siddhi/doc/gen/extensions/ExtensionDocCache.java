@@ -20,33 +20,56 @@ package io.siddhi.doc.gen.extensions;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * The ExtensionDocCache class works as the main manipulator of underline
+ * API response cache.
+ */
 public class ExtensionDocCache {
 
-    private static final String SIDDHI_CREATED_DATETIME = "Mon, 21 Apr 2014 09:51:36 GMT";
-
+    /**
+     * The description key in the cache.
+     */
     private static final String KEY_DESCRIPTION = "description";
 
+    /**
+     * The lastModifiedDateTime key in the cache.
+     */
     private static final String KEY_LAST_MODIFIED_DATETIME = "lastModifiedDateTime";
 
+    /**
+     * The actual JSON instance of the cache.
+     */
     private final JSONObject cache;
 
+    /**
+     * A memento of the cache instance.
+     */
     private final JSONObject memento;
 
+    /**
+     * The path to the cache in local storage.
+     */
     private final Path cachePath;
 
+    /**
+     * Whether cache is in-memory or not.
+     */
     private boolean inMemory = false;
 
+    /**
+     * Constructs a ExtensionDocCache instance. Any failure occurs while reading
+     * the cache from local storage will cause constructor to create an in-memory cache.
+     *
+     * @param cachePath the path to the cache
+     */
     public ExtensionDocCache(Path cachePath) {
         JSONObject cache;
         try {
@@ -64,10 +87,23 @@ public class ExtensionDocCache {
         memento = new JSONObject(cache.toString());
     }
 
+    /**
+     * Return whether extension exists in the cache.
+     *
+     * @param extension the name of the cache
+     * @return whether extension exists in the cache
+     */
     public boolean has(String extension) {
         return cache.has(extension);
     }
 
+    /**
+     * The add method adds an extension with description and last modified date to the cache.
+     *
+     * @param extension the name of the extension
+     * @param description the description for the extension
+     * @param lastModifiedDateTime the last modified date of the extension doc
+     */
     public void add(String extension, String description, String lastModifiedDateTime) {
         JSONObject values = (cache.has(extension)) ? cache.getJSONObject(extension) : new JSONObject();
 
@@ -77,10 +113,14 @@ public class ExtensionDocCache {
         cache.put(extension, values);
     }
 
+    /**
+     * The getLastModifiedDateTime returns the last modified date
+     * a given extension.
+     *
+     * @param extension the name of the extension
+     * @return the the last modified date a given extension
+     */
     public String getLastModifiedDateTime(String extension) {
-        if (inMemory) {
-            return SIDDHI_CREATED_DATETIME;
-        }
         if (cache.has(extension)) {
             JSONObject values = cache.getJSONObject(extension);
 
@@ -89,18 +129,44 @@ public class ExtensionDocCache {
         return null;
     }
 
+    /**
+     * Remove an extension from the cache.
+     *
+     * @param extension the name of the extension
+     */
     public void remove(String extension) {
         cache.remove(extension);
     }
 
+    /**
+     * Remove relative complement of the given extension set
+     * from the extension set in the cache.
+     *
+     * @param extensions the extension set
+     */
     public void removeComplementOf(Set<String> extensions) {
         cache.keySet().removeIf(e -> !extensions.contains(e));
     }
 
+    /**
+     * @return whether cache is in-memory
+     */
     public boolean isInMemory() {
         return inMemory;
     }
 
+    /**
+     * The commit method writes the data to the given location in the
+     * local storage.
+     *
+     * 1). If there is no update done to the {@link ExtensionDocCache#cache}
+     * it will return the false.
+     * 3). Due to any IO error if writing fails it will return the false.
+     *
+     * Overall method only returns true if it has written to the local storage.
+     *
+     * @return whether changes has made to the underline local storage
+     */
     public boolean commit() {
         if (cache.equals(memento)) {
             return false;
@@ -115,6 +181,12 @@ public class ExtensionDocCache {
         return true;
     }
 
+    /**
+     * The getExtensionDescriptionMap method returns a map of extensions
+     * with extension name as key and extension description as value.
+     *
+     * @return a map of extensions with extension name as key and extension description as value.
+     */
     public Map<String, String> getExtensionDescriptionMap() {
         Map<String, String> map = new TreeMap<>();
         Set<String> extensions = cache.keySet();

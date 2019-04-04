@@ -105,6 +105,13 @@ public class ExtensionDocRetriever {
         return true;
     }
 
+    /**
+     * This updateCache method updates the underline cache according to API responses.
+     *
+     * @param extension the name of the extension
+     * @param response the API response.
+     * @throws IOException if error occurred while extracting the JSON type error.
+     */
     private void updateCache(String extension, HtmlContentsResponse response) throws IOException {
         int status = response.getStatus();
 

@@ -6,7 +6,7 @@ Following are some pre-written extensions that are supported with Siddhi;
 
 ### Extensions released under Apache 2.0 License
 Name | Description
-:-- | :-- | :--
+:-- | :--
 <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-approximate">execution approximate</a> | The siddhi-execution-approximate is an extension to Siddhi that performs approximate computing on event streams.
 <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-env">execution env</a> | The siddhi-execution-env extension is an extension to Siddhi that provides the capability to read environment properties inside Siddhi stream definitions and use it inside queries. Functions of the env extension are as follows..
 <a target="_blank" href="https://wso2-extensions.github.io/siddhi-execution-extrema">execution extrema</a> | The siddhi-execution-extrema extension is an extension to Siddhi that processes event streams based on different arithmetic properties. Different types of processors are available to extract the extremas from the event streams according to the specified attribute in the stream.
@@ -59,7 +59,7 @@ Name | Description
 
 ### Extensions released under GPL License
 Name | Description
-:-- | :-- | :--
+:-- | :--
 <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-geo">execution geo</a> | The siddhi-gpl-execution-geo extension is an extension to Siddhi that provides geo data related functionality such as checking whether a given geo coordinate is within a predefined geo-fence, etc. Following are the functions of the Geo extension.
 <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-nlp">execution nlp</a> | The siddhi-gpl-execution-nlp extension is an extension to Siddhi that can be used to process natural language.
 <a target="_blank" href="https://wso2-extensions.github.io/siddhi-gpl-execution-pmml">execution pmml</a> | The siddhi-gpl-execution-pmml extension is an extension to Siddhi that can be used to process texts based on a PMML processing model.

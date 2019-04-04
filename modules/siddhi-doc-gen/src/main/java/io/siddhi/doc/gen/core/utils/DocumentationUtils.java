@@ -30,7 +30,6 @@ import io.siddhi.annotation.SystemParameter;
 import io.siddhi.doc.gen.core.freemarker.FormatDescriptionMethod;
 import io.siddhi.doc.gen.extensions.ExtensionDocCache;
 import io.siddhi.doc.gen.extensions.ExtensionDocRetriever;
-import io.siddhi.doc.gen.extensions.ExtensionDocStore;
 import io.siddhi.doc.gen.metadata.ExampleMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionType;
@@ -43,7 +42,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
