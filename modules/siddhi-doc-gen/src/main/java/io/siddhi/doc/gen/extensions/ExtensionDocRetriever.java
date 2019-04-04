@@ -54,20 +54,17 @@ public class ExtensionDocRetriever {
      */
     private final List<String> extensions;
 
-    /**
-     * A storage to keep track of descriptions fetched from the remote repositories.
-     */
-    private final ExtensionDocStore store;
+    private final ExtensionDocCache cache;
 
     /**
      * Whether the API has reached it's limits.
      */
     private boolean throttled = false;
 
-    public ExtensionDocRetriever(String baseGithubId, List<String> extensions, ExtensionDocStore store) {
+    public ExtensionDocRetriever(String baseGithubId, List<String> extensions, ExtensionDocCache cache) {
         this.baseGithubId = baseGithubId;
         this.extensions = extensions;
-        this.store = store;
+        this.cache = cache;
     }
 
     /**
@@ -78,17 +75,15 @@ public class ExtensionDocRetriever {
      */
     public boolean pull() {
         try {
-            String httpStandardLastModified = getRfc1123StandardTime(store.getLastModified());
-
             log.info("Retrieving extension descriptions from remote repositories");
 
             for (final String extension : extensions) {
                 GithubContentsClient githubClient = new GithubContentsClient.Builder(baseGithubId, extension)
                         .isReadme(true)
                         .build();
-                if (store.has(extension)) {
+                if (cache.has(extension)) {
                     /* Sets HTTP header to make the request conditional */
-                    githubClient.setHeader("If-Modified-Since", httpStandardLastModified);
+                    githubClient.setHeader("If-Modified-Since", cache.getLastModifiedDateTime(extension));
                 }
                 HtmlContentsResponse response = githubClient.getContentsResponse(HtmlContentsResponse.class);
                 /* API throttling limit reached, could not process further without credentials */
@@ -96,56 +91,21 @@ public class ExtensionDocRetriever {
                     throttled = true;
                     break;
                 }
-                updateStore(extension, response);
+                updateCache(extension, response);
             }
 
-            removeComplementOfGivenExtensionsFromStore();
+            cache.removeComplementOf(new TreeSet<>(extensions));
 
-            store.commit();
+            if (!throttled) {
+                cache.commit();
+            }
         } catch (IOException | ReflectiveOperationException e) {
             return false;
         }
         return true;
     }
 
-    /**
-     * Return the RFC 1123 standard datetime.
-     *
-     * Note
-     * ====
-     * Following datetime formatter may replaceable by more robust solutions like
-     * 'DateTimeFormatter.RFC_1123_DATE_TIME', while doing so will lead to some strange
-     * behaviours. Above formatter format date of month in following way.
-     *
-     * Wed, 1 Aug 2018 14:56:46 GMT
-     *
-     * If you set conditional request headers using above format in a Github API request,
-     * it will give you the correct result while silently reducing your request quota.
-     * So the correct format Github expects is,
-     *
-     * Wed, 01 Aug 2018 14:56:46 GMT
-     *
-     * That's why a custom pattern is used in this case.
-     *
-     * @param time the time to be converted
-     * @return the RFC 1123 standard datetime
-     */
-    private String getRfc1123StandardTime(FileTime time) {
-        DateTimeFormatter formatter = DateTimeFormatter
-                .ofPattern("EEE, dd MMM yyyy HH:mm:ss O")
-                .withZone(ZoneOffset.UTC);
-
-        return formatter.format(time.toInstant());
-    }
-
-    /**
-     * Update the extension storage according to the API response.
-     *
-     * @param extension the name of the extension.
-     * @param response the API response.
-     * @throws IOException if error occurs while extracting the API response.
-     */
-    private void updateStore(String extension, ContentsResponse response) throws IOException {
+    private void updateCache(String extension, HtmlContentsResponse response) throws IOException {
         int status = response.getStatus();
 
         switch (status) {
@@ -155,7 +115,7 @@ public class ExtensionDocRetriever {
                 if (firstParagraph == null) {
                     return;
                 }
-                store.add(extension, firstParagraph);
+                cache.add(extension, firstParagraph, response.getHeader("Last-Modified").get(0));
                 log.debug(String.format("Request to '%s' succeed with status '%s'", extension, status));
                 break;
             }
@@ -164,23 +124,12 @@ public class ExtensionDocRetriever {
                 break;
             case 404:
                 log.debug(String.format("Request to '%s' failed with status '%s'", extension, status));
-                store.remove(extension);
+                cache.remove(extension);
                 break;
             default:
                 log.error(String.format("Error occurred while retrieving the extension '%s': %s",
                         extension, response.getError().toString()));
         }
-    }
-
-    /**
-     * Remove the relative compliment of {@link ExtensionDocRetriever#extensions}
-     * from {@link ExtensionDocRetriever#store}.
-     */
-    private void removeComplementOfGivenExtensionsFromStore() {
-        Set<String> extensionSet = new TreeSet<>(extensions);
-        Set<String> storeKeys = store.asMap().keySet();
-
-        storeKeys.removeIf(e -> !extensionSet.contains(e));
     }
 
     /**

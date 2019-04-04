@@ -28,6 +28,7 @@ import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.doc.gen.core.freemarker.FormatDescriptionMethod;
+import io.siddhi.doc.gen.extensions.ExtensionDocCache;
 import io.siddhi.doc.gen.extensions.ExtensionDocRetriever;
 import io.siddhi.doc.gen.extensions.ExtensionDocStore;
 import io.siddhi.doc.gen.metadata.ExampleMetaData;
@@ -381,9 +382,9 @@ public class DocumentationUtils {
         rootDataModel.put("extensionsOwner", extensionRepositoryOwner);
 
         Path gplDocCachePath = Paths.get(
-                projectBaseDir, "src", "main", "resources", "gpl.docs.properties");
+                projectBaseDir, "src", "main", "resources", "gpl.docs.json");
         Path apacheDocCachePath = Paths.get(
-                projectBaseDir, "src", "main", "resources", "apache.docs.properties");
+                projectBaseDir, "src", "main", "resources", "apache.docs.json");
 
         rootDataModel.put("gplExtensions", retrieveExtensionWithDescriptions(
                 gplDocCachePath, extensionRepositoryOwner, gplExtensionRepositories));
@@ -402,12 +403,12 @@ public class DocumentationUtils {
                                                                          String extensionRepositoryOwner,
                                                                          List<String> extensions)
             throws MojoFailureException {
-        ExtensionDocStore store = new ExtensionDocStore(cachePath);
-        ExtensionDocRetriever retriever = new ExtensionDocRetriever(extensionRepositoryOwner, extensions, store);
+        ExtensionDocCache cache = new ExtensionDocCache(cachePath);
+        ExtensionDocRetriever retriever = new ExtensionDocRetriever(extensionRepositoryOwner, extensions, cache);
 
         retriever.pull();
 
-        boolean inMemory = store.isInMemory();
+        boolean inMemory = cache.isInMemory();
         boolean throttled = retriever.isThrottled();
 
         if (throttled && inMemory) {
@@ -416,7 +417,7 @@ public class DocumentationUtils {
                     "The extension cache is also not available." +
                     "Try again later or check whether cache is present in path: " + cachePath.toString());
         }
-        return store.asMap();
+        return cache.getExtensionDescriptionMap();
     }
 
     /**

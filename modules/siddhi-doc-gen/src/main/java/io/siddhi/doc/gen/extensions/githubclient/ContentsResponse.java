@@ -22,6 +22,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -43,6 +45,8 @@ public abstract class ContentsResponse<T> {
      */
     private final int status;
 
+    private final Map<String, List<String>> headers;
+
     /**
      * Reader to read the response body.
      */
@@ -53,6 +57,9 @@ public abstract class ContentsResponse<T> {
 
         status = connection.getResponseCode();
         stream = (status == 200) ? connection.getInputStream() : connection.getErrorStream();
+
+        headers = connection.getHeaderFields();
+
         contentsBodyReader = null;
     }
 
@@ -66,6 +73,10 @@ public abstract class ContentsResponse<T> {
      * @throws IOException if error occurs while parsing the response body as a type T instance
      */
     public abstract T getContent() throws IOException;
+
+    public List<String> getHeader(String name) {
+        return headers.get(name);
+    }
 
     /**
      * @return the ContentsBodyReader instance
