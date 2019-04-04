@@ -75,8 +75,6 @@ public class ExtensionDocRetriever {
      */
     public boolean pull() {
         try {
-            log.info("Retrieving extension descriptions from remote repositories");
-
             for (final String extension : extensions) {
                 GithubContentsClient githubClient = new GithubContentsClient.Builder(baseGithubId, extension)
                         .isReadme(true)
@@ -123,19 +121,16 @@ public class ExtensionDocRetriever {
                     return;
                 }
                 cache.add(extension, firstParagraph, response.getHeader("Last-Modified").get(0));
-                log.debug(String.format("Request to '%s' succeed with status '%s'", extension, status));
                 break;
             }
             case 304:
-                log.debug(String.format("Request to '%s' succeed with status '%s'", extension, status));
                 break;
             case 404:
-                log.debug(String.format("Request to '%s' failed with status '%s'", extension, status));
                 cache.remove(extension);
                 break;
             default:
-                log.error(String.format("Error occurred while retrieving the extension '%s': %s",
-                        extension, response.getError().toString()));
+                log.error(String.format("Error occurred while retrieving the extension '%s': %d %s",
+                        extension, status, response.getError().toString()));
         }
     }
 
