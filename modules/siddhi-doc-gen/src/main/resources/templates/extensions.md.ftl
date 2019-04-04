@@ -25,7 +25,7 @@ Following are some pre-written extensions that are supported with Siddhi;
 <#list extensions>
 ### ${title}
 Name | Description
-:-- | :-- | :--
+:-- | :--
 <#items as name, description>
 <a target="_blank" href="https://${extensionsOwner}.github.io/${name}">${name?replace(CONSTANTS.GITHUB_GPL_EXTENSION_REPOSITORY_PREFIX, "", "rf")?replace(CONSTANTS.GITHUB_APACHE_EXTENSION_REPOSITORY_PREFIX, "", "rf")?replace("-", " ")}</a> | ${description}
 </#items>
