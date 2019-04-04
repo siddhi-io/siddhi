@@ -41,7 +41,7 @@
         <module>modules/siddhi-samples</module>
         <module>modules/siddhi-annotations</module>
         <module>modules/siddhi-doc-gen</module>
-        <module>modules/siddhi-core/siddhi-core-doc-gen</module>
+        <!--module>modules/siddhi-core/siddhi-core-doc-gen</module-->
         <module>coverage-reports</module>
     </modules>
 
@@ -343,7 +343,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <configuration>
-                        <preparationGoals>clean install -Pdocumentation-deploy</preparationGoals>
+                        <preparationGoals>clean install</preparationGoals>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                     </configuration>
                 </plugin>
