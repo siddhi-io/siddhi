@@ -54,6 +54,7 @@ public abstract class OutputRateLimiter<S extends State> implements PartitionCre
         if (outputCallback != null) {
             this.lockWrapper = lockWrapper;
         }
+        latencyTracker = siddhiQueryContext.getLatencyTracker();
         stateHolder = siddhiQueryContext.generateStateHolder(this.getClass().getName(), groupBy, init());
     }
 
@@ -117,10 +118,6 @@ public abstract class OutputRateLimiter<S extends State> implements PartitionCre
 
     public boolean hasCallBack() {
         return hasCallBack;
-    }
-
-    public void setLatencyTracker(LatencyTracker latencyTracker) {
-        this.latencyTracker = latencyTracker;
     }
 
 }
