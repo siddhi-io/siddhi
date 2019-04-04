@@ -187,6 +187,7 @@ public class QueryParser {
                     query.getOutputStream().getId(), query.getOutputRate(),
                     query.getSelector().getGroupByList().size() != 0, isWindow,
                     siddhiAppContext.getScheduledExecutorService(), siddhiAppContext, queryName);
+            outputRateLimiter.setLatencyTracker(latencyTracker);
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
                 selector.setBatchingEnabled(false);
             }
