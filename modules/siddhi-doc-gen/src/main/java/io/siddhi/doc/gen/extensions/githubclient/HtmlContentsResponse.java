@@ -33,9 +33,9 @@ public class HtmlContentsResponse extends ContentsResponse<Document> {
     HtmlContentsResponse(HttpsURLConnection connection) throws IOException {
         super(connection);
         if (this.getStatus() != 200) {
-            super.contentReader = null;
+            super.contentsBodyReader = null;
         } else {
-            super.contentReader = new ContentReader<Document>(this.getContent()) {
+            super.contentsBodyReader = new ContentsBodyReader<Document>(this.getContent()) {
 
                 @Override
                 public String getFirstParagraph() {

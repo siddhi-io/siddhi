@@ -46,14 +46,14 @@ public abstract class ContentsResponse<T> {
     /**
      * Reader to read the response body.
      */
-    ContentReader contentReader;
+    ContentsBodyReader contentsBodyReader;
 
     ContentsResponse(HttpsURLConnection connection) throws IOException {
         connection.setRequestProperty("Accept", "application/vnd.githubclient.v3." + mediaType());
 
         status = connection.getResponseCode();
         stream = (status == 200) ? connection.getInputStream() : connection.getErrorStream();
-        contentReader = null;
+        contentsBodyReader = null;
     }
 
     /**
@@ -68,15 +68,15 @@ public abstract class ContentsResponse<T> {
     public abstract T getContent() throws IOException;
 
     /**
-     * @return the ContentReader instance
+     * @return the ContentsBodyReader instance
      */
-    public ContentReader getContentReader() {
-        if (contentReader == null) {
+    public ContentsBodyReader getContentsBodyReader() {
+        if (contentsBodyReader == null) {
             throw new IllegalStateException(this.getClass().getCanonicalName()
                     + " does not implement a subclass of "
-                    + ContentReader.class.getCanonicalName());
+                    + ContentsBodyReader.class.getCanonicalName());
         }
-        return contentReader;
+        return contentsBodyReader;
     }
 
     /**

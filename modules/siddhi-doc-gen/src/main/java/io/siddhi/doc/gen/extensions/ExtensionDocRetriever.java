@@ -17,7 +17,7 @@
  */
 package io.siddhi.doc.gen.extensions;
 
-import io.siddhi.doc.gen.extensions.githubclient.ContentReader;
+import io.siddhi.doc.gen.extensions.githubclient.ContentsBodyReader;
 import io.siddhi.doc.gen.extensions.githubclient.ContentsResponse;
 import io.siddhi.doc.gen.extensions.githubclient.GithubContentsClient;
 import io.siddhi.doc.gen.extensions.githubclient.HtmlContentsResponse;
@@ -26,14 +26,10 @@ import org.apache.maven.plugin.logging.SystemStreamLog;
 
 import java.io.IOException;
 import java.nio.file.attribute.FileTime;
-import java.text.SimpleDateFormat;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.TreeSet;
 
 /**
@@ -154,7 +150,7 @@ public class ExtensionDocRetriever {
 
         switch (status) {
             case 200: {
-                ContentReader reader = response.getContentReader();
+                ContentsBodyReader reader = response.getContentsBodyReader();
                 String firstParagraph = reader.getFirstParagraph();
                 if (firstParagraph == null) {
                     return;

@@ -18,19 +18,19 @@
 package io.siddhi.doc.gen.extensions.githubclient;
 
 /**
- * The ContentReader class offers ability to read from a C type response body
+ * The ContentsBodyReader class offers ability to read from a C type response body
  * from a Github Contents API response.
  *
  * @param <C> the response body type
  */
-public abstract class ContentReader<C> {
+public abstract class ContentsBodyReader<C> {
 
     /**
      * The C type content.
      */
     protected final C content;
 
-    ContentReader(C content) {
+    ContentsBodyReader(C content) {
         this.content = content;
     }
 

@@ -24,10 +24,10 @@ Following are some pre-written extensions that are supported with Siddhi;
 <#macro displayRepositoriesList title extensions>
 <#list extensions>
 ### ${title}
-Name | reference | description
+Name | Description
 :-- | :-- | :--
 <#items as name, description>
-${name} | <a target="_blank" href="https://${extensionsOwner}.github.io/${name}">${name?replace(CONSTANTS.GITHUB_GPL_EXTENSION_REPOSITORY_PREFIX, "", "rf")?replace(CONSTANTS.GITHUB_APACHE_EXTENSION_REPOSITORY_PREFIX, "", "rf")?replace("-", " ")}</a> | ${description}
+<a target="_blank" href="https://${extensionsOwner}.github.io/${name}">${name?replace(CONSTANTS.GITHUB_GPL_EXTENSION_REPOSITORY_PREFIX, "", "rf")?replace(CONSTANTS.GITHUB_APACHE_EXTENSION_REPOSITORY_PREFIX, "", "rf")?replace("-", " ")}</a> | ${description}
 </#items>
 </#list>
 
