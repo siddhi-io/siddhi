@@ -28,6 +28,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -105,7 +108,10 @@ public class ExtensionsIndexGenerationMojo extends AbstractMojo {
 
         // Creating a extensions index
         DocumentationUtils.createExtensionsIndex(
-                extensionRepositories, extensionRepositoryOwner, docGenBasePath, indexGenFileName
-        );
+                extensionRepositories,
+                extensionRepositoryOwner,
+                docGenBasePath,
+                mavenProject.getBasedir().toString(),
+                indexGenFileName);
     }
 }
