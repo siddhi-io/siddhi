@@ -26,15 +26,19 @@ import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 
 /**
- * Sample Siddhi application that groups the events by symbol and calculates aggregates such as the sum for price and
- * sum of volume for the last 5 seconds time window.
+ * Sample Siddhi application that groups the events by symbol and calculates aggregates such as the sum of price and
+ * sum of volume for the last sliding 5 seconds time window.
  */
 public class TimeWindowSample {
 
     public static void main(String[] args) throws InterruptedException {
 
-        // Create Siddhi Application
-        String siddhiApp = "define stream StockEventStream (symbol string, price float, volume long); " +
+        //Create Siddhi Manager
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        //Siddhi Application
+        String siddhiApp = "" +
+                "define stream StockEventStream (symbol string, price float, volume long); " +
                 " " +
                 "@info(name = 'query1') " +
                 "from StockEventStream#window.time(5 sec)  " +
@@ -42,13 +46,10 @@ public class TimeWindowSample {
                 "group by symbol " +
                 "insert into AggregateStockStream ;";
 
-        // Creating Siddhi Manager
-        SiddhiManager siddhiManager = new SiddhiManager();
-
-        //Generating runtime
+        //Generate runtime
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
 
-        //Adding callback to retrieve output events from query
+        //Add callback to retrieve output events from stream
         siddhiAppRuntime.addCallback("AggregateStockStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
@@ -56,13 +57,13 @@ public class TimeWindowSample {
             }
         });
 
-        //Retrieving input handler to push events into Siddhi
+        //Retrieve input handler to push events into Siddhi
         InputHandler inputHandler = siddhiAppRuntime.getInputHandler("StockEventStream");
 
-        //Starting event processing
+        //Start event processing
         siddhiAppRuntime.start();
 
-        //Sending events to Siddhi
+        //Send events to Siddhi
         inputHandler.send(new Object[]{"IBM", 100f, 100L});
         Thread.sleep(1000);
         inputHandler.send(new Object[]{"IBM", 200f, 300L});
@@ -79,10 +80,10 @@ public class TimeWindowSample {
         inputHandler.send(new Object[]{"GOOG", 60f, 30L});
         Thread.sleep(1000);
 
-        //Shutting down the runtime
+        //Shutdown the runtime
         siddhiAppRuntime.shutdown();
 
-        //Shutting down Siddhi
+        //Shutdown Siddhi Manager
         siddhiManager.shutdown();
 
     }

@@ -32,11 +32,18 @@ markdown_extensions:
 pages:
 - Welcome to Siddhi: index.md
 - Features: features.md
-- Quick Start Guide: documentation/siddhi-quckstart-4.0.md
+- Quick Start Guide: documentation/siddhi-5.x/quckstart-5.x.md
 - Documentation:
-  - User Guide: documentation/user-guide.md
-  - Siddhi Query Guide: documentation/siddhi-4.0.md
-  - Siddhi Architecture: documentation/siddhi-architecture.md
+  - Siddhi 5.x:
+    - Quick Start Guide: documentation/siddhi-5.x/quckstart-5.x.md
+    - User Guide: documentation/siddhi-5.x/user-guide-5.x.md
+    - Siddhi Query Guide: documentation/siddhi-5.x/query-guide-5.x.md
+    - Siddhi Architecture: documentation/siddhi-5.x/architecture-5.x.md
+  - Siddhi 4.x:
+    - Quick Start Guide: documentation/siddhi-4.x/quckstart-4.x.md
+    - User Guide: documentation/siddhi-4.x/user-guide-4.x.md
+    - Siddhi Query Guide: documentation/siddhi-4.x/query-guide-4.x.md
+    - Siddhi Architecture: documentation/siddhi-4.x/architecture-4.x.md
 - Contribute: documentation/contribution.md
 - Extensions: extensions.md
 - API Docs:

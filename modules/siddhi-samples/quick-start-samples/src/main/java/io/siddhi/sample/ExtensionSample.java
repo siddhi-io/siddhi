@@ -26,21 +26,26 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.sample.util.CustomFunctionExtension;
 
+/**
+ * The sample demonstrate how to use custom UDFs in Siddhi within another Java program.
+ */
 public class ExtensionSample {
 
     public static void main(String[] args) throws InterruptedException {
 
         // Creating Siddhi Manager
         SiddhiManager siddhiManager = new SiddhiManager();
+
+        //Register the extension to Siddhi Manager
         siddhiManager.setExtension("custom:plus", CustomFunctionExtension.class);
 
-
+        //Siddhi Application
         String siddhiApp = "" +
-                "define stream cseEventStream (symbol string, price long, volume long);" +
+                "define stream StockStream (symbol string, price long, volume long);" +
                 "" +
                 "@info(name = 'query1') " +
-                "from cseEventStream " +
-                "select symbol , custom:plus(price,volume) as totalCount " +
+                "from StockStream " +
+                "select symbol , custom:plus(price, volume) as totalCount " +
                 "insert into Output;";
 
         //Generating runtime
@@ -55,7 +60,7 @@ public class ExtensionSample {
         });
 
         //Retrieving InputHandler to push events into Siddhi
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
 
         //Starting event processing
         siddhiAppRuntime.start();
