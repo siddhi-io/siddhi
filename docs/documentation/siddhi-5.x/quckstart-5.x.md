@@ -108,7 +108,7 @@ This takes you to the Stream Processor Studio landing page.
 Siddhi Streaming SQL is a rich, compact, easy-to-learn SQL-like language. **Let's first learn how to find the total** of values 
 coming into a data stream and output the current running total value with each event. Siddhi has lot of in-built functions and extensions 
 available for complex analysis, but to get started, let's use a simple one. You can find more information about the Siddhi grammar 
-and its functions in the [Siddhi Query Guide](http://siddhi.io/documentation/siddhi-4.0/).
+and its functions in the [Siddhi Query Guide](http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/).
 
 Let's **consider a scenario where we are loading cargo boxes into a ship**. We need to keep track of the total 
 weight of the cargo added. **Measuring the weight of a cargo box when loading is considered an event**.
@@ -138,7 +138,7 @@ define stream CargoStream (weight int);
 _totalWeight_ attribute that contains the total weight calculated so far. Here, we need to add a 
 _"sink"_  to log the `OutputStream` so that we can observe the output values. (**Sink is the Siddhi way to publish 
 streams to external systems.** This particular `log` type sink just logs the stream events. To learn more about sinks, see 
-[sink](http://siddhi.io/documentation/siddhi-4.0/#sink))
+[sink](http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#sink))
 ```
 @sink(type='log', prefix='LOGGER')
 define stream OutputStream(weight int, totalWeight long);
@@ -194,7 +194,7 @@ This section demonstrates how to carry out **temporal window processing** with S
 Up to this point, we have been carrying out the processing by having only the running sum value in-memory. 
 No events were stored during this process. 
 
-[Window processing](http://siddhi.io/documentation/siddhi-4.0/#window)
+[Window processing](http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#window)
 is a method that allows us to store some events in-memory for a given period so that we can perform operations 
 such as calculating the average, maximum, etc values within them.
 
@@ -231,9 +231,9 @@ cargo events.
 
 It is also notable that the defined `length window` only keeps 3 events in-memory. When the 4th event arrives, the 
 first event in the window is removed from memory. This ensures that the memory usage does not grow beyond a specific limit. There are also other 
-implementations done in Siddhi  to reduce the memory consumption. For more information, see [Siddhi Architecture](http://siddhi.io/documentation/siddhi-architecture/).
+implementations done in Siddhi  to reduce the memory consumption. For more information, see [Siddhi Architecture](http://siddhi.io/documentation/siddhi-5.x/architecture-5.x/).
 
-To learn more about the Siddhi functionality, see [Siddhi Query Guide](http://siddhi.io/documentation/siddhi-4.0/).
+To learn more about the Siddhi functionality, see [Siddhi Query Guide](http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/).
 
 Feel free to try out Siddhi and event simulation to understand Siddhi better.
 
