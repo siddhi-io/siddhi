@@ -51,11 +51,6 @@ public class VariableExpressionExecutor implements ExpressionExecutor {
         return attribute.getType();
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return this;
-    }
-
     public Attribute getAttribute() {
         return attribute;
     }
@@ -81,11 +76,6 @@ public class VariableExpressionExecutor implements ExpressionExecutor {
         } else if (position.length == 4) {
             this.position = position.clone();
         }
-    }
-
-    @Override
-    public void clean() {
-        //ignore
     }
 
 }

@@ -497,7 +497,7 @@ public class SnapshotOutputRateLimitTestCase {
         Thread.sleep(1100);
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5", 3});
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3", 6});
-        Thread.sleep(2200);
+        Thread.sleep(2300);
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.5", 2});
         inputHandler.send(new Object[]{System.currentTimeMillis(), "192.10.1.3", 10});
         Thread.sleep(7200);

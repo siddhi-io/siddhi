@@ -32,6 +32,17 @@ public class StreamEventFactory implements EventFactory<StreamEvent>, Serializab
     private int outputDataSize;
 
     /**
+     * Initialization of the factory using MetaStreamEvent
+     *
+     * @param metaStreamEvent meta stream event
+     */
+    public StreamEventFactory(MetaStreamEvent metaStreamEvent) {
+        this.beforeWindowDataSize = metaStreamEvent.getBeforeWindowData().size();
+        this.onAfterWindowDataSize = metaStreamEvent.getOnAfterWindowData().size();
+        this.outputDataSize = metaStreamEvent.getOutputData().size();
+    }
+
+    /**
      * Initialization of the factory with event data sizes
      *
      * @param beforeWindowDataSize  BeforeWindow size

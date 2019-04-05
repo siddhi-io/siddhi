@@ -42,11 +42,6 @@ public class SnapshotableEventQueueOperator implements Operator {
     }
 
     @Override
-    public CompiledCondition cloneCompilation(String key) {
-        return new SnapshotableEventQueueOperator(expressionExecutor.cloneExecutor(key), storeEventPosition);
-    }
-
-    @Override
     public StreamEvent find(StateEvent matchingEvent, Object storeEvents, StreamEventCloner storeEventCloner) {
         SnapshotableStreamEventQueue storeEventQueue = (SnapshotableStreamEventQueue) storeEvents;
         ComplexEventChunk<StreamEvent> returnEventChunk = new ComplexEventChunk<StreamEvent>(false);

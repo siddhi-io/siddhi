@@ -48,18 +48,4 @@ public class SubtractExpressionExecutorFloat implements ExpressionExecutor {
     public Attribute.Type getReturnType() {
         return Attribute.Type.FLOAT;
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new SubtractExpressionExecutorFloat(leftExpressionExecutor.cloneExecutor(key), rightExpressionExecutor
-                .cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        leftExpressionExecutor.clean();
-        rightExpressionExecutor.clean();
-    }
-
-
 }

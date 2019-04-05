@@ -38,10 +38,4 @@ public class EqualCompareConditionExpressionExecutorFloatLong extends
         return ((Float) left).doubleValue() == ((Long) right).doubleValue();
 
     }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new EqualCompareConditionExpressionExecutorFloatLong(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

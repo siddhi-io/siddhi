@@ -65,8 +65,7 @@ public class TimestampGeneratorImpl implements TimestampGenerator {
     /**
      * List of listeners listening to this timestamp generator.
      */
-    private List<TimestampGeneratorImpl.TimeChangeListener> timeChangeListeners =
-            new ArrayList<TimestampGeneratorImpl.TimeChangeListener>();
+    private List<TimestampGeneratorImpl.TimeChangeListener> timeChangeListeners = new ArrayList<>();
 
     private SiddhiAppContext siddhiAppContext;
 

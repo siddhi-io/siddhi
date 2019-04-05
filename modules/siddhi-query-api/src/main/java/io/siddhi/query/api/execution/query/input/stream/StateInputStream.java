@@ -17,6 +17,7 @@
  */
 package io.siddhi.query.api.execution.query.input.stream;
 
+import io.siddhi.query.api.execution.query.input.handler.StreamHandler;
 import io.siddhi.query.api.execution.query.input.state.CountStateElement;
 import io.siddhi.query.api.execution.query.input.state.EveryStateElement;
 import io.siddhi.query.api.execution.query.input.state.LogicalStateElement;
@@ -34,6 +35,7 @@ import java.util.List;
 public class StateInputStream extends InputStream {
 
     private static final long serialVersionUID = 1L;
+    private final List<StreamHandler> streamHandlers;
     private Type stateType;
     private StateElement stateElement;
     private List<String> streamIdList;
@@ -42,7 +44,8 @@ public class StateInputStream extends InputStream {
     public StateInputStream(Type stateType, StateElement stateElement, TimeConstant withinTime) {
         this.stateType = stateType;
         this.stateElement = stateElement;
-        this.streamIdList = collectStreamIds(stateElement, new ArrayList<String>());
+        this.streamIdList = collectStreamIds(stateElement, new ArrayList<>());
+        this.streamHandlers = collectStreamHanders(stateElement, new ArrayList<>());
         this.withinTime = withinTime;
     }
 
@@ -57,6 +60,10 @@ public class StateInputStream extends InputStream {
     @Override
     public List<String> getAllStreamIds() {
         return streamIdList;
+    }
+
+    public List<StreamHandler> getStreamHandlers() {
+        return streamHandlers;
     }
 
     @Override
@@ -88,6 +95,26 @@ public class StateInputStream extends InputStream {
             streamIds.add(basicSingleInputStream.getStreamId());
         }
         return streamIds;
+    }
+
+    private List<StreamHandler> collectStreamHanders(StateElement stateElement,
+                                                     List<StreamHandler> streamHandlers) {
+        if (stateElement instanceof LogicalStateElement) {
+            collectStreamHanders(((LogicalStateElement) stateElement).getStreamStateElement1(), streamHandlers);
+            collectStreamHanders(((LogicalStateElement) stateElement).getStreamStateElement2(), streamHandlers);
+        } else if (stateElement instanceof CountStateElement) {
+            collectStreamHanders(((CountStateElement) stateElement).getStreamStateElement(), streamHandlers);
+        } else if (stateElement instanceof EveryStateElement) {
+            collectStreamHanders(((EveryStateElement) stateElement).getStateElement(), streamHandlers);
+        } else if (stateElement instanceof NextStateElement) {
+            collectStreamHanders(((NextStateElement) stateElement).getStateElement(), streamHandlers);
+            collectStreamHanders(((NextStateElement) stateElement).getNextStateElement(), streamHandlers);
+        } else if (stateElement instanceof StreamStateElement) {
+            BasicSingleInputStream basicSingleInputStream = ((StreamStateElement) stateElement)
+                    .getBasicSingleInputStream();
+            streamHandlers.addAll(basicSingleInputStream.getStreamHandlers());
+        }
+        return streamHandlers;
     }
 
     public int getStreamCount(String streamId) {

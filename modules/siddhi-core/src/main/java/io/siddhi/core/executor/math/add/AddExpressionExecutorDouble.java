@@ -49,16 +49,4 @@ public class AddExpressionExecutorDouble implements ExpressionExecutor {
         return Attribute.Type.DOUBLE;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new AddExpressionExecutorDouble(leftExpressionExecutor.cloneExecutor(key), rightExpressionExecutor
-                .cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        leftExpressionExecutor.clean();
-        rightExpressionExecutor.clean();
-    }
-
 }

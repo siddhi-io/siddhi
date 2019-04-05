@@ -95,7 +95,7 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
         if (records != null) {
             while (records.hasNext()) {
                 Object[] record = records.next();
-                StreamEvent streamEvent = storeEventPool.borrowEvent();
+                StreamEvent streamEvent = storeEventPool.newInstance();
                 streamEvent.setOutputData(new Object[outputAttributes.length]);
                 System.arraycopy(record, 0, streamEvent.getOutputData(), 0, record.length);
                 streamEventComplexEventChunk.add(streamEvent);
@@ -255,14 +255,6 @@ public abstract class AbstractQueryableRecordTable extends AbstractRecordTable i
             this.compiledSelection = compiledSelection;
         }
 
-        @Override
-        public CompiledSelection cloneCompilation(String key) {
-            Map<String, ExpressionExecutor> newVariableExpressionExecutorMap = new HashMap<>();
-            for (Map.Entry<String, ExpressionExecutor> entry : variableExpressionExecutorMap.entrySet()) {
-                newVariableExpressionExecutorMap.put(entry.getKey(), entry.getValue().cloneExecutor(key));
-            }
-            return new RecordStoreCompiledSelection(newVariableExpressionExecutorMap, compiledSelection);
-        }
     }
 
     /**

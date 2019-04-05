@@ -362,7 +362,6 @@ public class TimeBatchWindowTestCase {
         siddhiAppRuntime.start();
         // Start sending events in the beginning of a cycle
         while (System.currentTimeMillis() % 2000 != 0) {
-            ;
         }
         inputHandler.send(new Object[]{"IBM", 700f, 0});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});

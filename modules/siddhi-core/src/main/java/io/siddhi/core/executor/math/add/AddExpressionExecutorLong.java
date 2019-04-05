@@ -50,16 +50,4 @@ public class AddExpressionExecutorLong implements ExpressionExecutor {
         return Attribute.Type.LONG;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new AddExpressionExecutorLong(leftExpressionExecutor.cloneExecutor(key), rightExpressionExecutor
-                .cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        leftExpressionExecutor.clean();
-        rightExpressionExecutor.clean();
-    }
-
 }

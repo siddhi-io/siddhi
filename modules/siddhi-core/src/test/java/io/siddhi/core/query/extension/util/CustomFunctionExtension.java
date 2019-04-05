@@ -27,9 +27,9 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.function.FunctionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
-
-import java.util.Map;
 
 @Extension(
         name = "plus",
@@ -55,9 +55,9 @@ public class CustomFunctionExtension extends FunctionExecutor {
     private Attribute.Type returnType;
 
     @Override
-    public void init(ExpressionExecutor[] attributeExpressionExecutors,
-                     ConfigReader configReader,
-                     SiddhiQueryContext siddhiQueryContext) {
+    public StateFactory init(ExpressionExecutor[] attributeExpressionExecutors,
+                             ConfigReader configReader,
+                             SiddhiQueryContext siddhiQueryContext) {
         for (ExpressionExecutor expressionExecutor : attributeExpressionExecutors) {
             Attribute.Type attributeType = expressionExecutor.getReturnType();
             if (attributeType == Attribute.Type.DOUBLE) {
@@ -69,7 +69,7 @@ public class CustomFunctionExtension extends FunctionExecutor {
                 returnType = Attribute.Type.LONG;
             }
         }
-
+        return null;
     }
 
     /**
@@ -84,7 +84,7 @@ public class CustomFunctionExtension extends FunctionExecutor {
 
 
     @Override
-    protected Object execute(Object[] obj) {
+    protected Object execute(Object[] obj, State state) {
         if (returnType == Attribute.Type.DOUBLE) {
             double total = 0;
             for (Object aObj : obj) {
@@ -103,7 +103,7 @@ public class CustomFunctionExtension extends FunctionExecutor {
     }
 
     @Override
-    protected Object execute(Object obj) {
+    protected Object execute(Object obj, State state) {
         if (returnType == Attribute.Type.DOUBLE) {
             double total = 0;
             if (obj instanceof Object[]) {
@@ -123,14 +123,4 @@ public class CustomFunctionExtension extends FunctionExecutor {
         }
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        //No state
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Nothing to be done
-    }
 }

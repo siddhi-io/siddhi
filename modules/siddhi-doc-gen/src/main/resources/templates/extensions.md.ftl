@@ -19,19 +19,21 @@
 
 ## Available Extensions
 
-Following are some prewritten extensions that are supported with Siddhi;
+Following are some pre-written extensions that are supported with Siddhi;
 
-<#macro displayRepositoriesList title extensionRepositories>
-<#list extensionRepositories>
+<#macro displayRepositoriesList title extensions>
+<#list extensions>
 ### ${title}
-<#items as extensionRepository>
-1. <a target="_blank" href="https://${extensionsOwner}.github.io/${extensionRepository}">${extensionRepository?replace(CONSTANTS.GITHUB_GPL_EXTENSION_REPOSITORY_PREFIX, "", "rf")?replace(CONSTANTS.GITHUB_APACHE_EXTENSION_REPOSITORY_PREFIX, "", "rf")?replace("-", " ")}</a>
+Name | Description
+:-- | :--
+<#items as name, description>
+<a target="_blank" href="https://${extensionsOwner}.github.io/${name}">${name?replace(CONSTANTS.GITHUB_GPL_EXTENSION_REPOSITORY_PREFIX, "", "rf")?replace(CONSTANTS.GITHUB_APACHE_EXTENSION_REPOSITORY_PREFIX, "", "rf")}</a> | ${description}
 </#items>
 </#list>
 
 </#macro>
-<@displayRepositoriesList title="Extensions released under Apache 2.0 License" extensionRepositories=apacheExtensionRepositories/>
-<@displayRepositoriesList title="Extensions released under GPL License" extensionRepositories=gplExtensionRepositories/>
+<@displayRepositoriesList title="Extensions released under Apache 2.0 License" extensions=apacheExtensions/>
+<@displayRepositoriesList title="Extensions released under GPL License" extensions=gplExtensions/>
 
 ## Extension Repositories
 

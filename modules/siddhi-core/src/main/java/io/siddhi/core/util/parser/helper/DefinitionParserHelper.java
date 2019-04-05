@@ -21,7 +21,7 @@ package io.siddhi.core.util.parser.helper;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.function.Script;
 import io.siddhi.core.stream.StreamJunction;
@@ -168,9 +168,9 @@ public class DefinitionParserHelper {
                 tableMetaStreamEvent.addOutputData(attribute);
             }
 
-            StreamEventPool tableStreamEventPool = new StreamEventPool(tableMetaStreamEvent, 10);
+            StreamEventFactory tableStreamEventFactory = new StreamEventFactory(tableMetaStreamEvent);
             StreamEventCloner tableStreamEventCloner = new StreamEventCloner(tableMetaStreamEvent,
-                    tableStreamEventPool);
+                    tableStreamEventFactory);
 
             Annotation annotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_STORE,
                     tableDefinition.getAnnotations());
@@ -209,10 +209,10 @@ public class DefinitionParserHelper {
             } else {
                 table = new InMemoryTable();
             }
-            table.initTable(tableDefinition, tableStreamEventPool, tableStreamEventCloner, configReader,
+            table.initTable(tableDefinition, tableStreamEventFactory, tableStreamEventCloner, configReader,
                     siddhiAppContext, recordTableHandler);
             if (recordTableHandler != null) {
-                recordTableHandlerManager.registerRecordTableHandler(recordTableHandler.getElementId(),
+                recordTableHandlerManager.registerRecordTableHandler(recordTableHandler.getId(),
                         recordTableHandler);
             }
             tableMap.putIfAbsent(tableDefinition.getId(), table);
@@ -372,10 +372,8 @@ public class DefinitionParserHelper {
                     ExceptionUtil.populateQueryContext(t, sourceAnnotation, siddhiAppContext);
                     throw t;
                 }
-                siddhiAppContext.getSnapshotService().addSnapshotable(source.getStreamDefinition().getId(), source);
                 if (sourceHandlerManager != null) {
-                    sourceHandlerManager.registerSourceHandler(sourceHandler.getElementId(), sourceHandler);
-                    siddhiAppContext.getSnapshotService().addSnapshotable(streamDefinition.getId(), sourceHandler);
+                    sourceHandlerManager.registerSourceHandler(sourceHandler.getId(), sourceHandler);
                 }
                 List<Source> eventSources = eventSourceMap.get(streamDefinition.getId());
                 if (eventSources == null) {
@@ -553,9 +551,7 @@ public class DefinitionParserHelper {
                         }
 
                         if (sinkHandlerManager != null) {
-                            sinkHandlerManager.registerSinkHandler(sinkHandler.getElementId(), sinkHandler);
-                            siddhiAppContext.getSnapshotService().addSnapshotable(streamDefinition.getId(),
-                                    sinkHandler);
+                            sinkHandlerManager.registerSinkHandler(sinkHandler.getId(), sinkHandler);
                         }
 
                         validateSinkMapperCompatibility(streamDefinition, sinkType, mapType, sink, sinkMapper,
@@ -567,8 +563,6 @@ public class DefinitionParserHelper {
                         if (groupDeterminer != null) {
                             sink.getMapper().setGroupDeterminer(groupDeterminer);
                         }
-
-                        siddhiAppContext.getSnapshotService().addSnapshotable(sink.getStreamDefinition().getId(), sink);
 
                         List<Sink> eventSinks = eventSinkMap.get(streamDefinition.getId());
                         if (eventSinks == null) {

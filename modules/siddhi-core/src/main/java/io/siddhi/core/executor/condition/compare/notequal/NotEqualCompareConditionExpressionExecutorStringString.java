@@ -35,9 +35,4 @@ public class NotEqualCompareConditionExpressionExecutorStringString extends NotE
         return !(left.equals(right));
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new NotEqualCompareConditionExpressionExecutorStringString(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

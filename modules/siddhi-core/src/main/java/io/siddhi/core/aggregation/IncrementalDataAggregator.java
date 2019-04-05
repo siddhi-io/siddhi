@@ -22,15 +22,22 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.util.IncrementalTimeConverterUtil;
+import io.siddhi.core.util.parser.AggregationParser;
+import io.siddhi.core.util.snapshot.state.PartitionSyncStateHolder;
+import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.query.api.aggregation.TimePeriod;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class implements the logic to aggregate data that is in-memory or in tables, in incremental data processing.
@@ -41,103 +48,154 @@ import java.util.Map;
  */
 public class IncrementalDataAggregator {
     private final List<TimePeriod.Duration> incrementalDurations;
-    private final TimePeriod.Duration aggregateForDuration;
-    private final BaseIncrementalValueStore baseIncrementalValueStore;
-    private final Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap;
+    private final TimePeriod.Duration durationToAggregate;
+    private final List<ExpressionExecutor> baseExecutorsForFind;
+    private final StateHolder valueStateHolder;
+    private final StreamEvent resetEvent;
+    private final long oldestEventTimestamp;
+    private ExpressionExecutor shouldUpdateTimestamp;
+    private final StreamEventFactory streamEventFactory;
 
     public IncrementalDataAggregator(List<TimePeriod.Duration> incrementalDurations,
-                                     TimePeriod.Duration aggregateForDuration, long oldestEventTimeStamp,
-                                     List<ExpressionExecutor> baseExecutors,
-                                     MetaStreamEvent metaStreamEvent, SiddhiAppContext siddhiAppContext,
-                                     ExpressionExecutor shouldUpdateExpressionExecutor) {
+                                     TimePeriod.Duration durationToAggregate, long oldestEventTimestamp,
+                                     List<ExpressionExecutor> baseExecutorsForFind,
+                                     MetaStreamEvent metaStreamEvent,
+                                     ExpressionExecutor shouldUpdateTimestamp,
+                                     boolean groupBy) {
         this.incrementalDurations = incrementalDurations;
-        this.aggregateForDuration = aggregateForDuration;
-        StreamEventPool streamEventPool = new StreamEventPool(metaStreamEvent, 10);
-        this.baseIncrementalValueStore = new BaseIncrementalValueStore(oldestEventTimeStamp, baseExecutors,
-                streamEventPool, siddhiAppContext, null, shouldUpdateExpressionExecutor);
-        this.baseIncrementalValueStoreGroupByMap = new HashMap<>();
+        this.durationToAggregate = durationToAggregate;
+        this.oldestEventTimestamp = oldestEventTimestamp;
+        this.baseExecutorsForFind = baseExecutorsForFind;
+        this.streamEventFactory = new StreamEventFactory(metaStreamEvent);
+        if (groupBy) {
+            this.valueStateHolder = new PartitionSyncStateHolder(() -> new ValueState());
+        } else {
+            this.valueStateHolder = new SingleSyncStateHolder(() -> new ValueState());
+        }
+        this.resetEvent = AggregationParser.createRestEvent(metaStreamEvent, streamEventFactory.newInstance());
+        this.shouldUpdateTimestamp = shouldUpdateTimestamp;
     }
 
     public ComplexEventChunk<StreamEvent> aggregateInMemoryData(
             Map<TimePeriod.Duration, IncrementalExecutor> incrementalExecutorMap) {
-        int startIndex = incrementalDurations.indexOf(aggregateForDuration);
-        for (int i = startIndex; i >= 0; i--) {
-            TimePeriod.Duration duration = incrementalDurations.get(i);
+        int startIndex = incrementalDurations.indexOf(durationToAggregate);
+        Set<String> groupByKeys = new HashSet<>();
+        for (int k = startIndex; k >= 0; k--) {
+            TimePeriod.Duration duration = incrementalDurations.get(k);
             IncrementalExecutor incrementalExecutor = incrementalExecutorMap.get(duration);
 
-            BaseIncrementalValueStore baseIncrementalValueStore = incrementalExecutor.getBaseIncrementalValueStore();
-            Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap = null;
-            if (incrementalExecutor.getBaseIncrementalValueStoreGroupByMap() != null) {
-                baseIncrementalValueStoreGroupByMap
-                        = new HashMap<>(incrementalExecutor.getBaseIncrementalValueStoreGroupByMap());
-            }
-            if (baseIncrementalValueStoreGroupByMap != null) {
-                for (Map.Entry<String, BaseIncrementalValueStore> entry :
-                        baseIncrementalValueStoreGroupByMap.entrySet()) {
-                    BaseIncrementalValueStore aBaseIncrementalValueStore = entry.getValue();
-                    if (aBaseIncrementalValueStore.isProcessed()) {
-                        processInMemoryAggregates(aBaseIncrementalValueStore.createStreamEvent(),
-                                aBaseIncrementalValueStore.getTimestamp(), entry.getKey());
+            BaseIncrementalValueStore aBaseIncrementalValueStore = incrementalExecutor.getBaseIncrementalValueStore();
+            Map<String, StreamEvent> groupedByEvents = aBaseIncrementalValueStore.getGroupedByEvents();
+            for (Map.Entry<String, StreamEvent> eventEntry : groupedByEvents.entrySet()) {
+                long startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(
+                        eventEntry.getValue().getTimestamp(), durationToAggregate);
+                String groupByKey = eventEntry.getKey() + "-" + startTimeOfAggregates;
+                synchronized (this) {
+                    groupByKeys.add(groupByKey);
+                    SiddhiAppContext.startGroupByFlow(groupByKey);
+                    ValueState state = (ValueState) valueStateHolder.getState();
+                    try {
+                        boolean shouldUpdate = true;
+                        if (shouldUpdateTimestamp != null) {
+                            shouldUpdate = (boolean) shouldUpdate(
+                                    shouldUpdateTimestamp.execute(eventEntry.getValue()), state);
+                        } else {
+                            state.lastTimestamp = oldestEventTimestamp;
+                        }
+                        // keeping timestamp value location as null
+                        for (int i = 0; i < baseExecutorsForFind.size(); i++) {
+                            if (shouldUpdate) {
+                                ExpressionExecutor expressionExecutor = baseExecutorsForFind.get(i);
+                                state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
+                            } else {
+                                ExpressionExecutor expressionExecutor = baseExecutorsForFind.get(i);
+                                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
+                                    state.setValue(expressionExecutor.execute(eventEntry.getValue()), i + 1);
+                                }
+                            }
+                        }
+                    } finally {
+                        valueStateHolder.returnState(state);
+                        SiddhiAppContext.stopGroupByFlow();
                     }
                 }
-            } else if (baseIncrementalValueStore.isProcessed()) {
-                processInMemoryAggregates(baseIncrementalValueStore.createStreamEvent(),
-                        baseIncrementalValueStore.getTimestamp(), null);
             }
         }
-        return createEventChunkFromAggregatedData();
-    }
-
-    private void processInMemoryAggregates(StreamEvent streamEvent, long timestamp, String groupByKey) {
-        long startTimeOfAggregates = IncrementalTimeConverterUtil.getStartTimeOfAggregates(timestamp,
-                aggregateForDuration);
-        synchronized (this) {
-            if (groupByKey != null) {
-                BaseIncrementalValueStore aBaseIncrementalValueStore =
-                        this.baseIncrementalValueStoreGroupByMap.computeIfAbsent(
-                                groupByKey, k -> baseIncrementalValueStore.cloneStore(k, startTimeOfAggregates));
-                process(streamEvent, aBaseIncrementalValueStore);
-            } else {
-                process(streamEvent, this.baseIncrementalValueStore);
-            }
-        }
-    }
-
-    private void process(StreamEvent streamEvent, BaseIncrementalValueStore baseIncrementalValueStore) {
-        List<ExpressionExecutor> expressionExecutors = baseIncrementalValueStore.getExpressionExecutors();
-        boolean shouldUpdate = true;
-        ExpressionExecutor shouldUpdateExpressionExecutor =
-                baseIncrementalValueStore.getShouldUpdateExpressionExecutor();
-        if (shouldUpdateExpressionExecutor != null) {
-            shouldUpdate = ((boolean) shouldUpdateExpressionExecutor.execute(streamEvent));
-        }
-
-        for (int i = 0; i < expressionExecutors.size(); i++) { // keeping timestamp value location as null
-            if (shouldUpdate) {
-                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-                baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
-            } else {
-                ExpressionExecutor expressionExecutor = expressionExecutors.get(i);
-                if (!(expressionExecutor instanceof VariableExpressionExecutor)) {
-                    baseIncrementalValueStore.setValue(expressionExecutor.execute(streamEvent), i + 1);
+        //clean all executors
+        for (String groupByKey : groupByKeys) {
+            SiddhiAppContext.startGroupByFlow(groupByKey);
+            try {
+                for (ExpressionExecutor expressionExecutor : baseExecutorsForFind) {
+                    expressionExecutor.execute(resetEvent);
                 }
+            } finally {
+                SiddhiAppContext.stopGroupByFlow();
             }
         }
-        baseIncrementalValueStore.setProcessed(true);
+        return getProcessedEventChunk();
     }
 
-    private ComplexEventChunk<StreamEvent> createEventChunkFromAggregatedData() {
-        ComplexEventChunk<StreamEvent> processedInMemoryEventChunk = new ComplexEventChunk<>(true);
-        if (this.baseIncrementalValueStoreGroupByMap.size() == 0) {
-            if (this.baseIncrementalValueStore.isProcessed()) {
-                processedInMemoryEventChunk.add(this.baseIncrementalValueStore.createStreamEvent());
+
+    private ComplexEventChunk<StreamEvent> getProcessedEventChunk() {
+        ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(true);
+        Map<String, State> valueStoreMap = this.valueStateHolder.getAllGroupByStates();
+        try {
+            for (State aState : valueStoreMap.values()) {
+                ValueState state = (ValueState) aState;
+                StreamEvent streamEvent = streamEventFactory.newInstance();
+                long timestamp = state.lastTimestamp;
+                streamEvent.setTimestamp(timestamp);
+                state.setValue(timestamp, 0);
+                streamEvent.setOutputData(state.values);
+                streamEventChunk.add(streamEvent);
             }
-        } else {
-            for (Map.Entry<String, BaseIncrementalValueStore> entryAgainstGroupBy :
-                    baseIncrementalValueStoreGroupByMap.entrySet()) {
-                processedInMemoryEventChunk.add(entryAgainstGroupBy.getValue().createStreamEvent());
-            }
+        } finally {
+            this.valueStateHolder.returnGroupByStates(valueStoreMap);
         }
-        return processedInMemoryEventChunk;
+        return streamEventChunk;
+    }
+
+
+    private Object shouldUpdate(Object data, ValueState state) {
+        long timestamp = (long) data;
+        if (timestamp >= state.lastTimestamp) {
+            state.lastTimestamp = timestamp;
+            return true;
+        }
+        return false;
+    }
+
+    class ValueState extends State {
+        private Object[] values;
+        public long lastTimestamp;
+
+        public ValueState() {
+            this.lastTimestamp = 0;
+            this.values = new Object[baseExecutorsForFind.size() + 1];
+        }
+
+        @Override
+        public boolean canDestroy() {
+            return values == null && lastTimestamp == 0;
+        }
+
+        public void setValue(Object value, int position) {
+            values[position] = value;
+        }
+
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("Values", values);
+            state.put("LastTimestamp", lastTimestamp);
+            return state;
+        }
+
+        @Override
+        public void restore(Map<String, Object> state) {
+            values = (Object[]) state.get("Values");
+            lastTimestamp = (Long) state.get("LastTimestamp");
+        }
+
     }
 }

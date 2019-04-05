@@ -43,11 +43,12 @@ public interface InnerStateRuntime {
 
     void setQuerySelector(Processor commonProcessor);
 
+    void setup();
+
     void init();
 
     void reset();
 
     void update();
 
-    InnerStateRuntime clone(String key);
 }

@@ -73,8 +73,8 @@
             <class name="io.siddhi.core.query.pattern.absent.LogicalAbsentPatternTestCase"/>
             <class name="io.siddhi.core.query.pattern.absent.EveryAbsentPatternTestCase"/>
 
-            <class name="io.siddhi.core.query.selector.attribute.aggregator.DistinctCountAttributeAggregatorTestCase"/>
-            <class name="io.siddhi.core.query.selector.attribute.aggregator.StdDevAttributeAggregatorTestCase"/>
+            <class name="io.siddhi.core.query.selector.attribute.aggregator.DistinctCountAttributeAggregatorExecutorTestCase"/>
+            <class name="io.siddhi.core.query.selector.attribute.aggregator.StdDevAttributeAggregatorExecutorTestCase"/>
 
             <class name="io.siddhi.core.query.sequence.SequenceTestCase"/>
             <class name="io.siddhi.core.query.sequence.absent.AbsentSequenceTestCase"/>
@@ -123,6 +123,8 @@
             <class name="io.siddhi.core.window.TimeLengthWindowTestCase"/>
             <class name="io.siddhi.core.window.WindowDefinitionTestCase"/>
             <class name="io.siddhi.core.window.BatchWindowTestCase"/>
+            <class name="io.siddhi.core.window.SessionWindowTestCase"/>
+            <class name="io.siddhi.core.window.DelayWindowTestCase"/>
 
             <class name="io.siddhi.core.query.BooleanCompareTestCase"/>
             <class name="io.siddhi.core.query.FilterTestCase1"/>

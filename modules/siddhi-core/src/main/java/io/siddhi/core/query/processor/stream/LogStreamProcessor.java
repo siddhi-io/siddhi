@@ -28,12 +28,15 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.stream.MetaStreamEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import io.siddhi.core.executor.ConstantExpressionExecutor;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.query.processor.ProcessingMode;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
@@ -41,7 +44,6 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Input attributes to log is (priority (String), log.message (String), is.event.logged (Bool))
@@ -97,7 +99,7 @@ import java.util.Map;
                 )
         }
 )
-public class LogStreamProcessor extends StreamProcessor {
+public class LogStreamProcessor extends StreamProcessor<State> {
     private static final Logger log = Logger.getLogger(LogStreamProcessor.class);
     private ExpressionExecutor isLogEventExpressionExecutor = null;
     private ExpressionExecutor logMessageExpressionExecutor = null;
@@ -112,13 +114,17 @@ public class LogStreamProcessor extends StreamProcessor {
      * @param inputDefinition              the incoming stream definition
      * @param attributeExpressionExecutors the executors for the function parameters
      * @param configReader                 this hold the {@link LogStreamProcessor} configuration reader.
+     * @param streamEventClonerHolder      streamEventCloner Holder
+     * @param findToBeExecuted             find will be executed
      * @param siddhiQueryContext           current siddhi query context
      * @return the additional output attributes introduced by the function
      */
     @Override
-    protected List<Attribute> init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
-                                   ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                                   boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(MetaStreamEvent metaStreamEvent, AbstractDefinition inputDefinition,
+                                ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                StreamEventClonerHolder streamEventClonerHolder,
+                                boolean outputExpectsExpiredEvents, boolean findToBeExecuted,
+                                SiddhiQueryContext siddhiQueryContext) {
         int inputExecutorLength = attributeExpressionExecutors.length;
         if (inputExecutorLength == 1) {
             if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.STRING) {
@@ -183,12 +189,18 @@ public class LogStreamProcessor extends StreamProcessor {
                     "isEventLogged (Bool), but there are " + attributeExpressionExecutors.length + " in the input!");
         }
         logPrefix = siddhiQueryContext.getSiddhiAppContext().getName() + ": ";
+        return null;
+    }
+
+    @Override
+    public List<Attribute> getReturnAttributes() {
         return new ArrayList<Attribute>();
     }
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
+                           StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater,
+                           State state) {
         while (streamEventChunk.hasNext()) {
             ComplexEvent complexEvent = streamEventChunk.next();
             switch (attributeExpressionLength) {
@@ -277,17 +289,6 @@ public class LogStreamProcessor extends StreamProcessor {
     @Override
     public void stop() {
         //Do nothing
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        //No state
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Nothing to be done
     }
 
     @Override

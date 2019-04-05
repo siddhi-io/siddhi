@@ -33,8 +33,6 @@ import io.siddhi.core.util.transport.SubscriberUnAvailableException;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 
-import java.util.Map;
-
 /**
  * Implementation of {@link Sink} which represents in-memory transport. This implementation can send incoming objects
  * to in-memory transport within JVM.
@@ -99,13 +97,4 @@ public class InMemorySink extends Sink {
         }
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        // no state
-    }
 }

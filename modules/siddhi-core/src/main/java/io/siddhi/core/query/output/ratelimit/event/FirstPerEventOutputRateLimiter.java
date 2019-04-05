@@ -21,8 +21,9 @@ package io.siddhi.core.query.output.ratelimit.event;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,70 +31,69 @@ import java.util.Map;
  * Implementation of {@link OutputRateLimiter} which will collect pre-defined number of events and the emit only the
  * first event.
  */
-public class FirstPerEventOutputRateLimiter extends OutputRateLimiter {
+public class FirstPerEventOutputRateLimiter
+        extends OutputRateLimiter<FirstPerEventOutputRateLimiter.RateLimiterState> {
     private final Integer value;
-    private String id;
-    private volatile int counter = 0;
 
     public FirstPerEventOutputRateLimiter(String id, Integer value) {
         this.value = value;
-        this.id = id;
     }
 
     @Override
-    public OutputRateLimiter clone(String key) {
-        FirstPerEventOutputRateLimiter instance = new FirstPerEventOutputRateLimiter(id + key, value);
-        instance.setLatencyTracker(latencyTracker);
-        return instance;
+    protected StateFactory<RateLimiterState> init() {
+        return () -> new RateLimiterState();
     }
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
         complexEventChunk.reset();
-        ArrayList<ComplexEventChunk<ComplexEvent>> outputEventChunks = new ArrayList<ComplexEventChunk<ComplexEvent>>();
-        synchronized (this) {
-            while (complexEventChunk.hasNext()) {
-                ComplexEvent event = complexEventChunk.next();
-                if (event.getType() == ComplexEvent.Type.CURRENT || event.getType() == ComplexEvent.Type.EXPIRED) {
-                    if (counter == 0) {
-                        complexEventChunk.remove();
-                        ComplexEventChunk<ComplexEvent> firstPerEventChunk = new ComplexEventChunk<ComplexEvent>
-                                (complexEventChunk.isBatch());
-                        firstPerEventChunk.add(event);
-                        outputEventChunks.add(firstPerEventChunk);
-                    }
-                    if (++counter == value) {
-                        counter = 0;
+        ComplexEventChunk<ComplexEvent> outputEventChunk = new ComplexEventChunk<>(complexEventChunk.isBatch());
+        RateLimiterState state = stateHolder.getState();
+        try {
+            synchronized (state) {
+                while (complexEventChunk.hasNext()) {
+                    ComplexEvent event = complexEventChunk.next();
+                    complexEventChunk.remove();
+                    state.counter++;
+                    if (state.counter == 1) {
+                        outputEventChunk.add(event);
+                    } else if (state.counter == value) {
+                        state.counter = 0;
                     }
                 }
             }
+        } finally {
+            stateHolder.returnState(state);
         }
-        for (ComplexEventChunk eventChunk : outputEventChunks) {
-            sendToCallBacks(eventChunk);
+        if (outputEventChunk.getFirst() != null) {
+            sendToCallBacks(outputEventChunk);
+        }
+    }
+
+    @Override
+    public void partitionCreated() {
+        //Nothing to be done
+    }
+
+    class RateLimiterState extends State {
+
+        private volatile int counter = 0;
+
+        @Override
+        public boolean canDestroy() {
+            return counter == 0;
         }
 
-    }
+        @Override
+        public Map<String, Object> snapshot() {
+            Map<String, Object> state = new HashMap<>();
+            state.put("Counter", counter);
+            return state;
+        }
 
-    @Override
-    public void start() {
-        //Nothing to start
+        @Override
+        public void restore(Map<String, Object> state) {
+            counter = (int) state.get("Counter");
+        }
     }
-
-    @Override
-    public void stop() {
-        //Nothing to stop
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        Map<String, Object> state = new HashMap<>();
-        state.put("Counter", counter);
-        return state;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        counter = (int) state.get("Counter");
-    }
-
 }

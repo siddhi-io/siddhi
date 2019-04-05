@@ -130,6 +130,7 @@ public class IncrementalPersistenceTestCase {
         try {
             siddhiAppRuntime.restoreLastRevision();
         } catch (CannotRestoreSiddhiAppStateException e) {
+            log.error(e.getMessage(), e);
             Assert.fail("Restoring of Siddhi app " + siddhiAppRuntime.getName() + " failed");
         }
         siddhiAppRuntime.start();

@@ -50,17 +50,4 @@ public class MultiplyExpressionExecutorInt implements ExpressionExecutor {
         return Attribute.Type.INT;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new MultiplyExpressionExecutorInt(leftExpressionExecutor.cloneExecutor(key), rightExpressionExecutor
-                .cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        leftExpressionExecutor.clean();
-        rightExpressionExecutor.clean();
-    }
-
-
 }

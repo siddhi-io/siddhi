@@ -21,7 +21,7 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.extension.util.CustomFunctionExtension;
-import io.siddhi.core.query.extension.util.StringConcatAggregatorString;
+import io.siddhi.core.query.extension.util.StringConcatAggregatorExecutorString;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
@@ -85,7 +85,7 @@ public class ExtensionTestCase {
         log.info("extension test2");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:plus", CustomFunctionExtension.class);
-        siddhiManager.setExtension("email:getAll", StringConcatAggregatorString.class);
+        siddhiManager.setExtension("email:getAll", StringConcatAggregatorExecutorString.class);
 
         String cseEventStream = "define stream cseEventStream (symbol string, price long, volume long);";
         String query = ("@info(name = 'query1') from cseEventStream select symbol , custom:plus(price,volume) as " +
@@ -128,7 +128,7 @@ public class ExtensionTestCase {
         log.info("extension test3");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:plus", CustomFunctionExtension.class);
-        siddhiManager.setExtension("email:getAllNew", StringConcatAggregatorString.class);
+        siddhiManager.setExtension("email:getAllNew", StringConcatAggregatorExecutorString.class);
 
         String cseEventStream = "" +
                 "" +
@@ -172,7 +172,7 @@ public class ExtensionTestCase {
         log.info("extension test4");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("custom:plus", CustomFunctionExtension.class);
-        siddhiManager.setExtension("email:getAll", StringConcatAggregatorString.class);
+        siddhiManager.setExtension("email:getAll", StringConcatAggregatorExecutorString.class);
 
 
         String cseEventStream = "define stream cseEventStream (price long, volume long);";
@@ -218,7 +218,7 @@ public class ExtensionTestCase {
         configMap.put("email.getAllNew.append.abc", "true");
         siddhiManager.setConfigManager(new InMemoryConfigManager(configMap, null));
         siddhiManager.setExtension("custom:plus", CustomFunctionExtension.class);
-        siddhiManager.setExtension("email:getAllNew", StringConcatAggregatorString.class);
+        siddhiManager.setExtension("email:getAllNew", StringConcatAggregatorExecutorString.class);
 
         String cseEventStream = "" +
                 "" +

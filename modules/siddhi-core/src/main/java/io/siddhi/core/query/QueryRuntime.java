@@ -22,14 +22,12 @@ import io.siddhi.core.event.MetaComplexEvent;
 import io.siddhi.core.query.input.MultiProcessStreamReceiver;
 import io.siddhi.core.query.input.stream.StreamRuntime;
 import io.siddhi.core.query.input.stream.single.SingleStreamRuntime;
+import io.siddhi.core.query.input.stream.state.StateStreamRuntime;
 import io.siddhi.core.query.output.callback.OutputCallback;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.query.selector.QuerySelector;
-import io.siddhi.core.stream.StreamJunction;
-import io.siddhi.core.util.lock.LockWrapper;
-import io.siddhi.core.util.parser.OutputParser;
-import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.core.util.statistics.MemoryCalculable;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.execution.query.Query;
@@ -38,19 +36,16 @@ import io.siddhi.query.api.execution.query.input.stream.SingleInputStream;
 import io.siddhi.query.api.execution.query.input.stream.StateInputStream;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Query Runtime represent holder object for a single Siddhi query and holds all runtime objects related to that query.
  */
-public class QueryRuntime implements MemoryCalculable {
+public class QueryRuntime implements MemoryCalculable, ExternalReferencedHolder {
 
     private StreamRuntime streamRuntime;
     private OutputRateLimiter outputRateLimiter;
     private Query query;
     private OutputCallback outputCallback;
-    private boolean synchronised;
     private SiddhiQueryContext siddhiQueryContext;
     private StreamDefinition outputStreamDefinition;
     private boolean toLocalStream;
@@ -59,13 +54,12 @@ public class QueryRuntime implements MemoryCalculable {
 
     public QueryRuntime(Query query, StreamRuntime streamRuntime, QuerySelector selector,
                         OutputRateLimiter outputRateLimiter, OutputCallback outputCallback,
-                        MetaComplexEvent metaComplexEvent, boolean synchronised,
+                        MetaComplexEvent metaComplexEvent,
                         SiddhiQueryContext siddhiQueryContext) {
         this.query = query;
         this.streamRuntime = streamRuntime;
         this.selector = selector;
         this.outputCallback = outputCallback;
-        this.synchronised = synchronised;
         this.siddhiQueryContext = siddhiQueryContext;
         outputRateLimiter.setOutputCallback(outputCallback);
         setOutputRateLimiter(outputRateLimiter);
@@ -118,40 +112,6 @@ public class QueryRuntime implements MemoryCalculable {
         return false;
     }
 
-    public QueryRuntime clone(String key, ConcurrentMap<String, StreamJunction> localStreamJunctionMap) {
-
-        LockWrapper lockWrapper = null;
-        if (synchronised) {
-            lockWrapper = new LockWrapper("");
-            lockWrapper.setLock(new ReentrantLock());
-        }
-        StreamRuntime clonedStreamRuntime = this.streamRuntime.clone(key);
-        QuerySelector clonedSelector = this.selector.clone(key);
-        OutputRateLimiter clonedOutputRateLimiter = outputRateLimiter.clone(key);
-        clonedOutputRateLimiter.init(lockWrapper, siddhiQueryContext);
-
-        QueryRuntime queryRuntime = new QueryRuntime(query, clonedStreamRuntime, clonedSelector,
-                clonedOutputRateLimiter, outputCallback, this.metaComplexEvent,
-                synchronised, siddhiQueryContext);
-        QueryParserHelper.initStreamRuntime(clonedStreamRuntime, metaComplexEvent, lockWrapper,
-                siddhiQueryContext.getName());
-
-        queryRuntime.setToLocalStream(toLocalStream);
-
-        if (!toLocalStream) {
-            queryRuntime.outputRateLimiter.setOutputCallback(outputCallback);
-            queryRuntime.outputCallback = this.outputCallback;
-        } else {
-            OutputCallback clonedQueryOutputCallback = OutputParser.constructOutputCallback(query.getOutputStream(),
-                    key, localStreamJunctionMap, outputStreamDefinition, siddhiQueryContext);
-            queryRuntime.outputRateLimiter.setOutputCallback(clonedQueryOutputCallback);
-            queryRuntime.outputCallback = clonedQueryOutputCallback;
-        }
-        queryRuntime.outputRateLimiter.start();
-        return queryRuntime;
-
-    }
-
     private void setOutputRateLimiter(OutputRateLimiter outputRateLimiter) {
         this.outputRateLimiter = outputRateLimiter;
         selector.setNextProcessor(outputRateLimiter);
@@ -196,4 +156,18 @@ public class QueryRuntime implements MemoryCalculable {
         return selector;
     }
 
+    public void initPartition() {
+        if (streamRuntime instanceof StateStreamRuntime) {
+            ((StateStreamRuntime) streamRuntime).initPartition();
+        }
+        outputRateLimiter.partitionCreated();
+    }
+
+    public void start() {
+        initPartition();
+    }
+
+    @Override
+    public void stop() {
+    }
 }

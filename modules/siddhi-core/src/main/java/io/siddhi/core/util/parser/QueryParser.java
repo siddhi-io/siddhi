@@ -78,6 +78,8 @@ public class QueryParser {
      * @param windowMap                keyvalue containing event window map.
      * @param lockSynchronizer         Lock synchronizer for sync the lock across queries.
      * @param queryIndex               query index to identify unknown query by number
+     * @param partitioned              is the query partitioned
+     * @param partitionId              The ID of the partition
      * @return queryRuntime
      */
     public static QueryRuntime parse(Query query, SiddhiAppContext siddhiAppContext,
@@ -88,7 +90,7 @@ public class QueryParser {
                                      Map<String, Table> tableMap,
                                      Map<String, AggregationRuntime> aggregationMap, Map<String, Window> windowMap,
                                      LockSynchronizer lockSynchronizer,
-                                     String queryIndex) {
+                                     String queryIndex, boolean partitioned, String partitionId) {
         List<VariableExpressionExecutor> executors = new ArrayList<VariableExpressionExecutor>();
         QueryRuntime queryRuntime;
         Element nameElement = null;
@@ -103,7 +105,8 @@ public class QueryParser {
             } else {
                 queryName = "query_" + queryIndex;
             }
-            SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName);
+            SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext, queryName, partitionId);
+            siddhiQueryContext.setPartitioned(partitioned);
             latencyTracker = QueryParserHelper.createLatencyTracker(siddhiAppContext, siddhiQueryContext.getName(),
                     SiddhiConstants.METRIC_INFIX_QUERIES, null);
             siddhiQueryContext.setLatencyTracker(latencyTracker);
@@ -204,16 +207,17 @@ public class QueryParser {
             OutputRateLimiter outputRateLimiter = OutputParser.constructOutputRateLimiter(
                     query.getOutputStream().getId(), query.getOutputRate(),
                     query.getSelector().getGroupByList().size() != 0, isWindow,
-                    siddhiAppContext.getScheduledExecutorService(), siddhiQueryContext);
+                    siddhiQueryContext);
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
                 selector.setBatchingEnabled(false);
             }
-            siddhiAppContext.addEternalReferencedHolder(outputRateLimiter);
+
+            boolean groupBy = !query.getSelector().getGroupByList().isEmpty();
 
             OutputCallback outputCallback = OutputParser.constructOutputCallback(query.getOutputStream(),
                     streamRuntime.getMetaComplexEvent().getOutputStreamDefinition(), tableMap, windowMap,
                     !(streamRuntime instanceof SingleStreamRuntime) ||
-                            !query.getSelector().getGroupByList().isEmpty(), siddhiQueryContext);
+                            groupBy, siddhiQueryContext);
 
             QueryParserHelper.reduceMetaComplexEvent(streamRuntime.getMetaComplexEvent());
             QueryParserHelper.updateVariablePosition(streamRuntime.getMetaComplexEvent(), executors);
@@ -222,7 +226,7 @@ public class QueryParser {
             selector.setEventPopulator(StateEventPopulatorFactory.constructEventPopulator(streamRuntime
                     .getMetaComplexEvent()));
             queryRuntime = new QueryRuntime(query, streamRuntime, selector, outputRateLimiter, outputCallback,
-                    streamRuntime.getMetaComplexEvent(), lockWrapper != null, siddhiQueryContext);
+                    streamRuntime.getMetaComplexEvent(), siddhiQueryContext);
 
             if (outputRateLimiter instanceof WrappedSnapshotOutputRateLimiter) {
                 selector.setBatchingEnabled(false);
@@ -230,7 +234,7 @@ public class QueryParser {
                         .init(streamRuntime.getMetaComplexEvent().getOutputStreamDefinition().getAttributeList().size(),
                                 selector.getAttributeProcessorList(), streamRuntime.getMetaComplexEvent());
             }
-            outputRateLimiter.init(lockWrapper, siddhiQueryContext);
+            outputRateLimiter.init(lockWrapper, groupBy, siddhiQueryContext);
 
         } catch (DuplicateDefinitionException e) {
             if (nameElement != null) {

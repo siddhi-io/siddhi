@@ -17,6 +17,7 @@
  */
 package io.siddhi.core.query.selector;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.event.ComplexEvent;
 import io.siddhi.core.event.ComplexEventChunk;
@@ -28,7 +29,6 @@ import io.siddhi.core.executor.condition.ConditionExpressionExecutor;
 import io.siddhi.core.query.output.ratelimit.OutputRateLimiter;
 import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.query.selector.attribute.processor.AttributeProcessor;
-import io.siddhi.core.query.selector.attribute.processor.executor.GroupByAggregationAttributeExecutor;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.query.api.execution.query.selection.Selector;
 import org.apache.log4j.Logger;
@@ -74,7 +74,6 @@ public class QuerySelector implements Processor {
 
     @Override
     public void process(ComplexEventChunk complexEventChunk) {
-
         if (log.isTraceEnabled()) {
             log.trace("event is processed by selector " + id + this);
         }
@@ -97,11 +96,9 @@ public class QuerySelector implements Processor {
         if (outputComplexEventChunk != null) {
             outputRateLimiter.process(outputComplexEventChunk);
         }
-
     }
 
     public ComplexEventChunk execute(ComplexEventChunk complexEventChunk) {
-
         if (log.isTraceEnabled()) {
             log.trace("event is executed by selector " + id + this);
         }
@@ -178,31 +175,32 @@ public class QuerySelector implements Processor {
             while (complexEventChunk.hasNext()) {
                 ComplexEvent event = complexEventChunk.next();
                 switch (event.getType()) {
-
                     case CURRENT:
                     case EXPIRED:
                         eventPopulator.populateStateEvent(event);
-                        String groupedByKey = groupByKeyGenerator.constructEventKey(event);
-                        GroupByAggregationAttributeExecutor.getKeyThreadLocal().set(groupedByKey);
-
-                        for (AttributeProcessor attributeProcessor : attributeProcessorList) {
-                            attributeProcessor.process(event);
-                        }
-                        if ((event.getType() == StreamEvent.Type.CURRENT && currentOn) || (event.getType() ==
-                                StreamEvent.Type.EXPIRED && expiredOn)) {
-                            if (!(havingConditionExecutor != null && !havingConditionExecutor.execute(event))) {
-                                complexEventChunk.remove();
-                                if (limit == SiddhiConstants.UNKNOWN_STATE) {
-                                    currentComplexEventChunk.add(new GroupedComplexEvent(groupedByKey, event));
-                                } else {
-                                    if (limitCount < limit) {
-                                        currentComplexEventChunk.add(new GroupedComplexEvent(groupedByKey, event));
-                                        limitCount++;
+                        String groupByKey = groupByKeyGenerator.constructEventKey(event);
+                        SiddhiAppContext.startGroupByFlow(groupByKey);
+                        try {
+                            for (AttributeProcessor attributeProcessor : attributeProcessorList) {
+                                attributeProcessor.process(event);
+                            }
+                            if ((event.getType() == StreamEvent.Type.CURRENT && currentOn) || (event.getType() ==
+                                    StreamEvent.Type.EXPIRED && expiredOn)) {
+                                if (!(havingConditionExecutor != null && !havingConditionExecutor.execute(event))) {
+                                    complexEventChunk.remove();
+                                    if (limit == SiddhiConstants.UNKNOWN_STATE) {
+                                        currentComplexEventChunk.add(new GroupedComplexEvent(groupByKey, event));
+                                    } else {
+                                        if (limitCount < limit) {
+                                            currentComplexEventChunk.add(new GroupedComplexEvent(groupByKey, event));
+                                            limitCount++;
+                                        }
                                     }
                                 }
                             }
+                        } finally {
+                            SiddhiAppContext.stopGroupByFlow();
                         }
-                        GroupByAggregationAttributeExecutor.getKeyThreadLocal().remove();
                         break;
                     case TIMER:
                         break;
@@ -212,6 +210,7 @@ public class QuerySelector implements Processor {
                         }
                         break;
                 }
+
             }
         }
         if (isOrderBy) {
@@ -287,20 +286,21 @@ public class QuerySelector implements Processor {
                     case EXPIRED:
                         eventPopulator.populateStateEvent(event);
                         String groupByKey = groupByKeyGenerator.constructEventKey(event);
-                        GroupByAggregationAttributeExecutor.getKeyThreadLocal().set(groupByKey);
-
-                        for (AttributeProcessor attributeProcessor : attributeProcessorList) {
-                            attributeProcessor.process(event);
-                        }
-
-                        if (!(havingConditionExecutor != null && !havingConditionExecutor.execute(event))) {
-                            if ((event.getType() == StreamEvent.Type.CURRENT && currentOn) || (event.getType() ==
-                                    StreamEvent.Type.EXPIRED && expiredOn)) {
-                                complexEventChunk.remove();
-                                groupedEvents.put(groupByKey, event);
+                        SiddhiAppContext.startGroupByFlow(groupByKey);
+                        try {
+                            for (AttributeProcessor attributeProcessor : attributeProcessorList) {
+                                attributeProcessor.process(event);
                             }
+                            if (!(havingConditionExecutor != null && !havingConditionExecutor.execute(event))) {
+                                if ((event.getType() == StreamEvent.Type.CURRENT && currentOn) || (event.getType() ==
+                                        StreamEvent.Type.EXPIRED && expiredOn)) {
+                                    complexEventChunk.remove();
+                                    groupedEvents.put(groupByKey, event);
+                                }
+                            }
+                        } finally {
+                            SiddhiAppContext.stopGroupByFlow();
                         }
-                        GroupByAggregationAttributeExecutor.getKeyThreadLocal().remove();
                         break;
                     case TIMER:
                         break;
@@ -361,25 +361,6 @@ public class QuerySelector implements Processor {
         }
     }
 
-    @Override
-    public Processor cloneProcessor(String key) {
-        return null;
-    }
-
-    @Override
-    public void clean() {
-        for (AttributeProcessor processor : attributeProcessorList) {
-            processor.clean();
-        }
-        if (havingConditionExecutor != null) {
-            havingConditionExecutor.clean();
-        }
-        if (groupByKeyGenerator != null) {
-            groupByKeyGenerator.clean();
-        }
-        outputRateLimiter.clean();
-    }
-
     public List<AttributeProcessor> getAttributeProcessorList() {
         return attributeProcessorList;
     }
@@ -403,27 +384,6 @@ public class QuerySelector implements Processor {
             containsAggregator) {
         this.havingConditionExecutor = havingConditionExecutor;
         this.containsAggregator = this.containsAggregator || containsAggregator;
-    }
-
-    public QuerySelector clone(String key) {
-        QuerySelector clonedQuerySelector = new QuerySelector(id + key, selector, currentOn, expiredOn,
-                siddhiQueryContext);
-        List<AttributeProcessor> clonedAttributeProcessorList = new ArrayList<AttributeProcessor>();
-        for (AttributeProcessor attributeProcessor : attributeProcessorList) {
-            clonedAttributeProcessorList.add(attributeProcessor.cloneProcessor(key));
-        }
-        clonedQuerySelector.attributeProcessorList = clonedAttributeProcessorList;
-        clonedQuerySelector.isGroupBy = isGroupBy;
-        clonedQuerySelector.containsAggregator = containsAggregator;
-        clonedQuerySelector.groupByKeyGenerator = groupByKeyGenerator;
-        clonedQuerySelector.havingConditionExecutor = havingConditionExecutor;
-        clonedQuerySelector.eventPopulator = eventPopulator;
-        clonedQuerySelector.batchingEnabled = batchingEnabled;
-        clonedQuerySelector.isOrderBy = isOrderBy;
-        clonedQuerySelector.orderByEventComparator = orderByEventComparator;
-        clonedQuerySelector.limit = limit;
-        clonedQuerySelector.offset = offset;
-        return clonedQuerySelector;
     }
 
     public void setBatchingEnabled(boolean batchingEnabled) {

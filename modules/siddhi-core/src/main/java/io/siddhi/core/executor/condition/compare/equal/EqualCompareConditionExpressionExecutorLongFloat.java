@@ -35,12 +35,5 @@ public class EqualCompareConditionExpressionExecutorLongFloat
     @Override
     protected Boolean execute(Object left, Object right) {
         return ((Long) left).doubleValue() == ((Float) right).doubleValue();
-
-    }
-
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new EqualCompareConditionExpressionExecutorLongFloat(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
     }
 }

@@ -25,29 +25,33 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
 
+/**
+ * The sample demonstrate how to use Siddhi partitions within another Java program.
+ * This calculates sum of price from the last two events of each symbol.
+ */
 public class PartitionSample {
 
     public static void main(String[] args) throws InterruptedException {
 
-        // Creating Siddhi Manager
+        // Create Siddhi Manager
         SiddhiManager siddhiManager = new SiddhiManager();
 
-
+        //Siddhi Application
         String siddhiApp = "" +
-                "define stream cseEventStream (symbol string, price float,volume int);" +
+                "define stream StockStream (symbol string, price float,volume int);" +
                 "" +
-                "partition with (symbol of cseEventStream)" +
+                "partition with (symbol of StockStream)" +
                 "begin" +
                 "   @info(name = 'query') " +
-                "   from cseEventStream " +
+                "   from StockStream#window.length(2)" +
                 "   select symbol, sum(price) as price, volume " +
                 "   insert into OutStockStream ;" +
                 "end ";
 
-        //Generating runtime
+        //Generate runtime
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
 
-        //Adding callback to retrieve output events from stream
+        //Add callback to retrieve output events from stream
         siddhiAppRuntime.addCallback("OutStockStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
@@ -55,23 +59,27 @@ public class PartitionSample {
             }
         });
 
-        //Retrieving InputHandler to push events into Siddhi
-        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("cseEventStream");
+        //Retrieve InputHandler to push events into Siddhi
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
 
         //Starting event processing
         siddhiAppRuntime.start();
 
-        //Sending events to Siddhi
+        //Send events to Siddhi
         inputHandler.send(new Object[]{"IBM", 75f, 100});
+        inputHandler.send(new Object[]{"IBM", 76f, 100});
         inputHandler.send(new Object[]{"WSO2", 705f, 100});
-        inputHandler.send(new Object[]{"IBM", 35f, 100});
+        inputHandler.send(new Object[]{"WSO2", 711f, 100});
+        inputHandler.send(new Object[]{"IBM", 90f, 100});
         inputHandler.send(new Object[]{"ORACLE", 50.0f, 100});
+        inputHandler.send(new Object[]{"ORACLE", 51.0f, 100});
+        inputHandler.send(new Object[]{"ORACLE", 50.5f, 100});
         Thread.sleep(1000);
 
-        //Shutting down the runtime
+        //Shutdown the runtime
         siddhiAppRuntime.shutdown();
 
-        //Shutting down Siddhi
+        //Shutdown Siddhi Manager
         siddhiManager.shutdown();
     }
 }

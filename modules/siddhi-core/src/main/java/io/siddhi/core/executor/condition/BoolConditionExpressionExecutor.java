@@ -49,14 +49,4 @@ public class BoolConditionExpressionExecutor extends ConditionExpressionExecutor
         }
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new BoolConditionExpressionExecutor(conditionExecutor.cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        conditionExecutor.clean();
-    }
-
 }

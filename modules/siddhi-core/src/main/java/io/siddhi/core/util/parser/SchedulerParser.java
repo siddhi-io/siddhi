@@ -18,7 +18,7 @@
 
 package io.siddhi.core.util.parser;
 
-import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
 import io.siddhi.core.util.Schedulable;
 import io.siddhi.core.util.Scheduler;
 
@@ -35,14 +35,14 @@ public class SchedulerParser {
      * Create Scheduler object.
      *
      * @param singleThreadEntryValve Schedulable
-     * @param siddhiAppContext       SiddhiAppContext
+     * @param siddhiQueryContext     SiddhiAppContext
      * @return Scheduler instance
      */
-    public static Scheduler parse(Schedulable
-                                          singleThreadEntryValve, SiddhiAppContext siddhiAppContext) {
+    public static Scheduler parse(Schedulable singleThreadEntryValve, SiddhiQueryContext siddhiQueryContext) {
 
-        Scheduler scheduler = new Scheduler(singleThreadEntryValve, siddhiAppContext);
-        siddhiAppContext.addScheduler(scheduler);
+        Scheduler scheduler = new Scheduler(singleThreadEntryValve, siddhiQueryContext);
+        siddhiQueryContext.getSiddhiAppContext().addScheduler(scheduler);
+        siddhiQueryContext.getSiddhiAppContext().addEternalReferencedHolder(scheduler);
         return scheduler;
     }
 }

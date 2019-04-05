@@ -28,6 +28,8 @@ import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.ReturnAttribute;
 import io.siddhi.annotation.SystemParameter;
 import io.siddhi.doc.gen.core.freemarker.FormatDescriptionMethod;
+import io.siddhi.doc.gen.extensions.ExtensionDocCache;
+import io.siddhi.doc.gen.extensions.ExtensionDocRetriever;
 import io.siddhi.doc.gen.metadata.ExampleMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionMetaData;
 import io.siddhi.doc.gen.metadata.ExtensionType;
@@ -59,6 +61,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -354,8 +358,11 @@ public class DocumentationUtils {
      * @param extensionsIndexFileName    The name of the index file that will be generated
      * @throws MojoFailureException if the Mojo fails to find template file or create new documentation file
      */
-    public static void createExtensionsIndex(List<String> extensionRepositories, String extensionRepositoryOwner,
-                                             String documentationBaseDirectory, String extensionsIndexFileName)
+    public static void createExtensionsIndex(List<String> extensionRepositories,
+                                             String extensionRepositoryOwner,
+                                             String documentationBaseDirectory,
+                                             String projectBaseDir,
+                                             String extensionsIndexFileName)
             throws MojoFailureException {
         // Separating Apache and GPL extensions based on siddhi repository prefix conventions
         List<String> gplExtensionRepositories = new ArrayList<>();
@@ -371,8 +378,16 @@ public class DocumentationUtils {
         // Generating data model
         Map<String, Object> rootDataModel = new HashMap<>();
         rootDataModel.put("extensionsOwner", extensionRepositoryOwner);
-        rootDataModel.put("gplExtensionRepositories", gplExtensionRepositories);
-        rootDataModel.put("apacheExtensionRepositories", apacheExtensionRepositories);
+
+        Path gplDocCachePath = Paths.get(
+                projectBaseDir, "src", "main", "resources", "gpl.docs.json");
+        Path apacheDocCachePath = Paths.get(
+                projectBaseDir, "src", "main", "resources", "apache.docs.json");
+
+        rootDataModel.put("gplExtensions", retrieveExtensionWithDescriptions(
+                gplDocCachePath, extensionRepositoryOwner, gplExtensionRepositories));
+        rootDataModel.put("apacheExtensions", retrieveExtensionWithDescriptions(
+                apacheDocCachePath, extensionRepositoryOwner, apacheExtensionRepositories));
 
         generateFileFromTemplate(
                 Constants.MARKDOWN_EXTENSIONS_INDEX_TEMPLATE + Constants.MARKDOWN_FILE_EXTENSION
@@ -380,6 +395,27 @@ public class DocumentationUtils {
                 rootDataModel, documentationBaseDirectory,
                 extensionsIndexFileName + Constants.MARKDOWN_FILE_EXTENSION
         );
+    }
+
+    private static Map<String, String> retrieveExtensionWithDescriptions(Path cachePath,
+                                                                         String extensionRepositoryOwner,
+                                                                         List<String> extensions)
+            throws MojoFailureException {
+        ExtensionDocCache cache = new ExtensionDocCache(cachePath);
+        ExtensionDocRetriever retriever = new ExtensionDocRetriever(extensionRepositoryOwner, extensions, cache);
+
+        retriever.pull();
+
+        boolean inMemory = cache.isInMemory();
+        boolean throttled = retriever.isThrottled();
+
+        if (throttled && inMemory) {
+            throw new MojoFailureException(
+                    "The API has reached the throttling limits while fetching the extensions." +
+                    "The extension cache is also not available." +
+                    "Try again later or check whether cache is present in path: " + cachePath.toString());
+        }
+        return cache.getExtensionDescriptionMap();
     }
 
     /**

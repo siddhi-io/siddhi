@@ -28,10 +28,11 @@ import io.siddhi.core.exception.OperationNotSupportedException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -70,8 +71,8 @@ import java.util.Set;
 public class SizeOfSetFunctionExecutor extends FunctionExecutor {
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                SiddhiQueryContext siddhiQueryContext) {
         if (attributeExpressionExecutors.length != 1) {
             throw new SiddhiAppValidationException("sizeOfSet() function has to have exactly 1 parameter, currently " +
                     attributeExpressionExecutors.length + " parameters provided");
@@ -80,22 +81,24 @@ public class SizeOfSetFunctionExecutor extends FunctionExecutor {
             throw new OperationNotSupportedException("Parameter given for sizeOfSet() function has to be of type " +
                     "object, but found: " + attributeExpressionExecutors[0].getReturnType());
         }
+        return null;
     }
 
     /**
      * return maximum of arbitrary long set of Double values
      *
      * @param data array of Double values
+     * @param state
      * @return max
      */
     @Override
-    protected Object execute(Object[] data) {
+    protected Object execute(Object[] data, State state) {
         return null; //Since the sizeOfSet function takes in only 1 parameter, this method does not get called.
         // Hence, not implemented.
     }
 
     @Override
-    protected Object execute(Object data) {
+    protected Object execute(Object data, State state) {
         if (data == null) {
             return 0;
         }
@@ -112,13 +115,4 @@ public class SizeOfSetFunctionExecutor extends FunctionExecutor {
         return Attribute.Type.INT;
     }
 
-    @Override
-    public Map<String, Object> currentState() {
-        return null;    //no state is maintained.
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Does nothing as no state is maintained.
-    }
 }

@@ -21,8 +21,8 @@ package io.siddhi.core.query.output.callback;
 import io.siddhi.core.debugger.SiddhiDebugger;
 import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
-import io.siddhi.core.event.state.StateEventPool;
-import io.siddhi.core.event.stream.StreamEventPool;
+import io.siddhi.core.event.state.StateEventFactory;
+import io.siddhi.core.event.stream.StreamEventFactory;
 import io.siddhi.core.event.stream.converter.StreamEventConverter;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
@@ -37,26 +37,26 @@ public class DeleteTableCallback extends OutputCallback {
     private Table table;
     private CompiledCondition compiledCondition;
     private boolean convertToStreamEvent;
-    private StateEventPool stateEventPool;
-    private StreamEventPool streamEventPool;
+    private StateEventFactory stateEventFactory;
+    private StreamEventFactory streamEventFactory;
     private StreamEventConverter streamEventConverter;
 
     public DeleteTableCallback(Table table, CompiledCondition compiledCondition, int matchingStreamIndex,
-                               boolean convertToStreamEvent, StateEventPool stateEventPool,
-                               StreamEventPool streamEventPool, StreamEventConverter streamEventConverter,
+                               boolean convertToStreamEvent, StateEventFactory stateEventFactory,
+                               StreamEventFactory streamEventFactory, StreamEventConverter streamEventConverter,
                                String queryName) {
         super(queryName);
         this.matchingStreamIndex = matchingStreamIndex;
         this.table = table;
         this.compiledCondition = compiledCondition;
         this.convertToStreamEvent = convertToStreamEvent;
-        this.stateEventPool = stateEventPool;
-        this.streamEventPool = streamEventPool;
+        this.stateEventFactory = stateEventFactory;
+        this.streamEventFactory = streamEventFactory;
         this.streamEventConverter = streamEventConverter;
     }
 
     @Override
-    public synchronized void send(ComplexEventChunk deletingEventChunk, int noOfEvents) {
+    public void send(ComplexEventChunk deletingEventChunk, int noOfEvents) {
         if (getSiddhiDebugger() != null) {
             getSiddhiDebugger()
                     .checkBreakPoint(getQueryName(), SiddhiDebugger.QueryTerminal.OUT, deletingEventChunk.getFirst());
@@ -64,8 +64,8 @@ public class DeleteTableCallback extends OutputCallback {
         deletingEventChunk.reset();
         if (deletingEventChunk.hasNext()) {
             ComplexEventChunk<StateEvent> deletingStateEventChunk = constructMatchingStateEventChunk(
-                    deletingEventChunk, convertToStreamEvent, stateEventPool, matchingStreamIndex, streamEventPool,
-                    streamEventConverter);
+                    deletingEventChunk, convertToStreamEvent, stateEventFactory, matchingStreamIndex,
+                    streamEventFactory, streamEventConverter);
             table.deleteEvents(deletingStateEventChunk, compiledCondition, noOfEvents);
         }
     }

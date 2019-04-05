@@ -38,12 +38,12 @@ public final class PersistenceHelper {
     public static IncrementalSnapshotInfo convertRevision(String revision) {
         String[] items = revision.split(PersistenceConstants.REVISION_SEPARATOR);
         //Note: Here we discard the (items.length == 2) scenario which is handled by the full snapshot handling
-        if (items.length == 5) {
-            return new IncrementalSnapshotInfo(items[1], items[2], items[3],
-                    Long.parseLong(items[0]), IncrementalSnapshotInfo.SnapshotType.valueOf(items[4]));
-        } else if (items.length == 2) {
-            return new IncrementalSnapshotInfo(items[1], null, null,
-                    Long.parseLong(items[0]), IncrementalSnapshotInfo.SnapshotType.PERIODIC);
+        if (items.length == 7) {
+            return new IncrementalSnapshotInfo(items[1], items[2], items[4], items[5],
+                    Long.parseLong(items[0]), IncrementalSnapshotInfo.SnapshotType.valueOf(items[6]), items[3]);
+        } else if (items.length == 4) {
+            return new IncrementalSnapshotInfo(items[1], items[2], null, null,
+                    Long.parseLong(items[0]), IncrementalSnapshotInfo.SnapshotType.PERIODIC, items[3]);
         } else {
             throw new PersistenceStoreException("Invalid revision found '" + revision + "'!");
         }
@@ -65,13 +65,14 @@ public final class PersistenceHelper {
         //Periodic state
         Map<String, Map<String, byte[]>> periodicStateBase = serializeObj.getPeriodicState();
         if (periodicStateBase != null) {
-            periodicStateBase.forEach((queryName, value) -> {
-                value.forEach((elementId, value1) -> {
+            periodicStateBase.forEach((partitionId, value) -> {
+                value.forEach((id, value1) -> {
+                    String[] items = id.split(PersistenceConstants.REVISION_SEPARATOR);
                     AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
                             AsyncIncrementalSnapshotPersistor(value1,
                             siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
-                            new IncrementalSnapshotInfo(siddhiAppContext.getName(), queryName, elementId,
-                                    revisionTime, IncrementalSnapshotInfo.SnapshotType.PERIODIC));
+                            new IncrementalSnapshotInfo(siddhiAppContext.getName(), partitionId, items[1], items[2],
+                                    revisionTime, IncrementalSnapshotInfo.SnapshotType.PERIODIC, items[0]));
                     Future future = siddhiAppContext.getExecutorService().
                             submit(asyncIncrementSnapshotPersistor);
                     incrementalFutures.add(future);
@@ -81,13 +82,14 @@ public final class PersistenceHelper {
         //Incremental base state
         Map<String, Map<String, byte[]>> incrementalStateBase = serializeObj.getIncrementalStateBase();
         if (incrementalStateBase != null) {
-            incrementalStateBase.forEach((queryName, value) -> {
-                value.forEach((elementId, value1) -> {
+            incrementalStateBase.forEach((partitionId, value) -> {
+                value.forEach((id, value1) -> {
+                    String[] items = id.split(PersistenceConstants.REVISION_SEPARATOR);
                     AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
                             AsyncIncrementalSnapshotPersistor(value1,
                             siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
-                            new IncrementalSnapshotInfo(siddhiAppContext.getName(), queryName, elementId,
-                                    revisionTime, IncrementalSnapshotInfo.SnapshotType.BASE));
+                            new IncrementalSnapshotInfo(siddhiAppContext.getName(), partitionId, items[1], items[2],
+                                    revisionTime, IncrementalSnapshotInfo.SnapshotType.BASE, items[0]));
                     Future future = siddhiAppContext.getExecutorService().
                             submit(asyncIncrementSnapshotPersistor);
                     incrementalFutures.add(future);
@@ -98,13 +100,14 @@ public final class PersistenceHelper {
         //Incremental state
         Map<String, Map<String, byte[]>> incrementalState = serializeObj.getIncrementalState();
         if (incrementalState != null) {
-            incrementalState.forEach((queryName, value) -> {
-                value.forEach((elementId, value1) -> {
+            incrementalState.forEach((partitionId, value) -> {
+                value.forEach((id, value1) -> {
+                    String[] items = id.split(PersistenceConstants.REVISION_SEPARATOR);
                     AsyncIncrementalSnapshotPersistor asyncIncrementSnapshotPersistor = new
                             AsyncIncrementalSnapshotPersistor(value1,
                             siddhiAppContext.getSiddhiContext().getIncrementalPersistenceStore(),
-                            new IncrementalSnapshotInfo(siddhiAppContext.getName(), queryName, elementId,
-                                    revisionTime, IncrementalSnapshotInfo.SnapshotType.INCREMENT));
+                            new IncrementalSnapshotInfo(siddhiAppContext.getName(), partitionId, items[1], items[2],
+                                    revisionTime, IncrementalSnapshotInfo.SnapshotType.INCREMENT, items[0]));
                     Future future = siddhiAppContext.getExecutorService().
                             submit(asyncIncrementSnapshotPersistor);
                     incrementalFutures.add(future);

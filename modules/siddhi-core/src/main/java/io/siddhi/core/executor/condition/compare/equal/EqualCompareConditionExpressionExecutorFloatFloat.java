@@ -36,9 +36,4 @@ public class EqualCompareConditionExpressionExecutorFloatFloat extends
         return ((Float) left).floatValue() == ((Float) right).floatValue();
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new EqualCompareConditionExpressionExecutorFloatFloat(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

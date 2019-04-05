@@ -20,11 +20,17 @@ package io.siddhi.core.config;
 
 import com.lmax.disruptor.ExceptionHandler;
 import io.siddhi.core.function.Script;
-import io.siddhi.core.util.ElementIdGenerator;
+import io.siddhi.core.util.IdGenerator;
 import io.siddhi.core.util.Scheduler;
+import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.ThreadBarrier;
-import io.siddhi.core.util.extension.holder.EternalReferencedHolder;
+import io.siddhi.core.util.extension.holder.ExternalReferencedHolder;
 import io.siddhi.core.util.snapshot.SnapshotService;
+import io.siddhi.core.util.snapshot.state.EmptyStateHolder;
+import io.siddhi.core.util.snapshot.state.SingleStateHolder;
+import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.StatisticsManager;
 import io.siddhi.core.util.timestamp.TimestampGenerator;
 import io.siddhi.query.api.SiddhiApp;
@@ -53,12 +59,12 @@ public class SiddhiAppContext {
 
     private ExecutorService executorService;
     private ScheduledExecutorService scheduledExecutorService;
-    private List<EternalReferencedHolder> eternalReferencedHolders;
+    private List<ExternalReferencedHolder> externalReferencedHolders;
     private SnapshotService snapshotService;
 
     private ThreadBarrier threadBarrier = null;
     private TimestampGenerator timestampGenerator = null;
-    private ElementIdGenerator elementIdGenerator;
+    private IdGenerator idGenerator;
     private Map<String, Script> scriptFunctionMap;
     private ExceptionHandler<Object> disruptorExceptionHandler;
     private ExceptionListener runtimeExceptionListener;
@@ -67,11 +73,41 @@ public class SiddhiAppContext {
     private List<String> includedMetrics;
     private boolean transportChannelCreationEnabled;
     private List<Scheduler> schedulerList;
+    private static final ThreadLocal<String> GROUP_BY_KEY = new ThreadLocal<>();
+    private static final ThreadLocal<String> PARTITION_KEY = new ThreadLocal<>();
 
     public SiddhiAppContext() {
-        this.eternalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
+        this.externalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
         this.schedulerList = new ArrayList<Scheduler>();
+    }
+
+    public static void startGroupByFlow(String key) {
+        GROUP_BY_KEY.set(key);
+    }
+
+    public static void stopGroupByFlow() {
+        GROUP_BY_KEY.set(null);
+    }
+
+    public static void startPartitionFlow(String key) {
+        PARTITION_KEY.set(key);
+    }
+
+    public static void stopPartitionFlow() {
+        PARTITION_KEY.set(null);
+    }
+
+    public static String getCurrentFlowId() {
+        return PARTITION_KEY.get() + "--" + GROUP_BY_KEY.get();
+    }
+
+    public static String getPartitionFlowId() {
+        return PARTITION_KEY.get();
+    }
+
+    public static String getGroupByFlowId() {
+        return GROUP_BY_KEY.get();
     }
 
     public SiddhiContext getSiddhiContext() {
@@ -130,12 +166,12 @@ public class SiddhiAppContext {
         this.scheduledExecutorService = scheduledExecutorService;
     }
 
-    public synchronized void addEternalReferencedHolder(EternalReferencedHolder eternalReferencedHolder) {
-        eternalReferencedHolders.add(eternalReferencedHolder);
+    public void addEternalReferencedHolder(ExternalReferencedHolder externalReferencedHolder) {
+        externalReferencedHolders.add(externalReferencedHolder);
     }
 
-    public List<EternalReferencedHolder> getEternalReferencedHolders() {
-        return Collections.unmodifiableList(new ArrayList<>(eternalReferencedHolders));
+    public List<ExternalReferencedHolder> getExternalReferencedHolders() {
+        return Collections.unmodifiableList(new ArrayList<>(externalReferencedHolders));
     }
 
     public ThreadBarrier getThreadBarrier() {
@@ -170,12 +206,12 @@ public class SiddhiAppContext {
         this.snapshotService = snapshotService;
     }
 
-    public ElementIdGenerator getElementIdGenerator() {
-        return elementIdGenerator;
-    }
+//    public IdGenerator getElementIdGenerator() {
+//        return idGenerator;
+//    }
 
-    public void setElementIdGenerator(ElementIdGenerator elementIdGenerator) {
-        this.elementIdGenerator = elementIdGenerator;
+    public void setIdGenerator(IdGenerator idGenerator) {
+        this.idGenerator = idGenerator;
     }
 
     public Script getScript(String name) {
@@ -248,5 +284,29 @@ public class SiddhiAppContext {
 
     public List<Scheduler> getSchedulerList() {
         return schedulerList;
+    }
+
+    public StateHolder generateStateHolder(String name, StateFactory stateFactory) {
+        return generateStateHolder(name, stateFactory, false);
+    }
+
+    public StateHolder generateStateHolder(String name, StateFactory stateFactory, boolean unSafe) {
+        if (stateFactory != null) {
+            StateHolder stateHolder;
+            if (unSafe) {
+                stateHolder = new SingleStateHolder(stateFactory);
+            } else {
+                stateHolder = new SingleSyncStateHolder(stateFactory);
+            }
+            if (SnapshotService.getSkipStateStorageThreadLocal().get() == null ||
+                    !SnapshotService.getSkipStateStorageThreadLocal().get()) {
+                Map<String, StateHolder> stateHolderMap = getSnapshotService().getStateHolderMap(
+                        SiddhiConstants.PARTITION_ID_DEFAULT, SiddhiConstants.PARTITION_ID_DEFAULT);
+                stateHolderMap.put(name + "-" + idGenerator.createNewId(), stateHolder);
+            }
+            return stateHolder;
+        } else {
+            return new EmptyStateHolder();
+        }
     }
 }

@@ -75,16 +75,4 @@ public class OrConditionExpressionExecutor extends ConditionExpressionExecutor {
         return Boolean.FALSE;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new OrConditionExpressionExecutor(leftConditionExecutor.cloneExecutor(key), rightConditionExecutor
-                .cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        leftConditionExecutor.clean();
-        rightConditionExecutor.clean();
-    }
-
 }

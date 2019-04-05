@@ -25,19 +25,30 @@ google_analytics:
 - auto
 markdown_extensions:
 - admonition
-- toc(permalink=true)
-- codehilite(guess_lang=false)
+- toc:
+    permalink: true
+- codehilite:
+    guess_lang: false
 pages:
 - Welcome to Siddhi: index.md
 - Features: features.md
-- Quick Start Guide: documentation/siddhi-quckstart-4.0.md
+- Quick Start Guide: documentation/siddhi-5.x/quckstart-5.x.md
 - Documentation:
-  - User Guide: documentation/user-guide.md
-  - Siddhi Query Guide: documentation/siddhi-4.0.md
-  - Siddhi Architecture: documentation/siddhi-architecture.md
+  - Siddhi 5.x:
+    - Quick Start Guide: documentation/siddhi-5.x/quckstart-5.x.md
+    - User Guide: documentation/siddhi-5.x/user-guide-5.x.md
+    - Siddhi Query Guide: documentation/siddhi-5.x/query-guide-5.x.md
+    - Siddhi Architecture: documentation/siddhi-5.x/architecture-5.x.md
+  - Siddhi 4.x:
+    - Quick Start Guide: documentation/siddhi-4.x/quckstart-4.x.md
+    - User Guide: documentation/siddhi-4.x/user-guide-4.x.md
+    - Siddhi Query Guide: documentation/siddhi-4.x/query-guide-4.x.md
+    - Siddhi Architecture: documentation/siddhi-4.x/architecture-4.x.md
 - Contribute: documentation/contribution.md
 - Extensions: extensions.md
 - API Docs:
+  - 5.0.0-m6: api/5.0.0-m6.md
+  - 5.0.0-m5: api/5.0.0-m5.md
   - 5.0.0-m4: api/5.0.0-m4.md
   - 5.0.0-m3: api/5.0.0-m3.md
   - 5.0.0-m2: api/5.0.0-m2.md

@@ -21,6 +21,7 @@ import io.siddhi.core.event.Event;
 import org.apache.log4j.Logger;
 
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Utility class to print incoming {@link Event}
@@ -30,6 +31,14 @@ public class EventPrinter {
 
     public static void print(Event[] events) {
         log.info(Arrays.deepToString(events));
+    }
+
+    public static void print(Map[] events) {
+        log.info(Arrays.deepToString(events));
+    }
+
+    public static void print(Map event) {
+        log.info(event);
     }
 
 

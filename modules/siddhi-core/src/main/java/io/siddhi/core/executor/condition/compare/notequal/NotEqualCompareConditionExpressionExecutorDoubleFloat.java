@@ -39,9 +39,4 @@ public class NotEqualCompareConditionExpressionExecutorDoubleFloat extends
 
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new NotEqualCompareConditionExpressionExecutorDoubleFloat(leftExpressionExecutor.cloneExecutor(key),
-                rightExpressionExecutor.cloneExecutor(key));
-    }
 }

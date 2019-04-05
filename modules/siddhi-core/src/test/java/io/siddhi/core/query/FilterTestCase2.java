@@ -1595,8 +1595,11 @@ public class FilterTestCase2 {
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "define stream cseEventStream (symbol string, price float, volume long);";
-        String query = "@info(name = 'query1') from cseEventStream select symbol,sum(price) as sumprice group by " +
-                "symbol having sumprice > 880 insert into outputStream ;";
+        String query = "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select symbol, sum(price) as sumprice " +
+                "group by symbol " +
+                "having sumprice > 880 insert into outputStream ;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(cseEventStream + query);
 
         siddhiAppRuntime.addCallback("query1", new QueryCallback() {

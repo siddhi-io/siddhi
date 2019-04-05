@@ -32,6 +32,11 @@ public class StateEventFactory implements EventFactory<StateEvent> {
         this.outputDataSize = outputDataSize;
     }
 
+    public StateEventFactory(MetaStateEvent metaStateEvent) {
+        this.eventSize = metaStateEvent.getStreamEventCount();
+        this.outputDataSize = metaStateEvent.getOutputDataAttributes().size();
+    }
+
     public StateEvent newInstance() {
         return new StateEvent(eventSize, outputDataSize);
     }

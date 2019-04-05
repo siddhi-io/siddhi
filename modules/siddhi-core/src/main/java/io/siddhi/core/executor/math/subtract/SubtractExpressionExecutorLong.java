@@ -49,17 +49,4 @@ public class SubtractExpressionExecutorLong implements ExpressionExecutor {
         return Attribute.Type.LONG;
     }
 
-    @Override
-    public ExpressionExecutor cloneExecutor(String key) {
-        return new SubtractExpressionExecutorLong(leftExpressionExecutor.cloneExecutor(key), rightExpressionExecutor
-                .cloneExecutor(key));
-    }
-
-    @Override
-    public void clean() {
-        leftExpressionExecutor.clean();
-        rightExpressionExecutor.clean();
-    }
-
-
 }

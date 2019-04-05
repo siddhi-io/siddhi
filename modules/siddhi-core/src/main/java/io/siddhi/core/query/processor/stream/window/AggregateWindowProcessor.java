@@ -22,7 +22,7 @@ import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.event.stream.StreamEventCloner;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.event.stream.holder.StreamEventClonerHolder;
 import io.siddhi.core.executor.ExpressionExecutor;
 import io.siddhi.core.executor.VariableExpressionExecutor;
 import io.siddhi.core.query.input.stream.join.JoinProcessor;
@@ -31,6 +31,8 @@ import io.siddhi.core.table.Table;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.query.api.aggregation.Within;
 import io.siddhi.query.api.expression.Expression;
 
@@ -48,9 +50,6 @@ public class AggregateWindowProcessor extends BatchingWindowProcessor implements
     private final Within within;
     private final Expression per;
     private AggregationRuntime aggregationRuntime;
-    private ConfigReader configReader;
-    private boolean outputExpectsExpiredEvents;
-    private SiddhiQueryContext siddhiQueryContext;
 
     public AggregateWindowProcessor(AggregationRuntime aggregationRuntime, Within within, Expression per) {
         this.aggregationRuntime = aggregationRuntime;
@@ -59,24 +58,25 @@ public class AggregateWindowProcessor extends BatchingWindowProcessor implements
     }
 
     @Override
-    protected void init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
-                        boolean outputExpectsExpiredEvents, SiddhiQueryContext siddhiQueryContext) {
+    protected StateFactory init(ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
+                                StreamEventClonerHolder streamEventClonerHolder, boolean outputExpectsExpiredEvents,
+                                boolean findToBeExecuted, SiddhiQueryContext siddhiQueryContext) {
         // nothing to be done
-        this.configReader = configReader;
-        this.outputExpectsExpiredEvents = outputExpectsExpiredEvents;
-        this.siddhiQueryContext = siddhiQueryContext;
+        return null;
     }
 
     @Override
-    protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
-                           StreamEventCloner streamEventCloner) {
+    protected void process(ComplexEventChunk streamEventChunk, Processor nextProcessor,
+                           StreamEventCloner streamEventCloner, State state) {
         // Pass the event  to the post JoinProcessor
         nextProcessor.process(streamEventChunk);
     }
 
+
     @Override
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
-        return aggregationRuntime.find(matchingEvent, compiledCondition);
+        return aggregationRuntime.find(matchingEvent, compiledCondition, siddhiQueryContext);
+
     }
 
     @Override
@@ -95,40 +95,5 @@ public class AggregateWindowProcessor extends BatchingWindowProcessor implements
     @Override
     public void stop() {
         //Do nothing
-    }
-
-    @Override
-    public Processor cloneProcessor(String key) {
-        try {
-            AggregateWindowProcessor streamProcessor = new AggregateWindowProcessor(aggregationRuntime, within, per);
-            streamProcessor.inputDefinition = inputDefinition;
-            ExpressionExecutor[] innerExpressionExecutors = new ExpressionExecutor[attributeExpressionLength];
-            ExpressionExecutor[] attributeExpressionExecutors1 = this.attributeExpressionExecutors;
-            for (int i = 0; i < attributeExpressionLength; i++) {
-                innerExpressionExecutors[i] = attributeExpressionExecutors1[i].cloneExecutor(key);
-            }
-            streamProcessor.attributeExpressionExecutors = innerExpressionExecutors;
-            streamProcessor.attributeExpressionLength = attributeExpressionLength;
-            streamProcessor.additionalAttributes = additionalAttributes;
-            streamProcessor.complexEventPopulater = complexEventPopulater;
-            streamProcessor.init(metaStreamEvent, inputDefinition, attributeExpressionExecutors, configReader,
-                    outputExpectsExpiredEvents, siddhiQueryContext);
-            streamProcessor.start();
-            return streamProcessor;
-
-        } catch (Exception e) {
-            throw new SiddhiAppRuntimeException("Exception in cloning " + this.getClass().getCanonicalName(), e);
-        }
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        //No state
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //Nothing to be done
     }
 }
