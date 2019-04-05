@@ -48,7 +48,7 @@ Siddhi is free and open source, under **Apache Software License v2.0**.
 
 ## Get Started!
 
-Get started with Siddhi in a few minutes by following the <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-quckstart-4.0/">Siddhi Quick Start Guide</a>
+Get started with Siddhi in a few minutes by following the <a target="_blank" href="http://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/quckstart-5.x/">Siddhi Quick Start Guide</a>
 
 ## Why use Siddhi ? 
 
@@ -105,17 +105,17 @@ For more information please contact us via <a target="_blank" href="http://wso2.
      
     Find the released Siddhi libraries <a target="_blank" href="https://mvnrepository.com/artifact/io.siddhi/siddhi-core">here</a>.
 
-    <a target="_blank" href="http://siddhi.io/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v5.x.x
+    <a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/">Siddhi Query Guide</a> for Siddhi v5.x.x
     
-    <a target="_blank" href="http://siddhi.io/documentation/siddhi-architecture/">Architecture</a> of Siddhi v5.x.x
+    <a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/architecture-5.x/">Architecture</a> of Siddhi v5.x.x
 
 * **Latest Stable Release of Siddhi v4.x.x** : **v4.4.8** _built on Java 8. (Recommended for production use)_
      
     Find the released Siddhi libraries <a target="_blank" href="http://maven.wso2.org/nexus/content/groups/wso2-public/org/wso2/siddhi/">here</a>.
 
-    <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-4.0/">Siddhi Query Guide</a> for Siddhi v4.x.x
+    <a target="_blank" href="http://siddhi.io/documentation/siddhi-4.x/query-guide-4.x/">Siddhi Query Guide</a> for Siddhi v4.x.x
     
-    <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-architecture/">Architecture</a> of Siddhi v4.x.x
+    <a target="_blank" href="http://siddhi.io/documentation/siddhi-4.x/architecture-4.x/">Architecture</a> of Siddhi v4.x.x
 
 
 * **Latest Stable Release of Siddhi v3.x.x** : **v3.2.3** _built on Java 7._
