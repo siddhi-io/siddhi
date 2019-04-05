@@ -153,7 +153,7 @@ The source syntax is as follows:
         @attributes( <attribute1>='<attribute mapping>', <attributeN>='<attribute mapping>')
     )
 )
-define stream <stream name> (<attribute1> <type>, <attributeN> <Type>);
+define stream <stream name> (<attribute1> <type>, <attributeN> <type>);
 ```
 
 This syntax includes the following annotations.
@@ -212,7 +212,7 @@ There are two ways to configure `@attributes`.
 2. Define the mapping configurations in the same order as the attributes defined in stream definition:<br/>
   `@attributes( '<mapping for attribute1>', '<mapping for attributeN>')`
 
-**Supported Mapping Types**
+**Supported Source Mapping Types**
 
 The following is the list of source mapping types supported by Siddhi:
 
@@ -233,24 +233,62 @@ The following is the list of source mapping types supported by Siddhi:
 
  [PassThrough](http://siddhi.io/api/latest/#passthrough-source-mapper) is the only source mapper inbuilt in Siddhi, and all other source mappers are implemented as extensions.
 
-**Example**
+**Example 1**
 
 Receive `JSON` messages by exposing an `HTTP` service, and direct them to `InputStream` stream for processing.
 Here the `HTTP` service will be secured with basic authentication, receives events on all network interfaces on port `8080` and context `/foo`. The service expects the `JSON` messages to be on the default data format that's supported by the `JSON` mapper as follows.
-```
+```json
 {
-    "name":"Paul",
-    "age":20,
-    "country":"UK"
+  "name":"Paul",
+  "age":20,
+  "country":"UK"
 }
 ```
 
 The configuration of the `HTTP` source and `JSON` source mapper to achieve the above is as follows.
 
 ```sql
-@source(type='http', receiver.url='http://0.0.0.0:8080/foo', basic.auth.enabled='true',
+@source(type='http', receiver.url='http://0.0.0.0:8080/foo',
   @map(type='json'))
 define stream InputStream (name string, age int, country string);
+```
+
+**Example 2**
+
+Receive `JSON` messages by exposing an `HTTP` service, and direct them to `StockStream` stream for processing.
+Here the incoming `JSON`, as given bellow, do not adhere to the default data format that's supported by the `JSON` mapper.
+
+```json
+{
+  "portfolio":{
+    "stock":{
+      "volume":100,
+      "company":{
+        "symbol":"FB"
+      },
+      "price":55.6
+    }
+  }
+}
+```
+
+The configuration of the `HTTP` source and the custom `JSON` source mapping to achieve the above is as follows.
+
+```sql
+@source(type='http', receiver.url='http://0.0.0.0:8080/foo',
+  @map(type='json', enclosing.element="$.portfolio",
+    @attributes(symbol = "stock.company.symbol", price = "stock.price",
+                volume = "stock.volume")))
+define stream StockStream (symbol string, price float, volume long);
+```
+
+The same can also be configured by omitting the attribute names as bellow.
+
+```sql
+@source(type='http', receiver.url='http://0.0.0.0:8080/foo',
+  @map(type='json', enclosing.element="$.portfolio",
+    @attributes("stock.company.symbol", "stock.price", "stock.volume")))
+define stream StockStream (symbol string, price float, volume long);
 ```
 
 ### Sink
@@ -276,7 +314,7 @@ The sink syntax is as follows:
         @payload('<payload mapping>')
     )
 )
-define stream <stream name> (<attribute1> <type>, <attributeN> <Type>);
+define stream <stream name> (<attribute1> <type>, <attributeN> <type>);
 ```
 
 !!! Note "Dynamic Properties"
@@ -340,7 +378,7 @@ along with the common parameters also add the `@distribution` annotation specify
 
 The distributed sink syntax is as follows:
 
-*RoundRobin Distributed Sink*
+**_RoundRobin Distributed Sink_**
 
 Publishes events to defined destinations in a round robin manner.
 
@@ -353,10 +391,10 @@ Publishes events to defined destinations in a round robin manner.
         @destination(<destination.specific.key>='<value>'),
         @destination(<destination.specific.key>='<value>')))
 )
-define stream <stream name> (<attribute1> <type>, <attributeN> <Type>);
+define stream <stream name> (<attribute1> <type>, <attributeN> <type>);
 ```
 
-*Partitioned Distributed Sink*
+**_Partitioned Distributed Sink_**
 
 Publishes events to defined destinations by partitioning them based on the partitioning key.
 
@@ -369,7 +407,7 @@ Publishes events to defined destinations by partitioning them based on the parti
         @destination(<destination.specific.key>='<value>'),
         @destination(<destination.specific.key>='<value>')))
 )
-define stream <stream name> (<attribute1> <type>, <attributeN> <Type>);
+define stream <stream name> (<attribute1> <type>, <attributeN> <type>);
 ```
 
 #### Sink Mapper
@@ -392,7 +430,7 @@ There are two ways you to configure `@payload` annotation.
   `@payload( key1='mapping_1', 'key2'='user : {{user}}')` <br/>
   Here, the keys of payload mapping can be defined using the dot notation as ```a.b.c```, or using any constant string value as `'$abc'`.
 
-**Supported Mapping Types**
+**Supported Sink Mapping Types**
 
 The following is a list of sink mapping types supported by Siddhi:
 
@@ -420,14 +458,16 @@ Publishes `OutputStream` events by converting them to `JSON` messages with the d
 The configuration of the `HTTP` sink and `JSON` sink mapper to achieve the above is as follows.
 
 ```sql
-@sink(type='http', publisher.url='http://localhost:8005/endpoint', method='POST', headers='Accept-Date:20/02/2017',
-  basic.auth.enabled='true', basic.auth.username='admin', basic.auth.password='admin',
-  @map(type='json'))
+@sink(type='http', publisher.url='http://localhost:8005/endpoint',
+      method='POST', headers='Accept-Date:20/02/2017',
+      basic.auth.enabled='true', basic.auth.username='admin',
+      basic.auth.password='admin',
+      @map(type='json'))
 define stream OutputStream (name string, age int, country string);
 ```
 
 This will publish a `JSON` message on the following format:
-```
+```json
 {
   "event":{
     "name":"Paul",
@@ -439,22 +479,68 @@ This will publish a `JSON` message on the following format:
 
 **Example 2**
 
+Publishes `StockStream` events by converting them to user defined `JSON` messages, and by sending to an `HTTP` endpoint `http://localhost:8005/stocks`.
+
+The configuration of the `HTTP` sink and custom `JSON` sink mapping to achieve the above is as follows.
+
+```sql
+@sink(type='http', publisher.url='http://localhost:8005/stocks',
+      @map(type='json', validate.json='true', enclosing.element='$.Portfolio',
+           @payload("""{"StockData":{ "Symbol":"{{symbol}}", "Price":{{price}} }}""")))
+define stream StockStream (symbol string, price float, volume long);
+```
+
+This will publish a single event as the `JSON` message on the following format:
+
+```json
+{
+  "Portfolio":{
+    "StockData":{
+      "Symbol":"GOOG",
+      "Price":55.6
+    }
+  }
+}
+```
+This can also publish multiple events together as a `JSON` message on the following format:
+
+```json
+{
+  "Portfolio":[
+    {
+      "StockData":{
+        "Symbol":"GOOG",
+        "Price":55.6
+      }
+    },
+    {
+      "StockData":{
+        "Symbol":"FB",
+        "Price":57.0
+      }
+    }
+  ]  
+}
+```
+
+**Example 3**
+
 Publishes events from the `OutputStream` stream to multiple the `HTTP` endpoints using a partitioning strategy. Here the events are sent to either `http://localhost:8005/endpoint1` or `http://localhost:8006/endpoint2` based on the partitioning key `country`. It uses default `JSON` mapping, `POST` method, and used `admin` as both the username and the password when publishing to both the endpoints.
 
 The configuration of the distributed `HTTP` sink and `JSON` sink mapper to achieve the above is as follows.
 
 ```sql
 @sink(type='http', method='POST', basic.auth.enabled='true',
-  basic.auth.username='admin', basic.auth.password='admin',
-  @map(type='json'),
-  @distribution(strategy='partitioned', partitionKey='country',
-     @destination(publisher.url='http://localhost:8005/endpoint1'),
-     @destination(publisher.url='http://localhost:8006/endpoint2')))
+      basic.auth.username='admin', basic.auth.password='admin',
+      @map(type='json'),
+      @distribution(strategy='partitioned', partitionKey='country',
+        @destination(publisher.url='http://localhost:8005/endpoint1'),
+        @destination(publisher.url='http://localhost:8006/endpoint2')))
 define stream OutputStream (name string, age int, country string);
 ```
 
 This will partition the outgoing events and publish all events with the same country attribute value to the same endpoint. The `JSON` message published will be on the following format:
-```
+```json
 {
   "event":{
     "name":"Paul",
@@ -468,7 +554,7 @@ This will partition the outgoing events and publish all events with the same cou
 
 Errors in Siddhi can be handled at the Streams and in Sinks.
 
-*Error Handling at Stream*
+**_Error Handling at Stream_**
 
 When errors are thrown by Siddhi elements subscribed to the stream, the error gets propagated up to the stream that delivered the event to those Siddhi elements. By default the error is logged and dropped at the stream, but this behavior can be altered by by adding `@OnError` annotation to the corresponding stream definition.
 `@OnError` annotation can help users to capture the error and the associated event, and handle them gracefully by sending them to a fault stream.
@@ -505,10 +591,12 @@ Siddhi will infer and automatically defines the fault stream of `TempStream` as 
 define stream !TempStream (deviceID long, roomNo int, temp double, _error object);
 ```
 
-Following SiddhiApp extends the use-case by adding failure generation and error handling with the use of [queries](#query).
+The SiddhiApp extending the above the use-case by adding failure generation and error handling with the use of [queries](#query) is as follows.
+
 Note: Details on writing processing logics via [queries](#query) will be explained in later sections.
 
 ```sql
+-- Define fault stream to handle error occurred at TempStream subscribers
 @OnError(name='STREAM')
 define stream TempStream (deviceID long, roomNo int, temp double);
 
@@ -524,9 +612,9 @@ select deviceID, roomNo, temp, _error
 insert into IgnoreStream2;
 ```
 
-*Error Handling at Sink*
+**_Error Handling at Sink_**
 
-There can be cases where external systems becoming unavailable or coursing errors when the events are published to them. By default the sinks log and drop the events causing  event losses, this can be handled gracefully by configuring `@sink` annotation's `on.error` parameter.
+There can be cases where external systems becoming unavailable or coursing errors when the events are published to them. By default sinks log and drop the events causing event losses, and this can be handled gracefully by configuring `on.error` parameter of the `@sink` annotation.
 
 The `on.error` parameter of the `@sink` annotation can be specified as bellow.
 
@@ -539,18 +627,18 @@ define stream <stream name> (<attribute name> <attribute type>,
 The following actions can be specified to `on.error` parameter of `@sink` annotation to handle erroneous scenarios.
 
 * `LOG` : Logs the event with the error, and drops the event. This is the default action performed even when `on.error` parameter is not defined on the `@sink` annotation.
-* `WAIT` : The threads waits in `back-off and re-trying` state, and send the events only when the connection is re-established. During this time the threads will not consume any new messages causing the systems to introduce back pressure on the systems publishing to it.
-* `STREAM`: Pushes the failed events with the corresponding error to the associated fault stream that the sink belongs to.
+* `WAIT` : Publishing threads wait in `back-off and re-trying` mode, and only send the events when the connection is re-established. During this time the threads will not consume any new messages causing the systems to introduce back pressure on the systems that publishes to it.
+* `STREAM`: Pushes the failed events with the corresponding error to the associated fault stream the sink belongs to.
 
 **Example 1**
 
-Introduce back pressure on threads brining events via `TempStream` when the system cannot connect to Kafka.
+Introduce back pressure on the threads who bring events via `TempStream` when the system cannot connect to Kafka.
 
 The configuration of `TempStream` stream and `@sink` Kafka annotation with `on.error` property is as follows.
 
 ```sql
-@sink(type='kafka', on.error='WAIT', topic='{{symbol}}',
-      partition.no='{{volume}}', bootstrap.servers='localhost:9092',
+@sink(type='kafka', on.error='WAIT', topic='{{roomNo}}',
+      bootstrap.servers='localhost:9092',
       @map(type='xml'))
 define stream TempStream (deviceID long, roomNo int, temp double);
 ```
@@ -559,12 +647,14 @@ define stream TempStream (deviceID long, roomNo int, temp double);
 
 Send events to the fault stream of `TempStream` when the system cannot connect to Kafka.
 
-The configuration of `TempStream` stream with associated fault stream, `@sink` Kafka annotation with `on.error` property and a query to handle the error is as follows.
+The configuration of `TempStream` stream with associated fault stream, `@sink` Kafka annotation with `on.error` property and a [queries](#query) to handle the error is as follows.
+
+Note: Details on writing processing logics via [queries](#query) will be explained in later sections.
 
 ```sql
 @OnError(name='STREAM')
-@sink(type='kafka', on.error='STREAM', topic='{{symbol}}',
-      partition.no='{{volume}}', bootstrap.servers='localhost:9092',
+@sink(type='kafka', on.error='STREAM', topic='{{roomNo}}',
+      bootstrap.servers='localhost:9092',
       @map(type='xml'))
 define stream TempStream (deviceID long, roomNo int, temp double);
 
