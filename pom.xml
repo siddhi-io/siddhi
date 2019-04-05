@@ -756,7 +756,7 @@
         <maven.remote.resources.plugin.version>1.6.0</maven.remote.resources.plugin.version>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <clirr.maven.plugin.version>2.8</clirr.maven.plugin.version>
-        <json.version>20160810</json.version>
+        <json.version>20180813</json.version>
         <jsoup.version>1.11.3</jsoup.version>
 
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
