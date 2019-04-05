@@ -134,11 +134,12 @@ The above creates a stream with name `TempStream` having the following attribute
 ### Source
 Sources receive events via multiple transports and in various data formats, and direct them into streams for processing.
 
-A source configuration allows you to define a mapping in order to convert each incoming event from its native data format to a Siddhi event. When customizations to such mappings are not provided, Siddhi assumes that the arriving event adheres to the predefined format based on the stream definition and the configured message format.
+A source configuration allows to define a mapping in order to convert each incoming event from its native data format to a Siddhi event. When customizations to such mappings are not provided, Siddhi assumes that the arriving event adheres to the predefined format based on the stream definition and the configured message mapping type.
 
 **Purpose**
 
-Source provides a way to consume events from external systems using standard protocols, and converts them to adhere the associated stream for processing.
+Source provides a way to consume events from external systems and convert them to be processed by the associated stream.
+
 
 **Syntax**
 
@@ -161,35 +162,36 @@ This syntax includes the following annotations.
 
 The `type` parameter of `@source` annotation defines the source type that receives events.
 The other parameters of `@source` annotation depends upon the selected source type, and here
-some of the other parameters can be optional.
+some of its parameters can be optional.
 
 For detailed information about the supported parameters see the documentation of the relevant source.
 
 The following is the list of source types supported by Siddhi:
 
-|Source types | Description|
+|Source type | Description|
 | ------------- |-------------|
 | <a target="_blank" href="http://siddhi.io/api/latest/#inmemory-source">In-memory</a> | Allow SiddhiApp to consume events from other SiddhiApps running on the same JVM. |
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> | Expose an HTTP service to consume messages.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a> | Subscribe to Kafka topic to consume events.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a> | Expose a TCP service to consume messages.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a> | Expose a Thrift and TCP services to consume events formatted as WSO2Events.|
-| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> | Consume emails via POP3 and SMTP protocols.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> | Consume emails via POP3 and IMAP protocols.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> | Subscribe to JMS topic or queue to consume events.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> | Reads files by tailing or as a whole to extract events out of them.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a> | Subscribe to RabbitMQ topic to consume events.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a> | Subscribe to MQTT brokers to consume events.|
-| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a> | Create a web-socket connection to consume messages.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a> | Create a web-socket connection or expose a service to consume messages.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-twitter/">Twitter</a> | Subscribe to Twitter to consume tweets.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a> | Subscribe to Amazon SQS to consume events.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-cdc/">CDC</a> | Perform change data capture on databases.|
 | <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-prometheus/">Prometheus</a> | Consume data from Prometheus agent.|
 
- [In-memory](http://siddhi.io/api/latest/#inmemory-source) is the only source inbuilt in Siddhi, and all other source types are implemented as extensions to Siddhi.   
+ [In-memory](http://siddhi.io/api/latest/#inmemory-source) is the only source inbuilt in Siddhi, and all other source types are implemented as extensions.   
 
 #### Source Mapper
 
-Each `@source` configuration has a mapping denoted by the `@map` annotation that defines how to convert the incoming event format to Siddhi events.
+Each `@source` configuration can have a mapping denoted by the `@map` annotation that defines how to convert the incoming event
+format to Siddhi events.
 
 The `type` parameter of the `@map` defines the map type to be used in converting the incoming events. The other parameters
 of `@map` annotation depends on the mapper selected, and some of its parameters can be optional.
@@ -199,8 +201,8 @@ For detailed information about the parameters see the documentation of the relev
 **Map Attributes**
 
 `@attributes` is an optional annotation used with `@map` to define custom mapping. When `@attributes` is not provided, each mapper
-assumes that the incoming events adheres to its own default message format and attempt to convert the events from that format. 
-By adding the `@attributes` annotation, you can selectively extract data from the incoming message and assign them to the attributes.
+assumes that the incoming events adheres to its own default message format and attempt to convert the events from that format.
+By adding the `@attributes` annotation, users can selectively extract data from the incoming message and assign them to the attributes.
 
 There are two ways to configure `@attributes`.
 
@@ -212,61 +214,75 @@ There are two ways to configure `@attributes`.
 
 **Supported Mapping Types**
 
-The following is a list of supported source mapping types supported by Siddhi:
+The following is the list of source mapping types supported by Siddhi:
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event/">WSO2Event</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml/">XML</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text/">TEXT</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/">Avro</a>
+|Source mapping type | Description|
+| ------------- |-------------|
+| <a target="_blank" href="http://siddhi.io/api/latest/#passthrough-source-mapper">PassThrough</a> | Omits data conversion on Siddhi events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a> | Converts JSON messages to Siddhi events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml/">XML</a> | Converts XML messages to Siddhi events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text/">TEXT</a> | Converts plain text messages to Siddhi events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/">Avro</a> | Converts Avro events to Siddhi events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event/">WSO2Event</a> | Converts WSO2Events to Siddhi events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a> | Converts Siddhi specific binary events to Siddhi events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a> | Converts key-value HashMaps to Siddhi events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a> | Converts CSV like delimiter separated events to Siddhi events.|
 
 !!! tip
-    When the `@map` annotation is not provided, `@map(type='passThrough')` is used as default. This can be used when source consumes Siddhi events directly which it does not need any conversion.
+    When the `@map` annotation is not provided `@map(type='passThrough')` is used as default, that passes the consumed Siddhi events directly to the streams without any data conversion.
 
+ [PassThrough](http://siddhi.io/api/latest/#passthrough-source-mapper) is the only source mapper inbuilt in Siddhi, and all other source mappers are implemented as extensions.
 
 **Example**
 
-This query receives events via the `HTTP` source in the `JSON` data format, and directs them to the `InputStream` stream for processing.
-Here the HTTP source is configured to receive events on all network interfaces on the `8080`port, on the `foo` context, and
-it is secured via basic authentication.
+Receive `JSON` messages by exposing an `HTTP` service, and direct them to `InputStream` stream for processing.
+Here the `HTTP` service will be secured with basic authentication, receives events on all network interfaces on port `8080` and context `/foo`. The service expects the `JSON` messages to be on the default data format that's supported by the `JSON` mapper as follows.
+```
+{
+    "name":"Paul",
+    "age":20,
+    "country":"UK"
+}
+```
+
+The configuration of the `HTTP` source and `JSON` source mapper to achieve the above is as follows.
 
 ```sql
 @source(type='http', receiver.url='http://0.0.0.0:8080/foo', basic.auth.enabled='true',
   @map(type='json'))
 define stream InputStream (name string, age int, country string);
 ```
+
 ### Sink
 
-Sinks publish events from the streams via multiple transports to external endpoints in various data formats.
+Sinks consumes events from streams and publish them via multiple transports to external endpoints in various data formats.
 
-A sink configuration allows you to define a mapping to convert the Siddhi event to the required output data format (such as `JSON`, `TEXT`, `XML`, etc.).
-When customization to such mappings is not provided, Siddhi converts events to its default format based on the stream definition and
-the selected data format to publish the events.
+A sink configuration allows users to define a mapping to convert the Siddhi events in to the required output data format (such as `JSON`, `TEXT`, `XML`, etc.) and publish the events to the configured endpoints. When customizations to such mappings are not provided, Siddhi converts events to the predefined event format based on the stream definition and the configured message mapper type before publishing the events.
 
 **Purpose**
 
-Sinks provide a way to publish Siddhi events to external systems in the preferred data format.
+Sink provides a way to publish Siddhi events of a stream to external systems by converting events to their supported format.
 
 **Syntax**
 
 To configure a stream to publish events via a sink, add the sink configuration to a stream definition by adding the `@sink`
-annotation with the required parameter values. The sink syntax is as follows:
+annotation with the required parameter values.
+
+The sink syntax is as follows:
 
 ```sql
-@sink(type='sink_type', static_option_key1='static_option_value1', dynamic_option_key1='{{dynamic_option_value1}}',
-    @map(type='map_type', static_option_key1='static_option_value1', dynamic_option_key1='{{dynamic_option_value1}}',
-        @payload('payload_mapping')
+@sink(type='<sink type>', <static.key>='<value>', <dynamic.key>='{{<value>}}',
+    @map(type='<map type>', <static.key>='<value>', <dynamic.key>='{{<value>}}',
+        @payload('<payload mapping>')
     )
 )
-define stream StreamName (attribute1 Type1, attributeN TypeN);
+define stream <stream name> (<attribute1> <type>, <attributeN> <Type>);
 ```
 
 !!! Note "Dynamic Properties"
-    The sink and sink mapper properties that are categorized as `dynamic` have the ability to absorb attributes values
-    from their associated streams. This can be done by using the attribute names in double curly braces as `{{...}}` when configuring the property value.
+    The sink and sink mapper properties that are categorized as `dynamic` have the ability to absorb attribute values
+    dynamically from the Siddhi events of their associated streams. This can be configured by enclosing the relevant
+    attribute names in double curly braces as`{{...}}`, and using it within the property values.
 
     Some valid dynamic properties values are:
 
@@ -274,50 +290,54 @@ define stream StreamName (attribute1 Type1, attributeN TypeN);
     * `'This is {{attribute1}}'`
     * `{{attribute1}} > {{attributeN}}`  
 
-    Here the attribute names in the double curly braces will be replaced with event values during execution.
+    Here the attribute names in the double curly braces will be replaced with the values from the events before they are published.
 
 This syntax includes the following annotations.
 
 **Sink**
 
-The `type` parameter of the `@sink` annotation defines the sink type that publishes the events. The other parameters to be configured
-depends on the sink type selected. Some of these parameters are optional, and some can have dynamic values. </br>
+The `type` parameter of the `@sink` annotation defines the sink type that publishes the events.
+The other parameters of the `@sink` annotation depends upon the selected sink type, and here
+some of its parameters can be optional and/or dynamic.
 
-For detailed information about the parameters see documentation for the relevant sink.
+For detailed information about the supported parameters see documentation of the relevant sink.
 
-The following is a list of currently supported sink types.
+The following is a list of sink types supported by Siddhi:
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a>
-* <a target="_blank" href="http://siddhi.io/api/latest/#inmemory-sink">In-memory</a>
-* <a target="_blank" href="http://siddhi.io/api/latest/#log-sink">Log</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-prometheus/">Prometheus</a>
+|Source type | Description|
+| ------------- |-------------|
+| <a target="_blank" href="http://siddhi.io/api/latest/#inmemory-sink">In-memory</a> | Allow SiddhiApp to publish events to other SiddhiApps running on the same JVM. |
+| <a target="_blank" href="http://siddhi.io/api/latest/#log-sink">Log</a>| Logs the events appearing on the streams. |
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/">HTTP</a> | Publish events to an HTTP endpoint.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-kafka/">Kafka</a> | Publish events to Kafka topic. |
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-tcp/">TCP</a> | Publish events to a TCP service. |
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-wso2event/">WSO2Event</a> | Publish WSO2Events via Thrift or TCP protocols.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-email/">Email</a> | Send emails via SMTP protocols.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-jms/">JMS</a> | Publish events to JMS topics or queues. |
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-file/">File</a> | Writes events to files.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-rabbitmq/">RabbitMQ</a>| Publish events to RabbitMQ topics. |
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-mqtt/">MQTT</a> | Publish events to MQTT topics. |
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-websocket/">WebSocket</a> | Create a web-socket connection or expose a service to publish messages.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-sqs/">Amazon SQS</a> | Publish events to Amazon SQS.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-prometheus/">Prometheus</a> | Expose data through Prometheus agent.|
 
 #### Distributed Sink
 
-Distributed Sinks publish events from a defined stream to multiple destination endpoints using load balancing and partitioning strategies.
+Distributed Sinks publish events from a defined stream to multiple endpoints using load balancing or partitioning strategies.
 
-Any ordinary sink can be used as a distributed sink. A distributed sink configuration allows you to define a common mapping to convert the Siddhi events for all its destination endpoints,
-allows you to define a distribution strategy (e.g. `roundRobin`, `partitioned`), and configuration for each specific endpoint destination.
+Any sink can be used as a distributed sink. A distributed sink configuration allows users to define a common mapping to convert
+and send the Siddhi events for all its destination endpoints.
 
 **Purpose**
 
-Distributed sinks provide a way to publish Siddhi events to multiple destination endpoints in the preferred data format.
+Distributed sink provides a way to publish Siddhi events to multiple endpoints in the configured event format.
 
 **Syntax**
 
-To configure a stream to publish events via a distributed sink, add the sink configuration to a stream definition by adding the `@sink`
-annotation and add the configuration parameters that are common of all the destination endpoints inside the `@sink` annotation
-along with `@distribution` and `@destination` annotations providing distribution strategy and endpoint specific configurations.
+To configure distributed sink add the sink configuration to a stream definition by adding the `@sink`
+annotation and add the configuration parameters that are common of all the destination endpoints inside it,
+along with the common parameters also add the `@distribution` annotation specifying the distribution strategy (i.e. `roundRobin` or `partitioned`) and `@destination` annotations providing each endpoint specific configurations.
+
 The distributed sink syntax is as follows:
 
 *RoundRobin Distributed Sink*
@@ -325,103 +345,138 @@ The distributed sink syntax is as follows:
 Publishes events to defined destinations in a round robin manner.
 
 ```sql
-@sink(type='sink_type', common_option_key1='common_option_value1', common_option_key2='{{common_option_value1}}',
-    @map(type='map_type', option_key1='option_value1', option_key2='{{option_value1}}',
-        @payload('payload_mapping')
+@sink(type='<sink type>', <common.static.key>='<value>', <common.dynamic.key>='{{<value>}}',
+    @map(type='<map type>', <static.key>='<value>', <dynamic.key>='{{<value>}}',
+        @payload('<payload mapping>')
     )
     @distribution(strategy='roundRobin',
-        @destination(specific_option_key1='specific_option_value1'),
-        @destination(specific_option_key1='specific_option_value2')))
+        @destination(<destination.specific.key>='<value>'),
+        @destination(<destination.specific.key>='<value>')))
 )
-define stream StreamName (attribute1 Type1, attributeN TypeN);
+define stream <stream name> (<attribute1> <type>, <attributeN> <Type>);
 ```
 
 *Partitioned Distributed Sink*
 
-Publishes events to defined destinations by partitioning based on the hashcode of the events partition key.
+Publishes events to defined destinations by partitioning them based on the partitioning key.
 
 ```sql
-@sink(type='sink_type', common_option_key1='common_option_value1', common_option_key2='{{common_option_value1}}',
-    @map(type='map_type', option_key1='option_value1', option_key2='{{option_value1}}',
-        @payload('payload_mapping')
+@sink(type='<sink type>', <common.static.key>='<value>', <common.dynamic.key>='{{<value>}}',
+    @map(type='<map type>', <static.key>='<value>', <dynamic.key>='{{<value>}}',
+        @payload('<payload mapping>')
     )
-    @distribution(strategy='partitioned', partitionKey='partition_key',
-        @destination(specific_option_key1='specific_option_value1'),
-        @destination(specific_option_key1='specific_option_value2')))
+    @distribution(strategy='partitioned', partitionKey='<partition key>',
+        @destination(<destination.specific.key>='<value>'),
+        @destination(<destination.specific.key>='<value>')))
 )
-define stream StreamName (attribute1 Type1, attributeN TypeN);
+define stream <stream name> (<attribute1> <type>, <attributeN> <Type>);
 ```
 
 #### Sink Mapper
 
-Each `@sink` annotation has a mapping denoted by the  `@map` annotation that converts the Siddhi event to an outgoing message format.
+Each `@sink` configuration can have a mapping denoted by the `@map` annotation that defines how to convert Siddhi events to outgoing messages with the defined format.
 
-The `type` parameter of the `@map` annotation defines the map type based on which the event is mapped. The other parameters to be configured depends on the mapper selected. Some of these parameters are optional and some have dynamic values. </br>
+The `type` parameter of the `@map` defines the map type to be used in converting the outgoing events. The other parameters of `@map` annotation depends on the mapper selected, and some of its parameters can be optional and/or dynamic.
 
-For detailed information about the parameters see the documentation for the relevant mapping type.
-
-!!! tip
-    When the `@map` annotation is not provided, `@map(type='passThrough')` is used by default. This can be used when the sink publishes in the Siddhi event format, or when it does not need any mappings.
+For detailed information about the parameters see the documentation of the relevant mapper.
 
 **Map Payload**
 
-`@payload` is an optional annotation used with the `@map` annotation to define a custom mapping. When the `@payload` annotation is not provided, each mapper
-maps the outgoing events to its own default data format. By defining the `@payload` annotation you can configure mappers to produce the output payload with attribute names of your choice, using dynamic properties by selectively assigning
-the attributes in your preferred format.
+`@payload` is an optional annotation used with `@map` to define custom mapping. When the `@payload` annotation is not provided, each mapper maps the outgoing events to its own default event format. The `@payload` annotation allow users to configure mappers to produce the output payload of their choice, and by using dynamic properties within the payload they can selectively extract and add data from the published Siddhi events.
 
-There are two ways you can configure the `@payload` annotation.
+There are two ways you to configure `@payload` annotation.
 
-1. Some mappers such as `XML`, `JSON`, and `Test` accept only one output payload using the following format: <br/>
-```@payload( 'This is a test message from {{user}}.' )```
-2. Some mappers such `key-value` accept series of mapping values defined as follows: <br/>
-```@payload( key1='mapping_1', 'key2'='user : {{user}}')``` <br/>
-Here, apart from the dotted key names sush as ```a.b.c```, any constant string value such as ```'$abc'``` can also by used as a key.
+1. Some mappers such as `XML`, `JSON`, and `Test` only accept one output payload: <br/>
+  `@payload( 'This is a test message from {{user}}.')`
+2. Some mappers such `key-value` accept series of mapping values: <br/>
+  `@payload( key1='mapping_1', 'key2'='user : {{user}}')` <br/>
+  Here, the keys of payload mapping can be defined using the dot notation as ```a.b.c```, or using any constant string value as `'$abc'`.
 
 **Supported Mapping Types**
 
-The following is a list of currently supported sink mapping types:
+The following is a list of sink mapping types supported by Siddhi:
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event/">WSO2Event</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml/">XML</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text/">TEXT</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/">Avro</a>
+|Sink mapping type | Description|
+| ------------- |-------------|
+| <a target="_blank" href="http://siddhi.io/api/latest/#passthrough-sink-mapper">PassThrough</a> | Omits data conversion on outgoing Siddhi events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-json/">JSON</a> | Converts Siddhi events to JSON messages.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-xml/">XML</a> | Converts Siddhi events to XML messages.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-text/">TEXT</a> | Converts Siddhi events to plain text messages.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-avro/">Avro</a> | Converts Siddhi events to Avro Events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-wso2event/">WSO2Event</a> | Converts Siddhi events to WSO2Event events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-binary/">Binary</a> | Converts Siddhi events to Siddhi specific binary events.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-keyvalue/">Key Value</a> | Converts Siddhi events to key-value HashMaps.|
+| <a target="_blank" href="https://wso2-extensions.github.io/siddhi-map-csv/">CSV</a> | Converts Siddhi events to CSV like delimiter separated events.|
 
+!!! tip
+    When the `@map` annotation is not provided `@map(type='passThrough')` is used as default, that passes the outgoing Siddhi events directly to the sinks without any data conversion.
 
-**Example**
+ [PassThrough](http://siddhi.io/api/latest/#passthrough-sink-mapper) is the only sink mapper inbuilt in Siddhi, and all other sink mappers are implemented as extensions.
 
-Following query publishes events from the `OutputStream` stream to an `HTTP` endpoint. Here the events are mapped to the default `JSON` payloads and sent to `http://localhost:8005/endpoint`
- using the `POST` method, with the`Accept` header, and secured via basic authentication where `admin` is both the username and the password.
+**Example 1**
+
+Publishes `OutputStream` events by converting them to `JSON` messages with the default format, and by sending to an `HTTP` endpoint `http://localhost:8005/endpoint1`, using `POST` method, `Accept` header, and basic authentication having `admin` is both username and password.
+
+The configuration of the `HTTP` sink and `JSON` sink mapper to achieve the above is as follows.
+
 ```sql
 @sink(type='http', publisher.url='http://localhost:8005/endpoint', method='POST', headers='Accept-Date:20/02/2017',
-  basic.auth.username='admin', basic.auth.password='admin', basic.auth.enabled='true',
+  basic.auth.enabled='true', basic.auth.username='admin', basic.auth.password='admin',
   @map(type='json'))
-define stream OutputStream (name string, ang int, country string);
+define stream OutputStream (name string, age int, country string);
 ```
 
-Following query publishes events from the `OutputStream` stream to multiple the `HTTP` endpoints using partitioning strategy. Here the events sent to either `http://localhost:8005/endpoint1`
-or `http://localhost:8006/endpoint2` based on the partitioning key `country`. It uses default `JSON` mapping, `POST` method, and used `admin` as both the username and the password when publishing to both the endpoints.
+This will publish a `JSON` message on the following format:
+```
+{
+  "event":{
+    "name":"Paul",
+    "age":20,
+    "country":"UK"
+  }
+}
+```
+
+**Example 2**
+
+Publishes events from the `OutputStream` stream to multiple the `HTTP` endpoints using a partitioning strategy. Here the events are sent to either `http://localhost:8005/endpoint1` or `http://localhost:8006/endpoint2` based on the partitioning key `country`. It uses default `JSON` mapping, `POST` method, and used `admin` as both the username and the password when publishing to both the endpoints.
+
+The configuration of the distributed `HTTP` sink and `JSON` sink mapper to achieve the above is as follows.
+
 ```sql
-@sink(type='http', method='POST', basic.auth.username='admin', basic.auth.password='admin',
-  basic.auth.enabled='true', @map(type='json'),
+@sink(type='http', method='POST', basic.auth.enabled='true',
+  basic.auth.username='admin', basic.auth.password='admin',
+  @map(type='json'),
   @distribution(strategy='partitioned', partitionKey='country',
      @destination(publisher.url='http://localhost:8005/endpoint1'),
      @destination(publisher.url='http://localhost:8006/endpoint2')))
-define stream OutputStream (name string, ang int, country string);
+define stream OutputStream (name string, age int, country string);
 ```
+
+This will partition the outgoing events and publish all events with the same country attribute value to the same endpoint. The `JSON` message published will be on the following format:
+```
+{
+  "event":{
+    "name":"Paul",
+    "age":20,
+    "country":"UK"
+  }
+}
+```
+
 ### Error Handling
 
-When errors are thrown by Siddhi elements subscribed to the stream, the error gets propagated up to the stream which delivered
-the event to those Siddhi elements. By default the error is logged and dropped at the stream, but we can capture the error and
-the associated event and handle them gracefully by adding `@OnError` annotation to the corresponding stream definition.
+Errors in Siddhi can be handled at the Streams and in Sinks.
 
-The `@OnError` annotation requires an `action` to be specified as bellow.
+*Error Handling at Stream*
+
+When errors are thrown by Siddhi elements subscribed to the stream, the error gets propagated up to the stream that delivered the event to those Siddhi elements. By default the error is logged and dropped at the stream, but this behavior can be altered by by adding `@OnError` annotation to the corresponding stream definition.
+`@OnError` annotation can help users to capture the error and the associated event, and handle them gracefully by sending them to a fault stream.
+
+The `@OnError` annotation and the required `action` to be specified as bellow.
 
 ```sql
-@OnError(action='on_error_action')
+@OnError(action='on error action')
 define stream <stream name> (<attribute name> <attribute type>,
                              <attribute name> <attribute type>, ... );
 ```
@@ -429,40 +484,95 @@ define stream <stream name> (<attribute name> <attribute type>,
 The `action` parameter of the `@OnError` annotation defines the action to be executed during failure scenarios.
 The following actions can be specified to `@OnError` annotation to handle erroneous scenarios.
 
-* `LOG` : Logs the event with the error, and drops the event. This is the default action performed even when `@OnError` annotation is not defined
-* `STREAM`: Creates a fault stream and redirects the event and the error to it. The created fault stream will have all the attributes defined in the base stream to include the error causing event, and in addition it contains `_error` attribute of type `object` to capture the error information. The fault stream can be referred by adding `!` in front of the base stream name.
+* `LOG` : Logs the event with the error, and drops the event. This is the default action performed even when `@OnError` annotation is not defined.
+* `STREAM`: Creates a fault stream and redirects the event and the error to it. The created fault stream will have all the attributes defined in the base stream to capture the error causing event, and in addition it also contains `_error` attribute of type `object` to containing the error information. The fault stream can be referred by adding `!` in front of the base stream name as `!<stream name>`.
 
 **Example**
 
-Following `TempStream` is defined with `@OnError` annotation to redirect errors to a fault stream.
+Handle errors in `TempStream` by redirecting the errors to a fault stream.
+
+The configuration of `TempStream` stream and `@OnError` annotation is as follows.
 
 ```sql
 @OnError(name='STREAM')
 define stream TempStream (deviceID long, roomNo int, temp double);
 ```
+
 Siddhi will infer and automatically defines the fault stream of `TempStream` as given bellow.
+
 
 ```sql
 define stream !TempStream (deviceID long, roomNo int, temp double, _error object);
 ```
 
-Following SiddhiApp demonstrate failure generation and handling with the use of [queries](#query).
+Following SiddhiApp extends the use-case by adding failure generation and error handling with the use of [queries](#query).
 Note: Details on writing processing logics via [queries](#query) will be explained in later sections.
 
 ```sql
 @OnError(name='STREAM')
 define stream TempStream (deviceID long, roomNo int, temp double);
 
--- Failure generation through a custom function `createError`
-@name('failure-generation')
+-- Error generation through a custom function `createError()`
+@name('error-generation')
 from TempStream#custom:createError()
 insert into IgnoreStream1;
 
--- Handling failure by simply logging the event and error.
-@name('handle-failure')
-from !TempStream#log("Error Occoured!")
+-- Handling error by simply logging the event and error.
+@name('handle-error')
+from !TempStream#log("Error Occurred!")
 select deviceID, roomNo, temp, _error
 insert into IgnoreStream2;
+```
+
+*Error Handling at Sink*
+
+There can be cases where external systems becoming unavailable or coursing errors when the events are published to them. By default the sinks log and drop the events causing  event losses, this can be handled gracefully by configuring `@sink` annotation's `on.error` parameter.
+
+The `on.error` parameter of the `@sink` annotation can be specified as bellow.
+
+```sql
+@sink(type='<sink type>', on.error='<on error action>', <key>='<value>', ...)
+define stream <stream name> (<attribute name> <attribute type>,
+                             <attribute name> <attribute type>, ... );
+```  
+
+The following actions can be specified to `on.error` parameter of `@sink` annotation to handle erroneous scenarios.
+
+* `LOG` : Logs the event with the error, and drops the event. This is the default action performed even when `on.error` parameter is not defined on the `@sink` annotation.
+* `WAIT` : The threads waits in `back-off and re-trying` state, and send the events only when the connection is re-established. During this time the threads will not consume any new messages causing the systems to introduce back pressure on the systems publishing to it.
+* `STREAM`: Pushes the failed events with the corresponding error to the associated fault stream that the sink belongs to.
+
+**Example 1**
+
+Introduce back pressure on threads brining events via `TempStream` when the system cannot connect to Kafka.
+
+The configuration of `TempStream` stream and `@sink` Kafka annotation with `on.error` property is as follows.
+
+```sql
+@sink(type='kafka', on.error='WAIT', topic='{{symbol}}',
+      partition.no='{{volume}}', bootstrap.servers='localhost:9092',
+      @map(type='xml'))
+define stream TempStream (deviceID long, roomNo int, temp double);
+```
+
+**Example 2**
+
+Send events to the fault stream of `TempStream` when the system cannot connect to Kafka.
+
+The configuration of `TempStream` stream with associated fault stream, `@sink` Kafka annotation with `on.error` property and a query to handle the error is as follows.
+
+```sql
+@OnError(name='STREAM')
+@sink(type='kafka', on.error='STREAM', topic='{{symbol}}',
+      partition.no='{{volume}}', bootstrap.servers='localhost:9092',
+      @map(type='xml'))
+define stream TempStream (deviceID long, roomNo int, temp double);
+
+-- Handling error by simply logging the event and error.
+@name('handle-error')
+from !TempStream#log("Error Occurred!")
+select deviceID, roomNo, temp, _error
+insert into IgnoreStream;
 ```
 
 ## Query
@@ -3088,54 +3198,6 @@ The following elements are configured with this annotation.
 |`buffer.size`|The size of the event buffer that will be used to handover the execution to other threads. | - |
 |`workers`|Number of worker threads that will be be used to process the buffered events.|`1`|
 |`batch.size.max`|The maximum number of events that will be processed together by a worker thread at a given time.| `buffer.size`|
-
-### Fault Streams
-
-When the `@OnError` annotation is added to a stream definition, it handles failover scenarios that occur during runtime gracefully.
-
-```sql
-@OnError(action='on_error_action')
-define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
-```
-
-The action parameter of the `@OnError` annotation defines the action to be executed during failure scenarios.
-
-The following action types can be specified via the `@OnError` annotation when defining a stream. If this annotation is not added, `LOG` is the action type by default.
-
-* `LOG` : Logs the event with an error, and then drops the event.
-* `STREAM`: A fault stream is automatically created for the base stream. The definition of the fault stream includes all the attributes of the base stream as well as an additional attribute named `_error`.
-The events are inserted into the fault stream during a failure. The error identified is captured as the value for the `_error` attribute.
-
-e.g., the following is a Siddhi application that includes the `@OnError` annotation to handle failures during runtime.
-
-```sql
-@OnError(name='STREAM')
-define stream StreamA (symbol string, volume long);
-
-from StreamA[custom:fault() > volume]
-insert into StreamB;
-
-from !StreamA#log("Error Occured")
-select symbol, volume long, _error
-insert into tempStream;
-```
-
-`!StreamA`, fault stream is automatically created when you add the `@OnError` annotation with the following attributes.
-```sql
-symbol string, volume long, _error object
-```
-
-If you include the `on.error` parameter in the sink configuration, failures are handled by Siddhi at the time the events are published from the `Sink`.
-```sql
-@sink(type='sink_type', on.error='on.error.action')
-define stream <stream name> (<attribute name> <attribute type>, <attribute name> <attribute type>, ... );
-```  
-
-The action types that can be specified via the `on.error` parameter when configuring a sink are as follows. If this parameter is not included in the sink configuration, `LOG` is the action type by default.
-
-* `LOG` : Logs the event with the error, and then drops the event.
-* `WAIT` : The thread waits in the `back-off and re-trying` state, and reconnects once the connection is re-established.
-* `STREAM`: Corresponding fault stream is populated with the failed event and the error while publishing.
 
 ### Statistics
 
