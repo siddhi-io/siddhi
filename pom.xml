@@ -632,6 +632,11 @@
                     <revisionOnScmFailure>${maven.build.timestamp}</revisionOnScmFailure>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+                <version>${maven.scr.plugin.version}</version>
+            </plugin>
         </plugins>
     </build>
 
@@ -721,6 +726,11 @@
     </profiles>
 
     <properties>
+        <!-- version ranges-->
+        <com.lmax.disruptor.version.range>[3.0.0, 4.0.0)</com.lmax.disruptor.version.range>
+        <google.guava.version.range>[23.0.0, 24.0.0)</google.guava.version.range>
+        <org.quartz.version.range>[2.0.0, 3.0.0)</org.quartz.version.range>
+
         <testng.version>6.14.3</testng.version>
         <log4j.version>1.2.17</log4j.version>
         <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
@@ -776,6 +786,7 @@
         <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
         <maven.source.plugin.version>3.0.1</maven.source.plugin.version>
         <apache.rat.plugin.version>0.13</apache.rat.plugin.version>
+        <maven.scr.plugin.version>1.21.0</maven.scr.plugin.version>
 
         <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
         <maven.checkstyleplugin.version>3.0.0</maven.checkstyleplugin.version>
@@ -788,7 +799,7 @@
         <project.scm.id>my-scm-server</project.scm.id>
 
         <!--Maven bundle plugin configuration -->
-        <maven.bundle.plugin.version>4.1.0</maven.bundle.plugin.version>
+        <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
         <maven.bundle.plugin.vendor>WSO2 Inc</maven.bundle.plugin.vendor>
         <maven.bundle.plugin.extensions>true</maven.bundle.plugin.extensions>
         <bundle.classpath>.</bundle.classpath>

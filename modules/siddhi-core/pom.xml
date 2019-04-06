@@ -101,10 +101,13 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            io.siddhi.core,
-                            io.siddhi.core.*
+                            io.siddhi.core;version="${project.version}",
+                            io.siddhi.core.*;version="${project.version}"
                         </Export-Package>
                         <Import-Package>
+                            com.lmax.disruptor.*;version="${com.lmax.disruptor.version.range}",
+                            com.google.common.*;version="${google.guava.version.range}",
+                            org.quartz.*;version="${org.quartz.version.range}",
                             *;resolution:=optional
                         </Import-Package>
                         <Include-Resource>

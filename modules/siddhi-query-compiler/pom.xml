@@ -88,8 +88,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            io.siddhi.query.compiler,
-                            io.siddhi.query.compiler.*
+                            io.siddhi.query.compiler;version="${project.version}",
+                            io.siddhi.query.compiler.*;version="${project.version}"
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional

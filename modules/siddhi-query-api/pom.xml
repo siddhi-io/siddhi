@@ -51,8 +51,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            io.siddhi.query.api,
-                            io.siddhi.query.api.*
+                            io.siddhi.query.api;version="${project.version}",
+                            io.siddhi.query.api.*;version="${project.version}"
                         </Export-Package>
                         <Import-Package>
                             *;resolution:=optional
