@@ -635,7 +635,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.21.0</version>
+                <version>${maven.scr.plugin.version}</version>
             </plugin>
         </plugins>
     </build>
@@ -786,6 +786,7 @@
         <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
         <maven.source.plugin.version>3.0.1</maven.source.plugin.version>
         <apache.rat.plugin.version>0.13</apache.rat.plugin.version>
+        <maven.scr.plugin.version>1.21.0</maven.scr.plugin.version>
 
         <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
         <maven.checkstyleplugin.version>3.0.0</maven.checkstyleplugin.version>
