@@ -48,7 +48,7 @@ Siddhi is free and open source, under **Apache Software License v2.0**.
 
 ## Get Started!
 
-Get started with Siddhi in a few minutes by following the <a target="_blank" href="http://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/quckstart-5.x/">Siddhi Quick Start Guide</a>
+Get started with Siddhi in a few minutes by following the <a target="_blank" href="https://siddhi-io.github.io/siddhi/documentation/siddhi-5.x/quckstart-5.x/">Siddhi Quick Start Guide</a>
 
 ## Why use Siddhi ? 
 
@@ -126,7 +126,7 @@ For more information please contact us via <a target="_blank" href="http://wso2.
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.0.0-m6">5.0.0-m6</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.0.0-m7">5.0.0-m7</a>.
 
 ## How to Contribute
 * Report issues at <a target="_blank" href="https://github.com/wso2/siddhi/issues">GitHub Issue Tracker</a>.
