@@ -44,7 +44,7 @@ pages:
     - User Guide: documentation/siddhi-4.x/user-guide-4.x.md
     - Siddhi Query Guide: documentation/siddhi-4.x/query-guide-4.x.md
     - Siddhi Architecture: documentation/siddhi-4.x/architecture-4.x.md
-- Contribute: documentation/contribution.md
+- Contribute: contribution.md
 - Extensions: extensions.md
 - API Docs:
   - 5.0.0-m7: api/5.0.0-m7.md
@@ -69,3 +69,4 @@ pages:
   - 4.0.0: api/4.0.0.md
   - latest: api/latest.md
 - License: license.md
+- Google Season of Code 2019: season-of-docs-2019.md
