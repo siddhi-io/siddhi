@@ -802,7 +802,7 @@ public class CollectionExpressionParser {
             CollectionExpression leftCollectionExpression = ((AndCollectionExpression)
                     collectionExpression).getLeftCollectionExpression();
             CollectionExpression rightCollectionExpression = ((AndCollectionExpression)
-                    collectionExpression).getLeftCollectionExpression();
+                    collectionExpression).getRightCollectionExpression();
             Map<String, ExpressionExecutor> expressionExecutors = buildMultiPrimaryKeyExpressionExecutors(
                     leftCollectionExpression, matchingMetaInfoHolder, variableExpressionExecutors, tableMap,
                     siddhiAppContext, queryName);
