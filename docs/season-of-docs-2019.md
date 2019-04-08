@@ -75,20 +75,17 @@ We could perform extensive operations for streaming data integration purposes in
 there is no  end-end to documentation that explains these use cases. We are expecting the applicant to understand these 
 use cases, come up with some good examples, and write a comprehensive guide around the topics mentioned.
 
-
 ### Deliverables
 A comprehensive document explains the below streaming data integration use cases.
 - Chance Data Capture (CDC)
 - Throttling
 - Notification Manager
 
-
 ### Skills Needed
 
 - A reasonable knowledge of how to work with Github
 - A good command of English
 - Some basic idea on CDC, throttling and notifications
-
 
 ### References
 [1] - [Siddhi Github repository](https://github.com/siddhi-io)
@@ -125,18 +122,15 @@ requirement is addressed via Prometheus that monitors Siddhi Stream Processor, a
  real live environment and take necessary actions based on the load and the TPS of the system. Currently, we need an 
  end to end documentation explaining these monitoring capabilities. 
 
-
 ### Deliverables
 A comprehensive document that explains the monitoring capabilities of Siddhi Stream Processor. This documentation 
 should cover the integration use cases with Prometheus. 
-
 
 ### Skills Needed
 
 - A reasonable knowledge of how to work with Github
 - A good command of English
 - Basic knowledge of Prometheus [5]
-
 
 ### References
 [1] - [Siddhi Github repository](https://github.com/siddhi-io)
