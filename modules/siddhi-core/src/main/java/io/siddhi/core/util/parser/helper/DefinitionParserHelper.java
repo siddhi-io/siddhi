@@ -181,6 +181,7 @@ public class DefinitionParserHelper {
             RecordTableHandler recordTableHandler = null;
             if (annotation != null) {
                 annotation = updateAnnotationRef(annotation, SiddhiConstants.NAMESPACE_STORE, siddhiAppContext);
+                annotation = updateEnvironmentVariables(annotation);
                 String tableType = annotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_TYPE);
                 if (tableType == null) {
                     throw new SiddhiAppCreationException(
@@ -313,6 +314,7 @@ public class DefinitionParserHelper {
             if (SiddhiConstants.ANNOTATION_SOURCE.equalsIgnoreCase(sourceAnnotation.getName())) {
                 sourceAnnotation = updateAnnotationRef(sourceAnnotation, SiddhiConstants.NAMESPACE_SOURCE,
                         siddhiAppContext);
+                sourceAnnotation = updateEnvironmentVariables(sourceAnnotation);
                 Annotation mapAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_MAP,
                         sourceAnnotation.getAnnotations());
                 if (mapAnnotation == null) {
@@ -435,6 +437,7 @@ public class DefinitionParserHelper {
             if (SiddhiConstants.ANNOTATION_SINK.equalsIgnoreCase(sinkAnnotation.getName())) {
                 sinkAnnotation = updateAnnotationRef(sinkAnnotation, SiddhiConstants.NAMESPACE_SINK,
                         siddhiAppContext);
+                sinkAnnotation = updateEnvironmentVariables(sinkAnnotation);
                 Annotation mapAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_MAP,
                         sinkAnnotation.getAnnotations());
                 String sinkType = sinkAnnotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_TYPE);
@@ -868,6 +871,21 @@ public class DefinitionParserHelper {
                 annotation.setElements(annotationElements);
             }
         }
+        return annotation;
+    }
+
+    private static Annotation updateEnvironmentVariables (Annotation annotation) {
+        Map<String, String> newSystemConfig = new HashMap<>(System.getenv());
+        Map<String, String> collection = annotation.getElements().stream()
+                .collect(Collectors.toMap(Element::getKey, Element::getValue));
+        newSystemConfig.putAll(collection);
+
+        List<Element> annotationElements = newSystemConfig.entrySet().stream()
+                .map((property) -> new Element(
+                        property.getKey(),
+                        property.getValue()))
+                .collect(Collectors.toList());
+        annotation.setElements(annotationElements);
         return annotation;
     }
 
