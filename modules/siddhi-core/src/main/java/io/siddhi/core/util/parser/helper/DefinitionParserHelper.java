@@ -772,7 +772,6 @@ public class DefinitionParserHelper {
                                                       Annotation annotation,
                                                       io.siddhi.annotation.Extension extension,
                                                       String[] supportedDynamicOptions) {
-
         List<String> supportedDynamicOptionList = new ArrayList<>();
         if (supportedDynamicOptions != null) {
             supportedDynamicOptionList = Arrays.asList(supportedDynamicOptions);
@@ -832,7 +831,6 @@ public class DefinitionParserHelper {
                                                                      StreamDefinition streamDefinition,
                                                                      Sink clientTransport,
                                                                      SiddhiAppContext siddhiAppContext) {
-
         io.siddhi.annotation.Extension sinkExt
                 = clientTransport.getClass().getAnnotation(io.siddhi.annotation.Extension.class);
 
