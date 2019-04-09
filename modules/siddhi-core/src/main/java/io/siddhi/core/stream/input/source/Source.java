@@ -56,6 +56,7 @@ public abstract class Source<S extends State> {
     private ScheduledExecutorService scheduledExecutorService;
     private ConnectionCallback connectionCallback = new ConnectionCallback();
     private StateHolder<S> stateHolder;
+    private S state;
 
     public final void init(String sourceType, OptionHolder transportOptionHolder, SourceMapper sourceMapper,
                            String[] transportPropertyNames, ConfigReader configReader, String mapType,
@@ -73,7 +74,8 @@ public abstract class Source<S extends State> {
         this.siddhiAppContext = siddhiAppContext;
         StateFactory<S> stateFactory = init(sourceMapper, transportOptionHolder, transportPropertyNames,
                 configReader, siddhiAppContext);
-        stateHolder = siddhiAppContext.generateStateHolder(this.getClass().getName(), stateFactory);
+        stateHolder = siddhiAppContext.generateStateHolder(streamDefinition.getId() + "-" +
+                this.getClass().getName(), stateFactory);
         scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
     }
 
@@ -106,6 +108,7 @@ public abstract class Source<S extends State> {
      *
      * @param connectionCallback Callback to pass the ConnectionUnavailableException for connection failure after
      *                           initial successful connection
+     * @param state current state of the source
      * @throws ConnectionUnavailableException if it cannot connect to the source backend
      */
     public abstract void connect(ConnectionCallback connectionCallback, S state) throws ConnectionUnavailableException;
@@ -133,14 +136,14 @@ public abstract class Source<S extends State> {
     public void connectWithRetry() {
         if (!isConnected.get()) {
             isTryingToConnect.set(true);
-            S state = stateHolder.getState();
+            state = stateHolder.getState();
             try {
                 connect(connectionCallback, state);
                 isConnected.set(true);
                 isTryingToConnect.set(false);
                 backoffRetryCounter.reset();
             } catch (ConnectionUnavailableException e) {
-                disconnect();
+                disconnectSource();
                 isConnected.set(false);
                 retryWithBackoff(e);
             } catch (RuntimeException e) {
@@ -148,8 +151,6 @@ public abstract class Source<S extends State> {
                         " Error while connecting at Source '" + StringUtil.removeCRLFCharacters(type) + "' at '" +
                         StringUtil.removeCRLFCharacters(streamDefinition.getId()) + "'.", e);
                 throw e;
-            } finally {
-                stateHolder.returnState(state);
             }
         }
     }
@@ -174,11 +175,19 @@ public abstract class Source<S extends State> {
 
     public void shutdown() {
         try {
-            disconnect();
+            disconnectSource();
             destroy();
         } finally {
             isConnected.set(false);
             isTryingToConnect.set(false);
+        }
+    }
+
+    private void disconnectSource() {
+        try {
+            disconnect();
+        } finally {
+            stateHolder.returnState(state);
         }
     }
 
@@ -195,7 +204,7 @@ public abstract class Source<S extends State> {
      */
     public class ConnectionCallback {
         public void onError(ConnectionUnavailableException e) {
-            disconnect();
+            disconnectSource();
             isConnected.set(false);
             retryWithBackoff(e);
         }

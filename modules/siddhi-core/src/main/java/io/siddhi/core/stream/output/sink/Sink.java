@@ -91,7 +91,8 @@ public abstract class Sink<S extends State>  implements SinkListener {
         }
         StateFactory<S> stateFactory = init(streamDefinition, transportOptionHolder, sinkConfigReader,
                 siddhiAppContext);
-        stateHolder = siddhiAppContext.generateStateHolder(this.getClass().getName(), stateFactory);
+        stateHolder = siddhiAppContext.generateStateHolder(streamDefinition.getId() + "-" +
+                this.getClass().getName(), stateFactory);
         if (sinkMapper != null) {
             sinkMapper.init(streamDefinition, mapType, mapOptionHolder, payloadElementList, this,
                     mapperConfigReader, mapperLatencyTracker, siddhiAppContext);
@@ -180,6 +181,7 @@ public abstract class Sink<S extends State>  implements SinkListener {
      *
      * @param payload          payload of the event
      * @param transportOptions one of the event constructing the payload
+     * @param state current state of the sink
      * @throws ConnectionUnavailableException throw when connections are unavailable.
      */
     public abstract void publish(Object payload, DynamicOptions transportOptions, S state)
