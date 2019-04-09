@@ -24,6 +24,7 @@ import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
@@ -100,6 +101,11 @@ public class LogSink extends Sink {
     @Override
     public Class[] getSupportedInputEventClasses() {
         return new Class[]{Object.class};
+    }
+
+    @Override
+    protected ServiceDeploymentInfo exposedServiceDeploymentInfo() {
+        return null;
     }
 
     @Override

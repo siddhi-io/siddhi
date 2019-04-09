@@ -34,7 +34,9 @@ import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is the base class for Distributed transports. All distributed transport types must inherit from this class
@@ -59,8 +61,7 @@ public abstract class DistributedTransport extends Sink {
      */
     @Override
     protected StateFactory<State> init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                                       ConfigReader sinkConfigReader, SiddhiAppContext
-                                siddhiAppContext) {
+                                       ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
         this.streamDefinition = outputStreamDefinition;
         this.sinkOptionHolder = optionHolder;
         this.siddhiAppContext = siddhiAppContext;
@@ -70,35 +71,40 @@ public abstract class DistributedTransport extends Sink {
     /**
      * This is method contains the additional parameters which require to initialize distributed transport
      *
-     * @param streamDefinition         Definition of the stream this sink instance is publishing to
-     * @param type                     Type of the transport that (e.g., TCP, JMS)
-     * @param transportOptionHolder    Option holder for carrying options for the transport
-     * @param sinkConfigReader         This hold the {@link Sink} extensions configuration reader for the sink
-     * @param sinkMapper               Hold the mapper that's used in this sink
-     * @param mapType                  Type of the mapper
-     * @param mapOptionHolder          Options of the mapper
-     * @param sinkHandler              Sink handler to do optional processing
-     * @param payloadElementList       The template list of the payload messages
-     * @param mapperConfigReader       This hold the {@link Sink} extensions configuration reader for the mapper
-     * @param siddhiAppContext         The siddhi app context
-     * @param destinationOptionHolders List of option holders containing the options mentioned in @destination
-     * @param sinkAnnotation           The annotation of the Sink
-     * @param strategy                 Publishing strategy to be used by the distributed transport
-     * @param supportedDynamicOptions  List of supported dynamic options
+     * @param streamDefinition                Definition of the stream this sink instance is publishing to
+     * @param type                            Type of the transport that (e.g., TCP, JMS)
+     * @param transportOptionHolder           Option holder for carrying options for the transport
+     * @param sinkConfigReader                This hold the {@link Sink} extensions configuration reader for the sink
+     * @param sinkMapper                      Hold the mapper that's used in this sink
+     * @param mapType                         Type of the mapper
+     * @param mapOptionHolder                 Options of the mapper
+     * @param sinkHandler                     Sink handler to do optional processing
+     * @param payloadElementList              The template list of the payload messages
+     * @param mapperConfigReader              This hold the {@link Sink} extensions configuration reader for the mapper
+     * @param siddhiAppContext                The siddhi app context
+     * @param destinationOptionHolders        List of option holders containing the options mentioned in @destination
+     * @param sinkAnnotation                  The annotation of the Sink
+     * @param strategy                        Publishing strategy to be used by the distributed transport
+     * @param supportedDynamicOptions         List of supported dynamic options
+     * @param deploymentProperties
+     * @param destinationDeploymentProperties
      */
     public void init(StreamDefinition streamDefinition, String type, OptionHolder transportOptionHolder,
                      ConfigReader sinkConfigReader,
                      SinkMapper sinkMapper, String mapType, OptionHolder mapOptionHolder, SinkHandler sinkHandler,
                      List<Element> payloadElementList, ConfigReader mapperConfigReader,
                      SiddhiAppContext siddhiAppContext, List<OptionHolder> destinationOptionHolders,
-                     Annotation sinkAnnotation, DistributionStrategy strategy, String[] supportedDynamicOptions) {
+                     Annotation sinkAnnotation, DistributionStrategy strategy, String[] supportedDynamicOptions,
+                     Map<String, String> deploymentProperties,
+                     List<Map<String, String>> destinationDeploymentProperties) {
         this.type = type;
         this.strategy = strategy;
         this.supportedDynamicOptions = supportedDynamicOptions;
         init(streamDefinition, type, transportOptionHolder, sinkConfigReader, sinkMapper, mapType, mapOptionHolder,
-                sinkHandler, payloadElementList, mapperConfigReader, siddhiAppContext);
-        initTransport(sinkOptionHolder, destinationOptionHolders, sinkAnnotation, sinkConfigReader, strategy, type,
+                sinkHandler, payloadElementList, mapperConfigReader, new HashMap<>(),
                 siddhiAppContext);
+        initTransport(sinkOptionHolder, destinationOptionHolders, deploymentProperties,
+                destinationDeploymentProperties, sinkAnnotation, sinkConfigReader, strategy, type, siddhiAppContext);
     }
 
     @Override
@@ -153,6 +159,8 @@ public abstract class DistributedTransport extends Sink {
 
 
     public abstract void initTransport(OptionHolder sinkOptionHolder, List<OptionHolder> destinationOptionHolders,
+                                       Map<String, String> deploymentProperties,
+                                       List<Map<String, String>> destinationDeploymentProperties,
                                        Annotation sinkAnnotation, ConfigReader sinkConfigReader,
                                        DistributionStrategy strategy, String type, SiddhiAppContext siddhiAppContext);
 

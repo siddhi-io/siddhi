@@ -21,15 +21,18 @@ package io.siddhi.core.transport;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.core.util.transport.InMemoryBroker;
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -92,6 +95,9 @@ public class MultiClientDistributedSinkTestCase {
 
         SiddhiManager siddhiManager = new SiddhiManager();
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        List<ServiceDeploymentInfo> serviceDeploymentInfos = siddhiAppRuntime.getSinks().
+                iterator().next().get(0).getServiceDeploymentInfoList();
+        Assert.assertEquals(serviceDeploymentInfos.size(), 0);
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
 
         siddhiAppRuntime.start();
@@ -579,5 +585,92 @@ public class MultiClientDistributedSinkTestCase {
             InMemoryBroker.unsubscribe(subscriptionWSO2);
             InMemoryBroker.unsubscribe(subscriptionIBM);
         }
+    }
+
+    @Test
+    public void multiClientRoundRobinWithDep() throws InterruptedException {
+        log.info("Test inMemorySink And EventMapping With SiddhiQL Dynamic Params");
+
+        InMemoryBroker.Subscriber subscriptionWSO2 = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                topic1Count.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "topic1";
+            }
+        };
+
+        InMemoryBroker.Subscriber subscriptionIBM = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                topic2Count.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "topic2";
+            }
+        };
+
+        //subscribe to "inMemory" broker per topic
+        InMemoryBroker.subscribe(subscriptionWSO2);
+        InMemoryBroker.subscribe(subscriptionIBM);
+
+        String streams = "" +
+                "@app:name('TestSiddhiApp')" +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@sink(type='testDepInMemory', dep:foo='bar', @map(type='passThrough'), " +
+                "   @distribution(strategy='roundRobin', " +
+                "       @destination(topic = 'topic1', dep:foo1='bar1'), " +
+                "       @destination(topic = 'topic2', dep:foo2='bar2'))) " +
+                "define stream BarStream (symbol string, price float, volume long); ";
+
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        List<ServiceDeploymentInfo> serviceDeploymentInfos = siddhiAppRuntime.getSinks().
+                iterator().next().get(0).getServiceDeploymentInfoList();
+        Assert.assertEquals(serviceDeploymentInfos.size(), 2);
+        for (int i = 0; i < serviceDeploymentInfos.size(); i++) {
+            ServiceDeploymentInfo serviceDeploymentInfo = serviceDeploymentInfos.get(i);
+            Assert.assertNotNull(serviceDeploymentInfo);
+            Assert.assertTrue(serviceDeploymentInfo.isSecured());
+            Assert.assertTrue(serviceDeploymentInfo.getServiceProtocol() ==
+                    ServiceDeploymentInfo.ServiceProtocol.TCP);
+            Assert.assertTrue(serviceDeploymentInfo.getPort() == 8080);
+            Assert.assertTrue(serviceDeploymentInfo.getDeploymentProperties().get("foo").equals("bar"));
+            if (i == 0) {
+                Assert.assertTrue(serviceDeploymentInfo.getDeploymentProperties().get("foo1").equals("bar1"));
+            } else {
+                Assert.assertTrue(serviceDeploymentInfo.getDeploymentProperties().get("foo2").equals("bar2"));
+            }
+        }
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
+
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+
+        Thread.sleep(100);
+
+        //assert event count
+        AssertJUnit.assertEquals("Number of WSO2 events", 3, topic1Count.get());
+        AssertJUnit.assertEquals("Number of IBM events", 2, topic2Count.get());
+        siddhiAppRuntime.shutdown();
+
+        //unsubscribe from "inMemory" broker per topic
+        InMemoryBroker.unsubscribe(subscriptionWSO2);
+        InMemoryBroker.unsubscribe(subscriptionIBM);
+
     }
 }

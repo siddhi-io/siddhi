@@ -20,6 +20,7 @@ package io.siddhi.core.util.transport;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.stream.output.sink.distributed.DistributedTransport;
 import io.siddhi.core.stream.output.sink.distributed.DistributionStrategy;
@@ -36,6 +37,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -68,6 +70,8 @@ public class SingleClientDistributedSink extends DistributedTransport {
 
     @Override
     public void initTransport(OptionHolder sinkOptionHolder, List<OptionHolder> destinationOptionHolders,
+                              Map<String, String> deploymentProperties,
+                              List<Map<String, String>> destinationDeploymentProperties,
                               Annotation sinkAnnotation, ConfigReader sinkConfigReader,
                               DistributionStrategy strategy, String type, SiddhiAppContext siddhiAppContext) {
         final String transportType = sinkOptionHolder.validateAndGetStaticValue(SiddhiConstants
@@ -94,7 +98,12 @@ public class SingleClientDistributedSink extends DistributedTransport {
         this.sink = (Sink) SiddhiClassLoader.loadExtensionImplementation(
                 sinkExtension, SinkExecutorExtensionHolder.getInstance(siddhiAppContext));
         this.sink.initOnlyTransport(streamDefinition, sinkOptionHolder, sinkConfigReader, type,
-                new SingleClientConnectionCallback(destinationCount, strategy), siddhiAppContext);
+                new SingleClientConnectionCallback(destinationCount, strategy), destinationDeploymentProperties.get(0),
+                siddhiAppContext);
+        if (!this.sink.getServiceDeploymentInfoList().isEmpty()) {
+            ((ServiceDeploymentInfo) this.sink.getServiceDeploymentInfoList().get(0)).
+                    addDeploymentProperties(deploymentProperties);
+        }
     }
 
     @Override
@@ -128,6 +137,14 @@ public class SingleClientDistributedSink extends DistributedTransport {
         sink.destroy();
     }
 
+    @Override
+    protected ServiceDeploymentInfo exposedServiceDeploymentInfo() {
+        return null;
+    }
+
+    public List<ServiceDeploymentInfo> getServiceDeploymentInfoList() {
+        return sink.getServiceDeploymentInfoList();
+    }
 
     private Set<String> findAllDynamicOptions(List<OptionHolder> destinationOptionHolders) {
         Set<String> dynamicOptions = new HashSet<>();
