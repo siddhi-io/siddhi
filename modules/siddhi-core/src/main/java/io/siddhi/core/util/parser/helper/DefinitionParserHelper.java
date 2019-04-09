@@ -878,32 +878,33 @@ public class DefinitionParserHelper {
     }
 
     private static Annotation updateAnnotationEnvs(Annotation annotation) {
-        String envPattern = "\\$\\{(\\w+)\\}";
-        Pattern expr = Pattern.compile(envPattern);
-        Map<String, String> collection = annotation.getElements().stream()
-                .collect(Collectors.toMap(Element::getKey, Element::getValue));
-        HashMap<String, String> newAnnotationElements = new HashMap<>();
-        newAnnotationElements.putAll(collection);
-        Iterator<Map.Entry<String, String>> itr = newAnnotationElements.entrySet().iterator();
-        while (itr.hasNext()) {
-            Map.Entry<String, String> entry = itr.next();
-            Matcher matcher = expr.matcher(entry.getValue());
-            while (matcher.find()) {
-                String envValue = System.getenv(matcher.group(1).toUpperCase());
-                if (envValue == null) {
-                    envValue = "";
-                } else {
-                    envValue = envValue.replace("\\", "\\\\");
+        if (annotation.toString().contains("$")) {
+            String envPattern = "\\$\\{(\\w+)\\}";
+            Pattern expr = Pattern.compile(envPattern);
+            Map<String, String> collection = annotation.getElements().stream()
+                    .collect(Collectors.toMap(Element::getKey, Element::getValue));
+            HashMap<String, String> newAnnotationElements = new HashMap<>(collection);
+            Iterator<Map.Entry<String, String>> itr = newAnnotationElements.entrySet().iterator();
+            while (itr.hasNext()) {
+                Map.Entry<String, String> entry = itr.next();
+                Matcher matcher = expr.matcher(entry.getValue());
+                while (matcher.find()) {
+                    String envValue = System.getenv(matcher.group(1).toUpperCase());
+                    if (envValue == null) {
+                        envValue = "";
+                    } else {
+                        envValue = envValue.replace("\\", "\\\\");
+                    }
+                    newAnnotationElements.put(entry.getKey(), envValue);
                 }
-                newAnnotationElements.put(entry.getKey(), envValue);
             }
+            List<Element> annotationElements = newAnnotationElements.entrySet().stream()
+                    .map((property) -> new Element(
+                            property.getKey(),
+                            property.getValue()))
+                    .collect(Collectors.toList());
+            annotation.setElements(annotationElements);
         }
-        List<Element> annotationElements = newAnnotationElements.entrySet().stream()
-                .map((property) -> new Element(
-                        property.getKey(),
-                        property.getValue()))
-                .collect(Collectors.toList());
-        annotation.setElements(annotationElements);
         return annotation;
     }
 
