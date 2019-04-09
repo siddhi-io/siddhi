@@ -188,6 +188,7 @@ public abstract class Source<S extends State> {
             disconnect();
         } finally {
             stateHolder.returnState(state);
+            state = null;
         }
     }
 
