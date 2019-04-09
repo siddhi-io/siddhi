@@ -81,9 +81,11 @@ import io.siddhi.query.api.util.AnnotationHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -92,7 +94,6 @@ import java.util.stream.Collectors;
  * generation.
  */
 public class DefinitionParserHelper {
-
 
     public static void validateDefinition(AbstractDefinition definition,
                                           ConcurrentMap<String, AbstractDefinition> streamDefinitionMap,
@@ -181,7 +182,7 @@ public class DefinitionParserHelper {
             RecordTableHandler recordTableHandler = null;
             if (annotation != null) {
                 annotation = updateAnnotationRef(annotation, SiddhiConstants.NAMESPACE_STORE, siddhiAppContext);
-                annotation = updateEnvironmentVariables(annotation);
+                annotation = updateAnnotationEnvs(annotation);
                 String tableType = annotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_TYPE);
                 if (tableType == null) {
                     throw new SiddhiAppCreationException(
@@ -314,7 +315,7 @@ public class DefinitionParserHelper {
             if (SiddhiConstants.ANNOTATION_SOURCE.equalsIgnoreCase(sourceAnnotation.getName())) {
                 sourceAnnotation = updateAnnotationRef(sourceAnnotation, SiddhiConstants.NAMESPACE_SOURCE,
                         siddhiAppContext);
-                sourceAnnotation = updateEnvironmentVariables(sourceAnnotation);
+                sourceAnnotation = updateAnnotationEnvs(sourceAnnotation);
                 Annotation mapAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_MAP,
                         sourceAnnotation.getAnnotations());
                 if (mapAnnotation == null) {
@@ -437,7 +438,7 @@ public class DefinitionParserHelper {
             if (SiddhiConstants.ANNOTATION_SINK.equalsIgnoreCase(sinkAnnotation.getName())) {
                 sinkAnnotation = updateAnnotationRef(sinkAnnotation, SiddhiConstants.NAMESPACE_SINK,
                         siddhiAppContext);
-                sinkAnnotation = updateEnvironmentVariables(sinkAnnotation);
+                sinkAnnotation = updateAnnotationEnvs(sinkAnnotation);
                 Annotation mapAnnotation = AnnotationHelper.getAnnotation(SiddhiConstants.ANNOTATION_MAP,
                         sinkAnnotation.getAnnotations());
                 String sinkType = sinkAnnotation.getElement(SiddhiConstants.ANNOTATION_ELEMENT_TYPE);
@@ -771,6 +772,7 @@ public class DefinitionParserHelper {
                                                       Annotation annotation,
                                                       io.siddhi.annotation.Extension extension,
                                                       String[] supportedDynamicOptions) {
+
         List<String> supportedDynamicOptionList = new ArrayList<>();
         if (supportedDynamicOptions != null) {
             supportedDynamicOptionList = Arrays.asList(supportedDynamicOptions);
@@ -830,6 +832,7 @@ public class DefinitionParserHelper {
                                                                      StreamDefinition streamDefinition,
                                                                      Sink clientTransport,
                                                                      SiddhiAppContext siddhiAppContext) {
+
         io.siddhi.annotation.Extension sinkExt
                 = clientTransport.getClass().getAnnotation(io.siddhi.annotation.Extension.class);
 
@@ -874,13 +877,28 @@ public class DefinitionParserHelper {
         return annotation;
     }
 
-    private static Annotation updateEnvironmentVariables (Annotation annotation) {
-        Map<String, String> newSystemConfig = new HashMap<>(System.getenv());
+    private static Annotation updateAnnotationEnvs(Annotation annotation) {
+        String envPattern = "\\$\\{(\\w+)\\}";
+        Pattern expr = Pattern.compile(envPattern);
         Map<String, String> collection = annotation.getElements().stream()
                 .collect(Collectors.toMap(Element::getKey, Element::getValue));
-        newSystemConfig.putAll(collection);
-
-        List<Element> annotationElements = newSystemConfig.entrySet().stream()
+        HashMap<String, String> newAnnotationElements = new HashMap<>();
+        newAnnotationElements.putAll(collection);
+        Iterator<Map.Entry<String, String>> itr = newAnnotationElements.entrySet().iterator();
+        while (itr.hasNext()) {
+            Map.Entry<String, String> entry = itr.next();
+            Matcher matcher = expr.matcher(entry.getValue());
+            while (matcher.find()) {
+                String envValue = System.getenv(matcher.group(1).toUpperCase());
+                if (envValue == null) {
+                    envValue = "";
+                } else {
+                    envValue = envValue.replace("\\", "\\\\");
+                }
+                newAnnotationElements.put(entry.getKey(), envValue);
+            }
+        }
+        List<Element> annotationElements = newAnnotationElements.entrySet().stream()
                 .map((property) -> new Element(
                         property.getKey(),
                         property.getValue()))
