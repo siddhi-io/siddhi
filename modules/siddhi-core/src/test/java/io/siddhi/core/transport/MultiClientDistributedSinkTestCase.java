@@ -646,9 +646,9 @@ public class MultiClientDistributedSinkTestCase {
                     ServiceDeploymentInfo.ServiceProtocol.TCP);
             Assert.assertTrue(serviceDeploymentInfo.getPort() == 8080);
             Assert.assertTrue(serviceDeploymentInfo.getDeploymentProperties().get("foo").equals("bar"));
-            if(i==0){
+            if (i == 0) {
                 Assert.assertTrue(serviceDeploymentInfo.getDeploymentProperties().get("foo1").equals("bar1"));
-            }else {
+            } else {
                 Assert.assertTrue(serviceDeploymentInfo.getDeploymentProperties().get("foo2").equals("bar2"));
             }
         }
