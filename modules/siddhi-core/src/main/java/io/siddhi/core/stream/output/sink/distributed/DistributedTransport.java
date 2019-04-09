@@ -25,6 +25,8 @@ import io.siddhi.core.stream.output.sink.SinkHandler;
 import io.siddhi.core.stream.output.sink.SinkMapper;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.annotation.Annotation;
@@ -56,12 +58,13 @@ public abstract class DistributedTransport extends Sink {
      * @param siddhiAppContext       Context of the siddhi app which this output sink belongs to
      */
     @Override
-    protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                        ConfigReader sinkConfigReader, SiddhiAppContext
+    protected StateFactory<State> init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
+                                       ConfigReader sinkConfigReader, SiddhiAppContext
                                 siddhiAppContext) {
         this.streamDefinition = outputStreamDefinition;
         this.sinkOptionHolder = optionHolder;
         this.siddhiAppContext = siddhiAppContext;
+        return null;
     }
 
     /**
@@ -99,7 +102,8 @@ public abstract class DistributedTransport extends Sink {
     }
 
     @Override
-    public void publish(Object payload, DynamicOptions transportOptions) throws ConnectionUnavailableException {
+    public void publish(Object payload, DynamicOptions transportOptions, State state)
+            throws ConnectionUnavailableException {
         int errorCount = 0;
         StringBuilder errorMessages = null;
         List<Integer> destinationsToPublish = strategy.getDestinationsToPublish(payload, transportOptions);
@@ -110,7 +114,7 @@ public abstract class DistributedTransport extends Sink {
         }
         for (Integer destinationId : destinationsToPublish) {
             try {
-                publish(payload, transportOptions, destinationId);
+                publish(payload, transportOptions, destinationId, state);
             } catch (ConnectionUnavailableException e) {
                 errorCount++;
                 if (errorMessages == null) {
@@ -144,7 +148,7 @@ public abstract class DistributedTransport extends Sink {
         return supportedDynamicOptions;
     }
 
-    public abstract void publish(Object payload, DynamicOptions transportOptions, Integer destinationId)
+    public abstract void publish(Object payload, DynamicOptions transportOptions, Integer destinationId, State state)
             throws ConnectionUnavailableException;
 
 

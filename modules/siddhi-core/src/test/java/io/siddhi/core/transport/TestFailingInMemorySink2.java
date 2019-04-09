@@ -26,6 +26,8 @@ import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.stream.output.sink.InMemorySink;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
@@ -57,12 +59,13 @@ public class TestFailingInMemorySink2 extends InMemorySink {
     }
 
     @Override
-    protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                        ConfigReader sinkConfigReader, SiddhiAppContext
+    protected StateFactory<State> init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
+                                ConfigReader sinkConfigReader, SiddhiAppContext
                                 siddhiAppContext) {
         optionHolder.validateAndGetOption(TOPIC_KEY);
         optionHolder.validateAndGetOption(TEST_KEY);
         super.init(outputStreamDefinition, optionHolder, sinkConfigReader, siddhiAppContext);
+        return null;
     }
 
     @Override
@@ -76,13 +79,14 @@ public class TestFailingInMemorySink2 extends InMemorySink {
     }
 
     @Override
-    public void publish(Object payload, DynamicOptions dynamicOptions) throws ConnectionUnavailableException {
+    public void publish(Object payload, DynamicOptions dynamicOptions, State state)
+            throws ConnectionUnavailableException {
         if (fail || failOnce) {
             failOnce = false;
             numberOfErrorOccurred++;
             throw new ConnectionUnavailableException("Connection unavailable during publishing");
         }
-        super.publish(payload, dynamicOptions);
+        super.publish(payload, dynamicOptions, state);
     }
 
 }

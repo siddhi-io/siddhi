@@ -25,6 +25,8 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
@@ -106,16 +108,18 @@ public class LogSink extends Sink {
     }
 
     @Override
-    protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                        ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
+    protected StateFactory<State> init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
+                                       ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
         String defaultPrefix = siddhiAppContext.getName() + " : " + outputStreamDefinition.getId();
         logPrefix = optionHolder.validateAndGetStaticValue(PREFIX, defaultPrefix);
         logPriority = LogPriority.valueOf(optionHolder.validateAndGetStaticValue(PRIORITY, "INFO")
                 .toUpperCase());
+        return null;
     }
 
     @Override
-    public void publish(Object payload, DynamicOptions transportOptions) throws ConnectionUnavailableException {
+    public void publish(Object payload, DynamicOptions transportOptions, State s)
+            throws ConnectionUnavailableException {
         String message;
         if (payload instanceof Object[]) {
             message = logPrefix + " : " + Arrays.deepToString((Object[]) payload);

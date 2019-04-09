@@ -28,6 +28,7 @@ import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.extension.holder.SinkExecutorExtensionHolder;
 import io.siddhi.core.util.parser.helper.DefinitionParserHelper;
+import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.extension.Extension;
 import org.apache.log4j.Logger;
@@ -46,11 +47,11 @@ public class MultiClientDistributedSink extends DistributedTransport {
     private List<Sink> transports = new ArrayList<>();
 
     @Override
-    public void publish(Object payload, DynamicOptions transportOptions, Integer destinationId)
+    public void publish(Object payload, DynamicOptions transportOptions, Integer destinationId, State state)
             throws ConnectionUnavailableException {
         Sink transport = transports.get(destinationId);
         try {
-            transport.publish(payload, transportOptions);
+            transport.publish(payload, transportOptions, state);
         } catch (ConnectionUnavailableException e) {
             transport.setConnected(false);
             strategy.destinationFailed(destinationId);

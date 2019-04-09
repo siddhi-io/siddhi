@@ -24,6 +24,7 @@ import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.stream.output.sink.InMemorySink;
+import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.transport.DynamicOptions;
 
 @Extension(
@@ -61,12 +62,13 @@ public class TestFailingInMemorySink extends InMemorySink {
     }
 
     @Override
-    public void publish(Object payload, DynamicOptions dynamicOptions) throws ConnectionUnavailableException {
+    public void publish(Object payload, DynamicOptions dynamicOptions, State state)
+            throws ConnectionUnavailableException {
         if (fail || failOnce) {
             failOnce = false;
             numberOfErrorOccurred++;
             throw new ConnectionUnavailableException("Connection unavailable during publishing");
         }
-        super.publish(payload, dynamicOptions);
+        super.publish(payload, dynamicOptions, state);
     }
 }

@@ -24,6 +24,7 @@ import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.stream.input.source.InMemorySource;
+import io.siddhi.core.util.snapshot.state.State;
 import org.apache.log4j.Logger;
 
 /**
@@ -54,12 +55,12 @@ public class TestFailingInMemorySource extends InMemorySource {
     }
 
     @Override
-    public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
+    public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         this.connectionCallback = connectionCallback;
         if (fail) {
             numberOfErrorOccurred++;
             throw new ConnectionUnavailableException("Connection failed!");
         }
-        super.connect(connectionCallback);
+        super.connect(connectionCallback, state);
     }
 }

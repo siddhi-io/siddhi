@@ -27,6 +27,9 @@ import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.StringUtil;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.ThroughputTracker;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
@@ -44,8 +47,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * This is a Sink type. these let users to publish events according to
  * some type. this type can either be local, jms or ws (or any custom extension)
+ *
+ * @param <S> current state of the Sink
  */
-public abstract class Sink implements SinkListener {
+public abstract class Sink<S extends State>  implements SinkListener {
 
     private static final Logger LOG = Logger.getLogger(Sink.class);
     protected AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
@@ -63,6 +68,7 @@ public abstract class Sink implements SinkListener {
     private ScheduledExecutorService scheduledExecutorService;
     private ThroughputTracker throughputTracker;
     private LatencyTracker mapperLatencyTracker;
+    private StateHolder<S> stateHolder;
 
     public final void init(StreamDefinition streamDefinition, String type, OptionHolder transportOptionHolder,
                            ConfigReader sinkConfigReader, SinkMapper sinkMapper, String mapType,
@@ -83,7 +89,10 @@ public abstract class Sink implements SinkListener {
                     SiddhiConstants.METRIC_INFIX_SINK_MAPPERS,
                     type + SiddhiConstants.METRIC_DELIMITER + mapType);
         }
-        init(streamDefinition, transportOptionHolder, sinkConfigReader, siddhiAppContext);
+        StateFactory<S> stateFactory = init(streamDefinition, transportOptionHolder, sinkConfigReader,
+                siddhiAppContext);
+        stateHolder = siddhiAppContext.generateStateHolder(streamDefinition.getId() + "-" +
+                this.getClass().getName(), stateFactory);
         if (sinkMapper != null) {
             sinkMapper.init(streamDefinition, mapType, mapOptionHolder, payloadElementList, this,
                     mapperConfigReader, mapperLatencyTracker, siddhiAppContext);
@@ -129,8 +138,8 @@ public abstract class Sink implements SinkListener {
      * @param sinkConfigReader       this hold the {@link Sink} extensions configuration reader.
      * @param siddhiAppContext       {@link SiddhiAppContext} of the parent siddhi app.
      */
-    protected abstract void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                                 ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext);
+    protected abstract StateFactory<S> init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
+                                            ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext);
 
     @Override
     public final void publish(Object payload) {
@@ -138,9 +147,10 @@ public abstract class Sink implements SinkListener {
             mapperLatencyTracker.markOut();
         }
         if (isConnected()) {
+            S state = stateHolder.getState();
             try {
                 DynamicOptions dynamicOptions = trpDynamicOptions.get();
-                publish(payload, dynamicOptions);
+                publish(payload, dynamicOptions, state);
                 if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
                     throughputTracker.eventIn();
                 }
@@ -154,6 +164,8 @@ public abstract class Sink implements SinkListener {
                         "', will retry connection immediately.", e);
                 connectWithRetry();
                 publish(payload);
+            } finally {
+                stateHolder.returnState(state);
             }
         } else if (isTryingToConnect.get()) {
             onError(payload, new SiddhiAppRuntimeException("Connection unavailable at Sink '" + type + "' at '"
@@ -169,9 +181,10 @@ public abstract class Sink implements SinkListener {
      *
      * @param payload          payload of the event
      * @param transportOptions one of the event constructing the payload
+     * @param state current state of the sink
      * @throws ConnectionUnavailableException throw when connections are unavailable.
      */
-    public abstract void publish(Object payload, DynamicOptions transportOptions)
+    public abstract void publish(Object payload, DynamicOptions transportOptions, S state)
             throws ConnectionUnavailableException;
 
 
