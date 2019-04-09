@@ -6,7 +6,7 @@ open source collaboration with technical writers on Siddhi documentation. We are
 project proposals to encourage you to participate and become a contributor in the Siddhi open source community.
 
 If you are interested in working on any of the below projects and if you need further information, please feel free to 
-contact the mentors listed under each proposal below or write to us via siddhi-dev@googlegroups.com .
+contact the mentors listed under each proposal below, or write to us via siddhi-dev@googlegroups.com .
 
 Happy documenting with Google Season of Docs!
 
@@ -37,7 +37,7 @@ Docker-based deployment.
 
 - A reasonable knowledge of how to work with Github
 - A good command of English
-- Clear picture about the CI/CD pipeline
+- A clear understanding of the CI/CD pipeline
 
 ### References
 [1] - [Siddhi Github repository](https://github.com/siddhi-io)
@@ -85,7 +85,7 @@ A comprehensive document explains the below streaming data integration use cases
 
 - A reasonable knowledge of how to work with Github
 - A good command of English
-- Some basic idea on CDC, throttling and notifications
+- A basic understanding of CDC, throttling and notifications
 
 ### References
 [1] - [Siddhi Github repository](https://github.com/siddhi-io)
@@ -119,7 +119,7 @@ features, the Siddhi grammar, and how to use it.
 
 Monitoring the live Siddhi Stream Processor engine is one of the key requirements of the users. At present, this 
 requirement is addressed via Prometheus that monitors Siddhi Stream Processor, allowing users to  understand the
- real live environment and take necessary actions based on the load and the TPS of the system. Currently, we need an 
+ real live environment and take necessary actions based on the load and the TPS of the system. Currently, we need 
  end to end documentation explaining these monitoring capabilities. 
 
 ### Deliverables
