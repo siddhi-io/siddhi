@@ -20,6 +20,7 @@ package io.siddhi.core.util.transport;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.stream.output.sink.distributed.DistributedTransport;
 import io.siddhi.core.stream.output.sink.distributed.DistributionStrategy;
@@ -35,6 +36,7 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is the distributed transport to publish to multiple endpoints using client/publisher for each endpoint. There
@@ -62,28 +64,41 @@ public class MultiClientDistributedSink extends DistributedTransport {
     }
 
     @Override
-    public void initTransport(OptionHolder sinkOptionHolder, List<OptionHolder> destinationOptionHolders, Annotation
-            sinkAnnotation, ConfigReader sinkConfigReader, DistributionStrategy strategy, String type,
+    public void initTransport(OptionHolder sinkOptionHolder, List<OptionHolder> destinationOptionHolders,
+                              Map<String, String> deploymentProperties,
+                              List<Map<String, String>> destinationDeploymentProperties, Annotation sinkAnnotation,
+                              ConfigReader sinkConfigReader, DistributionStrategy strategy, String type,
                               SiddhiAppContext siddhiAppContext) {
         String transportType = sinkOptionHolder.validateAndGetStaticValue(SiddhiConstants.ANNOTATION_ELEMENT_TYPE);
         Extension sinkExtension = DefinitionParserHelper.constructExtension
                 (streamDefinition, SiddhiConstants.ANNOTATION_SINK, transportType, sinkAnnotation, SiddhiConstants
                         .NAMESPACE_SINK);
 
-        destinationOptionHolders.forEach(destinationOption -> {
+        for (int i = 0; i < destinationOptionHolders.size(); i++) {
+            OptionHolder destinationOption = destinationOptionHolders.get(i);
             Sink sink = (Sink) SiddhiClassLoader.loadExtensionImplementation(
                     sinkExtension, SinkExecutorExtensionHolder.getInstance(siddhiAppContext));
             destinationOption.merge(sinkOptionHolder);
             sink.initOnlyTransport(streamDefinition, destinationOption, sinkConfigReader, type,
-                    new MultiClientConnectionCallback(transports.size(), strategy), siddhiAppContext);
+                    new MultiClientConnectionCallback(transports.size(), strategy),
+                    destinationDeploymentProperties.get(i), siddhiAppContext);
+            if (!sink.getServiceDeploymentInfoList().isEmpty()) {
+                ((ServiceDeploymentInfo) sink.getServiceDeploymentInfoList().get(0)).
+                        addDeploymentProperties(deploymentProperties);
+            }
             transports.add(sink);
-        });
+        }
     }
 
 
     @Override
     public Class[] getSupportedInputEventClasses() {
         return transports.get(0).getSupportedInputEventClasses();
+    }
+
+    @Override
+    protected ServiceDeploymentInfo exposedServiceDeploymentInfo() {
+        return null;
     }
 
     /**
@@ -114,6 +129,15 @@ public class MultiClientDistributedSink extends DistributedTransport {
     @Override
     public void destroy() {
         transports.forEach(Sink::destroy);
+    }
+
+    @Override
+    public List<ServiceDeploymentInfo> getServiceDeploymentInfoList() {
+        List<ServiceDeploymentInfo> serviceDeploymentInfoList = new ArrayList<>();
+        for (Sink sink : transports) {
+            serviceDeploymentInfoList.addAll(sink.getServiceDeploymentInfoList());
+        }
+        return serviceDeploymentInfoList;
     }
 
     /**

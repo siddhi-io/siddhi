@@ -20,6 +20,8 @@ package io.siddhi.core.stream.input.source;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.StringUtil;
 import io.siddhi.core.util.config.ConfigReader;
@@ -32,6 +34,7 @@ import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,13 +60,14 @@ public abstract class Source<S extends State> {
     private ConnectionCallback connectionCallback = new ConnectionCallback();
     private StateHolder<S> stateHolder;
     private S state;
+    private ServiceDeploymentInfo serviceDeploymentInfo;
 
     public final void init(String sourceType, OptionHolder transportOptionHolder, SourceMapper sourceMapper,
                            String[] transportPropertyNames, ConfigReader configReader, String mapType,
                            OptionHolder mapOptionHolder, List<AttributeMapping> attributeMappings,
                            List<AttributeMapping> transportMappings, ConfigReader mapperConfigReader,
                            SourceHandler sourceHandler, StreamDefinition streamDefinition,
-                           SiddhiAppContext siddhiAppContext) {
+                           Map<String, String> deploymentProperties, SiddhiAppContext siddhiAppContext) {
         this.type = sourceType;
 
         sourceMapper.init(streamDefinition, mapType, mapOptionHolder, attributeMappings, sourceType,
@@ -77,7 +81,21 @@ public abstract class Source<S extends State> {
         stateHolder = siddhiAppContext.generateStateHolder(streamDefinition.getId() + "-" +
                 this.getClass().getName(), stateFactory);
         scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
+        serviceDeploymentInfo = exposeServiceDeploymentInfo();
+        if (serviceDeploymentInfo != null) {
+            serviceDeploymentInfo.addDeploymentProperties(deploymentProperties);
+        } else if (!deploymentProperties.isEmpty()) {
+            throw new SiddhiAppCreationException("Deployment properties '" + deploymentProperties +
+                    "' are defined for source '" + sourceType + "' which does not expose a service");
+        }
     }
+
+    /**
+     * Give information to the deployment about the service exposed by the sink.
+     *
+     * @return ServiceDeploymentInfo  Service related information to the deployment
+     */
+    protected abstract ServiceDeploymentInfo exposeServiceDeploymentInfo();
 
     /**
      * To initialize the source. (This will be called only once, no connection to external systems should be made at
@@ -92,8 +110,8 @@ public abstract class Source<S extends State> {
      * @param siddhiAppContext                Siddhi application context
      */
     public abstract StateFactory<S> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                              String[] requestedTransportPropertyNames, ConfigReader configReader,
-                              SiddhiAppContext siddhiAppContext);
+                                         String[] requestedTransportPropertyNames, ConfigReader configReader,
+                                         SiddhiAppContext siddhiAppContext);
 
     /**
      * Get produced event class types
@@ -108,7 +126,7 @@ public abstract class Source<S extends State> {
      *
      * @param connectionCallback Callback to pass the ConnectionUnavailableException for connection failure after
      *                           initial successful connection
-     * @param state current state of the source
+     * @param state              current state of the source
      * @throws ConnectionUnavailableException if it cannot connect to the source backend
      */
     public abstract void connect(ConnectionCallback connectionCallback, S state) throws ConnectionUnavailableException;
@@ -198,6 +216,10 @@ public abstract class Source<S extends State> {
 
     public StreamDefinition getStreamDefinition() {
         return streamDefinition;
+    }
+
+    public ServiceDeploymentInfo getServiceDeploymentInfo() {
+        return serviceDeploymentInfo;
     }
 
     /**

@@ -23,6 +23,7 @@ import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.EventPrinter;
@@ -30,6 +31,7 @@ import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.SubscriberUnAvailableException;
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -805,6 +807,10 @@ public class InMemoryTransportTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
 
+        ServiceDeploymentInfo serviceDeploymentInfos = siddhiAppRuntime.getSources().
+                iterator().next().get(0).getServiceDeploymentInfo();
+        Assert.assertNull(serviceDeploymentInfos);
+
         siddhiAppRuntime.addCallback("BarStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
@@ -826,5 +832,169 @@ public class InMemoryTransportTestCase {
         siddhiAppRuntime.shutdown();
     }
 
+    @Test(dependsOnMethods = {"inMemoryTestCase11"})
+    public void inMemoryTestCase12() throws InterruptedException, SubscriberUnAvailableException {
+        log.info("Test inMemory 12");
+
+        String streams = "" +
+                "@app:name('TestSiddhiApp')" +
+                "@source(type='testDepInMemory', topic='Foo', prop1='hi', prop2='test', dep:prop3='foo', " +
+                "   @map(type='testTrp', @attributes('trp:symbol'," +
+                "        'trp:price', '2'))) " +
+                "define stream FooStream (symbol string, price string, volume long); " +
+                "define stream BarStream (symbol string, price string, volume long); ";
+
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        ServiceDeploymentInfo serviceDeploymentInfo = siddhiAppRuntime.getSources().iterator().next().get(0)
+                .getServiceDeploymentInfo();
+        Assert.assertNotNull(serviceDeploymentInfo);
+        Assert.assertTrue(serviceDeploymentInfo.isSecured());
+        Assert.assertTrue(serviceDeploymentInfo.getServiceProtocol() ==
+                ServiceDeploymentInfo.ServiceProtocol.UDP);
+        Assert.assertTrue(serviceDeploymentInfo.getPort() == 9000);
+        Assert.assertTrue(serviceDeploymentInfo.getDeploymentProperties().get("prop3").equals("foo"));
+
+        siddhiAppRuntime.addCallback("BarStream", new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                wso2Count.incrementAndGet();
+                for (Event event : events) {
+                    AssertJUnit.assertArrayEquals(event.getData(), new Object[]{"hi", "test", 100L});
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        InMemoryBroker.publish("Foo", new Event(System.currentTimeMillis(), new Object[]{"WSO2", "in", 100L}));
+        InMemoryBroker.publish("Foo", new Event(System.currentTimeMillis(), new Object[]{"IBM", "in", 100L}));
+        InMemoryBroker.publish("Foo", new Event(System.currentTimeMillis(), new Object[]{"WSO2", "in", 100L}));
+        Thread.sleep(100);
+
+        //assert event count
+        AssertJUnit.assertEquals("Number of events", 3, wso2Count.get());
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class, dependsOnMethods = {"inMemoryTestCase12"})
+    public void inMemoryTestCase13() throws InterruptedException, SubscriberUnAvailableException {
+        log.info("Test inMemory 13");
+
+        String streams = "" +
+                "@app:name('TestSiddhiApp')" +
+                "@source(type='testTrpInMemory1', topic='Foo', prop1='hi', prop2='test', dep:prop3='foo', " +
+                "   @map(type='testTrp', @attributes('trp:symbol'," +
+                "        'trp:price', '2'))) " +
+                "define stream FooStream (symbol string, price string, volume long); " +
+                "define stream BarStream (symbol string, price string, volume long); ";
+
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = {"inMemoryTestCase13"})
+    public void inMemoryTestCase14() throws InterruptedException {
+        log.info("Test inMemoryTestCase14");
+
+        InMemoryBroker.Subscriber subscriptionWSO2 = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                wso2Count.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "WSO2";
+            }
+        };
+
+        InMemoryBroker.Subscriber subscriptionIBM = new InMemoryBroker.Subscriber() {
+            @Override
+            public void onMessage(Object msg) {
+                ibmCount.incrementAndGet();
+            }
+
+            @Override
+            public String getTopic() {
+                return "IBM";
+            }
+        };
+
+        //subscribe to "inMemory" broker per topic
+        InMemoryBroker.subscribe(subscriptionWSO2);
+        InMemoryBroker.subscribe(subscriptionIBM);
+
+        String streams = "" +
+                "@app:name('TestSiddhiApp')" +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@sink(type='testDepInMemory', topic='{{symbol}}', dep:prop3='foo', @map(type='passThrough')) " +
+                "define stream BarStream (symbol string, price float, volume long); ";
+
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        ServiceDeploymentInfo serviceDeploymentInfo = (ServiceDeploymentInfo) siddhiAppRuntime.getSinks().
+                iterator().next().get(0).getServiceDeploymentInfoList().get(0);
+        Assert.assertNotNull(serviceDeploymentInfo);
+        Assert.assertTrue(serviceDeploymentInfo.isSecured());
+        Assert.assertTrue(serviceDeploymentInfo.getServiceProtocol() ==
+                ServiceDeploymentInfo.ServiceProtocol.TCP);
+        Assert.assertTrue(serviceDeploymentInfo.getPort() == 8080);
+        Assert.assertTrue(serviceDeploymentInfo.getDeploymentProperties().get("prop3").equals("foo"));
+
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("FooStream");
+
+        siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6f, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6f, 100L});
+        Thread.sleep(100);
+
+        //assert event count
+        AssertJUnit.assertEquals("Number of WSO2 events", 2, wso2Count.get());
+        AssertJUnit.assertEquals("Number of IBM events", 1, ibmCount.get());
+        siddhiAppRuntime.shutdown();
+
+        //unsubscribe from "inMemory" broker per topic
+        InMemoryBroker.unsubscribe(subscriptionWSO2);
+        InMemoryBroker.unsubscribe(subscriptionIBM);
+    }
+
+    @Test(expectedExceptions = SiddhiAppCreationException.class, dependsOnMethods = {"inMemoryTestCase14"})
+    public void inMemoryTestCase15() throws InterruptedException {
+
+        String streams = "" +
+                "@app:name('TestSiddhiApp')" +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@sink(type='testInMemory', topic='foo', dep:prop3='foo', @map(type='passThrough')) " +
+                "define stream BarStream (symbol string, price float, volume long); ";
+
+        String query = "" +
+                "from FooStream " +
+                "select * " +
+                "insert into BarStream; ";
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+
+        siddhiAppRuntime.shutdown();
+    }
 
 }

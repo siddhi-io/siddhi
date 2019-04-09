@@ -20,7 +20,9 @@ package io.siddhi.core.stream.output.sink;
 
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.stream.output.sink.distributed.DistributedTransport;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiConstants;
@@ -39,7 +41,9 @@ import io.siddhi.query.api.annotation.Element;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -50,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @param <S> current state of the Sink
  */
-public abstract class Sink<S extends State>  implements SinkListener {
+public abstract class Sink<S extends State> implements SinkListener {
 
     private static final Logger LOG = Logger.getLogger(Sink.class);
     protected AtomicBoolean isTryingToConnect = new AtomicBoolean(false);
@@ -69,11 +73,13 @@ public abstract class Sink<S extends State>  implements SinkListener {
     private ThroughputTracker throughputTracker;
     private LatencyTracker mapperLatencyTracker;
     private StateHolder<S> stateHolder;
+    private ServiceDeploymentInfo serviceDeploymentInfo;
 
     public final void init(StreamDefinition streamDefinition, String type, OptionHolder transportOptionHolder,
                            ConfigReader sinkConfigReader, SinkMapper sinkMapper, String mapType,
                            OptionHolder mapOptionHolder, SinkHandler sinkHandler, List<Element> payloadElementList,
-                           ConfigReader mapperConfigReader, SiddhiAppContext siddhiAppContext) {
+                           ConfigReader mapperConfigReader, Map<String, String> deploymentProperties,
+                           SiddhiAppContext siddhiAppContext) {
         this.streamDefinition = streamDefinition;
         this.type = type;
         this.siddhiAppContext = siddhiAppContext;
@@ -103,9 +109,14 @@ public abstract class Sink<S extends State>  implements SinkListener {
                     new SinkHandlerCallback(sinkMapper), siddhiAppContext);
             this.handler = sinkHandler;
         }
-
         scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
-
+        serviceDeploymentInfo = exposedServiceDeploymentInfo();
+        if (serviceDeploymentInfo != null) {
+            serviceDeploymentInfo.addDeploymentProperties(deploymentProperties);
+        } else if (!deploymentProperties.isEmpty()) {
+            throw new SiddhiAppCreationException("Deployment properties '" + deploymentProperties +
+                    "' are defined for sink '" + type + "' which does not expose a service");
+        }
     }
 
     public abstract Class[] getSupportedInputEventClasses();
@@ -114,14 +125,28 @@ public abstract class Sink<S extends State>  implements SinkListener {
     public final void initOnlyTransport(StreamDefinition streamDefinition, OptionHolder transportOptionHolder,
                                         ConfigReader sinkConfigReader, String type,
                                         DistributedTransport.ConnectionCallback connectionCallback,
-                                        SiddhiAppContext siddhiAppContext) {
+                                        Map<String, String> deploymentProperties, SiddhiAppContext siddhiAppContext) {
         this.type = type;
         this.streamDefinition = streamDefinition;
         this.connectionCallback = connectionCallback;
         this.siddhiAppContext = siddhiAppContext;
         init(streamDefinition, transportOptionHolder, sinkConfigReader, siddhiAppContext);
         scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
+        serviceDeploymentInfo = exposedServiceDeploymentInfo();
+        if (serviceDeploymentInfo != null) {
+            serviceDeploymentInfo.addDeploymentProperties(deploymentProperties);
+        } else if (!deploymentProperties.isEmpty()) {
+            throw new SiddhiAppCreationException("Deployment properties '" + deploymentProperties +
+                    "' are defined for sink '" + type + "' which does not expose a service");
+        }
     }
+
+    /**
+     * Give information to the deployment about the service exposed by the sink.
+     *
+     * @return ServiceDeploymentInfo  Service related information to the deployment
+     */
+    protected abstract ServiceDeploymentInfo exposedServiceDeploymentInfo();
 
     /**
      * Supported dynamic options by the transport
@@ -181,7 +206,7 @@ public abstract class Sink<S extends State>  implements SinkListener {
      *
      * @param payload          payload of the event
      * @param transportOptions one of the event constructing the payload
-     * @param state current state of the sink
+     * @param state            current state of the sink
      * @throws ConnectionUnavailableException throw when connections are unavailable.
      */
     public abstract void publish(Object payload, DynamicOptions transportOptions, S state)
@@ -291,6 +316,16 @@ public abstract class Sink<S extends State>  implements SinkListener {
                         + type + "' at '" + streamDefinition.getId() + "' as its still trying to reconnect!, "
                         + "events dropped '" + payload + "'");
                 break;
+        }
+    }
+
+    public List<ServiceDeploymentInfo> getServiceDeploymentInfoList() {
+        if (serviceDeploymentInfo != null) {
+            List<ServiceDeploymentInfo> list = new ArrayList<>(1);
+            list.add(serviceDeploymentInfo);
+            return list;
+        } else {
+            return new ArrayList<>(0);
         }
     }
 
