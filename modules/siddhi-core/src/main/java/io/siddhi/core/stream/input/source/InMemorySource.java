@@ -25,6 +25,8 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.OptionHolder;
 import org.apache.log4j.Logger;
@@ -53,9 +55,9 @@ public class InMemorySource extends Source {
     private InMemoryBroker.Subscriber subscriber;
 
     @Override
-    public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                     String[] requestedTransportPropertyNames, ConfigReader configReader,
-                     SiddhiAppContext siddhiAppContext) {
+    public StateFactory<State> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+                                    String[] requestedTransportPropertyNames, ConfigReader configReader,
+                                    SiddhiAppContext siddhiAppContext) {
         this.sourceEventListener = sourceEventListener;
         String topic = optionHolder.validateAndGetStaticValue(TOPIC_KEY, "input inMemory source");
         this.subscriber = new InMemoryBroker.Subscriber() {
@@ -69,6 +71,7 @@ public class InMemorySource extends Source {
                 return topic;
             }
         };
+        return null;
     }
 
     @Override
@@ -77,7 +80,7 @@ public class InMemorySource extends Source {
     }
 
     @Override
-    public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
+    public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         InMemoryBroker.subscribe(subscriber);
     }
 

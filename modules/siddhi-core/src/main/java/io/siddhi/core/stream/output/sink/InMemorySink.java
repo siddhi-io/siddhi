@@ -25,6 +25,8 @@ import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.InMemoryBroker;
 import io.siddhi.core.util.transport.Option;
@@ -52,7 +54,7 @@ import org.apache.log4j.Logger;
                         "events internally without using external transport and transformation."
         )
 )
-public class InMemorySink extends Sink {
+public class InMemorySink extends Sink<State> {
     private static final Logger log = Logger.getLogger(InMemorySink.class);
     private static final String TOPIC_KEY = "topic";
     private Option topicOption;
@@ -68,9 +70,10 @@ public class InMemorySink extends Sink {
     }
 
     @Override
-    protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                        ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
+    protected StateFactory<State> init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
+                                       ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
         topicOption = optionHolder.validateAndGetOption(TOPIC_KEY);
+        return null;
     }
 
     @Override
@@ -89,7 +92,7 @@ public class InMemorySink extends Sink {
     }
 
     @Override
-    public void publish(Object payload, DynamicOptions dynamicOptions) throws ConnectionUnavailableException {
+    public void publish(Object payload, DynamicOptions dynamicOptions, State s) throws ConnectionUnavailableException {
         try {
             InMemoryBroker.publish(topicOption.getValue(dynamicOptions), payload);
         } catch (SubscriberUnAvailableException e) {

@@ -23,6 +23,9 @@ import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.StringUtil;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.query.api.definition.StreamDefinition;
@@ -37,8 +40,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Abstract class to represent Event Sources. Events Sources are the object entry point to Siddhi from external
  * transports. Each source represent a transport type. Whenever Siddhi need to support a new transport, a new Event
  * source should be implemented.
+ *
+ * @param <S> current state of the Source
  */
-public abstract class Source {
+public abstract class Source<S extends State> {
     private static final Logger LOG = Logger.getLogger(Source.class);
     private String type;
     private SourceMapper mapper;
@@ -50,6 +55,7 @@ public abstract class Source {
     private AtomicBoolean isConnected = new AtomicBoolean(false);
     private ScheduledExecutorService scheduledExecutorService;
     private ConnectionCallback connectionCallback = new ConnectionCallback();
+    private StateHolder<S> stateHolder;
 
     public final void init(String sourceType, OptionHolder transportOptionHolder, SourceMapper sourceMapper,
                            String[] transportPropertyNames, ConfigReader configReader, String mapType,
@@ -65,7 +71,9 @@ public abstract class Source {
         this.mapper = sourceMapper;
         this.streamDefinition = streamDefinition;
         this.siddhiAppContext = siddhiAppContext;
-        init(sourceMapper, transportOptionHolder, transportPropertyNames, configReader, siddhiAppContext);
+        StateFactory<S> stateFactory = init(sourceMapper, transportOptionHolder, transportPropertyNames,
+                configReader, siddhiAppContext);
+        stateHolder = siddhiAppContext.generateStateHolder(this.getClass().getName(), stateFactory);
         scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
     }
 
@@ -81,7 +89,7 @@ public abstract class Source {
      * @param configReader                    System configuration reader for source
      * @param siddhiAppContext                Siddhi application context
      */
-    public abstract void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+    public abstract StateFactory<S> init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                               String[] requestedTransportPropertyNames, ConfigReader configReader,
                               SiddhiAppContext siddhiAppContext);
 
@@ -100,7 +108,7 @@ public abstract class Source {
      *                           initial successful connection
      * @throws ConnectionUnavailableException if it cannot connect to the source backend
      */
-    public abstract void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException;
+    public abstract void connect(ConnectionCallback connectionCallback, S state) throws ConnectionUnavailableException;
 
     /**
      * Called to disconnect from the source backend, or when ConnectionUnavailableException is thrown
@@ -125,8 +133,9 @@ public abstract class Source {
     public void connectWithRetry() {
         if (!isConnected.get()) {
             isTryingToConnect.set(true);
+            S state = stateHolder.getState();
             try {
-                connect(connectionCallback);
+                connect(connectionCallback, state);
                 isConnected.set(true);
                 isTryingToConnect.set(false);
                 backoffRetryCounter.reset();
@@ -139,6 +148,8 @@ public abstract class Source {
                         " Error while connecting at Source '" + StringUtil.removeCRLFCharacters(type) + "' at '" +
                         StringUtil.removeCRLFCharacters(streamDefinition.getId()) + "'.", e);
                 throw e;
+            } finally {
+                stateHolder.returnState(state);
             }
         }
     }

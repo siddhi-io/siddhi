@@ -28,6 +28,7 @@ import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.extension.holder.SinkExecutorExtensionHolder;
 import io.siddhi.core.util.parser.helper.DefinitionParserHelper;
+import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import io.siddhi.query.api.extension.Extension;
@@ -51,11 +52,11 @@ public class SingleClientDistributedSink extends DistributedTransport {
     private int destinationCount = 0;
 
     @Override
-    public void publish(Object payload, DynamicOptions transportOptions, Integer destinationId)
+    public void publish(Object payload, DynamicOptions transportOptions, Integer destinationId, State s)
             throws ConnectionUnavailableException {
         try {
             transportOptions.setVariableOptionIndex(destinationId);
-            sink.publish(payload, transportOptions);
+            sink.publish(payload, transportOptions, s);
         } catch (ConnectionUnavailableException e) {
             sink.setConnected(false);
             strategy.destinationFailed(destinationId);
