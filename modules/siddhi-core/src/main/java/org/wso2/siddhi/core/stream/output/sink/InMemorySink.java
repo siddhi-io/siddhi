@@ -108,4 +108,9 @@ public class InMemorySink extends Sink {
     public void restoreState(Map<String, Object> state) {
         // no state
     }
+
+    @Override
+    public SinkHandler getHandler() {
+        return null;
+    }
 }
