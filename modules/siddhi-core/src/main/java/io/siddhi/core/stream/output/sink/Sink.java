@@ -204,12 +204,12 @@ public abstract class Sink<S extends State> implements SinkListener {
     /**
      * Sending events via output transport
      *
-     * @param payload          payload of the event
-     * @param transportOptions one of the event constructing the payload
-     * @param state            current state of the sink
+     * @param payload        payload of the event
+     * @param dynamicOptions of the event constructing the payload
+     * @param state          current state of the sink
      * @throws ConnectionUnavailableException throw when connections are unavailable.
      */
-    public abstract void publish(Object payload, DynamicOptions transportOptions, S state)
+    public abstract void publish(Object payload, DynamicOptions dynamicOptions, S state)
             throws ConnectionUnavailableException;
 
 
