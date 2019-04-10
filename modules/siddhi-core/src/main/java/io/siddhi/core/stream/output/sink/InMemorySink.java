@@ -66,7 +66,7 @@ public class InMemorySink extends Sink<State> {
     }
 
     @Override
-    protected ServiceDeploymentInfo exposedServiceDeploymentInfo() {
+    protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
         return null;
     }
 
