@@ -70,7 +70,7 @@ public class IncrementalAggregationProcessor implements Processor {
                 new ComplexEventChunk<>(complexEventChunk.isBatch());
         try {
             int noOfEvents = 0;
-            if (latencyTrackerInsert != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+            if (latencyTrackerInsert != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerInsert.markIn();
             }
             while (complexEventChunk.hasNext()) {
@@ -93,11 +93,11 @@ public class IncrementalAggregationProcessor implements Processor {
             }
             aggregationRuntime.processEvents(streamEventChunk);
             if (throughputTrackerInsert != null &&
-                    Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 throughputTrackerInsert.eventsIn(noOfEvents);
             }
         } finally {
-            if (latencyTrackerInsert != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+            if (latencyTrackerInsert != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerInsert.markOut();
             }
         }

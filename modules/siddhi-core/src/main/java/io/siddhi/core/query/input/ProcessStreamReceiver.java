@@ -76,7 +76,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         }
         try {
             LatencyTracker latencyTracker = siddhiQueryContext.getLatencyTracker();
-            if (Level.DETAIL.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0 &&
+            if (Level.BASIC.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0 &&
                     latencyTracker != null) {
                 try {
                     latencyTracker.markIn();

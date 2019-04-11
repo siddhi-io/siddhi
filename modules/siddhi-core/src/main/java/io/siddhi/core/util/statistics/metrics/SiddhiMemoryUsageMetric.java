@@ -64,8 +64,7 @@ public class SiddhiMemoryUsageMetric implements MemoryUsageTracker {
 
     @Override
     public void disableMemoryUsageMetrics() {
-        for (ConcurrentMap.Entry<Object, ObjectMetric> entry :
-                registeredObjects.entrySet()) {
+        for (ConcurrentMap.Entry<Object, ObjectMetric> entry : registeredObjects.entrySet()) {
             metricRegistry.remove(entry.getValue().getName());
         }
     }

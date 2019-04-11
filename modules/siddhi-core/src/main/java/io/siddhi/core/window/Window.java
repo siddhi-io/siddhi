@@ -237,7 +237,7 @@ public class Window implements FindableProcessor, MemoryCalculable {
 
             try {
                 if (throughputTrackerInsert != null &&
-                        Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTrackerInsert.eventsIn(numberOfEvents);
                     latencyTrackerInsert.markIn();
                 }
@@ -246,7 +246,7 @@ public class Window implements FindableProcessor, MemoryCalculable {
                         complexEventChunk.isBatch()));
             } finally {
                 if (throughputTrackerInsert != null &&
-                        Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                        Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     latencyTrackerInsert.markOut();
                 }
             }
@@ -261,13 +261,13 @@ public class Window implements FindableProcessor, MemoryCalculable {
     @Override
     public StreamEvent find(StateEvent matchingEvent, CompiledCondition compiledCondition) {
         try {
-            if (throughputTrackerFind != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+            if (throughputTrackerFind != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 throughputTrackerFind.eventIn();
                 latencyTrackerFind.markIn();
             }
             return ((FindableProcessor) this.internalWindowProcessor).find(matchingEvent, compiledCondition);
         } finally {
-            if (throughputTrackerFind != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+            if (throughputTrackerFind != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerFind.markOut();
             }
         }
@@ -329,7 +329,7 @@ public class Window implements FindableProcessor, MemoryCalculable {
 
         public void process(ComplexEventChunk complexEventChunk) {
             if (throughputTrackerInsert != null &&
-                    Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                    Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTrackerInsert.markOut();
             }
             // Filter the events depending on user defined output type.

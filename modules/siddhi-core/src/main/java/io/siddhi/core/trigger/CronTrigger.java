@@ -150,7 +150,7 @@ public class CronTrigger implements Trigger, Job {
 
     private void sendEvent() {
         long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
-        if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+        if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTracker.eventIn();
         }
         streamJunction.sendEvent(new Event(currentTime, new Object[]{currentTime}));
