@@ -110,7 +110,7 @@ public abstract class Sink<S extends State> implements SinkListener {
             this.handler = sinkHandler;
         }
         scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
-        serviceDeploymentInfo = exposedServiceDeploymentInfo();
+        serviceDeploymentInfo = exposeServiceDeploymentInfo();
         if (serviceDeploymentInfo != null) {
             serviceDeploymentInfo.addDeploymentProperties(deploymentProperties);
         } else if (!deploymentProperties.isEmpty()) {
@@ -132,7 +132,7 @@ public abstract class Sink<S extends State> implements SinkListener {
         this.siddhiAppContext = siddhiAppContext;
         init(streamDefinition, transportOptionHolder, sinkConfigReader, siddhiAppContext);
         scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
-        serviceDeploymentInfo = exposedServiceDeploymentInfo();
+        serviceDeploymentInfo = exposeServiceDeploymentInfo();
         if (serviceDeploymentInfo != null) {
             serviceDeploymentInfo.addDeploymentProperties(deploymentProperties);
         } else if (!deploymentProperties.isEmpty()) {
@@ -146,7 +146,7 @@ public abstract class Sink<S extends State> implements SinkListener {
      *
      * @return ServiceDeploymentInfo  Service related information to the deployment
      */
-    protected abstract ServiceDeploymentInfo exposedServiceDeploymentInfo();
+    protected abstract ServiceDeploymentInfo exposeServiceDeploymentInfo();
 
     /**
      * Supported dynamic options by the transport

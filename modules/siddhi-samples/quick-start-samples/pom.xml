@@ -56,7 +56,7 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.lmax</groupId>
+            <groupId>org.wso2.orbit.com.lmax</groupId>
             <artifactId>disruptor</artifactId>
             <scope>compile</scope>
         </dependency>
