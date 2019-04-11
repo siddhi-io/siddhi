@@ -21,7 +21,7 @@
     <parent>
         <artifactId>siddhi-samples</artifactId>
         <groupId>io.siddhi</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.0.0-m11</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

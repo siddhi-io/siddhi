@@ -21,7 +21,7 @@
     <parent>
         <artifactId>siddhi</artifactId>
         <groupId>io.siddhi</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.0.0-m11</version>
         <relativePath>../../pom.xml</relativePath>
 
     </parent>
