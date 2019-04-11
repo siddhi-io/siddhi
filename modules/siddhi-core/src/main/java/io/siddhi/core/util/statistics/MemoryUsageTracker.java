@@ -31,6 +31,10 @@ public interface MemoryUsageTracker {
      */
     void registerObject(Object object, String name);
 
+    void enableMemoryUsageMetrics();
+
+    void disableMemoryUsageMetrics();
+
     /**
      * @param object Object
      * @return Name of the mem tracker

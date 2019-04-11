@@ -25,6 +25,7 @@ import io.siddhi.core.util.ExceptionUtil;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.statistics.ThroughputTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.query.api.definition.TriggerDefinition;
 import org.apache.log4j.Logger;
 import org.quartz.CronScheduleBuilder;
@@ -149,7 +150,7 @@ public class CronTrigger implements Trigger, Job {
 
     private void sendEvent() {
         long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
-        if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+        if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTracker.eventIn();
         }
         streamJunction.sendEvent(new Event(currentTime, new Object[]{currentTime}));

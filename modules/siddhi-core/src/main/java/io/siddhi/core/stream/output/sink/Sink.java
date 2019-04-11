@@ -34,6 +34,7 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.ThroughputTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.transport.BackoffRetryCounter;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.OptionHolder;
@@ -168,7 +169,7 @@ public abstract class Sink<S extends State> implements SinkListener {
 
     @Override
     public final void publish(Object payload) {
-        if (mapperLatencyTracker != null && siddhiAppContext.isStatsEnabled()) {
+        if (mapperLatencyTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             mapperLatencyTracker.markOut();
         }
         if (isConnected()) {
@@ -176,7 +177,7 @@ public abstract class Sink<S extends State> implements SinkListener {
             try {
                 DynamicOptions dynamicOptions = trpDynamicOptions.get();
                 publish(payload, dynamicOptions, state);
-                if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+                if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTracker.eventIn();
                 }
             } catch (ConnectionUnavailableException e) {

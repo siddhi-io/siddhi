@@ -30,6 +30,7 @@ import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.ThreadBarrier;
 import io.siddhi.core.util.snapshot.SnapshotService;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.timestamp.TimestampGenerator;
 import io.siddhi.core.util.timestamp.TimestampGeneratorImpl;
 import io.siddhi.core.window.Window;
@@ -130,7 +131,7 @@ public class SiddhiAppParser {
                     SiddhiConstants.ANNOTATION_ELEMENT_ENABLE, siddhiApp.getAnnotations());
 
             if (statStateEnableElement != null && Boolean.valueOf(statStateEnableElement.getValue())) {
-                siddhiAppContext.setStatsEnabled(true);
+                siddhiAppContext.setRootMetricsLevel(Level.BASIC);
             } else {
                 Element statStateElement = AnnotationHelper.getAnnotationElement(
                         SiddhiConstants.ANNOTATION_STATISTICS, null, siddhiApp.getAnnotations());
@@ -138,7 +139,7 @@ public class SiddhiAppParser {
                 // @app:statistics(reporter = 'console', interval = '5' )
                 // where sp uses @app:statistics('true').
                 if (annotation != null && (statStateElement == null || Boolean.valueOf(statStateElement.getValue()))) {
-                    siddhiAppContext.setStatsEnabled(true);
+                    siddhiAppContext.setRootMetricsLevel(Level.BASIC);
                 }
             }
             Element statStateIncludElement = AnnotationHelper.getAnnotationElement(
