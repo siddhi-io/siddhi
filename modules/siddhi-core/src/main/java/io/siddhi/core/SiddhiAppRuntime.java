@@ -767,9 +767,9 @@ public class SiddhiAppRuntime {
     /**
      * To enable, disable and change Siddhi App statistics level on runtime.
      *
-     * @param level whether statistics is enabled or not
+     * @param level whether statistics is OFF, BASIC or DETAIL
      */
-    public void enableStats(Level level) {
+    public void setStatisticsLevel(Level level) {
         if (running && siddhiAppContext.getStatisticsManager() != null) {
 
             if (siddhiAppContext.getRootMetricsLevel().compareTo(level) == 0) {
