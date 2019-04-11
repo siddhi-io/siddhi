@@ -60,7 +60,7 @@
                                     </outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.lmax</groupId>
+                                    <groupId>org.wso2.orbit.com.lmax</groupId>
                                     <artifactId>disruptor</artifactId>
                                     <version>${disruptor.version}</version>
                                     <overWrite>false</overWrite>
