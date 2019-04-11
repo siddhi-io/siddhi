@@ -46,7 +46,27 @@ public class SiddhiMemoryUsageMetric implements MemoryUsageTracker {
     @Override
     public void registerObject(Object object, String name) {
         if (registeredObjects.get(object) == null) {
+            ObjectMetric objectMetric = new ObjectMetric(object, name);
+            metricRegistry.register(name, objectMetric.getGauge());
             registeredObjects.put(object, new ObjectMetric(object, name));
+        }
+    }
+
+    @Override
+    public void enableMemoryUsageMetrics() {
+        for (ConcurrentMap.Entry<Object, ObjectMetric> entry :
+                registeredObjects.entrySet()) {
+            if (!metricRegistry.getNames().contains(entry.getValue().getName())) {
+                metricRegistry.register(entry.getValue().getName(), entry.getValue().getGauge());
+            }
+        }
+    }
+
+    @Override
+    public void disableMemoryUsageMetrics() {
+        for (ConcurrentMap.Entry<Object, ObjectMetric> entry :
+                registeredObjects.entrySet()) {
+            metricRegistry.remove(entry.getValue().getName());
         }
     }
 
@@ -66,29 +86,29 @@ public class SiddhiMemoryUsageMetric implements MemoryUsageTracker {
 
         private final Object object;
         private String name;
+        private Gauge gauge;
 
         public ObjectMetric(final Object object, String name) {
             this.object = object;
             this.name = name;
-            initMetric();
+            this.gauge = new Gauge<Long>() {
+                @Override
+                public Long getValue() {
+                    try {
+                        return ObjectSizeCalculator.getObjectSize(object);
+                    } catch (UnsupportedOperationException e) {
+                        return 0L;
+                    }
+                }
+            };
         }
 
         public String getName() {
             return name;
         }
 
-        private void initMetric() {
-            metricRegistry.register(name,
-                    new Gauge<Long>() {
-                        @Override
-                        public Long getValue() {
-                            try {
-                                return ObjectSizeCalculator.getObjectSize(object);
-                            } catch (UnsupportedOperationException e) {
-                                return 0L;
-                            }
-                        }
-                    });
+        public Gauge getGauge() {
+            return gauge;
         }
     }
 }

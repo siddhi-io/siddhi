@@ -35,4 +35,8 @@ public interface BufferedEventsTracker {
      * @return Name of the buffered event tracker.
      */
     String getName(EventBufferHolder eventBufferHolder);
+
+    void enableEventBufferHolderMetrics();
+
+    void disableEventBufferHolderMetrics();
 }

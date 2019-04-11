@@ -38,6 +38,7 @@ import io.siddhi.core.util.event.handler.StreamHandler;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.statistics.EventBufferHolder;
 import io.siddhi.core.util.statistics.ThroughputTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.StreamDefinition;
 import io.siddhi.query.api.exception.DuplicateAnnotationException;
@@ -150,7 +151,7 @@ public class StreamJunction implements EventBufferHolder {
         ComplexEvent complexEventList = complexEvent;
         if (disruptor != null) {
             while (complexEventList != null) {
-                if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+                if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTracker.eventIn();
                 }
                 long sequenceNo = ringBuffer.next();
@@ -164,7 +165,7 @@ public class StreamJunction implements EventBufferHolder {
                 complexEventList = complexEventList.getNext();
             }
         } else {
-            if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+            if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 int messageCount = 0;
                 while (complexEventList != null) {
                     messageCount++;
@@ -179,7 +180,7 @@ public class StreamJunction implements EventBufferHolder {
     }
 
     public void sendEvent(Event event) {
-        if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+        if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTracker.eventIn();
         }
         if (isTraceEnabled) {
@@ -202,7 +203,7 @@ public class StreamJunction implements EventBufferHolder {
     }
 
     private void sendEvent(Event[] events) {
-        if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+        if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTracker.eventsIn(events.length);
         }
         if (isTraceEnabled) {
@@ -249,7 +250,7 @@ public class StreamJunction implements EventBufferHolder {
     }
 
     private void sendData(long timeStamp, Object[] data) {
-        if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+        if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTracker.eventIn();
         }
         if (disruptor != null) {
