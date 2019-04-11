@@ -72,7 +72,8 @@ public class SiddhiManager {
     }
 
     public SiddhiAppRuntime createSiddhiAppRuntime(String siddhiApp) {
-        return createSiddhiAppRuntime(SiddhiCompiler.parse(siddhiApp), siddhiApp);
+        String updatedSiddhiApp = SiddhiCompiler.updateVariables(siddhiApp);
+        return createSiddhiAppRuntime(SiddhiCompiler.parse(updatedSiddhiApp), updatedSiddhiApp);
     }
 
     /**
@@ -97,7 +98,8 @@ public class SiddhiManager {
     }
 
     public void validateSiddhiApp(String siddhiApp) {
-        validateSiddhiApp(SiddhiCompiler.parse(siddhiApp), siddhiApp);
+        String updatedSiddhiApp = SiddhiCompiler.updateVariables(siddhiApp);
+        validateSiddhiApp(SiddhiCompiler.parse(updatedSiddhiApp), updatedSiddhiApp);
     }
 
     /**
