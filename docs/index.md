@@ -126,7 +126,7 @@ For more information please contact us via <a target="_blank" href="http://wso2.
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.0.0-m10">5.0.0-m10</a>.
+Latest API Docs is <a target="_blank" href="https://wso2.github.io/siddhi/api/5.0.0-m11">5.0.0-m11</a>.
 
 ## How to Contribute
 * Report issues at <a target="_blank" href="https://github.com/wso2/siddhi/issues">GitHub Issue Tracker</a>.
