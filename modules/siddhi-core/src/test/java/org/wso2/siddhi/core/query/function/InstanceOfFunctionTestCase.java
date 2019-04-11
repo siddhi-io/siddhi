@@ -19,6 +19,7 @@
 package org.wso2.siddhi.core.query.function;
 
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -354,7 +355,7 @@ public class InstanceOfFunctionTestCase {
         inputHandler.send(new Object[]{19900813115534L, false, 601, "temperature", 90.34344, 20.44345, 2.3f, 20.44345});
         inputHandler.send(new Object[]{1990, false, 602, "temperature", 90.34344, 20.44345, 2.3f, 20.44345});
         Thread.sleep(100);
-        junit.framework.Assert.assertEquals(2, count);
+        Assert.assertEquals(2, count);
         AssertJUnit.assertTrue(eventArrived);
         siddhiAppRuntime.shutdown();
 
