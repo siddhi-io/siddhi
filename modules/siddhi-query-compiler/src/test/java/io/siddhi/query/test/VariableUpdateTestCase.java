@@ -83,6 +83,6 @@ public class VariableUpdateTestCase {
                 "" +
                 "define stream Foo (symbol string, price float, volume long);";
         Assert.assertEquals(SiddhiCompiler.updateVariables(siddhiApp),
-                siddhiAppExpected.replaceFirst("Foo",System.getenv("JAVA_HOME")));
+                siddhiAppExpected.replaceFirst("Foo", System.getenv("JAVA_HOME")));
     }
 }
