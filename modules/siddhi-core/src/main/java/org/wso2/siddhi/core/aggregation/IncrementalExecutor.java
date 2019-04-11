@@ -38,6 +38,8 @@ import org.wso2.siddhi.query.api.aggregation.TimePeriod;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Incremental executor class which is responsible for performing incremental aggregation.
@@ -62,6 +64,7 @@ public class IncrementalExecutor implements Executor, Snapshotable {
     private String elementId;
     private boolean isProcessingExecutor;
     private SiddhiAppContext siddhiAppContext;
+    private ExecutorService executorService;
 
     private BaseIncrementalValueStore baseIncrementalValueStore = null;
     private Map<String, BaseIncrementalValueStore> baseIncrementalValueStoreGroupByMap = null;
@@ -99,11 +102,12 @@ public class IncrementalExecutor implements Executor, Snapshotable {
             elementId = "IncrementalExecutor-" + siddhiAppContext.getElementIdGenerator().createNewId();
         }
         siddhiAppContext.getSnapshotService().addSnapshotable(aggregatorName, this);
+        executorService = Executors.newSingleThreadExecutor();
 
     }
 
     public void setScheduler(Scheduler scheduler) {
-        this.scheduler = scheduler;
+            this.scheduler = scheduler;
     }
 
     @Override
@@ -223,14 +227,15 @@ public class IncrementalExecutor implements Executor, Snapshotable {
 
     private void dispatchEvent(long startTimeOfNewAggregates, BaseIncrementalValueStore aBaseIncrementalValueStore) {
         if (aBaseIncrementalValueStore.isProcessed()) {
-            StreamEvent streamEvent = aBaseIncrementalValueStore.createStreamEvent();
             ComplexEventChunk<StreamEvent> eventChunk = new ComplexEventChunk<>(true);
-            eventChunk.add(streamEvent);
+            ComplexEventChunk<StreamEvent> tableEventChunk = new ComplexEventChunk<>(true);
+            eventChunk.add(aBaseIncrementalValueStore.createStreamEvent());
+            tableEventChunk.add(aBaseIncrementalValueStore.createStreamEvent());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                table.addEvents(eventChunk, 1);
+                executorService.submit(() -> table.addEvents(tableEventChunk, 1));
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
@@ -243,15 +248,16 @@ public class IncrementalExecutor implements Executor, Snapshotable {
         int noOfEvents = baseIncrementalValueGroupByStore.size();
         if (noOfEvents > 0) {
             ComplexEventChunk<StreamEvent> eventChunk = new ComplexEventChunk<>(true);
+            ComplexEventChunk<StreamEvent> tableEventChunk = new ComplexEventChunk<>(true);
             for (BaseIncrementalValueStore aBaseIncrementalValueStore : baseIncrementalValueGroupByStore.values()) {
-                StreamEvent streamEvent = aBaseIncrementalValueStore.createStreamEvent();
-                eventChunk.add(streamEvent);
+                eventChunk.add(aBaseIncrementalValueStore.createStreamEvent());
+                tableEventChunk.add(aBaseIncrementalValueStore.createStreamEvent());
             }
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                table.addEvents(eventChunk, noOfEvents);
+                executorService.submit(() -> table.addEvents(tableEventChunk, noOfEvents));
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);
