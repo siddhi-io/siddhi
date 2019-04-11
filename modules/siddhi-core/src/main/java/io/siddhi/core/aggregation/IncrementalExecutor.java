@@ -39,6 +39,8 @@ import org.apache.log4j.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Incremental executor class which is responsible for performing incremental aggregation.
@@ -57,6 +59,7 @@ public class IncrementalExecutor implements Executor {
     private Scheduler scheduler;
     private boolean isRoot;
     private boolean isProcessingExecutor;
+    private ExecutorService executorService;
 
     private BaseIncrementalValueStore baseIncrementalValueStore = null;
 
@@ -80,6 +83,7 @@ public class IncrementalExecutor implements Executor {
 
         this.stateHolder = siddhiQueryContext.generateStateHolder(
                 aggregatorName + "-" + this.getClass().getName(), false, () -> new ExecutorState());
+        this.executorService = Executors.newSingleThreadExecutor();
     }
 
     public void setScheduler(Scheduler scheduler) {
@@ -183,11 +187,16 @@ public class IncrementalExecutor implements Executor {
             for (StreamEvent event : streamEventMap.values()) {
                 eventChunk.add(event);
             }
+            Map<String, StreamEvent> tableStreamEventMap = aBaseIncrementalValueStore.getGroupedByEvents();
+            ComplexEventChunk<StreamEvent> tableEventChunk = new ComplexEventChunk<>(true);
+            for (StreamEvent event : tableStreamEventMap.values()) {
+                tableEventChunk.add(event);
+            }
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Event dispatched by " + this.duration + " incremental executor: " + eventChunk.toString());
             }
             if (isProcessingExecutor) {
-                table.addEvents(eventChunk, streamEventMap.size());
+                executorService.submit(() -> table.addEvents(tableEventChunk, streamEventMap.size()));
             }
             if (getNextExecutor() != null) {
                 next.execute(eventChunk);

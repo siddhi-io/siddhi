@@ -20,6 +20,7 @@ package io.siddhi.core.managment;
 
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.query.compiler.exception.SiddhiParserException;
 import org.apache.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -77,6 +78,53 @@ public class ValidateTestCase {
 
 
         siddhiManager.validateSiddhiApp(siddhiApp);
+
+    }
+
+    @Test
+    public void validateTest3() throws InterruptedException {
+        log.info("validate test3");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        System.setProperty("stream", "cseEventStream");
+
+        String siddhiApp = "" +
+                "@app:name('validateTest') " +
+                "" +
+                "define stream ${stream} (symbol string, price float, volume long);" +
+                "" +
+                "@info(name = 'query1') " +
+                "from cseEventStream " +
+                "select symbol, price, '${JAVA_HOME}' as javaHome " +
+                "insert into outputStream;";
+
+        siddhiManager.validateSiddhiApp(siddhiApp);
+        System.clearProperty("stream");
+
+    }
+
+    @Test(expectedExceptions = SiddhiParserException.class)
+    public void validateTest4() throws InterruptedException {
+        log.info("validate test4");
+        SiddhiManager siddhiManager = new SiddhiManager();
+
+        System.setProperty("streams", "cseEventStream");
+        try {
+            String siddhiApp = "" +
+                    "@app:name('validateTest') " +
+                    "" +
+                    "define stream ${stream} (symbol string, price float, volume long);" +
+                    "" +
+                    "@info(name = 'query1') " +
+                    "from cseEventStream " +
+                    "select symbol, price " +
+                    "insert into outputStream;";
+
+            siddhiManager.validateSiddhiApp(siddhiApp);
+        } finally {
+            System.clearProperty("streams");
+
+        }
 
     }
 }

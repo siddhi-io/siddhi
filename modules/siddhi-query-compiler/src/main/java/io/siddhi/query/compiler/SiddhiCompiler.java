@@ -49,6 +49,9 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Siddhi query compiler
  */
@@ -206,4 +209,32 @@ public class SiddhiCompiler {
         return (StoreQuery) eval.visit(tree);
     }
 
+    public static String updateVariables(String siddhiApp) {
+        String updatedSiddhiApp = siddhiApp;
+        if (siddhiApp.contains("$")) {
+            Pattern variablePattern = Pattern.compile("\\$\\{(\\w+)\\}");
+            Matcher variableMatcher = variablePattern.matcher(siddhiApp);
+            while (variableMatcher.find()) {
+                String key = variableMatcher.group(1);
+                String value = System.getProperty(key);
+                if (value == null) {
+                    value = System.getenv(key);
+                    if (value == null) {
+                        Pattern appNamePattern = Pattern.compile("@app:name\\(\\W*('|\")(\\w+)('|\")\\W*\\)");
+                        Matcher appNameMatcher = appNamePattern.matcher(siddhiApp);
+                        if (appNameMatcher.find()) {
+                            String appName = appNameMatcher.group(2);
+                            throw new SiddhiParserException("No system or environmental variable found for '${"
+                                    + key + "}', for Siddhi App '" + appName + "'");
+                        } else {
+                            throw new SiddhiParserException("No system or environmental variable found for '${"
+                                    + key + "}'");
+                        }
+                    }
+                }
+                updatedSiddhiApp = updatedSiddhiApp.replaceAll("\\$\\{(" + key + ")\\}", value);
+            }
+        }
+        return updatedSiddhiApp;
+    }
 }

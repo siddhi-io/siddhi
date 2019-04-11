@@ -46,7 +46,7 @@ import io.siddhi.core.stream.output.sink.InMemorySink;
 public class TestDepInMemorySink extends InMemorySink {
 
     @Override
-    protected ServiceDeploymentInfo exposedServiceDeploymentInfo() {
+    protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
         return new ServiceDeploymentInfo(8080, true);
     }
 }

@@ -29,6 +29,7 @@
             <class name="io.siddhi.query.test.DefineTableTestCase"/>
             <class name="io.siddhi.query.test.QueryStoreTestCase"/>
             <class name="io.siddhi.query.test.SimpleQueryTestCase"/>
+            <class name="io.siddhi.query.test.VariableUpdateTestCase"/>
         </classes>
     </test>
 </suite>

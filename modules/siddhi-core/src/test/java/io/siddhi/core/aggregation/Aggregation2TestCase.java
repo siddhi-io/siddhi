@@ -29,6 +29,7 @@ import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import org.apache.log4j.Logger;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -97,6 +98,7 @@ public class Aggregation2TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 96, 1496289953000L});
 
+            Thread.sleep(1000);
             Event[] events = null;
             int i = 0;
 
@@ -167,10 +169,11 @@ public class Aggregation2TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 96, 1496289953000L});
 
-            Thread.sleep(100);
+            Thread.sleep(1000);
 
             Event[] events = siddhiAppRuntime.query("from stockAggregation within 0L, 1543664151000L per " +
                     "'seconds' select AGG_TIMESTAMP, symbol, totalPrice ");
+            Assert.assertNotNull(events);
             AssertJUnit.assertEquals("Check time windows", 7, events.length);
             List<Object[]> eventsList = new ArrayList<>();
             for (Event event : events) {
@@ -411,7 +414,7 @@ public class Aggregation2TestCase {
                     year + "-06-01 09:35:52 +05:30", "hours"});
             inputStreamInputHandler.send(new Object[]{"IBM", 1, "2017-06-01 09:35:52 +05:30",
                     year + "-06-01 09:35:52 +05:30", "hours"});
-            Thread.sleep(100);
+            Thread.sleep(1000);
 
             Event[] events1 =
                     siddhiAppRuntime.query("from stockAggregation within 0L, " + (System.currentTimeMillis()
@@ -420,6 +423,9 @@ public class Aggregation2TestCase {
             Event[] events2 =
                     siddhiAppRuntime.query("from stockAggregation within 0L, " + (System.currentTimeMillis()
                             + 1000000) + "L per 'hours' select AGG_TIMESTAMP, avgPrice, totalPrice as sumPrice");
+
+            Assert.assertNotNull(events1);
+            Assert.assertNotNull(events2);
 
             List<Object[]> firstJoinEvent = new ArrayList<>();
             List<Object[]> secondJoinEvent = new ArrayList<>();
