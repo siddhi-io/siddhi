@@ -143,13 +143,13 @@ public abstract class SourceMapper implements SourceEventListener {
                         throughputTracker.eventIn();
                     }
                     if (throughputTracker != null &&
-                            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                            Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                         mapperLatencyTracker.markIn();
                     }
                     mapAndProcess(eventObject, inputEventHandler);
                 } finally {
                     if (throughputTracker != null &&
-                            Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                            Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                         mapperLatencyTracker.markOut();
                     }
                 }
