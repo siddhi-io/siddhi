@@ -1,4 +1,4 @@
-# Siddhi 5.x User Guide
+\# Siddhi 5.x User Guide
 
 ## System Requirements
 1. **Memory**   - 128 MB (minimum), 500 MB (recommended), higher memory might be needed based on in-memory data stored for processing
@@ -210,17 +210,29 @@ Templating SiddhiApps allows users to provide environment/system variables to si
 
 Following templated SiddhiApp collects events via HTTP, filters them based on `amount` greater than a given threshold value, and only sends the filtered events via email.
 
-Here the `threshold` value, and `to.email` are templated in the `TemplatedFilterAndEmail.siddhi` SiddhiApp.
+Here the `THRESHOLD` value, and `TO_EMAIL` are templated in the `TemplatedFilterAndEmail.siddhi` SiddhiApp.
 
 <script src="https://gist.github.com/suhothayan/47b6300f629463e63b2d5be78d6e45b4.js"></script>
 
-The runner config is configured with a gmail account to send email messages in `EmailConfig.yaml` by templating sending `email.address`, `email.username` and `email.password`.   
+The runner config is configured with a gmail account to send email messages in `EmailConfig.yaml` by templating sending `EMAIL_ADDRESS`, `EMAIL_USERNAME` and `EMAIL_PASSWORD`.   
 
 <script src="https://gist.github.com/suhothayan/3f36f8827d379925a8cca68dd78b9a8e.js"></script>
 
 <ul>
     <li>Copy the above SiddhiApp, & config yaml, and create corresponding the SiddhiApp file <code>TemplatedFilterAndEmail.siddhi</code> and <code>EmailConfig.yaml</code> files.</li>
-    <li>Run the SiddhiApp by executing following commands from the distribution directory
+    
+    <li>Set environment variables by running following in the termial Siddhi is about to run: 
+         <pre style="white-space:pre-wrap;">
+export THRESHOLD=20
+export TO_EMAIL=<to email address>
+export EMAIL_ADDRESS=<gmail address>
+export EMAIL_USERNAME=<gmail username>
+export EMAIL_PASSWORD=<gmail password>
+         </pre>
+        Or they can also be passed as system variables by adding <code>-DTHRESHOLD=20 -DTO_EMAIL=<to email address> -DEMAIL_ADDRESS=<gmail address> -DEMAIL_USERNAME=<gmail username> -DEMAIL_PASSWORD=<gmail password></code>
+        to the end of the runner startup script.
+    </li>
+        <li>Run the SiddhiApp by executing following commands from the distribution directory
         <ul>
             <li>Linux/Mac :
             <pre style="white-space:pre-wrap;">
@@ -241,7 +253,7 @@ bin\runner.bat -Dapps=<absolute-file-path>\TemplatedFilterAndEmail.siddhi ^
 <pre style="white-space:pre-wrap;">
 curl -X POST http://localhost:8006/production \
   --header "Content-Type:application/json" \
-  -d '{"event":{"name":"Cake","amount":2000}}'
+  -d '{"event":{"name":"Cake","amount":2000.0}}'
 </pre>
             </li>
             <li><b>Publish events with Postman:</b>
@@ -253,7 +265,7 @@ curl -X POST http://localhost:8006/production \
 {
   "event": {
     "name": "Cake",
-    "amount": 2000
+    "amount": 2000.0
   }
 }</pre>
                 </li>
@@ -263,12 +275,15 @@ curl -X POST http://localhost:8006/production \
     </li>
     <li>Check the <code>to.email</code> for the published email message, which will look as follows,
 <pre style="white-space:pre-wrap;">
-{
-  "event": {
-    "name": "Cake",
-    "amount": 2000
-  }
-}</pre>
+Subject : High Cake production!
+
+Hi, 
+
+High production of Cake, with amount 2000.0 identified. 
+
+For more information please contact production department. 
+
+Thank you</pre>
     </li>
 </ul>
 
@@ -276,7 +291,7 @@ curl -X POST http://localhost:8006/production \
 
 WIP
 
-### **Using Siddhi as kubernetes Micro Service**
+### **Using Siddhi as Kubernetes Micro Service**
 
 WIP
 
