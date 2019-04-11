@@ -760,7 +760,7 @@ public class SiddhiAppRuntime {
      *
      * @return Level value of Siddhi App statistics state
      */
-    public Level getRootMetricsLevel() {
+    public Level getStatisticsLevel() {
         return siddhiAppContext.getRootMetricsLevel();
     }
 
