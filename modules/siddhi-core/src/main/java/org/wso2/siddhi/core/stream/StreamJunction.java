@@ -155,7 +155,7 @@ public class StreamJunction implements EventBufferHolder {
         ComplexEvent complexEventList = complexEvent;
         if (disruptor != null) {
             while (complexEventList != null) {
-                if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+                if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTracker.eventIn();
                 }
                 long sequenceNo = ringBuffer.next();
@@ -169,7 +169,7 @@ public class StreamJunction implements EventBufferHolder {
                 complexEventList = complexEventList.getNext();
             }
         } else {
-            if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+            if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 int messageCount = 0;
                 while (complexEventList != null) {
                     messageCount++;
@@ -184,7 +184,7 @@ public class StreamJunction implements EventBufferHolder {
     }
 
     public void sendEvent(Event event) {
-        if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+        if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTracker.eventIn();
         }
         if (isTraceEnabled) {
@@ -207,7 +207,7 @@ public class StreamJunction implements EventBufferHolder {
     }
 
     private void sendEvent(Event[] events) {
-        if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+        if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTracker.eventsIn(events.length);
         }
         if (isTraceEnabled) {
@@ -254,7 +254,7 @@ public class StreamJunction implements EventBufferHolder {
     }
 
     private void sendData(long timeStamp, Object[] data) {
-        if (throughputTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+        if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
             throughputTracker.eventIn();
         }
         if (disruptor != null) {

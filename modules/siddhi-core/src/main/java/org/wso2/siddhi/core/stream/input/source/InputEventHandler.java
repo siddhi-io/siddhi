@@ -63,7 +63,7 @@ public class InputEventHandler {
 
     public void sendEvent(Event event) throws InterruptedException {
         try {
-            if (latencyTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+            if (latencyTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTracker.markOut();
             }
             String[] transportProperties = trpProperties.get();
@@ -91,7 +91,7 @@ public class InputEventHandler {
 
     public void sendEvents(Event[] events) throws InterruptedException {
         try {
-            if (latencyTracker != null && Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
+            if (latencyTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                 latencyTracker.markOut();
             }
             String[] transportProperties = trpProperties.get();
