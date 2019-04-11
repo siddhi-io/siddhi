@@ -43,7 +43,6 @@ import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.Variable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -161,11 +160,18 @@ public class SelectorParser {
                         .getAttributeList();
                 for (Attribute attribute : attributeList) {
                     Variable variable = new Variable(attribute.getName());
-                    variable.setQueryContextEndIndex(selector.getQueryContextEndIndex());
-                    variable.setQueryContextStartIndex(selector.getQueryContextStartIndex());
                     OutputAttribute outputAttribute = new OutputAttribute(variable);
-                    outputAttribute.setQueryContextStartIndex(selector.getQueryContextStartIndex());
-                    outputAttribute.setQueryContextEndIndex(selector.getQueryContextEndIndex());
+                    if (selector.getQueryContextStartIndex() != null) {
+                        variable.setQueryContextEndIndex(selector.getQueryContextEndIndex());
+                        variable.setQueryContextStartIndex(selector.getQueryContextStartIndex());
+                        outputAttribute.setQueryContextStartIndex(selector.getQueryContextStartIndex());
+                        outputAttribute.setQueryContextEndIndex(selector.getQueryContextEndIndex());
+                    } else {
+                        variable.setQueryContextEndIndex(outputStream.getQueryContextEndIndex());
+                        variable.setQueryContextStartIndex(outputStream.getQueryContextStartIndex());
+                        outputAttribute.setQueryContextStartIndex(outputStream.getQueryContextStartIndex());
+                        outputAttribute.setQueryContextEndIndex(outputStream.getQueryContextEndIndex());
+                    }
                     outputAttributes.add(outputAttribute);
                 }
             } else {
