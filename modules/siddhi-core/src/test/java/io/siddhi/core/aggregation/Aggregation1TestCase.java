@@ -163,10 +163,13 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L});
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L});
 
+        Thread.sleep(1000);
+
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-06-** **:**:**\" " +
                 "per \"seconds\"");
         EventPrinter.print(events);
+        Assert.assertNotNull(events);
         AssertJUnit.assertEquals(3, events.length);
         List<Object[]> eventsOutputList = new ArrayList<>();
         for (Event event : events) {
@@ -832,7 +835,7 @@ public class Aggregation1TestCase {
                 "per \"seconds\"; ");
 
         EventPrinter.print(events);
-
+        Assert.assertNotNull(events);
         AssertJUnit.assertEquals(1, events.length);
         for (int i = 0; i < events.length; i++) {
             switch (i) {
@@ -1482,7 +1485,7 @@ public class Aggregation1TestCase {
 
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L});
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L});
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "on symbol==\"IBM\" " +
@@ -1490,6 +1493,7 @@ public class Aggregation1TestCase {
                 "per \"seconds\" " +
                 "select AGG_TIMESTAMP, symbol, avgPrice;");
         EventPrinter.print(events);
+        Assert.assertNotNull(events);
         AssertJUnit.assertEquals(1, events.length);
         for (int i = 0; i < events.length; i++) {
             switch (i) {
@@ -1533,12 +1537,13 @@ public class Aggregation1TestCase {
 
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L});
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L});
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-06-** **:**:**\" " +
                 "per \"seconds\"");
         EventPrinter.print(events);
+        Assert.assertNotNull(events);
         AssertJUnit.assertEquals(3, events.length);
         List<Object[]> outputDataList = new ArrayList<>();
         for (Event event : events) {
@@ -1583,7 +1588,7 @@ public class Aggregation1TestCase {
 
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289954000L});
         stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 96, 1496289954000L});
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-06-** **:**:**\" " +
@@ -1591,6 +1596,7 @@ public class Aggregation1TestCase {
                 "select * " +
                 "order by AGG_TIMESTAMP ;");
         EventPrinter.print(events);
+        Assert.assertNotNull(events);
         AssertJUnit.assertEquals(3, events.length);
         for (int i = 0; i < events.length; i++) {
             switch (i) {
@@ -1861,7 +1867,7 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 26, 1513578087000L});
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 96, 1513578087000L});
 
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-**-** **:**:**\" " +
@@ -1869,6 +1875,7 @@ public class Aggregation1TestCase {
                 "select * " +
                 "order by AGG_TIMESTAMP ;");
         EventPrinter.print(events);
+        Assert.assertNotNull(events);
         AssertJUnit.assertEquals(4, events.length);
         for (int i = 0; i < events.length; i++) {
             switch (i) {
@@ -1929,7 +1936,7 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 26, 1513578087000L});
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 96, 1513578087000L});
 
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-12-18 **:**:**\" " +
@@ -1937,6 +1944,7 @@ public class Aggregation1TestCase {
                 "select * " +
                 "order by AGG_TIMESTAMP ;");
         EventPrinter.print(events);
+        Assert.assertNotNull(events);
         AssertJUnit.assertEquals(1, events.length);
         for (int i = 0; i < events.length; i++) {
             switch (i) {
@@ -1985,7 +1993,7 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 26, 1513578087000L});
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 96, 1513578087000L});
 
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-12-18 06:**:**\" " +
@@ -1993,6 +2001,7 @@ public class Aggregation1TestCase {
                 "select * " +
                 "order by AGG_TIMESTAMP ;");
         EventPrinter.print(events);
+        Assert.assertNotNull(events);
         AssertJUnit.assertEquals(1, events.length);
         for (int i = 0; i < events.length; i++) {
             switch (i) {
@@ -2041,7 +2050,7 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 26, 1513578087000L});
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 96, 1513578087000L});
 
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-12-18 06:21:**\" " +
@@ -2049,6 +2058,7 @@ public class Aggregation1TestCase {
                 "select * " +
                 "order by AGG_TIMESTAMP ;");
         EventPrinter.print(events);
+        Assert.assertNotNull(events);
         AssertJUnit.assertEquals(1, events.length);
         for (int i = 0; i < events.length; i++) {
             switch (i) {
@@ -2097,7 +2107,7 @@ public class Aggregation1TestCase {
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 26, 1513578087000L});
         stockStreamInputHandler.send(new Object[]{"CISCO", 100f, null, 200L, 96, 1513578087000L});
 
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         Event[] events = siddhiAppRuntime.query("from stockAggregation " +
                 "within \"2017-12-18 11:51:27 +05:30\" " +
@@ -2105,6 +2115,7 @@ public class Aggregation1TestCase {
                 "select * " +
                 "order by AGG_TIMESTAMP ;");
         EventPrinter.print(events);
+        Assert.assertNotNull(events);
         AssertJUnit.assertEquals(1, events.length);
         for (int i = 0; i < events.length; i++) {
             switch (i) {
@@ -2842,11 +2853,11 @@ public class Aggregation1TestCase {
             stockStreamInputHandler.send(new Object[]{"IBM", 100f, null, 200L, 26, 1496289953000L});
             stockStreamInputHandler.send(new Object[]{"WSO2", 100f, null, 200L, 96, 1496289953000L});
 
-            Thread.sleep(100);
+            Thread.sleep(1000);
 
             Event[] events = siddhiAppRuntime.query("from stockAggregation within 0L, 1496289953000L per " +
                     "'seconds' select AGG_TIMESTAMP, symbol, totalPrice");
-
+            Assert.assertNotNull(events);
             AssertJUnit.assertEquals("Check time windows", 5, events.length);
 
         } finally {
