@@ -52,7 +52,7 @@
             <artifactId>slf4j-simple</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.lmax</groupId>
+            <groupId>org.wso2.orbit.com.lmax</groupId>
             <artifactId>disruptor</artifactId>
         </dependency>
         <dependency>
@@ -65,7 +65,7 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.quartz-scheduler</groupId>
+            <groupId>org.quartz-scheduler.wso2</groupId>
             <artifactId>quartz</artifactId>
         </dependency>
         <dependency>

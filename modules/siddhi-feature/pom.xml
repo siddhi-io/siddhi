@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ /*
+  ~ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ *
+  ~ * Licensed under the Apache License, Version 2.0 (the "License");
+  ~ * you may not use this file except in compliance with the License.
+  ~ * You may obtain a copy of the License at
+  ~ *
+  ~ * http://www.apache.org/licenses/LICENSE-2.0
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ */
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>siddhi</artifactId>
+        <groupId>io.siddhi</groupId>
+        <version>5.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>io.siddhi.feature</artifactId>
+    <packaging>carbon-feature</packaging>
+    <name>Siddhi Feature</name>
+    <url>http://wso2.org</url>
+    <description>This feature contains the dependency bundles related to Siddhi</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.osgi</groupId>
+            <artifactId>org.eclipse.osgi.services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+        </dependency>
+
+        <!--siddhi dependencies start-->
+        <dependency>
+            <groupId>io.siddhi</groupId>
+            <artifactId>siddhi-query-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.siddhi</groupId>
+            <artifactId>siddhi-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.siddhi</groupId>
+            <artifactId>siddhi-query-compiler</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.siddhi</groupId>
+            <artifactId>siddhi-annotations</artifactId>
+        </dependency>
+
+        <!-- Dependency jars for Siddhi Components -->
+        <dependency>
+            <groupId>org.wso2.orbit.com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.quartz-scheduler.wso2</groupId>
+            <artifactId>quartz</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+
+        <resources>
+            <resource>
+                <directory>target/lib</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.commons</groupId>
+                                    <artifactId>commons-lang3</artifactId>
+                                    <version>${commons-lang3.version}</version>
+                                    <outputDirectory>${project.build.directory}/lib/launcher</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prefilter-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>resources</directory>
+                                    <includes>
+                                        <include>bin/**</include>
+                                        <include>conf/**</include>
+                                        <include>logs/**</include>
+                                        <include>wso2/lib/**</include>
+                                        <include>lib/**</include>
+                                        <include>resources/**</include>
+                                        <include>tmp/**</include>
+                                        <include>p2.inf</include>
+                                        <include>build.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.wso2.carbon.maven</groupId>
+                <artifactId>carbon-feature-plugin</artifactId>
+                <version>${carbon.feature.plugin.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>1-p2-feature-generation</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <propertyFile>../etc/feature.properties</propertyFile>
+                            <adviceFileContents>
+                                <advice>
+                                    <name>org.wso2.carbon.p2.category.type</name>
+                                    <value>server</value>
+                                </advice>
+                                <advice>
+                                    <name>org.eclipse.equinox.p2.type.group</name>
+                                    <value>true</value>
+                                </advice>
+                            </adviceFileContents>
+                            <bundles>
+                                <bundle>
+                                    <symbolicName>osgi.core</symbolicName>
+                                    <version>${org.osgi.core.bundle.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.eclipse.osgi.services</symbolicName>
+                                    <version>${equinox.osgi.services.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>slf4j.api</symbolicName>
+                                    <version>${slf4j.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>slf4j.log4j12</symbolicName>
+                                    <version>${slf4j.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.antlr.antlr4-runtime</symbolicName>
+                                    <version>${antlr.runtime.version}</version>
+                                </bundle>
+
+                                <!-- Siddhi dependencies -->
+                                <bundle>
+                                    <symbolicName>siddhi-core</symbolicName>
+                                    <version>${project.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>siddhi-query-api</symbolicName>
+                                    <version>${project.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>siddhi-query-compiler</symbolicName>
+                                    <version>${project.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>siddhi-annotations</symbolicName>
+                                    <version>${project.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>disruptor</symbolicName>
+                                    <version>${disruptor.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.google.guava</symbolicName>
+                                    <version>${guava.bundle.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>quartz</symbolicName>
+                                    <version>${quartz.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>io.dropwizard.metrics.core</symbolicName>
+                                    <version>${metrics.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.apache.commons.lang3</symbolicName>
+                                    <version>${commons-lang3.version}</version>
+                                </bundle>
+                            </bundles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clean_target</id>
+                        <phase>install</phase>
+                        <configuration>
+                            <target>
+                                <delete dir="src/main/resources"/>
+                                <delete dir="src/main"/>
+                                <delete dir="src"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
