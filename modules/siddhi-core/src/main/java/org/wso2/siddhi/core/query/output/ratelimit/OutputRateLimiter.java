@@ -68,7 +68,7 @@ public abstract class OutputRateLimiter implements EternalReferencedHolder, Snap
         } else if (lockWrapper != null) {
             lockWrapper.unlock();
         }
-        if (Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 && latencyTracker != null) {
+        if (Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 && latencyTracker != null) {
             latencyTracker.markOut();
         }
         if (lockWrapper != null) {

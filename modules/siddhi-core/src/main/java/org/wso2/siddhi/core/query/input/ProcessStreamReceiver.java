@@ -86,7 +86,7 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
             lockWrapper.lock();
         }
         try {
-            if (Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 && latencyTracker != null) {
+            if (Level.DETAIL.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 && latencyTracker != null) {
                 try {
                     latencyTracker.markIn();
                     processAndClear(streamEventChunk);
