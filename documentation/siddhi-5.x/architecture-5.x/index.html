@@ -1,0 +1,1469 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="Stream Processing and Complex Event Processing Engine">
+      
+      
+        <link rel="canonical" href="http://siddhi.io/documentation/siddhi-5.x/architecture-5.x/">
+      
+      
+        <meta name="author" content="WSO2">
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../../../images/favicon.ico">
+      <meta name="generator" content="mkdocs-0.17.3, mkdocs-material-2.7.3">
+    
+    
+      
+        <title>Siddhi Architecture - Siddhi</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/application.8d40d89b.css">
+      
+        <link rel="stylesheet" href="../../../assets/stylesheets/application-palette.6079476c.css">
+      
+    
+    
+      <script src="../../../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <a href="#siddhi-5x-architecture" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="http://siddhi.io" title="Siddhi" class="md-header-nav__button md-logo">
+          
+            <img src="../../../images/siddhi-logo-w.svg" width="24" height="24">
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                Siddhi
+              </span>
+              <span class="md-header-nav__topic">
+                Siddhi Architecture
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/wso2/siddhi/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      Siddhi
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    <span class="md-nav__button md-logo">
+      
+        <img src="../../../images/siddhi-logo-w.svg" width="48" height="48">
+      
+    </span>
+    Siddhi
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/wso2/siddhi/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      Siddhi
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../.." title="Welcome to Siddhi" class="md-nav__link">
+      Welcome to Siddhi
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../features/" title="Features" class="md-nav__link">
+      Features
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../quckstart-5.x/" title="Quick Start Guide" class="md-nav__link">
+      Quick Start Guide
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+    
+    <label class="md-nav__link" for="nav-4">
+      Documentation
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        Documentation
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-1" type="checkbox" id="nav-4-1" checked>
+    
+    <label class="md-nav__link" for="nav-4-1">
+      Siddhi 5.x
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
+      <label class="md-nav__title" for="nav-4-1">
+        Siddhi 5.x
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../quckstart-5.x/" title="Quick Start Guide" class="md-nav__link">
+      Quick Start Guide
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../user-guide-5.x/" title="User Guide" class="md-nav__link">
+      User Guide
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../query-guide-5.x/" title="Siddhi Query Guide" class="md-nav__link">
+      Siddhi Query Guide
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Siddhi Architecture
+      </label>
+    
+    <a href="./" title="Siddhi Architecture" class="md-nav__link md-nav__link--active">
+      Siddhi Architecture
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#main-design-decisions" title="Main Design Decisions" class="md-nav__link">
+    Main Design Decisions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-architecture" title="High Level Architecture" class="md-nav__link">
+    High Level Architecture
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main-modules-in-siddhi-engine" title="Main Modules in Siddhi Engine" class="md-nav__link">
+    Main Modules in Siddhi Engine
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-component-architecture" title="Siddhi Component Architecture" class="md-nav__link">
+    Siddhi Component Architecture
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-application-creation" title="Siddhi Application Creation" class="md-nav__link">
+    Siddhi Application Creation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-app-execution-flow" title="Siddhi App Execution Flow" class="md-nav__link">
+    Siddhi App Execution Flow
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-query-execution" title="Siddhi Query Execution" class="md-nav__link">
+    Siddhi Query Execution
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#singleinputstream-query-runtime-filter-windows" title="SingleInputStream Query Runtime (Filter &amp; Windows)" class="md-nav__link">
+    SingleInputStream Query Runtime (Filter &amp; Windows)
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#temporal-processing-with-windows" title="Temporal Processing with Windows" class="md-nav__link">
+    Temporal Processing with Windows
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joininputstream-query-runtime-join" title="JoinInputStream Query Runtime (Join)" class="md-nav__link">
+    JoinInputStream Query Runtime (Join)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stateinputstream-query-runtime-pattern-sequence" title="StateInputStream Query Runtime (Pattern &amp; Sequence)" class="md-nav__link">
+    StateInputStream Query Runtime (Pattern &amp; Sequence)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-partition-execution" title="Siddhi Partition Execution" class="md-nav__link">
+    Siddhi Partition Execution
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-aggregation" title="Siddhi Aggregation" class="md-nav__link">
+    Siddhi Aggregation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-event-formats" title="Siddhi Event Formats" class="md-nav__link">
+    Siddhi Event Formats
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" title="Summary" class="md-nav__link">
+    Summary
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-2" type="checkbox" id="nav-4-2">
+    
+    <label class="md-nav__link" for="nav-4-2">
+      Siddhi 4.x
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
+      <label class="md-nav__title" for="nav-4-2">
+        Siddhi 4.x
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../siddhi-4.x/quckstart-4.x/" title="Quick Start Guide" class="md-nav__link">
+      Quick Start Guide
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../siddhi-4.x/user-guide-4.x/" title="User Guide" class="md-nav__link">
+      User Guide
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../siddhi-4.x/query-guide-4.x/" title="Siddhi Query Guide" class="md-nav__link">
+      Siddhi Query Guide
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../siddhi-4.x/architecture-4.x/" title="Siddhi Architecture" class="md-nav__link">
+      Siddhi Architecture
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../contribution/" title="Contribute" class="md-nav__link">
+      Contribute
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../extensions/" title="Extensions" class="md-nav__link">
+      Extensions
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+    
+    <label class="md-nav__link" for="nav-7">
+      API Docs
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-7">
+        API Docs
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/5.0.0/" title="5.0.0" class="md-nav__link">
+      5.0.0
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.4.8/" title="4.4.8" class="md-nav__link">
+      4.4.8
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.4.0/" title="4.4.0" class="md-nav__link">
+      4.4.0
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.3.19/" title="4.3.19" class="md-nav__link">
+      4.3.19
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.3.0/" title="4.3.0" class="md-nav__link">
+      4.3.0
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.2.40/" title="4.2.40" class="md-nav__link">
+      4.2.40
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.2.20/" title="4.2.20" class="md-nav__link">
+      4.2.20
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.2.0/" title="4.2.0" class="md-nav__link">
+      4.2.0
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.1.64/" title="4.1.64" class="md-nav__link">
+      4.1.64
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.1.46/" title="4.1.46" class="md-nav__link">
+      4.1.46
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.1.7/" title="4.1.7" class="md-nav__link">
+      4.1.7
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.1.0/" title="4.1.0" class="md-nav__link">
+      4.1.0
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.0.9/" title="4.0.9" class="md-nav__link">
+      4.0.9
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/4.0.0/" title="4.0.0" class="md-nav__link">
+      4.0.0
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../api/latest/" title="latest" class="md-nav__link">
+      latest
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../license/" title="License" class="md-nav__link">
+      License
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../season-of-docs-2019/" title="Google Season of Code 2019" class="md-nav__link">
+      Google Season of Code 2019
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#main-design-decisions" title="Main Design Decisions" class="md-nav__link">
+    Main Design Decisions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-architecture" title="High Level Architecture" class="md-nav__link">
+    High Level Architecture
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main-modules-in-siddhi-engine" title="Main Modules in Siddhi Engine" class="md-nav__link">
+    Main Modules in Siddhi Engine
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-component-architecture" title="Siddhi Component Architecture" class="md-nav__link">
+    Siddhi Component Architecture
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-application-creation" title="Siddhi Application Creation" class="md-nav__link">
+    Siddhi Application Creation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-app-execution-flow" title="Siddhi App Execution Flow" class="md-nav__link">
+    Siddhi App Execution Flow
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-query-execution" title="Siddhi Query Execution" class="md-nav__link">
+    Siddhi Query Execution
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#singleinputstream-query-runtime-filter-windows" title="SingleInputStream Query Runtime (Filter &amp; Windows)" class="md-nav__link">
+    SingleInputStream Query Runtime (Filter &amp; Windows)
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#temporal-processing-with-windows" title="Temporal Processing with Windows" class="md-nav__link">
+    Temporal Processing with Windows
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#joininputstream-query-runtime-join" title="JoinInputStream Query Runtime (Join)" class="md-nav__link">
+    JoinInputStream Query Runtime (Join)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stateinputstream-query-runtime-pattern-sequence" title="StateInputStream Query Runtime (Pattern &amp; Sequence)" class="md-nav__link">
+    StateInputStream Query Runtime (Pattern &amp; Sequence)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-partition-execution" title="Siddhi Partition Execution" class="md-nav__link">
+    Siddhi Partition Execution
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-aggregation" title="Siddhi Aggregation" class="md-nav__link">
+    Siddhi Aggregation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#siddhi-event-formats" title="Siddhi Event Formats" class="md-nav__link">
+    Siddhi Event Formats
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" title="Summary" class="md-nav__link">
+    Summary
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/wso2/siddhi/edit/master/docs/documentation/siddhi-5.x/architecture-5.x.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                <h1 id="siddhi-5x-architecture">Siddhi 5.x Architecture<a class="headerlink" href="#siddhi-5x-architecture" title="Permanent link">&para;</a></h1>
+<p>Siddhi is an open source, cloud native, stream processing and complex event processing engine, and it can be utilized in any of the following ways:</p>
+<ul>
+<li>Run as a server on its own</li>
+<li>Run with <a href="https://wso2.com/analytics-and-stream-processing/">WSO2 Stream Processor</a> as a service</li>
+<li>Embedded into any Java or Python based application</li>
+<li>Run on an Android application</li>
+</ul>
+<p>Siddhi provides streaming data integration and data analytical operators. It connects multiple disparate live data sources, 
+orchestrates data flows, calculates analytics, and also detects complex event patterns. This allows developers to build 
+applications that collect data, performs data transformation and analytics, and publish the results to data sinks in real time.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Please find the Siddhi 4.x Architecture <a href="https://siddhi-io.github.io/siddhi/documentation/siddhi-4.x/architecture-4.x/">here</a></p>
+</div>
+<p>This section illustrates the architecture of Siddhi Engine and guides you through its key functionality. We hope this article 
+helps developers to understand Siddhi and its codebase better, and also help them to contribute and improve Siddhi.</p>
+<h2 id="main-design-decisions">Main Design Decisions<a class="headerlink" href="#main-design-decisions" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Event by event processing of real-time streaming data to achieve low latency. </li>
+<li>Ease of use with Streaming SQL providing an intuitive way to express stream processing logic and complex 
+event processing constructs such as Patterns. </li>
+<li>Achieve high performance by processing events in-memory and using data stores for long term data storage. </li>
+<li>Optimize performance by enforcing a strict event stream schema and by pre-compiling the queries.</li>
+<li>Optimize memory consumption by having only the absolutely necessary information in-memory and dropping the rest as soon as possible. </li>
+<li>Supporting multiple extension points to accommodate a diverse set of functionality such as supporting multiple sources, sinks, functions, 
+aggregation operations, windows, etc.</li>
+</ul>
+<h2 id="high-level-architecture">High Level Architecture<a class="headerlink" href="#high-level-architecture" title="Permanent link">&para;</a></h2>
+<p><img alt="Simple Siddhi Overview" src="../../../images/architecture/siddhi-overview-simple.png?raw=true" title="Simple Siddhi Overview" /></p>
+<p>At a high level, Siddhi consumes events from various events sources, processes them according to the defined Siddhi application, 
+and produces results to the subscribed event sinks. 
+Siddhi can store and consume events from in-memory tables or from external data stores such as <code>RDBMS</code>, <code>MongoDB</code>, 
+<code>Hazelcast</code> in-memory grid, etc. (i.e., when configured to do so). Siddhi also allows applications and users to query Siddhi via its Store Query API to interactively 
+retrieve data from in-memory and other stores.</p>
+<h3 id="main-modules-in-siddhi-engine">Main Modules in Siddhi Engine<a class="headerlink" href="#main-modules-in-siddhi-engine" title="Permanent link">&para;</a></h3>
+<p>Siddhi Engine comprises four main modules, they are: </p>
+<ul>
+<li>
+<p><strong><a href="https://github.com/wso2/siddhi/tree/master/modules/siddhi-query-api">Siddhi Query API</a></strong> : This allows users to define the execution logic of the Siddhi application as queries and definitions using POJOs (Plan Old Java Objects). 
+Internally, Siddhi uses these objects to identify the logic that it is expected to perform. </p>
+</li>
+<li>
+<p><strong><a href="https://github.com/wso2/siddhi/tree/master/modules/siddhi-query-compiler">Siddhi Query Compiler</a></strong> : This allows users to define the Siddhi application using the Siddhi Streaming SQL, 
+ and it compiles the Streaming SQL script to Siddhi Query API POJOs so that Siddhi can execute them. </p>
+</li>
+<li>
+<p><strong><a href="https://github.com/wso2/siddhi/tree/master/modules/siddhi-core">Siddhi Core</a></strong> : This builds the execution runtime based on the defined Siddhi Application POJOs and processes the incoming events as and when they arrive. </p>
+</li>
+<li>
+<p><strong><a href="https://github.com/wso2/siddhi/tree/master/modules/siddhi-annotations">Siddhi Annotation</a></strong> : This is a helper module that allows all extensions to be annotated, so that they can be 
+picked by Siddhi Core for processing. This also helps Siddhi to generate the extension documentation. </p>
+</li>
+</ul>
+<h2 id="siddhi-component-architecture">Siddhi Component Architecture<a class="headerlink" href="#siddhi-component-architecture" title="Permanent link">&para;</a></h2>
+<p>The following diagram illustrates the main components of Siddhi and how they work together. </p>
+<p><img alt="Siddhi Component Architecture" src="../../../images/architecture/siddhi-architecture-highlevel.png" title="Siddhi Component Architecture" /></p>
+<p>Here the <a href="https://github.com/wso2/siddhi/tree/master/modules/siddhi-core">Siddhi Core</a> module maintains
+the execution logic. It also interacts with the external environment and systems 
+for consuming, processing and publishing events. It uses the following components achieve its tasks:  </p>
+<ul>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/SiddhiManager.java">SiddhiManager</a> : 
+  This is a key component of Siddhi Core that manages Siddhi Application Runtimes 
+  and facilitates their functionality via Siddhi Context with periodic state persistence, 
+  statistics reporting and extension loading. It is recommended to use one Siddhi Manager for a single JVM.  </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/SiddhiAppRuntime.java">SiddhiAppRuntime</a> : 
+ Siddhi Application Runtime can be generated for each Siddhi Application through the Siddhi Manager. Siddhi Application Runtimes
+ provide an isolated execution environment for each defined Siddhi Application. These Siddhi Application Runtimes can have their one lifecycle and they execute 
+ based on the logic defined in their Siddhi Application. </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/config/SiddhiContext.java">SiddhiContext</a> : 
+This is a shared object across all the Siddhi Application Runtimes within the same Siddhi manager. It contains references 
+to the persistence store for periodic persistence, statistics manager to report performance statistics of Siddhi Application Runtimes, 
+and extension holders for loading Siddhi extensions. </p>
+</li>
+</ul>
+<h2 id="siddhi-application-creation">Siddhi Application Creation<a class="headerlink" href="#siddhi-application-creation" title="Permanent link">&para;</a></h2>
+<p>Execution logic if the Siddhi Engine is composed as a Siddhi Application, and this is usually passed as a string to 
+<strong>SiddhiManager</strong> to create the <strong>SiddhiAppRuntime</strong> for execution. </p>
+<p>When a Siddhi Application is passed to the <code>SiddhiManager.createSiddhiAppRuntime()</code>, it is processed internally with the 
+<a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-compiler/src/main/java/io/siddhi/query/compiler/SiddhiCompiler.java">SiddhiCompiler</a>. 
+Here, the <strong>SiddhiApp</strong> String is compiled to <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/io/siddhi/query/api/SiddhiApp.java">SiddhiApp</a>
+ object model by the <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-compiler/src/main/java/io/siddhi/query/compiler/internal/SiddhiQLBaseVisitorImpl.java">SiddhiQLBaseVisitorImpl</a> class. 
+ This validates the syntax of the given Siddhi Application. The model is then passed to the <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/util/parser/SiddhiAppParser.java">SiddhiAppParser</a> 
+to create the <strong>SiddhiAppRuntime</strong>. During this phase the semantics of the Siddhi Application is validated and the execution logic of the Siddhi Application is optimized. </p>
+<h2 id="siddhi-app-execution-flow">Siddhi App Execution Flow<a class="headerlink" href="#siddhi-app-execution-flow" title="Permanent link">&para;</a></h2>
+<p>Following diagram depicts the execution flow within a Siddhi App Runtime. </p>
+<p><img alt="Execution Flow in Siddhi App" src="../../../images/architecture/siddhi-event-flow.png" title="Execution Flow in Siddhi App" /></p>
+<p>The path taken by events within Siddhi Engine is indicated in blue. </p>
+<p>The components that are involved in handling the events are following: </p>
+<ul>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/StreamJunction.java">StreamJunction</a></p>
+<p>This routes events of a particular stream to various components within the Siddhi App Runtime. A stream junction is
+generated for each defined or inferred Stream in the Siddhi Application. A stream junction by default uses the incoming event's thread
+and passes all the events to its subscribed components as soon as they arrive, but this behaviour can be altered by configuring <code>@Async</code> 
+annotation to buffer the events at the and stream junction and to use another one or more threads to collect the events from the buffer 
+and process the subsequent executions.</p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/input/InputHandler.java">InputHandler</a> </p>
+<p>Input handler is used to push <code>Event</code> and <code>Event[]</code> objects into stream junctions from defined event sources, and from Java/Python programmes. </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/output/StreamCallback.java">StreamCallback</a> </p>
+<p>This receives <code>Event[]</code>s from stream junction and passes them to event sinks to publish to external endpoints, 
+and/or passes them to subscribed Java/Python programmes for further processing. </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/QueryRuntime.java">Queries</a> &amp; <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/partition/PartitionRuntime.java">Partitions</a> </p>
+<p>These components process events by filtering, transforming, aggregation, joining, patten matching, 
+etc. They consume events from one or more stream junctions, process them and publish the processed events
+into a set of stream junctions based on the defined queries or partitions. </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/input/source/Source.java">Source</a> </p>
+<p>Sources consume events from external sources in various data formats, convert them into Siddhi events using <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/input/source/SourceMapper.java">SourceMapper</a>s 
+and pass them to corresponding stream junction via their associated input handlers. A source is generated 
+for each <code>@Source</code> annotation defined above a stream definition. </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/input/source/SourceMapper.java">SourceMapper</a> </p>
+<p>A source mapper is a sub component of source, and it needs to be configured for each source in order to convert the incoming event into Siddhi event. 
+The source mapper type can be configured using the <code>@Map</code> annotation within the <code>@Source</code> annotation. When the <code>@Map</code> annotation is
+not defined, Siddhi uses the <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/input/source/PassThroughSourceMapper.java">PassThroughSourceMapper</a>,
+where it assumes that the incoming message is already in the <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/event/Event.java">Siddhi Event</a> 
+format (i.e <code>Event</code> or <code>Event[]</code>), and therefore makes no changes to the incoming event format.</p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/output/sink/Sink.java">Sink</a> </p>
+<p>Sinks consumes events from its associated stream junction, convert them to various data formats via <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/output/sink/SinkMapper.java">SinkMapper</a> 
+and publish them to external endpoints as defined in the <code>@Sink</code> annotation. A sink is generated for each <code>@Sink</code> annotation defined above a stream definition. </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/output/sink/SinkMapper.java">SinkMapper</a></p>
+<p>A sink mapper is a sub component of sink. and its need to be configured for each sink in order to map the Siddhi events to the specified data format so that they 
+can be published via the sink. The sink mapper type can be configured using the <code>@Map</code> annotation within the <code>@Sink</code>
+annotation. When the <code>@Map</code> annotation is not defined, Siddhi uses <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/stream/output/sink/PassThroughSinkMapper.java">PassThroughSinkMapper</a>, 
+where it passes the <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/event/Event.java">Siddhi Event</a> 
+(i.e <code>Event</code> or <code>Event[]</code>) without any formatting to the Sink.</p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/table/Table.java">Table</a></p>
+<p>Tables are used to store events. When tables are defined by default, Siddhi uses the <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/table/InMemoryTable.java">InMemoryTable</a> 
+implementation to store events in-memory. When <code>@Store</code> annotation
+is used on top of the table definition, it loads the associated external data store connector based on the defined <code>store</code> type. Most table implementations are 
+extended from either <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/table/record/AbstractRecordTable.java">AbstractRecordTable</a> 
+or <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/table/record/AbstractQueryableRecordTable.java">AbstractQueryableRecordTable</a> abstract classes
+the former provides functionality to query external data store based on a given filtering condition, and the latter queries external data store by providing projection, limits, and ordering parameters in addition to data filter condition.</p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/window/Window.java">Window</a></p>
+<p>Windows store events as and when they arrive and automatically expire/clean them based on the given window constrain. Multiple types of windows are
+can be implemented by extending the <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/processor/stream/window/WindowProcessor.java">WindowProcessor</a> 
+abstract class. </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/selector/attribute/aggregator/incremental/IncrementalAggregationProcessor.java">IncrementalAggregation</a> </p>
+<p>Long running time series aggregates defined via the aggregation definition is calculated in an incremental manner using the Incremental Aggregation Processor for the defined time periods.
+Incremental aggregation functions can be implemented by extending <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/selector/attribute/aggregator/incremental/IncrementalAttributeAggregator.java">IncrementalAttributeAggregator</a>. 
+By default, incremental aggregations aggregate all the values in-memory, but when its associated with a store by adding <code>@store</code> 
+annotation it uses in-memory to aggregate partial results and use data stores to persist those increments. When requested for aggregate results it 
+retrieves data from data stores and (if needed from) in-memory, computes combined aggregate results and provide as the output. </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/trigger/Trigger.java">Trigger</a></p>
+<p>A trigger triggers events at a given interval as given in the trigger definition. The triggered events are pushed to a stream junction having the same name as the trigger.</p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/output/callback/QueryCallback.java">QueryCallback</a></p>
+<p>A query callback taps in to the events that are emitted by a particular query. It notifies the event occurrence <code>timestamp</code>, and classifies 
+the output events into <code>currentEvents</code>, and <code>expiredEvents</code>. </p>
+</li>
+</ul>
+<h2 id="siddhi-query-execution">Siddhi Query Execution<a class="headerlink" href="#siddhi-query-execution" title="Permanent link">&para;</a></h2>
+<p>Siddhi <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/QueryRuntime.java">QueryRuntimes</a>
+ can be categorized in to three main types: </p>
+<ul>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/io/siddhi/query/api/execution/query/input/stream/SingleInputStream.java">SingleInputStream</a>: 
+ Queries that consist of query types such as filters and windows.</p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/io/siddhi/query/api/execution/query/input/stream/JoinInputStream.java">JoinInputStream</a>:
+  Queries that consist of joins.</p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/io/siddhi/query/api/execution/query/input/stream/StateInputStream.java">StateInputStream</a>: 
+   Queries that consist of patterns and sequences. </p>
+</li>
+</ul>
+<p>Following section explains the internals of each query type. </p>
+<h3 id="singleinputstream-query-runtime-filter-windows"><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/io/siddhi/query/api/execution/query/input/stream/SingleInputStream.java">SingleInputStream</a> Query Runtime (Filter &amp; Windows)<a class="headerlink" href="#singleinputstream-query-runtime-filter-windows" title="Permanent link">&para;</a></h3>
+<p><img alt="Single Input Stream Query" src="../../../images/architecture/siddhi-query-single.png" title="Single Input Stream Query (Filter &amp; Window)" /></p>
+<p>A single input stream query runtime is generated for filter and window queries. They consume events from a stream junction or a window
+and convert the incoming events according to the expected output stream format at the <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/input/ProcessStreamReceiver.java">ProcessStreamReceiver</a>
+by dropping all the unrelated incoming stream attributes.</p>
+<p>Then the converted events are passed through a few Processors such as <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/processor/filter/FilterProcessor.java">FilterProcessor</a>,
+<a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/processor/stream/StreamProcessor.java">StreamProcessor</a>, 
+<a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/processor/stream/function/StreamFunctionProcessor.java">StreamFunctionProcessor</a>, 
+<a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/processor/stream/window/WindowProcessor.java">WindowProcessor</a>
+and <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/selector/QuerySelector.java">QuerySelector</a>. 
+Here, the <code>StreamProcessor</code>, <code>StreamFunctionProcessor</code>, and <code>WindowProcessor</code> can be extended with various stream processing capabilities. 
+The last processor of the chain of processors must always be a <code>QuerySelector</code> and it can't appear anywhere else. When the query runtime consumes events from a stream,
+its processor chain can maximum contain one <code>WindowProcessor</code>, and when query runtime consumes events from a window, its chain of processors cannot 
+contain any <code>WindowProcessor</code>.</p>
+<p>The <code>FilterProcessor</code> is implemented using expressions that returns a boolean value. <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/executor/ExpressionExecutor.java">ExpressionExecutor</a> 
+is used to process conditions, mathematical operations, unary operations, constant values, variables, and functions. Expressions have a tree structure, and 
+they are processed based using the Depth First search algorithm. To achieve high performance, Siddhi currently depends on the user
+to formulate the least successful case in the leftmost side of the condition, thereby increasing the chance of an early <code>false</code> detection.</p>
+<p>The condition expression <code>price &gt;= 100 and ( Symbol == 'IBM' or Symbol == 'MSFT' )</code> is represented as shown below.</p>
+<p><img alt="Siddhi Expression" src="../../../images/architecture/siddhi-expressions.png" title="Single Input Query (Filter &amp; Window)" /></p>
+<p>These expressions also support the execution of user defined functions (UDFs), and they can be implemented by extending the <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/executor/function/FunctionExecutor.java">FunctionExecutor</a> class. </p>
+<p>After getting processed by all the processors events reach the <code>QuerySelector</code> for transformation. At the <code>QuerySelector</code>,
+events are transformed based on the <code>select</code> clause of the query. The <code>select</code> clause produced one <code>AttributeProcessor</code> for each output stream attribute, and these 
+<code>AttributeProcessor</code>s contain expressions defining data transformation including constant values, variables, user defined functions, etc. 
+They can also contain <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/selector/attribute/aggregator/AttributeAggregatorExecutor.java">AttributeAggregatorExecutor</a>s
+to process aggregation operations such as <code>sum</code>, <code>count</code>, etc. If there is a <code>Group By</code> clause defined, then the <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/selector/GroupByKeyGenerator.java">GroupByKeyGenerator</a>
+is used to identify the composite group-by key, and then for each key an <code>AttributeAggregatorExecutor</code> state is generated to maintain per group-by key aggregations. 
+When each time <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/selector/attribute/processor/AttributeProcessor.java">AttributeProcessor</a> 
+is executed the <code>AttributeAggregatorExecutor</code> calculates per group-by aggregation results and output the values. When <code>AttributeAggregatorExecutor</code> group-by states become
+obsolete, they are destroyed and automatically cleaned. </p>
+<p>After an event is transformed to the output format through the above process, it is evaluated against the having condition executor if a <code>having</code> clause is 
+provided. The succeeding events are then ordered, and limited based on <code>order by</code>, <code>limit</code> and <code>offset</code> clauses, 
+before they pushed to the <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/output/ratelimit/OutputRateLimiter.java">OutputRateLimiter</a>. </p>
+<p>At <code>OutputRateLimiter</code>, the event output is controlled before sending the events to the stream junction or to the query callback. 
+When the <code>output</code> clause is not defined, the <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/output/ratelimit/PassThroughOutputRateLimiter.java">PassThroughOutputRateLimiter</a> is used by passing all the events without any rate limiting. </p>
+<h4 id="temporal-processing-with-windows">Temporal Processing with Windows<a class="headerlink" href="#temporal-processing-with-windows" title="Permanent link">&para;</a></h4>
+<p>The temporal event processing aspect is achieved via <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/window/Window.java">Window</a>
+and <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/selector/attribute/aggregator/AttributeAggregator.java">AttributeAggregators</a></p>
+<p>To achieve temporal processing, Siddhi uses the following four type of events: </p>
+<ul>
+<li>
+<p><strong>Current Events</strong>: Events that are newly arriving to the query from streams.</p>
+</li>
+<li>
+<p><strong>Expired Events</strong>: Events that have expired from a window. </p>
+</li>
+<li>
+<p><strong>Timer Events</strong>: Events that inform the query about an update of execution time. These events are usually generated by schedulers. </p>
+</li>
+<li>
+<p><strong>Reset Events</strong>: Events that resets the Siddhi query states.</p>
+</li>
+</ul>
+<p>In Siddhi, when an event comes into a <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/processor/stream/window/WindowProcessor.java">WindowProcessor</a>, 
+it creates an appropriate <code>expired event</code> corresponding to the incoming <code>current event</code> with the expiring timestamp, and stores that 
+event in the window. At the same time <code>WindowProcessor</code> also forwards the <code>current event</code> to the next processor for further processing. 
+It uses a scheduler or some other counting approach to determine when to emit the events that are stored in in-memory. When the <code>expired events</code> meets the condition for expiry based on the window contains, it emits the <code>expired events</code> to the next processor. 
+At times like in <code>window.timeBatch()</code> there can be cases that needs to emit all the events in-memory at once and the output does not need individual <code>expired events</code> values, in this cases the window emits a single <code>reset event</code> instead of sending one <code>expired event</code> for each event it has stored, 
+so that it can reset the states in one go. For the <code>QuerySelector</code> aggregations to work correctly the window must emit a corresponding <code>expired event</code> for each <code>current event</code> it has emitted or it must send a <code>reset event</code>. 
+In the <code>QuerySelector</code>, the arrived <code>current events</code> increase the aggregation values, <code>expired events</code> decrease the values, and 
+<code>reset events</code> reset the aggregation calculation to produce correct query output. </p>
+<p>For example, the sliding <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/processor/stream/window/TimeWindowProcessor.java">TimeWindow</a>
+(<code>window.time()</code>) creates a corresponding <code>expired event</code> for each <code>current event</code> that arrives, adds the <code>expired event</code>s to 
+the window, adds an entry to the scheduler to notify when that event need to be expired, and finally sends the <code>current event</code> to the next processor for subsequent processing. 
+The scheduler notifies the window by sending a <code>timer event</code>, and when the window receives an indication that the expected expiry time has come for the oldest event in the window via a 
+a <code>timer event</code> or by other means, it removes the <code>expired event</code> from the window and passes that to the next processor. </p>
+<p><img alt="Siddhi Time Window" src="../../../images/architecture/siddhi-time-window.png" title="Siddhi Time Window" /></p>
+<h3 id="joininputstream-query-runtime-join"><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/io/siddhi/query/api/execution/query/input/stream/JoinInputStream.java">JoinInputStream</a> Query Runtime (Join)<a class="headerlink" href="#joininputstream-query-runtime-join" title="Permanent link">&para;</a></h3>
+<p><img alt="Join Input Stream Query" src="../../../images/architecture/siddhi-query-join.png" title="Join Input Stream Query" /></p>
+<p>Join input stream query runtime is generated for join queries. This can consume events from two stream junctions and perform a join operation as depicted above. 
+It can also perform a join by consuming events from one stream junction and join against itself, or it can also join against a 
+table, window or an aggregation. When a join is performed with a table, window or aggregation,
+the <code>WindowProcessor</code> in the above image is replaced with the corresponding table, window or aggregation and no basic processors are used on their side. </p>
+<p>The joining operation is triggered by the events that arrive from the stream junction.
+Here, when an event from one stream reaches the pre <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/input/stream/join/JoinProcessor.java">JoinProcessor</a>, 
+it matches against all the available events of the other stream's <code>WindowProcessor</code>. 
+When a match is found, those matched events are sent to the <code>QuerySelector</code> as <code>current events</code>, and at the same time, 
+the original event is added to the <code>WindowProcessor</code> where it remains until it expires. Similarly, when an 
+event expires from the <code>WindowProcessor</code>, it matches against all the available events of the other stream's <code>WindowProcessor</code>, and 
+when a match is found, those matched events are sent to the <code>QuerySelector</code> as <code>expired events</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Despite the optimizations, a join query is quite expensive when it comes to performance. This is because the <code>WindowProcessor</code> 
+is locked during the matching process to avoid race conditions and to achieve accuracy while joining. Therefore, when possible avoid 
+matching large (time or length) windows in high volume streams.</p>
+</div>
+<h3 id="stateinputstream-query-runtime-pattern-sequence"><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-query-api/src/main/java/io/siddhi/query/api/execution/query/input/stream/StateInputStream.java">StateInputStream</a> Query Runtime (Pattern &amp; Sequence)<a class="headerlink" href="#stateinputstream-query-runtime-pattern-sequence" title="Permanent link">&para;</a></h3>
+<p><img alt="State Input Stream Query (Pattern &amp; Sequence)" src="../../../images/architecture/siddhi-query-state.png" title="State Input Stream Query (Pattern &amp; Sequence)" /></p>
+<p>The state input stream query runtime is generated for pattern and sequence queries. This consumes events from one or more stream junctions 
+via <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/input/ProcessStreamReceiver.java">ProcessStreamReceiver</a>s
+and checks whether the events matches each pattern or sequence condition by processing the set of basic processors associated with each <code>ProcessStreamReceiver</code>. 
+The <code>PreStateProcessor</code>s usually contains lists of state events that are already matched by previous conditions, and if its the first condition 
+then it will have an empty state event in its list. When <code>ProcessStreamReceiver</code> consumes an event, it passes the event 
+to the <code>PreStateProcessor</code> which updates the list of state events it has with the incoming event and executes the condition by passing the events to the basic processors. 
+The state events that matches the conditions reaches the <code>PostStateProcessor</code> which will then stores the events to the state event list of the following <code>PreStateProcessor</code>.
+If it is the final condition's <code>PostStateProcessor</code>, then it will pass the state event to the <code>QuerySelector</code> to generate and emit the output.</p>
+<h2 id="siddhi-partition-execution">Siddhi Partition Execution<a class="headerlink" href="#siddhi-partition-execution" title="Permanent link">&para;</a></h2>
+<p><img alt="Siddhi Partition" src="../../../images/architecture/siddhi-5.x-partition.png" title="Siddhi Partition" /></p>
+<p>A partition is a wrapper around one or more Siddhi queries and inner streams that connect them. 
+A partition is implemented in Siddhi as a <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/partition/PartitionRuntime.java">PartitionRuntime</a>
+which contains multiple <code>QueryRuntime</code>s and inner stream junctions. 
+Each partitioned stream entering the partition goes through a designated <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/partition/PartitionStreamReceiver.java">PartitionStreamReceiver</a>.
+The <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/partition/executor/PartitionExecutor.java">PartitionExecutor</a>
+of <code>PartitionStreamReceiver</code> evaluates the incoming events to identify their associated partition-key using either <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/partition/executor/RangePartitionExecutor.java">RangePartitionExecutor</a>
+or <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/partition/executor/ValuePartitionExecutor.java">ValuePartitionExecutor</a>. 
+The identified partition-key is then set as thread local variable and the event is passed to the <code>QueryRuntime</code>s of processing. 
+The <code>QueryRuntime</code>s process events by maintaining separate states for each partition-key such that producing separate output per partition.
+When a partition query consumes a non partitioned global stream, the <code>QueryRuntime</code>s are executed for each available partition-key in the system such that 
+allowing all partitions to receive the same event. When the partitions are obsolete <code>PartitionRuntime</code> deletes all the partition states from its <code>QueryRuntime</code>s. </p>
+<h2 id="siddhi-aggregation">Siddhi Aggregation<a class="headerlink" href="#siddhi-aggregation" title="Permanent link">&para;</a></h2>
+<p><img alt="Siddhi Aggregation" src="../../../images/architecture/siddhi-5.x-aggregation.png" title="Siddhi Aggregation" /></p>
+<p>Siddhi supports long duration time series aggregations via its aggregation definition. <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/aggregation/AggregationRuntime.java">AggregationRuntime</a> 
+implements this by the use of <strong><em>streaming lambda architecture</em></strong>, where it process part of the data in-memory and gets part of the data from data stores. 
+<code>AggregationRuntime</code> creates an in-memory table or external store for each time granularity (i.e seconds, minutes, days, etc) it has to process the events, 
+and when events enters it calculates the aggregations in-memory for its least granularity (usually seconds) using the <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/aggregation/IncrementalExecutor.java">IncrementalExecutor</a> 
+and maintains the running aggregation values in its <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/aggregation/BaseIncrementalValueStore.java">BaseIncrementalValueStore</a>. 
+At each clock end time of the granularity (end of each second) <code>IncrementalExecutor</code> stores the summarized values to the associated granularity 
+table and also passes the summarized values to the <code>IncrementalExecutor</code> of the next granularity level, which also follows 
+the same methodology in processing the events. Through this approach each time granularities, the current time duration will be in-memory and all the historical time durations 
+will be in stored in the tables. </p>
+<p>The aggregations results are calculated by <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/query/selector/attribute/aggregator/incremental/IncrementalAttributeAggregator.java">IncrementalAttributeAggregator</a>s 
+and stored in such as way that allows proper data composition upon retrial, for example <code>avg()</code> is stored as <code>sum</code> and <code>count</code>. 
+This allows data composition across various granularity time durations when retrieving, for example results for <code>avg()</code> composed by returning sum of <code>sum</code>s divided by the sum of <code>count</code>s. 
+Aggregation can also work in a distributed manner and across system restarts. This is done by storing node specific IDs and granularity time duration information in the tables. 
+To make sure tables do not go out of memory <a href="https://github.com/siddhi-io/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/aggregation/IncrementalDataPurging.java">IncrementalDataPurging</a> 
+is used to purge old data. </p>
+<p>When aggregation is queried through join or store query for a given time granularity it reads the data 
+from the in-memory <code>BaseIncrementalValueStore</code> and from the tables, computes the composite results as described, and presents the results. </p>
+<h2 id="siddhi-event-formats">Siddhi Event Formats<a class="headerlink" href="#siddhi-event-formats" title="Permanent link">&para;</a></h2>
+<p>Siddhi has three event formats. </p>
+<ul>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/event/Event.java">Event</a> </p>
+<p>This is the format exposed to external systems when they send events via Input Handler, and consume events via Stream Callback or Query Callback.
+This consists of a <code>timestamp</code> and an <code>Object[]</code> that contains all the values in accordance to the corresponding stream. </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/event/stream/StreamEvent.java">StreamEvent</a> (Subtype of <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/event/ComplexEvent.java">ComplexEvent</a>)</p>
+<p>This is used within queries. This contains a <code>timestamp</code> and the following three <code>Object[]</code>s: </p>
+<ul>
+<li><code>beforeWindowData</code>: This contains values that are only used in processors that are executed before the <code>WindowProcessor</code>.</li>
+<li><code>onAfterWindowData</code>: This contains values that are only used by the <code>WindowProcessor</code> and the other processors that follow it, but not sent as output.</li>
+<li><code>outputData</code>: This contains the values that are sent via the output stream of the query.</li>
+</ul>
+<p>In order to optimize the amount of data that is stored in the in-memory at windows, the content in <code>beforeWindowData</code> is cleared before the 
+event enters the <code>WindowProcessor</code>. StreamEvents can also be chained by linking each other via the <code>next</code> property in them. </p>
+</li>
+<li>
+<p><a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/event/state/StateEvent.java">StateEvent</a> (Subtype of <a href="https://github.com/wso2/siddhi/blob/master/modules/siddhi-core/src/main/java/io/siddhi/core/event/ComplexEvent.java">ComplexEvent</a>)</p>
+<p>This is used in joins, patterns and sequences queries when we need to associate events of multiple streams, tables, windows or aggregations together.
+This contains a <code>timestamp</code>, a collection of <code>StreamEvent</code>s representing different streams, tables, etc, that are used in the query, and an <code>Object[]</code> to contain <code>outputData</code> values that is needed for query output. 
+The <code>StreamEvent</code>s within the <code>StateEvent</code>, and the <code>StateEvent</code> themselves can be chained by linking each other with the <code>next</code> property in them. </p>
+</li>
+</ul>
+<p><strong>Event Chunks</strong></p>
+<p>Event Chunks provide an easier way of manipulating the chain of <code>StreamEvent</code>s and <code>StateEvent</code>s so that they are be easily iterated, inserted and removed. </p>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>This article focuses on describing the architecture of Siddhi and rationalizing some of the architectural decisions made when implementing the system.
+It also explains the key features of Siddhi. 
+We hope this will be a good starting point for new developers to understand Siddhi and to start contributing to it.</p>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../query-guide-5.x/" title="Siddhi Query Guide" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Siddhi Query Guide
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../../siddhi-4.x/quckstart-4.x/" title="Quick Start Guide" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Quick Start Guide
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2011 - 2019 WSO2
+          </div>
+        
+        powered by
+        <a href="http://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+  <div class="md-footer-social">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+      <a href="https://github.com/wso2/siddhi" class="md-footer-social__link fa fa-github"></a>
+    
+      <a href="https://www.linkedin.com/groups/13553064" class="md-footer-social__link fa fa-linkedin"></a>
+    
+  </div>
+
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../../assets/javascripts/application.b438e6c5.js"></script>
+      
+      <script>app.initialize({version:"0.17.3",url:{base:"../../.."}})</script>
+      
+    
+    
+      
+        <script>!function(e,a,t,n,o,c,i){e.GoogleAnalyticsObject=o,e.ga=e.ga||function(){(e.ga.q=e.ga.q||[]).push(arguments)},e.ga.l=1*new Date,c=a.createElement(t),i=a.getElementsByTagName(t)[0],c.async=1,c.src="https://www.google-analytics.com/analytics.js",i.parentNode.insertBefore(c,i)}(window,document,"script",0,"ga"),ga("create","UA-103065-28","auto"),ga("set","anonymizeIp",!0),ga("send","pageview");var links=document.getElementsByTagName("a");if(Array.prototype.map.call(links,function(e){e.host!=document.location.host&&e.addEventListener("click",function(){var a=e.getAttribute("data-md-action")||"follow";ga("send","event","outbound",a,e.href)})}),document.forms.search){var query=document.forms.search.query;query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})}</script>
+      
+    
+  </body>
+</html>
