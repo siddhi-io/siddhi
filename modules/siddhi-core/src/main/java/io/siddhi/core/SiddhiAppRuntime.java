@@ -60,6 +60,7 @@ import io.siddhi.core.util.snapshot.PersistenceReference;
 import io.siddhi.core.util.statistics.BufferedEventsTracker;
 import io.siddhi.core.util.statistics.LatencyTracker;
 import io.siddhi.core.util.statistics.MemoryUsageTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.window.Window;
 import io.siddhi.query.api.definition.AbstractDefinition;
 import io.siddhi.query.api.definition.AggregationDefinition;
@@ -279,7 +280,8 @@ public class SiddhiAppRuntime {
 
     private Event[] query(StoreQuery storeQuery, String storeQueryString) {
         try {
-            if (siddhiAppContext.isStatsEnabled() && storeQueryLatencyTracker != null) {
+            if (Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 &&
+                    storeQueryLatencyTracker != null) {
                 storeQueryLatencyTracker.markIn();
             }
             StoreQueryRuntime storeQueryRuntime;
@@ -309,7 +311,8 @@ public class SiddhiAppRuntime {
             }
             throw new StoreQueryCreationException(e.getMessage(), e);
         } finally {
-            if (siddhiAppContext.isStatsEnabled() && storeQueryLatencyTracker != null) {
+            if (Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0 &&
+                    storeQueryLatencyTracker != null) {
                 storeQueryLatencyTracker.markOut();
             }
         }
@@ -387,7 +390,12 @@ public class SiddhiAppRuntime {
                     "SiddhiApp already started.");
         } else {
             try {
-                if (siddhiAppContext.isStatsEnabled() && siddhiAppContext.getStatisticsManager() != null) {
+                memoryUsageTracker.disableMemoryUsageMetrics();
+                if (siddhiAppContext.getRootMetricsLevel().compareTo(Level.OFF) != 0 &&
+                        siddhiAppContext.getStatisticsManager() != null) {
+                    if (siddhiAppContext.getRootMetricsLevel().compareTo(Level.DETAIL) == 0) {
+                        memoryUsageTracker.enableMemoryUsageMetrics();
+                    }
                     siddhiAppContext.getStatisticsManager().startReporting();
                 }
                 for (ExternalReferencedHolder externalReferencedHolder :
@@ -564,7 +572,7 @@ public class SiddhiAppRuntime {
         }
 
         if (siddhiAppContext.getStatisticsManager() != null) {
-            if (siddhiAppContext.isStatsEnabled()) {
+            if (siddhiAppContext.getRootMetricsLevel().compareTo(Level.OFF) != 0) {
                 siddhiAppContext.getStatisticsManager().stopReporting();
             }
             siddhiAppContext.getStatisticsManager().cleanup();
@@ -748,31 +756,54 @@ public class SiddhiAppRuntime {
     }
 
     /**
-     * Method to check whether the Siddhi App statistics are enabled or not.
+     * Method to check the Siddhi App statistics level enabled.
      *
-     * @return Boolean value of Siddhi App statistics state
+     * @return Level value of Siddhi App statistics state
      */
-    public boolean isStatsEnabled() {
-        return siddhiAppContext.isStatsEnabled();
+    public Level getStatisticsLevel() {
+        return siddhiAppContext.getRootMetricsLevel();
     }
 
     /**
-     * To enable and disable Siddhi App statistics on runtime.
+     * To enable, disable and change Siddhi App statistics level on runtime.
      *
-     * @param statsEnabled whether statistics is enabled or not
+     * @param level whether statistics is OFF, BASIC or DETAIL
      */
-    public void enableStats(boolean statsEnabled) {
-        siddhiAppContext.setStatsEnabled(statsEnabled);
+    public void setStatisticsLevel(Level level) {
         if (running && siddhiAppContext.getStatisticsManager() != null) {
-            if (siddhiAppContext.isStatsEnabled()) {
-                siddhiAppContext.getStatisticsManager().startReporting();
-                log.debug("Siddhi App '" + getName() + "' statistics reporting started!");
+
+            if (siddhiAppContext.getRootMetricsLevel().compareTo(level) == 0) {
+                if (level == Level.OFF) {
+                    log.info("Siddhi App '" + getName() + "' statistics reporting is already disabled!");
+                } else if (level == Level.BASIC || level == Level.DETAIL) {
+                    log.info("Siddhi App '" + getName() + "' statistics reporting is already in " + level + " level!");
+                }
             } else {
-                siddhiAppContext.getStatisticsManager().stopReporting();
-                log.debug("Siddhi App '" + getName() + "' statistics reporting stopped!");
+                if (level == Level.OFF) {
+                    memoryUsageTracker.disableMemoryUsageMetrics();
+                    siddhiAppContext.setRootMetricsLevel(Level.OFF);
+                    siddhiAppContext.getStatisticsManager().stopReporting();
+                    log.info("Siddhi App '" + getName() + "' statistics reporting stopped!");
+                } else {
+                    if (siddhiAppContext.getRootMetricsLevel().compareTo(Level.OFF) == 0) {
+                        siddhiAppContext.getStatisticsManager().startReporting();
+                        log.debug("Siddhi App '" + getName() + "' statistics reporting started!");
+                    }
+                    if (level == Level.DETAIL) {
+                        memoryUsageTracker.enableMemoryUsageMetrics();
+                    }
+                    siddhiAppContext.setRootMetricsLevel(level);
+                    log.info("Siddhi App '" + getName() + "' statistics reporting changed to: " + level.toString());
+                }
             }
         } else {
-            log.debug("Siddhi App '" + getName() + "' statistics reporting not changed!");
+            if (running) {
+                log.debug("Siddhi App '" + getName() + "' statistics reporting not changed, " +
+                        "as app has not started running!");
+            } else {
+                log.debug("Siddhi App '" + getName() + "' statistics reporting not changed, as StatisticsManager" +
+                        " is not defined!");
+            }
         }
     }
 

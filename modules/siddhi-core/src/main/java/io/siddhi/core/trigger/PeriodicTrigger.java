@@ -24,6 +24,7 @@ import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.util.SiddhiConstants;
 import io.siddhi.core.util.parser.helper.QueryParserHelper;
 import io.siddhi.core.util.statistics.ThroughputTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.query.api.definition.TriggerDefinition;
 
 import java.util.concurrent.ScheduledFuture;
@@ -74,7 +75,7 @@ public class PeriodicTrigger implements Trigger {
             @Override
             public void run() {
                 long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
-                if (throughputTracker != null && siddhiAppContext.isStatsEnabled()) {
+                if (throughputTracker != null && Level.BASIC.compareTo(siddhiAppContext.getRootMetricsLevel()) <= 0) {
                     throughputTracker.eventIn();
                 }
                 streamJunction.sendEvent(new Event(currentTime, new Object[]{currentTime}));

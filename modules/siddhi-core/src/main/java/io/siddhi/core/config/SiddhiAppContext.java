@@ -32,6 +32,7 @@ import io.siddhi.core.util.snapshot.state.SingleSyncStateHolder;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.StatisticsManager;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.timestamp.TimestampGenerator;
 import io.siddhi.query.api.SiddhiApp;
 
@@ -54,7 +55,7 @@ public class SiddhiAppContext {
     private String name;
     private boolean playback;
     private boolean enforceOrder;
-    private boolean statsEnabled = false;
+    private Level rootMetricsLevel;
     private StatisticsManager statisticsManager = null;
 
     private ExecutorService executorService;
@@ -80,6 +81,7 @@ public class SiddhiAppContext {
         this.externalReferencedHolders = Collections.synchronizedList(new LinkedList<>());
         this.scriptFunctionMap = new HashMap<String, Script>();
         this.schedulerList = new ArrayList<Scheduler>();
+        this.rootMetricsLevel = Level.OFF;
     }
 
     public static void startGroupByFlow(String key) {
@@ -142,12 +144,12 @@ public class SiddhiAppContext {
         this.enforceOrder = enforceOrder;
     }
 
-    public boolean isStatsEnabled() {
-        return statsEnabled;
+    public Level getRootMetricsLevel() {
+        return rootMetricsLevel;
     }
 
-    public void setStatsEnabled(boolean statsEnabled) {
-        this.statsEnabled = statsEnabled;
+    public void setRootMetricsLevel(Level rootMetricsLevel) {
+        this.rootMetricsLevel = rootMetricsLevel;
     }
 
     public StatisticsManager getStatisticsManager() {

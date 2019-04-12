@@ -32,6 +32,7 @@ import io.siddhi.core.query.processor.Processor;
 import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +76,8 @@ public class ProcessStreamReceiver implements StreamJunction.Receiver {
         }
         try {
             LatencyTracker latencyTracker = siddhiQueryContext.getLatencyTracker();
-            if (siddhiQueryContext.getSiddhiAppContext().isStatsEnabled() && latencyTracker != null) {
+            if (Level.BASIC.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0 &&
+                    latencyTracker != null) {
                 try {
                     latencyTracker.markIn();
                     processAndClear(streamEventChunk);

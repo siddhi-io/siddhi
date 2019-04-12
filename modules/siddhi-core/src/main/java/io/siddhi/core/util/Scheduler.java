@@ -29,6 +29,7 @@ import io.siddhi.core.util.lock.LockWrapper;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateHolder;
 import io.siddhi.core.util.statistics.LatencyTracker;
+import io.siddhi.core.util.statistics.metrics.Level;
 import io.siddhi.core.util.timestamp.TimestampGeneratorImpl;
 import org.apache.log4j.Logger;
 
@@ -179,7 +180,8 @@ public class Scheduler implements ExternalReferencedHolder {
             try {
                 ComplexEventChunk<StreamEvent> streamEventChunk = new ComplexEventChunk<>(false);
                 streamEventChunk.add(timerEvent);
-                if (siddhiQueryContext.getSiddhiAppContext().isStatsEnabled() && latencyTracker != null) {
+                if (Level.BASIC.compareTo(siddhiQueryContext.getSiddhiAppContext().getRootMetricsLevel()) <= 0 &&
+                        latencyTracker != null) {
                     try {
                         latencyTracker.markIn();
                         singleThreadEntryValve.process(streamEventChunk);
